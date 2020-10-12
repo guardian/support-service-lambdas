@@ -3,11 +3,12 @@ package com.gu.supporter.fulfilment
 import java.time.LocalDate
 
 import com.gu.supporter.fulfilment.DigitalVoucherFulfilmentDates.apply
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DigitalVoucherFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
+class DigitalVoucherFulfilmentDatesSpec extends AnyFlatSpec with Matchers with DateSupport {
 
-  def shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek(
+  private def shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek(
     today: LocalDate,
     expectedDayOfWeek: String,
     expectedDate: LocalDate
@@ -17,19 +18,41 @@ class DigitalVoucherFulfilmentDatesSpec extends FlatSpec with Matchers with Date
     result(expectedDayOfWeek).holidayStopProcessorTargetDate.get should equalDate(expectedDate)
   }
 
+  private def shouldHaveCorrectEarliestHolidayStopAvailableDate(today: LocalDate, expectedDate: LocalDate) =
+    apply(today)
+      .values
+      .map(_.holidayStopFirstAvailableDate)
+      .toList
+      .distinct shouldBe List(expectedDate)
+
   it should "calculate holidayStopProcessorTargetDate" in {
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-02", "Monday", "2019-12-02")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-03", "Tuesday", "2019-12-03")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-04", "Wednesday", "2019-12-04")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-05", "Thursday", "2019-12-05")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-06", "Friday", "2019-12-06")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-07", "Saturday", "2019-12-07")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-08", "Sunday", "2019-12-08")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-09", "Monday", "2019-12-09")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-10", "Tuesday", "2019-12-10")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-11", "Wednesday", "2019-12-11")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-12", "Thursday", "2019-12-12")
-    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-13", "Friday", "2019-12-13")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-02", "Monday", "2019-12-03")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-03", "Tuesday", "2019-12-04")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-04", "Wednesday", "2019-12-05")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-05", "Thursday", "2019-12-06")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-06", "Friday", "2019-12-07")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-07", "Saturday", "2019-12-08")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-08", "Sunday", "2019-12-09")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-09", "Monday", "2019-12-10")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-10", "Tuesday", "2019-12-11")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-11", "Wednesday", "2019-12-12")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-12", "Thursday", "2019-12-13")
+    shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-13", "Friday", "2019-12-14")
+  }
+
+  it should "have correct earliest holiday-stop available date" in {
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-02", "2019-12-04")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-03", "2019-12-05")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-04", "2019-12-06")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-05", "2019-12-07")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-06", "2019-12-08")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-07", "2019-12-09")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-08", "2019-12-10")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-09", "2019-12-11")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-10", "2019-12-12")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-11", "2019-12-13")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-12", "2019-12-14")
+    shouldHaveCorrectEarliestHolidayStopAvailableDate("2019-12-13", "2019-12-15")
   }
 
   "MONDAY DigitalVoucherFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
