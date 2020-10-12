@@ -34,22 +34,30 @@ object BillingAccountRemover extends App with LazyLogging {
     attributes: Attributes = Attributes(`type` = "Zuora__CustomerAccount__c")
   )
 
-  case class SfBillingAccountsToUpdate(allOrNone: Boolean,
-                                       records: Seq[SfBillingAccountToUpdate])
+  case class SfBillingAccountsToUpdate(
+    allOrNone: Boolean,
+    records: Seq[SfBillingAccountToUpdate]
+  )
 
-  case class SfErrorRecordToCreate(Type__c: String,
-                                   Info__c: String,
-                                   Message__c: String,
-                                   attributes: Attributes = Attributes(
-                                     `type` = "Apex_Error__c"
-                                   ))
+  case class SfErrorRecordToCreate(
+    Type__c: String,
+    Info__c: String,
+    Message__c: String,
+    attributes: Attributes = Attributes(
+      `type` = "Apex_Error__c"
+    )
+  )
 
-  case class SfErrorRecordsToCreate(allOrNone: Boolean,
-                                    records: Seq[SfErrorRecordToCreate])
+  case class SfErrorRecordsToCreate(
+    allOrNone: Boolean,
+    records: Seq[SfErrorRecordToCreate]
+  )
 
   //Zuora
-  case class BillingAccountsForRemoval(CrmId: String = "",
-                                       Status: String = "Canceled")
+  case class BillingAccountsForRemoval(
+    CrmId: String = "",
+    Status: String = "Canceled"
+  )
   case class Errors(Code: String, Message: String)
   case class ZuoraResponse(Success: Boolean, Errors: Seq[Errors])
 
@@ -65,22 +73,21 @@ object BillingAccountRemover extends App with LazyLogging {
     zuoraApiSecretAccessKey <- Option(System.getenv("apiSecretAccessKey"))
     zuoraInstanceUrl <- Option(System.getenv("zuoraInstanceUrl"))
 
-  } yield
-    Config(
-      SalesforceConfig(
-        userName = sfUserName,
-        clientId = sfClientId,
-        clientSecret = sfClientSecret,
-        password = sfPassword,
-        token = sfToken,
-        authUrl = sfAuthUrl
-      ),
-      ZuoraConfig(
-        apiAccessKeyId = zuoraApiAccessKeyId,
-        apiSecretAccessKey = zuoraApiSecretAccessKey,
-        zuoraInstanceUrl = zuoraInstanceUrl
-      )
+  } yield Config(
+    SalesforceConfig(
+      userName = sfUserName,
+      clientId = sfClientId,
+      clientSecret = sfClientSecret,
+      password = sfPassword,
+      token = sfToken,
+      authUrl = sfAuthUrl
+    ),
+    ZuoraConfig(
+      apiAccessKeyId = zuoraApiAccessKeyId,
+      apiSecretAccessKey = zuoraApiSecretAccessKey,
+      zuoraInstanceUrl = zuoraInstanceUrl
     )
+  )
   processBillingAccounts()
 
   def processBillingAccounts(): Unit = {
@@ -171,9 +178,11 @@ object BillingAccountRemover extends App with LazyLogging {
       .body
   }
 
-  def doSfCompositeRequest(sfAuthDetails: SfAuthDetails,
-                           jsonBody: String,
-                           requestType: String): Either[Throwable, String] = {
+  def doSfCompositeRequest(
+    sfAuthDetails: SfAuthDetails,
+    jsonBody: String,
+    requestType: String
+  ): Either[Throwable, String] = {
 
     Try {
       Http(
@@ -245,9 +254,11 @@ object BillingAccountRemover extends App with LazyLogging {
 
   }
 
-  def updateZuoraBillingAcc(zuoraConfig: ZuoraConfig,
-                            billingAccountForRemovalAsJson: String,
-                            zuoraBillingAccountId: String) = {
+  def updateZuoraBillingAcc(
+    zuoraConfig: ZuoraConfig,
+    billingAccountForRemovalAsJson: String,
+    zuoraBillingAccountId: String
+  ) = {
     Http(
       s"${zuoraConfig.zuoraInstanceUrl}/v1/object/account/$zuoraBillingAccountId"
     ).header("apiAccessKeyId", zuoraConfig.apiAccessKeyId)
@@ -324,7 +335,7 @@ object BillingAccountRemover extends App with LazyLogging {
               Type__c = a.ErrorCode.get,
               Info__c = "Billing Account Id:" + a.Id,
               Message__c = a.ErrorMessage.get
-          )
+            )
         )
         .toSeq
 
