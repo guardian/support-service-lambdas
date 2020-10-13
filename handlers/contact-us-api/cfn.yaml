@@ -87,7 +87,7 @@ Resources:
     Condition: IsProd
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:contact-us-api
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
       AlarmName: !Sub 4XX rate from contact-us-api-${Stage}
       AlarmDescription: >
         IMPACT: Contact Us API is receiving invalid requests.
@@ -111,7 +111,7 @@ Resources:
     Condition: IsProd
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:contact-us-api
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
       AlarmName: !Sub 5XX rate from contact-us-api-${Stage}
       AlarmDescription: >
         IMPACT: Contact Us form requests are not being entered into Salesforce.
