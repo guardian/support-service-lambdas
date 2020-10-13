@@ -115,7 +115,6 @@ Resources:
       AlarmName: !Sub 5XX rate from contact-us-api-${Stage}
       AlarmDescription: >
         IMPACT: Contact Us form requests are not being entered into Salesforce.
-        Branch name is rm requests are not being entered into Salesforce.
         CAUSE: Likely one of the following. a) Unable to obtain config;
         b) Failed to contact Salesforce endpoint;
         c) Error decoding Salesforce's responses;
