@@ -445,21 +445,24 @@ lazy val `digital-voucher-api` = lambdaProject(
   )
 ).dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`)
 
-lazy val `digital-voucher-cancellation-processor` = all(project in file("handlers/digital-voucher-cancellation-processor"))
-  .dependsOn(
-    `config-cats`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test, `imovo-sttp-client`,
-    `imovo-sttp-test-stub` % Test
+// FIXME: riffRaffArtifactResources += (file(s"handlers/${name.value}/cdk-cfn.yaml"), "cfn/cdk-cfn.yaml")
+lazy val `digital-voucher-cancellation-processor` = lambdaProject(
+  "digital-voucher-cancellation-processor",
+  "Processor that co-ordinates the cancellation of digital voucher redemption via the imovo api",
+  "MemSub::Membership Admin::digital-voucher-cancellation-processor",
+  Seq(
+    scalatest,
+    diffx,
+    sttpCats
   )
-  .settings(
-    libraryDependencies ++=
-      Seq(
-        scalatest,
-        diffx,
-        sttpCats
-      )
-        ++ logging
-  )
-  .enablePlugins(RiffRaffArtifact)
+).dependsOn(
+  `config-cats`,
+  `salesforce-sttp-client`,
+  `salesforce-sttp-test-stub` % Test,
+  `imovo-sttp-client`,
+  `imovo-sttp-test-stub` % Test
+)
+
 
 lazy val `digital-voucher-suspension-processor` =
   all(project in file("handlers/digital-voucher-suspension-processor"))
