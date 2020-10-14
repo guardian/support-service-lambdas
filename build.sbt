@@ -301,9 +301,11 @@ lazy val `catalog-service` = lambdaProject(
   "MemSub::Subscriptions::Lambdas::Catalog Service"
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `identity-retention` = all(project in file("handlers/identity-retention"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `identity-retention` = lambdaProject(
+  "identity-retention",
+  "Confirms whether an identity account can be deleted, from a reader revenue perspective",
+  "MemSub::Membership Admin::Identity Retention"
+).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `new-product-api` = all(project in file("handlers/new-product-api"))
   .enablePlugins(RiffRaffArtifact)
