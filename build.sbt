@@ -480,21 +480,18 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
   )
 ).dependsOn(`salesforce-sttp-client`, `imovo-sttp-client`)
 
-lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
-  .dependsOn(handler)
-  .settings(
-    libraryDependencies ++=
-      Seq(
-        circe,
-        circeParser,
-        scalatest,
-        scalajHttp,
-        awsEvents
-      )
-      ++ logging
+lazy val `contact-us-api` = lambdaProject(
+  "contact-us-api",
+  "Transforms a request from the Contact Us form into a Salesforce case",
+  "MemSub::Subscriptions::Lambdas::Contact Us API",
+  Seq(
+    circe,
+    circeParser,
+    scalatest,
+    scalajHttp,
+    awsEvents
   )
-  .enablePlugins(RiffRaffArtifact)
-
+).dependsOn(handler)
 
 lazy val `http4s-lambda-handler` = all(project in file("lib/http4s-lambda-handler"))
   .settings(
