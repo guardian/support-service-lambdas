@@ -354,9 +354,12 @@ lazy val `cancellation-sf-cases-api` = lambdaProject(
     Seq(playJsonExtensions)
   ).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `sf-gocardless-sync` = lambdaProject(
+  "sf-gocardless-sync",
+  "Polls GoCardless for direct debit mandate events and pushes into SalesForce",
+  "MemSub::Subscriptions::Lambdas::GoCardless SalesForce Sync",
+  Seq(playJsonExtensions)
+).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
   .enablePlugins(RiffRaffArtifact)
