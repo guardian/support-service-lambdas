@@ -34,6 +34,8 @@ Resources:
 
   ContactUsLambda:
     Type: AWS::Serverless::Function
+    DependsOn:
+      - ContactUsApiGateway
     Properties:
       FunctionName: !Sub contact-us-api-${Stage}
       Handler: com.gu.contact_us_api.Handler
@@ -85,6 +87,8 @@ Resources:
   4xxApiAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
+    DependsOn:
+      - ContactUsApiGateway
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
@@ -109,6 +113,8 @@ Resources:
   5xxApiAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
+    DependsOn:
+      - ContactUsApiGateway
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
