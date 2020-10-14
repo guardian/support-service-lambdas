@@ -242,13 +242,7 @@ lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-
     libraryDependencies ++= Seq(scalatest)
   )
 
-def lambdaProject(
-  projectName: String,
-  projectDescription: String,
-  riffRaffProjectName: String,
-  dependencies: Seq[ModuleID] = Nil,
-  isCdk: Boolean = false
-): Project = {
+def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil, isCdk: Boolean = false) = {
   val cfName = if (isCdk) "cdk-cfn.yaml" else "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
@@ -262,7 +256,7 @@ def lambdaProject(
       riffRaffPackageType := assembly.value,
       riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
       riffRaffUploadManifestBucket := Option("riffraff-builds"),
-      riffRaffManifestProjectName := riffRaffProjectName,
+      riffRaffManifestProjectName := s"support-service-lambdas::$projectName",
       riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
       libraryDependencies ++= dependencies ++ logging
     )
@@ -275,12 +269,7 @@ lazy val `zuora-callout-apis` = library(project in file("handlers/zuora-callout-
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
-lazy val `identity-backfill` = lambdaProject(
-  "identity-backfill",
-  "links subscriptions with identity accounts",
-  "MemSub::Membership Admin::Identity Backfill",
-  Seq(supportInternationalisation)
-).dependsOn(
+lazy val `identity-backfill` = lambdaProject("identity-backfill", "links subscriptions with identity accounts", Seq(supportInternationalisation)).dependsOn(
   zuora,
   `salesforce-client` % "compile->compile;test->test",
   handler,
@@ -291,120 +280,100 @@ lazy val `identity-backfill` = lambdaProject(
 lazy val `digital-subscription-expiry` = lambdaProject(
   "digital-subscription-expiry",
   "check digital subscription expiration for authorisation purposes",
-  "MemSub::Subscriptions::Lambdas::Digital Subscription Expiry",
   Seq(contentAuthCommon)
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `catalog-service` = lambdaProject(
   "catalog-service",
-  "Download the Zuora Catalog and store the JSON in S3",
-  "MemSub::Subscriptions::Lambdas::Catalog Service"
+  "Download the Zuora Catalog and store the JSON in S3"
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-retention` = lambdaProject(
   "identity-retention",
-  "Confirms whether an identity account can be deleted, from a reader revenue perspective",
-  "MemSub::Membership Admin::Identity Retention"
+  "Confirms whether an identity account can be deleted, from a reader revenue perspective"
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `new-product-api` = lambdaProject(
   "new-product-api",
   "Add subscription to account",
-  "MemSub::Membership Admin::New product API",
-  Seq(supportInternationalisation),
+  Seq(supportInternationalisation)
 ).dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
-  "find and mark accounts that are out of the retention period",
-  "MemSub::Membership Admin::Zuora Retention"
+  "find and mark accounts that are out of the retention period"
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-sar` = lambdaProject(
   "zuora-sar",
   "Performs a Subject Access Requests against Zuora",
-  "MemSub::Membership Admin::Zuora Sar",
   Seq(catsEffect, circeParser, circe, awsStepFunction)
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",
   "Cleans up the salesforce to free up storage via 360 sync/zuora",
-  "MemSub::Membership Admin::DEV Env Cleaner",
   Seq("com.amazonaws" % "aws-java-sdk-cloudwatch" % awsVersion, catsEffect, circeParser, circe, awsStepFunction)
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `sf-contact-merge` = lambdaProject(
   "sf-contact-merge",
-  "Merges together the salesforce account referenced by a set of zuora accounts",
-  "MemSub::Membership Admin::SF Contact Merge"
+  "Merges together the salesforce account referenced by a set of zuora accounts"
 ).dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-billing-account-remover` = lambdaProject(
   "sf-billing-account-remover",
   "Removes Billing Accounts and related records from Salesforce",
-  "MemSub::Membership Admin::SF Billing Account Remover",
-  Seq(circe, circeParser, scalajHttp)
-)
+  Seq(circe, circeParser, scalajHttp))
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
-    "cancellation-sf-cases-api",
-    "Create/update SalesForce cases for self service cancellation tracking",
-    "MemSub::Membership::Lambdas::Cancellation SF Cases API",
-    Seq(playJsonExtensions)
-  ).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
+  "cancellation-sf-cases-api",
+  "Create/update SalesForce cases for self service cancellation tracking",
+  Seq(playJsonExtensions)
+).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-gocardless-sync` = lambdaProject(
   "sf-gocardless-sync",
   "Polls GoCardless for direct debit mandate events and pushes into SalesForce",
-  "MemSub::Subscriptions::Lambdas::GoCardless SalesForce Sync",
   Seq(playJsonExtensions)
 ).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `holiday-stop-api` = lambdaProject(
   "holiday-stop-api",
   "CRUD API for Holiday Stop Requests stored in SalesForce",
-  "MemSub::Membership Admin::holiday-stop-api",
   Seq(playJsonExtensions)
 ).dependsOn(`holiday-stops` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep, `fulfilment-dates`)
 
 lazy val `sf-datalake-export` = lambdaProject(
   "sf-datalake-export",
   "Export salesforce data to the data lake",
-  "MemSub::Membership Admin::SF Data Lake Export",
   Seq(scalaXml)
 ).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
   "Zuora to Datalake export using Stateful AQuA API which exports incremental changes",
-  "MemSub::Membership Admin::Zuora Data Lake Export",
-  Seq(scalaLambda, scalajHttp, awsS3, enumeratum)
-)
+  Seq(scalaLambda, scalajHttp, awsS3, enumeratum))
 
 lazy val `batch-email-sender` = lambdaProject(
   "batch-email-sender",
   "Receive batches of emails to be sent, munge them into an appropriate format and put them on the email sending queue.",
-  "MemSub::Membership Admin::Batch Email Sender",
   Seq(playJsonExtensions, supportInternationalisation, diffx)
 ).dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 lazy val `braze-to-salesforce-file-upload` = lambdaProject(
   "braze-to-salesforce-file-upload",
   "MemSub::Membership Admin::braze-to-salesforce-file-upload",
-  "Braze to Salesforce file upload",
   Seq(
     scalaLambda,
     scalajHttp,
     awsS3,
     betterFiles,
-  )
-)
+  ))
 
 lazy val `holiday-stop-processor` = lambdaProject(
   "holiday-stop-processor",
   "Add a holiday credit amendment to a subscription.",
-  s"MemSub::Membership Admin::holiday-stop-processor",
   Seq(scalaLambda, awsS3)
 ).dependsOn(
   `credit-processor`,
@@ -415,7 +384,6 @@ lazy val `holiday-stop-processor` = lambdaProject(
 lazy val `delivery-problem-credit-processor` = lambdaProject(
   "delivery-problem-credit-processor",
   "Applies a credit amendment to a subscription for a delivery problem.",
-  s"MemSub::Membership Admin::delivery-problem-credit-processor",
   Seq(
     scalaLambda,
     circe,
@@ -428,14 +396,11 @@ lazy val `delivery-problem-credit-processor` = lambdaProject(
 
 lazy val `metric-push-api` = lambdaProject(
   "metric-push-api",
-  "HTTP API to push a metric to cloudwatch so we can alarm on errors",
-  "MemSub::Membership Admin::Metric Push API"
-)
+  "HTTP API to push a metric to cloudwatch so we can alarm on errors")
 
 lazy val `sf-move-subscriptions-api` = lambdaProject(
   "sf-move-subscriptions-api",
   "API for for moving subscriptions in ZUORA from SalesForce",
-  "MemSub::Membership Admin::sf-move-subscriptions-api",
   Seq(
     http4sDsl,
     http4sCirce,
@@ -452,14 +417,12 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
 lazy val `fulfilment-date-calculator` = lambdaProject(
   "fulfilment-date-calculator",
   "Generate files in S3 bucket containing relevant fulfilment-related dates, for example, acquisitionsStartDate, holidayStopFirstAvailableDate, etc.",
-  "MemSub::Membership Admin::fulfilment-date-calculator",
   Seq(scalaLambda, scalajHttp, enumeratum)
 ).dependsOn(testDep, `fulfilment-dates`)
 
 lazy val `delivery-records-api` = lambdaProject(
   "delivery-records-api",
   "API for accessing delivery records in Salesforce",
-  "MemSub::Subscriptions::Lambdas::Delivery Record API",
   Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest)
 ).dependsOn(
   `effects-s3`,
@@ -472,7 +435,6 @@ lazy val `delivery-records-api` = lambdaProject(
 lazy val `digital-voucher-api` = lambdaProject(
   "digital-voucher-api",
   "API for integrating Imovos digital voucher services",
-  "MemSub::Subscriptions::Lambdas::Digital Voucher API",
   Seq(
     http4sDsl,
     http4sCirce,
@@ -487,7 +449,6 @@ lazy val `digital-voucher-api` = lambdaProject(
 lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   "digital-voucher-cancellation-processor",
   "Processor that co-ordinates the cancellation of digital voucher redemption via the imovo api",
-  "MemSub::Membership Admin::digital-voucher-cancellation-processor",
   Seq(
     scalatest,
     diffx,
@@ -505,7 +466,6 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
 lazy val `digital-voucher-suspension-processor` = lambdaProject(
   "digital-voucher-suspension-processor",
   "Processor that suspends digital vouchers via the digital voucher API.",
-  "MemSub::Membership Admin::digital-voucher-suspension-processor",
   Seq(
     awsLambda,
     sttpAsyncHttpClientBackendCats,
@@ -518,7 +478,6 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
 lazy val `contact-us-api` = lambdaProject(
   "contact-us-api",
   "Transforms a request from the Contact Us form into a Salesforce case",
-  "MemSub::Subscriptions::Lambdas::Contact Us API",
   Seq(
     circe,
     circeParser,
