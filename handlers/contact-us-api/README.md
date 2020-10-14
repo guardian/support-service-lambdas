@@ -1,0 +1,33 @@
+## Errors
+
+This lambda is designed to handle errors and exceptions gracefully and always return a response with an appropriate
+status code. Alarms have been added to notify of any issues that might arise.
+
+### 4XX Errors
+
+**CAUSE**: 4xx errors mean the contents of the requests are invalid. Looking at the logs will give a better
+ understanding ofwhat's going on but this will always be either an empty or a malformed request.
+
+**IMPACT**: These requests are not (cannot) be entered to Salesforce.
+
+**FIX**: Check this lambda for changes to how the request is decoded. Check the source of the requests
+ (manage-frontend) for changes to how the request is constructed.
+
+### 5XX Errors
+
+**CAUSE**: 5xx errors could mean one of 3 things:
+
+1. Failed to obtain all environment variables;
+2. Failed to contact Salesforce endpoint;
+3. Error decoding Salesforce's responses;
+
+The lambda logs wil provide more details regarding which of these is happening and where in the code.
+
+**IMPACT**: These requests are not entered into Salesforce.
+
+**FIX**: For each corresponding cause:
+
+1. Check the Cloud Formation template for environment variables and make sure all the necessary key-values are present
+1. Check the Salesforce endpoints are correct and online.
+1. Check this lambda for changes to how the relevant Salesforce response is decoded. Check this lambda for changes to
+ the version of the Salesforce API used and if that version's responses are the same the lambda expects.
