@@ -394,22 +394,21 @@ lazy val `metric-push-api` = lambdaProject(
   "MemSub::Membership Admin::Metric Push API"
 )
 
-lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
-  .dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
-  .settings(
-    libraryDependencies ++=
-      Seq(
-        http4sDsl,
-        http4sCirce,
-        http4sServer,
-        sttp,
-        sttpCirce,
-        sttpAsyncHttpClientBackendCats,
-        scalatest,
-        diffx
-      ) ++ logging
+lazy val `sf-move-subscriptions-api` = lambdaProject(
+  "sf-move-subscriptions-api",
+  "API for for moving subscriptions in ZUORA from SalesForce",
+  "MemSub::Membership Admin::sf-move-subscriptions-api",
+  Seq(
+    http4sDsl,
+    http4sCirce,
+    http4sServer,
+    sttp,
+    sttpCirce,
+    sttpAsyncHttpClientBackendCats,
+    scalatest,
+    diffx
   )
-  .enablePlugins(RiffRaffArtifact)
+).dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
 lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment-date-calculator"))
   .enablePlugins(RiffRaffArtifact)
