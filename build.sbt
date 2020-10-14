@@ -430,22 +430,20 @@ lazy val `delivery-records-api` = lambdaProject(
   `http4s-lambda-handler`
 )
 
-lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-api"))
-  .dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`)
-  .settings(
-    libraryDependencies ++=
-      Seq(
-        http4sDsl,
-        http4sCirce,
-        http4sServer,
-        sttpAsyncHttpClientBackendCats,
-        scalatest,
-        diffx,
-        scalaMock,
-      )
-      ++ logging
+lazy val `digital-voucher-api` = lambdaProject(
+  "digital-voucher-api",
+  "API for integrating Imovos digital voucher services",
+  "MemSub::Subscriptions::Lambdas::Digital Voucher API",
+  Seq(
+    http4sDsl,
+    http4sCirce,
+    http4sServer,
+    sttpAsyncHttpClientBackendCats,
+    scalatest,
+    diffx,
+    scalaMock,
   )
-  .enablePlugins(RiffRaffArtifact)
+).dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`)
 
 lazy val `digital-voucher-cancellation-processor` = all(project in file("handlers/digital-voucher-cancellation-processor"))
   .dependsOn(
