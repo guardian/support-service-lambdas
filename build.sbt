@@ -374,24 +374,19 @@ lazy val `holiday-stop-processor` = lambdaProject(
   effects
 )
 
-lazy val `delivery-problem-credit-processor` =
-  all(project in file("handlers/delivery-problem-credit-processor"))
-    .dependsOn(
-      `credit-processor`,
-      `salesforce-sttp-client`,
-      effects
-    )
-    .settings(
-      libraryDependencies ++= Seq(
-        scalaLambda,
-        circe,
-        zio,
-        sttpAsyncHttpClientBackendCats,
-        scalatest,
-        diffx
-      )
-    )
-    .enablePlugins(RiffRaffArtifact)
+lazy val `delivery-problem-credit-processor` = lambdaProject(
+  "delivery-problem-credit-processor",
+  "Applies a credit amendment to a subscription for a delivery problem.",
+  s"MemSub::Membership Admin::delivery-problem-credit-processor",
+  Seq(
+    scalaLambda,
+    circe,
+    zio,
+    sttpAsyncHttpClientBackendCats,
+    scalatest,
+    diffx
+  )
+).dependsOn(`credit-processor`, `salesforce-sttp-client`, effects)
 
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)
