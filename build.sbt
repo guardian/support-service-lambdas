@@ -368,9 +368,12 @@ lazy val `holiday-stop-api` = lambdaProject(
   Seq(playJsonExtensions)
 ).dependsOn(`holiday-stops` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep, `fulfilment-dates`)
 
-lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `sf-datalake-export` = lambdaProject(
+  "sf-datalake-export",
+  "Export salesforce data to the data lake",
+  "MemSub::Membership Admin::SF Data Lake Export",
+  Seq(scalaXml)
+).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
