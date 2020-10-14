@@ -467,24 +467,18 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   `imovo-sttp-test-stub` % Test
 )
 
-lazy val `digital-voucher-suspension-processor` =
-  all(project in file("handlers/digital-voucher-suspension-processor"))
-  .dependsOn(
-    `salesforce-sttp-client`,
-    `imovo-sttp-client`
+lazy val `digital-voucher-suspension-processor` = lambdaProject(
+  "digital-voucher-suspension-processor",
+  "Processor that suspends digital vouchers via the digital voucher API.",
+  "MemSub::Membership Admin::digital-voucher-suspension-processor",
+  Seq(
+    awsLambda,
+    sttpAsyncHttpClientBackendCats,
+    sttpOkhttpBackend,
+    scalatest,
+    scalaMock
   )
-  .settings(
-    libraryDependencies ++=
-      Seq(
-        awsLambda,
-        sttpAsyncHttpClientBackendCats,
-        sttpOkhttpBackend,
-        scalatest,
-        scalaMock
-      )
-        ++ logging
-  )
-  .enablePlugins(RiffRaffArtifact)
+).dependsOn(`salesforce-sttp-client`, `imovo-sttp-client`)
 
 lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
   .dependsOn(handler)
