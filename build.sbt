@@ -410,9 +410,12 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
   )
 ).dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
-lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment-date-calculator"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(testDep, `fulfilment-dates`)
+lazy val `fulfilment-date-calculator` = lambdaProject(
+  "fulfilment-date-calculator",
+  "Generate files in S3 bucket containing relevant fulfilment-related dates, for example, acquisitionsStartDate, holidayStopFirstAvailableDate, etc.",
+  "MemSub::Membership Admin::fulfilment-date-calculator",
+  Seq(scalaLambda, scalajHttp, enumeratum)
+).dependsOn(testDep, `fulfilment-dates`)
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
   .dependsOn(
