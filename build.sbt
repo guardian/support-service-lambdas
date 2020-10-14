@@ -327,10 +327,12 @@ lazy val `zuora-sar` = lambdaProject(
   Seq(catsEffect, circeParser, circe, awsStepFunction)
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
-lazy val `dev-env-cleaner` = all(project in file("handlers/dev-env-cleaner"))
-  .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+lazy val `dev-env-cleaner` = lambdaProject(
+  "dev-env-cleaner",
+  "Cleans up the salesforce to free up storage via 360 sync/zuora",
+  "MemSub::Membership Admin::DEV Env Cleaner",
+  Seq("com.amazonaws" % "aws-java-sdk-cloudwatch" % awsVersion, catsEffect, circeParser, circe, awsStepFunction)
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
