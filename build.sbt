@@ -314,9 +314,11 @@ lazy val `new-product-api` = lambdaProject(
   Seq(supportInternationalisation),
 ).dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
-lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `zuora-retention` = lambdaProject(
+  "zuora-retention",
+  "find and mark accounts that are out of the retention period",
+  "MemSub::Membership Admin::Zuora Retention"
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
   .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
