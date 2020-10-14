@@ -363,7 +363,7 @@ lazy val `batch-email-sender` = lambdaProject(
 
 lazy val `braze-to-salesforce-file-upload` = lambdaProject(
   "braze-to-salesforce-file-upload",
-  "MemSub::Membership Admin::braze-to-salesforce-file-upload",
+  "Braze to Salesforce file upload",
   Seq(
     scalaLambda,
     scalajHttp,
