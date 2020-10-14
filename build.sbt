@@ -319,7 +319,9 @@ def lambdaProject(
   projectDescription: String,
   riffRaffProjectName: String,
   dependencies: Seq[ModuleID] = Nil,
-): Project =
+  isCdk: Boolean = false
+): Project = {
+  val cfName = if (isCdk) "cdk-cfn.yaml" else "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
     .configs(EffectsTest, HealthCheckTest)
@@ -333,9 +335,10 @@ def lambdaProject(
       riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
       riffRaffUploadManifestBucket := Option("riffraff-builds"),
       riffRaffManifestProjectName := riffRaffProjectName,
-      riffRaffArtifactResources += (file(s"handlers/$projectName/cfn.yaml"), "cfn/cfn.yaml"),
+      riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
       libraryDependencies ++= dependencies ++ logging
     )
+}
 
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
@@ -407,7 +410,8 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
     sttpAsyncHttpClientBackendCats,
     scalatest,
     diffx
-  )
+  ),
+  isCdk = true
 ).dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
 lazy val `fulfilment-date-calculator` = lambdaProject(
@@ -445,7 +449,6 @@ lazy val `digital-voucher-api` = lambdaProject(
   )
 ).dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`)
 
-// FIXME: riffRaffArtifactResources += (file(s"handlers/${name.value}/cdk-cfn.yaml"), "cfn/cdk-cfn.yaml")
 lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   "digital-voucher-cancellation-processor",
   "Processor that co-ordinates the cancellation of digital voucher redemption via the imovo api",
@@ -454,7 +457,8 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
     scalatest,
     diffx,
     sttpCats
-  )
+  ),
+  isCdk = true
 ).dependsOn(
   `config-cats`,
   `salesforce-sttp-client`,
@@ -462,7 +466,6 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   `imovo-sttp-client`,
   `imovo-sttp-test-stub` % Test
 )
-
 
 lazy val `digital-voucher-suspension-processor` =
   all(project in file("handlers/digital-voucher-suspension-processor"))
