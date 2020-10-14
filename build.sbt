@@ -307,9 +307,12 @@ lazy val `identity-retention` = lambdaProject(
   "MemSub::Membership Admin::Identity Retention"
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `new-product-api` = all(project in file("handlers/new-product-api"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
+lazy val `new-product-api` = lambdaProject(
+  "new-product-api",
+  "Add subscription to account",
+  "MemSub::Membership Admin::New product API",
+  Seq(supportInternationalisation),
+).dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
   .enablePlugins(RiffRaffArtifact)
