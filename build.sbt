@@ -363,13 +363,16 @@ lazy val `braze-to-salesforce-file-upload` = lambdaProject(
   )
 )
 
-lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-processor"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(
-    `credit-processor`,
-    `holiday-stops` % "compile->compile;test->test",
-    effects
-  )
+lazy val `holiday-stop-processor` = lambdaProject(
+  "holiday-stop-processor",
+  "Add a holiday credit amendment to a subscription.",
+  s"MemSub::Membership Admin::holiday-stop-processor",
+  Seq(scalaLambda, awsS3)
+).dependsOn(
+  `credit-processor`,
+  `holiday-stops` % "compile->compile;test->test",
+  effects
+)
 
 lazy val `delivery-problem-credit-processor` =
   all(project in file("handlers/delivery-problem-credit-processor"))
