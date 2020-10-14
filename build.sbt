@@ -288,9 +288,12 @@ lazy val `identity-backfill` = lambdaProject(
   testDep
 )
 
-lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-subscription-expiry"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `digital-subscription-expiry` = lambdaProject(
+  "digital-subscription-expiry",
+  "check digital subscription expiration for authorisation purposes",
+  "MemSub::Subscriptions::Lambdas::Digital Subscription Expiry",
+  Seq(contentAuthCommon)
+).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `catalog-service` = all(project in file("handlers/catalog-service"))
   .enablePlugins(RiffRaffArtifact)
