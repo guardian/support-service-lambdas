@@ -417,16 +417,18 @@ lazy val `fulfilment-date-calculator` = lambdaProject(
   Seq(scalaLambda, scalajHttp, enumeratum)
 ).dependsOn(testDep, `fulfilment-dates`)
 
-lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
-  .dependsOn(
-    `effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test, `http4s-lambda-handler`
-  )
-  .settings(
-    libraryDependencies ++=
-      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest)
-        ++ logging
-  )
-  .enablePlugins(RiffRaffArtifact)
+lazy val `delivery-records-api` = lambdaProject(
+  "delivery-records-api",
+  "API for accessing delivery records in Salesforce",
+  "MemSub::Subscriptions::Lambdas::Delivery Record API",
+  Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest)
+).dependsOn(
+  `effects-s3`,
+  `config-core`,
+  `salesforce-sttp-client`,
+  `salesforce-sttp-test-stub` % Test,
+  `http4s-lambda-handler`
+)
 
 lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-api"))
   .dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`)
