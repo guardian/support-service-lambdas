@@ -94,8 +94,8 @@ Resources:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
       AlarmName: !Sub 4XX rate from contact-us-api-${Stage}
       AlarmDescription: >
-        IMPACT: Contact Us API is receiving invalid requests.
-        CAUSE: Likely the requests being sent from manage-frontend are invalid.
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/contact-us-api/README.md#4XX-Errors
+        for possible causes, impacts and fixes.
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: ApiName
@@ -120,10 +120,8 @@ Resources:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
       AlarmName: !Sub 5XX rate from contact-us-api-${Stage}
       AlarmDescription: >
-        IMPACT: Contact Us form requests are not being entered into Salesforce.
-        CAUSE: Likely one of the following. a) Unable to obtain config;
-        b) Failed to contact Salesforce endpoint;
-        c) Error decoding Salesforce's responses;
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/contact-us-api/README.md#5XX-Errors
+        for possible causes, impacts and fixes.
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: ApiName
