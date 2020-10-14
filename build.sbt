@@ -318,7 +318,7 @@ def lambdaProject(
   projectName: String,
   projectDescription: String,
   riffRaffProjectName: String,
-  dependencies: Seq[ModuleID],
+  dependencies: Seq[ModuleID] = Nil,
 ): Project =
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
@@ -388,9 +388,11 @@ lazy val `delivery-problem-credit-processor` = lambdaProject(
   )
 ).dependsOn(`credit-processor`, `salesforce-sttp-client`, effects)
 
-lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn()
+lazy val `metric-push-api` = lambdaProject(
+  "metric-push-api",
+  "HTTP API to push a metric to cloudwatch so we can alarm on errors",
+  "MemSub::Membership Admin::Metric Push API"
+)
 
 lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
   .dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
