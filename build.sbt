@@ -295,9 +295,11 @@ lazy val `digital-subscription-expiry` = lambdaProject(
   Seq(contentAuthCommon)
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `catalog-service` = all(project in file("handlers/catalog-service"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `catalog-service` = lambdaProject(
+  "catalog-service",
+  "Download the Zuora Catalog and store the JSON in S3",
+  "MemSub::Subscriptions::Lambdas::Catalog Service"
+).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-retention` = all(project in file("handlers/identity-retention"))
   .enablePlugins(RiffRaffArtifact)
