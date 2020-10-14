@@ -361,11 +361,12 @@ lazy val `sf-gocardless-sync` = lambdaProject(
   Seq(playJsonExtensions)
 ).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(
-    `holiday-stops` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep, `fulfilment-dates`
-  )
+lazy val `holiday-stop-api` = lambdaProject(
+  "holiday-stop-api",
+  "CRUD API for Holiday Stop Requests stored in SalesForce",
+  "MemSub::Membership Admin::holiday-stop-api",
+  Seq(playJsonExtensions)
+).dependsOn(`holiday-stops` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep, `fulfilment-dates`)
 
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
