@@ -15,9 +15,11 @@ Conditions:
 Mappings:
   StageMap:
     CODE:
-      SecretsVersion: "9a7414c9-6711-44fa-a683-b1d11643c8c7"
+      Domain: test.salesforce.com
+      SecretsVersion: 5a68b23e-6d75-4bb4-9131-a4d94c121010
     PROD:
-      SecretsVersion: "0cee634d-a5f4-454d-a3a2-9d57ee90e154"
+      Domain: gnmtouchpoint.my.salesforce.com
+      SecretsVersion: cfe10466-bd62-45f2-a61f-3fcf9c12ef9f
 
 Resources:
   ContactUsApiGateway:
@@ -47,32 +49,26 @@ Resources:
         Variables:
           clientID:
             !Sub
-            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:clientID::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:clientId::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
           clientSecret:
             !Sub
-            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:clientSecret::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:clientSecret::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
           username:
             !Sub
-            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:username::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:userName::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
           password:
             !Sub
-            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:password::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:password::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
           token:
             !Sub
-            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:token::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:token::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
-          authDomain:
-            !Sub
-            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:authDomain::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
-          reqDomain:
-            !Sub
-            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:reqDomain::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+          authDomain: !FindInMap [ StageMap, !Ref Stage, Domain ]
+          reqDomain: !FindInMap [ StageMap, !Ref Stage, Domain ]
       Events:
         ApiEvent:
           Type: Api
