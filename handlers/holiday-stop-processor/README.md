@@ -28,10 +28,10 @@ eg:
   "productType": {
     "name": "Guardian Weekly"
   },
-  "stopDate": "2020-10-13"
+  "stopDate": "2020-10-16"
 }
 ```
-This example will cause the processor to process only Guardian Weekly subscriptions for 13 October. 
+This example will cause the processor to process only Guardian Weekly subscriptions for 16 October. 
 
 ## Output
 The output is a list of successfully applied holiday credits corresponding to the requests fetched from Salesforce.  These may not have been applied as part of the current run of the lambda; they may have been applied in previous runs.  But this ensures there is a complete list of results corresponding to the list of holiday requests fetched.
