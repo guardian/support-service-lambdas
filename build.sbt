@@ -340,8 +340,12 @@ lazy val `sf-contact-merge` = lambdaProject(
   "MemSub::Membership Admin::SF Contact Merge"
 ).dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `sf-billing-account-remover` = all(project in file("handlers/sf-billing-account-remover"))
-  .enablePlugins(RiffRaffArtifact)
+lazy val `sf-billing-account-remover` = lambdaProject(
+  "sf-billing-account-remover",
+  "Removes Billing Accounts and related records from Salesforce",
+  "MemSub::Membership Admin::SF Billing Account Remover",
+  Seq(circe, circeParser, scalajHttp)
+)
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
     "cancellation-sf-cases-api",
