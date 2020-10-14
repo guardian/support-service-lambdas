@@ -242,19 +242,51 @@ lazy val `imovo-sttp-test-stub` = all(project in file("lib/imovo/imovo-sttp-test
     libraryDependencies ++= Seq(scalatest)
   )
 
+def lambdaProject(
+  projectName: String,
+  projectDescription: String,
+  riffRaffProjectName: String,
+  dependencies: Seq[ModuleID] = Nil,
+  isCdk: Boolean = false
+): Project = {
+  val cfName = if (isCdk) "cdk-cfn.yaml" else "cfn.yaml"
+  Project(projectName, file(s"handlers/$projectName"))
+    .enablePlugins(RiffRaffArtifact)
+    .configs(EffectsTest, HealthCheckTest)
+    .settings(scalaSettings, testSettings)
+    .settings(
+      name := projectName,
+      description:= projectDescription,
+      assemblyJarName := s"$projectName.jar",
+      assemblyMergeStrategyDiscardModuleInfo,
+      riffRaffPackageType := assembly.value,
+      riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
+      riffRaffUploadManifestBucket := Option("riffraff-builds"),
+      riffRaffManifestProjectName := riffRaffProjectName,
+      riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
+      libraryDependencies ++= dependencies ++ logging
+    )
+}
+
+// FIXME: This seems to be non-standard
+// FIXME: Why is the name in sub-project build.sbt support-service-lambda
+// FIXME: Why is riff-raff not refering to CF?
 lazy val `zuora-callout-apis` = all(project in file("handlers/zuora-callout-apis"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
-lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(
-    zuora,
-    `salesforce-client` % "compile->compile;test->test",
-    handler,
-    effectsDepIncludingTestFolder,
-    testDep
-  )
+lazy val `identity-backfill` = lambdaProject(
+  "identity-backfill",
+  "links subscriptions with identity accounts",
+  "MemSub::Membership Admin::Identity Backfill",
+  Seq(supportInternationalisation)
+).dependsOn(
+  zuora,
+  `salesforce-client` % "compile->compile;test->test",
+  handler,
+  effectsDepIncludingTestFolder,
+  testDep
+)
 
 lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-subscription-expiry"))
   .enablePlugins(RiffRaffArtifact)
@@ -313,32 +345,6 @@ lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
-
-def lambdaProject(
-  projectName: String,
-  projectDescription: String,
-  riffRaffProjectName: String,
-  dependencies: Seq[ModuleID] = Nil,
-  isCdk: Boolean = false
-): Project = {
-  val cfName = if (isCdk) "cdk-cfn.yaml" else "cfn.yaml"
-  Project(projectName, file(s"handlers/$projectName"))
-    .enablePlugins(RiffRaffArtifact)
-    .configs(EffectsTest, HealthCheckTest)
-    .settings(scalaSettings, testSettings)
-    .settings(
-      name := projectName,
-      description:= projectDescription,
-      assemblyJarName := s"$projectName.jar",
-      assemblyMergeStrategyDiscardModuleInfo,
-      riffRaffPackageType := assembly.value,
-      riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
-      riffRaffUploadManifestBucket := Option("riffraff-builds"),
-      riffRaffManifestProjectName := riffRaffProjectName,
-      riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
-      libraryDependencies ++= dependencies ++ logging
-    )
-}
 
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
