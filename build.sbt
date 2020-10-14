@@ -48,11 +48,11 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
   testOptions in HealthCheckTest += Tests.Argument("-n", "com.gu.test.HealthCheck")
 )
 
-def all(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
+def library(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
 
 // ==== START libraries ====
 
-lazy val test = all(project in file("lib/test"))
+lazy val test = library(project in file("lib/test"))
   .settings(
     libraryDependencies ++= Seq(
       scalatest,
@@ -62,7 +62,7 @@ lazy val test = all(project in file("lib/test"))
 
 val testDep = test % "test->test"
 
-lazy val zuora = all(project in file("lib/zuora"))
+lazy val zuora = library(project in file("lib/zuora"))
   .dependsOn(
     restHttp,
     testDep,
@@ -73,13 +73,13 @@ lazy val zuora = all(project in file("lib/zuora"))
     libraryDependencies ++= Seq(okhttp3, playJson, scalatest, jacksonDatabind) ++ logging
   )
 
-lazy val `salesforce-core` = all(project in file("lib/salesforce/core"))
+lazy val `salesforce-core` = library(project in file("lib/salesforce/core"))
   .dependsOn(`config-core`)
   .settings(
     libraryDependencies ++= Seq(playJson) ++ logging
   )
 
-lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
+lazy val `salesforce-client` = library(project in file("lib/salesforce/client"))
   .dependsOn(
     restHttp,
     handler,// % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
@@ -91,7 +91,7 @@ lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
     libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging
   )
 
-lazy val `salesforce-sttp-client` = all(project in file("lib/salesforce/sttp-client"))
+lazy val `salesforce-sttp-client` = library(project in file("lib/salesforce/sttp-client"))
   .dependsOn(
     `salesforce-core`,
     `salesforce-sttp-test-stub` % Test
@@ -101,7 +101,7 @@ lazy val `salesforce-sttp-client` = all(project in file("lib/salesforce/sttp-cli
       Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
-lazy val `salesforce-sttp-test-stub` = all(project in file("lib/salesforce/sttp-test-stub"))
+lazy val `salesforce-sttp-test-stub` = library(project in file("lib/salesforce/sttp-test-stub"))
   .dependsOn(
     `salesforce-core`
   )
@@ -109,7 +109,7 @@ lazy val `salesforce-sttp-test-stub` = all(project in file("lib/salesforce/sttp-
     libraryDependencies ++= Seq(sttp, sttpCirce, scalatest) ++ logging
   )
 
-lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
+lazy val `holiday-stops` = library(project in file("lib/holiday-stops"))
   .dependsOn(
     `salesforce-client`,
     effects % "test->test",
@@ -133,13 +133,13 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
     ) ++ logging
   )
 
-lazy val restHttp = all(project in file("lib/restHttp"))
+lazy val restHttp = library(project in file("lib/restHttp"))
   .dependsOn(handler)
   .settings(
     libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging
   )
 
-lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
+lazy val s3ConfigValidator = library(project in file("lib/s3ConfigValidator"))
   .dependsOn(
     testDep,
     handler,
@@ -155,58 +155,58 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
     libraryDependencies ++= Seq(scalatest)
   )
 
-lazy val handler = all(project in file("lib/handler"))
+lazy val handler = library(project in file("lib/handler"))
   .dependsOn(`effects-s3`, `config-core`)
   .settings(
     libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest, awsLambda) ++ logging
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
-lazy val effects = all(project in file("lib/effects"))
+lazy val effects = library(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
     libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3, jacksonDatabind) ++ logging
   )
-lazy val `effects-s3` = all(project in file("lib/effects-s3"))
+lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
     libraryDependencies ++= Seq(awsS3) ++ logging
   )
-lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
+lazy val `effects-sqs` = library(project in file("lib/effects-sqs"))
   .dependsOn(testDep)
   .settings(
     libraryDependencies ++= Seq(awsSQS) ++ logging
   )
-lazy val `effects-lambda` = all(project in file("lib/effects-lambda"))
+lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
   .dependsOn(testDep)
   .settings(
     libraryDependencies ++= Seq(awsSdkLambda) ++ logging
   )
 
-lazy val `effects-ses` = all(project in file("lib/effects-ses"))
+lazy val `effects-ses` = library(project in file("lib/effects-ses"))
   .dependsOn(testDep)
   .settings(
     libraryDependencies ++= Seq(awsSES) ++ logging
   )
 
-lazy val `config-core` = all(project in file("lib/config-core"))
+lazy val `config-core` = library(project in file("lib/config-core"))
 
-lazy val `config-cats` = all(project in file("lib/config-cats"))
+lazy val `config-cats` = library(project in file("lib/config-cats"))
   .settings(
     libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig)
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
-lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
+lazy val `zuora-reports` = library(project in file("lib/zuora-reports"))
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `fulfilment-dates` = all(project in file("lib/fulfilment-dates"))
+lazy val `fulfilment-dates` = library(project in file("lib/fulfilment-dates"))
   .dependsOn(`effects-s3`, `config-core`, testDep, `zuora-core`)
   .settings(
     libraryDependencies ++= Seq(catsCore, circe, circeParser)
   )
 
-lazy val `zuora-core` = all(project in file("lib/zuora-core"))
+lazy val `zuora-core` = library(project in file("lib/zuora-core"))
   .settings(
     libraryDependencies ++= Seq(
       playJson,
@@ -222,7 +222,7 @@ lazy val `zuora-core` = all(project in file("lib/zuora-core"))
     ) ++ logging
   )
 
-lazy val `credit-processor` = all(project in file("lib/credit-processor"))
+lazy val `credit-processor` = library(project in file("lib/credit-processor"))
   .dependsOn(
     `zuora-core`,
     `fulfilment-dates`
@@ -230,13 +230,13 @@ lazy val `credit-processor` = all(project in file("lib/credit-processor"))
     libraryDependencies ++= logging
   )
 
-lazy val `imovo-sttp-client` = all(project in file("lib/imovo/imovo-sttp-client"))
+lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-client"))
   .settings(
     libraryDependencies ++=
       Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
-lazy val `imovo-sttp-test-stub` = all(project in file("lib/imovo/imovo-sttp-test-stub"))
+lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-test-stub"))
   .dependsOn(`imovo-sttp-client`)
   .settings(
     libraryDependencies ++= Seq(scalatest)
@@ -271,7 +271,7 @@ def lambdaProject(
 // FIXME: This seems to be non-standard
 // FIXME: Why is the name in sub-project build.sbt support-service-lambda
 // FIXME: Why is riff-raff not refering to CF?
-lazy val `zuora-callout-apis` = all(project in file("handlers/zuora-callout-apis"))
+lazy val `zuora-callout-apis` = library(project in file("handlers/zuora-callout-apis"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
@@ -528,7 +528,7 @@ lazy val `contact-us-api` = lambdaProject(
   )
 ).dependsOn(handler)
 
-lazy val `http4s-lambda-handler` = all(project in file("lib/http4s-lambda-handler"))
+lazy val `http4s-lambda-handler` = library(project in file("lib/http4s-lambda-handler"))
   .settings(
     libraryDependencies ++= Seq(circe, circeParser, http4sCore, http4sDsl % Test, scalatest) ++ logging
   )
