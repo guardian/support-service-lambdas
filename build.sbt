@@ -334,9 +334,11 @@ lazy val `dev-env-cleaner` = lambdaProject(
   Seq("com.amazonaws" % "aws-java-sdk-cloudwatch" % awsVersion, catsEffect, circeParser, circe, awsStepFunction)
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
-lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
+lazy val `sf-contact-merge` = lambdaProject(
+  "sf-contact-merge",
+  "Merges together the salesforce account referenced by a set of zuora accounts",
+  "MemSub::Membership Admin::SF Contact Merge"
+).dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-billing-account-remover` = all(project in file("handlers/sf-billing-account-remover"))
   .enablePlugins(RiffRaffArtifact)
