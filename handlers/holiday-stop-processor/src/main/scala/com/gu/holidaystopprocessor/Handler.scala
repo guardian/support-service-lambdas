@@ -7,30 +7,42 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.creditprocessor.ProcessResult
 import com.gu.effects.GetFromS3
 import com.gu.holiday_stops.{ConfigLive, Configuration}
+import com.gu.holidaystopprocessor.HolidayStopCreditProcessor.{ProductTypeAndStopDate, processAllProducts}
+import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
 import zio.console.Console
-import zio.{DefaultRuntime, RIO, console}
+import zio._
 
-object Handler extends Lambda[Option[LocalDate], List[ZuoraHolidayCreditAddResult]] {
-
-  private val runtime = new DefaultRuntime {}
+object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayCreditAddResult]] with zio.App {
 
   /**
-   * @param processDateOverride
-   *             The date for which relevant holiday stop requests will be processed.
+   * @param productTypeAndStopDateOverride
+   *             Optionally, the handler will take a product type and stopped publication date
+   *             of holiday-stop requests to process.
    *             This is to facilitate testing.
-   *             In normal use it will be missing and a default value will apply instead.
+   *             In normal use it will be missing and all product types will be processed for
+   *             publication dates determined by the fulfilment dates file.
    */
-  override def handle(processDateOverride: Option[LocalDate], context: Context): Either[Throwable, List[ZuoraHolidayCreditAddResult]] = {
+  override def handle(productTypeAndStopDateOverride: Option[ProductTypeAndStopDate], context: Context): Either[Throwable, List[ZuoraHolidayCreditAddResult]] = {
+
+    val runtime = new DefaultRuntime {}
 
     val main: RIO[Console with Configuration, List[ZuoraHolidayCreditAddResult]] =
       for {
-        config <- Configuration.factory.config.tapError(e => console.putStrLn(s"Config failure: $e"))
-        results <- RIO.effect(HolidayStopCreditProcessor.processAllProducts(config, processDateOverride, HttpURLConnectionBackend(), GetFromS3.fetchString))
-        _ <- RIO.foreach(results)(result => RIO.effect(ProcessResult.log(result)))
+        config <- Configuration.factory.config.tapError(e =>
+          console.putStrLn(s"Config failure: $e"))
+        results <- RIO.effect(
+          HolidayStopCreditProcessor.processAllProducts(
+            config,
+            productTypeAndStopDateOverride,
+            HttpURLConnectionBackend(),
+            GetFromS3.fetchString
+          )
+        )
+        _ <- RIO.foreach_(results)(result => RIO.effect(ProcessResult.log(result)))
         zuoraWriteResults <- results.flatMap(_.overallFailure.toList) match {
           case Nil =>
             val (_, successfulZuoraResponses) = results.flatMap(_.creditResults).separate
@@ -43,5 +55,43 @@ object Handler extends Lambda[Option[LocalDate], List[ZuoraHolidayCreditAddResul
     runtime.unsafeRun {
       main.provide(new Console.Live with ConfigLive {}).either
     }
+  }
+
+  // This is just for functional testing locally.
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+
+    def showResults(processResults: List[ProcessResult[ZuoraHolidayCreditAddResult]]) =
+      for {
+        _ <- console.putStrLn(processResults.flatMap(_.creditsToApply).size.toString)
+        _ <- URIO.foreach_(processResults.flatMap(_.overallFailure)) { failure =>
+          console.putStrLn(s"Overall failure: ${failure.reason}")
+        }
+        _ <- URIO.foreach_(processResults.flatMap(_.creditResults)) {
+          case Left(failure) => console.putStrLn(s"Failed: ${failure.reason}")
+          case Right(response) => console.putStrLn(s"Success: $response")
+        }
+      } yield ()
+
+    def main(productTypeAndStopDate: Option[ProductTypeAndStopDate]) =
+      for {
+        config <- Configuration.factory.config.tapError(e =>
+          console.putStrLn(s"Config failure: $e"))
+        processResults <- ZIO.effect(
+          processAllProducts(
+            config,
+            productTypeAndStopDate,
+            HttpURLConnectionBackend(),
+            GetFromS3.fetchString
+          )
+        )
+        _ <- showResults(processResults)
+      } yield ()
+
+    val productTypeAndStopDate = for {
+      productType <- args.headOption.map(arg => ZuoraProductType(arg))
+      stopDate <- args.lift(1).map(LocalDate.parse)
+    } yield ProductTypeAndStopDate(productType, stopDate)
+    val program = main(productTypeAndStopDate).provide(new Console.Live with ConfigLive {})
+    program.fold(_ => 1, _ => 0)
   }
 }

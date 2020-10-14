@@ -20,7 +20,19 @@ The lambda is deployed in [Code](https://eu-west-1.console.aws.amazon.com/lambda
 
 ## Input
 The lambda has no direct inputs.  Its configuration is fetched as part of the script.
- 
+
+However, for testing or emergency use it can take an optional `ProductTypeAndStopDate` instance,
+eg:
+```json
+{
+  "productType": {
+    "name": "Guardian Weekly"
+  },
+  "stopDate": "2020-10-16"
+}
+```
+This example will cause the processor to process only Guardian Weekly subscriptions for 16 October. 
+
 ## Output
 The output is a list of successfully applied holiday credits corresponding to the requests fetched from Salesforce.  These may not have been applied as part of the current run of the lambda; they may have been applied in previous runs.  But this ensures there is a complete list of results corresponding to the list of holiday requests fetched.
  
