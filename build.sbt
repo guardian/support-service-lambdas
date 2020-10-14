@@ -320,10 +320,12 @@ lazy val `zuora-retention` = lambdaProject(
   "MemSub::Membership Admin::Zuora Retention"
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
-  .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+lazy val `zuora-sar` = lambdaProject(
+  "zuora-sar",
+  "Performs a Subject Access Requests against Zuora",
+  "MemSub::Membership Admin::Zuora Sar",
+  Seq(catsEffect, circeParser, circe, awsStepFunction)
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `dev-env-cleaner` = all(project in file("handlers/dev-env-cleaner"))
   .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
