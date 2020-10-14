@@ -34,8 +34,6 @@ Resources:
 
   ContactUsLambda:
     Type: AWS::Serverless::Function
-    DependsOn:
-      - ContactUsApiGateway
     Properties:
       FunctionName: !Sub contact-us-api-${Stage}
       Handler: com.gu.contact_us_api.Handler
