@@ -41,8 +41,9 @@ status code. Alarms have been added to notify of any issues that might arise.
 
 ### 4XX Errors
 
-**CAUSE**: 4xx errors mean the contents of the requests are invalid. Looking at the logs will give a better
- understanding of what's going on but this will always be either an empty or a malformed request.
+**CAUSE**: 4xx errors mean the contents of the requests are invalid. Looking at the
+ [logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fcontact-us-api-PROD)
+ will give a better understanding of what's going on but this will always be either an empty or a malformed request.
 
 **IMPACT**: These requests are not (cannot) be entered to Salesforce.
 
@@ -57,7 +58,8 @@ status code. Alarms have been added to notify of any issues that might arise.
 2. Failed to contact Salesforce endpoint;
 3. Error decoding Salesforce's responses;
 
-The lambda logs wil provide more details regarding which of these is happening and where in the code.
+The [lambda logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fcontact-us-api-PROD)
+ will provide more details regarding which of these is happening and where in the code.
 
 **IMPACT**: These requests are not entered into Salesforce.
 
