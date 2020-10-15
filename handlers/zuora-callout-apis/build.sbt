@@ -1,3 +1,4 @@
+// FIXME: This sub-project builds.sbt should be removed
 import Dependencies._
 
 name := "support-service-lambdas"
