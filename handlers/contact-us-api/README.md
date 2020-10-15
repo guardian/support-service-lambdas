@@ -1,3 +1,39 @@
+# contact-us-api
+
+This is a lambda that turns Contact Us form submissions into Salesforce cases.
+
+## Input
+
+It expects the following JSON format in the request's body:
+
+```
+{
+    "topic": string,
+    "subtopic"?: string, // Optional because not all topics have subtopics
+    "subsubtopic"?: string, // Optional because not all subtopics have subsubtopics
+    "name": string,
+    "email": string,
+    "subject": string,
+    "message": string,
+    "attachment"?: { // Attachments are optional
+        "name": string,
+        "contents": base64 encoded string, // File contents
+    }
+}
+```
+
+## Output
+
+Once the request has been processed a response with an appropriate status code will be provided. The body of the request
+ will include details in the following JSON format.
+
+```
+{
+    "success": boolean,
+    "error"?: string, // Error message only present if success is false
+}
+```
+
 ## Errors
 
 This lambda is designed to handle errors and exceptions gracefully and always return a response with an appropriate
@@ -5,8 +41,9 @@ status code. Alarms have been added to notify of any issues that might arise.
 
 ### 4XX Errors
 
-**CAUSE**: 4xx errors mean the contents of the requests are invalid. Looking at the logs will give a better
- understanding ofwhat's going on but this will always be either an empty or a malformed request.
+**CAUSE**: 4xx errors mean the contents of the requests are invalid. Looking at the
+ [logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fcontact-us-api-PROD)
+ will give a better understanding of what's going on but this will always be either an empty or a malformed request.
 
 **IMPACT**: These requests are not (cannot) be entered to Salesforce.
 
@@ -21,7 +58,8 @@ status code. Alarms have been added to notify of any issues that might arise.
 2. Failed to contact Salesforce endpoint;
 3. Error decoding Salesforce's responses;
 
-The lambda logs wil provide more details regarding which of these is happening and where in the code.
+The [lambda logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fcontact-us-api-PROD)
+ will provide more details regarding which of these is happening and where in the code.
 
 **IMPACT**: These requests are not entered into Salesforce.
 
