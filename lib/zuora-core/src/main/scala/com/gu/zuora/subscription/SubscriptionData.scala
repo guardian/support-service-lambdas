@@ -30,7 +30,7 @@ case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double)
 }
 
 trait SubscriptionData {
-  def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData]
+  @deprecated("Migrate to https://github.com/guardian/invoicing-api/pull/20") def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData]
   def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData]
   def productType: ZuoraProductType
   def subscriptionAnnualIssueLimit: Int
