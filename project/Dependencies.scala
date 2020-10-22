@@ -1,6 +1,9 @@
 import sbt._
 import sbtassembly.AssemblyKeys.assembly
-import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
+import sbtassembly.AssemblyPlugin.autoImport.{
+  MergeStrategy,
+  assemblyMergeStrategy
+}
 import sbtassembly.PathList
 
 object Dependencies {
@@ -25,6 +28,7 @@ object Dependencies {
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
+  val secretsManager = "com.amazonaws" % "aws-java-sdk-secretsmanager" % "1.11.882"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -34,7 +38,7 @@ object Dependencies {
   // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeConfig =  "io.circe" %% "circe-config" % "0.7.0"
+  val circeConfig = "io.circe" %% "circe-config" % "0.7.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
   val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.0" // FIXME: Why is this necessery?
@@ -76,7 +80,8 @@ object Dependencies {
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
   val assemblyMergeStrategyDiscardModuleInfo = assemblyMergeStrategy in assembly := {
     case PathList("module-info.class") => MergeStrategy.discard
-    case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
+    case PathList("META-INF", "io.netty.versions.properties") =>
+      MergeStrategy.discard
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
