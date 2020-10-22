@@ -3,7 +3,7 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
-import com.gu.creditprocessor.{ProcessResult, Processor}
+import com.gu.creditprocessor.{NextInvoiceDate, ProcessResult, Processor}
 import com.gu.effects.S3Location
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.holiday_stops.Config
@@ -88,7 +88,8 @@ object HolidayStopCreditProcessor {
             updateToApply,
             ZuoraHolidayCreditAddResult.apply,
             Salesforce.holidayStopUpdateResponse(config.sfConfig),
-            Zuora.accountGetResponse(config.zuoraConfig, zuoraAccessToken, backend)
+            Zuora.accountGetResponse(config.zuoraConfig, zuoraAccessToken, backend),
+            NextInvoiceDate.getNextInvoiceDate
           )
         }
         }
