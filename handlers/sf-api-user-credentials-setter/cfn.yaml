@@ -12,8 +12,6 @@ Mappings:
       SecretsVersion: "TODO"
     CODE:
       SecretsVersion: "TODO"
-    PROD:
-      SecretsVersion:  "TODO"
 
 Resources:
   SfApiUserCredentialsSetterRole:
