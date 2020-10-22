@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+
+Mappings:
+  StageMap:
+    DEV:
+      SecretsVersion: "TODO"
+    CODE:
+      SecretsVersion: "TODO"
+    PROD:
+      SecretsVersion:  "TODO"
+
+Resources:
+  SfApiUserCredentialsSetterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SfApiUserCredentialsSetterPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-api-user-credentials-setter-${Stage}:log-stream:*
+
+  SfApiUserCredentialsSetterLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        !Sub sf-api-user-credentials-setter-${Stage}
+      Description: Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key: !Sub membership/${Stage}/sf-api-user-credentials-setter/sf-api-user-credentials-setter.jar
+      Handler: com.gu.sf_api_user_credentials_setter.Main::lambda
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          authUrl:
+            !Sub
+            - '{{resolve:secretsmanager:sf-api-user-credentials-setter-${Stage}:SecretString:authUrl::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          clientId:
+            !Sub
+            - '{{resolve:secretsmanager:sf-api-user-credentials-setter-${Stage}:SecretString:clientId::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          clientSecret:
+            !Sub
+            - '{{resolve:secretsmanager:sf-api-user-credentials-setter-${Stage}:SecretString:clientSecret::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          password:
+            !Sub
+            - '{{resolve:secretsmanager:sf-api-user-credentials-setter-${Stage}:SecretString:password::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          token:
+            !Sub
+            - '{{resolve:secretsmanager:sf-api-user-credentials-setter-${Stage}:SecretString:token::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          username:
+            !Sub
+            - '{{resolve:secretsmanager:sf-api-user-credentials-setter-${Stage}:SecretString:username::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+
+      Role:
+        !GetAtt SfApiUserCredentialsSetterRole.Arn
+      MemorySize: 512
+      Runtime: java8
+      Timeout: 900
+    DependsOn:
+      - SfApiUserCredentialsSetterRole
