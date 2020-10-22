@@ -110,8 +110,7 @@ object Main extends App with LazyLogging {
   def getAwsApiUsersInSf(sfAuthDetails: SfAuthDetails): Either[Error, SfGetAwsApiUsersResponse] = {
     logger.info("Getting Aws Api users from Salesforce...")
 
-    //val query = "Select Id, name, email, username, CommunityNickname from user where profile.name='Touchpoint API User' order by name"
-    val query = "Select Id, name, email, username, CommunityNickname from user where Id in ('0050J000008jM4h', '0050J000008ziiMQAQ') order by name"
+    val query = "Select Id, name, email, username, CommunityNickname from user where profile.name='Touchpoint API User' order by name"
     decode[SfGetAwsApiUsersResponse](doSfGetWithQuery(sfAuthDetails, query))
   }
 
