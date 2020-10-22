@@ -131,7 +131,7 @@ object Main extends App with LazyLogging {
   }
 
   def createSecret(awsApiUserInSf: UserRecords.Records, secretName: String, newPwd: String): Unit = {
-    val y = secretsManagerClient.createSecret(
+    secretsManagerClient.createSecret(
       new CreateSecretRequest()
         .withName(secretName)
         .withSecretString(s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}""")
@@ -140,7 +140,7 @@ object Main extends App with LazyLogging {
 
   def updateSecret(secretName: String, newPwd: String): Unit = {
     println(s"setting secret in $secretName to : $newPwd")
-    val z = secretsManagerClient.updateSecret(
+    secretsManagerClient.updateSecret(
       new UpdateSecretRequest()
         .withSecretId(secretName)
         .withSecretString(s"""{"password":"$newPwd","token":""}""")
