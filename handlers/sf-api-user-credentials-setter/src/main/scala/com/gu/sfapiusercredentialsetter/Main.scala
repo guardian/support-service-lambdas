@@ -201,7 +201,8 @@ object Main extends App with LazyLogging {
     sb.toString
   }
 
-  def lambda(): Unit = {
+  //main method for lambda
+  def handler(): Unit = {
     setApiUserPasswordInSfAndSyncToAwsSecret()
   }
 }

@@ -47,7 +47,7 @@ Resources:
       Code:
         S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/sf-api-user-credentials-setter/sf-api-user-credentials-setter.jar
-      Handler: com.gu.sf_api_user_credentials_setter.Main::lambda
+      Handler: com.gu.sf_api_user_credentials_setter.Main::handler
       Environment:
         Variables:
           Stage: !Ref Stage
