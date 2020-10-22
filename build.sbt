@@ -326,6 +326,11 @@ lazy val `sf-billing-account-remover` = lambdaProject(
   "Removes Billing Accounts and related records from Salesforce",
   Seq(circe, circeParser, scalajHttp))
 
+lazy val `sf-api-user-credentials-setter` = lambdaProject(
+  "sf-api-user-credentials-setter",
+  "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
+  Seq(secretsManager, circe, circeParser,scalajHttp, awsS3))
+
 lazy val `cancellation-sf-cases-api` = lambdaProject(
   "cancellation-sf-cases-api",
   "Create/update SalesForce cases for self service cancellation tracking",
