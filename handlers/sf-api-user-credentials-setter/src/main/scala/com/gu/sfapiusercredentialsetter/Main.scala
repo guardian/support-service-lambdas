@@ -58,6 +58,7 @@ object Main extends App with LazyLogging {
       .build()
 
   setApiUserPasswordInSfAndSyncToAwsSecret()
+
   def setApiUserPasswordInSfAndSyncToAwsSecret(): Unit = {
     (for {
       environment <- optEnvironment.toRight(
