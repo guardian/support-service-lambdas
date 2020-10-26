@@ -1,15 +1,7 @@
 package com.gu.sfapiusercredentialsetter
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder
-import com.amazonaws.services.secretsmanager.model.{
-  CreateSecretRequest,
-  CreateSecretResult,
-  Filter,
-  ListSecretsRequest,
-  UpdateSecretRequest,
-  UpdateSecretResult
-}
+import com.amazonaws.services.secretsmanager.model._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe._
 import io.circe.generic.auto._
@@ -36,12 +28,6 @@ object Main extends App with LazyLogging {
       Id: String,
       Username: String
   )
-
-  private lazy val credential =
-    new ProfileCredentialsProvider(
-      "/Users/david_pepper/.aws/credentials",
-      "developerPlayground"
-    )
 
   lazy val optConfig = for {
     sfUserName <- Option(System.getenv("username"))
