@@ -8,7 +8,7 @@ deployments:
     app: sf-api-user-credentials-setter
     parameters:
       templatePath: cfn.yaml
-  sf-billing-account-remover:
+  sf-api-user-credentials-setter:
     type: aws-lambda
     parameters:
       fileName: sf-api-user-credentials-setter.jar
