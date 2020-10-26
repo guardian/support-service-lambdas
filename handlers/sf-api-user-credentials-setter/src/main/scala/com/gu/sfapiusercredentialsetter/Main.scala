@@ -69,8 +69,6 @@ object Main extends App with LazyLogging {
   val secretsManagerClient =
     AWSSecretsManagerClientBuilder
       .standard()
-      .withCredentials(credential)
-      .withRegion("eu-west-1")
       .build()
 
   setApiUserPasswordInSfAndSyncToAwsSecret()
