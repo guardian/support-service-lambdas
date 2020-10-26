@@ -10,7 +10,7 @@ import io.circe.parser._
 import io.circe.syntax._
 import scalaj.http._
 
-import scala.util.Try
+import scala.util.{Random, Try}
 
 object Main extends App with LazyLogging {
   case class SfAuthDetails(access_token: String, instance_url: String)
@@ -93,7 +93,13 @@ object Main extends App with LazyLogging {
   //As of 22/10/2020, Password Policy in Sf is (minimum 8 chars, must include alpha and numeric chars)
   def generatePassword(): String = {
     logger.info("Generating password for api user")
-    getRandomAlphaString(4) + getRandomNumericString(4)
+    val newRandomAlphaString = randomStringFromCharList(6, ('a' to 'z') ++ ('A' to 'Z'))
+
+    val newRandomNumericString = randomStringFromCharList(2, ('0' to '9'))
+
+    val newPassword = Random.shuffle((newRandomAlphaString + newRandomNumericString).toList).mkString("")
+
+    newPassword
   }
 
   def updatePassword(sfAuthDetails: SfAuthDetails, awsApiUserInSf: UserRecords.Records, newPassword: String): Unit = {
@@ -181,22 +187,11 @@ object Main extends App with LazyLogging {
       .body
   }
 
-  def getRandomAlphaString(len: Int): String = {
-    val rand = new scala.util.Random(System.nanoTime)
-    val sb = new StringBuilder(len)
-    val ab = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    for (i <- 0 until len) {
-      sb.append(ab(rand.nextInt(ab.length)))
-    }
-    sb.toString
-  }
-
-  def getRandomNumericString(len: Int): String = {
-    val rand = new scala.util.Random(System.nanoTime)
-    val sb = new StringBuilder(len)
-    val ab = "0123456789"
-    for (i <- 0 until len) {
-      sb.append(ab(rand.nextInt(ab.length)))
+  def randomStringFromCharList(length: Int, chars: Seq[Char]): String = {
+    val sb = new StringBuilder
+    for (i <- 1 to length) {
+      val randomNum = util.Random.nextInt(chars.length)
+      sb.append(chars(randomNum))
     }
     sb.toString
   }
