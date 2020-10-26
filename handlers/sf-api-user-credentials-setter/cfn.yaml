@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
 Description: Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager
 
 Parameters:
