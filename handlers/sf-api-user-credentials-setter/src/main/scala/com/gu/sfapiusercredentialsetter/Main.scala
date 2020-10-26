@@ -21,17 +21,22 @@ import scala.util.{Random, Try}
 
 object Main extends App with LazyLogging {
   case class SfAuthDetails(access_token: String, instance_url: String)
+
   case class setPasswordResponse(message: String, errorCode: String)
+
   case class setPasswordRequestBody(NewPassword: String)
+
   case class SfGetAwsApiUsersResponse(
       done: Boolean,
       records: Seq[Records],
       nextRecordsUrl: Option[String] = None
   )
+
   case class Records(
       Id: String,
       Username: String
   )
+
   private lazy val credential =
     new ProfileCredentialsProvider(
       "/Users/david_pepper/.aws/credentials",
@@ -139,12 +144,11 @@ object Main extends App with LazyLogging {
 
     val sfUpdateResponse =
       setSfPasswordPostRequest(sfAuthDetails, newPassword, awsApiUserInSf.Id)
+
     val setPasswordResponseJson = sfUpdateResponse
       .getOrElse("")
-      .replace("[", "")
-      .replace("]", "")
 
-    decode[setPasswordResponse](setPasswordResponseJson)
+    decode[List[setPasswordResponse]](setPasswordResponseJson)
   }
 
   def getAwsApiUsersInSf(
@@ -154,6 +158,7 @@ object Main extends App with LazyLogging {
 
     val query =
       "Select Id, name, email, username from user where profile.name='Touchpoint API User' order by name"
+
     decode[SfGetAwsApiUsersResponse](doSfGetWithQuery(sfAuthDetails, query))
   }
 
@@ -195,7 +200,7 @@ object Main extends App with LazyLogging {
       secretName: String,
       newPwd: String
   ): Either[Throwable, UpdateSecretResult] = {
-    println(s"setting secret in $secretName to : $newPwd")
+
     Try {
       secretsManagerClient.updateSecret(
         new UpdateSecretRequest()
