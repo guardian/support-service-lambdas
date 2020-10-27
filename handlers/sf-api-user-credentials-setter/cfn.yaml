@@ -35,6 +35,7 @@ Resources:
                   - secretsmanager:GetSecretValue
                   - secretsmanager:PutSecretValue
                   - secretsmanager:UpdateSecretVersionStage
+                  - secretsmanager:CreateSecret
                 Resource: '*'
               - Effect: Allow
                 Action:
