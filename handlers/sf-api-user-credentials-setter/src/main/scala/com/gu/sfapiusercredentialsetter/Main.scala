@@ -158,9 +158,7 @@ object Main extends App with LazyLogging {
   }
 
   def secretExists(secretName: String): Boolean = {
-    println("Checking if secret exists: " + secretName)
     val filter: Filter = new Filter().withKey("name").withValues(secretName)
-    println("filter: " + filter)
     val listSecrets = secretsManagerClient.listSecrets(
       new ListSecretsRequest().withFilters(filter)
     )
