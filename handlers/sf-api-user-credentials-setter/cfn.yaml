@@ -30,15 +30,18 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - lambda:InvokeFunction
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
                   - secretsmanager:ListSecrets
                   - secretsmanager:DescribeSecret
                   - secretsmanager:GetSecretValue
                   - secretsmanager:PutSecretValue
                   - secretsmanager:UpdateSecretVersionStage
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-api-user-credentials-setter-${Stage}:log-stream:*
 
   SfApiUserCredentialsSetterLambda:
