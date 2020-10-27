@@ -9,9 +9,7 @@ Parameters:
 Mappings:
   StageMap:
     DEV:
-      SecretsVersion: "TODO"
-    CODE:
-      SecretsVersion: "TODO"
+      SecretsVersion: "c1b4be58-6236-4d75-9c25-4883c4de2402"
 
 Resources:
   SfApiUserCredentialsSetterRole:
