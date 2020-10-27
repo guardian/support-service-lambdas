@@ -19,14 +19,14 @@ object Main extends App with LazyLogging {
   case class setPasswordRequestBody(NewPassword: String)
 
   case class SfGetAwsApiUsersResponse(
-    done: Boolean,
-    records: Seq[Records],
-    nextRecordsUrl: Option[String] = None
+      done: Boolean,
+      records: Seq[Records],
+      nextRecordsUrl: Option[String] = None
   )
 
   case class Records(
-    Id: String,
-    Username: String
+      Id: String,
+      Username: String
   )
 
   lazy val optConfig = for {
@@ -49,7 +49,7 @@ object Main extends App with LazyLogging {
   )
 
   lazy val optEnvironment = for {
-    environment <- args.headOption
+    environment <- Option(System.getenv("Stage"))
   } yield environment
 
   val secretsManagerClient =
@@ -85,9 +85,9 @@ object Main extends App with LazyLogging {
   }
 
   def setPasswordInSecretsManager(
-    awsApiUser: Records,
-    newPassword: String,
-    environment: String
+      awsApiUser: Records,
+      newPassword: String,
+      environment: String
   ): Unit = {
     logger.info(
       s"Setting password for user ${awsApiUser.Username} in Secrets Manager..."
@@ -119,9 +119,9 @@ object Main extends App with LazyLogging {
   }
 
   def updatePassword(
-    sfAuthDetails: SfAuthDetails,
-    awsApiUserInSf: Records,
-    newPassword: String
+      sfAuthDetails: SfAuthDetails,
+      awsApiUserInSf: Records,
+      newPassword: String
   ): Unit = {
     logger.info(
       s"Setting password for user ${awsApiUserInSf.Username} in Salesforce..."
@@ -137,7 +137,7 @@ object Main extends App with LazyLogging {
   }
 
   def getAwsApiUsersInSf(
-    sfAuthDetails: SfAuthDetails
+      sfAuthDetails: SfAuthDetails
   ): Either[Error, SfGetAwsApiUsersResponse] = {
     logger.info("Getting Aws Api users from Salesforce...")
 
@@ -166,9 +166,9 @@ object Main extends App with LazyLogging {
   }
 
   def createSecret(
-    awsApiUserInSf: Records,
-    secretName: String,
-    newPwd: String
+      awsApiUserInSf: Records,
+      secretName: String,
+      newPwd: String
   ): Either[Throwable, CreateSecretResult] = {
     Try {
       secretsManagerClient.createSecret(
@@ -182,8 +182,8 @@ object Main extends App with LazyLogging {
   }
 
   def updateSecret(
-    secretName: String,
-    newPwd: String
+      secretName: String,
+      newPwd: String
   ): Either[Throwable, UpdateSecretResult] = {
 
     Try {
@@ -196,9 +196,9 @@ object Main extends App with LazyLogging {
   }
 
   def setSfPasswordPostRequest(
-    sfAuthDetails: SfAuthDetails,
-    newPwd: String,
-    sfUserId: String
+      sfAuthDetails: SfAuthDetails,
+      newPwd: String,
+      sfUserId: String
   ): Either[Throwable, String] = {
     val newPassword =
       setPasswordRequestBody(NewPassword = newPwd).asJson.spaces2
