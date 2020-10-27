@@ -181,24 +181,23 @@ object Main extends App with LazyLogging {
       awsApiUserInSf: Records,
       secretName: String,
       newPwd: String
-  ): Either[Throwable, CreateSecretResult] = {
-    Try {
-      println("7. In createSecret")
-      val secretsManagerClient2 =
-        AWSSecretsManagerClientBuilder
-          .standard()
-          .build()
+  ): CreateSecretResult = {
 
-      val createSecretReq: CreateSecretRequest =
-        new CreateSecretRequest()
-          .withName(secretName)
-          .withSecretString(
-            s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
-          )
+    println("7. In createSecret")
+    val secretsManagerClient2 =
+      AWSSecretsManagerClientBuilder
+        .standard()
+        .build()
 
-      println("8. createSecretReq: " + createSecretReq)
-      secretsManagerClient2.createSecret(createSecretReq)
-    }.toEither
+    val createSecretReq: CreateSecretRequest =
+      new CreateSecretRequest()
+        .withName(secretName)
+        .withSecretString(
+          s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
+        )
+
+    println("8. createSecretReq: " + createSecretReq)
+    secretsManagerClient2.createSecret(createSecretReq)
   }
 
   def updateSecret(
