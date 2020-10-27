@@ -16,13 +16,16 @@ Conditions:
 Mappings:
   StageMap:
     PROD:
-      Domain: gnmtouchpoint.my.salesforce.com
+      authDomain: gnmtouchpoint.my.salesforce.com
+      reqDomain: gnmtouchpoint.my.salesforce.com
       SecretsVersion: cfe10466-bd62-45f2-a61f-3fcf9c12ef9f
     CODE:
-      Domain: test.salesforce.com
+      authDomain: test.salesforce.com
+      reqDomain: gnmtouchpoint--DEV.my.salesforce.com
       SecretsVersion: 5a68b23e-6d75-4bb4-9131-a4d94c121010
     DEV:
-      Domain: test.salesforce.com
+      authDomain: test.salesforce.com
+      reqDomain: gnmtouchpoint--DEV.my.salesforce.com
       SecretsVersion: 89ac830e-166c-444a-a61b-72fb5173e761
 
 Resources:
@@ -71,8 +74,8 @@ Resources:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:token::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
-          authDomain: !FindInMap [ StageMap, !Ref Stage, Domain ]
-          reqDomain: !FindInMap [ StageMap, !Ref Stage, Domain ]
+          authDomain: !FindInMap [ StageMap, !Ref Stage, authDomain ]
+          reqDomain: !FindInMap [ StageMap, !Ref Stage, reqDomain ]
       Events:
         ApiEvent:
           Type: Api
