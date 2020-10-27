@@ -158,11 +158,16 @@ object Main extends App with LazyLogging {
   }
 
   def secretExists(secretName: String): Boolean = {
+    val secretsManagerClient1 =
+      AWSSecretsManagerClientBuilder
+        .standard()
+        .build()
+
     val filter: Filter = new Filter().withKey("name").withValues(secretName)
     val listSecretsReq: ListSecretsRequest =
       new ListSecretsRequest().withFilters(filter)
     println("listSecretsReq: " + listSecretsReq)
-    val listSecrets = secretsManagerClient.listSecrets(listSecretsReq)
+    val listSecrets = secretsManagerClient1.listSecrets(listSecretsReq)
     !listSecrets.getSecretList().isEmpty
   }
 
