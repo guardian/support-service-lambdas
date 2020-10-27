@@ -90,18 +90,18 @@ object Main extends App with LazyLogging {
       environment: String
   ): Unit = {
     logger.info(
-      s"Setting password for user ${awsApiUser.Username} in Secrets Manager..."
+      s"2. Setting password for user ${awsApiUser.Username} in Secrets Manager..."
     )
 
     val secretName = getSecretName(awsApiUser.Username, environment)
 
     val secretAlreadyExists = secretExists(secretName)
-    println(s"secret: $secretName - exists: $secretAlreadyExists")
+    println(s"5. secret: $secretName - exists: $secretAlreadyExists")
     if (secretAlreadyExists) {
-      println(s"updating creating secret for $secretName")
+      println(s"6a. updating creating secret for $secretName")
       updateSecret(secretName, newPassword)
     } else {
-      println(s"creating secret for $secretName")
+      println(s"6b. creating secret for $secretName")
       createSecret(awsApiUser, secretName, newPassword)
     }
 
@@ -128,7 +128,7 @@ object Main extends App with LazyLogging {
       newPassword: String
   ): Unit = {
     logger.info(
-      s"Setting password for user ${awsApiUserInSf.Username} in Salesforce..."
+      s"1. Setting password for user ${awsApiUserInSf.Username} in Salesforce..."
     )
 
     val sfUpdateResponse =
@@ -170,9 +170,9 @@ object Main extends App with LazyLogging {
     val filter: Filter = new Filter().withKey("name").withValues(secretName)
     val listSecretsReq: ListSecretsRequest =
       new ListSecretsRequest().withFilters(filter)
-    println("listSecretsReq: " + listSecretsReq)
+    println("3. listSecretsReq: " + listSecretsReq)
     val listSecrets = secretsManagerClient1.listSecrets(listSecretsReq)
-    println("listSecrets: " + listSecrets)
+    println("4. listSecrets: " + listSecrets)
 
     !listSecrets.getSecretList().isEmpty
   }
@@ -183,7 +183,7 @@ object Main extends App with LazyLogging {
       newPwd: String
   ): Either[Throwable, CreateSecretResult] = {
     Try {
-      println("In createSecret")
+      println("7. In createSecret")
       val secretsManagerClient2 =
         AWSSecretsManagerClientBuilder
           .standard()
@@ -196,7 +196,7 @@ object Main extends App with LazyLogging {
             s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
           )
 
-      println("createSecretReq: " + createSecretReq)
+      println("8. createSecretReq: " + createSecretReq)
       secretsManagerClient2.createSecret(createSecretReq)
     }.toEither
   }
