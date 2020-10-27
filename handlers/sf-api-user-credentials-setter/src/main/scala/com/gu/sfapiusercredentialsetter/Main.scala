@@ -177,7 +177,12 @@ object Main extends App with LazyLogging {
       newPwd: String
   ): Either[Throwable, CreateSecretResult] = {
     Try {
-      secretsManagerClient.createSecret(
+      val secretsManagerClient2 =
+        AWSSecretsManagerClientBuilder
+          .standard()
+          .build()
+
+      secretsManagerClient2.createSecret(
         new CreateSecretRequest()
           .withName(secretName)
           .withSecretString(
@@ -193,7 +198,11 @@ object Main extends App with LazyLogging {
   ): Either[Throwable, UpdateSecretResult] = {
 
     Try {
-      secretsManagerClient.updateSecret(
+      val secretsManagerClient3 =
+        AWSSecretsManagerClientBuilder
+          .standard()
+          .build()
+      secretsManagerClient3.updateSecret(
         new UpdateSecretRequest()
           .withSecretId(secretName)
           .withSecretString(s"""{"password":"$newPwd","token":""}""")
