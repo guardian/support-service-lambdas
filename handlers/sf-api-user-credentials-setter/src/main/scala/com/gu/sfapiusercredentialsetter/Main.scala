@@ -95,9 +95,13 @@ object Main extends App with LazyLogging {
 
     val secretName = getSecretName(awsApiUser.Username, environment)
 
-    if (secretExists(secretName)) {
+    val secretAlreadyExists = secretExists(secretName)
+    println(s"secret: $secretName - exists: $secretAlreadyExists")
+    if (secretAlreadyExists) {
+      println(s"updating creating secret for $secretName")
       updateSecret(secretName, newPassword)
     } else {
+      println(s"creating secret for $secretName")
       createSecret(awsApiUser, secretName, newPassword)
     }
 
@@ -168,6 +172,8 @@ object Main extends App with LazyLogging {
       new ListSecretsRequest().withFilters(filter)
     println("listSecretsReq: " + listSecretsReq)
     val listSecrets = secretsManagerClient1.listSecrets(listSecretsReq)
+    println("listSecrets: " + listSecrets)
+
     !listSecrets.getSecretList().isEmpty
   }
 
@@ -177,18 +183,21 @@ object Main extends App with LazyLogging {
       newPwd: String
   ): Either[Throwable, CreateSecretResult] = {
     Try {
+      println("In createSecret")
       val secretsManagerClient2 =
         AWSSecretsManagerClientBuilder
           .standard()
           .build()
 
-      secretsManagerClient2.createSecret(
+      val createSecretReq: CreateSecretRequest =
         new CreateSecretRequest()
           .withName(secretName)
           .withSecretString(
             s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
           )
-      )
+
+      println("createSecretReq: " + createSecretReq)
+      secretsManagerClient2.createSecret(createSecretReq)
     }.toEither
   }
 
