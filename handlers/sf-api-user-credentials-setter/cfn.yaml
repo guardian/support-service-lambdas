@@ -9,7 +9,7 @@ Parameters:
 Mappings:
   StageMap:
     DEV:
-      SecretsVersion: "02a53c1b-4b65-4d2b-ab01-cce941998273"
+      SecretsVersion: "efdd624c-eedd-47de-b9ea-78637c5dd970"
 
 Resources:
   SfApiUserCredentialsSetterRole:
