@@ -159,15 +159,16 @@ object Main extends App with LazyLogging {
   }
 
   def secretExists(secretName: String): Boolean = {
-    val secretsManagerClient1 =
+    val secretsManagerClient_listSecrets =
       AWSSecretsManagerClientBuilder
         .standard()
         .build()
 
     val filter: Filter = new Filter().withKey("name").withValues(secretName)
-    val listSecretsReq: ListSecretsRequest =
-      new ListSecretsRequest().withFilters(filter)
-    val listSecrets = secretsManagerClient1.listSecrets(listSecretsReq)
+    val listSecrets =
+      secretsManagerClient_listSecrets.listSecrets(
+        new ListSecretsRequest().withFilters(filter)
+      )
 
     !listSecrets.getSecretList().isEmpty
   }
@@ -176,21 +177,22 @@ object Main extends App with LazyLogging {
       awsApiUserInSf: Records,
       secretName: String,
       newPwd: String
-  ): CreateSecretResult = {
+  ): Either[Throwable, CreateSecretResult] = {
 
-    val secretsManagerClient2 =
-      AWSSecretsManagerClientBuilder
-        .standard()
-        .build()
+    Try {
+      val secretsManagerClient_createSecret =
+        AWSSecretsManagerClientBuilder
+          .standard()
+          .build()
 
-    val createSecretReq: CreateSecretRequest =
-      new CreateSecretRequest()
-        .withName(secretName)
-        .withSecretString(
-          s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
-        )
-
-    secretsManagerClient2.createSecret(createSecretReq)
+      secretsManagerClient_createSecret.createSecret(
+        new CreateSecretRequest()
+          .withName(secretName)
+          .withSecretString(
+            s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
+          )
+      )
+    }.toEither
   }
 
   def updateSecret(
@@ -199,11 +201,11 @@ object Main extends App with LazyLogging {
   ): Either[Throwable, UpdateSecretResult] = {
 
     Try {
-      val secretsManagerClient3 =
+      val secretsManagerClient_updateSecret =
         AWSSecretsManagerClientBuilder
           .standard()
           .build()
-      secretsManagerClient3.updateSecret(
+      secretsManagerClient_updateSecret.updateSecret(
         new UpdateSecretRequest()
           .withSecretId(secretName)
           .withSecretString(s"""{"password":"$newPwd","token":""}""")
