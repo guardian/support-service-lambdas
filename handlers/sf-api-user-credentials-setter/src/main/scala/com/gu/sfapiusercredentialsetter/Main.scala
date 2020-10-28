@@ -26,7 +26,8 @@ object Main extends App with LazyLogging {
 
   case class Records(
       Id: String,
-      Username: String
+      Username: String,
+      CommunityNickname: String
   )
 
   lazy val optConfig = for {
@@ -80,8 +81,11 @@ object Main extends App with LazyLogging {
   }
 
   //Convention: <stage>/<system>/<user>
-  def getSecretName(awsApiUserUsername: String, environment: String): String = {
-    s"$environment/Salesforce/$awsApiUserUsername"
+  def getSecretName(
+      awsApiUserCommunityNickname: String,
+      environment: String
+  ): String = {
+    s"$environment/Salesforce/$awsApiUserCommunityNickname"
   }
 
   def setPasswordInSecretsManager(
@@ -93,7 +97,7 @@ object Main extends App with LazyLogging {
       s"Setting password for user ${awsApiUser.Username} in Secrets Manager..."
     )
 
-    val secretName = getSecretName(awsApiUser.Username, environment)
+    val secretName = getSecretName(awsApiUser.CommunityNickname, environment)
 
     if (secretExists(secretName)) {
       updateSecret(secretName, newPassword)
@@ -142,7 +146,7 @@ object Main extends App with LazyLogging {
     logger.info("Getting Aws Api users from Salesforce...")
 
     val query =
-      "Select Id, name, email, username from user where profile.name='Touchpoint API User' and isActive=true order by name"
+      "Select Id, name, email, username, CommunityNickname from user where profile.name='Touchpoint API User' and isActive=true order by name"
 
     decode[SfGetAwsApiUsersResponse](doSfGetWithQuery(sfAuthDetails, query))
   }
