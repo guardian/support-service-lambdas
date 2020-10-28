@@ -62,27 +62,27 @@ Resources:
           Stage: !Ref Stage
           authUrl:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk.dev1:SecretString:authUrl::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:authUrl::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           clientId:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk.dev1:SecretString:clientId::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:clientId::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           clientSecret:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk.dev1:SecretString:clientSecret::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:clientSecret::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           password:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk.dev1:SecretString:password::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:password::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           token:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk.dev1:SecretString:token::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:token::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           username:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk.dev1:SecretString:username::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:username::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
 
       Role:
