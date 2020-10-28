@@ -95,8 +95,7 @@ object Main extends App with LazyLogging {
 
     val secretName = getSecretName(awsApiUser.Username, environment)
 
-    val secretAlreadyExists = secretExists(secretName)
-    if (secretAlreadyExists) {
+    if (secretExists(secretName)) {
       updateSecret(secretName, newPassword)
     } else {
       createSecret(awsApiUser, secretName, newPassword)
