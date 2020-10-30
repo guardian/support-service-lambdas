@@ -174,7 +174,7 @@ lazy val `effects-s3` = library(project in file("lib/effects-s3"))
 lazy val `effects-sqs` = library(project in file("lib/effects-sqs"))
   .dependsOn(testDep)
   .settings(
-    libraryDependencies ++= Seq(awsSQS) ++ logging
+    libraryDependencies ++= Seq(awsSQS, jacksonDatabind) ++ logging
   )
 lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
   .dependsOn(testDep)
