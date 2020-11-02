@@ -100,7 +100,7 @@ object Main extends App with LazyLogging {
     val secretName = getSecretName(awsApiUser.CommunityNickname, environment)
 
     if (secretExists(secretName)) {
-      updateSecret(secretName, newPassword)
+      updateSecret(awsApiUser, secretName, newPassword)
     } else {
       createSecret(awsApiUser, secretName, newPassword)
     }
@@ -199,6 +199,7 @@ object Main extends App with LazyLogging {
   }
 
   def updateSecret(
+      awsApiUserInSf: Records,
       secretName: String,
       newPwd: String
   ): Either[Throwable, UpdateSecretResult] = {
@@ -211,7 +212,9 @@ object Main extends App with LazyLogging {
       secretsManagerClient_updateSecret.updateSecret(
         new UpdateSecretRequest()
           .withSecretId(secretName)
-          .withSecretString(s"""{"password":"$newPwd","token":""}""")
+          .withSecretString(
+            s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
+          )
       )
     }.toEither
   }
