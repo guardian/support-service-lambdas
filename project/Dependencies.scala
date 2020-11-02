@@ -20,6 +20,7 @@ object Dependencies {
   // AWS
   val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsVersion1
   val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsVersion1
+  val awsSES = "com.amazonaws" % "aws-java-sdk-ses" % awsVersion1
   val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsVersion1
   val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsVersion1
 
