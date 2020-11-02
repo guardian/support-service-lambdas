@@ -313,7 +313,7 @@ lazy val `zuora-sar` = lambdaProject(
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",
   "Cleans up the salesforce to free up storage via 360 sync/zuora",
-  Seq("com.amazonaws" % "aws-java-sdk-cloudwatch" % awsVersion, catsEffect, circeParser, circe, awsStepFunction)
+  Seq(awsCloudwatch, catsEffect, circeParser, circe, awsStepFunction)
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `sf-contact-merge` = lambdaProject(
