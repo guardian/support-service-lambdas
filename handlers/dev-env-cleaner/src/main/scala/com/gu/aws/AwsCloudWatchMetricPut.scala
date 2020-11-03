@@ -1,32 +1,32 @@
 package com.gu.aws
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.auth.{AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider}
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.cloudwatch.{AmazonCloudWatch, AmazonCloudWatchClientBuilder}
-import com.amazonaws.services.cloudwatch.model.{Dimension, MetricDatum, PutMetricDataRequest, StandardUnit}
-import com.gu.aws.AwsCloudWatch.MetricRequest
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, ProfileCredentialsProvider}
+import software.amazon.awssdk.regions.Region.EU_WEST_1
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
+import software.amazon.awssdk.services.cloudwatch.model.{Dimension, MetricDatum, PutMetricDataRequest, StandardUnit}
 
 import scala.util.Try
 
 object Aws {
   val ProfileName = "membership"
 
-  lazy val CredentialsProvider = new AWSCredentialsProviderChain(
-    new ProfileCredentialsProvider(ProfileName),
-    new InstanceProfileCredentialsProvider(false),
-    new EnvironmentVariableCredentialsProvider()
-  )
+  lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain
+    .builder
+    .credentialsProviders(
+      ProfileCredentialsProvider.builder.profileName(ProfileName).build(),
+      InstanceProfileCredentialsProvider.builder.build(),
+      EnvironmentVariableCredentialsProvider.create()
+    )
+    .build()
 
 }
 
 object AwsCloudWatch {
-  val client: AmazonCloudWatch =
-    AmazonCloudWatchClientBuilder
-      .standard()
-      .withRegion(Regions.EU_WEST_1)
-      .withCredentials(Aws.CredentialsProvider)
-      .build()
+  val client: CloudWatchClient = CloudWatchClient
+    .builder
+    .region(EU_WEST_1)
+    .credentialsProvider(Aws.CredentialsProvider)
+    .build()
 
   case class MetricNamespace(value: String) extends AnyVal
 
@@ -45,23 +45,28 @@ object AwsCloudWatch {
 
   def metricPut(request: MetricRequest): Try[Unit] = {
 
-    val putMetricDataRequest = new PutMetricDataRequest
-    putMetricDataRequest.setNamespace(request.namespace.value)
-
-    val metricDatum1 = request.dimensions.foldLeft(
-      new MetricDatum()
-        .withMetricName(request.name.value)
+    val metricDatum = request.dimensions.foldLeft(
+      MetricDatum.builder.metricName(request.name.value)
     ) {
         case (agg, (name, value)) =>
-          agg.withDimensions(
-            new Dimension()
-              .withName(name.value)
-              .withValue(value.value)
+          agg.dimensions(
+            Dimension
+              .builder
+              .name(name.value)
+              .value(value.value)
+              .build()
           )
       }
-    metricDatum1.setValue(request.value)
-    metricDatum1.setUnit(StandardUnit.Count)
-    putMetricDataRequest.getMetricData.add(metricDatum1)
+      .value(request.value)
+      .unit(StandardUnit.COUNT)
+      .build()
+
+    val putMetricDataRequest = PutMetricDataRequest
+      .builder
+      .namespace(request.namespace.value)
+      .metricData(metricDatum)
+      .build()
+
     Try(client.putMetricData(putMetricDataRequest)).map(_ => ())
   }
 
