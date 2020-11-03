@@ -32,6 +32,7 @@ Resources:
   ContactUsApiGateway:
     Type: AWS::Serverless::Api
     Properties:
+      OpenApiVersion: '2.0'
       Name: !Sub contact-us-api-${Stage}-ApiGateway
       StageName: !Sub ${Stage}
       Auth:
