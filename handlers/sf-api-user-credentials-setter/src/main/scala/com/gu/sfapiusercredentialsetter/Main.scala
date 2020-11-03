@@ -80,12 +80,12 @@ object Main extends App with LazyLogging {
 
   }
 
-  //Convention: <stage>/<system>/<user>
+  //Convention: <stage>/<system>/User/<user>
   def getSecretName(
       awsApiUserCommunityNickname: String,
       environment: String
   ): String = {
-    s"$environment/Salesforce/$awsApiUserCommunityNickname"
+    s"$environment/Salesforce/User/$awsApiUserCommunityNickname"
   }
 
   def setPasswordInSecretsManager(
