@@ -1,6 +1,7 @@
 package com.gu.zuora.retention
 
 import org.scalatest.{FlatSpec, Matchers}
+import scala.jdk.CollectionConverters._
 
 class DiffTest extends FlatSpec with Matchers {
 
@@ -26,7 +27,7 @@ class DiffTest extends FlatSpec with Matchers {
         |21,C,23,24
         |31,D,33,34""".stripMargin
 
-    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
+    Diff(candidates.lines.iterator.asScala, excluded.lines.iterator.asScala).mkString("\n") shouldBe expected
   }
 
   it should "should correctly exclude crmIds even if the input has duplicate values" in {
@@ -54,7 +55,7 @@ class DiffTest extends FlatSpec with Matchers {
         |31,E_duplicate,33,34
         |31,E_duplicate,33,34""".stripMargin
 
-    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
+    Diff(candidates.lines.iterator.asScala, excluded.lines.iterator.asScala).mkString("\n") shouldBe expected
   }
 
   it should "should not exclude anything with an empty exclusion list " in {
@@ -79,7 +80,7 @@ class DiffTest extends FlatSpec with Matchers {
         |41,H,43,44
         |51,L,54,54""".stripMargin
 
-    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
+    Diff(candidates.lines.iterator.asScala, excluded.lines.iterator.asScala).mkString("\n") shouldBe expected
   }
 
   it should "should return empty with no candidates " in {
@@ -97,7 +98,7 @@ class DiffTest extends FlatSpec with Matchers {
     val expected =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id""".stripMargin
 
-    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
+    Diff(candidates.lines.iterator.asScala, excluded.lines.iterator.asScala).mkString("\n") shouldBe expected
   }
   it should "not skip ahead when ascii sorting differs from zuora order" in {
     val candidates =
@@ -120,7 +121,7 @@ class DiffTest extends FlatSpec with Matchers {
         |a_lowercase
         |R""".stripMargin
 
-    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
+    Diff(candidates.lines.iterator.asScala, excluded.lines.iterator.asScala).mkString("\n") shouldBe expected
   }
 
   it should "exclude candidates with no crmId" in {
@@ -140,7 +141,6 @@ class DiffTest extends FlatSpec with Matchers {
       """Account.Id,Account.CrmId
         |includedAccount,C""".stripMargin
 
-    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
+    Diff(candidates.lines.iterator.asScala, excluded.lines.iterator.asScala).mkString("\n") shouldBe expected
   }
 }
-
