@@ -4,8 +4,8 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsVersion1 = "1.11.892"
-  val awsVersion2 = "2.15.19"
+  val awsV1Version = "1.11.893"
+  val awsV2Version = "2.15.20"
   val circeVersion = "0.12.3"
   val sttpVersion = "1.7.0"
   val http4sVersion = "0.21.0"
@@ -18,13 +18,13 @@ object Dependencies {
   )
 
   // AWS
-  val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsVersion1
-  val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsVersion1
-  val awsSES = "com.amazonaws" % "aws-java-sdk-ses" % awsVersion1
-  val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsVersion1
-  val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsVersion1
+  val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsV1Version
+  val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsV1Version
+  val awsSES = "com.amazonaws" % "aws-java-sdk-ses" % awsV1Version
+  val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsV1Version
+  val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsV1Version
 
-  val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsVersion2
+  val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsV2Version
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"
