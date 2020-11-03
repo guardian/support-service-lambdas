@@ -84,7 +84,7 @@ object SafeQueryBuilder {
       val maybeEscapedInserts = inserts.sequence
       maybeEscapedInserts.map { escapedInserts =>
         val rawQueryString = hardCode.s(escapedInserts.toArray: _*)
-        val queryString = rawQueryString.lines.map(_.trim).filter(_ != "").mkString(" ")
+        val queryString = rawQueryString.linesIterator.map(_.trim).filter(_ != "").mkString(" ")
         new SafeQuery(queryString)
       }
     }
