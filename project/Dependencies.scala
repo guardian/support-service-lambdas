@@ -81,6 +81,7 @@ object Dependencies {
   val assemblyMergeStrategyDiscardModuleInfo = assemblyMergeStrategy in assembly := {
     case PathList("module-info.class") => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
+    case PathList("mime.types") => MergeStrategy.filterDistinctLines
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
