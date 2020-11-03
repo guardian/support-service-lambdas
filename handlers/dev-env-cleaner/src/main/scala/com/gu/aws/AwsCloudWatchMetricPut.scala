@@ -45,7 +45,7 @@ object AwsCloudWatch {
 
   def metricPut(request: MetricRequest): Try[Unit] = {
 
-    val metricDatum1 = request.dimensions.foldLeft(
+    val metricDatum = request.dimensions.foldLeft(
       MetricDatum.builder.metricName(request.name.value)
     ) {
         case (agg, (name, value)) =>
@@ -64,7 +64,7 @@ object AwsCloudWatch {
     val putMetricDataRequest = PutMetricDataRequest
       .builder
       .namespace(request.namespace.value)
-      .metricData(metricDatum1)
+      .metricData(metricDatum)
       .build()
 
     Try(client.putMetricData(putMetricDataRequest)).map(_ => ())
