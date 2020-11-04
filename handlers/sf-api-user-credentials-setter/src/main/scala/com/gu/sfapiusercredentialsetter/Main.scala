@@ -1,6 +1,9 @@
 package com.gu.sfapiusercredentialsetter
 
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder
+import com.amazonaws.services.secretsmanager.{
+  AWSSecretsManager,
+  AWSSecretsManagerClientBuilder
+}
 import com.amazonaws.services.secretsmanager.model._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe._
@@ -97,12 +100,17 @@ object Main extends App with LazyLogging {
       s"Setting password for user ${awsApiUser.Username} in Secrets Manager..."
     )
 
+    val secretsManagerClient =
+      AWSSecretsManagerClientBuilder
+        .standard()
+        .build()
+
     val secretName = getSecretName(awsApiUser.CommunityNickname, environment)
 
-    if (secretExists(secretName)) {
-      updateSecret(awsApiUser, secretName, newPassword)
+    if (secretExists(secretsManagerClient, secretName)) {
+      updateSecret(secretsManagerClient, awsApiUser, secretName, newPassword)
     } else {
-      createSecret(awsApiUser, secretName, newPassword)
+      createSecret(secretsManagerClient, awsApiUser, secretName, newPassword)
     }
 
   }
@@ -161,15 +169,14 @@ object Main extends App with LazyLogging {
       .body
   }
 
-  def secretExists(secretName: String): Boolean = {
-    val secretsManagerClient_listSecrets =
-      AWSSecretsManagerClientBuilder
-        .standard()
-        .build()
+  def secretExists(
+      secretsManagerClient: AWSSecretsManager,
+      secretName: String
+  ): Boolean = {
 
     val filter: Filter = new Filter().withKey("name").withValues(secretName)
     val listSecrets =
-      secretsManagerClient_listSecrets.listSecrets(
+      secretsManagerClient.listSecrets(
         new ListSecretsRequest().withFilters(filter)
       )
 
@@ -177,18 +184,14 @@ object Main extends App with LazyLogging {
   }
 
   def createSecret(
+      secretsManagerClient: AWSSecretsManager,
       awsApiUserInSf: Records,
       secretName: String,
       newPwd: String
   ): Either[Throwable, CreateSecretResult] = {
 
     Try {
-      val secretsManagerClient_createSecret =
-        AWSSecretsManagerClientBuilder
-          .standard()
-          .build()
-
-      secretsManagerClient_createSecret.createSecret(
+      secretsManagerClient.createSecret(
         new CreateSecretRequest()
           .withName(secretName)
           .withSecretString(
@@ -199,17 +202,14 @@ object Main extends App with LazyLogging {
   }
 
   def updateSecret(
+      secretsManagerClient: AWSSecretsManager,
       awsApiUserInSf: Records,
       secretName: String,
       newPwd: String
   ): Either[Throwable, UpdateSecretResult] = {
 
     Try {
-      val secretsManagerClient_updateSecret =
-        AWSSecretsManagerClientBuilder
-          .standard()
-          .build()
-      secretsManagerClient_updateSecret.updateSecret(
+      secretsManagerClient.updateSecret(
         new UpdateSecretRequest()
           .withSecretId(secretName)
           .withSecretString(
