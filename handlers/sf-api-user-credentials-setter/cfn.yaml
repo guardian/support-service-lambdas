@@ -5,6 +5,10 @@ Parameters:
   Stage:
     Description: Stage name
     Type: String
+    AllowedValues:
+      - CODE
+      - DEV
+      Default: DEV
 
 Mappings:
   StageMap:
