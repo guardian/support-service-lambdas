@@ -126,7 +126,7 @@ object Main extends App with LazyLogging {
       sfAuthDetails: SfAuthDetails,
       awsApiUserInSf: Records,
       newPassword: String
-  ): Unit = {
+  ): Either[Throwable, List[setPasswordResponse]] = {
     logger.info(
       s"Setting password for user ${awsApiUserInSf.Username} in Salesforce..."
     )
