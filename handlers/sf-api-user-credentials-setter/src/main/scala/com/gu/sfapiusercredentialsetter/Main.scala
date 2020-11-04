@@ -22,15 +22,15 @@ object Main extends App with LazyLogging {
   case class setPasswordRequestBody(NewPassword: String)
 
   case class SfGetAwsApiUsersResponse(
-      done: Boolean,
-      records: Seq[Records],
-      nextRecordsUrl: Option[String] = None
+    done: Boolean,
+    records: Seq[Records],
+    nextRecordsUrl: Option[String] = None
   )
 
   case class Records(
-      Id: String,
-      Username: String,
-      CommunityNickname: String
+    Id: String,
+    Username: String,
+    CommunityNickname: String
   )
 
   lazy val optConfig = for {
@@ -85,16 +85,16 @@ object Main extends App with LazyLogging {
 
   //Convention: <stage>/<system>/User/<user>
   def getSecretName(
-      awsApiUserCommunityNickname: String,
-      environment: String
+    awsApiUserCommunityNickname: String,
+    environment: String
   ): String = {
     s"$environment/Salesforce/User/$awsApiUserCommunityNickname"
   }
 
   def setPasswordInSecretsManager(
-      awsApiUser: Records,
-      newPassword: String,
-      environment: String
+    awsApiUser: Records,
+    newPassword: String,
+    environment: String
   ): Unit = {
     logger.info(
       s"Setting password for user ${awsApiUser.Username} in Secrets Manager..."
@@ -131,9 +131,9 @@ object Main extends App with LazyLogging {
   }
 
   def updatePassword(
-      sfAuthDetails: SfAuthDetails,
-      awsApiUserInSf: Records,
-      newPassword: String
+    sfAuthDetails: SfAuthDetails,
+    awsApiUserInSf: Records,
+    newPassword: String
   ): Unit = {
     logger.info(
       s"Setting password for user ${awsApiUserInSf.Username} in Salesforce..."
@@ -155,12 +155,15 @@ object Main extends App with LazyLogging {
   }
 
   def getAwsApiUsersInSf(
-      sfAuthDetails: SfAuthDetails
+    sfAuthDetails: SfAuthDetails
   ): Either[Error, SfGetAwsApiUsersResponse] = {
     logger.info("Getting Aws Api users from Salesforce...")
 
+    //val query =
+    //  "Select Id, name, email, username, CommunityNickname from user where profile.name='Touchpoint API User' and isActive=true order by name"
+
     val query =
-      "Select Id, name, email, username, CommunityNickname from user where profile.name='Touchpoint API User' and isActive=true order by name"
+      "Select Id, name, email, username, CommunityNickname from user where Id='0050J000009fqI6' order by name"
 
     decode[SfGetAwsApiUsersResponse](doSfGetWithQuery(sfAuthDetails, query))
   }
@@ -176,8 +179,8 @@ object Main extends App with LazyLogging {
   }
 
   def secretExists(
-      secretsManagerClient: AWSSecretsManager,
-      secretName: String
+    secretsManagerClient: AWSSecretsManager,
+    secretName: String
   ): Boolean = {
 
     val filter: Filter = new Filter().withKey("name").withValues(secretName)
@@ -190,10 +193,10 @@ object Main extends App with LazyLogging {
   }
 
   def createSecret(
-      secretsManagerClient: AWSSecretsManager,
-      awsApiUserInSf: Records,
-      secretName: String,
-      newPwd: String
+    secretsManagerClient: AWSSecretsManager,
+    awsApiUserInSf: Records,
+    secretName: String,
+    newPwd: String
   ): Either[Throwable, CreateSecretResult] = {
 
     Try {
@@ -208,10 +211,10 @@ object Main extends App with LazyLogging {
   }
 
   def updateSecret(
-      secretsManagerClient: AWSSecretsManager,
-      awsApiUserInSf: Records,
-      secretName: String,
-      newPwd: String
+    secretsManagerClient: AWSSecretsManager,
+    awsApiUserInSf: Records,
+    secretName: String,
+    newPwd: String
   ): Either[Throwable, UpdateSecretResult] = {
 
     Try {
@@ -226,9 +229,9 @@ object Main extends App with LazyLogging {
   }
 
   def setSfPasswordPostRequest(
-      sfAuthDetails: SfAuthDetails,
-      newPwd: String,
-      sfUserId: String
+    sfAuthDetails: SfAuthDetails,
+    newPwd: String,
+    sfUserId: String
   ): Either[Throwable, String] = {
     val newPassword =
       setPasswordRequestBody(NewPassword = newPwd).asJson.spaces2
@@ -261,12 +264,10 @@ object Main extends App with LazyLogging {
   }
 
   def randomStringFromCharList(length: Int, chars: Seq[Char]): String = {
-    val sb = new StringBuilder
-    for (i <- 1 to length) {
+    (1 to length).foldLeft("") { (acc, _) =>
       val randomNum = util.Random.nextInt(chars.length)
-      sb.append(chars(randomNum))
+      acc + chars(randomNum)
     }
-    sb.toString
   }
 
   //main method for lambda
