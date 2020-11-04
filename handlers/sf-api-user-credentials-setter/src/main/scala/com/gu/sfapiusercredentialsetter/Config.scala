@@ -1,6 +1,6 @@
 package com.gu.sfapiusercredentialsetter
 
-case class Config(salesforceConfig: SalesforceConfig)
+case class Config(salesforceConfig: SalesforceConfig, awsConfig: AwsConfig)
 
 case class SalesforceConfig(
   authUrl: String,
@@ -9,4 +9,8 @@ case class SalesforceConfig(
   userName: String,
   password: String,
   token: String
+)
+
+case class AwsConfig(
+  environment: String
 )
