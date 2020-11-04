@@ -18,15 +18,24 @@ Mappings:
     PROD:
       authDomain: gnmtouchpoint.my.salesforce.com
       reqDomain: gnmtouchpoint.my.salesforce.com
-      SecretsVersion: cfe10466-bd62-45f2-a61f-3fcf9c12ef9f
+      SalesforceStage: PROD
+      AppName: TouchpointUpdate
+      AppSecretsVersion: 0f374e2e-5b4e-4fda-8cba-2c02368ff937
+      UserSecretsVersion: dfbf9eba-5215-4cb8-91f1-ff5bcbbf5201
     CODE:
       authDomain: test.salesforce.com
-      reqDomain: gnmtouchpoint--DEV.my.salesforce.com
-      SecretsVersion: 5a68b23e-6d75-4bb4-9131-a4d94c121010
+      reqDomain: gnmtouchpoint--DEV1.my.salesforce.com
+      SalesforceStage: DEV
+      AppName: AwsConnectorSandbox
+      AppSecretsVersion: b7b63e09-f39f-4e4f-80ef-9dd203c2d59b
+      UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
     DEV:
       authDomain: test.salesforce.com
-      reqDomain: gnmtouchpoint--DEV.my.salesforce.com
-      SecretsVersion: 89ac830e-166c-444a-a61b-72fb5173e761
+      reqDomain: gnmtouchpoint--DEV1.my.salesforce.com
+      SalesforceStage: DEV
+      AppName: AwsConnectorSandbox
+      AppSecretsVersion: b7b63e09-f39f-4e4f-80ef-9dd203c2d59b
+      UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
 
 Resources:
   ContactUsApiGateway:
@@ -57,24 +66,31 @@ Resources:
         Variables:
           clientID:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:clientId::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId::${AppSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
           clientSecret:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:clientSecret::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret::${AppSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
           username:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:userName::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/MembersDataAPI:SecretString:username::${UserSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, UserSecretsVersion ]
           password:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:password::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/MembersDataAPI:SecretString:password::${UserSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, UserSecretsVersion ]
           token:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:token::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/MembersDataAPI:SecretString:token::${UserSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, UserSecretsVersion ]
           authDomain: !FindInMap [ StageMap, !Ref Stage, authDomain ]
           reqDomain: !FindInMap [ StageMap, !Ref Stage, reqDomain ]
       Events:
