@@ -86,15 +86,15 @@ object Main extends App with LazyLogging {
   //Convention: <stage>/<system>/User/<user>
   def getSecretName(
       awsApiUserCommunityNickname: String,
-      environment: String
+      stage: String
   ): String = {
-    s"$environment/Salesforce/User/$awsApiUserCommunityNickname"
+    s"$stage/Salesforce/User/$awsApiUserCommunityNickname"
   }
 
   def setPasswordInSecretsManager(
       awsApiUser: Records,
       newPassword: String,
-      environment: String
+      stage: String
   ): Unit = {
     logger.info(
       s"Setting password for user ${awsApiUser.Username} in Secrets Manager..."
@@ -105,7 +105,7 @@ object Main extends App with LazyLogging {
         .standard()
         .build()
 
-    val secretName = getSecretName(awsApiUser.CommunityNickname, environment)
+    val secretName = getSecretName(awsApiUser.CommunityNickname, stage)
 
     if (secretExists(secretsManagerClient, secretName)) {
       updateSecret(secretsManagerClient, awsApiUser, secretName, newPassword)
