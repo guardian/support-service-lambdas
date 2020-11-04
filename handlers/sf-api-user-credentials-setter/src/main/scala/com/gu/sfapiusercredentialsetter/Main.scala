@@ -134,7 +134,7 @@ object Main extends App with LazyLogging {
       sfAuthDetails: SfAuthDetails,
       awsApiUserInSf: Records,
       newPassword: String
-  ): Either[Throwable, List[setPasswordResponse]] = {
+  ): Unit = {
     logger.info(
       s"Setting password for user ${awsApiUserInSf.Username} in Salesforce..."
     )
@@ -145,7 +145,13 @@ object Main extends App with LazyLogging {
     val setPasswordResponseJson = sfUpdateResponse
       .getOrElse("")
 
-    decode[List[setPasswordResponse]](setPasswordResponseJson)
+    if (!setPasswordResponseJson.isEmpty) {
+      val decodedResponse =
+        decode[List[setPasswordResponse]](setPasswordResponseJson)
+      logger.error(
+        s"Error setting password for user ${awsApiUserInSf.Username} in Salesforce: $decodedResponse"
+      )
+    }
   }
 
   def getAwsApiUsersInSf(
