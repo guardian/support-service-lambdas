@@ -12,5 +12,5 @@ case class SalesforceConfig(
 )
 
 case class AwsConfig(
-  environment: String
+  stageName: String
 )

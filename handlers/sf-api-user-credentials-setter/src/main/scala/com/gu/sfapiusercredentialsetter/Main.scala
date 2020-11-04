@@ -19,15 +19,15 @@ object Main extends App with LazyLogging {
   case class setPasswordRequestBody(NewPassword: String)
 
   case class SfGetAwsApiUsersResponse(
-    done: Boolean,
-    records: Seq[Records],
-    nextRecordsUrl: Option[String] = None
+      done: Boolean,
+      records: Seq[Records],
+      nextRecordsUrl: Option[String] = None
   )
 
   case class Records(
-    Id: String,
-    Username: String,
-    CommunityNickname: String
+      Id: String,
+      Username: String,
+      CommunityNickname: String
   )
 
   lazy val optConfig = for {
@@ -37,7 +37,7 @@ object Main extends App with LazyLogging {
     sfPassword <- Option(System.getenv("password"))
     sfToken <- Option(System.getenv("token"))
     sfAuthUrl <- Option(System.getenv("authUrl"))
-    awsEnvironment <- Option(System.getenv("Stage"))
+    stage <- Option(System.getenv("stageName"))
   } yield Config(
     SalesforceConfig(
       userName = sfUserName,
@@ -48,7 +48,7 @@ object Main extends App with LazyLogging {
       authUrl = sfAuthUrl
     ),
     AwsConfig(
-      environment = awsEnvironment
+      stageName = stage
     )
   )
 
@@ -71,7 +71,7 @@ object Main extends App with LazyLogging {
         setPasswordInSecretsManager(
           awsApiUser,
           newPassword,
-          config.awsConfig.environment
+          config.awsConfig.stageName
         )
       }
 
@@ -82,16 +82,16 @@ object Main extends App with LazyLogging {
 
   //Convention: <stage>/<system>/User/<user>
   def getSecretName(
-    awsApiUserCommunityNickname: String,
-    environment: String
+      awsApiUserCommunityNickname: String,
+      environment: String
   ): String = {
     s"$environment/Salesforce/User/$awsApiUserCommunityNickname"
   }
 
   def setPasswordInSecretsManager(
-    awsApiUser: Records,
-    newPassword: String,
-    environment: String
+      awsApiUser: Records,
+      newPassword: String,
+      environment: String
   ): Unit = {
     logger.info(
       s"Setting password for user ${awsApiUser.Username} in Secrets Manager..."
@@ -123,9 +123,9 @@ object Main extends App with LazyLogging {
   }
 
   def updatePassword(
-    sfAuthDetails: SfAuthDetails,
-    awsApiUserInSf: Records,
-    newPassword: String
+      sfAuthDetails: SfAuthDetails,
+      awsApiUserInSf: Records,
+      newPassword: String
   ): Either[Throwable, List[setPasswordResponse]] = {
     logger.info(
       s"Setting password for user ${awsApiUserInSf.Username} in Salesforce..."
@@ -141,7 +141,7 @@ object Main extends App with LazyLogging {
   }
 
   def getAwsApiUsersInSf(
-    sfAuthDetails: SfAuthDetails
+      sfAuthDetails: SfAuthDetails
   ): Either[Error, SfGetAwsApiUsersResponse] = {
     logger.info("Getting Aws Api users from Salesforce...")
 
@@ -177,9 +177,9 @@ object Main extends App with LazyLogging {
   }
 
   def createSecret(
-    awsApiUserInSf: Records,
-    secretName: String,
-    newPwd: String
+      awsApiUserInSf: Records,
+      secretName: String,
+      newPwd: String
   ): Either[Throwable, CreateSecretResult] = {
 
     Try {
@@ -199,9 +199,9 @@ object Main extends App with LazyLogging {
   }
 
   def updateSecret(
-    awsApiUserInSf: Records,
-    secretName: String,
-    newPwd: String
+      awsApiUserInSf: Records,
+      secretName: String,
+      newPwd: String
   ): Either[Throwable, UpdateSecretResult] = {
 
     Try {
@@ -220,9 +220,9 @@ object Main extends App with LazyLogging {
   }
 
   def setSfPasswordPostRequest(
-    sfAuthDetails: SfAuthDetails,
-    newPwd: String,
-    sfUserId: String
+      sfAuthDetails: SfAuthDetails,
+      newPwd: String,
+      sfUserId: String
   ): Either[Throwable, String] = {
     val newPassword =
       setPasswordRequestBody(NewPassword = newPwd).asJson.spaces2
