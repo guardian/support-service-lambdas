@@ -13,9 +13,9 @@ Parameters:
 Mappings:
   StageMap:
     DEV:
-      SecretsVersion: "be9ab61c-2280-4d38-9909-c1cebdbd51d4"
+      SecretsVersion: "bef68149-32cb-459c-8238-e1832a385b95"
     CODE:
-      SecretsVersion: "9bfbcc3f-8aec-40c4-9dfd-b6bdd14a8dc0"
+      SecretsVersion: "867c511a-9c86-4ffd-9e2e-11d61540e708"
 
 Resources:
   SfApiUserCredentialsSetterRole:
@@ -66,27 +66,27 @@ Resources:
           Stage: !Ref Stage
           authUrl:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:authUrl::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:authUrl::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           clientId:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:clientId::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:clientId::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           clientSecret:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:clientSecret::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:clientSecret::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           password:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:password::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:password::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           token:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:token::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:token::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
           username:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/awscredentialssetter@guardian.co.uk:SecretString:username::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:username::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
 
       Role:
