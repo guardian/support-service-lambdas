@@ -88,6 +88,10 @@ Resources:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:username::${SecretsVersion}}}'
             - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          stageName:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:stageName::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
 
       Role:
         !GetAtt SfApiUserCredentialsSetterRole.Arn
