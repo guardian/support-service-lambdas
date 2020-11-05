@@ -4,7 +4,8 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsVersion = "1.11.879"
+  val awsV1Version = "1.11.893"
+  val awsV2Version = "2.15.20"
   val circeVersion = "0.12.3"
   val sttpVersion = "1.7.0"
   val http4sVersion = "0.21.0"
@@ -17,11 +18,13 @@ object Dependencies {
   )
 
   // AWS
-  val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsVersion
-  val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsVersion
-  val awsSES = "com.amazonaws" % "aws-java-sdk-ses" % awsVersion
-  val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsVersion
-  val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsVersion
+  val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsV1Version
+  val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsV1Version
+  val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsV1Version
+  val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsV1Version
+
+  val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsV2Version
+
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
@@ -77,6 +80,7 @@ object Dependencies {
   val assemblyMergeStrategyDiscardModuleInfo = assemblyMergeStrategy in assembly := {
     case PathList("module-info.class") => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
+    case PathList("mime.types") => MergeStrategy.filterDistinctLines
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
