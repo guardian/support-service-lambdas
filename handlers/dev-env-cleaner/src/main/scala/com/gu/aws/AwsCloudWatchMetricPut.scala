@@ -5,6 +5,7 @@ import software.amazon.awssdk.regions.Region.EU_WEST_1
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import software.amazon.awssdk.services.cloudwatch.model.{Dimension, MetricDatum, PutMetricDataRequest, StandardUnit}
 
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object Aws {
@@ -14,7 +15,6 @@ object Aws {
     .builder
     .credentialsProviders(
       ProfileCredentialsProvider.builder.profileName(ProfileName).build(),
-      InstanceProfileCredentialsProvider.builder.build(),
       EnvironmentVariableCredentialsProvider.create()
     )
     .build()
@@ -45,29 +45,24 @@ object AwsCloudWatch {
 
   def metricPut(request: MetricRequest): Try[Unit] = {
 
-    val metricDatum = request.dimensions.foldLeft(
-      MetricDatum.builder.metricName(request.name.value)
-    ) {
-        case (agg, (name, value)) =>
-          agg.dimensions(
-            Dimension
-              .builder
-              .name(name.value)
-              .value(value.value)
-              .build()
-          )
-      }
-      .value(request.value)
-      .unit(StandardUnit.COUNT)
-      .build()
-
     val putMetricDataRequest = PutMetricDataRequest
       .builder
       .namespace(request.namespace.value)
-      .metricData(metricDatum)
+      .metricData(buildMetricDatum(request))
       .build()
 
     Try(client.putMetricData(putMetricDataRequest)).map(_ => ())
   }
 
+  private[aws] def buildMetricDatum(request: MetricRequest) = {
+    val dimensions = request.dimensions.map { case (name, value) =>
+      Dimension.builder.name(name.value).value(value.value).build()
+    }.toList.asJava
+    MetricDatum.builder
+      .metricName(request.name.value)
+      .dimensions(dimensions)
+      .value(request.value)
+      .unit(StandardUnit.COUNT)
+      .build()
+  }
 }
