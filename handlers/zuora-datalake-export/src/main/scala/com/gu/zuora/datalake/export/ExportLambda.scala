@@ -415,7 +415,7 @@ object GetResultsFile {
     response.code match {
       case 200 =>
         val zuoraRowCount = batch.recordCount.get
-        val downloadedLineCount = response.body.lines.length
+        val downloadedLineCount = response.body.lines.toArray.length
         val downloadedRowCount = downloadedLineCount - 1 // for header row
         if (downloadedRowCount != zuoraRowCount) {
           throw new RuntimeException(s"HALTING at '${batch.name}' because the row count of downloaded file ($downloadedRowCount) did not match the Zuora row count (${zuoraRowCount})")

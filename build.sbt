@@ -182,12 +182,6 @@ lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
     libraryDependencies ++= Seq(awsSdkLambda) ++ logging
   )
 
-lazy val `effects-ses` = library(project in file("lib/effects-ses"))
-  .dependsOn(testDep)
-  .settings(
-    libraryDependencies ++= Seq(awsSES) ++ logging
-  )
-
 lazy val `config-core` = library(project in file("lib/config-core"))
 
 lazy val `config-cats` = library(project in file("lib/config-cats"))
