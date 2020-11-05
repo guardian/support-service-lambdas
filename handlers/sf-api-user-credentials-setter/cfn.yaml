@@ -13,9 +13,9 @@ Parameters:
 Mappings:
   StageMap:
     DEV:
-      SecretsVersion: "bef68149-32cb-459c-8238-e1832a385b95"
+      SecretsVersion: "20293fee-309b-4baa-9e7a-6df20023eb6c"
     CODE:
-      SecretsVersion: "867c511a-9c86-4ffd-9e2e-11d61540e708"
+      SecretsVersion: "64e573b7-2a34-4bb4-85fe-a32a50d848be"
 
 Resources:
   SfApiUserCredentialsSetterRole:
