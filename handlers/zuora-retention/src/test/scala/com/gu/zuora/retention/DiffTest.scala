@@ -61,7 +61,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
   it should "should not exclude anything with an empty exclusion list " in {
     val candidates =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |11,B,13,14 
+        |11,B,13,14
         |21,E,23,24
         |31,G,33,34
         |41,H,43,44
