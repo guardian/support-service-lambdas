@@ -13,7 +13,7 @@ deployments:
   dev-env-cleaner:
     type: aws-lambda
     parameters:
-      fileName: lambda.jar
+      fileName: dev-env-cleaner.jar
       bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames: [dev-env-cleaner-]

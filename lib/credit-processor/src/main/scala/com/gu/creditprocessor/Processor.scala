@@ -1,15 +1,15 @@
 package com.gu.creditprocessor
 
 import java.time.LocalDate
-
 import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.zuora.ZuoraLockingContention.retryLockingContention
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
-import com.gu.zuora.{AccessToken, Zuora, HolidayStopProcessorZuoraConfig}
+import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import com.softwaremill.sttp.{Id, SttpBackend}
 import org.slf4j.LoggerFactory
+import scala.util.Try
 
 object Processor {
 
@@ -29,7 +29,8 @@ object Processor {
     updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
     resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
     writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
-    getAccount: String => ZuoraApiResponse[ZuoraAccount]
+    getAccount: String => ZuoraApiResponse[ZuoraAccount],
+    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
   ): ProcessResult[Result] = {
 
     def getSubscription(
@@ -56,7 +57,8 @@ object Processor {
       updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
       updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
-      writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_]
+      writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
+      getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
     )
   }
 
@@ -71,7 +73,8 @@ object Processor {
     updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
-    writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_]
+    writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
+    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
   ): ProcessResult[Result] = {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
@@ -94,7 +97,8 @@ object Processor {
             getAccount,
             updateToApply,
             updateSubscription,
-            resultOfZuoraCreditAdd
+            resultOfZuoraCreditAdd,
+            getNextInvoiceDate,
           )
         )
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraCreditResponses.separate
@@ -109,6 +113,24 @@ object Processor {
     }
   }
 
+  // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20
+  private def testInProdNextInvoiceDate(
+    subscription: Subscription,
+    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
+    expected: SubscriptionUpdate,
+  ): Try[Unit] = Try {
+    (getNextInvoiceDate(subscription.subscriptionNumber).map { actual =>
+      if (expected.add.forall(_.contractEffectiveDate == actual)) {
+        // logger.info("testInProdNextInvoiceDate OK")
+      } else {
+        logger.error(s"testInProdNextInvoiceDate failed because ${expected.add.head} =/= $actual")
+      }
+    }).left.map { e =>
+      logger.error(s"testInProdNextInvoiceDate failed because invoicing-api error: $e")
+    }
+  }
+
+
   /**
    * This is the main business logic for adding a credit amendment to a subscription in Zuora
    */
@@ -118,13 +140,17 @@ object Processor {
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
     updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
-    result: (Request, RatePlanCharge) => Result
+    result: (Request, RatePlanCharge) => Result,
+    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
   )(request: Request): ZuoraApiResponse[Result] =
     for {
       subscription <- getSubscription(request.subscriptionName)
       account <- getAccount(subscription.accountNumber)
       _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};")) else Right(())
-      subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request)
+      subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request) // FIXME: Deprecated
+      _ = testInProdNextInvoiceDate(subscription, getNextInvoiceDate, subscriptionUpdate)
+      // FIXME: nextInvoiceDate <- getNextInvoiceDate(subscription.subscriptionNumber)
+      // FIXME: subscriptionUpdate <- SubscriptionUpdate(creditProduct(subscription), subscription, account, request.publicationDate, Some(InvoiceDate(nextInvoiceDate)))
       _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write credit amendment to Zuora: $request"))

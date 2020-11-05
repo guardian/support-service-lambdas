@@ -118,3 +118,11 @@ Resources:
         Threshold: 1
         TreatMissingData: notBreaching
 
+    DisableAutomaticLambdaRetry:
+      Type: AWS::Lambda::EventInvokeConfig
+      Properties:
+        FunctionName: !Sub zuora-datalake-export-${Stage}
+        MaximumRetryAttempts: 0
+        Qualifier: '$LATEST'
+      DependsOn: ExportLambda
+
