@@ -80,7 +80,7 @@ object SendVoucherEmailsManualTest {
     val result = for {
       email <- args.headOption.map(Email.apply)
       queueName = emailQueuesFor(Stage("PROD")).paper
-      sqsSend = AwsSQSSend(queueName) _
+      sqsSend = AwsSQSSend.sendAsync(queueName) _
       voucherSqsSend = EtSqsSend[PaperEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmail(voucherSqsSend) _
       data = fakeVoucherEmailData(email)

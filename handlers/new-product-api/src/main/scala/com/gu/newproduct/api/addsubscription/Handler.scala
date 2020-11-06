@@ -36,7 +36,7 @@ object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, AwsSQSSend.apply, RawEffects.now)
+      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, AwsSQSSend.sendAsync, RawEffects.now)
     }
 }
 

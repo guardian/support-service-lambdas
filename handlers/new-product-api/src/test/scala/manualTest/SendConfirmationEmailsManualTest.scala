@@ -72,7 +72,7 @@ object SendConfirmationEmailsManualTest {
     val result = for {
       email <- args.headOption.map(Email.apply)
       queueName = emailQueuesFor(Stage("DEV")).contributions
-      sqsSend = AwsSQSSend(queueName) _
+      sqsSend = AwsSQSSend.sendAsync(queueName) _
       contributionsSqsSend = EtSqsSend[ContributionsEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmail[ContributionsEmailData](contributionsSqsSend)_
       sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), contributionsEmailData(fakeContacts(email)))

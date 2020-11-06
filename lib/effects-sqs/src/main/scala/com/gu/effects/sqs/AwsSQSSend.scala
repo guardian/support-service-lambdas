@@ -1,14 +1,14 @@
 package com.gu.effects.sqs
 
-import com.amazonaws.auth._
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.sqs.model.SendMessageRequest
-import com.amazonaws.services.sqs.{AmazonSQSAsync, AmazonSQSAsyncClientBuilder}
 import com.typesafe.scalalogging.LazyLogging
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider, SystemPropertyCredentialsProvider}
+import software.amazon.awssdk.regions.Region.EU_WEST_1
+import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, SendMessageRequest}
+import software.amazon.awssdk.services.sqs.{SqsAsyncClient, SqsClient}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.jdk.FutureConverters._
 import scala.util.{Failure, Success, Try}
 
 object AwsSQSSend extends LazyLogging {
@@ -17,58 +17,71 @@ object AwsSQSSend extends LazyLogging {
 
   case class Payload(value: String) extends AnyVal
 
-  private def buildSqsClient(queueName: QueueName): (AmazonSQSAsync, String) = {
-    val sqsClient = AmazonSQSAsyncClientBuilder
-      .standard()
-      .withCredentials(aws.CredentialsProvider)
-      .withRegion(Regions.EU_WEST_1)
+  def sendAsync(queueName: QueueName)(payload: Payload): Future[Unit] = {
+
+    val sqsClient = SqsAsyncClient
+      .builder
+      .region(EU_WEST_1)
+      .credentialsProvider(aws.CredentialsProvider)
       .build()
-    val queueUrl = sqsClient.getQueueUrl(queueName.value).getQueueUrl
-    (sqsClient, queueUrl)
-  }
 
-  def apply(queueName: QueueName)(payload: Payload): Future[Unit] = {
-    val (sqsClient: AmazonSQSAsync, queueUrl: String) = buildSqsClient(queueName)
+    val futureQueueUrl =
+      sqsClient.getQueueUrl(
+        GetQueueUrlRequest.builder.queueName(queueName.value).build()
+      ).asScala.map(_.queueUrl)
 
-    logger.info(s"Sending message to SQS queue $queueUrl")
-    val messageResult = AwsAsync(sqsClient.sendMessageAsync, new SendMessageRequest(queueUrl, payload.value))
-
-    messageResult.transform {
-      case Success(result) =>
-        logger.info(s"Successfully sent message to $queueUrl: $result")
-        Success(())
-      case Failure(throwable) =>
-        logger.error(s"Failed to send message due to $queueUrl due to:", throwable)
-        Failure(throwable)
-    }
+    for {
+      queueUrl <- futureQueueUrl
+      _ <- Future.successful(logger.info(s"Sending message to SQS queue $queueUrl"))
+      request = SendMessageRequest.builder.queueUrl(queueUrl).messageBody(payload.value).build()
+      response = sqsClient.sendMessage(request).asScala
+      _ <- response.transform {
+        case Success(result) =>
+          logger.info(s"Successfully sent message to $queueUrl: $result")
+          Success(())
+        case Failure(throwable) =>
+          logger.error(s"Failed to send message to $queueUrl due to:", throwable)
+          Failure(throwable)
+      }
+    } yield ()
   }
 
   def sendSync(queueName: QueueName)(payload: Payload): Try[Unit] = {
-    val (sqsClient: AmazonSQSAsync, queueUrl: String) = buildSqsClient(queueName)
+
+    val sqsClient = SqsClient
+      .builder
+      .region(EU_WEST_1)
+      .credentialsProvider(aws.CredentialsProvider)
+      .build()
+
+    val queueUrl = sqsClient.getQueueUrl(
+      GetQueueUrlRequest.builder.queueName(queueName.value).build()
+    ).queueUrl
 
     logger.info(s"Sending message to SQS queue $queueUrl")
 
-    Try(sqsClient.sendMessage(new SendMessageRequest(queueUrl, payload.value))) match {
+    val request = SendMessageRequest.builder.queueUrl(queueUrl).messageBody(payload.value).build()
+    val response = Try(sqsClient.sendMessage(request))
+    response match {
       case Success(result) =>
         logger.info(s"Successfully sent message to $queueUrl: $result")
         Success(())
       case Failure(throwable) =>
-        logger.error(s"Failed to send message due to $queueUrl due to:", throwable)
+        logger.error(s"Failed to send message to $queueUrl due to:", throwable)
         Failure(throwable)
     }
-
   }
 }
 
 object aws {
   val ProfileName = "membership"
 
-  lazy val CredentialsProvider = new AWSCredentialsProviderChain(
-    new EnvironmentVariableCredentialsProvider,
-    new SystemPropertiesCredentialsProvider,
-    new ProfileCredentialsProvider(ProfileName),
-    new InstanceProfileCredentialsProvider(false),
-    new EC2ContainerCredentialsProviderWrapper
-  )
-
+  lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain
+    .builder
+    .credentialsProviders(
+      EnvironmentVariableCredentialsProvider.create(),
+      SystemPropertyCredentialsProvider.create(),
+      ProfileCredentialsProvider.builder.profileName(ProfileName).build()
+    )
+    .build()
 }
