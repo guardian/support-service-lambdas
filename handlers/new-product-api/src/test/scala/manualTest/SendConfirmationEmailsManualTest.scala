@@ -2,20 +2,20 @@ package manualTest
 
 import java.time.LocalDate
 
-import com.gu.effects.sqs.AwsSQSSend
+import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.{Country, Currency}
+import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
+import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{ContributionsEmailData, EtSqsSend, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.NonDirectDebitMethod
 import com.gu.newproduct.api.addsubscription.zuora.{PaymentMethodStatus, PaymentMethodType}
-import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
-import com.gu.util.config.Stage
-import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
-import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription}
+import com.gu.util.config.Stage
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -72,7 +72,7 @@ object SendConfirmationEmailsManualTest {
     val result = for {
       email <- args.headOption.map(Email.apply)
       queueName = emailQueuesFor(Stage("DEV")).contributions
-      sqsSend = AwsSQSSend.sendAsync(queueName) _
+      sqsSend = SqsAsync.send(SqsAsync.buildClient)(queueName) _
       contributionsSqsSend = EtSqsSend[ContributionsEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmail[ContributionsEmailData](contributionsSqsSend)_
       sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), contributionsEmailData(fakeContacts(email)))

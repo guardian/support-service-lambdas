@@ -24,7 +24,7 @@ class AWSSQSSendTest extends AsyncFlatSpec with Matchers {
     val testQueueName = QueueName("test-support-service-effects-tests")
 
     for {
-      _ <- AwsSQSSend.sendAsync(testQueueName)(Payload(data))
+      _ <- SqsAsync.send(SqsAsync.buildClient)(testQueueName)(Payload(data))
     } yield {
       val allMessages = SQSRead(testQueueName)
       val myMessages = allMessages.filter(_ == data)
@@ -39,12 +39,12 @@ object SQSRead extends LazyLogging {
 
   private implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  def apply(queueName: AwsSQSSend.QueueName): List[String] = {
+  def apply(queueName: QueueName): List[String] = {
 
     val sqsClient = SqsAsyncClient
       .builder
       .region(EU_WEST_1)
-      .credentialsProvider(aws.CredentialsProvider)
+      .credentialsProvider(AwsSQSSend.CredentialsProvider)
       .build()
 
     val futureQueueUrl = sqsClient.getQueueUrl(

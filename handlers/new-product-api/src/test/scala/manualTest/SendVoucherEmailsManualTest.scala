@@ -2,10 +2,11 @@ package manualTest
 
 import java.time.LocalDate
 
-import com.gu.effects.sqs.AwsSQSSend
+import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
+import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
@@ -13,10 +14,9 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDayPlus
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog._
 import com.gu.util.config.Stage
-import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailDataSerialiser._
-import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -80,7 +80,7 @@ object SendVoucherEmailsManualTest {
     val result = for {
       email <- args.headOption.map(Email.apply)
       queueName = emailQueuesFor(Stage("PROD")).paper
-      sqsSend = AwsSQSSend.sendAsync(queueName) _
+      sqsSend = SqsAsync.send(SqsAsync.buildClient)(queueName) _
       voucherSqsSend = EtSqsSend[PaperEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmail(voucherSqsSend) _
       data = fakeVoucherEmailData(email)

@@ -1,10 +1,10 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
-import java.time.{LocalDateTime}
+import java.time.LocalDateTime
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.sqs.AwsSQSSend
+import com.gu.effects.sqs.{AwsSQSSend, SqsAsync}
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
@@ -36,7 +36,7 @@ object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, AwsSQSSend.sendAsync, RawEffects.now)
+      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, SqsAsync.send(SqsAsync.buildClient), RawEffects.now)
     }
 }
 

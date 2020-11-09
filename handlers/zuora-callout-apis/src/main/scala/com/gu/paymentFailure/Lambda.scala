@@ -3,8 +3,8 @@ package com.gu.paymentFailure
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
+import com.gu.effects.sqs.SqsSync
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.Auth.TrustedApiConfig
@@ -16,6 +16,7 @@ import com.gu.util.email.EmailSendSteps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
+
 import scala.util.Try
 
 object Lambda {
@@ -72,7 +73,7 @@ object Lambda {
       GetFromS3.fetchString,
       RawEffects.response,
       LambdaIO(inputStream, outputStream, context),
-      AwsSQSSend.sendSync
+      SqsSync.send(SqsSync.buildClient)
     )
   }
 
