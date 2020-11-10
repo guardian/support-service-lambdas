@@ -1,10 +1,14 @@
 import sbt._
 import sbtassembly.AssemblyKeys.assembly
-import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
+import sbtassembly.AssemblyPlugin.autoImport.{
+  MergeStrategy,
+  assemblyMergeStrategy
+}
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsVersion = "1.11.879"
+  val awsV1Version = "1.11.893"
+  val awsV2Version = "2.15.20"
   val circeVersion = "0.12.3"
   val sttpVersion = "1.7.0"
   val http4sVersion = "0.21.0"
@@ -17,34 +21,41 @@ object Dependencies {
   )
 
   // AWS
-  val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsVersion
-  val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsVersion
-  val awsSES = "com.amazonaws" % "aws-java-sdk-ses" % awsVersion
-  val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsVersion
-  val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsVersion
+  val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsV1Version
+  val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsV1Version
+  val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsV1Version
+  val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsV1Version
+
+  val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsV2Version
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
+  val secretsManager =
+    "com.amazonaws" % "aws-java-sdk-secretsmanager" % "1.11.882"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
-  val mouse = "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
+  val mouse =
+    "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
 
   // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeConfig =  "io.circe" %% "circe-config" % "0.7.0"
+  val circeConfig = "io.circe" %% "circe-config" % "0.7.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
-  val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.0" // FIXME: Why is this necessery?
+  val jacksonDatabind =
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.0" // FIXME: Why is this necessery?
 
   // HTTP clients
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
-  val sttpAsyncHttpClientBackendCats = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
-  val sttpOkhttpBackend = "com.softwaremill.sttp" %% "okhttp-backend" % sttpVersion
+  val sttpAsyncHttpClientBackendCats =
+    "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
+  val sttpOkhttpBackend =
+    "com.softwaremill.sttp" %% "okhttp-backend" % sttpVersion
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
@@ -56,7 +67,8 @@ object Dependencies {
 
   // Guardian
   val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.2"
-  val supportInternationalisation = "com.gu" %% "support-internationalisation" % "0.13"
+  val supportInternationalisation =
+    "com.gu" %% "support-internationalisation" % "0.13"
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.5"
 
   // Other
@@ -77,9 +89,11 @@ object Dependencies {
   val assemblyMergeStrategyDiscardModuleInfo = assemblyMergeStrategy in assembly := {
     case PathList("module-info.class") => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
+    case PathList("mime.types") => MergeStrategy.filterDistinctLines
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
   }
+
 
 }

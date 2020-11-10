@@ -182,12 +182,6 @@ lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
     libraryDependencies ++= Seq(awsSdkLambda) ++ logging
   )
 
-lazy val `effects-ses` = library(project in file("lib/effects-ses"))
-  .dependsOn(testDep)
-  .settings(
-    libraryDependencies ++= Seq(awsSES) ++ logging
-  )
-
 lazy val `config-core` = library(project in file("lib/config-core"))
 
 lazy val `config-cats` = library(project in file("lib/config-cats"))
@@ -313,7 +307,7 @@ lazy val `zuora-sar` = lambdaProject(
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",
   "Cleans up the salesforce to free up storage via 360 sync/zuora",
-  Seq("com.amazonaws" % "aws-java-sdk-cloudwatch" % awsVersion, catsEffect, circeParser, circe, awsStepFunction)
+  Seq(awsCloudwatch, catsEffect, circeParser, circe, awsStepFunction)
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `sf-contact-merge` = lambdaProject(
@@ -325,6 +319,11 @@ lazy val `sf-billing-account-remover` = lambdaProject(
   "sf-billing-account-remover",
   "Removes Billing Accounts and related records from Salesforce",
   Seq(circe, circeParser, scalajHttp))
+
+lazy val `sf-api-user-credentials-setter` = lambdaProject(
+  "sf-api-user-credentials-setter",
+  "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
+  Seq(secretsManager, circe, circeParser, scalajHttp, awsS3))
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
   "cancellation-sf-cases-api",

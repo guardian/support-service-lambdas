@@ -1,0 +1,102 @@
+Transform: AWS::Serverless-2016-10-31
+Description: Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - CODE
+      - DEV
+    Default: DEV
+
+Mappings:
+  StageMap:
+    DEV:
+      SecretsVersion: "10741350-3232-40ba-8713-7728bc180170"
+    CODE:
+      SecretsVersion: "84f470bf-a9e5-40a7-a044-6b91dcae7670"
+
+Resources:
+  SfApiUserCredentialsSetterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SfApiUserCredentialsSetterPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:ListSecrets
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:PutSecretValue
+                  - secretsmanager:UpdateSecretVersionStage
+                  - secretsmanager:CreateSecret
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-api-user-credentials-setter-${Stage}:log-stream:*
+
+  SfApiUserCredentialsSetterLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        !Sub sf-api-user-credentials-setter-${Stage}
+      Description: Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager.
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key: !Sub membership/${Stage}/sf-api-user-credentials-setter/sf-api-user-credentials-setter.jar
+      Handler: com.gu.sfapiusercredentialsetter.Main::handler
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          authUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:authUrl::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          clientId:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:clientId::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          clientSecret:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:clientSecret::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          password:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:password::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          token:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:token::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          username:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:username::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          stageName:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:stageName::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+
+      Role:
+        !GetAtt SfApiUserCredentialsSetterRole.Arn
+      MemorySize: 512
+      Runtime: java8
+      Timeout: 900
+    DependsOn:
+      - SfApiUserCredentialsSetterRole

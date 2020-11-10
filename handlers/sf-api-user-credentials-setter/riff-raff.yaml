@@ -3,18 +3,17 @@ stacks:
 regions:
 - eu-west-1
 deployments:
-
   cfn:
     type: cloud-formation
-    app: dev-env-cleaner
+    app: sf-api-user-credentials-setter
     parameters:
       templatePath: cfn.yaml
-
-  dev-env-cleaner:
+  sf-api-user-credentials-setter:
     type: aws-lambda
     parameters:
-      fileName: dev-env-cleaner.jar
+      fileName: sf-api-user-credentials-setter.jar
       bucket: support-service-lambdas-dist
       prefixStack: false
-      functionNames: [dev-env-cleaner-]
+      functionNames:
+      - sf-api-user-credentials-setter-
     dependencies: [cfn]
