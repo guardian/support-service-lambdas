@@ -10,22 +10,22 @@ Mappings:
   StageMap:
     DEV:
       SalesforceUrl: https://test.salesforce.com
-      SalesforceSecretsVersion: 89ac830e-166c-444a-a61b-72fb5173e761
+      SalesforceAccountType: ConnectedApp
+      SalesforceAccount: AwsConnectorSandbox
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SfSaves
-      ZuoraSecretsVersion: 4460c713-12dc-4fef-87c1-bf416ff73d5c
     CODE:
       SalesforceUrl: https://test.salesforce.com
-      SalesforceSecretsVersion: 5a68b23e-6d75-4bb4-9131-a4d94c121010
+      SalesforceAccountType: ConnectedApp
+      SalesforceAccount: AwsConnectorSandbox
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SubscriptionsZuoraApi
-      ZuoraSecretsVersion: 92a2b806-1f9b-4e6f-8d7f-8b774e6a5196
     PROD:
       SalesforceUrl: https://gnmtouchpoint.my.salesforce.com
-      SalesforceSecretsVersion: cfe10466-bd62-45f2-a61f-3fcf9c12ef9f
+      SalesforceAccountType: User
+      SalesforceAccount: MembersDataApi
       ZuoraUrl: https://rest.zuora.com
       ZuoraAccount: SupportServiceLambdas
-      ZuoraSecretsVersion: abea25fb-bc38-4ef9-89a8-6efabc9750b9
 
 Resources:
   SFBillingAccountRemoverRole:
@@ -67,35 +67,38 @@ Resources:
           Stage: !Ref Stage
           apiAccessKeyId:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/${Account}:SecretString:apiAccessKeyId::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Zuora/${Account}:SecretString:apiAccessKeyId}}'
             - Account: !FindInMap [StageMap, !Ref Stage, ZuoraAccount]
-              SecretsVersion: !FindInMap [StageMap, !Ref Stage, ZuoraSecretsVersion]
           apiSecretAccessKey:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/${Account}:SecretString:apiSecretAccessKey::${SecretsVersion}}}'
+            - '{{resolve:secretsmanager:${Stage}/Zuora/${Account}:SecretString:apiSecretAccessKey}}'
             - Account: !FindInMap [StageMap, !Ref Stage, ZuoraAccount]
-              SecretsVersion: !FindInMap [StageMap, !Ref Stage, ZuoraSecretsVersion]
           authUrl: !FindInMap [StageMap, !Ref Stage, SalesforceUrl]
           clientId:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:clientId::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SalesforceSecretsVersion]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/${AccountType}/${Account}:SecretString:clientId}}'
+            - AccountType: !FindInMap [StageMap, !Ref Stage, SalesforceAccountType]
+              Account: !FindInMap [StageMap, !Ref Stage, SalesforceAccount]
           clientSecret:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:clientSecret::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SalesforceSecretsVersion]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/${AccountType}/${Account}:SecretString:clientSecret}}'
+            - AccountType: !FindInMap [StageMap, !Ref Stage, SalesforceAccountType]
+              Account: !FindInMap [StageMap, !Ref Stage, SalesforceAccount]
           password:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:password::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SalesforceSecretsVersion]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/${AccountType}/${Account}:SecretString:password}}'
+            - AccountType: !FindInMap [StageMap, !Ref Stage, SalesforceAccountType]
+              Account: !FindInMap [StageMap, !Ref Stage, SalesforceAccount]
           token:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:token::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SalesforceSecretsVersion]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/${AccountType}/${Account}:SecretString:token}}'
+            - AccountType: !FindInMap [StageMap, !Ref Stage, SalesforceAccountType]
+              Account: !FindInMap [StageMap, !Ref Stage, SalesforceAccount]
           username:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:userName::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SalesforceSecretsVersion]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/${AccountType}/${Account}:SecretString:userName}}'
+            - AccountType: !FindInMap [StageMap, !Ref Stage, SalesforceAccountType]
+              Account: !FindInMap [StageMap, !Ref Stage, SalesforceAccount]
           zuoraInstanceUrl: !FindInMap [StageMap, !Ref Stage, ZuoraUrl]
 
       Role:
