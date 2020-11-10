@@ -114,11 +114,13 @@ object Processor {
   }
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20
+  import scala.concurrent.{ExecutionContext, Future}
+  import java.util.concurrent.Executors
   private def testInProdNextInvoiceDate(
     subscription: Subscription,
     getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
     expected: SubscriptionUpdate,
-  ): Try[Unit] = Try {
+  ): Future[_] = Future {
     (getNextInvoiceDate(subscription.subscriptionNumber).map { actual =>
       if (expected.add.forall(_.contractEffectiveDate == actual)) {
         // logger.info("testInProdNextInvoiceDate OK")
@@ -128,7 +130,7 @@ object Processor {
     }).left.map { e =>
       logger.error(s"testInProdNextInvoiceDate failed because invoicing-api error: $e")
     }
-  }
+  }(ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor))
 
 
   /**
