@@ -9,13 +9,13 @@ Parameters:
 Mappings:
   StageMap:
     DEV:
-      SalesforceUrl: https://gnmtouchpoint--dev.my.salesforce.com
+      SalesforceUrl: https://test.salesforce.com
       SalesforceSecretsVersion: 89ac830e-166c-444a-a61b-72fb5173e761
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SfSaves
       ZuoraSecretsVersion: 4460c713-12dc-4fef-87c1-bf416ff73d5c
     CODE:
-      SalesforceUrl: https://gnmtouchpoint--uat.my.salesforce.com
+      SalesforceUrl: https://test.salesforce.com
       SalesforceSecretsVersion: 5a68b23e-6d75-4bb4-9131-a4d94c121010
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SubscriptionsZuoraApi
