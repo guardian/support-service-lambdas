@@ -210,13 +210,16 @@ object Handler extends Logging {
   )
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/23
+  import scala.concurrent.{ExecutionContext, Future}
+  import java.util.concurrent.Executors
+  private val ecForTestInProd = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor)
   private def testInProdPreviewPublications(
     previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
     subscription: Subscription,
     queryParams: PotentialHolidayStopsQueryParams,
     potentialHolidayStops: List[PotentialHolidayStop],
     nextInvoiceDateAfterToday: LocalDate
-  ): Try[Unit] = Try {
+  ): Future[_] = Future {
     (previewPublications(subscription.subscriptionNumber, queryParams.startDate.toString, queryParams.endDate.toString).map { actual =>
       val actualPotentialHolidayStops =
         actual
@@ -236,7 +239,7 @@ object Handler extends Logging {
     }).left.map { e =>
       logger.error(s"testInProdNextInvoiceDate failed because invoicing-api error: $e")
     }
-  }
+  }(ecForTestInProd)
 
   def stepsForPotentialHolidayStop(
     getAccessToken: () => Either[ApiFailure, AccessToken],
