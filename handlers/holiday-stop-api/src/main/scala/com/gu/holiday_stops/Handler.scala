@@ -237,7 +237,7 @@ object Handler extends Logging {
         )
       }
     }).left.map { e =>
-      logger.error(s"testInProdNextInvoiceDate failed because invoicing-api error: $e")
+      logger.error(s"testInProdPreviewPublications failed because invoicing-api error: $e")
     }
   }(ecForTestInProd)
 
