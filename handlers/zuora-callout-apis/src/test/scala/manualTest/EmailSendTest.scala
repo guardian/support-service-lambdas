@@ -2,8 +2,8 @@ package manualTest
 
 import java.util.UUID
 
-import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
+import com.gu.effects.sqs.SqsSync
 import com.gu.util.Logging
 import com.gu.util.email._
 
@@ -58,7 +58,7 @@ object EmailSendTest extends App with Logging {
     emailName <- emailNames
     product <- products
   } {
-    val result = EmailSendSteps(AwsSQSSend.sendSync(QueueName("contributions-thanks")))(createMessage(product, emailName.id))
+    val result = EmailSendSteps(SqsSync.send(SqsSync.buildClient)(QueueName("contributions-thanks")))(createMessage(product, emailName.id))
     println(s"result for $emailName $product is $result")
   }
 

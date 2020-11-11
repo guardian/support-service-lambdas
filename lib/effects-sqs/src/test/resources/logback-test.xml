@@ -1,0 +1,16 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- see http://logback.qos.ch/manual/layouts.html -->
+            <pattern>%level %class:%line - %message%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="software.amazon.awssdk" level="ERROR"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>

@@ -1,15 +1,19 @@
 package com.gu.effects.sqs
 
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
-import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.test.EffectsTest
 import com.typesafe.scalalogging.LazyLogging
-import org.scalatest.{AsyncFlatSpec, Matchers}
+import org.scalatest.flatspec.AsyncFlatSpec
+import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.regions.Region.EU_WEST_1
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, ReceiveMessageRequest}
 
-import scala.collection.JavaConverters._
-import scala.util.{Failure, Random, Success, Try}
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.jdk.CollectionConverters._
+import scala.jdk.FutureConverters._
+import scala.util.Random
 
 class AWSSQSSendTest extends AsyncFlatSpec with Matchers {
 
@@ -20,7 +24,7 @@ class AWSSQSSendTest extends AsyncFlatSpec with Matchers {
     val testQueueName = QueueName("test-support-service-effects-tests")
 
     for {
-      _ <- AwsSQSSend(testQueueName)(Payload(data))
+      _ <- SqsAsync.send(SqsAsync.buildClient)(testQueueName)(Payload(data))
     } yield {
       val allMessages = SQSRead(testQueueName)
       val myMessages = allMessages.filter(_ == data)
@@ -33,27 +37,33 @@ class AWSSQSSendTest extends AsyncFlatSpec with Matchers {
 
 object SQSRead extends LazyLogging {
 
-  def apply(queueName: AwsSQSSend.QueueName): List[String] = {
-    val sqsClient = AmazonSQSAsyncClientBuilder
-      .standard()
-      .withCredentials(aws.CredentialsProvider)
-      .withRegion(Regions.EU_WEST_1)
+  private implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
+
+  def apply(queueName: QueueName): List[String] = {
+
+    val sqsClient = SqsAsyncClient
+      .builder
+      .region(EU_WEST_1)
+      .credentialsProvider(AwsSQSSend.CredentialsProvider)
       .build()
-    val queueUrl = sqsClient.getQueueUrl(queueName.value).getQueueUrl
 
-    logger.info(s"reading message to SQS queue $queueUrl")
+    val futureQueueUrl = sqsClient.getQueueUrl(
+      GetQueueUrlRequest.builder.queueName(queueName.value).build()
+    ).asScala.map(_.queueUrl)
 
-    val request = new ReceiveMessageRequest(queueName.value)
-      .withAttributeNames("ApproximateReceiveCount")
-      .withMaxNumberOfMessages(10)
-      .withWaitTimeSeconds(0)
+    val futureReceived = for {
+      queueUrl <- futureQueueUrl
+      _ <- Future.successful(logger.info(s"reading message from SQS queue $queueUrl"))
+      request = ReceiveMessageRequest.builder.queueUrl(queueUrl).attributeNamesWithStrings("ApproximateReceiveCount").maxNumberOfMessages(10).waitTimeSeconds(0).build()
+      received <- sqsClient.receiveMessage(request).asScala.map {
+        results => results.messages.asScala.toList.map(_.body)
+      }.recover {
+        e =>
+          logger.warn("Error encountered while receiving messages from Amazon: " + e.getMessage)
+          Nil
+      }
+    } yield received
 
-    Try(sqsClient.receiveMessage(request)) match {
-      case Success(results) => results.getMessages.asScala.toList.map(_.getBody)
-      case Failure(e) =>
-        logger.warn("Error encountered while receiving messages from Amazon: " + e.getMessage)
-        Nil
-    }
+    Await.result(futureReceived, 10.seconds)
   }
-
 }
