@@ -11,16 +11,19 @@ Mappings:
     DEV:
       SalesforceUrl: https://test.salesforce.com
       SalesforceConnectedApp: AwsConnectorSandbox
+      SalesforceUser: MembersDataApi
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SfSaves
     CODE:
       SalesforceUrl: https://test.salesforce.com
       SalesforceConnectedApp: AwsConnectorSandbox
+      SalesforceUser: MembersDataApi
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SubscriptionsZuoraApi
     PROD:
       SalesforceUrl: https://gnmtouchpoint.my.salesforce.com
       SalesforceConnectedApp: TouchpointUpdate
+      SalesforceUser: MembersDataApi
       ZuoraUrl: https://rest.zuora.com
       ZuoraAccount: SupportServiceLambdas
 
@@ -79,9 +82,18 @@ Resources:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${ConnectedApp}:SecretString:clientSecret}}'
             - ConnectedApp: !FindInMap [StageMap, !Ref Stage, SalesforceConnectedApp]
-          password: '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataApi:SecretString:password}}'
-          token: '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataApi:SecretString:token}}'
-          username: '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataApi:SecretString:userName}}'
+          password:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:password}}'
+            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
+          token:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:token}}'
+            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
+          username:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:userName}}'
+            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
           zuoraInstanceUrl: !FindInMap [StageMap, !Ref Stage, ZuoraUrl]
 
       Role:
