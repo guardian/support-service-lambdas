@@ -11,19 +11,19 @@ Mappings:
     DEV:
       SalesforceUrl: https://test.salesforce.com
       SalesforceConnectedApp: AwsConnectorSandbox
-      SalesforceUser: MembersDataApi
+      SalesforceUser: MembersDataAPI
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SfSaves
     CODE:
       SalesforceUrl: https://test.salesforce.com
       SalesforceConnectedApp: AwsConnectorSandbox
-      SalesforceUser: MembersDataApi
+      SalesforceUser: MembersDataAPI
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SubscriptionsZuoraApi
     PROD:
       SalesforceUrl: https://gnmtouchpoint.my.salesforce.com
       SalesforceConnectedApp: TouchpointUpdate
-      SalesforceUser: MembersDataApi
+      SalesforceUser: MembersDataAPI
       ZuoraUrl: https://rest.zuora.com
       ZuoraAccount: SupportServiceLambdas
 
