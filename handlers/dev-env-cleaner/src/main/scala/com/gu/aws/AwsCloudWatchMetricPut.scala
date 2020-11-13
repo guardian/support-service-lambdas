@@ -55,8 +55,9 @@ object AwsCloudWatch {
   }
 
   private[aws] def buildMetricDatum(request: MetricRequest) = {
-    val dimensions = request.dimensions.map { case (name, value) =>
-      Dimension.builder.name(name.value).value(value.value).build()
+    val dimensions = request.dimensions.map {
+      case (name, value) =>
+        Dimension.builder.name(name.value).value(value.value).build()
     }.toList.asJava
     MetricDatum.builder
       .metricName(request.name.value)

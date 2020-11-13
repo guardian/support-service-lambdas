@@ -1,25 +1,27 @@
 package com.gu.zuora.datalake.export
 
-import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit.DAYS
+
+import com.amazonaws.services.lambda.runtime.Context
+import com.typesafe.scalalogging.LazyLogging
+import enumeratum._
 import io.circe.Printer
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
-import io.github.mkotsur.aws.handler.Lambda._
 import io.github.mkotsur.aws.handler.Lambda
-import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
-import com.typesafe.scalalogging.LazyLogging
+import io.github.mkotsur.aws.handler.Lambda._
 import scalaj.http.{BaseHttp, HttpOptions}
-import java.time.temporal.ChronoUnit.DAYS
-import scala.io.Source
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.{GetObjectRequest, ObjectCannedACL, PutObjectRequest}
+
 import scala.concurrent.duration._
+import scala.io.Source
 import scala.util.Try
-import enumeratum._
 
 /**
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes:
@@ -278,10 +280,12 @@ object DeletedColumn {
 object ReadConfig {
   def apply(): Config = {
     val stage = System.getenv("Stage")
-    val s3Client = AmazonS3Client.builder.build()
+    val s3Client = S3Client.create()
     val bucketName = "gu-reader-revenue-private"
     val key = s"membership/support-service-lambdas/$stage/zuoraRest-$stage.v1.json"
-    val inputStream = s3Client.getObject(bucketName, key).getObjectContent
+    val inputStream = s3Client.getObject(
+      GetObjectRequest.builder.bucket(bucketName).key(key).build()
+    )
     val rawJson = Source.fromInputStream(inputStream).mkString
     decode[Config](rawJson) match {
       case Right(oauth) => oauth
@@ -428,28 +432,33 @@ object GetResultsFile {
 
 object SaveCsvToBucket extends LazyLogging {
   def apply(csvContent: String, job: JobResults, batch: Batch) = {
-    val s3Client = AmazonS3Client.builder.build()
+    val s3Client = S3Client.create()
     System.getenv("Stage") match {
       case "CODE" => // do nothing
 
       case "PROD" =>
         val bucket = Query.withName(batch.name).s3Bucket
         val metadata: String = Printer.spaces2.pretty(Metadata(job, batch).asJson)
-        val csvRequestWithAcl = putRequestWithAcl(bucket, key = Query.withName(batch.name).s3Key, csvContent)
-        val metadataRequestWithAcl = putRequestWithAcl(bucket, key = s"metadata/${batch.name}.json", metadata)
-        s3Client.putObject(csvRequestWithAcl)
+        val csvRequestWithAcl = putRequestWithAcl(bucket, key = Query.withName(batch.name).s3Key)
+        val metadataRequestWithAcl = putRequestWithAcl(bucket, key = s"metadata/${batch.name}.json")
+        s3Client.putObject(
+          csvRequestWithAcl,
+          RequestBody.fromString(csvContent, StandardCharsets.UTF_8)
+        )
         logger.info(s"Saving ${batch.name}.json to $bucket with content: $metadata")
-        s3Client.putObject(metadataRequestWithAcl)
+        s3Client.putObject(
+          metadataRequestWithAcl,
+          RequestBody.fromString(metadata, StandardCharsets.UTF_8)
+        )
     }
   }
 
-  private def putRequestWithAcl(bucketName: String, key: String, content: String): PutObjectRequest =
-    new PutObjectRequest(
-      bucketName,
-      key,
-      new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)),
-      new ObjectMetadata()
-    ).withCannedAcl(CannedAccessControlList.BucketOwnerRead)
+  private def putRequestWithAcl(bucketName: String, key: String): PutObjectRequest =
+    PutObjectRequest.builder
+      .bucket(bucketName)
+      .key(key)
+      .acl(ObjectCannedACL.BUCKET_OWNER_READ)
+      .build()
 
 }
 

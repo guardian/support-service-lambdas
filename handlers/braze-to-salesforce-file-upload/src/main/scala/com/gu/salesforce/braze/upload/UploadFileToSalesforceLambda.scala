@@ -1,20 +1,20 @@
 package com.gu.salesforce.braze.upload
 
-import java.nio.file.Paths
-import better.files.File
+import java.io.InputStream
+import java.nio.file.{Files, Paths, StandardCopyOption}
+
+import better.files.File._
 import better.files._
-import File._
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
+import com.amazonaws.services.lambda.runtime.Context
+import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
-import io.github.mkotsur.aws.handler.Lambda._
 import io.github.mkotsur.aws.handler.Lambda
-import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.S3ObjectInputStream
-import com.typesafe.scalalogging.LazyLogging
+import io.github.mkotsur.aws.handler.Lambda._
 import scalaj.http.Http
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.{DeleteObjectRequest, GetObjectRequest, ListObjectsRequest}
+
 import scala.io.Source
 
 case class S3EventObject(key: String)
@@ -108,7 +108,9 @@ object ReadConfig {
     val stage = System.getenv("Stage")
     val bucketName = "gu-reader-revenue-private"
     val key = s"membership/support-service-lambdas/$stage/sfAuth-$stage.v1.json"
-    val inputStream = AmazonS3Client.builder.build().getObject(bucketName, key).getObjectContent
+    val inputStream = S3Client.create().getObject(
+      GetObjectRequest.builder.bucket(bucketName).key(key).build()
+    )
     val rawJson = Source.fromInputStream(inputStream).mkString
     decode[Config](rawJson)
       .getOrElse(throw new RuntimeException(s"Could not read secret config file from S3://$bucketName/$key"))
@@ -196,13 +198,13 @@ object BucketName {
 }
 
 object ReadZippedFileFromS3Bucket {
-  def apply(key: String): S3ObjectInputStream =
-    AmazonS3Client.builder.build().getObject(BucketName(), key).getObjectContent
+  def apply(key: String): InputStream =
+    S3Client.create().getObject(GetObjectRequest.builder.bucket(BucketName()).key(key).build())
 }
 
 // https://github.com/pathikrit/better-files
 object UnzipToString {
-  def apply(inputStream: S3ObjectInputStream, filename: String): String = {
+  def apply(inputStream: InputStream, filename: String): String = {
     Files.copy(inputStream, Paths.get(s"/tmp/$filename"), StandardCopyOption.REPLACE_EXISTING)
     file"/tmp/$filename".unzipTo(root / "tmp")
     (root / "tmp" / s"${DropZipSuffix(filename)}").contentAsString
@@ -215,13 +217,17 @@ object DropZipSuffix {
 
 object DeleteZippedFileFromS3Bucket {
   def apply(key: String) = {
-    AmazonS3Client.builder.build().deleteObject(BucketName(), key)
+    S3Client.create().deleteObject(
+      DeleteObjectRequest.builder.bucket(BucketName()).key(key).build()
+    )
   }
 }
 
 object S3BucketIsEmpty {
   def apply(): Boolean =
-    AmazonS3Client.builder.build().listObjects(BucketName()).getObjectSummaries.size() == 0
+    !S3Client.create().listObjects(
+      ListObjectsRequest.builder.bucket(BucketName()).build()
+    ).hasContents
 }
 
 object SalesforceDocumentFolderId {

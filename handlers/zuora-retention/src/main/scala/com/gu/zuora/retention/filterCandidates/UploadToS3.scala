@@ -1,30 +1,24 @@
 package com.gu.zuora.retention.filterCandidates
 
-import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
 
-import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
-import com.gu.zuora.reports.S3ReportUpload.logger
 import com.typesafe.scalalogging.LazyLogging
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.{PutObjectRequest, PutObjectResponse}
 
 import scala.util.Try
 
 object UploadToS3 extends LazyLogging {
 
   def apply(
-    s3Write: PutObjectRequest => Try[PutObjectResult],
+    s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse],
     bucket: String
-  )(filteredCandidates: Iterator[String], key: String) = {
+  )(filteredCandidates: Iterator[String], key: String): Try[String] = {
     val uploadLocation = s"s3://$bucket/$key"
     logger.info(s"uploading do do not process list to $uploadLocation")
-
     val stringData = filteredCandidates.toList.mkString("\n")
-    val data = stringData.getBytes("UTF-8")
-    val stream = new ByteArrayInputStream(data)
-
-    val metadata = new ObjectMetadata()
-    metadata.setContentLength(data.length.toLong)
-
-    val putObjectRequest = new PutObjectRequest(bucket, key, stream, metadata)
-    s3Write(putObjectRequest).map(_ => uploadLocation)
+    val putObjectRequest = PutObjectRequest.builder.bucket(bucket).key(key).build()
+    val requestBody = RequestBody.fromString(stringData, StandardCharsets.UTF_8)
+    s3Write(putObjectRequest, requestBody).map(_ => uploadLocation)
   }
 }

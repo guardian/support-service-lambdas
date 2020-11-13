@@ -2,13 +2,14 @@ package com.gu.zuora.sar
 
 import java.util.UUID.randomUUID
 
-import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.typesafe.scalalogging.LazyLogging
 import com.gu.effects.{BucketName, CopyS3Objects, Key, ListS3Objects, S3Location, S3Path, UploadToS3}
 import com.gu.util.resthttp.RestRequestMaker.DownloadStream
 import cats.syntax.traverse._
 import cats.instances.list._
 import cats.instances.either._
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.{ObjectCannedACL, PutObjectRequest}
 
 import scala.util.{Failure, Success, Try}
 
@@ -66,7 +67,7 @@ object S3Helper extends S3Service with LazyLogging {
     UploadToS3
       .putStringWithAcl(
         S3Location(config.resultsBucket, completedPath),
-        CannedAccessControlList.BucketOwnerRead,
+        ObjectCannedACL.BUCKET_OWNER_READ,
         ""
       ) match {
           case Failure(err) => Left(S3Error(err.getMessage))
@@ -90,7 +91,7 @@ object S3Helper extends S3Service with LazyLogging {
               .copyStringWithAcl(
                 S3Location(config.resultsBucket, pendingKey.value),
                 S3Location(config.resultsBucket, completedKey),
-                CannedAccessControlList.BucketOwnerRead
+                ObjectCannedACL.BUCKET_OWNER_READ
               ).toEither.left.map(err => S3Error(err.getMessage))
           }
           createCompletedObject("ResultsCompleted", initiationReference, config)
@@ -107,7 +108,7 @@ object S3Helper extends S3Service with LazyLogging {
     logger.info("Uploading file to failed path in S3.")
     UploadToS3.putStringWithAcl(
       S3Location(config.resultsBucket, resultsPath),
-      CannedAccessControlList.BucketOwnerRead,
+      ObjectCannedACL.BUCKET_OWNER_READ,
       zuoraError.toString
     ).toEither.map(_ => S3WriteSuccess()).left.map(err => S3Error(err.getMessage))
   }
@@ -122,7 +123,7 @@ object S3Helper extends S3Service with LazyLogging {
     logger.info("Uploading successful account result to S3.")
     UploadToS3.putStringWithAcl(
       S3Location(config.resultsBucket, resultsPath),
-      CannedAccessControlList.BucketOwnerRead,
+      ObjectCannedACL.BUCKET_OWNER_READ,
       accountDetails
     ).toEither.map(_ => S3WriteSuccess()).left.map(err => S3Error(err.getMessage))
   }
@@ -133,12 +134,14 @@ object S3Helper extends S3Service with LazyLogging {
     config: ZuoraSarConfig
   ): Either[S3Error, List[S3WriteSuccess]] = {
     logger.info("Uploading successful invoice results to S3.")
+    val resultsPath = s"${config.resultsPath}/$initiationId/pending/$randomUUID"
+    val uploadRequest = PutObjectRequest.builder
+      .bucket(config.resultsBucket)
+      .key(resultsPath)
+      .build()
     zuoraInvoiceStreams.traverse { invoiceStream =>
-      val metadata = new ObjectMetadata
-      metadata.setContentLength(invoiceStream.lengthBytes)
-      val resultsPath = s"${config.resultsPath}/$initiationId/pending/$randomUUID"
-      val uploadRequest = new PutObjectRequest(config.resultsBucket, resultsPath, invoiceStream.stream, metadata)
-      UploadToS3.putObject(uploadRequest) match {
+      val requestBody = RequestBody.fromInputStream(invoiceStream.stream, invoiceStream.lengthBytes)
+      UploadToS3.putObject(uploadRequest, requestBody) match {
         case Failure(err) => Left(S3Error(err.getMessage))
         case Success(_) => Right(S3WriteSuccess())
       }

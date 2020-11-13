@@ -8,7 +8,7 @@ import sbtassembly.PathList
 
 object Dependencies {
   val awsV1Version = "1.11.893"
-  val awsV2Version = "2.15.23"
+  val awsV2Version = "2.15.27"
   val circeVersion = "0.12.3"
   val sttpVersion = "1.7.0"
   val http4sVersion = "0.21.0"
@@ -21,13 +21,13 @@ object Dependencies {
   )
 
   // AWS
-  val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsV1Version
   val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsV1Version
   val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsV1Version
   val secretsManager = "com.amazonaws" % "aws-java-sdk-secretsmanager" % awsV1Version
 
   val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsV2Version
   val awsSQS = "software.amazon.awssdk" % "sqs" % awsV2Version
+  val awsS3 = "software.amazon.awssdk" % "s3" % awsV2Version
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"

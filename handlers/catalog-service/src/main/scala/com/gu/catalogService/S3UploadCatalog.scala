@@ -1,10 +1,12 @@
 package com.gu.catalogService
 
-import java.io.{ByteArrayInputStream, InputStream}
-import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
-import com.amazonaws.util.IOUtils
+import java.nio.charset.StandardCharsets
+
 import com.gu.util.Logging
 import com.gu.util.config.{Stage, ZuoraEnvironment}
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.{PutObjectRequest, PutObjectResponse}
+
 import scala.util.Try
 
 object S3UploadCatalog extends Logging {
@@ -13,21 +15,19 @@ object S3UploadCatalog extends Logging {
     stage: Stage,
     zuoraEnvironment: ZuoraEnvironment,
     catalog: String,
-    s3Write: PutObjectRequest => Try[PutObjectResult]
-  ): Either[String, PutObjectResult] = {
+    s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse]
+  ): Either[String, PutObjectResponse] = {
     logger.info("Uploading catalog to S3...")
-    val stream: InputStream = new ByteArrayInputStream(catalog.getBytes(java.nio.charset.StandardCharsets.UTF_8.name))
-    val bytes = IOUtils.toByteArray(stream)
-    val uploadMetadata = new ObjectMetadata()
-    uploadMetadata.setContentLength(bytes.length.toLong)
-    val putRequest = new PutObjectRequest(
-      s"gu-zuora-catalog/${stage.value}/Zuora-${zuoraEnvironment.value}",
-      "catalog.json",
-      new ByteArrayInputStream(bytes),
-      uploadMetadata
-    )
+
+    val putRequest = PutObjectRequest.builder
+      .bucket(s"gu-zuora-catalog/${stage.value}/Zuora-${zuoraEnvironment.value}")
+      .key("catalog.json")
+      .build()
+
+    val requestBody = RequestBody.fromString(catalog, StandardCharsets.UTF_8)
+
     val uploadAttempt = for {
-      result <- s3Write(putRequest)
+      result <- s3Write(putRequest, requestBody)
     } yield {
       result
     }
