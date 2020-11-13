@@ -2,8 +2,8 @@ package com.gu.zuora.retention.filterCandidates
 
 import java.io.{ByteArrayInputStream, InputStream}
 
-import com.amazonaws.services.s3.model.GetObjectRequest
 import org.scalatest.{FlatSpec, Matchers}
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
 import scala.util.{Failure, Success, Try}
 
@@ -12,7 +12,7 @@ class S3IteratorTest extends FlatSpec with Matchers {
 
   it should "parse Uri correctly" in {
     def fakeFetchContent(req: GetObjectRequest): Try[InputStream] = {
-      if (req.getBucketName == "testbucket" && req.getKey == "some/key.csv")
+      if (req.bucket == "testbucket" && req.key == "some/key.csv")
         Success(new ByteArrayInputStream(testContent.getBytes))
       else Failure(new RuntimeException("wrong Params"))
     }

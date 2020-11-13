@@ -33,7 +33,7 @@ object GetFromS3 extends LazyLogging {
     fetchString(request)
   }
 
-  def fetchString(request: GetObjectRequest): Try[String] = {
+  private def fetchString(request: GetObjectRequest): Try[String] = {
     for {
       s3Stream <- fetchContent(request)
       contentString <- Try(Source.fromInputStream(s3Stream).mkString)
@@ -88,7 +88,7 @@ object ListS3Objects extends LazyLogging {
 
 object CopyS3Objects extends LazyLogging {
 
-  def copyObject(request: CopyObjectRequest): Try[CopyObjectResponse] = {
+  private def copyObject(request: CopyObjectRequest): Try[CopyObjectResponse] = {
     logger.info(
       s"Copying file from ${request.copySource} to ${request.destinationBucket} | ${request.destinationKey}"
     )
