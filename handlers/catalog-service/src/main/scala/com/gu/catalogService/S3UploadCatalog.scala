@@ -20,8 +20,8 @@ object S3UploadCatalog extends Logging {
     logger.info("Uploading catalog to S3...")
 
     val putRequest = PutObjectRequest.builder
-      .bucket(s"gu-zuora-catalog/${stage.value}/Zuora-${zuoraEnvironment.value}")
-      .key("catalog.json")
+      .bucket("gu-zuora-catalog")
+      .key(s"${stage.value}/Zuora-${zuoraEnvironment.value}/catalog.json")
       .build()
 
     val requestBody = RequestBody.fromString(catalog, StandardCharsets.UTF_8)
