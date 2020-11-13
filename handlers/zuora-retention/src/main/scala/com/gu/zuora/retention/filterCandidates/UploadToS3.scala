@@ -17,8 +17,12 @@ object UploadToS3 extends LazyLogging {
     val uploadLocation = s"s3://$bucket/$key"
     logger.info(s"uploading do do not process list to $uploadLocation")
     val stringData = filteredCandidates.toList.mkString("\n")
-    val putObjectRequest = PutObjectRequest.builder.bucket(bucket).key(key).build()
     val requestBody = RequestBody.fromString(stringData, StandardCharsets.UTF_8)
+    val putObjectRequest = PutObjectRequest.builder
+      .bucket(bucket)
+      .key(key)
+      .contentLength(requestBody.contentLength)
+      .build()
     s3Write(putObjectRequest, requestBody).map(_ => uploadLocation)
   }
 }
