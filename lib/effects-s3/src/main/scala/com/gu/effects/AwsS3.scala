@@ -1,39 +1,39 @@
 package com.gu.effects
 
-import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
-import com.amazonaws.auth._
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model._
 import com.typesafe.scalalogging.LazyLogging
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider, SystemPropertyCredentialsProvider}
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.regions.Region.EU_WEST_1
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model._
 
-import scala.collection.JavaConverters._
 import scala.io.Source
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Try}
 
 case class S3Location(bucket: String, key: String)
 
 object GetFromS3 extends LazyLogging {
 
-  def fetchContent(request: GetObjectRequest): Try[S3ObjectInputStream] = {
-    logger.info(s"Getting file from S3. Bucket: ${request.getBucketName} | Key: ${request.getKey}")
-    val contentRequest = Try(AwsS3.client.getObject(request).getObjectContent)
+  def fetchContent(request: GetObjectRequest): Try[InputStream] = {
+    logger.info(s"Getting file from S3. Bucket: ${request.bucket} | Key: ${request.key}")
+    val contentRequest = Try(AwsS3.client.getObject(request))
     contentRequest.recoverWith {
-      case ex => {
+      case ex =>
         logger.error(s"Failed to fetch config from S3 due to: ${ex.getMessage}")
         Failure(ex)
-      }
     }
   }
 
   def fetchString(s3Location: S3Location): Try[String] = {
-    val request = new GetObjectRequest(s3Location.bucket, s3Location.key)
+    val request = GetObjectRequest.builder.bucket(s3Location.bucket).key(s3Location.key).build()
     fetchString(request)
   }
 
-  def fetchString(request: GetObjectRequest): Try[String] = {
+  private def fetchString(request: GetObjectRequest): Try[String] = {
     for {
       s3Stream <- fetchContent(request)
       contentString <- Try(Source.fromInputStream(s3Stream).mkString)
@@ -45,20 +45,16 @@ object GetFromS3 extends LazyLogging {
 
 object UploadToS3 extends LazyLogging {
 
-  def putObject(request: PutObjectRequest): Try[PutObjectResult] = {
-    logger.info(s"Copying file to S3. Bucket: ${request.getBucketName} | Key: ${request.getKey}")
-    val uploadRequest = Try(AwsS3.client.putObject(request))
+  def putObject(request: PutObjectRequest, body: RequestBody): Try[PutObjectResponse] = {
+    logger.info(s"Copying file to S3. Bucket: ${request.bucket} | Key: ${request.key}")
+    val uploadRequest = Try(AwsS3.client.putObject(request, body))
     uploadRequest
   }
 
-  def putStringWithAcl(s3Location: S3Location, cannedAcl: CannedAccessControlList, content: String) = {
+  def putStringWithAcl(s3Location: S3Location, cannedAcl: ObjectCannedACL, content: String): Try[PutObjectResponse] = {
     putObject(
-      new PutObjectRequest(
-        s3Location.bucket,
-        s3Location.key,
-        new ByteArrayInputStream(content.getBytes),
-        new ObjectMetadata
-      ).withCannedAcl(cannedAcl)
+      PutObjectRequest.builder.bucket(s3Location.bucket).key(s3Location.key).acl(cannedAcl).build(),
+      RequestBody.fromString(content, StandardCharsets.UTF_8)
     )
   }
 }
@@ -78,31 +74,36 @@ object ListS3Objects extends LazyLogging {
 
   def listObjectsWithPrefix(prefix: S3Path): Try[List[Key]] = {
     Try {
-      val response = AwsS3.client.listObjects(prefix.bucketName.value, prefix.key.map(_.value).getOrElse(""))
-      val objSummaries = response.getObjectSummaries.asScala.toList
-      objSummaries.map(objSummary => Key(objSummary.getKey))
+      val response = AwsS3.client.listObjects(
+        ListObjectsRequest.builder
+          .bucket(prefix.bucketName.value)
+          .prefix(prefix.key.map(_.value).getOrElse(""))
+          .build()
+      )
+      val objects = response.contents.asScala.toList
+      objects.map(objSummary => Key(objSummary.key))
     }
   }
 }
 
 object CopyS3Objects extends LazyLogging {
 
-  def copyObject(request: CopyObjectRequest): Try[CopyObjectResult] = {
+  private def copyObject(request: CopyObjectRequest): Try[CopyObjectResponse] = {
     logger.info(
-      s"Copying file from ${request.getSourceBucketName} | ${request.getSourceKey} to ${request.getDestinationBucketName} | ${request.getDestinationKey}"
+      s"Copying file from ${request.copySource} to ${request.destinationBucket} | ${request.destinationKey}"
     )
     val copyRequest = Try(AwsS3.client.copyObject(request))
     copyRequest
   }
 
-  def copyStringWithAcl(originS3Location: S3Location, destinationS3Location: S3Location, cannedAcl: CannedAccessControlList) = {
+  def copyStringWithAcl(originS3Location: S3Location, destinationS3Location: S3Location, cannedAcl: ObjectCannedACL): Try[CopyObjectResponse] = {
     copyObject(
-      new CopyObjectRequest(
-        originS3Location.bucket,
-        originS3Location.key,
-        destinationS3Location.bucket,
-        destinationS3Location.key
-      ).withCannedAccessControlList(cannedAcl)
+      CopyObjectRequest.builder
+        .copySource(s"${originS3Location.bucket}/${originS3Location.key}")
+        .destinationBucket(destinationS3Location.bucket)
+        .destinationKey(destinationS3Location.key)
+        .acl(cannedAcl)
+        .build()
     )
   }
 }
@@ -111,10 +112,10 @@ object DeleteS3Objects extends LazyLogging {
 
   def deleteObjects(bucketName: BucketName, keysToDelete: List[Key]): Try[Unit] = {
     Try {
-      val s3Keys = keysToDelete.map(_.value)
-      val req = new DeleteObjectsRequest(bucketName.value)
-        .withKeys(s3Keys: _*)
-        .withQuiet(false)
+      val s3Keys = keysToDelete.map(key => ObjectIdentifier.builder.key(key.value).build())
+      val req = DeleteObjectsRequest.builder.bucket(bucketName.value).delete(
+        Delete.builder.objects(s3Keys: _*).quiet(false).build()
+      ).build()
       AwsS3.client.deleteObjects(req)
     }
   }
@@ -122,9 +123,9 @@ object DeleteS3Objects extends LazyLogging {
 
 object AwsS3 {
 
-  val client = AmazonS3Client.builder
-    .withCredentials(aws.CredentialsProvider)
-    .withRegion(Regions.EU_WEST_1)
+  val client: S3Client = S3Client.builder
+    .credentialsProvider(aws.CredentialsProvider)
+    .region(EU_WEST_1)
     .build()
 
 }
@@ -132,11 +133,10 @@ object AwsS3 {
 object aws {
   val ProfileName = "membership"
 
-  lazy val CredentialsProvider = new AWSCredentialsProviderChain(
-    new EnvironmentVariableCredentialsProvider,
-    new SystemPropertiesCredentialsProvider,
-    new ProfileCredentialsProvider(ProfileName),
-    new InstanceProfileCredentialsProvider(false),
-    new EC2ContainerCredentialsProviderWrapper
-  )
+  lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain.builder
+    .credentialsProviders(
+      EnvironmentVariableCredentialsProvider.create(),
+      SystemPropertyCredentialsProvider.create(),
+      ProfileCredentialsProvider.create(ProfileName)
+    ).build()
 }

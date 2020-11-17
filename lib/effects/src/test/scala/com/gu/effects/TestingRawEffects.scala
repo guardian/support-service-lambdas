@@ -1,15 +1,12 @@
 package com.gu.effects
 
-import java.io.ByteArrayInputStream
-
-import com.amazonaws.AmazonServiceException
-import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.effects.TestingRawEffects._
 import com.gu.util.Logging
-import com.gu.util.config.Stage
-import okhttp3._
 import okhttp3.internal.Util.UTF_8
+import okhttp3._
 import okio.Buffer
+import software.amazon.awssdk.core.sync.{RequestBody => S3RequestBody}
+import software.amazon.awssdk.services.s3.model.{PutObjectRequest, PutObjectResponse}
 
 import scala.util.{Failure, Success}
 
@@ -80,8 +77,6 @@ object TestingRawEffects {
 
   case class BasicRequest(method: String, path: String, body: String)
 
-  def s3Load(s: Stage) = Right(TestingRawEffects.codeConfig)
-
   val codeConfig: String =
     """
       |{ "stage": "DEV",
@@ -130,14 +125,11 @@ object TestingRawEffects {
       |}
     """.stripMargin
 
-  val dummyStream = new ByteArrayInputStream("catalog".getBytes(java.nio.charset.StandardCharsets.UTF_8.name))
-  val fakeRequest = new PutObjectRequest(s"gu-fake-bucket-for-testing", "fake-catalog.json", dummyStream, new ObjectMetadata())
-
-  val successfulS3Upload = {
-    fakeRequest: PutObjectRequest => Success(new PutObjectResult)
+  val successfulS3Upload: (PutObjectRequest, S3RequestBody) => Success[PutObjectResponse] = {
+    case (_, _) => Success(PutObjectResponse.builder.build())
   }
 
-  val failedS3Upload = {
-    fakeRequest: PutObjectRequest => Failure(new AmazonServiceException("failure"))
+  val failedS3Upload: (PutObjectRequest, S3RequestBody) => Failure[Nothing] = {
+    case (_, _) => Failure(new RuntimeException("failure"))
   }
 }

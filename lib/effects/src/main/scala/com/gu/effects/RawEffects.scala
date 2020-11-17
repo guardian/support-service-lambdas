@@ -1,10 +1,12 @@
 package com.gu.effects
 
-import okhttp3.{Request, Response}
+import java.io.InputStream
 import java.time.LocalDateTime
 
-import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutObjectResult, S3ObjectInputStream}
 import com.gu.util.config.{Stage, ZuoraEnvironment}
+import okhttp3.{Request, Response}
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.{GetObjectRequest, PutObjectRequest, PutObjectResponse}
 
 import scala.util.Try
 
@@ -15,8 +17,8 @@ object RawEffects {
 
   val response: Request => Response = Http.response
   val downloadResponse: Request => Response = Http.downloadResponse
-  def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
+  def s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse] = UploadToS3.putObject
   def now: () => LocalDateTime = () => LocalDateTime.now
-  def fetchContent(request: GetObjectRequest): Try[S3ObjectInputStream] = GetFromS3.fetchContent(request)
+  def fetchContent(request: GetObjectRequest): Try[InputStream] = GetFromS3.fetchContent(request)
 
 }

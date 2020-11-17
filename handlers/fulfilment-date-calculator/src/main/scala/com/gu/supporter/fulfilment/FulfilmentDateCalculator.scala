@@ -3,15 +3,15 @@ package com.gu.supporter.fulfilment
 import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.model.PutObjectResult
 import com.gu.fulfilmentdates.FulfilmentDatesLocation.fulfilmentDatesFileLocation
 import com.gu.util.config.Stage
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperDigitalVoucher, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
+import com.gu.zuora.ZuoraProductTypes._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
+import software.amazon.awssdk.services.s3.model.PutObjectResponse
 
 class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
 
@@ -44,7 +44,7 @@ class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyL
     }
   }
 
-  private def writeToBucket(product: ZuoraProductType, date: LocalDate, content: String): PutObjectResult = {
+  private def writeToBucket(product: ZuoraProductType, date: LocalDate, content: String): PutObjectResponse = {
     BucketHelpers.write(fulfilmentDatesFileLocation(Stage(), product, date), content)
   }
 

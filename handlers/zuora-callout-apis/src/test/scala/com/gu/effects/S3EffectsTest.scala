@@ -1,34 +1,29 @@
 package com.gu.effects
 
-import java.io.{ByteArrayInputStream, InputStream}
+import java.nio.charset.StandardCharsets
 
-import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
-import com.amazonaws.util.IOUtils
 import com.gu.test.EffectsTest
-import org.scalatest.{AsyncFlatSpec, BeforeAndAfterAll, Ignore, Matchers}
+import org.scalatest.{AsyncFlatSpec, Matchers}
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.{ObjectCannedACL, PutObjectRequest}
 
 import scala.util.Success
 //Todo this test should be in the effects project but we need to refactor to be able to access the effectsTest tag from there
 
 class S3EffectsTest extends AsyncFlatSpec with Matchers {
-  val testBucket = BucketName("support-service-lambdas-test")
+  private val testBucket = BucketName("support-service-lambdas-test")
 
-  def put(key: String, content: String) = {
-    val stream: InputStream = new ByteArrayInputStream(content.getBytes(java.nio.charset.StandardCharsets.UTF_8.name))
-    val bytes = IOUtils.toByteArray(stream)
-    val uploadMetadata = new ObjectMetadata()
-    uploadMetadata.setContentLength(bytes.length.toLong)
-
-    val putRequest = new PutObjectRequest(
-      "support-service-lambdas-test",
-      key,
-      new ByteArrayInputStream(bytes),
-      uploadMetadata
-    ).withCannedAcl(CannedAccessControlList.BucketOwnerRead)
-    RawEffects.s3Write(putRequest)
+  private def put(key: String, content: String) = {
+    val putRequest = PutObjectRequest.builder
+      .bucket("support-service-lambdas-test")
+      .key(key)
+      .acl(ObjectCannedACL.BUCKET_OWNER_READ)
+      .build()
+    val requestBody = RequestBody.fromString(content, StandardCharsets.UTF_8)
+    RawEffects.s3Write(putRequest, requestBody)
   }
 
-  def initialiseTestBucket: Unit = {
+  private def initialiseTestBucket(): Unit = {
     //put test data in
     put("S3EffectsTest/test-prefix-file1", "this is file1")
     put("S3EffectsTest/test-prefix-file2", "this is file2")
@@ -37,7 +32,7 @@ class S3EffectsTest extends AsyncFlatSpec with Matchers {
 
   it should "list bucket and delete" taggedAs EffectsTest in {
 
-    initialiseTestBucket
+    initialiseTestBucket()
 
     val testPath = S3Path(testBucket, Some(Key("S3EffectsTest/test-prefix")))
 
@@ -52,13 +47,13 @@ class S3EffectsTest extends AsyncFlatSpec with Matchers {
 
     withClue("should delete objects with a matching prefix") {
       DeleteS3Objects.deleteObjects(testBucket, expectedObjectsWithPrefix).isSuccess shouldBe true
-      ListS3Objects.listObjectsWithPrefix(testPath) shouldBe (Success(List()))
+      ListS3Objects.listObjectsWithPrefix(testPath) shouldBe Success(List())
     }
 
     withClue("objects that do not match the deleted prefix should still be there") {
       //object with other prefixes should still be there
       val ignoredPrefixPath = testPath.copy(key = Some(Key("S3EffectsTest/ignored-prefix")))
-      ListS3Objects.listObjectsWithPrefix(ignoredPrefixPath) shouldBe (Success(List(Key("S3EffectsTest/ignored-prefix-file3"))))
+      ListS3Objects.listObjectsWithPrefix(ignoredPrefixPath) shouldBe Success(List(Key("S3EffectsTest/ignored-prefix-file3")))
     }
   }
 }

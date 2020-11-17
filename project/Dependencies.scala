@@ -7,8 +7,8 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsV1Version = "1.11.893"
-  val awsV2Version = "2.15.23"
+  val awsV1Version = "1.11.901"
+  val awsV2Version = "2.15.28"
   val circeVersion = "0.12.3"
   val sttpVersion = "1.7.0"
   val http4sVersion = "0.21.0"
@@ -21,15 +21,15 @@ object Dependencies {
   )
 
   // AWS
-  val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsV1Version
   val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsV1Version
   val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsV1Version
   val secretsManager = "com.amazonaws" % "aws-java-sdk-secretsmanager" % awsV1Version
 
   val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsV2Version
   val awsSQS = "software.amazon.awssdk" % "sqs" % awsV2Version
+  val awsS3 = "software.amazon.awssdk" % "s3" % awsV2Version
 
-  val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
+  val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
 
@@ -90,6 +90,12 @@ object Dependencies {
     case PathList("module-info.class") => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
+    /*
+     * AWS SDK v2 includes a codegen-resources directory in each jar, with conflicting names.
+     * This appears to be for generating clients from HTTP services.
+     * So it's redundant in a binary artefact.
+     */
+    case PathList("codegen-resources", _*) => MergeStrategy.discard
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)

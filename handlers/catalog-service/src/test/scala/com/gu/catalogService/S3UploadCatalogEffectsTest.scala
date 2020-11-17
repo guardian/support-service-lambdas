@@ -1,16 +1,26 @@
 package com.gu.catalogService
 
-import java.util.Date
+import java.time.Instant
+
 import com.gu.effects.{AwsS3, UploadToS3}
 import com.gu.test.EffectsTest
 import com.gu.util.Logging
 import com.gu.util.config.{Stage, ZuoraEnvironment}
 import org.scalatest.FlatSpec
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
+
 import scala.util.Try
 
 class S3UploadCatalogEffectsTest extends FlatSpec with Logging {
 
-  def getLatestCatalogTimestamp: Try[Date] = Try(AwsS3.client.getObjectMetadata("gu-zuora-catalog/EffectsTest/Zuora-FakeEnv", "catalog.json").getLastModified)
+  private def getLatestCatalogTimestamp: Try[Instant] = Try(
+    AwsS3.client.getObject(
+      GetObjectRequest.builder
+        .bucket("gu-zuora-catalog")
+        .key("EffectsTest/Zuora-FakeEnv/catalog.json")
+        .build()
+    ).response.lastModified
+  )
 
   "S3UploadCatalog" should "upload a file" taggedAs EffectsTest in {
     val readBefore = getLatestCatalogTimestamp
@@ -19,7 +29,7 @@ class S3UploadCatalogEffectsTest extends FlatSpec with Logging {
     val compareDates = for {
       beforeUpload <- readBefore
       afterUpload <- readAfter
-    } yield afterUpload.after(beforeUpload)
+    } yield afterUpload.isAfter(beforeUpload)
 
     compareDates.fold(
       ex => assert(false), timestampUpdated => assert(timestampUpdated)
