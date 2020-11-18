@@ -1,44 +1,47 @@
 package com.gu.effects
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.auth.{AWSCredentialsProviderChain, EC2ContainerCredentialsProviderWrapper, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, SystemPropertiesCredentialsProvider}
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.lambda.AWSLambdaClient
-import com.amazonaws.services.lambda.model.{InvocationType, InvokeRequest, InvokeResult}
+import java.nio.charset.StandardCharsets.UTF_8
+
 import com.typesafe.scalalogging.LazyLogging
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider, SystemPropertyCredentialsProvider}
+import software.amazon.awssdk.core.SdkBytes
+import software.amazon.awssdk.regions.Region.EU_WEST_1
+import software.amazon.awssdk.services.lambda.LambdaClient
+import software.amazon.awssdk.services.lambda.model.InvocationType.EVENT
+import software.amazon.awssdk.services.lambda.model.{InvokeRequest, InvokeResponse}
 
 import scala.util.Try
 
 object InvokeLambda extends LazyLogging {
 
-  def invokeLambda(functionName: String, lambdaPayload: String): Try[InvokeResult] = {
-    val invokeRequest = new InvokeRequest()
-      .withFunctionName(functionName)
-      .withPayload(lambdaPayload)
-      .withInvocationType(InvocationType.Event)
-
-    Try(AwsLambda.client.invoke(invokeRequest))
-  }
+  def invokeLambda(functionName: String, lambdaPayload: String): Try[InvokeResponse] =
+    Try(
+      AwsLambda.client.invoke(
+        InvokeRequest.builder
+          .functionName(functionName)
+          .payload(SdkBytes.fromString(lambdaPayload, UTF_8))
+          .invocationType(EVENT)
+          .build()
+      )
+    )
 }
 
 object AwsLambda {
 
-  val client = AWSLambdaClient
-    .builder()
-    .withCredentials(awsCredentials.CredentialsProvider)
-    .withRegion(Regions.EU_WEST_1)
+  val client: LambdaClient = LambdaClient.builder
+    .credentialsProvider(awsCredentials.CredentialsProvider)
+    .region(EU_WEST_1)
     .build()
-
 }
 
 object awsCredentials {
   val ProfileName = "membership"
 
-  lazy val CredentialsProvider = new AWSCredentialsProviderChain(
-    new EnvironmentVariableCredentialsProvider,
-    new SystemPropertiesCredentialsProvider,
-    new ProfileCredentialsProvider(ProfileName),
-    new InstanceProfileCredentialsProvider(false),
-    new EC2ContainerCredentialsProviderWrapper
-  )
+  lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain.builder
+    .credentialsProviders(
+      EnvironmentVariableCredentialsProvider.create(),
+      SystemPropertyCredentialsProvider.create(),
+      ProfileCredentialsProvider.create(ProfileName)
+    )
+    .build()
 }
