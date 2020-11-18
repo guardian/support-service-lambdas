@@ -360,16 +360,6 @@ lazy val `batch-email-sender` = lambdaProject(
   Seq(playJsonExtensions, supportInternationalisation, diffx)
 ).dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
-lazy val `braze-to-salesforce-file-upload` = lambdaProject(
-  "braze-to-salesforce-file-upload",
-  "Braze to Salesforce file upload",
-  Seq(
-    scalaLambda,
-    scalajHttp,
-    awsS3,
-    betterFiles,
-  ))
-
 lazy val `holiday-stop-processor` = lambdaProject(
   "holiday-stop-processor",
   "Add a holiday credit amendment to a subscription.",
