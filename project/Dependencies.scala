@@ -23,9 +23,9 @@ object Dependencies {
   // AWS
   val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsV1Version
   val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsV1Version
-  val secretsManager = "com.amazonaws" % "aws-java-sdk-secretsmanager" % awsV1Version
 
   val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsV2Version
+  val awsSecretsManager = "software.amazon.awssdk" % "secretsmanager" % awsV2Version
   val awsSQS = "software.amazon.awssdk" % "sqs" % awsV2Version
   val awsS3 = "software.amazon.awssdk" % "s3" % awsV2Version
 
