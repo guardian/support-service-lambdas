@@ -20,7 +20,10 @@ import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import io.circe.generic.auto._
-import zio.{Task, ZIO}
+import zio.Schedule.{exponential, recurs}
+import zio.clock.Clock
+import zio.duration._
+import zio.{RIO, Task, ZIO}
 
 object DeliveryCreditProcessor extends Logging {
 
@@ -49,13 +52,15 @@ object DeliveryCreditProcessor extends Logging {
     }
   }
 
-  private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): Task[AccessToken] =
-    ZIO.absolve(Task.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend))).mapError {
-      case e: ZuoraApiFailure => new RuntimeException(e.reason)
-      case e: Throwable => e
-    }
+  private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): RIO[Clock, AccessToken] =
+    ZIO.absolve(ZIO.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend)))
+      .retry(exponential(1.second) && recurs(5))
+      .mapError {
+        case e: ZuoraApiFailure => new RuntimeException(e.reason)
+        case e: Throwable => e
+      }
 
-  val processAllProducts: Task[List[DeliveryCreditResult]] = {
+  val processAllProducts: RIO[Clock, List[DeliveryCreditResult]] = {
     val productTypes = List(NewspaperHomeDelivery, GuardianWeekly)
     for {
       sfAuthConfig <- sfConfig
