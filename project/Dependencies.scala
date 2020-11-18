@@ -7,8 +7,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsV1Version = "1.11.901"
-  val awsV2Version = "2.15.30"
+  val awsSdkVersion = "2.15.30"
   val circeVersion = "0.12.3"
   val sttpVersion = "1.7.0"
   val http4sVersion = "0.21.0"
@@ -21,16 +20,15 @@ object Dependencies {
   )
 
   // AWS
-  val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsV1Version
-
-  val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsV2Version
-  val awsSdkLambda = "software.amazon.awssdk" % "lambda" % awsV2Version
-  val awsSecretsManager = "software.amazon.awssdk" % "secretsmanager" % awsV2Version
-  val awsSQS = "software.amazon.awssdk" % "sqs" % awsV2Version
-  val awsS3 = "software.amazon.awssdk" % "s3" % awsV2Version
+  val awsCloudwatch = "software.amazon.awssdk" % "cloudwatch" % awsSdkVersion
+  val awsSdkLambda = "software.amazon.awssdk" % "lambda" % awsSdkVersion
+  val awsSecretsManager = "software.amazon.awssdk" % "secretsmanager" % awsSdkVersion
+  val awsSQS = "software.amazon.awssdk" % "sqs" % awsSdkVersion
+  val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.4.0"
+
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
 
   // Cats
