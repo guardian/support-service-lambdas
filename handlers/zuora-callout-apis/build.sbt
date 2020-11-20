@@ -17,7 +17,6 @@ libraryDependencies ++= Seq(
   okhttp3,
   scalatest,
   stripe,
-  jacksonDatabind
 ) ++ logging
 
 assemblyMergeStrategyDiscardModuleInfo

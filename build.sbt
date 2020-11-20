@@ -70,7 +70,7 @@ lazy val zuora = library(project in file("lib/zuora"))
     effects % "test->test"
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, jacksonDatabind) ++ logging
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest) ++ logging
   )
 
 lazy val `salesforce-core` = library(project in file("lib/salesforce/core"))
@@ -165,7 +165,7 @@ lazy val handler = library(project in file("lib/handler"))
 lazy val effects = library(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3, jacksonDatabind) ++ logging
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging
   )
 lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(

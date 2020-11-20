@@ -43,8 +43,6 @@ object Dependencies {
   val circeConfig = "io.circe" %% "circe-config" % "0.7.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
-  val jacksonDatabind =
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.0" // FIXME: Why is this necessery?
 
   // HTTP clients
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
