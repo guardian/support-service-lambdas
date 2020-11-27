@@ -2,14 +2,13 @@ package com.gu.digital_voucher_cancellation_processor
 
 import java.time.{Clock, Instant, LocalDate}
 
-import cats.{Monad, Show}
 import cats.data.{EitherT, NonEmptyList}
+import cats.implicits._
+import cats.{Monad, Show}
 import com.gu.imovo.{ImovoClient, ImovoClientException, SfSubscriptionId}
 import com.gu.salesforce.sttp.{SFApiCompositePart, SFApiCompositeRequest, SalesforceClient}
-import com.gu.salesforce.SalesforceQueryConstants.formatDate
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
-import cats.implicits._
 
 import scala.collection.immutable
 
@@ -28,8 +27,8 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
   )
 
   object ImovoCancellationResults {
-    implicit val show = {
-      implicit val resultShow = Show.show[DigitalVoucherQueryResult](result =>
+    implicit val show: Show[ImovoCancellationResults] = {
+      implicit val resultShow: Show[DigitalVoucherQueryResult] = Show.show[DigitalVoucherQueryResult](result =>
         s"subscriptionId=${result.SF_Subscription__r.Id}")
       Show.show[ImovoCancellationResults](results =>
         s"""
@@ -46,15 +45,13 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
     salesforceClient: SalesforceClient[F],
     imovoClient: ImovoClient[F],
     clock: Clock
-  ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, ImovoCancellationResults] = {
-    val today = LocalDate.now(clock)
+  ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, ImovoCancellationResults] =
     for {
       vouchersToProcess <- salesforceClient.query[DigitalVoucherQueryResult](
-        subscrptionsCancelledTodayQuery(today)
+        subscriptionsCancelledTodayQuery
       ).leftMap(error => DigitalVoucherCancellationProcessorServiceError(s"Failed to query for cancelled digital vouchers: ${error.message}"))
       results <- processCancellations(imovoClient, salesforceClient, vouchersToProcess.records, clock)
     } yield results
-  }
 
   def processCancellations[F[_]: Monad](
     imovoClient: ImovoClient[F],
@@ -84,8 +81,8 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
       .fold(EitherT.rightT[F, DigitalVoucherCancellationProcessorServiceError](())) { sucessfullyProcessedVouchers =>
         salesforceClient.composite(
           SFApiCompositeRequest(
-            true,
-            false,
+            allOrNone = true,
+            collateSubrequests = false,
             sucessfullyProcessedVouchers
               .toList
               .map(voucherToMarkAsProcessed => {
@@ -139,15 +136,18 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
     )
   }
 
-  def subscrptionsCancelledTodayQuery(today: LocalDate): String = {
+  val subscriptionsCancelledTodayQuery: String = {
+    // Limit is because a Salesforce composite response cannot contain more than 25 operations
     s"""
        |SELECT
        |  Id,
        |  SF_Subscription__r.Id
        |FROM
        |  Digital_Voucher__c
-       |WHERE SF_Subscription__r.Cancellation_Effective_Date__c <= ${formatDate(today)}
-       |  AND Cancellation_Processed_At__c = null
+       |WHERE SF_Subscription__r.Cancellation_Effective_Date__c <= TODAY
+       |AND Cancellation_Processed_At__c = null
+       |ORDER BY SF_Subscription__r.Cancellation_Effective_Date__c
+       |LIMIT 25
        |""".stripMargin
   }
 

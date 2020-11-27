@@ -1,23 +1,22 @@
 package com.gu.digital_voucher_cancellation_processor
 
-import java.time.{Clock, Instant, LocalDate, ZoneId}
+import java.time.{Clock, Instant, ZoneId}
 
 import cats.effect.IO
+import cats.implicits._
 import com.gu.DevIdentity
-import com.gu.digital_voucher_cancellation_processor.DigitalVoucherCancellationProcessorService.{CObjectAttribues, DigitalVoucherQueryResult, DigitalVoucherUpdate, ImovoCancellationResults, SubscriptionQueryResult, subscrptionsCancelledTodayQuery}
-import com.gu.imovo.{ImovoClientException, ImovoConfig, ImovoErrorResponse, ImovoSuccessResponse}
-import com.gu.salesforce.sttp.{QueryRecordsWrapperCaseClass, SFApiCompositePart, SFApiCompositeRequest, SFApiCompositeResponse, SFApiCompositeResponsePart}
-import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
+import com.gu.digital_voucher_cancellation_processor.DigitalVoucherCancellationProcessorService._
 import com.gu.imovo.ImovoStub._
+import com.gu.imovo.{ImovoClientException, ImovoConfig, ImovoErrorResponse, ImovoSuccessResponse}
 import com.gu.salesforce.sttp.SalesforceStub._
+import com.gu.salesforce.sttp._
+import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-import com.gu.salesforce.sttp.SalesforceStub._
 import io.circe.generic.auto._
 import org.scalatest.Inside.inside
-import cats.implicits._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Matchers {
   val authConfig = SFAuthConfig(
@@ -65,7 +64,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           .stubAuth(authConfig, authResponse)
           .stubQuery(
             auth = authResponse,
-            query = subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
+            query = subscriptionsCancelledTodayQuery,
             response = QueryRecordsWrapperCaseClass(
               List(
                 voucherToCancelQueryResult("valid-sub-1"),
@@ -119,7 +118,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           auth = authResponse,
-          query = subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
+          query = subscriptionsCancelledTodayQuery,
           response = QueryRecordsWrapperCaseClass(
             List(
               voucherToCancelQueryResult("valid-sub"),
@@ -178,7 +177,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           auth = authResponse,
-          query = subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
+          query = subscriptionsCancelledTodayQuery,
           response = QueryRecordsWrapperCaseClass(
             List(
               voucherToCancelQueryResult("valid-sub"),
@@ -250,7 +249,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           auth = authResponse,
-          query = subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
+          query = subscriptionsCancelledTodayQuery,
           response = QueryRecordsWrapperCaseClass(
             records = List[SFApiCompositePart[DigitalVoucherUpdate]](),
             nextRecordsUrl = None
@@ -265,7 +264,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           auth = authResponse,
-          query = subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
+          query = subscriptionsCancelledTodayQuery,
           response = QueryRecordsWrapperCaseClass(
             List(
               voucherToCancelQueryResult("valid-sub"),
