@@ -135,6 +135,38 @@ object Program extends (String => JobResults) {
   }
 }
 
+/**
+ * This app is useful if you want to use local machine to simply copy to ophan data lake
+ * an already completed Zuora batch job. Give loads of memory
+ *
+ *   -Xmx8G
+ *
+ * and set environmental variables
+ *
+ *   STAGE=PROD
+ *   AWS_REGION=eu-west-1
+ *   AWS_ACCESS_KEY_ID=*************
+ *   AWS_SECRET_ACCESS_KEY=***********
+ *   AWS_SESSION_TOKEN=***************
+ *   AWS_SECURITY_TOKEN=**************
+ *
+ * and pass Zuora batch jobId
+ *
+ *   runMain com.gu.zuora.datalake.export.Cli jobId
+ */
+object Cli { // similar to Program but skips StartAquaJob
+  def main(arr: Array[String]): Unit = {
+    val jobId = arr(0)
+    val jobResult = GetJobResult(jobId)
+    jobResult.batches.foreach { batch =>
+      val csvFile = GetResultsFile(batch)
+      println(s"Saving to ophan raw bucket batch: $batch")
+      SaveCsvToBucket(csvFile, jobResult, batch)
+    }
+    Postconditions(jobResult)
+  }
+}
+
 object Postconditions extends (JobResults => Either[Throwable, String]) with LazyLogging {
   def apply(jobResult: JobResults): Either[Throwable, String] = {
     assert(jobResult.status == "completed", "Job should have completed")
