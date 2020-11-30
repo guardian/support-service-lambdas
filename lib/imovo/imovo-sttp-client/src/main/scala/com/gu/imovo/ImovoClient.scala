@@ -61,8 +61,8 @@ case class ImovoSubscriptionHistoryItem(
   voucherType: String,
   date: String,
   activityType: String,
-  address: String,
-  postCode: String,
+  address: Option[String],
+  postCode: Option[String],
   reason: String,
   value: Double
 )

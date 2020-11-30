@@ -346,8 +346,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
         "card",
         "2020-06-29T19:19:21.816Z",
         "redemption",
-        "221B Baker Street, London, U.K.",
-        "NW1 6XE",
+        Some("221B Baker Street, London, U.K."),
+        Some("NW1 6XE"),
         "Success",
         2.22
       ),
@@ -356,8 +356,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
         "card",
         "2020-07-29T19:19:21.816Z",
         "redemption",
-        "221B Baker Street, London, U.K.",
-        "NW1 6XE",
+        Some("221B Baker Street, London, U.K."),
+        Some("NW1 6XE"),
         "Redemption rejected - this voucher has been used the maximum number of times this period. Please check terms and conditions",
         0.0
       )
@@ -370,8 +370,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
           "card",
           "2020-06-29T19:19:21.816Z",
           "redemption",
-          "221B Baker Street, London, U.K.",
-          "NW1 6XE",
+          Some("221B Baker Street, London, U.K."),
+          Some("NW1 6XE"),
           "Success",
           2.22
         ),
@@ -380,8 +380,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
           "card",
           "2020-07-29T19:19:21.816Z",
           "redemption",
-          "221B Baker Street, London, U.K.",
-          "NW1 6XE",
+          Some("221B Baker Street, London, U.K."),
+          Some("NW1 6XE"),
           "Redemption rejected - this voucher has been used the maximum number of times this period. Please check terms and conditions",
           0.0
         )
