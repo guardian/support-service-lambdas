@@ -68,7 +68,7 @@ object Dependencies {
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.5"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.0-RC17"
+  val zio = "dev.zio" %% "zio" % "1.0.3"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
   val stripe = "com.stripe" % "stripe-java" % "5.28.0"
