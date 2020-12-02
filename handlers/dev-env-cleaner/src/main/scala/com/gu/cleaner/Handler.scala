@@ -3,7 +3,7 @@ package com.gu.cleaner
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.time.LocalDate
 
-import cats.implicits._
+import cats.syntax.all._
 import com.amazonaws.services.lambda.runtime._
 import com.gu.aws.AwsCloudWatch
 import com.gu.aws.AwsCloudWatch._

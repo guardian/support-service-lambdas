@@ -2,7 +2,7 @@ package com.gu.util.zuora
 
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import cats.data.NonEmptyList
-import cats.implicits._
+import cats.syntax.all._
 
 import scala.annotation.implicitNotFound
 

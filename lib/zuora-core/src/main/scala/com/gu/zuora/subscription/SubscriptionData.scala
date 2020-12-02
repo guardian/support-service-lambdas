@@ -4,7 +4,7 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.ZuoraApiFailure
-import cats.implicits._
+import cats.syntax.all._
 import RatePlanChargeData.round2Places
 import mouse.all._
 import math.abs
