@@ -76,7 +76,7 @@ object Dependencies {
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.29" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.14.3" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "4.4.0" % Test
 
   // to resolve merge clash of 'module-info.class'
