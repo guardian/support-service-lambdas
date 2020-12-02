@@ -40,7 +40,7 @@ object Dependencies {
   // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeConfig = "io.circe" %% "circe-config" % "0.7.0"
+  val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
 
