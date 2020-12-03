@@ -31,19 +31,25 @@ incrementDataset
     .filter(_.isDeleted == false)
 ```
 
-## How to add amend fields in existing object?
+## How to add new fields in existing object?
 
-* Update the zoql query
-* Submit PR & get it approved
-* Submit PR in https://github.com/guardian/ophan-data-lake with additional fields in case class
-    * You might want to download data from Zuora API in case you get additional fields
-* Merge both PRs
-* Trigger lambda download for the new object only and let it fail (15 minutes)
-* Download the whole history data manually via Zuora API (~1 hour wait time)
-* Upload the file in to relevant S3 bucket
-* Drop the output table from Athena
-* Trigger the updated Spark job in Airflow (or run it manually) 
-* Next day lambda extract will be incremental and shouldn't cause anything to fail
+1. Add fields to Zuora https://www.zuora.com/apps/CustomField.do
+1. Add fields to support-service-lambda https://github.com/guardian/support-service-lambdas/pull/757
+1. Add fields to ophan-data-lake https://github.com/guardian/ophan-data-lake/pull/5675
+1. Run export lambda with input `{"exportFromDate": "afterLastIncrement"}` and let it fail (new fields will trigger full export so it will fail due to memory or timeout)
+1. Copy over raw CSVs once Zuora export job succeeds https://github.com/guardian/support-service-lambdas/pull/769
+1. Drop table in Athena `drop table clean.zuora_subscription`
+1. Run spark jobs via [airflow](https://zc6e7edd5b7c7cbb9p-tp.appspot.com/admin/airflow/graph?dag_id=supporter-experience) by clicking `Clear` on `zuora_account`.
+1. This should trigger all the children jobs as well.
+1. Raise support ticket with data team asking for extra fields in Google BigQuery
+1. Check new fields are available at https://console.cloud.google.com/bigquery?project=datatech-platform-prod
+
+## How to get data from AWS Athena to Google BigQuery?
+
+1. Currently, manual changes to schema are required so raise support ticket with data team asking for extra fields
+1. To get clean S3 data into BQ, we have an airflow task that runs and uses Google Storage Transfer to copy the objects over to GCS buckets
+1. We then have staging tables running directly over those GCS buckets
+1. when DBT runs, it does a SELECT * on the staging table (unless it's partitioned) and then loads that data into 'native' tables in BigQuery storage. These are the tables in the `datalake` dataset
 
 ## How to add another object to export?
 
