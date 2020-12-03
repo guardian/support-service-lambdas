@@ -7,12 +7,12 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.15.30"
+  val awsSdkVersion = "2.15.38"
   val circeVersion = "0.12.3"
   val sttpVersion = "1.7.0"
   val http4sVersion = "0.21.0"
   val catsVersion = "2.1.1"
-  val catsEffectVersion = "2.1.1"
+  val catsEffectVersion = "2.1.4"
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.2.3",
@@ -42,7 +42,7 @@ object Dependencies {
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig = "io.circe" %% "circe-config" % "0.7.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
-  val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
+  val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.2"
 
   // HTTP clients
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
@@ -68,15 +68,15 @@ object Dependencies {
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.5"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.3"
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
+  val zio = "dev.zio" %% "zio" % "1.0.0-RC17"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.5.15"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
   val stripe = "com.stripe" % "stripe-java" % "5.28.0"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.29" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.30" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.1.4" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.14.3" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "4.4.0" % Test
 
   // to resolve merge clash of 'module-info.class'
