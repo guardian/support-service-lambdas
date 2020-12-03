@@ -133,13 +133,10 @@ export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
             evaluationPeriods: 1,
             treatMissingData: cloudwatch.TreatMissingData.MISSING
         });
-        const topic = new sns.Topic(this, 'ErrorAlarmTopic', {
-            topicName: `arn:aws:sns:${region}:${account}:fulfilment-dev`
-        });
         alarm.addAlarmAction({
             bind() {
                 return {
-                    alarmActionArn: topic.topicArn
+                    alarmActionArn: `arn:aws:sns:${region}:${account}:fulfilment-dev`
                 };
             },
         });
