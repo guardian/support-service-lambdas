@@ -42,7 +42,7 @@ object Dependencies {
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig = "io.circe" %% "circe-config" % "0.7.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
-  val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
+  val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.2"
 
   // HTTP clients
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
