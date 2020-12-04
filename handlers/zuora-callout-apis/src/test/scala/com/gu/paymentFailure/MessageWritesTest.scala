@@ -1,9 +1,8 @@
 package com.gu.paymentFailure
 
 import com.gu.util.email._
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.Json
-import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec
 
 class MessageWritesTest extends AnyFlatSpec with EmailSqsSerialisation {

@@ -1,7 +1,7 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
 import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec

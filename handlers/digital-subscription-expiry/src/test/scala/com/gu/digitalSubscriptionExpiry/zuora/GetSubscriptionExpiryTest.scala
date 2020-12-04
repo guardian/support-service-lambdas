@@ -6,7 +6,7 @@ import com.gu.digitalSubscriptionExpiry.responses.{ErrorResponse, Expiry, Expiry
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
 import com.gu.util.apigateway.ApiGatewayResponse
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec
 

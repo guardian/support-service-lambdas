@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
 import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec

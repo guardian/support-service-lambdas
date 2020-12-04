@@ -1,7 +1,7 @@
 package test.scala.com.gu.digitalSubscriptionExpiry
 
 import com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
 import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec

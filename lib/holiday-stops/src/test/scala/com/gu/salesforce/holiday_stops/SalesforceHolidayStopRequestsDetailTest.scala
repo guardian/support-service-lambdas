@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.FetchHolidayStopRequestsDetailsForProductType
 import com.gu.zuora.ZuoraProductTypes
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec
 

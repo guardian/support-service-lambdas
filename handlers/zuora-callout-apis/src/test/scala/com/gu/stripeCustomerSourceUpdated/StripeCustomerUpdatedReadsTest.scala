@@ -1,6 +1,6 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
 import SourceUpdatedCallout._
 import org.scalatest.matchers

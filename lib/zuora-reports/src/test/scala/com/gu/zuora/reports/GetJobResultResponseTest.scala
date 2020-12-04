@@ -1,7 +1,7 @@
 package com.gu.zuora.reports
 
 import play.api.libs.json.Json
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import JobResult.writes
 import com.gu.zuora.reports.dataModel.Batch
 import org.scalatest.matchers

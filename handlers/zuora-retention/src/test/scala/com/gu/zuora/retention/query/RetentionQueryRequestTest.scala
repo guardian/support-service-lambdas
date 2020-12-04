@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest}
 import play.api.libs.json.Json
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.matchers
 import org.scalatest.flatspec.AsyncFlatSpec
 

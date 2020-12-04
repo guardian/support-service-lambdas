@@ -1,7 +1,7 @@
 package com.gu.util.apigateway
 
 import com.gu.util.apigateway.ResponseWriters._
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.Json
 import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec

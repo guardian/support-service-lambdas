@@ -1,6 +1,6 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import com.gu.TestData
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
 import com.gu.util.config.{StripeConfig, StripeSecretKey}

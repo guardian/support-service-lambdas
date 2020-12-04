@@ -2,7 +2,7 @@ package com.gu.zuora.reports
 
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import com.gu.zuora.reports.aqua.AquaJobResponse
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.matchers
 import org.scalatest.flatspec.AsyncFlatSpec
 

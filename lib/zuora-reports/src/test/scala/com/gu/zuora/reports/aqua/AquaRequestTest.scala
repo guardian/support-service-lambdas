@@ -1,7 +1,7 @@
 package com.gu.zuora.reports.aqua
 import org.scalatest._
 import play.api.libs.json.Json
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.matchers
 import org.scalatest.flatspec.AsyncFlatSpec
 

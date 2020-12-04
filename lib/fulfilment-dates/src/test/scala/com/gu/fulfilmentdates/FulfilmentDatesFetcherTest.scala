@@ -6,7 +6,7 @@ import java.time.LocalDate
 import com.gu.effects.S3Location
 import com.gu.util.config.Stage
 import com.gu.zuora.ZuoraProductTypes
-import matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.Inside
 
 import scala.io.Source

@@ -3,8 +3,8 @@ package com.gu.util
 import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import okhttp3._
-import matchers.should.Matchers._
 import org.scalatest._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
 import org.scalatest.matchers
 import org.scalatest.flatspec.AsyncFlatSpec
