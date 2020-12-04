@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import cats.implicits._
+import cats.syntax.all._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.creditprocessor.ProcessResult
 import com.gu.effects.GetFromS3

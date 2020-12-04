@@ -3,7 +3,7 @@ package com.gu.holidaystopprocessor
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.creditprocessor.Processor
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
