@@ -6,8 +6,6 @@ import com.typesafe.scalalogging.LazyLogging
 import com.gu.effects.{BucketName, CopyS3Objects, Key, ListS3Objects, S3Location, S3Path, UploadToS3}
 import com.gu.util.resthttp.RestRequestMaker.DownloadStream
 import cats.syntax.traverse._
-import cats.instances.list._
-import cats.instances.either._
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.{ObjectCannedACL, PutObjectRequest}
 

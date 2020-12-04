@@ -7,7 +7,7 @@ import com.gu.util.resthttp.Types._
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
-import cats.implicits._
+import cats.syntax.all._
 
 object GetZuoraAccountsForEmail {
 

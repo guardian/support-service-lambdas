@@ -6,10 +6,11 @@ import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, ClearZuoraIdentityId, ReplaceZuoraIdentityId, ZuoraFieldUpdates}
 import com.gu.util.resthttp.RestRequestMaker.{PutRequest, RelativePath}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
+class UpdateAccountSFLinksTest extends AnyFlatSpec with Matchers {
 
   it should "clear the identity id if the winning account didn't have one" in {
 

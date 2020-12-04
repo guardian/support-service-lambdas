@@ -1,10 +1,10 @@
 package com.gu.util.apigateway
 
 import com.gu.util.apigateway.Auth._
-import org.scalatest.FlatSpec
 import play.api.libs.json.{JsValue, Json}
+import org.scalatest.flatspec.AnyFlatSpec
 
-class AuthTest extends FlatSpec {
+class AuthTest extends AnyFlatSpec {
 
   val trustedApiConfig = TrustedApiConfig("correctPassword", "tenant123")
 

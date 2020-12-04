@@ -3,7 +3,7 @@ package com.gu.salesforce.sttp
 import java.time.Instant
 
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
-import org.scalatest.{FlatSpec, Inside, Matchers}
+import org.scalatest.Inside
 import com.gu.salesforce.sttp.SalesforceStub._
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -14,10 +14,12 @@ import cats.effect.IO
 import scala.io.Source
 import org.scalatest.fixture
 import org.scalatest.Inside.inside
+import org.scalatest.flatspec
+import org.scalatest.matchers.should.Matchers
 
 case class QueryResults(Id: String, CreatedDate: Instant, Name: String)
 
-class SalesforceClientTest extends fixture.FlatSpec with Matchers {
+class SalesforceClientTest extends flatspec.FixtureAnyFlatSpec with Matchers {
 
   case class FixtureParam(
     config: SFAuthConfig,

@@ -1,9 +1,10 @@
 package com.gu.newproduct.api.addsubscription.email
 
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ETPayloadTest extends FlatSpec with Matchers {
+class ETPayloadTest extends AnyFlatSpec with Matchers {
 
   case class TestPayload(data: String)
 

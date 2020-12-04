@@ -6,12 +6,14 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identityBackfill.HealthCheckData._
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import org.scalatest.{Assertion, FlatSpec, Matchers}
+import org.scalatest.Assertion
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 // this test runs the health check from locally. this means you can only run it manually
 // you should also run the healthcheck in code after deploy
-class HealthCheckSystemTest extends FlatSpec with Matchers {
+class HealthCheckSystemTest extends AnyFlatSpec with Matchers {
 
   it should "successfully run the health check using the local code against real backend" taggedAs EffectsTest in {
 

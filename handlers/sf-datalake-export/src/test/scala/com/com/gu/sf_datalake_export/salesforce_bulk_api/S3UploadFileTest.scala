@@ -3,14 +3,15 @@ package com.com.gu.sf_datalake_export.salesforce_bulk_api
 import com.gu.effects.{BucketName, S3Path}
 import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile
 import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileContent, FileName}
-import org.scalatest.{FlatSpec, Matchers}
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.{ObjectCannedACL, PutObjectRequest, PutObjectResponse}
 
 import scala.io.Source
 import scala.util.{Success, Try}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class S3UploadFileTest extends FlatSpec with Matchers {
+class S3UploadFileTest extends AnyFlatSpec with Matchers {
   private val testPath = S3Path(BucketName("someBucket"), None)
   private val testFile = File(FileName("someName"), FileContent("these are the file contents"))
   private val successS3Result = Success(PutObjectResponse.builder.build())

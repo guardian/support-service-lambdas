@@ -6,9 +6,10 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.Soql
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.util.resthttp.JsonHttp.{PostMethod, StringHttpRequest}
 import com.gu.util.resthttp.RestRequestMaker._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AddQueryToJobTest extends FlatSpec with Matchers {
+class AddQueryToJobTest extends AnyFlatSpec with Matchers {
 
   it should "create a request ok" in {
     val addQueryRequest = AddQueryRequest(

@@ -6,10 +6,11 @@ import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 // run this manually
-class GetByIdentityIdEffectsTest extends FlatSpec with Matchers {
+class GetByIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "successfull run the health check using the local code against real backend" taggedAs EffectsTest in {
 

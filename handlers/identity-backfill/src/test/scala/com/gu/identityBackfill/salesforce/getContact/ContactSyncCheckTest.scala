@@ -4,9 +4,10 @@ import com.gu.identityBackfill.salesforce.ContactSyncCheck
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ContactSyncCheckTest extends FlatSpec with Matchers {
+class ContactSyncCheckTest extends AnyFlatSpec with Matchers {
 
   it should "should return right contact if contact is valid for update" in {
     val areFieldsValid: List[ContactSyncCheckFields] => Either[String, SFContactId] = ContactSyncCheck(RecordTypeId("correctId"))

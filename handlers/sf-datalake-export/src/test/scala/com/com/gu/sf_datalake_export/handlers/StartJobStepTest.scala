@@ -11,10 +11,11 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.SfQueries
 import com.gu.util.config.Stage
 import com.gu.util.handlers.LambdaException
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class StartJobStepTest extends FlatSpec with Matchers {
+class StartJobStepTest extends AnyFlatSpec with Matchers {
 
   def createJob(req: CreateJobRequest) = {
     req.maybeChunkSize shouldBe Some(BatchSize(250000))

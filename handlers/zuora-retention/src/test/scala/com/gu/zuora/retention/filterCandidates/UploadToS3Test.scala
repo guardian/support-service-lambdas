@@ -1,14 +1,15 @@
 package com.gu.zuora.retention.filterCandidates
 
 import com.gu.util.handlers.LambdaException
-import org.scalatest.{FlatSpec, Matchers}
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.{PutObjectRequest, PutObjectResponse}
 
 import scala.io.Source
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class UploadToS3Test extends FlatSpec with Matchers {
+class UploadToS3Test extends AnyFlatSpec with Matchers {
 
   private def s3Write(req: PutObjectRequest, body: RequestBody) = {
     val uploadData = Source.fromInputStream(body.contentStreamProvider.newStream()).mkString

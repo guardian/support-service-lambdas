@@ -7,10 +7,11 @@ import java.time.{DayOfWeek, LocalDate}
 import com.gu.fulfilmentdates.FulfilmentDates
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.subscription.{IssueData, SubscriptionData, ZuoraApiFailure}
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class GetHolidayStopRequestsTest extends FlatSpec {
+class GetHolidayStopRequestsTest extends AnyFlatSpec {
   val annualIssueLimit = 23
 
   val expectedEditionDaysOfWeek = List(FRIDAY)

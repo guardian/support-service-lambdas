@@ -1,7 +1,7 @@
 package com.gu.creditprocessor
 
 import java.time.LocalDate
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.zuora.ZuoraLockingContention.retryLockingContention
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType

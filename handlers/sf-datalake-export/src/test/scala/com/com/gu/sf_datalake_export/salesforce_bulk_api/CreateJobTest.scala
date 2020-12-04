@@ -4,10 +4,11 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.{BatchSize, S
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{CreateJobRequest, JobId, WireResponse}
 import com.gu.util.resthttp.RestRequestMaker.{Header, PostRequestWithHeaders, RelativePath}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CreateJobTest extends FlatSpec with Matchers {
+class CreateJobTest extends AnyFlatSpec with Matchers {
 
   it should "create a request ok" in {
     val createJobRequest = CreateJobRequest(

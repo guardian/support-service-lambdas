@@ -6,10 +6,11 @@ import com.gu.digitalSubscriptionExpiry.responses.{ErrorResponse, Expiry, Expiry
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
 import com.gu.util.apigateway.ApiGatewayResponse
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class GetSubscriptionExpiryTest extends FlatSpec {
+class GetSubscriptionExpiryTest extends AnyFlatSpec {
   val lastWeek = LocalDate.of(2018, 4, 11)
   val nextWeek = LocalDate.of(2018, 4, 25)
   val subEndDate = LocalDate.of(2018, 4, 20)

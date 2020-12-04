@@ -4,9 +4,10 @@ import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.IsDigi
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ValidateNoLosingDigitalVoucherTest extends FlatSpec with Matchers {
+class ValidateNoLosingDigitalVoucherTest extends AnyFlatSpec with Matchers {
 
   it should "not object to an empty list" in {
 

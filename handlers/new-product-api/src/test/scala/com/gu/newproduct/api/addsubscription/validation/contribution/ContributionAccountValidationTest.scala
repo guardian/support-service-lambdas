@@ -3,9 +3,10 @@ package com.gu.newproduct.api.addsubscription.validation.contribution
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidatedAccount}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ContributionAccountValidationTest extends FlatSpec with Matchers {
+class ContributionAccountValidationTest extends AnyFlatSpec with Matchers {
   val account = ValidatedAccount(
     identityId = Some(IdentityId("identityId")),
     sfContactId = Some(SfContactId("sfContactId")),

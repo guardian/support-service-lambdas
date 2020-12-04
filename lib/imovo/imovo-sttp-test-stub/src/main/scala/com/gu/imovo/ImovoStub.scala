@@ -7,7 +7,7 @@ import com.softwaremill.sttp.testing.SttpBackendStub
 import com.softwaremill.sttp.{Method, Request, Response}
 import io.circe.Encoder
 import io.circe.syntax._
-import cats.implicits._
+import cats.syntax.all._
 
 object ImovoStub {
   class ImovoStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {

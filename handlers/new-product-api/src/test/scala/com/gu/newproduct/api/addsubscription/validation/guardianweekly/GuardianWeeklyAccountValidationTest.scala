@@ -3,9 +3,10 @@ package com.gu.newproduct.api.addsubscription.validation.guardianweekly
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidatedAccount}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GuardianWeeklyAccountValidationTest extends FlatSpec with Matchers {
+class GuardianWeeklyAccountValidationTest extends AnyFlatSpec with Matchers {
   val account = ValidatedAccount(
     identityId = Some(IdentityId("1234")),
     sfContactId = None,

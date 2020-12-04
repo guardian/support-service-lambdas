@@ -11,12 +11,13 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccount
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog._
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
-class ContributionsFieldsTest extends FlatSpec with Matchers {
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
 
   val billto = BillToContact(
     None,
