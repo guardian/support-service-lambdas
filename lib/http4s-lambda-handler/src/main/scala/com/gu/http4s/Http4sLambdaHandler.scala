@@ -8,7 +8,7 @@ import org.http4s.{EmptyBody, Header, Headers, HttpRoutes, Method, Query, Reques
 import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import cats.implicits._
+import cats.syntax.all._
 import fs2.{Stream, text}
 
 import scala.collection.immutable

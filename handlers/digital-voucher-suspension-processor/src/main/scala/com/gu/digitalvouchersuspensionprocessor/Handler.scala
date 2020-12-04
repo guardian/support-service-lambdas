@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import cats.arrow.FunctionK
 import cats.data.EitherT
 import cats.effect.{IO, Sync}
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.digitalvouchersuspensionprocessor.Salesforce.Suspension
 import com.gu.imovo.ImovoClient
 import com.gu.salesforce.sttp.SalesforceClient

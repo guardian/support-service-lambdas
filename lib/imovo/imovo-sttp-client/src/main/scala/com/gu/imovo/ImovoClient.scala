@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 
 import cats.data.EitherT
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import com.softwaremill.sttp.Method.GET
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._

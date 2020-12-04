@@ -1,7 +1,7 @@
 package com.gu.util.config
 
 import cats.data.EitherT
-import cats.implicits._
+import cats.syntax.all._
 import cats.effect.Sync
 import com.gu.conf.{ResourceConfigurationLocation, SSMConfigurationLocation}
 import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
