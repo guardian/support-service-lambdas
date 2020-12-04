@@ -3,11 +3,12 @@ package com.gu.digitalSubscriptionExpiry
 import java.time.LocalDate
 import com.gu.cas.SevenDay
 import com.gu.digitalSubscriptionExpiry.responses.{ErrorResponse, Expiry, SuccessResponse}
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import matchers.should.Matchers._
 import play.api.libs.json.Json
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class DigitalSubscriptionExpiryResponseTest extends FlatSpec {
+class DigitalSubscriptionExpiryResponseTest extends AnyFlatSpec {
 
   it should "serialise success response" in {
 

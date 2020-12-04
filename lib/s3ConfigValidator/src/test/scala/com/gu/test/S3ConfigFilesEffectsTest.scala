@@ -7,10 +7,11 @@ import com.gu.salesforce.SalesforceReads._
 import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config._
 import com.gu.util.zuora.ZuoraRestConfig
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Reads
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class S3ConfigFilesEffectsTest extends FlatSpec with Matchers {
+class S3ConfigFilesEffectsTest extends AnyFlatSpec with Matchers {
 
   val PROD = "PROD"
   val CODE = "CODE"

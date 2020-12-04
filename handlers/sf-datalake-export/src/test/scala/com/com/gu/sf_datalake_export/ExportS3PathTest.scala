@@ -5,9 +5,10 @@ import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
 import com.gu.sf_datalake_export.util.ExportS3Path
 import com.gu.util.config.Stage
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ExportS3PathTest extends FlatSpec with Matchers {
+class ExportS3PathTest extends AnyFlatSpec with Matchers {
   "uploadBasePath" should "return ophan bucket basepath for PROD requests with uploadToDataLake enabled" in {
     val contactName = BulkApiParams.contact.objectName
     val actualBasePath = ExportS3Path(Stage("PROD"))(contactName, ShouldUploadToDataLake(true))

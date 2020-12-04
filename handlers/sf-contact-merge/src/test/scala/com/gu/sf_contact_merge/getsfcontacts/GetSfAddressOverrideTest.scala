@@ -4,9 +4,10 @@ import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
 import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types._
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetSfAddressOverrideTest extends FlatSpec with Matchers {
+class GetSfAddressOverrideTest extends AnyFlatSpec with Matchers {
 
   def testAddress(label: String) = SFAddress(
     SFStreet(s"street$label"),

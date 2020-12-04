@@ -7,11 +7,12 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery._
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 // run this manually
-class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
+class ZuoraQueryEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "successfull query multiple accounts" taggedAs EffectsTest in {
 

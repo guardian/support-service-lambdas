@@ -12,9 +12,10 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestRequestMaker.RequestsPost
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
+class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
 
   import ZuoraDevContributions._
 

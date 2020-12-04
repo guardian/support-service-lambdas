@@ -1,11 +1,12 @@
 package com.gu.util.apigateway
 
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class ApiGatewayHandlerReadsTest extends FlatSpec {
+class ApiGatewayHandlerReadsTest extends AnyFlatSpec {
 
   "ApiGatewayHandler" should "deserialise the headers too when receiving a request from Stripe" in {
 

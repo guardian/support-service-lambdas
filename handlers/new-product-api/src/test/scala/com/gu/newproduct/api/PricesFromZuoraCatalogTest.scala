@@ -8,11 +8,12 @@ import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PricesFromZuoraCa
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Try
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
+class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
 
   val fakeGetStringFromS3: StringFromS3 = s3Location => {
     s3Location shouldBe S3Location(bucket = "gu-zuora-catalog", key = "CODE/Zuora-DEV/catalog.json")

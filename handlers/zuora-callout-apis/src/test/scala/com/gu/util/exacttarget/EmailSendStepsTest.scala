@@ -3,12 +3,13 @@ package com.gu.util.exacttarget
 import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.util.email._
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 import scala.util.{Failure, Success, Try}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class EmailSendStepsTest extends FlatSpec with Matchers {
+class EmailSendStepsTest extends AnyFlatSpec with Matchers {
 
   def makeMessage(recipient: String): EmailMessage = {
     EmailMessage(

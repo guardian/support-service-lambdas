@@ -5,11 +5,12 @@ import java.time.{DayOfWeek, LocalDate}
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import java.time.DayOfWeek._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CatalogWireTest extends FlatSpec with Matchers {
+class CatalogWireTest extends AnyFlatSpec with Matchers {
   it should "serialise catalog" in {
     val expected =
       """

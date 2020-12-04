@@ -1,9 +1,11 @@
 package com.gu.zuora.reports
 
 import com.gu.zuora.reports.dataModel.{Batch, FetchedFile}
-import org.scalatest.Matchers._
+import matchers.should.Matchers._
 import org.scalatest._
 import play.api.libs.json.Json
+import org.scalatest.matchers
+import org.scalatest.flatspec.AsyncFlatSpec
 
 class FetchFileRequestTest extends AsyncFlatSpec {
 

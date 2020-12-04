@@ -1,9 +1,10 @@
 package com.gu.test
 
-import org.scalatest.{Assertion, Matchers}
+import org.scalatest.Assertion
 import play.api.libs.json._
 
 import scala.util.{Failure, Success, Try}
+import org.scalatest.matchers.should.Matchers
 
 object JsonMatchers {
 

@@ -3,8 +3,8 @@ package com.gu.zuora.fake
 import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError}
 import com.gu.util.zuora.ZuoraQuery.{QueryResult, ZuoraQuerier}
 import com.gu.util.zuora.{SafeQueryBuilder, ZuoraQuery}
-import org.scalatest.Matchers
 import play.api.libs.json.{Json, Reads}
+import org.scalatest.matchers.should.Matchers
 
 object FakeZuoraQuerier extends Matchers {
 

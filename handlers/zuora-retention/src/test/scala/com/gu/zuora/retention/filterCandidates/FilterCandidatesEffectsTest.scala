@@ -3,10 +3,11 @@ package com.gu.zuora.retention.filterCandidates
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.test.EffectsTest
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class FilterCandidatesEffectsTest extends FlatSpec with Matchers {
+class FilterCandidatesEffectsTest extends AnyFlatSpec with Matchers {
   it should "filter candidates with exclusion results" taggedAs EffectsTest in {
     val input =
       """

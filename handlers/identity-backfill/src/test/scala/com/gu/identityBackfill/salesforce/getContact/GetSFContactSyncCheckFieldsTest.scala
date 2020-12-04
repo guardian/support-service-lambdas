@@ -4,10 +4,11 @@ import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.{ContactSyncCheckFields, ContactsByAccountIdQueryResponse}
 import com.gu.salesforce.TypesForSFEffectsData.SFAccountId
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {
+class GetSFContactSyncCheckFieldsTest extends AnyFlatSpec with Matchers {
 
   it should "send the right request for get the contact sync fields" in {
     val actual = GetSFContactSyncCheckFields.toRequest(SFAccountId("001g000000XrQcaAAF"))

@@ -10,9 +10,10 @@ import com.gu.salesforce.TypesForSFEffectsData.{SFAccountId, SFContactId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PreReqCheckTest extends FlatSpec with Matchers {
+class PreReqCheckTest extends AnyFlatSpec with Matchers {
 
   val personContact = SFContactId("sf")
 

@@ -10,9 +10,10 @@ import com.gu.util.email._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PaymentFailureHandlerTest extends FlatSpec with Matchers {
+class PaymentFailureHandlerTest extends AnyFlatSpec with Matchers {
 
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")

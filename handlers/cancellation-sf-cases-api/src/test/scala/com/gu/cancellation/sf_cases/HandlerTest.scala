@@ -3,9 +3,10 @@ package com.gu.cancellation.sf_cases
 import com.gu.cancellation.sf_cases.RaiseCase._
 import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
 import com.gu.salesforce.cases.SalesforceCase.{CaseSubject, ContactId, SubscriptionId}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HandlerTest extends FlatSpec with Matchers {
+class HandlerTest extends AnyFlatSpec with Matchers {
 
   it should "convert the raise case post body, sub id and contact id to a WireNewCase" in {
 

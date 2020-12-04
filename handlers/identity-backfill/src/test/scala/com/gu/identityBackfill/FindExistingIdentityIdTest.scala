@@ -7,9 +7,10 @@ import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError, NotFound}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class FindExistingIdentityIdTest extends FlatSpec with Matchers {
+class FindExistingIdentityIdTest extends AnyFlatSpec with Matchers {
   "findExistingIdentityId" should "continue processing with identity id for existing validated account" in {
     FindExistingIdentityId(
       _ => ClientSuccess(IdentityAccount(IdentityId("100"), isUserEmailValidated = true)),

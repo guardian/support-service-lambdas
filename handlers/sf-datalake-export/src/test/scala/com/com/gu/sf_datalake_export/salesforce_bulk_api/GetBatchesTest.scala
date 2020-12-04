@@ -3,9 +3,10 @@ package com.com.gu.sf_datalake_export.salesforce_bulk_api
 import com.gu.sf_datalake_export.handlers.GetBatchesHandler
 import com.gu.sf_datalake_export.handlers.GetBatchesHandler.{CompletedJob, FailedJob, PendingJob}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetBatchesTest extends FlatSpec with Matchers {
+class GetBatchesTest extends AnyFlatSpec with Matchers {
   "getJobStatus" should "set job as failed if there is at least on failed batch" in {
     val batches = Seq(
       BatchInfo(BatchId("1"), Completed),

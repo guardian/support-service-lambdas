@@ -5,9 +5,10 @@ import com.gu.newproduct.api.addsubscription.AccountIdentitys.HealthCheckTestAcc
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HealthCheckTest extends FlatSpec with Matchers {
+class HealthCheckTest extends AnyFlatSpec with Matchers {
 
   it should "pass" in {
     def getAccount(requestedAccountId: ZuoraAccountId): Types.ClientFailableOp[Account] = {

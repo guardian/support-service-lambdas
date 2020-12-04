@@ -3,10 +3,11 @@ package com.gu.sf_contact_merge.getaccounts
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{ContactId, EmailAddress, FirstName, LastName, ZuoraContactDetails}
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
-import org.scalatest.{FlatSpec, Matchers}
 import cats.data.NonEmptyList
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetZuoraContactDetailsTest extends FlatSpec with Matchers {
+class GetZuoraContactDetailsTest extends AnyFlatSpec with Matchers {
 
   import GetZuoraContactDetailsTest._
 

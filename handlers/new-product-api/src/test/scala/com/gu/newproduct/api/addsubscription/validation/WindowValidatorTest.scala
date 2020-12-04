@@ -1,9 +1,10 @@
 package com.gu.newproduct.api.addsubscription.validation
 
 import java.time.LocalDate
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class WindowValidatorTest extends FlatSpec with Matchers {
+class WindowValidatorTest extends AnyFlatSpec with Matchers {
 
   val august6 = LocalDate.of(2018, 8, 6)
   val august26 = LocalDate.of(2018, 8, 26)

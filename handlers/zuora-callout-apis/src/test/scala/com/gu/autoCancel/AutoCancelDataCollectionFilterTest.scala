@@ -7,8 +7,9 @@ import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
 
-class AutoCancelDataCollectionFilterTest extends FlatSpec {
+class AutoCancelDataCollectionFilterTest extends AnyFlatSpec {
 
   import AutoCancelDataCollectionFilter._
 

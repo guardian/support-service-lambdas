@@ -12,10 +12,12 @@ import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityIdData, GetZu
 import com.gu.salesforce.auth.SalesforceAuthenticateData
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
-import org.scalatest.{Assertion, FlatSpec, Matchers}
+import org.scalatest.Assertion
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class EndToEndHandlerTest extends FlatSpec with Matchers {
+class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
 
   it should "manage an end to end call in dry run mode" in {
 

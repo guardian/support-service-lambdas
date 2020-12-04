@@ -5,9 +5,9 @@ import java.time.LocalDate
 
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class SubscriptionDataGuardianWeeklyWithRemovedRatePlansIntegrationTest extends FlatSpec {
+class SubscriptionDataGuardianWeeklyWithRemovedRatePlansIntegrationTest extends AnyFlatSpec {
 
   /**
    * This tests GuardianWeeklyWith6For6WithChristmasFix.json which is a subscription that has modified rateplans

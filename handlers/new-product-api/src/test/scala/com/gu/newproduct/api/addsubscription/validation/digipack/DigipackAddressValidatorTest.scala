@@ -4,9 +4,10 @@ import com.gu.i18n.Country
 import com.gu.newproduct.api.addsubscription.email.digipack.{DigipackAddressValidator, ValidatedAddress}
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DigipackAddressValidatorTest extends FlatSpec with Matchers {
+class DigipackAddressValidatorTest extends AnyFlatSpec with Matchers {
 
   val testAddress = BillToAddress(
     Some(Address1("Address1")),

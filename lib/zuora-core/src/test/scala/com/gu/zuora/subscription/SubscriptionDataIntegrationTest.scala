@@ -4,7 +4,8 @@ import java.time.temporal.ChronoUnit
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import org.scalatest.{Assertion, Inside, Matchers}
+import org.scalatest.{Assertion, Inside}
+import org.scalatest.matchers.should.Matchers
 
 object SubscriptionDataIntegrationTest extends Matchers {
   def testSubscriptonDataIssueGeneration(

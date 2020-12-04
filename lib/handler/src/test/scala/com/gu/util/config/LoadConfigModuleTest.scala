@@ -2,12 +2,13 @@ package com.gu.util.config
 
 import com.gu.effects.S3Location
 import com.gu.util.config.ConfigReads.ConfigFailure
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 import scala.util.Try
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class LoadConfigModuleTest extends FlatSpec with Matchers {
+class LoadConfigModuleTest extends AnyFlatSpec with Matchers {
 
   def fakeS3Load(response: String)(location: S3Location): Try[String] = Try {
     if (location.bucket != "gu-reader-revenue-private") throw (new RuntimeException(s"test failed: unexpected bucket name ${location.bucket}"))

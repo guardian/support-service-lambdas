@@ -1,11 +1,12 @@
 package com.gu.util.apigateway
 
 import com.gu.util.apigateway.ResponseWriters._
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import matchers.should.Matchers._
 import play.api.libs.json.Json
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class ApiGatewayResponseTest extends FlatSpec {
+class ApiGatewayResponseTest extends AnyFlatSpec {
 
   "ApiGatewayResponse" should "serialise success response" in {
     val data = ApiGatewayResponse.successfulExecution
