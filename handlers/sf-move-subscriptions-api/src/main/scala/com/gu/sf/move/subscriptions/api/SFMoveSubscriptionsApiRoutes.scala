@@ -2,7 +2,7 @@ package com.gu.sf.move.subscriptions.api
 
 import cats.data.EitherT
 import cats.effect.Effect
-import cats.implicits._
+import cats.syntax.all._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._

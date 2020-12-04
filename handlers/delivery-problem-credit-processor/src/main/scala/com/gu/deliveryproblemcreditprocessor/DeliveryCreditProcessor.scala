@@ -4,7 +4,7 @@ import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 
 import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
 import com.gu.effects.GetFromS3
