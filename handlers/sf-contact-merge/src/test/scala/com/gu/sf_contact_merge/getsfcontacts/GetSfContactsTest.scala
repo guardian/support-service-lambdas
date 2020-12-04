@@ -2,9 +2,10 @@ package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetSfContactsTest extends FlatSpec with Matchers {
+class GetSfContactsTest extends AnyFlatSpec with Matchers {
 
   "getSfContacts" should "get the winner and the other correctly (lazy)" in {
 

@@ -7,7 +7,7 @@ import cats.effect.Effect
 import org.http4s.{EntityEncoder, HttpRoutes, Request, Response}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityEncoder._
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.salesforce.sttp.SFApiCompositeResponse
 import com.gu.salesforce.{Contact, SalesforceHandlerSupport}
 import org.http4s.dsl.Http4sDsl

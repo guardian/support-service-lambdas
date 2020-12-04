@@ -1,9 +1,10 @@
 package com.gu.util.config
 
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class StripeConfigTest extends FlatSpec with Matchers {
+class StripeConfigTest extends AnyFlatSpec with Matchers {
   // Stripe specific tests
   it should "the sig verified status is on by default" in {
     val configString = """{

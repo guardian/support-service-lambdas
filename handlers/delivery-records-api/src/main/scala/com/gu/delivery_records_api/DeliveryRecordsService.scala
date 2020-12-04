@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import cats.Monad
 import cats.data.EitherT
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.salesforce.SalesforceQueryConstants.{contactToWhereClausePart, escapeString}
 import com.gu.salesforce.sttp.{SFApiCompositeResponse, SalesforceClient}
 import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}

@@ -2,9 +2,10 @@ package com.gu.util.apigateway
 
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class OperationTest extends FlatSpec with Matchers {
+class OperationTest extends AnyFlatSpec with Matchers {
 
   it should "map the operation properly when it succeeds" in {
 

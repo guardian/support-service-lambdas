@@ -12,11 +12,12 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePay
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog._
 import com.gu.newproduct.api.productcatalog.PlanId._
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import PaperEmailDataSerialiser._
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
-class PaperEmailDataTest extends FlatSpec with Matchers {
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+class PaperEmailDataTest extends AnyFlatSpec with Matchers {
 
   val billto = BillToContact(
     None,

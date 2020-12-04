@@ -5,9 +5,10 @@ import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.config.Stage
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class EndToEndTest extends FlatSpec with Matchers {
+class EndToEndTest extends AnyFlatSpec with Matchers {
 
   import Runner._
 

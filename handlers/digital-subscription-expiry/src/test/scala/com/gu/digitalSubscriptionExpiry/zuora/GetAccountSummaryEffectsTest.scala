@@ -8,9 +8,10 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
+class GetAccountSummaryEffectsTest extends AnyFlatSpec with Matchers {
   it should "successfully get account summary against dev" taggedAs EffectsTest in {
     val testAccountId = AccountId("2c92c0f86078c4d4016079e1402d6536")
 

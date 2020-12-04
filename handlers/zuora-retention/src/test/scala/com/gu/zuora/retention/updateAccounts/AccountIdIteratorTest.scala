@@ -1,11 +1,12 @@
 package com.gu.zuora.retention.updateAccounts
 
 import com.gu.util.handlers.LambdaException
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AccountIdIteratorTest extends FlatSpec with Matchers {
+class AccountIdIteratorTest extends AnyFlatSpec with Matchers {
 
   def linesIterator(data: String) = data.split("\n").iterator
   def errorResponse(msg: String) = Failure(LambdaException(msg))

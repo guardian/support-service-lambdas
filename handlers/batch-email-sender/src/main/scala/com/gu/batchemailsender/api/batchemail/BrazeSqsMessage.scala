@@ -3,6 +3,7 @@ package com.gu.batchemailsender.api.batchemail
 import ai.x.play.json.Jsonx
 import SalesforceMessage.SalesforceBatchItem
 import SalesforceToBrazeTransformations._
+import ai.x.play.json.Encoders._
 
 /**
  * This is what actually gets sent to SQS and the fields correspond to Braze api_trigger_properties.

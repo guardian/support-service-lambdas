@@ -4,10 +4,11 @@ import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
+class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
 
   it should "send the right request for update identity id" in {
 

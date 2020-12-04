@@ -8,10 +8,11 @@ import com.gu.stripeCustomerSourceUpdated.SourceUpdatedStepsTestData._
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matchers {
+class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Matchers {
 
   "SourceUpdatedSteps" should "getAccountToUpdate non default pm" in {
     val effects = new TestingRawEffects(500, Map(
@@ -307,7 +308,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
 }
 
-class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
+class SourceUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matchers {
 
   "SourceUpdatedSteps" should "updatePaymentMethod" in {
 
@@ -349,7 +350,7 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
 
 }
 
-class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
+class SourceUpdatedStepsApplyTest extends AnyFlatSpec with Matchers {
 
   "SourceUpdatedSteps" should "fail with unauthorised if the Stripe Signature header check fails" in {
     val effects = new TestingRawEffects(500)

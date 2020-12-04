@@ -3,11 +3,12 @@ package com.gu.delivery_records_api
 import java.time.{LocalDate, LocalDateTime}
 
 import com.gu.salesforce.IdentityId
-import org.scalatest.{FlatSpec, Matchers}
 import io.circe.generic.auto._
 import io.circe.syntax._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SFApiCompositeCreateDeliveryProblemTest extends FlatSpec with Matchers {
+class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers {
 
   // because by default circe wraps the inner 'body' fields with the case class name (as a discriminator) - invalid for SF
   it should "encode a SFApiCompositeCreateDeliveryProblem to JSON correctly (for composite request)" in {

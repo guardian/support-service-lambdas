@@ -2,9 +2,10 @@ package com.gu.newproduct.api.addsubscription.validation
 
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ValidateAccountTest extends FlatSpec with Matchers {
+class ValidateAccountTest extends AnyFlatSpec with Matchers {
 
   val validAccount = Account(
     identityId = Some(IdentityId("idAccount1")),

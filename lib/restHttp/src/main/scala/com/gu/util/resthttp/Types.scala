@@ -1,6 +1,5 @@
 package com.gu.util.resthttp
 import cats.Monad
-import cats.implicits._
 
 import scala.annotation.tailrec
 

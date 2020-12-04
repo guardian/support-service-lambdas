@@ -2,7 +2,7 @@ package com.gu.sf_datalake_export.handlers
 
 import java.io.{InputStream, OutputStream}
 
-import cats.implicits._
+import cats.syntax.all._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects._
 import com.gu.salesforce.SalesforceReads._

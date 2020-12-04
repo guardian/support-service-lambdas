@@ -22,7 +22,6 @@ import com.gu.util.reader.Types.{ApiGatewayOp, _}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
 import cats.data.NonEmptyList
-import cats.implicits._
 
 object DomainSteps {
 

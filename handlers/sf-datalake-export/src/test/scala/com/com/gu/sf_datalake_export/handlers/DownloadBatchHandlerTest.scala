@@ -13,12 +13,13 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.{BatchId, Bat
 import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileContent, FileName}
 import com.gu.util.config.Stage
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 import scala.util.{Success, Try}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DownloadBatchHandlerTest extends FlatSpec with Matchers {
+class DownloadBatchHandlerTest extends AnyFlatSpec with Matchers {
 
   def fakeDownloadBatch(jobName: JobName, jobId: JobId, batchId: BatchId, basePath: S3Path): Try[Unit] = {
     jobName.value shouldBe "someJobName"

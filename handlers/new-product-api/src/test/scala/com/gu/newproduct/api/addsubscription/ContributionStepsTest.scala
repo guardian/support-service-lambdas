@@ -20,14 +20,15 @@ import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ContributionStepsTest extends FlatSpec with Matchers {
+class ContributionStepsTest extends AnyFlatSpec with Matchers {
 
   case class ExpectedOut(subscriptionNumber: String)
 

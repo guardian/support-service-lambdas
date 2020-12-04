@@ -1,12 +1,13 @@
 package com.gu.newproduct.api.addsubscription
 
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
-import org.scalatest.{FlatSpec, Matchers}
 import TypeConvert._
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError, NotFound}
-class TypeConvertTest extends FlatSpec with Matchers {
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+class TypeConvertTest extends AnyFlatSpec with Matchers {
 
   def api422Response(message: String) = ReturnWithResponse(ApiGatewayResponse.messageResponse(statusCode = "422", message = message))
   "ValidationToApiGatewayOp" should "convert failed validation to status 422 api response" in {

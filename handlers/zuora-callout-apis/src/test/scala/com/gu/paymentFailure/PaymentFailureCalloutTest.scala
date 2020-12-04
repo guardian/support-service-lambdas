@@ -2,8 +2,10 @@ package com.gu.paymentFailure
 
 import org.scalatest._
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PaymentFailureCalloutTest extends FlatSpec with Matchers {
+class PaymentFailureCalloutTest extends AnyFlatSpec with Matchers {
 
   val expectedBillingDetails = BillingDetails(
     address1 = Some("someBilltoAddress1"),

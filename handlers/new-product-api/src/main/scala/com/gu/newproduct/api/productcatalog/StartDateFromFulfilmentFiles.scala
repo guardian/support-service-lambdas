@@ -2,7 +2,7 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.{DayOfWeek, LocalDate}
 
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.effects.S3Location
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.Stage

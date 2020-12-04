@@ -13,9 +13,10 @@ import com.gu.util.resthttp.RestOp._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetSfAddressEffectsTest extends FlatSpec with Matchers {
+class GetSfAddressEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get a contact" taggedAs EffectsTest in {
 

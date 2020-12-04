@@ -9,9 +9,10 @@ import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CreateSubscriptionTest extends FlatSpec with Matchers {
+class CreateSubscriptionTest extends AnyFlatSpec with Matchers {
 
   def currentDate = () => LocalDate.of(2018, 7, 2)
   it should "get account as object" in {

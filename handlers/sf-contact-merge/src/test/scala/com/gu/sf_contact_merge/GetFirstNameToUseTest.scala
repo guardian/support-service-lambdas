@@ -5,9 +5,10 @@ import com.gu.sf_contact_merge.GetFirstNameToUse.NameForContactId
 import com.gu.sf_contact_merge.Types.WinningSFContact
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetFirstNameToUseFirstNameForSFContactTest extends FlatSpec with Matchers {
+class GetFirstNameToUseFirstNameForSFContactTest extends AnyFlatSpec with Matchers {
 
   it should "abort if the winning contact isn't in any zuora account" in {
     val contactIdsFromZuora = List(NameForContactId(SFContactId("wrong"), None))

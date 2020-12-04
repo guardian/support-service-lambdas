@@ -7,10 +7,12 @@ import com.gu.digitalSubscriptionExpiry.Runner._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import org.scalatest.{Assertion, FlatSpec, Matchers}
+import org.scalatest.Assertion
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers {
+class DigitalSubscriptionExpiryHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "return 404 for invalid subscriber id" taggedAs EffectsTest in {
 

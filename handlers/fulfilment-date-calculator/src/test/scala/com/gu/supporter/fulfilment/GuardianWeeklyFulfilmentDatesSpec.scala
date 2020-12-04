@@ -2,9 +2,10 @@ package com.gu.supporter.fulfilment
 
 import java.time.LocalDate
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GuardianWeeklyFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
+class GuardianWeeklyFulfilmentDatesSpec extends AnyFlatSpec with Matchers with DateSupport {
 
   it should "calculate holidayStopProcessorTargetDate" in {
     GuardianWeeklyFulfilmentDates( /* Monday    */ "2019-12-02").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
