@@ -4,7 +4,6 @@ import java.time.LocalDate
 
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
-import cats.implicits._
 
 import scala.util.Try
 

@@ -15,7 +15,7 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
 import play.api.libs.json.JsPath
-import cats.implicits._
+import cats.syntax.all._
 import cats.data.NonEmptyList
 
 object SourceUpdatedSteps extends Logging {

@@ -5,7 +5,7 @@ import java.net.URI
 import cats.Show
 import cats.data.EitherT
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.salesforce.SalesforceConstants.{compositeBaseUrl, sfObjectsBaseUrl, soqlQueryBaseUrl}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth}
 import com.softwaremill.sttp.circe._

@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailId, ProductName}
 import com.gu.zuora.subscription.{AffectedPublicationDate, Price, RatePlanCharge, RatePlanChargeCode, SubscriptionName}
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.creditprocessor.ZuoraCreditAddResult
 
 case class ZuoraHolidayCreditAddResult(
