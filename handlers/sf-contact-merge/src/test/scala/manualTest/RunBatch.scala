@@ -11,7 +11,7 @@ import manualTest.ReadFile.JsonString
 import okhttp3.Request
 import play.api.libs.json.{JsSuccess, Json}
 import scala.util.Try
-import cats.implicits._
+import cats.syntax.all._
 
 object RunBatch {
 

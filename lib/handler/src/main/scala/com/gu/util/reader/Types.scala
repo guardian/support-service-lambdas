@@ -8,7 +8,6 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
 import scala.util.{Failure, Success, Try}
 import cats.Monad
-import cats.implicits._
 
 object Types extends Logging {
   object ApiGatewayOp {
