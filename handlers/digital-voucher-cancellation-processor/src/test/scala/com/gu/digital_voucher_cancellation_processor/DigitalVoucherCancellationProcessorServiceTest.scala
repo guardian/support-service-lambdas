@@ -3,7 +3,7 @@ package com.gu.digital_voucher_cancellation_processor
 import java.time.{Clock, Instant, ZoneId}
 
 import cats.effect.IO
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.DevIdentity
 import com.gu.digital_voucher_cancellation_processor.DigitalVoucherCancellationProcessorService._
 import com.gu.imovo.ImovoStub._

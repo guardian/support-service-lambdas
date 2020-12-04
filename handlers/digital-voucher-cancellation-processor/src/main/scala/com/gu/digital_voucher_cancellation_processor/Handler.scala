@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, Output
 import com.gu.AppIdentity
 import com.typesafe.scalalogging.LazyLogging
 import scala.io.Source
-import cats.implicits._
+import cats.syntax.all._
 
 object Handler extends LazyLogging {
   def handle(is: InputStream, os: OutputStream): Unit = {

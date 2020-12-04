@@ -2,7 +2,7 @@ package com.gu.sf.move.subscriptions.api
 
 import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.AppIdentity
 import com.gu.util.config.ConfigLoader
 import com.softwaremill.sttp.{Id, SttpBackend}
