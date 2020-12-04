@@ -8,9 +8,10 @@ import com.gu.newproduct.api.addsubscription.validation.contribution.Contributio
 import com.gu.newproduct.api.addsubscription.validation.{AmountLimits, Failed, Passed, ValidationResult}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ContributionValidationsTest extends FlatSpec with Matchers {
+class ContributionValidationsTest extends AnyFlatSpec with Matchers {
 
   val testRequest = ValidatableFields(
     startDate = LocalDate.of(2018, 7, 20),

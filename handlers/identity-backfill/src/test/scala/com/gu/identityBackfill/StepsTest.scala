@@ -9,9 +9,10 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class StepsTest extends FlatSpec with Matchers {
+class StepsTest extends AnyFlatSpec with Matchers {
 
   class StepsWithMocks {
 

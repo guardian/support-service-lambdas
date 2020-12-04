@@ -2,9 +2,10 @@ package com.gu.util
 
 import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class LazyClientFailableOpTest extends FlatSpec with Matchers {
+class LazyClientFailableOpTest extends AnyFlatSpec with Matchers {
 
   final class InvocationLog() {
 

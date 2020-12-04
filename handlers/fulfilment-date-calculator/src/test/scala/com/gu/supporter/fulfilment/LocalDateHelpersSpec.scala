@@ -3,10 +3,11 @@ package com.gu.supporter.fulfilment
 import java.time.LocalDate
 
 import com.gu.supporter.fulfilment.LocalDateHelpers.LocalDateWithWorkingDaySupport
-import org.scalatest.{FlatSpec, Matchers}
 import scala.language.postfixOps
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class LocalDateHelpersSpec extends FlatSpec with Matchers with DateSupport {
+class LocalDateHelpersSpec extends AnyFlatSpec with Matchers with DateSupport {
 
   implicit val sampleBankHolidays: BankHolidays = BankHolidays(List(
     LocalDate.parse( /* New Year’s Day */ "2021-01-01"),

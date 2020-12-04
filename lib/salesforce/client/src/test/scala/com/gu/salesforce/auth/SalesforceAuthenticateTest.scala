@@ -5,9 +5,10 @@ import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.salesforce.SalesforceAuthenticate
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SalesforceAuthenticateTest extends FlatSpec with Matchers {
+class SalesforceAuthenticateTest extends AnyFlatSpec with Matchers {
 
   it should "get auth SF correctly" in {
     val effects = new TestingRawEffects(postResponses = SalesforceAuthenticateData.postResponses)

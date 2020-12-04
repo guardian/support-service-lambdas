@@ -8,9 +8,10 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class IdentityBackfillStepsTest extends FlatSpec with Matchers {
+class IdentityBackfillStepsTest extends AnyFlatSpec with Matchers {
 
   it should "backfill identity ids successfully" in {
     val ApiResponse(statusCode, _, _) = IdentityBackfillSteps.apply(

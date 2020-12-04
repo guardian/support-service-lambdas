@@ -1,10 +1,11 @@
 package com.gu.digitalSubscriptionExpiry.emergencyToken
 
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class EmergencyTokensConfigTest extends FlatSpec {
+class EmergencyTokensConfigTest extends AnyFlatSpec {
 
   "Emergency token" should "deserialise correctly from config file" in {
 

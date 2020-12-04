@@ -10,9 +10,10 @@ import com.gu.salesforce.dev.SFEffectsData
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
+class GetSFContactSyncCheckFieldsEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get auth SF correctly" taggedAs EffectsTest in {
 

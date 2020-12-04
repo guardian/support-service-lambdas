@@ -3,10 +3,11 @@ package com.gu.util
 import com.gu.util.resthttp.HttpOp
 import com.gu.util.resthttp.Types.ClientSuccess
 import okhttp3._
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HttpOpTest extends FlatSpec with Matchers {
+class HttpOpTest extends AnyFlatSpec with Matchers {
 
   // Mocks and helper functions for handleFutureResponse testing
   val dummyJson = Json.parse(

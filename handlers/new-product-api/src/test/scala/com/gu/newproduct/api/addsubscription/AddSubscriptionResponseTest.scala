@@ -1,9 +1,10 @@
 package com.gu.newproduct.api.addsubscription
 
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AddSubscriptionResponseTest extends FlatSpec with Matchers {
+class AddSubscriptionResponseTest extends AnyFlatSpec with Matchers {
   it should "serialise successful response" in {
     val success: AddSubscriptionResponse = AddedSubscription(subscriptionNumber = "someNumber")
 

@@ -6,9 +6,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.{GetCon
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{WireModel, _}
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetContactsTest extends FlatSpec with Matchers {
+class GetContactsTest extends AnyFlatSpec with Matchers {
 
   it should "get contacts" in {
 

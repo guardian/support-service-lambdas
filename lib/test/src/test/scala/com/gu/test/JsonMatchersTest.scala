@@ -1,9 +1,10 @@
 package com.gu.test
 
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class JSComparisonTest extends FlatSpec with Matchers {
+class JSComparisonTest extends AnyFlatSpec with Matchers {
 
   import JsonMatchers._
 
@@ -32,7 +33,7 @@ class JSComparisonTest extends FlatSpec with Matchers {
 
 }
 
-class JSComparisonEmdeddedTest extends FlatSpec with Matchers {
+class JSComparisonEmdeddedTest extends AnyFlatSpec with Matchers {
 
   import JsonMatchers._
 

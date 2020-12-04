@@ -2,11 +2,12 @@ package com.gu.zuora.retention.updateAccounts
 
 import com.gu.util.handlers.LambdaException
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class UpdateAccountsTest extends FlatSpec with Matchers {
+class UpdateAccountsTest extends AnyFlatSpec with Matchers {
   val testUri = "someUri"
   def successZuoraUpdate(accountId: AccountId): ClientFailableOp[Unit] = ClientSuccess(())
 

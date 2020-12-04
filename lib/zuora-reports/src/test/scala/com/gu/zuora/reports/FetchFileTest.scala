@@ -5,8 +5,9 @@ import java.io.ByteArrayInputStream
 import com.gu.util.resthttp.RestRequestMaker.DownloadStream
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.zuora.reports.dataModel.{Batch, FetchedFile}
-import org.scalatest.AsyncFlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers
+import org.scalatest.flatspec.AsyncFlatSpec
 
 class FetchFileTest extends AsyncFlatSpec {
 

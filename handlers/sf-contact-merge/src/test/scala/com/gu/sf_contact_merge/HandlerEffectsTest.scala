@@ -4,10 +4,11 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.test.EffectsTest
 import com.gu.test.JsonMatchers._
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{Json, OFormat}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HandlerEffectsTest extends FlatSpec with Matchers {
+class HandlerEffectsTest extends AnyFlatSpec with Matchers {
 
   import TestData._
 

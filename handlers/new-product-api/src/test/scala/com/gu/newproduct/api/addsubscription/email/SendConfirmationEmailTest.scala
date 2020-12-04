@@ -11,9 +11,10 @@ import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, RuleFixtures}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import org.scalatest.{AsyncFlatSpec, Matchers}
 
 import scala.concurrent.Future
+import org.scalatest.flatspec.AsyncFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   it should "send confirmation email" in {

@@ -5,9 +5,10 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import circeCodecs._
 import com.gu.zuora.sar.BatonModels.{Completed, Failed, Pending, SarInitiateRequest, SarInitiateResponse, SarStatusRequest, SarStatusResponse}
 import io.circe.ParsingFailure
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class ZuoraSarHandlerSpec extends FreeSpec with Matchers {
+class ZuoraSarHandlerSpec extends AnyFreeSpec with Matchers {
   val mockConfig: ZuoraSarConfig = ConfigLoader.getSarLambdaConfigTemp
 
   "ZuoraSarLambda" - {

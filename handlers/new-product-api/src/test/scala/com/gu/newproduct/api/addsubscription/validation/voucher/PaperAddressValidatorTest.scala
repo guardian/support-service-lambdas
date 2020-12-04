@@ -5,9 +5,10 @@ import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValida
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.productcatalog.PlanId.{HomeDeliveryWeekendPlus, VoucherEveryDay}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PaperAddressValidatorTest extends FlatSpec with Matchers {
+class PaperAddressValidatorTest extends AnyFlatSpec with Matchers {
 
   val testAddress = SoldToAddress(
     Some(Address1("soldToAddress1")),

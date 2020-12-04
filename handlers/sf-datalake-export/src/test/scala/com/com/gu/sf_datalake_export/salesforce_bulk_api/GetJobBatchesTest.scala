@@ -6,9 +6,10 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.{BatchId, Bat
 import com.gu.util.resthttp.JsonHttp.{GetMethod, StringHttpRequest}
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetJobBatchesTest extends FlatSpec with Matchers {
+class GetJobBatchesTest extends AnyFlatSpec with Matchers {
 
   it should "create a request ok" in {
 
