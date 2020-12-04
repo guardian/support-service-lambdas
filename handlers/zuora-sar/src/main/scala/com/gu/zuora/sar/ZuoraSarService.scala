@@ -7,8 +7,6 @@ import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json.{JsValue, Json, Reads}
 import cats.syntax.traverse._
-import cats.instances.list._
-import cats.instances.either._
 
 // For Zuora response deserialisation
 case class ZuoraContact(AccountId: String)

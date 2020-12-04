@@ -2,7 +2,6 @@ package com.gu.delivery_records_api
 
 import cats.data.EitherT
 import cats.effect.Sync
-import cats.implicits._
 import com.gu.effects.{GetFromS3, S3Location}
 import com.gu.util.config.{ConfigLocation, Stage}
 import io.circe.Decoder

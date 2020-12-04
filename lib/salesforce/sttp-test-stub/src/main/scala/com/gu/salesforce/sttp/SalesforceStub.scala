@@ -8,7 +8,7 @@ import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
 import io.circe.parser.decode
-import cats.implicits._
+import cats.syntax.all._
 
 object SalesforceStub {
   class SalesforceStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {

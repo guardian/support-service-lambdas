@@ -2,7 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.{DayOfWeek, LocalDate, ZonedDateTime}
 
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.fulfilmentdates.FulfilmentDates
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
