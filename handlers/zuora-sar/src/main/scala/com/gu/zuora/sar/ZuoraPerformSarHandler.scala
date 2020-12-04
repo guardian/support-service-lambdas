@@ -4,8 +4,6 @@ import cats.effect.IO
 import com.gu.zuora.sar.BatonModels.{Completed, Failed, PerformSarRequest, PerformSarResponse, SarRequest, SarResponse}
 import com.typesafe.scalalogging.LazyLogging
 import cats.syntax.traverse._
-import cats.instances.list._
-import cats.instances.either._
 
 case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSar, s3Service: S3Service, zuoraSarConfig: ZuoraSarConfig)
   extends LazyLogging
