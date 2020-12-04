@@ -8,9 +8,10 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetPaymentMethodEffectsTest extends FlatSpec with Matchers {
+class GetPaymentMethodEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get payment details" taggedAs EffectsTest in {
     val actual = for {

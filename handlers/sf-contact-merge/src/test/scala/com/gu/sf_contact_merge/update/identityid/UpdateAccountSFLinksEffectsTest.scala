@@ -14,12 +14,13 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 // run this manually
-class UpdateAccountSFLinksEffectsTest extends FlatSpec with Matchers {
+class UpdateAccountSFLinksEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "successfully UPDATE the identity id against dev" taggedAs EffectsTest in {
 

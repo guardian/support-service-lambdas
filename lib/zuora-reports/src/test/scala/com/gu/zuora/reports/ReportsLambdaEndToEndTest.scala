@@ -12,10 +12,12 @@ import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.zuora.reports.EndToEndData._
 import com.gu.zuora.reports.Runner._
 import com.gu.zuora.reports.aqua.{AquaJobResponse, AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
-import org.scalatest.{Assertion, FlatSpec, Matchers}
+import org.scalatest.Assertion
 import play.api.libs.json.{Json, Reads, Writes}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
+class ReportsLambdaEndToEndTest extends AnyFlatSpec with Matchers {
 
   case class FakeQueryRequest(id: String, dryRun: Boolean) extends QuerierRequest
   implicit val reads = Json.reads[FakeQueryRequest]

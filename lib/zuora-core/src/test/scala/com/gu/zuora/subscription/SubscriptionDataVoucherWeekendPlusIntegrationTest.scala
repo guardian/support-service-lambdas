@@ -6,9 +6,9 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class SubscriptionDataVoucherWeekendPlusIntegrationTest extends FlatSpec {
+class SubscriptionDataVoucherWeekendPlusIntegrationTest extends AnyFlatSpec {
   "SubscriptionData" should "calculate issue data correctly for weekend voucher subscription" in {
     MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
 

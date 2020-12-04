@@ -5,9 +5,10 @@ import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CountZuoraAccountsForIdentityIdTest extends FlatSpec with Matchers {
+class CountZuoraAccountsForIdentityIdTest extends AnyFlatSpec with Matchers {
 
   it should "get one result for an identity id if there already is one" in {
     val effects = new TestingRawEffects(postResponses = CountZuoraAccountsForIdentityIdData.postResponses(true))

@@ -19,12 +19,13 @@ import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsValue, Json}
 
 import scala.util.Random
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
+class UpdateSalesforceIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get auth SF correctly" taggedAs EffectsTest in {
 

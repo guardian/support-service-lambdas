@@ -3,6 +3,8 @@ package com.gu.autoCancel
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
 import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 object AutoCancelHandlerTest {
 
   def fakeCallout(autoPay: Boolean) = {
@@ -12,7 +14,7 @@ object AutoCancelHandlerTest {
   }
 
 }
-class AutoCancelHandlerTest extends FlatSpec {
+class AutoCancelHandlerTest extends AnyFlatSpec {
 
   import AutoCancelHandlerTest._
   import AutoCancelInputFilter._
@@ -61,7 +63,7 @@ class AutoCancelHandlerTest extends FlatSpec {
 
 }
 
-class DeserialiserTest extends FlatSpec with Matchers {
+class DeserialiserTest extends AnyFlatSpec with Matchers {
 
   "deserialise UrlParams" should "manage without the only direct debit param" in {
     val json = """{"apiToken": "a", "apiClientId": "b"}"""

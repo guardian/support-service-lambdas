@@ -5,9 +5,10 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ValidationImplicitsTest extends FlatSpec with Matchers {
+class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
   case class TestData(maybeValue: Option[String])
 

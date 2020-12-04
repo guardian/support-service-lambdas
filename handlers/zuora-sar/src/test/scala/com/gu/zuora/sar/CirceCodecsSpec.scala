@@ -1,13 +1,14 @@
 package com.gu.zuora.sar
 
 import com.gu.zuora.sar.BatonModels.{Completed, Failed, Pending, PerformSarRequest, SarInitiateRequest, SarInitiateResponse, SarRequest, SarResponse, SarStatusRequest, SarStatusResponse}
-import org.scalatest.{FreeSpec, Matchers}
 import io.circe.parser._
 import io.circe.syntax._
 import circeCodecs._
 import io.circe.Printer
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class CirceCodecsSpec extends FreeSpec with Matchers {
+class CirceCodecsSpec extends AnyFreeSpec with Matchers {
   val jsonPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
   "BatonModels" - {

@@ -6,10 +6,11 @@ import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.resthttp.RestRequestMaker.{GetRequestWithParams, RelativePath, UrlParams}
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetByEmailTest extends FlatSpec with Matchers {
+class GetByEmailTest extends AnyFlatSpec with Matchers {
 
   it should "formulate a request" in {
     val actual = GetByEmail.wrapper.fromNewParam(EmailAddress("email@address"))

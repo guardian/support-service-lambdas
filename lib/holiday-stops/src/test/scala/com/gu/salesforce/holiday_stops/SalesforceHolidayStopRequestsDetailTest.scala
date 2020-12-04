@@ -4,10 +4,11 @@ import java.time.LocalDate
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.FetchHolidayStopRequestsDetailsForProductType
 import com.gu.zuora.ZuoraProductTypes
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class SalesforceHolidayStopRequestsDetailTest extends FlatSpec {
+class SalesforceHolidayStopRequestsDetailTest extends AnyFlatSpec {
   "SalesforceHolidayStopRequestsDetail" should "generate correct soql" in {
     FetchHolidayStopRequestsDetailsForProductType.createSoql(
       List(LocalDate.parse("2019-12-20"), LocalDate.parse("2019-12-21")),

@@ -3,9 +3,10 @@ package com.gu.identityRetention
 import com.gu.identityRetention.IdentityRetentionSteps.UrlParams
 import com.gu.identityRetention.Types.IdentityId
 import com.gu.util.apigateway.ApiGatewayResponse
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class IdentityRetentionStepsTest extends FlatSpec with Matchers {
+class IdentityRetentionStepsTest extends AnyFlatSpec with Matchers {
 
   it should "return the identity id if it was included in a query string param" in {
     val result = IdentityRetentionSteps.extractIdentityId(UrlParams(identityId = "123"))

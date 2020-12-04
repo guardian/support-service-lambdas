@@ -7,9 +7,10 @@ import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetZuoraAccountsForEmailTest extends FlatSpec with Matchers {
+class GetZuoraAccountsForEmailTest extends AnyFlatSpec with Matchers {
 
   it should "get the accounts for an email with identity" in {
     val effects = new TestingRawEffects(postResponses = GetZuoraAccountsForEmailData.postResponses(true))

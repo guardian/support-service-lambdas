@@ -11,10 +11,11 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
+class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
 
   val validTokenResponse = {
     val expiry = Expiry(
@@ -229,7 +230,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     """.stripMargin
 }
 
-class DeserialiserTest extends FlatSpec with Matchers {
+class DeserialiserTest extends AnyFlatSpec with Matchers {
 
   "deserialise url params" should "manage without the noActivation param" in {
     val json = """{"apiToken": "a", "apiClientId": "b"}"""

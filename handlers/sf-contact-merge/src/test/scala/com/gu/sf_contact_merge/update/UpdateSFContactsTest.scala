@@ -9,9 +9,10 @@ import com.gu.sf_contact_merge.update.UpdateSFContacts.{IdentityIdMoveData, Iden
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{SFContactUpdate, SetFirstName}
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class UpdateSFContactsTest extends FlatSpec with Matchers {
+class UpdateSFContactsTest extends AnyFlatSpec with Matchers {
 
   final class MockSetOrClearIdentityId() {
 

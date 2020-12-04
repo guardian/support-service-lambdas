@@ -7,9 +7,10 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
 import com.gu.test.EffectsTest
 import com.gu.util.resthttp.RestRequestMaker.IsCheckNeeded
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, PaymentError}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetPaymentMethodTest extends FlatSpec with Matchers {
+class GetPaymentMethodTest extends AnyFlatSpec with Matchers {
 
   def fakeGet(response: ClientFailableOp[PaymentMethodWire])(path: String, skipCheck: IsCheckNeeded) = {
     path shouldBe "object/payment-method/accountId"

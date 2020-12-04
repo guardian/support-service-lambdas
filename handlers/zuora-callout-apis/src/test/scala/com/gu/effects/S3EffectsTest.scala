@@ -3,11 +3,12 @@ package com.gu.effects
 import java.nio.charset.StandardCharsets
 
 import com.gu.test.EffectsTest
-import org.scalatest.{AsyncFlatSpec, Matchers}
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.{ObjectCannedACL, PutObjectRequest}
 
 import scala.util.Success
+import org.scalatest.flatspec.AsyncFlatSpec
+import org.scalatest.matchers.should.Matchers
 //Todo this test should be in the effects project but we need to refactor to be able to access the effectsTest tag from there
 
 class S3EffectsTest extends AsyncFlatSpec with Matchers {

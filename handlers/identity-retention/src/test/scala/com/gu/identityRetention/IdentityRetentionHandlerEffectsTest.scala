@@ -5,10 +5,12 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import org.scalatest.{Assertion, FlatSpec, Matchers}
+import org.scalatest.Assertion
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class IdentityRetentionHandlerEffectsTest extends FlatSpec with Matchers {
+class IdentityRetentionHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "return 404 if the identity id is not linked to any Zuora billing accounts" taggedAs EffectsTest in {
     val actualResponse = runWithMock(dummyRequest("12345"))

@@ -3,9 +3,11 @@ package com.gu.util
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3._
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest._
 import play.api.libs.json._
+import org.scalatest.matchers
+import org.scalatest.flatspec.AsyncFlatSpec
 
 class ZuoraRestServiceTest extends AsyncFlatSpec {
 

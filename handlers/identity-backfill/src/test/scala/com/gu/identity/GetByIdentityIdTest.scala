@@ -4,10 +4,11 @@ import com.gu.identity.GetByIdentityId.IdentityUser
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetByIdentityIdTest extends FlatSpec with Matchers {
+class GetByIdentityIdTest extends AnyFlatSpec with Matchers {
   it should "formulate a request" in {
     GetByIdentityId.wrapper.fromNewParam(IdentityId("1234")) should be(GetRequest(RelativePath("/user/1234")))
   }

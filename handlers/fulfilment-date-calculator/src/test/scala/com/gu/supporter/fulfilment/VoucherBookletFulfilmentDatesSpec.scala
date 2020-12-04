@@ -2,10 +2,11 @@ package com.gu.supporter.fulfilment
 
 import java.time.LocalDate
 
-import org.scalatest.{FlatSpec, Matchers}
 import VoucherBookletFulfilmentDates.apply
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class VoucherBookletFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
+class VoucherBookletFulfilmentDatesSpec extends AnyFlatSpec with Matchers with DateSupport {
 
   def shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek(
     today: LocalDate,

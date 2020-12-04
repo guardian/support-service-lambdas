@@ -8,8 +8,8 @@ import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.Matchers
 import play.api.libs.json.Json
+import org.scalatest.matchers.should.Matchers
 
 object TestData extends Matchers {
 

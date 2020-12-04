@@ -8,9 +8,10 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetAccountSubscriptionsEffectsTest extends FlatSpec with Matchers {
+class GetAccountSubscriptionsEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get payment details" taggedAs EffectsTest in {
     val actual = for {
