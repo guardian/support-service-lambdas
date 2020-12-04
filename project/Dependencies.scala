@@ -34,8 +34,6 @@ object Dependencies {
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
-  val mouse =
-    "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
 
   // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
