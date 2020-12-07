@@ -10,12 +10,13 @@ import com.gu.salesforce.{SFAuthConfig, SalesforceClient}
 import com.gu.test.EffectsTest
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.resthttp.JsonHttp
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
 
 import scala.util.Random
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
+class EndToEndHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
   import com.gu.cancellation.sf_cases.EndToEndData._
   import com.gu.cancellation.sf_cases.Runner._

@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.Show
 import cats.data.EitherT
 import cats.effect.Effect
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.Decoder
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._

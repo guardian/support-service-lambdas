@@ -7,11 +7,12 @@ import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.JobName
 import com.gu.util.handlers.LambdaException
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CleanBucketHandlerTest extends FlatSpec with Matchers {
+class CleanBucketHandlerTest extends AnyFlatSpec with Matchers {
 
   val wireState = WireState(
     jobName = "someJobName",

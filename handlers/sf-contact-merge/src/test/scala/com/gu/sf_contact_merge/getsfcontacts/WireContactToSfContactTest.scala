@@ -4,9 +4,10 @@ import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
 import com.gu.sf_contact_merge.getsfcontacts.ToSfContactRequest.WireResult
 import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class WireContactToSfContactTest extends FlatSpec with Matchers {
+class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
 
   "toMaybeAddress" should "return some if all are set" in {
     val wireResult = WireResult(

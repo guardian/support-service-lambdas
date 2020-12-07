@@ -1,7 +1,7 @@
 import Dependencies._
 
 val scalaSettings = Seq(
-  scalaVersion := "2.13.3",
+  ThisBuild / scalaVersion := "2.13.3",
   version      := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -127,7 +127,6 @@ lazy val `holiday-stops` = library(project in file("lib/holiday-stops"))
       circeParser,
       sttp,
       sttpCirce,
-      mouse,
       enumeratum,
       zio
     ) ++ logging
@@ -212,7 +211,6 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
       sttpCirce,
       scalatest,
       diffx,
-      mouse
     ) ++ logging
   )
 

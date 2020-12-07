@@ -7,9 +7,10 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.EffectsTest
 import com.gu.util.resthttp.RestRequestMaker.IsCheckNeeded
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetAccountSubscriptionsTest extends FlatSpec with Matchers {
+class GetAccountSubscriptionsTest extends AnyFlatSpec with Matchers {
 
   def subWith(number: String, status: String, rateplans: List[String]) = {
     ZuoraSubscription(

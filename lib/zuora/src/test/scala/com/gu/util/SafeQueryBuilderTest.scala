@@ -5,8 +5,10 @@ import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery}
 import org.scalatest._
 import cats.data.NonEmptyList
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SafeQueryBuilderEscapeTest extends FlatSpec with Matchers {
+class SafeQueryBuilderEscapeTest extends AnyFlatSpec with Matchers {
 
   it should "escape single quotes" in {
     val actual = makeSafeStringIntoQueryLiteral("""bobby tables'drop database students""")
@@ -51,7 +53,7 @@ class SafeQueryBuilderEscapeTest extends FlatSpec with Matchers {
 
 }
 
-class SafeQueryBuilderApplyTest extends FlatSpec with Matchers {
+class SafeQueryBuilderApplyTest extends AnyFlatSpec with Matchers {
 
   it should "assemble a whole query with no fanfare" in {
     val actual: ClientFailableOp[SafeQuery] = zoql"""field=${"hahaha"}"""

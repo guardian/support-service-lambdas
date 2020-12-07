@@ -6,9 +6,9 @@ import java.time.temporal.TemporalAdjusters.next
 
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class SubscriptionDataGuardianWeeklyMigratedWithIncorrectStartDateIntegrationTest extends FlatSpec {
+class SubscriptionDataGuardianWeeklyMigratedWithIncorrectStartDateIntegrationTest extends AnyFlatSpec {
     "SubscriptionData" should "calculate issue data correctly for migrated GW with incorrect start date" in {
       MutableCalendar.setFakeToday(Some(LocalDate.of(2020, 1, 1)))
 

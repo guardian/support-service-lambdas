@@ -6,13 +6,15 @@ import java.time.LocalDate
 import com.gu.effects.S3Location
 import com.gu.util.config.Stage
 import com.gu.zuora.ZuoraProductTypes
-import org.scalatest.Matchers._
-import org.scalatest.{FlatSpec, Inside}
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.Inside
 
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class FulfilmentDatesFetcherTest extends FlatSpec {
+class FulfilmentDatesFetcherTest extends AnyFlatSpec {
   "FulfilmentDatesFetcher" should "fetch and parse fulfilment dates from s3" in {
     def fetchFromS3(s3Location: S3Location): Try[String] = {
       s3Location match {

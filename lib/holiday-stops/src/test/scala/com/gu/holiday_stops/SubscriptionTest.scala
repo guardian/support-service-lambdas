@@ -4,9 +4,11 @@ import java.time.LocalDate
 
 import com.gu.zuora.subscription.{RatePlanCharge, Fixtures => SubscriptionFixtures}
 import org.scalactic.TypeCheckedTripleEquals
-import org.scalatest.{FlatSpec, Matchers, OptionValues}
+import org.scalatest.OptionValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SubscriptionTest extends FlatSpec with Matchers with OptionValues with TypeCheckedTripleEquals {
+class SubscriptionTest extends AnyFlatSpec with Matchers with OptionValues with TypeCheckedTripleEquals {
 
   "ratePlanCharge" should "give ratePlanCharge corresponding to holiday stop" in {
     val subscription = Fixtures.mkSubscriptionWithHolidayStops()

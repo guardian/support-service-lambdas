@@ -9,8 +9,10 @@ import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, Payment
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AutoCancelStepsTest extends FlatSpec with Matchers {
+class AutoCancelStepsTest extends AnyFlatSpec with Matchers {
 
   private val basicInfo = BasicAccountInfo(AccountId("accId123"), 11.99, PaymentMethodId("pmid"))
   private val invoiceDueMultipleSubscriptions = List(

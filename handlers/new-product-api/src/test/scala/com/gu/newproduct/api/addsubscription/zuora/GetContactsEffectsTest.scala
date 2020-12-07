@@ -8,9 +8,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{apply => _, _}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetContactsEffectsTest extends FlatSpec with Matchers {
+class GetContactsEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get contacts for account from Zuora" taggedAs EffectsTest in {
     val actual = for {

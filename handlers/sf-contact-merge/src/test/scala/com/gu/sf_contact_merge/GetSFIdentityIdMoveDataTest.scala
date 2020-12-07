@@ -6,9 +6,10 @@ import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
 import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.EmailIdentity
 import com.gu.sf_contact_merge.update.UpdateSFContacts.{IdentityIdMoveData, IdentityIdToUse, OldSFContact}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
+class GetSFIdentityIdMoveDataTest extends AnyFlatSpec with Matchers {
 
   it should "not move identity id if there isn't another account" in {
 

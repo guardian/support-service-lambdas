@@ -5,9 +5,9 @@ import java.time.LocalDate
 
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class SubscriptionDataGuardianWeeklyIntegrationTest extends FlatSpec {
+class SubscriptionDataGuardianWeeklyIntegrationTest extends AnyFlatSpec {
   "SubscriptionDataIntegrationTest" should "calculate issue data correctly for GW 6 for 6" in {
 
     MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))

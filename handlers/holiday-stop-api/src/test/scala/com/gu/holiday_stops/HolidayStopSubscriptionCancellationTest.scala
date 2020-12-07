@@ -3,9 +3,10 @@ package com.gu.holiday_stops
 import java.time.LocalDate
 
 import com.gu.zuora.subscription.{Price, RatePlanChargeCode}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
+class HolidayStopSubscriptionCancellationTest extends AnyFlatSpec with Matchers {
   val estimatedPrice = 1.23
 
   val cancellationDate = LocalDate.now()

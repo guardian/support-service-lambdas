@@ -6,9 +6,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAcc
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithoutCheck}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetAccountTest extends FlatSpec with Matchers {
+class GetAccountTest extends AnyFlatSpec with Matchers {
 
   val acc: ZuoraAccount = ZuoraAccount(
     IdentityId__c = Some("6002"),

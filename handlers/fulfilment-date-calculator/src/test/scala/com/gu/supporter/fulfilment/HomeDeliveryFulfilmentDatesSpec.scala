@@ -2,9 +2,10 @@ package com.gu.supporter.fulfilment
 
 import java.time.LocalDate
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HomeDeliveryFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
+class HomeDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with DateSupport {
 
   def apply(today: LocalDate) = HomeDeliveryFulfilmentDates.apply(today)(
     BankHolidays(Nil) // TODO reuse sampleBankHolidays from LocalDateHelpersSpec with some test cases below

@@ -2,9 +2,10 @@ package com.gu.identityRetention
 
 import java.time.LocalDate
 import com.gu.identityRetention.SubscriptionsForAccounts.SubscriptionsQueryResponse
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RelationshipForSubscriptionsTest extends FlatSpec with Matchers {
+class RelationshipForSubscriptionsTest extends AnyFlatSpec with Matchers {
 
   val today = LocalDate.of(2018, 5, 23)
   val activeSubResponse = SubscriptionsQueryResponse("id123", "Active", LocalDate.now().plusMonths(4))

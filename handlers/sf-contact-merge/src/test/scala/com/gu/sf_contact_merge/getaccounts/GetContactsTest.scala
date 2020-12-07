@@ -6,10 +6,11 @@ import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityAndSF
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.ContactId
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
-import org.scalatest.{FlatSpec, Matchers}
 import cats.data.NonEmptyList
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetContactsTest extends FlatSpec with Matchers {
+class GetContactsTest extends AnyFlatSpec with Matchers {
 
   import GetContactsTest._
 

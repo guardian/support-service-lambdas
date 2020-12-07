@@ -5,9 +5,10 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.{PricesFromZuoraCatalog, ZuoraIds}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{Stage, ZuoraEnvironment}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PricesFromZuoraCatalogEffectsTest extends FlatSpec with Matchers {
+class PricesFromZuoraCatalogEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "load catalog" taggedAs EffectsTest in {
 

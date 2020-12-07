@@ -1,12 +1,13 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import com.gu.TestData
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
 import com.gu.util.config.{StripeConfig, StripeSecretKey}
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class StripeRequestSignatureCheckerTest extends FlatSpec {
+class StripeRequestSignatureCheckerTest extends AnyFlatSpec {
 
   val testSignatureHelper = new FakeStripeSignatureChecker(TestData.fakeStripeConfig)
   val testStripeDeps = StripeDeps(TestData.fakeStripeConfig, testSignatureHelper)

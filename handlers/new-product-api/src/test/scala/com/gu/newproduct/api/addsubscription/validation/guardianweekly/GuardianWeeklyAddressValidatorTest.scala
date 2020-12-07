@@ -3,9 +3,10 @@ package com.gu.newproduct.api.addsubscription.validation.guardianweekly
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GuardianWeeklyAddressValidatorTest extends FlatSpec with Matchers {
+class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
 
   val testBillingAddress = BillToAddress(
     Some(Address1("soldToAddress1")),

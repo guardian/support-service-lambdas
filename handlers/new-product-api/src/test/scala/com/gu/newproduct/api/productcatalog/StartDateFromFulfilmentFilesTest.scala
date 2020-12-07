@@ -5,12 +5,14 @@ import java.time.DayOfWeek._
 
 import com.gu.effects.S3Location
 import com.gu.util.config.Stage
-import org.scalatest.{FlatSpec, Inside, Matchers}
+import org.scalatest.Inside
 
 import scala.io.Source
 import scala.util.Try
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class StartDateFromFulfilmentFilesTest extends FlatSpec with Matchers {
+class StartDateFromFulfilmentFilesTest extends AnyFlatSpec with Matchers {
   def stubFetchString(s3Location: S3Location): Try[String] = s3Location match {
     case S3Location("fulfilment-date-calculator-dev", "Guardian Weekly/2020-04-27_Guardian Weekly.json") =>
       Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Guardian Weekly.json").getLines().mkString("\n"))

@@ -3,9 +3,10 @@ package com.gu.newproduct.api.addsubscription.validation.digipack
 import com.gu.i18n.Currency.USD
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidatedAccount}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DigipackAccountValidationTest extends FlatSpec with Matchers {
+class DigipackAccountValidationTest extends AnyFlatSpec with Matchers {
   val account = ValidatedAccount(
     identityId = Some(IdentityId("identityId")),
     sfContactId = Some(SfContactId("sfContactId")),

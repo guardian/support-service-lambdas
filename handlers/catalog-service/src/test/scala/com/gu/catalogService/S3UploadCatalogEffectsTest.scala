@@ -6,12 +6,12 @@ import com.gu.effects.{AwsS3, UploadToS3}
 import com.gu.test.EffectsTest
 import com.gu.util.Logging
 import com.gu.util.config.{Stage, ZuoraEnvironment}
-import org.scalatest.FlatSpec
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
 import scala.util.Try
+import org.scalatest.flatspec.AnyFlatSpec
 
-class S3UploadCatalogEffectsTest extends FlatSpec with Logging {
+class S3UploadCatalogEffectsTest extends AnyFlatSpec with Logging {
 
   private def getLatestCatalogTimestamp: Try[Instant] = Try(
     AwsS3.client.getObject(

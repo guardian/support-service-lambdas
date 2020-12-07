@@ -4,9 +4,11 @@ import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
 import org.scalatest.Inside.inside
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RatePlanChargeDataTest extends FlatSpec with Matchers with EitherValues {
+class RatePlanChargeDataTest extends AnyFlatSpec with Matchers with EitherValues {
 
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
 

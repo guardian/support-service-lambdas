@@ -1,9 +1,10 @@
 package com.gu.zuora.sar
 
 import com.gu.zuora.sar.BatonModels.{Completed, Failed, PerformSarRequest, PerformSarResponse, SarInitiateRequest}
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class ZuoraPerformSarHandlerSpec extends FreeSpec with Matchers {
+class ZuoraPerformSarHandlerSpec extends AnyFreeSpec with Matchers {
   val mockConfig: ZuoraSarConfig = ConfigLoader.getSarLambdaConfigTemp
 
   "ZuoraPerformSarLambda" - {

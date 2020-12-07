@@ -1,10 +1,11 @@
 package com.gu.zuora.retention.updateAccounts
 
 import com.gu.util.handlers.LambdaException
-import org.scalatest.{FlatSpec, Matchers}
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HandlerTest extends FlatSpec with Matchers {
+class HandlerTest extends AnyFlatSpec with Matchers {
   it should "detect if there was no progress made in api call" in {
     val request = UpdateAccountsRequest(uri = "someUri", nextIndex = Option(10))
     val noProgressResponse = UpdateAccountsResponse(uri = "someUri", nextIndex = Option(10), done = false)

@@ -3,9 +3,11 @@ package com.gu.zuora.subscription
 import java.time.LocalDate
 
 import org.scalactic.TypeCheckedTripleEquals
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class FulfilmentStartDateSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
+class FulfilmentStartDateSpec extends AnyFlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
 
   "Subscription" should "calculate the 'fulfilment start date' based on the 'effectiveStartDate's of all its Rate Plans" in {
 

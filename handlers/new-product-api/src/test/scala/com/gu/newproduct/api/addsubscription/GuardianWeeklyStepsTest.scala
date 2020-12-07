@@ -19,14 +19,15 @@ import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
+class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
   val quarterlyTestRatePlanZuoraId = ProductRatePlanId("quarterly-zuora-rate-plan-id")
   val sixForSixTestRatePlanZuoraId = ProductRatePlanId("6-for-6-zuora-rate-plan-id")
   val sixForSixTestRatePlanChargeZuoraId = ProductRatePlanChargeId("6-for-6-zuora-rate-plan-charge-id")

@@ -10,9 +10,10 @@ import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SalesforceDDMandateEventEffectsTest extends FlatSpec with Matchers {
+class SalesforceDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "create a 'DD Mandate Event' in salesforce" taggedAs EffectsTest in {
 

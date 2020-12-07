@@ -2,9 +2,10 @@ package com.gu.sf_contact_merge.validate
 
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, LastName}
 import com.gu.sf_contact_merge.validate.GetVariations.{Differing, HasAllowableVariations, HasNoVariations}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AssertSameEmailsTest extends FlatSpec with Matchers {
+class AssertSameEmailsTest extends AnyFlatSpec with Matchers {
 
   it should "be all ok with the same email addresses" in {
     val testData = List("hi@gu.com", "hi@gu.com").map(email => EmailAddress(email))

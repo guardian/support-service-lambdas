@@ -12,10 +12,11 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
 import cats.data.NonEmptyList
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
+class GetZuoraEmailsForAccountsEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "return the right emails" taggedAs EffectsTest in {
 

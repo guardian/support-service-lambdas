@@ -4,12 +4,13 @@ import com.gu.effects.S3Location
 import com.gu.effects.{GetFromS3, Http}
 import com.gu.test.HealthCheck
 import okhttp3._
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 // this test runs the health check from locally. this means you can only run it manually
 // you should run the healthcheck in code and in prod after deployments
-class CODEPRODHealthCheck extends FlatSpec with Matchers {
+class CODEPRODHealthCheck extends AnyFlatSpec with Matchers {
 
   import com.gu.util.reader.Types._
 

@@ -1,8 +1,6 @@
 package com.gu.fulfilmentdates
 
 import java.time.{DayOfWeek, LocalDate}
-
-import cats.implicits._
 import com.gu.effects.S3Location
 import com.gu.fulfilmentdates.FulfilmentDatesLocation.fulfilmentDatesFileLocation
 import com.gu.util.config.Stage

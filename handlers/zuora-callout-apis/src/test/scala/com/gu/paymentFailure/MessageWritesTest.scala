@@ -1,11 +1,11 @@
 package com.gu.paymentFailure
 
 import com.gu.util.email._
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
 
-class MessageWritesTest extends FlatSpec with EmailSqsSerialisation {
+class MessageWritesTest extends AnyFlatSpec with EmailSqsSerialisation {
 
   "Message" should "serialize to the correct json format with payment id" in {
     val message = EmailMessage(

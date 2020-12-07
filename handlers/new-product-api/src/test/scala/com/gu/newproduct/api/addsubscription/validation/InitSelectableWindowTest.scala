@@ -3,9 +3,10 @@ package com.gu.newproduct.api.addsubscription.validation
 import java.time.LocalDate
 
 import com.gu.newproduct.api.productcatalog.{WindowRule, WindowSizeDays}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class InitSelectableWindowTest extends FlatSpec with Matchers {
+class InitSelectableWindowTest extends AnyFlatSpec with Matchers {
 
   val wednesdayAugust8 = LocalDate.of(2018, 8, 8)
 

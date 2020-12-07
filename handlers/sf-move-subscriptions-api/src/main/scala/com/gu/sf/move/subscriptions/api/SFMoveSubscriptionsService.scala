@@ -2,7 +2,7 @@ package com.gu.sf.move.subscriptions.api
 
 import cats.Monad
 import cats.data.EitherT
-import cats.implicits._
+import cats.syntax.all._
 import com.gu.zuora.Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
 import com.gu.zuora._
 import com.gu.zuora.subscription._
