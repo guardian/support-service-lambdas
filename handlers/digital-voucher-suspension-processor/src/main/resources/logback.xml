@@ -1,0 +1,19 @@
+<!--<configuration debug="true">-->
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- see http://logback.qos.ch/manual/layouts.html -->
+            <pattern>%level %class:%line - %message%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- see https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/java-dg-logging.html -->
+    <logger name="software.amazon.awssdk" level="WARN"/>
+    <logger name="software.amazon.awssdk.request" level="DEBUG"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
