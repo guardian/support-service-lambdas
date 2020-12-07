@@ -1,14 +1,14 @@
 package com.gu.batchemailsender.api.batchemail
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
 object SalesforceToBrazeTransformations {
   def fromSfDateToDisplayDate(sfDate: String): String = {
     val formattedDate: Try[String] = Try {
-      val asDateTime = DateTime.parse(sfDate, DateTimeFormat.forPattern("yyyy-MM-dd"))
-      asDateTime.toString(DateTimeFormat.forPattern("d MMMM yyyy"))
+      val asDateTime = LocalDate.parse(sfDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+      asDateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
     }
 
     formattedDate match {
