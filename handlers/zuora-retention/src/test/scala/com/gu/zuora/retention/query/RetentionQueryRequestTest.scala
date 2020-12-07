@@ -3,9 +3,10 @@ package com.gu.zuora.retention.query
 import java.time.LocalDate
 
 import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest}
-import org.scalatest.AsyncFlatSpec
 import play.api.libs.json.Json
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers
+import org.scalatest.flatspec.AsyncFlatSpec
 
 class RetentionQueryRequestTest extends AsyncFlatSpec {
 

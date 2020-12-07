@@ -5,11 +5,12 @@ import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.S3Location
 import com.gu.util.config.{Stage, ZuoraEnvironment}
 import com.gu.util.zuora.ZuoraRestConfig
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Try}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CatalogServiceStepsTest extends FlatSpec with Matchers {
+class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
 
   val successfulResponseEffects = new TestingRawEffects(200)
   val failureResponseEffects = new TestingRawEffects(500)

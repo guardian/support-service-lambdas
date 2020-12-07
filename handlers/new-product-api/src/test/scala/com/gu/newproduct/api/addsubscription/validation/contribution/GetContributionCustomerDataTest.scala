@@ -10,9 +10,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMetho
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetContributionCustomerDataTest extends FlatSpec with Matchers {
+class GetContributionCustomerDataTest extends AnyFlatSpec with Matchers {
 
   "GetContributionCustomerData" should "return data succesfully" in {
     val actual = getContributionCustomerData(

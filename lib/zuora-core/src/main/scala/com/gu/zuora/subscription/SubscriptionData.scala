@@ -2,7 +2,7 @@ package com.gu.zuora.subscription
 
 import java.time.{DayOfWeek, LocalDate}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import cats.implicits._
+import cats.syntax.all._
 import RatePlanChargeData.round2Places
 
 import math.abs

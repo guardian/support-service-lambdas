@@ -3,7 +3,7 @@ package com.gu.digital_voucher_api
 import java.time.LocalDate
 
 import cats.Monad
-import cats.implicits._
+import cats.syntax.all._
 import cats.data.EitherT
 import com.gu.imovo.{ImovoClient, ImovoSubscriptionResponse, ImovoSubscriptionType, SchemeName, SfSubscriptionId}
 

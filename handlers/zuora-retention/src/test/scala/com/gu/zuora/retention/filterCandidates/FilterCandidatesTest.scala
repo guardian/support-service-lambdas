@@ -2,11 +2,12 @@ package com.gu.zuora.retention.filterCandidates
 
 import com.gu.util.handlers.LambdaException
 import com.gu.zuora.reports.dataModel.FetchedFile
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class FilterCandidatesTest extends FlatSpec with Matchers {
+class FilterCandidatesTest extends AnyFlatSpec with Matchers {
 
   val candidatesFetchedFile = FetchedFile("id", "candidatesQuery", "s3://candidatesUri")
   val exclusionsFetchedFile = FetchedFile("id", "exclusionQuery", "s3://exclusionsUri")

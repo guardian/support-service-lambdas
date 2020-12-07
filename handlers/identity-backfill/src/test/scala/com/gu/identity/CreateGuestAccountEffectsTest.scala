@@ -8,12 +8,13 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.{JsonHttp, RestRequestMaker}
 import com.gu.util.resthttp.RestRequestMaker.{GetRequestWithParams, RelativePath, UrlParams}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsValue, Json, Reads}
 
 import scala.util.Random
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CreateGuestAccountEffectsTest extends FlatSpec with Matchers {
+class CreateGuestAccountEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "create a guest account" taggedAs EffectsTest in {
 

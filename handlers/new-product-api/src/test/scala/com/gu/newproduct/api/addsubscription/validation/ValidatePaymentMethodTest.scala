@@ -5,9 +5,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.NonDirectDeb
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.{ActivePaymentMethod, NotActivePaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.{CreditCard, Other}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ValidatePaymentMethodTest extends FlatSpec with Matchers {
+class ValidatePaymentMethodTest extends AnyFlatSpec with Matchers {
   val paymentMethodId = PaymentMethodId("paymentMethodId")
   it should "fail if payment method is not active" in {
     val inactivePaymentMethod = NonDirectDebitMethod(NotActivePaymentMethod, CreditCard)

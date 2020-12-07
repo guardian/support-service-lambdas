@@ -1,10 +1,11 @@
 package com.gu.newproduct.api.addsubscription
 
-import org.scalatest.{FlatSpec, Matchers}
 import Formatters._
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class FormattersTest extends FlatSpec with Matchers {
+class FormattersTest extends AnyFlatSpec with Matchers {
   it should "format 4 digit amount" in {
     val amount = AmountMinorUnits(1234)
 

@@ -4,10 +4,11 @@ import java.time.LocalDate
 
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsError, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AddSubscriptionRequestTest extends FlatSpec with Matchers {
+class AddSubscriptionRequestTest extends AnyFlatSpec with Matchers {
   it should "deserialize correctly" in {
     val input =
       """{

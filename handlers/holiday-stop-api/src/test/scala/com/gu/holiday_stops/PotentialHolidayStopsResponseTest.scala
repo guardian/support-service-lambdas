@@ -3,10 +3,11 @@ package com.gu.holiday_stops
 import java.time.LocalDate
 
 import com.gu.zuora.subscription.Credit
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PotentialHolidayStopsResponseTest extends FlatSpec with Matchers {
+class PotentialHolidayStopsResponseTest extends AnyFlatSpec with Matchers {
 
   private val response = PotentialHolidayStopsResponse(
     nextInvoiceDateAfterToday = LocalDate.of(2019, 10, 1),

@@ -5,10 +5,11 @@ import java.time.LocalDate
 import com.gu.digitalSubscriptionExpiry.UrlParams
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class SkipActivationDateUpdateTest extends FlatSpec {
+class SkipActivationDateUpdateTest extends AnyFlatSpec {
 
   val testDate = LocalDate.now()
   def testSubscriptionResult(casActivationDate: Option[String]) = SubscriptionResult(

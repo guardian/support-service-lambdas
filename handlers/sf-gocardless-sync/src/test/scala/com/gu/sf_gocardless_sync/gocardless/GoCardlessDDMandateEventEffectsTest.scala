@@ -9,9 +9,10 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GoCardlessDDMandateEventEffectsTest extends FlatSpec with Matchers {
+class GoCardlessDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "fetch a set of mandate events from GoCardless, with accompanying mandate detail" taggedAs EffectsTest in {
 

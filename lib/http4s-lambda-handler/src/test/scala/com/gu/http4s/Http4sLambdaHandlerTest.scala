@@ -6,9 +6,11 @@ import cats.effect.IO
 import cats.effect.IO._
 import org.http4s._
 import org.http4s.dsl.io._
-import org.scalatest.{FlatSpec, Inside, Matchers}
+import org.scalatest.Inside
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class Http4sLambdaHandlerTest extends FlatSpec with Matchers {
+class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
   "Http4sLambdaHandler" should "handle GET request with no body" in {
 
     val apiGatewayRequest =

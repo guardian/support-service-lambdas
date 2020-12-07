@@ -3,12 +3,13 @@ package com.gu.util.handlers
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class JsonHandlerTest extends FlatSpec with Matchers {
+class JsonHandlerTest extends AnyFlatSpec with Matchers {
 
   case class TestRequest(requestValue: String)
   implicit val reqFormat = Json.format[TestRequest]

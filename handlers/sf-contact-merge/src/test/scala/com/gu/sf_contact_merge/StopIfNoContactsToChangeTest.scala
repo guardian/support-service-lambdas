@@ -1,8 +1,9 @@
 package com.gu.sf_contact_merge
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class StopIfNoContactsToChangeTest extends FlatSpec with Matchers {
+class StopIfNoContactsToChangeTest extends AnyFlatSpec with Matchers {
 
   it should "return no action needed if only one contact with the correct id" in {
     val actual = StopIfNoContactsToChange(1, List(1))

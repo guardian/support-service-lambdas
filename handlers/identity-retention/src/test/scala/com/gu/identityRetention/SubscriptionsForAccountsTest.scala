@@ -2,10 +2,11 @@ package com.gu.identityRetention
 
 import com.gu.identityRetention.Types.AccountId
 import com.gu.util.resthttp.Types.ClientSuccess
-import org.scalatest.{FlatSpec, Matchers}
 import cats.data.NonEmptyList
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SubscriptionsForAccountsTest extends FlatSpec with Matchers {
+class SubscriptionsForAccountsTest extends AnyFlatSpec with Matchers {
 
   it should "build a valid query for a single account" in {
     val query = SubscriptionsForAccounts.buildQuery(NonEmptyList(

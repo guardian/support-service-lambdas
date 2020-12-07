@@ -5,9 +5,11 @@ import java.time.temporal.ChronoUnit
 
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.Inside.inside
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
+class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
   "BillingSchedule" should "calculate fixed monthly period valid date range" in {
     testFixedBillingPeriod(
       billingPeriodName = "Month",

@@ -4,6 +4,8 @@ import * as lambda from '@aws-cdk/aws-lambda'
 import * as iam from '@aws-cdk/aws-iam'
 import { Duration, Tag } from '@aws-cdk/core'
 import * as s3 from '@aws-cdk/aws-s3'
+import * as cloudwatch from '@aws-cdk/aws-cloudwatch';
+import * as sns from '@aws-cdk/aws-sns';
 import events = require('@aws-cdk/aws-events');
 import targets = require('@aws-cdk/aws-events-targets');
 
@@ -21,6 +23,11 @@ export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
 
     const appName = 'digital-voucher-cancellation-processor'
     const stackName = 'membership'
+
+    const isProd = new cdk.CfnCondition(this, 'IsProd', {
+        expression: cdk.Fn.conditionEquals(stageParameter.valueAsString, 'PROD'),
+    });
+
     const deployBucket = s3.Bucket.fromBucketName(
       this,
       'deployBucket',
@@ -107,10 +114,43 @@ export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
         return schedule
     }
 
+    const createErrorAlarm = (lambdaFn: lambda.Function) => {
+        const alarm = new cloudwatch.Alarm(this, 'ErrorAlarm', {
+            alarmName: 'URGENT 9-5 - PROD: Failed to cancel digital voucher subscriptions',
+            alarmDescription: 'IMPACT: If this goes unaddressed at least one subscription that ' +
+                'was supposed to be cancelled will be available for fulfilment. ' +
+                'For troubleshooting, see ' +
+                'https://github.com/guardian/support-service-lambdas/blob/main/handlers/digital-voucher-cancellation-processor/README.md.',
+            metric: new cloudwatch.Metric({
+                namespace: 'AWS/Lambda',
+                metricName: 'Errors',
+                dimensions: {FunctionName: lambdaFn.functionName}
+            }),
+            comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+            period: cdk.Duration.minutes(5),
+            statistic: 'Sum',
+            threshold: 1,
+            evaluationPeriods: 1,
+            treatMissingData: cloudwatch.TreatMissingData.MISSING
+        });
+        alarm.addAlarmAction({
+            bind() {
+                return {
+                    alarmActionArn: `arn:aws:sns:${region}:${account}:fulfilment-dev`
+                };
+            },
+        });
+        return alarm;
+    }
+
     const digitalVoucherCancellationProcessorFnRole = createDigitalVoucherCancellationProcessorFnRole()
 
     const digitalVoucherCancellationProcessorLambda = createDigitalVoucherCancellationProcessorLambda(digitalVoucherCancellationProcessorFnRole)
 
     const digitalVoucherCancellationProcessorSchedule = createDigitalVoucherCancellationProcessorSchedule(digitalVoucherCancellationProcessorLambda)
+
+    const errorAlarm = createErrorAlarm(digitalVoucherCancellationProcessorLambda);
+    errorAlarm.node.addDependency(digitalVoucherCancellationProcessorLambda);
+    (errorAlarm.node.defaultChild as cloudwatch.CfnAlarm).cfnOptions.condition = isProd;
   }
 }

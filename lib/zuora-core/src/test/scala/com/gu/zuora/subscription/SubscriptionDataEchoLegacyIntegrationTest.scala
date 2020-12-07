@@ -6,9 +6,9 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class SubscriptionDataEchoLegacyIntegrationTest extends FlatSpec {
+class SubscriptionDataEchoLegacyIntegrationTest extends AnyFlatSpec {
   /**
    * This tests the echo legacy subscription description described in EchoLegacySubscription.json
    * This subscription is for Friday/Saturday ie it has non-zero rate plan charge price for those days

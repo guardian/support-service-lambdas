@@ -1,11 +1,12 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
 import SourceUpdatedCallout._
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class StripeCustomerUpdatedReadsTest extends FlatSpec {
+class StripeCustomerUpdatedReadsTest extends AnyFlatSpec {
 
   "SourceUpdatedCallout" should "deserialise correctly from a valid event" in {
 

@@ -4,10 +4,11 @@ import com.gu.identity.CreateGuestAccount.{WireGuestRegistrationResponse, WireId
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.resthttp.RestRequestMaker.{PostRequest, RelativePath}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CreateGuestAccountTest extends FlatSpec with Matchers {
+class CreateGuestAccountTest extends AnyFlatSpec with Matchers {
 
   it should "create a request ok" in {
     val actual = CreateGuestAccount.toRequest(EmailAddress("hello@gu.com"))

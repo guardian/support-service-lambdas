@@ -3,9 +3,10 @@ package com.gu.newproduct.api.addsubscription.validation
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.Subscription
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ValidateSubscriptionsTest extends FlatSpec with Matchers {
+class ValidateSubscriptionsTest extends AnyFlatSpec with Matchers {
 
   def sub(active: Boolean, rateplans: Set[String]) = Subscription(
     status = if (active) GetAccountSubscriptions.Active else GetAccountSubscriptions.NotActive,

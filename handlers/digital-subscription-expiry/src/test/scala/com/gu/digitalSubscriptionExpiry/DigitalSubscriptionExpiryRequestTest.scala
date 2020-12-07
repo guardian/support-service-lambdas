@@ -1,11 +1,12 @@
 package test.scala.com.gu.digitalSubscriptionExpiry
 
 import com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
+import org.scalatest.matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class DigitalSubscriptionExpiryRequestTest extends FlatSpec {
+class DigitalSubscriptionExpiryRequestTest extends AnyFlatSpec {
 
   "DigitalSubscriptionExpiryRequest" should "deserialise correctly from a valid request" in {
 

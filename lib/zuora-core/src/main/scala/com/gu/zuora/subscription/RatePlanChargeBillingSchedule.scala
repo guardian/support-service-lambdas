@@ -6,7 +6,7 @@ import java.time.temporal.{ChronoUnit, TemporalAdjusters}
 import java.time.LocalDate
 
 import cats.data.NonEmptyList
-import cats.implicits._
+import cats.syntax.all._
 
 import scala.annotation.tailrec
 

@@ -5,11 +5,12 @@ import java.time.LocalDate
 import com.gu.cas.{PrefixedTokens, SevenDay}
 import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GetTokenExpiryTest extends FlatSpec with Matchers {
+class GetTokenExpiryTest extends AnyFlatSpec with Matchers {
 
   val getTokenExpiry = {
     val codec = PrefixedTokens(secretKey = "secret", emergencySubscriberAuthPrefix = "G99")

@@ -8,10 +8,11 @@ import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types._
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId._
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
+class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
 
   it should "send the right request for update identity id" in {
 

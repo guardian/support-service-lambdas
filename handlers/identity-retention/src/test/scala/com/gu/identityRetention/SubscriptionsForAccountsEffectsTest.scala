@@ -7,10 +7,11 @@ import com.gu.identityRetention.Types.AccountId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
-import org.scalatest.{FlatSpec, Matchers}
 import cats.data.NonEmptyList
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SubscriptionsForAccountsEffectsTest extends FlatSpec with Matchers {
+class SubscriptionsForAccountsEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "successfull query multiple accounts" taggedAs EffectsTest in {
 

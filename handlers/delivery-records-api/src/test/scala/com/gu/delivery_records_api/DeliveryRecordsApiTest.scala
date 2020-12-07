@@ -11,13 +11,15 @@ import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Decoder
 import org.http4s.{Header, Headers, Method, Query, Request, Response, Uri}
-import org.scalatest.{EitherValues, FlatSpec, Inside, Matchers}
+import org.scalatest.{EitherValues, Inside}
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
 import org.http4s.circe._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
+class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues {
   val config = SFAuthConfig("https://salesforceAuthUrl", "sfClientId", "sfClientSecret", "sfUsername", "sfPassword", "sfToken")
   val auth = SalesforceAuth("salesforce-access-token", "https://salesforceInstanceUrl")
   val subscriptionNumber = "A-213123"

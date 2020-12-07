@@ -8,10 +8,11 @@ import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
-import org.scalatest.{FlatSpec, Matchers}
 import scala.util.{Success, Try}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class EndToEndHandlerTest extends FlatSpec with Matchers {
+class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
 
   case class testData(zuoraCalloutInput: String, expectedEmailSend: String)
 

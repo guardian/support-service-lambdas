@@ -3,7 +3,7 @@ package com.gu.digital_voucher_cancellation_processor
 import java.time.{Clock, Instant, LocalDate}
 
 import cats.data.{EitherT, NonEmptyList}
-import cats.implicits._
+import cats.syntax.all._
 import cats.{Monad, Show}
 import com.gu.imovo.{ImovoClient, ImovoClientException, SfSubscriptionId}
 import com.gu.salesforce.sttp.{SFApiCompositePart, SFApiCompositeRequest, SalesforceClient}
