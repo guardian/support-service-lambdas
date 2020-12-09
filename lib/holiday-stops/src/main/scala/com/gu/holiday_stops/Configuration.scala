@@ -1,17 +1,12 @@
 package com.gu.holiday_stops
 
-import zio.RIO
-
-trait Configuration {
-  val configuration: Configuration.Service[Any]
-}
+import zio.{UIO, URIO}
 
 object Configuration {
-  trait Service[R] {
-    val config: RIO[R, Config]
+
+  trait Service {
+    val config: UIO[Config]
   }
 
-  object factory extends Service[Configuration] {
-    val config: RIO[Configuration, Config] = RIO.accessM(_.configuration.config)
-  }
+  val config: URIO[Configuration, Config] = URIO.accessM(_.get.config)
 }
