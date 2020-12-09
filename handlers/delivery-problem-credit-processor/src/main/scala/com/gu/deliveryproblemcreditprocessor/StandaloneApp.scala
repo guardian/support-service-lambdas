@@ -1,13 +1,13 @@
 package com.gu.deliveryproblemcreditprocessor
 
 import com.gu.deliveryproblemcreditprocessor.DeliveryCreditProcessor.processAllProducts
-import zio.{App, ZEnv, ZIO, console}
+import zio._
 
 // For functional testing locally
 object StandaloneApp extends App {
 
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
+  def run(args: List[String]): URIO[ZEnv, ExitCode] =
     processAllProducts
       .tapError(e => console.putStrLn(e.toString))
-      .fold(_ => 1, _ => 0)
+      .exitCode
 }

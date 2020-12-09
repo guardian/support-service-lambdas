@@ -30,14 +30,13 @@ import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads, Writes}
 import zio.console.Console
-import zio.{DefaultRuntime, ZIO, console}
-import scala.util.Try
+import zio.ZIO
 
 object Handler extends Logging {
 
   type SfClient = HttpOp[StringHttpRequest, BodyAsString]
 
-  private val runtime = new DefaultRuntime {}
+  private val runtime = zio.Runtime.default
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
@@ -48,7 +47,7 @@ object Handler extends Logging {
         GetFromS3.fetchString,
         HttpURLConnectionBackend(),
         UUID.randomUUID().toString,
-      ).provide(new Console.Live with ConfigLive {})
+      ).provideCustomLayer(ConfigurationLive.impl)
     }
 
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context))(configOp)
@@ -61,15 +60,15 @@ object Handler extends Logging {
     backend: SttpBackend[Id, Nothing],
     idGenerator: => String,
   ): ZIO[Console with Configuration, Serializable, ApiGatewayOp[Operation]] =
-    for {
-      config <- Configuration.factory.config.tapError(e => console.putStrLn(s"Config failure: $e"))
-    } yield operationForEffectsInternal(
-      response,
-      stage,
-      fetchString,
-      backend,
-      idGenerator,
-      config
+    Configuration.config.map(config =>
+      operationForEffectsInternal(
+        response,
+        stage,
+        fetchString,
+        backend,
+        idGenerator,
+        config
+      )
     )
 
   private def operationForEffectsInternal(

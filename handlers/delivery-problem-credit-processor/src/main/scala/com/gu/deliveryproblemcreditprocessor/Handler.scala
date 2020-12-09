@@ -4,11 +4,10 @@ import com.amazonaws.services.lambda.runtime.Context
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
-import zio.DefaultRuntime
 
 object Handler extends Lambda[None.type, List[DeliveryCreditResult]] {
 
-  private val runtime = new DefaultRuntime {}
+  private val runtime = zio.Runtime.default
 
   override protected def handle(
     unused: None.type,

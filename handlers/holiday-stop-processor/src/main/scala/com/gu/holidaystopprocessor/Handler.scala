@@ -6,15 +6,15 @@ import cats.syntax.all._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.creditprocessor.ProcessResult
 import com.gu.effects.GetFromS3
-import com.gu.holiday_stops.{ConfigLive, Configuration}
+import com.gu.holiday_stops.{Configuration, ConfigurationLive}
 import com.gu.holidaystopprocessor.HolidayStopCreditProcessor.{ProductTypeAndStopDate, processAllProducts}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
-import zio.console.Console
 import zio._
+import zio.console.Console
 
 object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayCreditAddResult]] with zio.App {
 
@@ -28,12 +28,11 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
    */
   override def handle(productTypeAndStopDateOverride: Option[ProductTypeAndStopDate], context: Context): Either[Throwable, List[ZuoraHolidayCreditAddResult]] = {
 
-    val runtime = new DefaultRuntime {}
+    val runtime = zio.Runtime.default
 
     val main: RIO[Console with Configuration, List[ZuoraHolidayCreditAddResult]] =
       for {
-        config <- Configuration.factory.config.tapError(e =>
-          console.putStrLn(s"Config failure: $e"))
+        config <- Configuration.config
         results <- RIO.effect(
           HolidayStopCreditProcessor.processAllProducts(
             config,
@@ -53,12 +52,12 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
       } yield zuoraWriteResults
 
     runtime.unsafeRun {
-      main.provide(new Console.Live with ConfigLive {}).either
+      main.provideCustomLayer(ConfigurationLive.impl).either
     }
   }
 
   // This is just for functional testing locally.
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+  def run(args: List[String]): URIO[ZEnv, ExitCode] = {
 
     def showResults(processResults: List[ProcessResult[ZuoraHolidayCreditAddResult]]) =
       for {
@@ -74,8 +73,7 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
 
     def main(productTypeAndStopDate: Option[ProductTypeAndStopDate]) =
       for {
-        config <- Configuration.factory.config.tapError(e =>
-          console.putStrLn(s"Config failure: $e"))
+        config <- Configuration.config
         processResults <- ZIO.effect(
           processAllProducts(
             config,
@@ -91,7 +89,7 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
       productType <- args.headOption.map(arg => ZuoraProductType(arg))
       stopDate <- args.lift(1).map(LocalDate.parse)
     } yield ProductTypeAndStopDate(productType, stopDate)
-    val program = main(productTypeAndStopDate).provide(new Console.Live with ConfigLive {})
-    program.fold(_ => 1, _ => 0)
+    val program = main(productTypeAndStopDate).provideCustomLayer(ConfigurationLive.impl)
+    program.exitCode
   }
 }
