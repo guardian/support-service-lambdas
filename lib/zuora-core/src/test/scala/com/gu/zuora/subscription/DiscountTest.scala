@@ -8,6 +8,7 @@ import org.scalatest.matchers.should.Matchers
 
 class DiscountTest extends AnyFlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
   "Credit calculation" should "take into account discounts" in {
+    MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-10-04")))
     val subscription = Fixtures.subscriptionFromJson("Discounts.json")
     val account = Fixtures.mkAccount()
     val subscriptionData = SubscriptionData(subscription, account).right.value

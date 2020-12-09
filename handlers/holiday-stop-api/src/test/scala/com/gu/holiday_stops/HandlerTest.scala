@@ -21,17 +21,17 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsObject, JsString, JsSuccess, Json}
 import zio.console.Console
-import zio.{DefaultRuntime, ZIO}
+import zio.ZIO
 
 class HandlerTest extends AnyFlatSpec with Matchers {
   val testId = "test-generated-id"
 
-  private val runtime = new DefaultRuntime {}
+  private val runtime = zio.Runtime.default
 
   private def unwrappedOp(wrapped: ZIO[Console with Configuration, Serializable,
     ApiGatewayOp[ApiGatewayHandler.Operation]]): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     runtime.unsafeRun {
-      wrapped.provide(new Console.Live with ConfigTest {})
+      wrapped.provideCustomLayer(ConfigurationTest.impl)
     }
   }
 
