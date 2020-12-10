@@ -1,11 +1,11 @@
 package com.gu.effects
 
-import java.util.concurrent.TimeUnit
-
 import com.gu.util.Logging
-import okhttp3.internal.Util.UTF_8
 import okhttp3.{OkHttpClient, Request, RequestBody, Response}
 import okio.Buffer
+
+import java.nio.charset.StandardCharsets.UTF_8
+import java.util.concurrent.TimeUnit
 
 object Http extends Logging {
 
