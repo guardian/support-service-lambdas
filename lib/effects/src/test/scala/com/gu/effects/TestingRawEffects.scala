@@ -2,12 +2,12 @@ package com.gu.effects
 
 import com.gu.effects.TestingRawEffects._
 import com.gu.util.Logging
-import okhttp3.internal.Util.UTF_8
 import okhttp3._
 import okio.Buffer
 import software.amazon.awssdk.core.sync.{RequestBody => S3RequestBody}
 import software.amazon.awssdk.services.s3.model.{PutObjectRequest, PutObjectResponse}
 
+import java.nio.charset.StandardCharsets.UTF_8
 import scala.util.{Failure, Success}
 
 class TestingRawEffects(

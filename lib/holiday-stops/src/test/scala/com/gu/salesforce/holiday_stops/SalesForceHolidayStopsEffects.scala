@@ -28,14 +28,8 @@ object SalesForceHolidayStopsEffects {
     }"
   }
 
-  def escapeQueryStringValue(value: String) = {
-    URLEncoder
-      .encode(value, "UTF-8")
-      .replace("+", "%20")
-      .replace("%2C", ",")
-      .replace("%28", "(")
-      .replace("%29", ")")
-  }
+  def escapeQueryStringValue(value: String) =
+    URLEncoder.encode(value, "UTF-8").replace("+", "%20")
 
   def listHolidayStops(contactId: String, subscriptionName: String, holidayStops: List[HolidayStopRequest], optionalHistoricalCutOff: Option[LocalDate] = None): (String, HTTPResponse) =
     listHolidayRequestUrl(

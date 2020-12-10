@@ -42,7 +42,7 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
       BasicRequest("POST", "/action/query",
         """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
-      BasicRequest("GET", "/user?emailAddress=email@address", "")
+      BasicRequest("GET", "/user?emailAddress=email%40address", "")
     ))
   }
 
@@ -71,7 +71,7 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
       BasicRequest("POST", "/action/query",
         """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
-      BasicRequest("GET", "/user?emailAddress=email@address", "")
+      BasicRequest("GET", "/user?emailAddress=email%40address", "")
     ))
   }
 
@@ -119,7 +119,7 @@ object EndToEndData {
   }
 
   def GetByEmailTestresponses: Map[String, HTTPResponse] = Map(
-    "/user?emailAddress=email@address" -> HTTPResponse(200, dummyIdentityResponse)
+    "/user?emailAddress=email%40address" -> HTTPResponse(200, dummyIdentityResponse)
   )
 
   def responses: Map[String, HTTPResponse] =
