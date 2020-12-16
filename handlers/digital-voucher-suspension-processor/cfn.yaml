@@ -93,3 +93,26 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+
+  LambdaScheduleRule:
+    Type: AWS::Events::Rule
+    DependsOn: SuspensionLambda
+    Properties:
+      Description: Triggers hourly processing of digital voucher suspensions.
+      ScheduleExpression: "rate(1 hour)"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt SuspensionLambda.Arn
+          Id: !Ref SuspensionLambda
+          Input: "null"
+
+  LambdaSchedulePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - SuspensionLambda
+      - LambdaScheduleRule
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref SuspensionLambda
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt LambdaScheduleRule.Arn
