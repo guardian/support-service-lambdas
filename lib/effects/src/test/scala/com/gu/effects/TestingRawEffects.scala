@@ -47,7 +47,7 @@ class TestingRawEffects(
         .request(req)
         .protocol(Protocol.HTTP_1_1)
         .code(code)
-        .body(ResponseBody.create(MediaType.parse("text/plain"), response))
+        .body(ResponseBody.create(response, MediaType.parse("text/plain")))
         .message("message??")
         .build()
   }
