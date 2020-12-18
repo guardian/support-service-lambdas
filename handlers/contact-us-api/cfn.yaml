@@ -153,3 +153,30 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+
+  noRequestsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - ContactUsApiGateway
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+      AlarmName: !Sub No requests coming into contact-us-api-${Stage}
+      AlarmDescription: >
+        This is a last line catch-all alarm. It means no requests were received in the last 6 hours.
+        It might mean something's (silently) gone wrong with a part of the system that sends these requests (eg. MMA client or server-side).
+        Or it could mean our users are happy and don't need to contact us. :)
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub contact-us-api-${Stage}-ApiGateway
+        - Name: Stage
+          Value: !Sub ${Stage}
+      EvaluationPeriods: 6
+      MetricName: Count
+      Namespace: AWS/ApiGateway
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: breaching
