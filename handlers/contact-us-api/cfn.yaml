@@ -156,7 +156,6 @@ Resources:
 
   noRequestsAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsProd
     DependsOn:
       - ContactUsApiGateway
     Properties:
@@ -168,15 +167,23 @@ Resources:
         It might mean something's (silently) gone wrong with a part of the system that sends these requests (eg. MMA client or server-side).
         Or it could mean our users are happy and don't need to contact us. :)
       ComparisonOperator: LessThanThreshold
-      Dimensions:
-        - Name: ApiName
-          Value: !Sub contact-us-api-${Stage}-ApiGateway
-        - Name: Stage
-          Value: !Sub ${Stage}
-      EvaluationPeriods: 6
-      MetricName: Count
-      Namespace: AWS/ApiGateway
-      Period: 3600
-      Statistic: Sum
       Threshold: 1
+      EvaluationPeriods: 6
+      Metrics:
+        - Id: actualCount
+          Expression: "FILL(rawCount, 0)"
+        - Id: rawCount
+          ReturnData: false
+          MetricStat:
+            Metric:
+              MetricName: Count
+              Namespace: AWS/ApiGateway
+              Dimensions:
+                - Name: ApiName
+                  Value: !Sub contact-us-api-${Stage}-ApiGateway
+                - Name: Stage
+                  Value: !Sub ${Stage}
+            Period: 3600
+            Stat: Sum
+            Unit: Count
       TreatMissingData: breaching
