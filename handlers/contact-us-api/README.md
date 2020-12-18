@@ -34,7 +34,7 @@ Once the request has been processed a response with an appropriate status code w
 }
 ```
 
-## Errors
+## Errors & Alarms
 
 This lambda is designed to handle errors and exceptions gracefully and always return a response with an appropriate
 status code. Alarms have been added to notify of any issues that might arise.
@@ -69,3 +69,16 @@ The [lambda logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
 1. Check the Salesforce endpoints are correct and online.
 1. Check this lambda for changes to how the relevant Salesforce response is decoded. Check this lambda for changes to
  the version of the Salesforce API used and if that version's responses are the same the lambda expects.
+ 
+ ### No incoming requests
+ 
+ **CAUSE**: This is catch-all alarm to address our lack of end-to-end testing.
+ No requests coming into contact-us-api could mean one of two things:
+ 
+ 1. Something is preventing requests from being sent through to contact-us-api. Eg: a change that breaks the form submission flow
+ 2. Our users are happy and don't need to contact us :)
+ 
+ **IMPACT**: No Contact Us form are reaching the lambda.
+ 
+ **FIX**: Go through MMA logs to determine if any form submissions failed to be routed to the lambda.
+Try submitting a form in PROD and following it in the logs. If it shows up in Salesforce it means all is good.
