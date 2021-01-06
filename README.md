@@ -89,23 +89,6 @@ Ideally this test should be automated and your PR shouldn't be mergeable until t
 
 ---
 
-## Structure
-The main project aggregates all the sub projects from handlers and lib, so we can build and test them in one go.
-
-| Project                                                              | Description                                   |                                    
-| -------------------------------------------------------------------- | --------------------------------------------  |
-|  [root](handlers/root.md)                                            | Auto cancel, payment failure and stripe hook  |
-|  [catalog-service](handlers/catalog-service)                         | Write Zuora catalogue to S3                   |
-|  [digital-subscription-expiry](handlers/digital-subscription-expiry) | Does user have active subscription?           |
-|  [identity-backfill](handlers/identity-backfill)                     | Add identity accounts to Zuora and Salesforce |
-|  [identity-retention](handlers/identity-retention)                   | Is user recurring?                            |
-|  [zuora-retention](handlers/zuora-retention)                         | Exclude long cancelled subscriptions from DL  |
-|  [sf-gocardless-sync](handlers/sf-gocardless-sync)                   | Polling lambda keeping SalesForce in sync with GoCardless  |
-|  [cancellation-sf-cases-api](handlers/cancellation-sf-cases-api)     | API for creating/updating Cases in Salesforce to track self-service cancellation |
-|  [holiday-stop-api](handlers/holiday-stop-api)                       | API for CRUD of Holiday Stop Requests in Salesforce |
-|  [delivery-records-api](handlers/delivery-records-api)               | API for reading Delivery records and creating delivery problems Cases in Salesforce |
-|  [lib](lib)                                                          | Shared code                                   |
-
 ## Generating CloudFormation templates:
 
 See the [docs](./cdk/README.md) for setup and running guides.
