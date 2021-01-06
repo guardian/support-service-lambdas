@@ -12,10 +12,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Echo name of source branch
+      - name: Echo significant env vars
         env:
            HEAD_REF: ${{ github.head_ref }}
-        run: echo "$HEAD_REF"
+           REF: ${{ github.ref }}
+           REPO_OWNER: ${{ github.repository_owner }}
+           EVENT: ${{ github.event }}
+           ACTOR: ${{ github.actor }}
+        run: |
+          echo "HEAD_REF = $HEAD_REF"
+          echo "REF = $REF"
+          echo "REPO_OWNER = $REPO_OWNER"
+          echo "EVENT = $EVENT"
+          echo "ACTOR = $ACTOR"
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Set up Java
