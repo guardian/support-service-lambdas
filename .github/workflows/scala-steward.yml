@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     # Assuming Scala-steward branches are always named 'update/...' and other branches aren't.
-    if: startsWith(github.head_ref, 'update/')
+#    if: startsWith(github.head_ref, 'update/')
 
     runs-on: ubuntu-latest
 
