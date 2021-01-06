@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      # This is to see if condition above can be tightened a little more.
+      # It can be removed once condition is as tight as possible.
       - name: Echo significant env vars
         env:
            HEAD_REF: ${{ github.head_ref }}
@@ -25,6 +28,7 @@ jobs:
           echo "REPO_OWNER = $REPO_OWNER"
           echo "EVENT = $EVENT"
           echo "ACTOR = $ACTOR"
+
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Set up Java
