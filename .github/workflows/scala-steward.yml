@@ -2,8 +2,8 @@ name: Test Scala Steward PRs
 
 on:
   pull_request:
-    branches: [ main ]
-#    branches: [*]
+#    branches: [ main ]
+    branches: [*]
 
 jobs:
   build:
