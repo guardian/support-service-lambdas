@@ -1,5 +1,6 @@
 .*
 !/.gitignore
+!/.github
 target/
 cdk-cfn.yaml
 metals.sbt
