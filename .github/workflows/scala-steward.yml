@@ -17,7 +17,7 @@ jobs:
            HEAD_REF: ${{ github.head_ref }}
            REF: ${{ github.ref }}
            REPO_OWNER: ${{ github.repository_owner }}
-           EVENT: ${{ github.event }}
+           EVENT: ${{ toJson(github.event) }}
            ACTOR: ${{ github.actor }}
         run: |
           echo "HEAD_REF = $HEAD_REF"
