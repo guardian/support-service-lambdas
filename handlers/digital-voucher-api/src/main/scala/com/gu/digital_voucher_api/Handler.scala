@@ -10,3 +10,4 @@ object Handler extends Http4sLambdaHandler(
     .unsafeRunSync()
     .valueOr((error: DigitalVoucherApiError) => throw new RuntimeException(error.toString))
 )
+

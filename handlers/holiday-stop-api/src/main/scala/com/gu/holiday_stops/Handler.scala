@@ -196,8 +196,11 @@ object Handler extends Logging {
           error.message
         ))
 
-  private def exposeSfErrorMessageIn500ApiResponse(action: String) = (error: ClientFailure) => {
-    logger.error(s"Failed to $action: $error")
+  private def exposeSfErrorMessageIn500ApiResponse[A <: Product](
+    action: String,
+    inputThatCausedError: Option[A] = None
+  ): ClientFailure => ApiResponse = (error: ClientFailure) => {
+    logger.error(s"Failed to $action using input $inputThatCausedError: $error")
     ApiGatewayResponse.messageResponse("500", error.message)
   }
 
@@ -366,7 +369,7 @@ object Handler extends Logging {
         .toApiGatewayOp(s"calculating publication dates")
       createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, issuesData, matchingSfSub, requestBody.bulkSuspensionReason)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
-        exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
+        exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)", Some(createBody))
       )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
@@ -403,7 +406,7 @@ object Handler extends Logging {
         .toApiGatewayOp(
           exposeSfErrorMessageIn500ApiResponse(
             s"cancel holiday stop request details: ${holidayStopRequestDetailToUpdate.map(_.Id.value).mkString(",")} " +
-              s"(contact $contact)"
+              s"(contact $contact)", Some(cancelBody)
           )
         )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
@@ -465,7 +468,7 @@ object Handler extends Logging {
         .toApiGatewayOp(s"calculating publication dates")
       amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesData, existingPublicationsThatWereToBeStopped, subscription)
       _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
-        exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
+        exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)", Some(amendBody))
       )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
@@ -504,7 +507,7 @@ object Handler extends Logging {
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
       existingForUser <- lookupOp(contact, None, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       hsr <- existingForUser.find(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
-      _ = hsr.Holiday_Stop_Request_Detail__r.exists(_.records.exists(_.Is_Actioned__c)).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("can't withdraw holiday stop with any actioned items"))
+      _ = hsr.Holiday_Stop_Request_Detail__r.exists(_.records.exists(_.Is_Actioned__c)).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("can't withdraw holiday stop with any actioned items")) // FIXME: Does this do anyting?
       _ <- withdrawOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"withdraw Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
       )

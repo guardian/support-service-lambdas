@@ -7,12 +7,12 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.15.49"
+  val awsSdkVersion = "2.15.60"
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
-  val http4sVersion = "0.21.14"
-  val catsVersion = "2.3.1"
-  val catsEffectVersion = "2.3.1"
+  val http4sVersion = "0.21.15"
+  val catsVersion = "2.3.0"
+  val catsEffectVersion = "2.3.0"
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.2.3",
@@ -39,7 +39,7 @@ object Dependencies {
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
-  val playJson = "com.typesafe.play" %% "play-json" % "2.9.1"
+  val playJson = "com.typesafe.play" %% "play-json" % "2.9.2"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
   // HTTP clients
