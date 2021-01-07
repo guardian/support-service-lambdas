@@ -263,7 +263,7 @@ object SalesforceHolidayStopRequest extends Logging {
       issuesData: List[IssueData],
       existingPublicationsThatWereToBeStopped: List[HolidayStopRequestsDetail],
       zuoraSubscription: Subscription
-    ) = {
+    ): CompositeRequest = {
 
       val masterRecordToBePatched = CompositePart(
         method = "PATCH",
