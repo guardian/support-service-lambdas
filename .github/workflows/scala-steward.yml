@@ -6,29 +6,11 @@ on:
 
 jobs:
   test:
-    # Assuming Scala-steward branches are always named 'update/...' and other branches aren't.
-    if: startsWith(github.head_ref, 'update/')
+    if: github.actor == 'scala-steward'
 
     runs-on: ubuntu-latest
 
     steps:
-
-      # This is to see if condition above can be tightened a little more.
-      # It can be removed once condition is as tight as possible.
-      - name: Echo significant env vars
-        env:
-           HEAD_REF: ${{ github.head_ref }}
-           REF: ${{ github.ref }}
-           REPO_OWNER: ${{ github.repository_owner }}
-           EVENT: ${{ toJson(github.event) }}
-           ACTOR: ${{ github.actor }}
-        run: |
-          echo "HEAD_REF = $HEAD_REF"
-          echo "REF = $REF"
-          echo "REPO_OWNER = $REPO_OWNER"
-          echo "EVENT = $EVENT"
-          echo "ACTOR = $ACTOR"
-
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Set up Java
