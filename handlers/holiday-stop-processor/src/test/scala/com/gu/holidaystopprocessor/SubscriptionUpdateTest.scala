@@ -1,14 +1,15 @@
 package com.gu.holidaystopprocessor
 
-import java.time.temporal.TemporalAdjusters
-import java.time.{DayOfWeek, LocalDate}
-
 import com.gu.holiday_stops.Fixtures
 import com.gu.zuora.subscription.{Add, AffectedPublicationDate, ChargeOverride, InvoiceDate, MutableCalendar, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
+import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.time.temporal.TemporalAdjusters
+import java.time.{DayOfWeek, LocalDate}
 
 class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher with EitherValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-12")))
@@ -145,7 +146,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       stoppedPublicationDate,
       Some(givenInvoiceDate)
     )
-    update.right.value should matchTo(SubscriptionUpdate(
+    update.value should matchTo(SubscriptionUpdate(
       currentTerm = Some(536),
       currentTermPeriodType = Some("Day"),
       List(Add(
