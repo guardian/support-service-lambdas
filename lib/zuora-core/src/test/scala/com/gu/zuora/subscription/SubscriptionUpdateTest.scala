@@ -1,11 +1,12 @@
 package com.gu.zuora.subscription
 
-import java.time.LocalDate
-
+import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.time.LocalDate
 
 class SubscriptionUpdateTest
   extends AnyFlatSpec
@@ -29,7 +30,7 @@ class SubscriptionUpdateTest
       maybeInvoiceDate = Some(invoiceDate)
     )
 
-    update.right.value should matchTo(
+    update.value should matchTo(
       SubscriptionUpdate(
         currentTerm = Some(418),
         currentTermPeriodType = Some("Day"),
