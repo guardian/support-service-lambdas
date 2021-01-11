@@ -3,6 +3,7 @@ package com.gu.sf.move.subscriptions.api
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.zuora.MoveSubscriptionAtZuoraAccountResponse
+import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.Id
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -10,7 +11,7 @@ import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
-import org.http4s.{Method, Request, Response, Status, Uri}
+import org.http4s._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
@@ -58,7 +59,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      FetchZuoraAccessTokenError(accessTokenUnAuthError.body.left.get).toString
+      FetchZuoraAccessTokenError(accessTokenUnAuthError.body.swap.getOrElse(throw new RuntimeException)).toString
     ))
   }
 
@@ -80,7 +81,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      FetchZuoraSubscriptionError(fetchSubscriptionFailedRes.body.left.get).toString
+      FetchZuoraSubscriptionError(fetchSubscriptionFailedRes.body.swap.getOrElse(throw new RuntimeException)).toString
     ))
   }
 
@@ -102,7 +103,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      UpdateZuoraAccountError(updateAccountFailedRes.body.left.get).toString
+      UpdateZuoraAccountError(updateAccountFailedRes.body.swap.getOrElse(throw new RuntimeException)).toString
     ))
   }
 
@@ -132,12 +133,12 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
   private def createApp(backendStub: SttpBackendStub[Id, Nothing]) = {
     SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api"), backendStub)
       .value.unsafeRunSync()
-      .right.get
+      .getOrElse(throw new RuntimeException)
   }
 
   private def getBody[A: Decoder](response: org.http4s.Response[IO]) = {
     val bodyString = response
-      .bodyAsText()
+      .bodyText
       .compile
       .toList
       .unsafeRunSync()

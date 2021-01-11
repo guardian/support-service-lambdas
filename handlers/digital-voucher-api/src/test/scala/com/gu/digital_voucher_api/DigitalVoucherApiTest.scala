@@ -1,11 +1,10 @@
 package com.gu.digital_voucher_api
 
-import java.time.LocalDate
-
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.imovo.ImovoStub._
-import com.gu.imovo.{ImovoConfig, ImovoErrorResponse, ImovoRedemptionHistoryResponse, ImovoSubscriptionHistoryItem, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoSuccessResponse, ImovoVoucherResponse, SfSubscriptionId}
+import com.gu.imovo._
+import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -18,6 +17,8 @@ import org.scalatest.EitherValues
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+
+import java.time.LocalDate
 
 class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with EitherValues {
 
