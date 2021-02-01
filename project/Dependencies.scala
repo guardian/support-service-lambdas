@@ -29,7 +29,7 @@ object Dependencies {
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.7.0"
 
-  val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
+  val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
