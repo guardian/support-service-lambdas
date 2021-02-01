@@ -170,6 +170,11 @@ lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
     libraryDependencies ++= Seq(awsS3) ++ logging
   )
+lazy val `effects-cloudwatch` = library(project in file("lib/effects-cloudwatch"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(awsCloudwatch) ++ logging
+  )
 lazy val `effects-sqs` = library(project in file("lib/effects-sqs"))
   .dependsOn(testDep)
   .settings(
@@ -305,8 +310,14 @@ lazy val `zuora-sar` = lambdaProject(
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",
   "Cleans up the salesforce to free up storage via 360 sync/zuora",
-  Seq(awsCloudwatch, catsEffect, circeParser, circe)
-).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+  Seq()
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
+
+lazy val `revenue-recogniser-job` = lambdaProject(
+  "revenue-recogniser-job",
+  "Finds unrecognised revenue in zuora and recognises it appropariately",
+  Seq()
+).dependsOn(handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
 
 lazy val `sf-contact-merge` = lambdaProject(
   "sf-contact-merge",
