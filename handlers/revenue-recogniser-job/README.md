@@ -1,4 +1,4 @@
-# DEV env cleaner
+# Revenue recognition job
 
 The revenue recognition job is needed because some subscriptions (Digital Subscription gifts)
 have a manual revenue recognition rule set up.  This is so that revenue can be recognised

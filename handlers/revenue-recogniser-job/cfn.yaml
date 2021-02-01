@@ -56,7 +56,7 @@ Resources:
                 - logs:CreateLogStream
                 - logs:PutLogEvents
                 - lambda:InvokeFunction
-              Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/dev-env-cleaner-${Stage}:log-stream:*"
+              Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/revenue-recogniser-job-${Stage}:log-stream:*"
         - Statement:
             - Effect: Allow
               Action: s3:GetObject
