@@ -222,6 +222,8 @@ object Handler extends Logging {
     potentialHolidayStops: List[PotentialHolidayStop],
     nextInvoiceDateAfterToday: LocalDate
   ): Future[_] = Future {
+    lazy val testCase = s"${subscription.subscriptionNumber}?startDate=${queryParams.startDate}&endDate=${queryParams.endDate}"
+
     (previewPublications(subscription.subscriptionNumber, queryParams.startDate.toString, queryParams.endDate.toString).map { actual =>
       val actualPotentialHolidayStops =
         actual
@@ -235,11 +237,11 @@ object Handler extends Logging {
         // 1logger.info("testInProdPreviewPublications OK")
       } else {
         logger.error(
-          s"testInProdPreviewPublications failed ${subscription.subscriptionNumber}?startDate=${queryParams.startDate}&endDate=${queryParams.endDate} because $potentialHolidayStops =/= $actualPotentialHolidayStops or $nextInvoiceDateAfterToday =/= $actualNextInvoiceDateAfterToday"
+          s"testInProdPreviewPublications failed $testCase because $potentialHolidayStops =/= $actualPotentialHolidayStops or $nextInvoiceDateAfterToday =/= $actualNextInvoiceDateAfterToday"
         )
       }
     }).left.map { e =>
-      logger.error(s"testInProdPreviewPublications failed because invoicing-api error: $e")
+      logger.error(s"testInProdPreviewPublications failed $testCase because invoicing-api error: $e")
     }
   }(ecForTestInProd)
 
