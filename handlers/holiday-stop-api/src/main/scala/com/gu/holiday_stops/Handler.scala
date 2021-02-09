@@ -212,6 +212,7 @@ object Handler extends Logging {
   )
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/23
+  // FIXME: Make sure to add .filter(_.price > 0.0) if it ever replaces old potential endpoint
   import scala.concurrent.{ExecutionContext, Future}
   import java.util.concurrent.Executors
   private val ecForTestInProd = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor)
@@ -228,6 +229,7 @@ object Handler extends Logging {
       val actualPotentialHolidayStops =
         actual
           .publicationsWithinRange
+          .filter(_.price > 0.0) // invoicing-api/preview endpoint is general and calculates the price of each publication (even if it is 0)
           .map(pub => PotentialHolidayStop(pub.publicationDate, Credit(-pub.price, pub.nextInvoiceDate)))
           .sortBy(_.publicationDate)
 
