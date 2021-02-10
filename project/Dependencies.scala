@@ -11,8 +11,8 @@ object Dependencies {
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
   val http4sVersion = "0.21.18"
-  val catsVersion = "2.3.1"
-  val catsEffectVersion = "2.3.1"
+  val catsVersion = "2.4.0"
+  val catsEffectVersion = "2.4.0"
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.2.3",
