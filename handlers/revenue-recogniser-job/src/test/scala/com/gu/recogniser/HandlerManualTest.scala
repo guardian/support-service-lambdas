@@ -22,7 +22,7 @@ object CreateTestSubscriptionManualTest {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      subNumber <- ZuoraGiftSubscribe.subscribe(zuoraDeps).toDisjunction
+      subNumber <- ZuoraGiftSubscribe.subscribe(zuoraDeps).toDisjunction.left.map(httpError => new RuntimeException(httpError.toString))
     } yield subNumber
     println("result: " + actual)
     println("****\nNOTE: wait a while as the revenue schedule isn't created straight away\n****")
@@ -67,28 +67,26 @@ object CreateRevenueSchedule {
 
   case class RevenueEvent(
     eventType: String = "Digital Subscription Gift Redeemed",
-    eventTypeSystemId: String = "DigitalSubscriptionGiftRedeemed",
+    eventTypeSystemId: String = "DigitalSubscriptionGiftRedeemed"
   )
 
   case class RevenueDistribution(
     newAmount: String,
-    accountingPeriodName: String = "Open-Ended",
+    accountingPeriodName: String = "Open-Ended"
   )
 
   case class CreateRevenueScheduleRequest(
     amount: String,
     revenueScheduleDate: LocalDate,
     revenueDistributions: List[RevenueDistribution],
-    revenueEvent: RevenueEvent = RevenueEvent(),
+    revenueEvent: RevenueEvent = RevenueEvent()
   )
 
   implicit val eventWrites = Json.writes[RevenueEvent]
   implicit val revenueDistributionWrites = Json.writes[RevenueDistribution]
   implicit val writes = Json.writes[CreateRevenueScheduleRequest]
 
-  case class CreateRevenueScheduleResult(
-    number: String,
-  )
+  case class CreateRevenueScheduleResult(number: String)
 
   implicit val reads: Reads[CreateRevenueScheduleResult] =
     ((__ \ "revenueScheduleNumber").read[String]).map(CreateRevenueScheduleResult.apply _)
@@ -101,7 +99,7 @@ case class CreateRevenueSchedule(restRequestMaker: RestRequestMaker.Requests) {
   // https://www.zuora.com/developer/api-reference/#operation/POST_RSforSubscCharge
   def create(
     chargeId: String,
-    today: LocalDate,
+    today: LocalDate
   ) = {
     restRequestMaker.post[CreateRevenueScheduleRequest, CreateRevenueScheduleResult](
       CreateRevenueScheduleRequest("10.01", today, List(RevenueDistribution("0.00"))),
@@ -112,13 +110,10 @@ case class CreateRevenueSchedule(restRequestMaker: RestRequestMaker.Requests) {
 
 object GetRevenueSchedule {
 
-  case class SubscriptionResult(
-    undistributedUnrecognizedRevenueInPence: Int,
-  )
+  case class SubscriptionResult(undistributedUnrecognizedRevenueInPence: Int)
 
   implicit val reads: Reads[SubscriptionResult] =
-    (((__ \ "revenueSchedules")(0) \ "undistributedUnrecognizedRevenue").read[Double].map(amount => (amount * 100).toInt)
-      ).map(SubscriptionResult.apply _)
+    (((__ \ "revenueSchedules")(0) \ "undistributedUnrecognizedRevenue").read[Double].map(amount => (amount * 100).toInt)).map(SubscriptionResult.apply _)
 
   def apply(requests: Requests, chargeId: String): ClientFailableOp[Int] =
     requests.get[SubscriptionResult](s"revenue-schedules/subscription-charges/$chargeId").map(_.undistributedUnrecognizedRevenueInPence)
@@ -127,13 +122,10 @@ object GetRevenueSchedule {
 
 object ZuoraGiftSubscribe {
 
-  case class SubscribeResult(
-    SubscriptionNumber: String,
-  )
+  case class SubscribeResult(SubscriptionNumber: String)
 
   implicit val reads: Reads[SubscribeResult] =
     (__(0) \ "SubscriptionNumber").read[String].map(SubscribeResult)
-
 
   def subscribe(requests: Requests): ClientFailableOp[String] =
     requests.post[JsValue, SubscribeResult](requestJson, s"action/subscribe", WithoutCheck).map(_.SubscriptionNumber)

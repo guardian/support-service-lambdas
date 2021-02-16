@@ -13,6 +13,7 @@ import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import okhttp3.{Request, Response}
 
 import java.io.{InputStream, OutputStream}
+import scala.util.Try
 
 object Handler extends RequestStreamHandler {
 
@@ -34,13 +35,13 @@ object Handler extends RequestStreamHandler {
     } yield ()
     val _ = maybeSuccess.toTry.get // throws exception if something failed
     log("finished successfully - sending metric!")
-    putMetric(stage)
+    putMetric(stage).get
   }
 
   /*
   this is alarmed in the cfn
    */
-  def putMetric(stage: Stage): Unit = {
+  def putMetric(stage: Stage): Try[Unit] = {
     AwsCloudWatch.metricPut(MetricRequest(
       MetricNamespace("support-service-lambdas"),
       MetricName("job-succeeded"),
@@ -58,23 +59,23 @@ import java.time.LocalDate
 
 case class RevenueSchedule(
   number: String,
-  undistributedAmountInPence: Int,
+  undistributedAmountInPence: Int
 )
 
 object RevenueSchedule {
 
   val csvFields = List(
     "RevenueSchedule.Number",
-    "RevenueSchedule.UndistributedAmount",
+    "RevenueSchedule.UndistributedAmount"
   )
 
   implicit val decoder: HeaderDecoder[RevenueSchedule] = csvFields match {
     case a1 :: a2 :: Nil =>
       HeaderDecoder.decoder(a1, a2)((number: String, amount: Double) => RevenueSchedule(number, (amount * 100).toInt))
+    case _ => throw new RuntimeException("coding error - number of fields doesn't match the decoder")
   }
 
 }
-
 
 object Steps {
   def apply(
@@ -92,7 +93,7 @@ object Steps {
       new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, log),
       today,
       DistributeRevenueOnSpecificDate(requests),
-      DistributeRevenueWithDateRange(requests),
+      DistributeRevenueWithDateRange(requests)
     )
   }
 }
@@ -102,7 +103,7 @@ class Steps(
   blockingAquaQuery: BlockingAquaQuery,
   today: () => LocalDate,
   distributeRevenueOnSpecificDate: DistributeRevenueOnSpecificDate,
-  distributeRevenueWithDateRange: DistributeRevenueWithDateRange,
+  distributeRevenueWithDateRange: DistributeRevenueWithDateRange
 ) {
 
   def execute(): Either[String, Unit] = {
@@ -126,6 +127,8 @@ class Steps(
         case RevenueSchedule(refundSchedule, amount) if amount < 0 =>
           log(s"distribute refund: $refundSchedule $amount")
         //TODO
+        case RevenueSchedule(refundSchedule, amount) =>
+          log(s"mistake in query - no refund to make on: $refundSchedule $amount")
       }
       _ = log("now query again and assert there are none")
       stillUndistributedRevenue <- blockingAquaQuery.executeQuery[RevenueSchedule](expiredGiftsAndRefunds).toDisjunction.leftMap(_.toString)

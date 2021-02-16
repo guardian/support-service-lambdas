@@ -22,10 +22,10 @@ trait BlockingAquaQuery {
 class BlockingAquaQueryImpl(
   aquaQuerier: AquaQueryRequest => ClientFailableOp[String],
   downloadRequests: RestRequestMaker.Requests,
-  log: String => Unit,
+  log: String => Unit
 ) extends BlockingAquaQuery {
 
-  override def executeQuery[CsvHeaderDecoder : HeaderDecoder](queryString: String): ClientFailableOp[CsvReader[ReadResult[CsvHeaderDecoder]]] = {
+  override def executeQuery[CsvHeaderDecoder: HeaderDecoder](queryString: String): ClientFailableOp[CsvReader[ReadResult[CsvHeaderDecoder]]] = {
     val queryName = "expired_gift_and_refunds_undistributed"
     val subsQuery = AquaQuery(queryName, queryString)
     val request = AquaQueryRequest(
@@ -37,7 +37,8 @@ class BlockingAquaQueryImpl(
       batches <- waitForResult(jobId, GetJobResult(downloadRequests.get[AquaJobResponse]))
       streams <- batches.toList.traverse { batch =>
         downloadRequests.getDownloadStream(s"batch-query/file/${batch.fileId}").map(
-          stream => (batch.name, stream.stream))
+          stream => (batch.name, stream.stream)
+        )
       }
       queryResults = streams.map {
         case (name, csvStream) =>
