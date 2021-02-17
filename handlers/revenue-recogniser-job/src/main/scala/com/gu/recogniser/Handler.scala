@@ -113,8 +113,7 @@ class Steps(
          |from RevenueSchedule
          |where Rule = 'Digital Subscription Gift Rule'
          | AND (
-         |      UndistributedAmount < 0
-         |  OR (UndistributedAmount > 0 AND subscription.termstartdate <= '$oneYearAgo')
+         |     (UndistributedAmount > 0 AND subscription.termstartdate <= '$oneYearAgo')
          | )
          |""".stripMargin
     for {

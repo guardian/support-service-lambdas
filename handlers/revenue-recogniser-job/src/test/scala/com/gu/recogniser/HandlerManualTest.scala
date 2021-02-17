@@ -37,7 +37,6 @@ object RunLambdaManualTest {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       downloadRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
-      aquaQuerier = Querier.lowLevel(downloadRequests) _
       _ <- Steps(
         println,
         RawEffects.downloadResponse,
