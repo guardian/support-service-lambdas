@@ -316,8 +316,11 @@ lazy val `dev-env-cleaner` = lambdaProject(
 lazy val `revenue-recogniser-job` = lambdaProject(
   "revenue-recogniser-job",
   "Finds unrecognised revenue in zuora and recognises it appropariately",
-  Seq()
-).dependsOn(handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
+  Seq(
+    "com.nrinaudo" %% "kantan.csv-generic" % "0.6.1",
+    "com.nrinaudo" %% "kantan.csv-java8" % "0.6.1",
+  )
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
 
 lazy val `sf-contact-merge` = lambdaProject(
   "sf-contact-merge",
