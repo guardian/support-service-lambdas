@@ -213,39 +213,26 @@ object Handler extends Logging {
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/23
   // FIXME: Make sure to add .filter(_.price > 0.0) if it ever replaces old potential endpoint
-  import scala.concurrent.{ExecutionContext, Future}
-  import java.util.concurrent.Executors
-  private val ecForTestInProd = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor)
-  private def testInProdPreviewPublications(
+  private def buildPotentialHolidayStopsFromPublicationsPreview(
     previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
     subscription: Subscription,
     queryParams: PotentialHolidayStopsQueryParams,
-    potentialHolidayStops: List[PotentialHolidayStop],
-    nextInvoiceDateAfterToday: LocalDate
-  ): Future[_] = Future {
-    lazy val testCase = s"${subscription.subscriptionNumber}?startDate=${queryParams.startDate}&endDate=${queryParams.endDate}"
-
-    (previewPublications(subscription.subscriptionNumber, queryParams.startDate.toString, queryParams.endDate.toString).map { actual =>
+  ): Either[ApiFailure, PotentialHolidayStopsResponse] = {
+    previewPublications(subscription.subscriptionNumber, queryParams.startDate.toString, queryParams.endDate.toString).map { actual =>
       val actualPotentialHolidayStops =
         actual
           .publicationsWithinRange
           .filter(_.price > 0.0) // invoicing-api/preview endpoint is general and calculates the price of each publication (even if it is 0)
           .map(pub => PotentialHolidayStop(pub.publicationDate, Credit(-pub.price, pub.nextInvoiceDate)))
           .sortBy(_.publicationDate)
-
       val actualNextInvoiceDateAfterToday = actual.nextInvoiceDateAfterToday
 
-      if ((potentialHolidayStops == actualPotentialHolidayStops) && (nextInvoiceDateAfterToday == actualNextInvoiceDateAfterToday)) {
-        // 1logger.info("testInProdPreviewPublications OK")
-      } else {
-        logger.error(
-          s"testInProdPreviewPublications failed $testCase because $potentialHolidayStops =/= $actualPotentialHolidayStops or $nextInvoiceDateAfterToday =/= $actualNextInvoiceDateAfterToday"
-        )
-      }
-    }).left.map { e =>
-      logger.error(s"testInProdPreviewPublications failed $testCase because invoicing-api error: $e")
+      PotentialHolidayStopsResponse(
+        actualNextInvoiceDateAfterToday,
+        actualPotentialHolidayStops
+      )
     }
-  }(ecForTestInProd)
+  }
 
   def stepsForPotentialHolidayStop(
     getAccessToken: () => Either[ApiFailure, AccessToken],
@@ -261,26 +248,11 @@ object Handler extends Logging {
         .toApiGatewayOp(s"get zuora access token")
       subscription <- getSubscription(accessToken, pathParams.subscriptionName)
         .toApiGatewayOp(s"get subscription ${pathParams.subscriptionName}")
-      account <- getAccount(accessToken, subscription.accountNumber)
-        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
-      subscriptionData <- SubscriptionData(subscription, account)
-        .toApiGatewayOp(s"building SubscriptionData")
-      issuesData = subscriptionData.issueDataForPeriod(queryParams.startDate, queryParams.endDate)
-      potentialHolidayStops = issuesData.map { issueData =>
-        PotentialHolidayStop(
-          issueData.issueDate,
-          Credit(issueData.credit, issueData.nextBillingPeriodStartDate)
-        )
-      }
-      nextInvoiceDateAfterToday = subscriptionData
-        .issueDataForPeriod(MutableCalendar.today.minusDays(7), MutableCalendar.today.plusMonths(2))
-        .filter(_.nextBillingPeriodStartDate.isAfter(MutableCalendar.today))
-        .minBy(_.nextBillingPeriodStartDate)(Ordering.by(_.toEpochDay))
-        .nextBillingPeriodStartDate
-      _ = testInProdPreviewPublications(previewPublications, subscription, queryParams, potentialHolidayStops, nextInvoiceDateAfterToday) // FIXME
+      potentialHolidayStopsResponse <- buildPotentialHolidayStopsFromPublicationsPreview(previewPublications, subscription, queryParams)
+        .toApiGatewayOp("preview publication dates and credits")
     } yield ApiGatewayResponse(
       "200",
-      PotentialHolidayStopsResponse(nextInvoiceDateAfterToday, potentialHolidayStops)
+      potentialHolidayStopsResponse
     )).apiResponse
   }
 
