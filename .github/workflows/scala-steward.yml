@@ -6,16 +6,21 @@ on:
 
 jobs:
   test:
+    name: Test of Scala Steward PR
+        
     if: github.actor == 'scala-steward'
 
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - 
+        name: Checkout repo
         uses: actions/checkout@v2
-      - name: Set up Java
+      - 
+        name: Set up Java
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Run tests
+      - 
+        name: Run tests
         run: sbt test
