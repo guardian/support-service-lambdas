@@ -107,7 +107,7 @@ object Handler extends Logging {
     getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
     idGenerator: => String,
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
-    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null // FIXME
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
   ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
@@ -142,12 +142,12 @@ object Handler extends Logging {
     getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
     idGenerator: => String,
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
-    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null // FIXME
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsForPotentialHolidayStop(getAccessToken, getSubscription, getAccount, previewPublications) _
+          case "GET" => stepsForPotentialHolidayStop(getAccessToken, getSubscription, previewPublications) _
           case _ => unsupported _
         }
       case "hsr" :: Nil =>
@@ -237,8 +237,7 @@ object Handler extends Logging {
   def stepsForPotentialHolidayStop(
     getAccessToken: () => Either[ApiFailure, AccessToken],
     getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
-    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
-    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null // FIXME
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
   )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
     (for {
