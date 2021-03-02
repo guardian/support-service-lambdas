@@ -37,7 +37,6 @@ object SubscriptionDataIntegrationTest extends Matchers {
         }
 
         val (startTestDate, endTestDate) = getTestPeriod(startDate, expectedIssueData)
-        subscriptionData.issueDataForPeriod(startTestDate, endTestDate) should equal(expectedIssueData)
         subscriptionData.subscriptionAnnualIssueLimit should equal(expectedTotalAnnualIssueLimitPerSubscription)
         subscriptionData.productType should equal(expectedProductType)
         subscriptionData.editionDaysOfWeek should contain only (expectedEditionDaysOfWeek: _*)

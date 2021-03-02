@@ -11,6 +11,7 @@ import com.gu.util.resthttp.JsonHttp
 import com.gu.zuora.subscription._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import java.time.LocalDate
 
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with Matchers {
 
@@ -38,12 +39,14 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
         contact
       ).toDisjunction
 
-      fakeSubscription: Subscription = Fixtures.mkGuardianWeeklySubscription()
-
-      publicationDatesToBeStopped = SubscriptionData(fakeSubscription, Fixtures.mkAccount())
-        .map(_.issueDataForPeriod(startDate, endDate))
-        .toOption
-        .get
+      // guardian weekly quarterly
+      publicationDatesToBeStopped = List(
+        IssueData(
+          startDate,
+          BillDates(LocalDate.now(), LocalDate.now().plusMonths(3).minusDays(1)),
+          -0.08
+        )
+      )
 
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
       createResult <- createOp(CreateHolidayStopRequestWithDetail.buildBody(

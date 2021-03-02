@@ -30,7 +30,6 @@ case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double)
 
 trait SubscriptionData {
   @deprecated("Migrate to https://github.com/guardian/invoicing-api/pull/20") def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData]
-  def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData]
   def productType: ZuoraProductType
   def subscriptionAnnualIssueLimit: Int
   def editionDaysOfWeek: List[DayOfWeek]
@@ -112,13 +111,6 @@ object SubscriptionData {
           .pipe(round2Places)
           .pipe(verify)
           .pipe(discountedCredit => issueData.copy(credit = discountedCredit))
-      }
-
-      def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
-        nonZeroRatePlanChargeDatas
-          .flatMap(_.getIssuesForPeriod(startDateInclusive, endDateInclusive))
-          .map(applyAnyDiscounts)
-          .sortBy(_.issueDate)(Ordering.fromLessThan(_.isBefore(_)))
       }
 
       override def productType: ZuoraProductType = {
