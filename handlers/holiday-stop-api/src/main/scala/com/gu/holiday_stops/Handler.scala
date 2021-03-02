@@ -173,7 +173,7 @@ object Handler extends Logging {
         }
       case "hsr" :: _ :: _ :: Nil =>
         httpMethod match {
-          case "PATCH" => stepsToAmend(getAccessToken, getSubscription, getAccount) _
+          case "PATCH" => stepsToAmend(getAccessToken, getSubscription, previewPublications) _
           case "DELETE" => stepsToWithdraw _
           case _ => unsupported _
         }
@@ -433,7 +433,7 @@ object Handler extends Logging {
   def stepsToAmend(
     getAccessToken: () => Either[ApiFailure, AccessToken],
     getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
-    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -448,11 +448,8 @@ object Handler extends Logging {
       accessToken <- getAccessToken().toApiGatewayOp(s"get zuora access token")
       subscription <- getSubscription(accessToken, requestBody.subscriptionName)
         .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
-      account <- getAccount(accessToken, subscription.accountNumber)
-        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
-      issuesData <- SubscriptionData(subscription, account)
-        .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
-        .toApiGatewayOp(s"calculating publication dates")
+      issuesData <- buildIssueDataFromPublicationsPreview(previewPublications, subscription, requestBody.startDate, requestBody.endDate)
+        .toApiGatewayOp("calculating publication dates")
       amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesData, existingPublicationsThatWereToBeStopped, subscription)
       _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)", Some(amendBody))
