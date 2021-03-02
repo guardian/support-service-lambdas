@@ -152,12 +152,12 @@ object Handler extends Logging {
         }
       case "hsr" :: Nil =>
         httpMethod match {
-          case "POST" => stepsToCreate(getAccessToken, getSubscription, getAccount) _
+          case "POST" => stepsToCreate(getAccessToken, getSubscription, previewPublications) _
           case _ => unsupported _
         }
       case "bulk-hsr" :: Nil =>
         httpMethod match {
-          case "POST" => stepsToBulkCreate(getAccessToken, getSubscription, getAccount) _
+          case "POST" => stepsToBulkCreate(getAccessToken, getSubscription, previewPublications) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: Nil =>
@@ -298,32 +298,47 @@ object Handler extends Logging {
   def stepsToCreate(
     getAccessToken: () => Either[ApiFailure, AccessToken],
     getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
-    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse =
     stepsToCreate(
       getAccessToken,
       getSubscription,
-      getAccount,
-      req.bodyAsCaseClass[HolidayStopRequestPartial]()
+      req.bodyAsCaseClass[HolidayStopRequestPartial](),
+      previewPublications,
     )(req, sfClient)
 
   def stepsToBulkCreate(
     getAccessToken: () => Either[ApiFailure, AccessToken],
     getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
-    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse =
     stepsToCreate(
       getAccessToken,
       getSubscription,
-      getAccount,
-      req.bodyAsCaseClass[BulkHolidayStopRequestPartial]()
+      req.bodyAsCaseClass[BulkHolidayStopRequestPartial](),
+      previewPublications
     )(req, sfClient)
+
+  private def buildIssueDataFromPublicationsPreview(
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
+    subscription: Subscription,
+    startDate: LocalDate,
+    endDate: LocalDate,
+  ): Either[ApiFailure, List[IssueData]] = {
+    previewPublications(subscription.subscriptionNumber, startDate.toString, endDate.toString).map { pubs =>
+        pubs
+          .publicationsWithinRange
+          .filter(_.price > 0.0) // invoicing-api/preview endpoint is general and calculates the price of each publication (even if it is 0)
+          .map(pub => IssueData(pub.publicationDate, BillDates(pub.invoiceDate, pub.nextInvoiceDate.minusDays(1)), -pub.price))
+          .sortBy(_.issueDate)
+    }
+  }
 
   private def stepsToCreate(
     getAccessToken: () => Either[ApiFailure, AccessToken],
     getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
-    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
-    requestBodyOp: ApiGatewayOp[HolidayStopRequestPartialTrait]
+    requestBodyOp: ApiGatewayOp[HolidayStopRequestPartialTrait],
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -337,11 +352,8 @@ object Handler extends Logging {
       accessToken <- getAccessToken().toApiGatewayOp(s"get zuora access token")
       subscription <- getSubscription(accessToken, requestBody.subscriptionName)
         .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
-      account <- getAccount(accessToken, subscription.accountNumber)
-        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
-      issuesData <- SubscriptionData(subscription, account)
-        .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
-        .toApiGatewayOp(s"calculating publication dates")
+      issuesData <- buildIssueDataFromPublicationsPreview(previewPublications, subscription, requestBody.startDate, requestBody.endDate)
+        .toApiGatewayOp("calculating publication dates")
       createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, issuesData, matchingSfSub, requestBody.bulkSuspensionReason)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)", Some(createBody))
