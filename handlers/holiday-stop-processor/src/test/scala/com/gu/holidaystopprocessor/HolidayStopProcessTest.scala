@@ -2,14 +2,13 @@ package com.gu.holidaystopprocessor
 
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
-
 import cats.syntax.all._
 import com.gu.creditprocessor.Processor
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
-import com.gu.zuora.ZuoraProductTypes
+import com.gu.zuora.{PreviewPublicationsResponse, Publication, ZuoraProductTypes}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.Fixtures.mkGuardianWeeklySubscription
 import com.gu.zuora.subscription._
@@ -72,15 +71,36 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
     creditProduct: CreditProductForSubscription,
     subscription: Subscription,
     account: ZuoraAccount,
-    request: HolidayStopRequestsDetail
+    request: HolidayStopRequestsDetail,
+    issueData: IssueData,
   ) =
     SubscriptionUpdate(
       creditProduct(subscription),
       subscription,
       account,
       request.Stopped_Publication_Date__c,
-      None
+      None,
+      issueData
     )
+
+  private val previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse] =
+    (a,b,c) => Right(PreviewPublicationsResponse(
+      subscriptionName = "",
+      nextInvoiceDateAfterToday = LocalDate.now(),
+      rangeStartDate = LocalDate.now(),
+      rangeEndDate = LocalDate.now(),
+      publicationsWithinRange = List(
+        Publication(       /* Contrast with InvoiceItem                               */
+          AffectedPublicationDate(LocalDate.of(2019, 8, 9)).value: LocalDate, /* Date of paper printed on cover                          */
+          LocalDate.now(): LocalDate,     /* Publication falls on this invoice                       */
+          LocalDate.now().plusMonths(3).minusDays(1): LocalDate, /* The invoice on which this publication would be credited */
+          "productName": String,        /* For example Newspaper Delivery                          */
+          "chargeName": String,         /* For example Sunday                                      */
+          3.27: Double,              /* Charge of single publication                            */
+        )
+
+      )
+    ))
 
   "HolidayStopProcess" should "give correct added charge" in {
     val response = Processor.addCreditToSubscription(
@@ -89,7 +109,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Right(())),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
+      null,
+      previewPublications = previewPublications,
     )(request)
 
     response.right.value shouldBe ZuoraHolidayCreditAddResult(
@@ -110,7 +132,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Left(ZuoraApiFailure("update went wrong"))),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
+      null,
+      previewPublications,
     )(request)
     response.left.value shouldBe ZuoraApiFailure("update went wrong")
   }
@@ -122,7 +146,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Right(())),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
+      null,
+      previewPublications,
     )(request)
     response.left.value shouldBe ZuoraApiFailure("get went wrong")
   }
@@ -139,7 +165,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Right(())),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
+      null,
+      previewPublications
     )(request)
     response.isRight shouldBe true
   }
@@ -151,7 +179,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
+      null,
+      previewPublications
     )(request)
     response.left.value.reason should include("Apply manual refund")
   }
@@ -163,7 +193,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
+      null,
+      previewPublications
     )(request)
     response.right.value shouldBe ZuoraHolidayCreditAddResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
@@ -183,7 +215,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
+      null,
+      previewPublications
     )(request)
     response.left.value shouldBe ZuoraApiFailure("shouldn't need to apply an update")
   }
@@ -204,7 +238,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
+      null,
+      previewPublications
     )
     responses.creditResults.headOption.value.right.value shouldBe ZuoraHolidayCreditAddResult(
       requestId = HolidayStopRequestsDetailId("R1"),
@@ -241,7 +277,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
+      null,
+      previewPublications
     )
   }
   it should "get target date from overridedate" in {
@@ -261,7 +299,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
+      null,
+      previewPublications
     )
   }
 
@@ -281,7 +321,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
+      null,
+      previewPublications
     )
     responses.resultsToExport shouldBe List(
       ZuoraHolidayCreditAddResult(
@@ -312,7 +354,9 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Left(SalesforceApiFailure("Export failed")))
+      exportAmendments(Left(SalesforceApiFailure("Export failed"))),
+      null,
+      previewPublications,
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }

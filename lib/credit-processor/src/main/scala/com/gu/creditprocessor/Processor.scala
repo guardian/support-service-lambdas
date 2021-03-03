@@ -6,9 +6,10 @@ import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.zuora.ZuoraLockingContention.retryLockingContention
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
-import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
+import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, PreviewPublicationsResponse, Publication, Zuora}
 import com.softwaremill.sttp.{Id, SttpBackend}
 import org.slf4j.LoggerFactory
+
 import scala.util.Try
 
 object Processor {
@@ -26,11 +27,12 @@ object Processor {
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
     processOverrideDate: Option[LocalDate],
     productType: ZuoraProductType,
-    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request, IssueData) => SubscriptionUpdate,
     resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
     writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
-    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
+    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
+    previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse],
   ): ProcessResult[Result] = {
 
     def getSubscription(
@@ -54,11 +56,12 @@ object Processor {
       productType: ZuoraProductType,
       getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
       getAccount: String => ZuoraApiResponse[ZuoraAccount],
-      updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+      updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request, IssueData) => SubscriptionUpdate,
       updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
+      previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse],
     )
   }
 
@@ -70,11 +73,12 @@ object Processor {
     productType: ZuoraProductType,
     getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
-    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request, IssueData) => SubscriptionUpdate,
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
     writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
     getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
+    previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse],
   ): ProcessResult[Result] = {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
@@ -99,6 +103,7 @@ object Processor {
             updateSubscription,
             resultOfZuoraCreditAdd,
             getNextInvoiceDate,
+            previewPublications,
           )
         )
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraCreditResponses.separate
@@ -133,6 +138,10 @@ object Processor {
     }
   }(ecForTestInProd)
 
+  def findAffectedPublication(previewedPubs: List[Publication], affectedPubDate: LocalDate): Option[IssueData] = {
+    previewedPubs.find(_.publicationDate == affectedPubDate)
+      .map(v => IssueData(v.publicationDate, BillDates(v.invoiceDate, v.nextInvoiceDate.minusDays(1)), -v.price))
+  }
 
   /**
    * This is the main business logic for adding a credit amendment to a subscription in Zuora
@@ -141,16 +150,23 @@ object Processor {
     creditProduct: CreditProductForSubscription,
     getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
-    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request, IssueData) => SubscriptionUpdate,
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     result: (Request, RatePlanCharge) => Result,
     getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
+    previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse],
   )(request: Request): ZuoraApiResponse[Result] =
     for {
       subscription <- getSubscription(request.subscriptionName)
       account <- getAccount(subscription.accountNumber)
       _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};")) else Right(())
-      subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request) // FIXME: Deprecated
+      publications <- previewPublications(subscription.subscriptionNumber, request.publicationDate.value.toString, request.publicationDate.value.toString)
+      issueData = publications
+        .publicationsWithinRange
+        .find(_.publicationDate == request.publicationDate.value)
+        .map(v => IssueData(v.publicationDate, BillDates(v.invoiceDate, v.nextInvoiceDate.minusDays(1)), -v.price))
+        .getOrElse(throw new RuntimeException("could not find publication"))
+      subscriptionUpdate = updateToApply(creditProduct, subscription, account, request, issueData) // FIXME: Deprecated
       _ = testInProdNextInvoiceDate(subscription, getNextInvoiceDate, subscriptionUpdate)
       // FIXME: nextInvoiceDate <- getNextInvoiceDate(subscription.subscriptionNumber)
       // FIXME: subscriptionUpdate <- SubscriptionUpdate(creditProduct(subscription), subscription, account, request.publicationDate, Some(InvoiceDate(nextInvoiceDate)))

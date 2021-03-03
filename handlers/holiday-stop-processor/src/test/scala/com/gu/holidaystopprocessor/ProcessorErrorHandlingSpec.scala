@@ -2,14 +2,13 @@ package com.gu.holidaystopprocessor
 
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
-
 import cats.syntax.all._
 import com.gu.creditprocessor.Processor
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
-import com.gu.zuora.ZuoraProductTypes
+import com.gu.zuora.{PreviewPublicationsResponse, Publication, ZuoraProductTypes}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
 import org.scalatest.OptionValues
@@ -58,15 +57,35 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     creditProduct: CreditProductForSubscription,
     subscription: Subscription,
     account: ZuoraAccount,
-    request: HolidayStopRequestsDetail
+    request: HolidayStopRequestsDetail,
+    issueData: IssueData,
   ) =
     SubscriptionUpdate(
       creditProduct(subscription),
       subscription,
       account,
       request.Stopped_Publication_Date__c,
-      None
+      None,
+      issueData
     )
+
+  private val previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse] =
+    (a,b,c) => Right(PreviewPublicationsResponse(
+      subscriptionName = "",
+      nextInvoiceDateAfterToday = LocalDate.now(),
+      rangeStartDate = LocalDate.now(),
+      rangeEndDate = LocalDate.now(),
+      publicationsWithinRange = List(
+        Publication(       /* Contrast with InvoiceItem                               */
+          AffectedPublicationDate(LocalDate.of(2019, 8, 9)).value: LocalDate, /* Date of paper printed on cover                          */
+          LocalDate.now(): LocalDate,     /* Publication falls on this invoice                       */
+          LocalDate.now().plusMonths(3).minusDays(1): LocalDate, /* The invoice on which this publication would be credited */
+          "productName": String,        /* For example Newspaper Delivery                          */
+          "chargeName": String,         /* For example Sunday                                      */
+          3.27: Double,              /* Charge of single publication                            */
+        )
+      )
+    ))
 
   "Error handling" should "not short-circuit if some writes to Zuora fail (but others succeed), and Salesforce write succeeds" in {
     val getSubscription: SubscriptionName => Either[ZuoraApiFailure, Subscription] = {
@@ -88,7 +107,9 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       updateToApply,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      null,
+      previewPublications,
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
@@ -119,7 +140,9 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       updateToApply,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      null,
+      previewPublications
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
@@ -150,7 +173,9 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       updateToApply,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      null,
+      previewPublications,
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
@@ -180,7 +205,9 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       updateToApply,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      null,
+      previewPublications,
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate

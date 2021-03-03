@@ -1,7 +1,6 @@
 package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
-
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{NextInvoiceDate, ProcessResult, Processor}
 import com.gu.effects.S3Location
@@ -9,9 +8,9 @@ import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.holiday_stops.Config
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
 import com.gu.util.config.Stage
-import com.gu.zuora.Zuora
+import com.gu.zuora.{PreviewPublications, Zuora}
 import com.gu.zuora.ZuoraProductTypes._
-import com.gu.zuora.subscription.{OverallFailure, Subscription, SubscriptionUpdate, ZuoraAccount}
+import com.gu.zuora.subscription.{IssueData, OverallFailure, Subscription, SubscriptionUpdate, ZuoraAccount}
 import com.softwaremill.sttp.{Id, SttpBackend}
 
 import scala.util.Try
@@ -66,14 +65,16 @@ object HolidayStopCreditProcessor {
              creditProduct: CreditProductForSubscription,
              subscription: Subscription,
              account: ZuoraAccount,
-             request: HolidayStopRequestsDetail
+             request: HolidayStopRequestsDetail,
+             issueData: IssueData,
           ) =
              SubscriptionUpdate(
               creditProduct(subscription),
               subscription,
               account,
               request.Stopped_Publication_Date__c,
-              None
+              None,
+              issueData,
             )
 
           Processor.processLiveProduct(
@@ -89,7 +90,8 @@ object HolidayStopCreditProcessor {
             ZuoraHolidayCreditAddResult.apply,
             Salesforce.holidayStopUpdateResponse(config.sfConfig),
             Zuora.accountGetResponse(config.zuoraConfig, zuoraAccessToken, backend),
-            NextInvoiceDate.getNextInvoiceDate
+            NextInvoiceDate.getNextInvoiceDate,
+            PreviewPublications.preview
           )
         }
         }

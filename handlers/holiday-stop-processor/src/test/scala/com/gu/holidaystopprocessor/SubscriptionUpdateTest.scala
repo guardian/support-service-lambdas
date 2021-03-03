@@ -34,7 +34,8 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       subscription = subscription,
       account = Fixtures.mkAccount(),
       stoppedPublicationDate,
-      None
+      None,
+      null
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = None,
@@ -71,7 +72,8 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       subscription = subscription,
       account = Fixtures.mkAccount(),
       stoppedPublicationDate,
-      None
+      None,
+      null
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = Some(366),
@@ -107,7 +109,8 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       subscription = subscription,
       account = Fixtures.mkAccount(),
       stoppedPublicationDate,
-      None
+      None,
+      null
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = None,
@@ -144,9 +147,10 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       subscription = subscription,
       account = Fixtures.mkAccount(),
       stoppedPublicationDate,
-      Some(givenInvoiceDate)
+      Some(givenInvoiceDate),
+      null
     )
-    update.value should matchTo(SubscriptionUpdate(
+    update should matchTo(SubscriptionUpdate(
       currentTerm = Some(536),
       currentTermPeriodType = Some("Day"),
       List(Add(

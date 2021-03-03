@@ -3,7 +3,6 @@ package com.gu.holiday_stops
 import java.io.{InputStream, OutputStream, Serializable}
 import java.time.LocalDate
 import java.util.UUID
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
@@ -25,7 +24,7 @@ import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.Types.ClientFailure
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.zuora.subscription._
-import com.gu.zuora.{AccessToken, Zuora}
+import com.gu.zuora.{AccessToken, PreviewPublications, PreviewPublicationsResponse, Zuora}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads, Writes}

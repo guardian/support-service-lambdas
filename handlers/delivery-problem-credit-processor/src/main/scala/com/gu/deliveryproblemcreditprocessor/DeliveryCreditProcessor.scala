@@ -1,7 +1,6 @@
 package com.gu.deliveryproblemcreditprocessor
 
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
-
 import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
 import cats.syntax.all._
@@ -16,7 +15,7 @@ import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.gu.zuora.subscription._
-import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
+import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, PreviewPublications, Zuora}
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import io.circe.generic.auto._
@@ -103,7 +102,8 @@ object DeliveryCreditProcessor extends Logging {
             updateToApply,
             resultOfZuoraCreditAdd,
             writeCreditResultsToSalesforce(sfAuthConfig),
-            Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend)
+            Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend),
+            previewPublications = PreviewPublications.preview,
           )
       )
     } yield processResult
@@ -131,14 +131,16 @@ object DeliveryCreditProcessor extends Logging {
     creditProduct: CreditProductForSubscription,
     subscription: Subscription,
     account: ZuoraAccount,
-    request: DeliveryCreditRequest
-  ): ZuoraApiResponse[SubscriptionUpdate] =
+    request: DeliveryCreditRequest,
+    issueData: IssueData,
+  ): SubscriptionUpdate =
     SubscriptionUpdate(
       creditProduct(subscription),
       subscription,
       account,
       AffectedPublicationDate(request.Delivery_Date__c),
-      request.Invoice_Date__c.map(InvoiceDate)
+      request.Invoice_Date__c.map(InvoiceDate),
+      issueData,
     )
 
   def resultOfZuoraCreditAdd(

@@ -20,12 +20,9 @@ object SubscriptionUpdate {
     subscription: Subscription,
     account: ZuoraAccount,
     affectedDate: AffectedPublicationDate,
-    maybeInvoiceDate: Option[InvoiceDate]
-  ): ZuoraApiResponse[SubscriptionUpdate] =
-    for {
-      subscriptionData <- SubscriptionData(subscription, account)
-      issueData <- subscriptionData.issueDataForDate(affectedDate.value)
-    } yield {
+    maybeInvoiceDate: Option[InvoiceDate],
+    issueData: IssueData,
+  ): SubscriptionUpdate = {
       val invoiceDate = maybeInvoiceDate.map(_.value).getOrElse(issueData.nextBillingPeriodStartDate)
       val maybeExtendedTerm = ExtendedTerm(invoiceDate, subscription)
       val credit = Credit(issueData.credit, invoiceDate)

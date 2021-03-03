@@ -27,10 +27,11 @@ class SubscriptionUpdateTest
         Fixtures.subscriptionFromJson("GWTermEndsBeforeInvoiceDate.json"),
       account = Fixtures.mkAccount(),
       affectedDate = publicationDate,
-      maybeInvoiceDate = Some(invoiceDate)
+      maybeInvoiceDate = Some(invoiceDate),
+      IssueData(publicationDate.value, BillDates(publicationDate.value, invoiceDate.value), -4.72)
     )
 
-    update.value should matchTo(
+    update should matchTo(
       SubscriptionUpdate(
         currentTerm = Some(418),
         currentTermPeriodType = Some("Day"),
