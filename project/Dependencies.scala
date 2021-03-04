@@ -7,7 +7,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.16.11"
+  val awsSdkVersion = "2.16.12"
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
   val http4sVersion = "0.21.20"
