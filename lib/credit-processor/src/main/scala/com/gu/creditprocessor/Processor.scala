@@ -161,11 +161,7 @@ object Processor {
       account <- getAccount(subscription.accountNumber)
       _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};")) else Right(())
       publications <- previewPublications(subscription.subscriptionNumber, request.publicationDate.value.toString, request.publicationDate.value.toString)
-      issueData = publications
-        .publicationsWithinRange
-        .find(_.publicationDate == request.publicationDate.value)
-        .map(v => IssueData(v.publicationDate, BillDates(v.invoiceDate, v.nextInvoiceDate.minusDays(1)), -v.price))
-        .getOrElse(throw new RuntimeException("could not find publication"))
+      issueData <- findAffectedPublication(publications.publicationsWithinRange, request.publicationDate.value).toRight(ZuoraApiFailure(s"Cannot find affected publication in previewed publications: ${request.publicationDate}; ${subscription.subscriptionNumber}"))
       subscriptionUpdate = updateToApply(creditProduct, subscription, account, request, issueData) // FIXME: Deprecated
       _ = testInProdNextInvoiceDate(subscription, getNextInvoiceDate, subscriptionUpdate)
       // FIXME: nextInvoiceDate <- getNextInvoiceDate(subscription.subscriptionNumber)
