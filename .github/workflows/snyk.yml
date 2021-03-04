@@ -28,5 +28,5 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --org=the-guardian-cuu --project-name=guardian/support-service-lambdas
+          args: --org=the-guardian-cuu --project-name=${{github.repository}}
           command: monitor
