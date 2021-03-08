@@ -79,7 +79,7 @@ object Main extends App {
     val cancSubUpdatesToWriteBackToSf =
       processCancSubs(sfAuthDetails, cancellationSubs)
 
-    cancSubUpdatesToWriteBackToSf map (subList => {
+    cancSubUpdatesToWriteBackToSf map (subList => { // What happens when it throws?
       updateSubsInSf(
         sfAuthDetails,
         BodyForWriteBackToSf(false, subList).asJson.spaces2
