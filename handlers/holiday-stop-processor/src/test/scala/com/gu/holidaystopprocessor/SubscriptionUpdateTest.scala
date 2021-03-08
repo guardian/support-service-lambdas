@@ -1,7 +1,7 @@
 package com.gu.holidaystopprocessor
 
 import com.gu.holiday_stops.Fixtures
-import com.gu.zuora.subscription.{Add, AffectedPublicationDate, ChargeOverride, InvoiceDate, MutableCalendar, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
+import com.gu.zuora.subscription.{Add, AffectedPublicationDate, BillDates, ChargeOverride, InvoiceDate, IssueData, MutableCalendar, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import org.scalatest.EitherValues
@@ -20,6 +20,12 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
   )
   private val creditProduct = HolidayCreditProduct.Dev.GuardianWeekly
 
+  val issueData = IssueData(
+    stoppedPublicationDate.value,
+    BillDates(effectiveStartDate, effectiveStartDate.plusMonths(3).minusDays(1)),
+    -3.24
+  )
+
   "forHolidayStop" should "generate update correctly" in {
     val subscription = SubscriptionFixtures.mkGuardianWeeklySubscription(
       termStartDate = LocalDate.of(2019, 7, 12),
@@ -35,9 +41,9 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       account = Fixtures.mkAccount(),
       stoppedPublicationDate,
       None,
-      null
+      issueData
     )
-    update shouldBe Right(SubscriptionUpdate(
+    update shouldBe SubscriptionUpdate(
       currentTerm = None,
       currentTermPeriodType = None,
       List(
@@ -56,7 +62,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
           )
         )
       )
-    ))
+    )
   }
 
   it should "generate an update with an extended term when credit invoice date is after its term-end date" in {
@@ -73,9 +79,9 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       account = Fixtures.mkAccount(),
       stoppedPublicationDate,
       None,
-      null
+      issueData
     )
-    update shouldBe Right(SubscriptionUpdate(
+    update shouldBe SubscriptionUpdate(
       currentTerm = Some(366),
       currentTermPeriodType = Some("Day"),
       List(Add(
@@ -92,7 +98,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
           )
         )
       ))
-    ))
+    )
   }
 
   it should "generate an update without an extended term when credit invoice date is on its term-end date" in {
@@ -110,9 +116,9 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       account = Fixtures.mkAccount(),
       stoppedPublicationDate,
       None,
-      null
+      issueData
     )
-    update shouldBe Right(SubscriptionUpdate(
+    update shouldBe SubscriptionUpdate(
       currentTerm = None,
       currentTermPeriodType = None,
       List(Add(
@@ -129,7 +135,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
           )
         )
       ))
-    ))
+    )
   }
 
   it should "generate an update using given invoice date if provided" in {
@@ -148,7 +154,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       account = Fixtures.mkAccount(),
       stoppedPublicationDate,
       Some(givenInvoiceDate),
-      null
+      issueData
     )
     update should matchTo(SubscriptionUpdate(
       currentTerm = Some(536),
