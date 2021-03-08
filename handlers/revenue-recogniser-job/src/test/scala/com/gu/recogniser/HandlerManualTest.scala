@@ -4,10 +4,11 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.RestRequestMaker.{Requests, WithoutCheck}
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.zuora.reports.Querier
 import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
+import okhttp3.{Request, Response}
 import play.api.libs.json.{JsValue, Json, Reads, __}
 
 import java.time.LocalDate
@@ -15,14 +16,33 @@ import java.time.LocalDate
 /*
 Run this in order to set up data in dev so that you can run the job and it will find some data
  */
-object CreateTestSubscriptionManualTest {
+object CreateExpiredGiftTestSubscriptionManualTest {
 
   def main(args: Array[String]): Unit = {
+
+    val startDate = LocalDate.of(2020, 2, 9)
 
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      subNumber <- ZuoraGiftSubscribe.subscribe(zuoraDeps).toDisjunction.left.map(httpError => new RuntimeException(httpError.toString))
+      subNumber <- ZuoraGiftSubscribe.subscribe(zuoraDeps, startDate).toDisjunction.left.map(httpError => new RuntimeException(httpError.toString))
+    } yield subNumber
+    println("result: " + actual)
+    println("****\nNOTE: wait a while as the revenue schedule isn't created straight away\n****")
+
+  }
+}
+
+object CreateRefundedBeforeRedemptionTestSubscriptionManualTest {
+
+  def main(args: Array[String]): Unit = {
+
+    val startDate = LocalDate.now().minusWeeks(2) // arbitrary recent but not expired
+
+    val actual = for {
+      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
+      subNumber <- ZuoraGiftSubscribe.subscribe(zuoraDeps, startDate).toDisjunction.left.map(httpError => new RuntimeException(httpError.toString))
     } yield subNumber
     println("result: " + actual)
     println("****\nNOTE: wait a while as the revenue schedule isn't created straight away\n****")
@@ -35,19 +55,60 @@ object RunLambdaManualTest {
   def main(args: Array[String]): Unit = {
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
-      downloadRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
-      _ <- Steps(
+      zuoraRestConfig <- LoadConfigModule(Stage("PROD"), GetFromS3.fetchString)[ZuoraRestConfig]
+      _ <- fakeSteps(
         println,
         RawEffects.downloadResponse,
         RawEffects.response,
         zuoraRestConfig,
-        () => LocalDate.of(2021, 2, 10)
+        () => LocalDate.now()
       ).execute()
     } yield ()
     println("result: " + actual)
 
   }
+
+  def fakeSteps(
+    log: String => Unit,
+    downloadResponse: Request => Response,
+    response: Request => Response,
+    zuoraRestConfig: ZuoraRestConfig,
+    today: () => LocalDate
+  ): Steps = {
+    val requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
+    val downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
+    val aquaQuerier = Querier.lowLevel(downloadRequests) _
+    val getRevenueSchedules = GetRevenueSchedules(requests)
+    val distributeRevenueOnSpecificDate = new DistributeRevenueOnSpecificDate(null) {
+      override def distribute(revenueScheduleNumber: String, dateToDistribute: LocalDate): ClientFailableOp[Unit] = {
+        log(s"trying to distribute $revenueScheduleNumber on $dateToDistribute")
+        ClientSuccess(())
+      }
+    }
+    new Steps(
+      log,
+      new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, log),
+      today,
+      distributeRevenueOnSpecificDate,
+      new DistributeRedeemedSub(
+        new DistributeRevenueAcrossAccountingPeriods(null) {
+          override def distribute(revenueScheduleNumber: String, revenueDistributions: List[DistributeRevenueAcrossAccountingPeriods.RevenueDistribution]): ClientFailableOp[Unit] = {
+            log(s"trying to distribute $revenueScheduleNumber as $revenueDistributions")
+            ClientSuccess(())
+          }
+        },
+        distributeRevenueOnSpecificDate,
+        getRevenueSchedules,
+        today
+      ),
+      new DistributeUnredeemedSub(
+        distributeRevenueOnSpecificDate,
+        getRevenueSchedules,
+        today
+      )
+    )
+  }
+
 }
 
 object GetSubscriptionChargeId {
@@ -126,11 +187,11 @@ object ZuoraGiftSubscribe {
   implicit val reads: Reads[SubscribeResult] =
     (__(0) \ "SubscriptionNumber").read[String].map(SubscribeResult)
 
-  def subscribe(requests: Requests): ClientFailableOp[String] =
-    requests.post[JsValue, SubscribeResult](requestJson, s"action/subscribe", WithoutCheck).map(_.SubscriptionNumber)
+  def subscribe(requests: Requests, startDate: LocalDate): ClientFailableOp[String] =
+    requests.post[JsValue, SubscribeResult](requestJson(startDate), s"action/subscribe", WithoutCheck).map(_.SubscriptionNumber)
 
-  val requestJson = Json.parse(
-    """{
+  def requestJson(startDate: LocalDate) = Json.parse(
+    s"""{
       |    "subscribes": [
       |        {
       |            "Account": {
@@ -170,9 +231,9 @@ object ZuoraGiftSubscribe {
       |                    }
       |                ],
       |                "Subscription": {
-      |                    "ContractEffectiveDate": "2020-02-09",
-      |                    "ContractAcceptanceDate": "2020-02-09",
-      |                    "TermStartDate": "2020-02-09",
+      |                    "ContractEffectiveDate": "$startDate",
+      |                    "ContractAcceptanceDate": "$startDate",
+      |                    "TermStartDate": "$startDate",
       |                    "AutoRenew": false,
       |                    "InitialTerm": 13,
       |                    "RenewalTerm": 12,
