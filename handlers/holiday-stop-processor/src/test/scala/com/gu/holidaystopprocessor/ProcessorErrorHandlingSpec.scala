@@ -22,12 +22,16 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
 
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
 
+  val affectedPublicationDate1 = LocalDate.of(2019, 8, 2)
+  val affectedPublicationDate2 = LocalDate.of(2019, 9, 6)
+  val affectedPublicationDate3 = LocalDate.of(2019, 8, 9)
+
   val holidayStopRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[HolidayStopRequestsDetail]] = {
     (_, _) =>
       Right(List(
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 6), SubscriptionName("A-S2")), "C3"),
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9), SubscriptionName("A-S3")), "C4")
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", affectedPublicationDate1, SubscriptionName("A-S1")), "C1"),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", affectedPublicationDate2, SubscriptionName("A-S2")), "C3"),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", affectedPublicationDate3, SubscriptionName("A-S3")), "C4")
       ))
   }
 
@@ -69,24 +73,6 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       issueData
     )
 
-  private val previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse] =
-    (a,b,c) => Right(PreviewPublicationsResponse(
-      subscriptionName = "",
-      nextInvoiceDateAfterToday = LocalDate.now(),
-      rangeStartDate = LocalDate.now(),
-      rangeEndDate = LocalDate.now(),
-      publicationsWithinRange = List(
-        Publication(       /* Contrast with InvoiceItem                               */
-          AffectedPublicationDate(LocalDate.of(2019, 8, 9)).value: LocalDate, /* Date of paper printed on cover                          */
-          LocalDate.now(): LocalDate,     /* Publication falls on this invoice                       */
-          LocalDate.now().plusMonths(3).minusDays(1): LocalDate, /* The invoice on which this publication would be credited */
-          "productName": String,        /* For example Newspaper Delivery                          */
-          "chargeName": String,         /* For example Sunday                                      */
-          3.27: Double,              /* Charge of single publication                            */
-        )
-      )
-    ))
-
   "Error handling" should "not short-circuit if some writes to Zuora fail (but others succeed), and Salesforce write succeeds" in {
     val getSubscription: SubscriptionName => Either[ZuoraApiFailure, Subscription] = {
       case subName if subName.value == "A-S1" => Right(subscription)
@@ -109,7 +95,10 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce,
       null,
-      previewPublications,
+      Fixtures.mockPreviewPublications(
+        affectedPublicationDate1,
+        affectedPublicationDate3,
+      ),
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
@@ -142,7 +131,11 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce,
       null,
-      previewPublications
+      Fixtures.mockPreviewPublications(
+        affectedPublicationDate1,
+        affectedPublicationDate2,
+        affectedPublicationDate3,
+      ),
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
@@ -175,7 +168,7 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce,
       null,
-      previewPublications,
+      Fixtures.mockPreviewPublications(),
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
@@ -207,7 +200,11 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce,
       null,
-      previewPublications,
+      Fixtures.mockPreviewPublications(
+        affectedPublicationDate1,
+        affectedPublicationDate2,
+        affectedPublicationDate3,
+      ),
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate

@@ -1,11 +1,10 @@
 package com.gu.holiday_stops
 
 import java.time.LocalDate
-
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailExpectedInvoiceDate, HolidayStopRequestsDetailId, ProductName}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
-import com.gu.zuora.{HolidayStopProcessor, Oauth, HolidayStopProcessorZuoraConfig}
+import com.gu.zuora.{HolidayStopProcessor, HolidayStopProcessorZuoraConfig, Oauth, PreviewPublicationsResponse, Publication}
 import com.gu.zuora.subscription.Fixtures.mkRatePlanCharge
 import com.gu.zuora.subscription._
 import io.circe.generic.auto._
@@ -304,4 +303,29 @@ object Fixtures extends Assertions {
     zuoraConfig = HolidayStopProcessorZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
   )
+
+  def mockPreviewPublications(
+    affectedPublicationDaters: LocalDate*
+  ): (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse] = {
+    (a,b,c) => Right(PreviewPublicationsResponse(
+      subscriptionName = "",
+      nextInvoiceDateAfterToday = LocalDate.now(),
+      rangeStartDate = LocalDate.now(),
+      rangeEndDate = LocalDate.now(),
+      publicationsWithinRange = affectedPublicationDaters.toList.map(affectedPublicationDate =>
+        Publication(                         /* Contrast with InvoiceItem                               */
+          affectedPublicationDate,           /* Date of paper printed on cover                          */
+          invoiceDate = LocalDate.now(),     /* Publication falls on this invoice                       */
+          nextInvoiceDate = LocalDate.now(), /* The invoice on which this publication would be credited */
+          "productName": String,             /* For example Newspaper Delivery                          */
+          "chargeName": String,              /* For example Sunday                                      */
+          3.27: Double,                      /* Charge of single publication                            */
+        ),
+      )
+    ))
+  }
+
+  def mockPreviewPublications(): (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse] =
+  Fixtures.mockPreviewPublications(AffectedPublicationDate(LocalDate.of(2019, 8, 9)).value)
+
 }
