@@ -39,4 +39,6 @@ object ConsentsCalculator {
             Right(canceledProductConsents.diff(ownedProductConsents)))
       })
   }
+
+  def buildConsentsBody(consents: Set[String], state: Boolean): String = ???
 }

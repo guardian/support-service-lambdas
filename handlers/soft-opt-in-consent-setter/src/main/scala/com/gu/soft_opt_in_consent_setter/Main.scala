@@ -1,5 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
+import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -172,22 +173,24 @@ object Main extends App {
   def processAcqSubs(
     acqSubs: Seq[SFSubscription.Record]
   ): Seq[SFSubscription.UpdateRecord] = {
+    acqSubs.map(sub => {
+      buildSfResponse(sub, "Acquisition", for {
+        consents <- ConsentsCalculator.getAcqConsents(sub.Name)
+        consentsBody = ConsentsCalculator.buildConsentsBody(consents, true)
+        result <- IdentityConnector.sendConsentsReq(sub.Id, consentsBody)
+      } yield result)
+    })
+  }
 
-    val subsWithIdentityConsents = enhanceSubsWithIdentityConsents(acqSubs)
-
-    val updatedConsentSubs =
-      processIdentityConsentUpdates(subsWithIdentityConsents, "Acquisition")
-
-    val acquisitionSubsToUpdate = updatedConsentSubs
-      .map(sub =>
-        SFSubscription.UpdateRecord(
-          sub.Id,
-          sub.Soft_Opt_in_Last_Stage_Processed__c,
-          sub.Soft_Opt_in_Number_of_Attempts__c
-        ))
-      .toSeq
-
-    acquisitionSubsToUpdate
+  def buildSfResponse(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {
+    result match {
+      case Right(_) => successfulUpdateToIdentityConsents(sub, stage)
+      case Left(failure) => {
+        // TODO: Log error
+        println(failure)
+        failedUpdateToIdentityConsents(sub)
+      }
+    }
   }
 
   def processIdentityConsentUpdates(
@@ -196,7 +199,7 @@ object Main extends App {
   ): Seq[SFSubscription.UpdateRecord] = {
     subs.map(sub => {
 
-      setConsentsInIdentityForSub(sub) match {
+      setConsentsInIdentityForSub(sub.Id) match {
         case true => successfulUpdateToIdentityConsents(sub, softOptInStage)
         case false => failedUpdateToIdentityConsents(sub)
       }
@@ -330,14 +333,6 @@ object Main extends App {
     subs.map(sub => sub.Buyer__r.IdentityID__c)
   }
 
-  def enhanceSubsWithIdentityConsents(
-    subs: Seq[SFSubscription.Record]
-  ): Seq[SFSubscription.Record] = {
-    subs.map(sub =>
-      sub.copy(IdentityConsents =
-        Some(getIdentityConsentsSpecificToProduct(sub.Product__c))))
-  }
-
   //Mapping needed here
   def getIdentityConsentsSpecificToProduct(productName: String): Seq[String] = {
     val identityConsents: Seq[String] = Seq("consent1", "consent2")
@@ -345,7 +340,7 @@ object Main extends App {
   }
 
   //Callout to Identity here
-  def setConsentsInIdentityForSub(sub: SFSubscription.Record): Boolean = {
+  def setConsentsInIdentityForSub(identityId: String, consents: Set[String]): Boolean = {
     true
   }
 
