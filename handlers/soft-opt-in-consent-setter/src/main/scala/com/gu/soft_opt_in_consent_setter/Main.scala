@@ -59,12 +59,6 @@ object Main extends App {
   } yield {
     val sfRecords = allSubsToProcessFromSf.records
     println("sfRecords:" + sfRecords)
-    //    val subsWithIdentityConsents = enhanceSubsWithIdentityConsents(sfRecords)
-
-    //    val acquisitionSubs =
-    //      sfRecords.filter(
-    //        _.Soft_Opt_in_Status__c.equals("Ready to process acquisition")
-    //      )
 
     val acqSubUpdatesToWriteBackToSf = processAcqSubs(
       sfRecords.filter(
@@ -199,7 +193,7 @@ object Main extends App {
   ): Seq[SFSubscription.UpdateRecord] = {
     subs.map(sub => {
 
-      setConsentsInIdentityForSub(sub.Id) match {
+      setConsentsInIdentityForSub(sub.Id, Set()) match {
         case true => successfulUpdateToIdentityConsents(sub, softOptInStage)
         case false => failedUpdateToIdentityConsents(sub)
       }
