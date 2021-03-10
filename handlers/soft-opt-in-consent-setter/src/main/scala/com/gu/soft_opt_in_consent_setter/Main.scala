@@ -7,13 +7,13 @@ import io.circe.parser._
 import io.circe.syntax.EncoderOps
 import scalaj.http.{Http, HttpOptions}
 
-//TODO get Identity callout working
-//TODO (DONE) get write back to SF for cancellations
-//TODO get list added to list for full cycle
-//TODO add to support service Lambdas repo
-//TODO (DONE) ensure that canc subs where identity update not needed are written back to sf
-//TODO can(/should?) we omit subs from checking immediately when no associated subs
-//TODO test the postman script
+// TODO get Identity callout working
+// TODO (DONE) get write back to SF for cancellations
+// TODO get list added to list for full cycle
+// TODO add to support service Lambdas repo
+// TODO (DONE) ensure that canc subs where identity update not needed are written back to sf
+// TODO can(/should?) we omit subs from checking immediately when no associated subs
+// TODO test the postman script
 object Main extends App {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
@@ -250,7 +250,7 @@ object Main extends App {
   }
 
   def getSubsOverlapCheckQuery(IdentityIds: Seq[String]): String = {
-    val identityId = "softOptInTest-863";
+    val identityId = "softOptInTest-863"
     val query =
       s"""
          |SELECT
@@ -269,8 +269,8 @@ object Main extends App {
   }
 
   def getAllSubsQuery(): String = {
-    val limit = 2;
-    val sfSubName = "A-S00161734";
+    val limit = 2
+    val sfSubName = "A-S00161734"
     val query =
       s"""
          |SELECT
