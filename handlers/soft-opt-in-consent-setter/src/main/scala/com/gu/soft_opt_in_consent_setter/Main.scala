@@ -18,15 +18,15 @@ object Main extends App {
   case class SfAuthDetails(access_token: String, instance_url: String)
 
   case class BodyForWriteBackToSf(
-      allOrNone: Boolean = false,
-      records: Seq[SFSubscription.UpdateRecord]
+    allOrNone: Boolean = false,
+    records: Seq[SFSubscription.UpdateRecord]
   )
 
   case class EnhancedCancelledSub(
-      identityId: String,
-      cancelledSub: SFSubscription.Record,
-      associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record],
-      identityUpdateNeeded: Boolean
+    identityId: String,
+    cancelledSub: SFSubscription.Record,
+    associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record],
+    identityUpdateNeeded: Boolean
   )
 
   val optConfig = for {
@@ -58,14 +58,18 @@ object Main extends App {
   } yield {
     val sfRecords = allSubsToProcessFromSf.records
     println("sfRecords:" + sfRecords)
-    val subsWithIdentityConsents = enhanceSubsWithIdentityConsents(sfRecords)
+    //    val subsWithIdentityConsents = enhanceSubsWithIdentityConsents(sfRecords)
 
-    val acquisitionSubs =
-      subsWithIdentityConsents.filter(
+    //    val acquisitionSubs =
+    //      sfRecords.filter(
+    //        _.Soft_Opt_in_Status__c.equals("Ready to process acquisition")
+    //      )
+
+    val acqSubUpdatesToWriteBackToSf = processAcqSubs(
+      sfRecords.filter(
         _.Soft_Opt_in_Status__c.equals("Ready to process acquisition")
       )
-
-    val acqSubUpdatesToWriteBackToSf = processAcqSubs(acquisitionSubs)
+    )
     updateSubsInSf(
       sfAuthDetails,
       BodyForWriteBackToSf(false, acqSubUpdatesToWriteBackToSf).asJson.spaces2
@@ -90,16 +94,15 @@ object Main extends App {
   }
 
   def processCancSubs(
-      sfAuthDetails: SfAuthDetails,
-      cancSubs: Seq[SFSubscription.Record]
+    sfAuthDetails: SfAuthDetails,
+    cancSubs: Seq[SFSubscription.Record]
   ): Either[Throwable, Seq[SFSubscription.UpdateRecord]] = {
 
     val identityIds = getIdentityIdsFromSubs(cancSubs)
     println("identityIds:" + identityIds)
 
     for {
-      subsToCheckConsentOverlapAgainst <-
-        getSfSubsOverlapCheck(sfAuthDetails, identityIds)
+      subsToCheckConsentOverlapAgainst <- getSfSubsOverlapCheck(sfAuthDetails, identityIds)
     } yield {
       val sfSubsAssociatedWithIdentityIdsOnCancSubs =
         subsToCheckConsentOverlapAgainst.records
@@ -127,16 +130,15 @@ object Main extends App {
               sub.Id,
               sub.Soft_Opt_in_Last_Stage_Processed__c,
               sub.Soft_Opt_in_Number_of_Attempts__c
-            )
-          )
+            ))
       cancSubsToUpdateInSf
     }
 
   }
 
   def getEnhancedCancSubs(
-      cancSubs: Seq[SFSubscription.Record],
-      associatedSubs: Seq[AssociatedSFSubscription.Record]
+    cancSubs: Seq[SFSubscription.Record],
+    associatedSubs: Seq[AssociatedSFSubscription.Record]
   ): Seq[EnhancedCancelledSub] = {
 
     cancSubs.map(a => {
@@ -161,18 +163,20 @@ object Main extends App {
   }
 
   def consentOverlapExists(
-      sub: SFSubscription.Record,
-      AssociatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record]
+    sub: SFSubscription.Record,
+    AssociatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record]
   ): Boolean = {
     false
   }
 
   def processAcqSubs(
-      acqSubs: Seq[SFSubscription.Record]
+    acqSubs: Seq[SFSubscription.Record]
   ): Seq[SFSubscription.UpdateRecord] = {
 
+    val subsWithIdentityConsents = enhanceSubsWithIdentityConsents(acqSubs)
+
     val updatedConsentSubs =
-      processIdentityConsentUpdates(acqSubs, "Acquisition")
+      processIdentityConsentUpdates(subsWithIdentityConsents, "Acquisition")
 
     val acquisitionSubsToUpdate = updatedConsentSubs
       .map(sub =>
@@ -180,21 +184,20 @@ object Main extends App {
           sub.Id,
           sub.Soft_Opt_in_Last_Stage_Processed__c,
           sub.Soft_Opt_in_Number_of_Attempts__c
-        )
-      )
+        ))
       .toSeq
 
     acquisitionSubsToUpdate
   }
 
   def processIdentityConsentUpdates(
-      subs: Seq[SFSubscription.Record],
-      softOptInStage: String
+    subs: Seq[SFSubscription.Record],
+    softOptInStage: String
   ): Seq[SFSubscription.UpdateRecord] = {
     subs.map(sub => {
 
       setConsentsInIdentityForSub(sub) match {
-        case true  => successfulUpdateToIdentityConsents(sub, softOptInStage)
+        case true => successfulUpdateToIdentityConsents(sub, softOptInStage)
         case false => failedUpdateToIdentityConsents(sub)
       }
 
@@ -202,8 +205,8 @@ object Main extends App {
   }
 
   def successfulUpdateToIdentityConsents(
-      sub: SFSubscription.Record,
-      softOptInStage: String
+    sub: SFSubscription.Record,
+    softOptInStage: String
   ): SFSubscription.UpdateRecord = {
     println("I succeeded!")
 
@@ -215,7 +218,7 @@ object Main extends App {
   }
 
   def failedUpdateToIdentityConsents(
-      sub: SFSubscription.Record
+    sub: SFSubscription.Record
   ): SFSubscription.UpdateRecord = {
     println("I failed!")
 
@@ -230,7 +233,7 @@ object Main extends App {
   }
 
   def getSfSubs(
-      sfAuthentication: SfAuthDetails
+    sfAuthentication: SfAuthDetails
   ): Either[Error, SFSubscription.RootInterface] = {
 
     decode[SFSubscription.RootInterface](
@@ -238,9 +241,10 @@ object Main extends App {
     )
 
   }
+
   def getSfSubsOverlapCheck(
-      sfAuthentication: SfAuthDetails,
-      IdentityIds: Seq[String]
+    sfAuthentication: SfAuthDetails,
+    IdentityIds: Seq[String]
   ): Either[Error, AssociatedSFSubscription.RootInterface] = {
 
     decode[AssociatedSFSubscription.RootInterface](
@@ -305,6 +309,7 @@ object Main extends App {
     println("response:" + response)
     response
   }
+
   def auth(salesforceConfig: SalesforceConfig): String = {
     Http(s"${System.getenv("authUrl")}/services/oauth2/token")
       .postForm(
@@ -320,18 +325,17 @@ object Main extends App {
       .body
 
   }
+
   def getIdentityIdsFromSubs(subs: Seq[SFSubscription.Record]): Seq[String] = {
     subs.map(sub => sub.Buyer__r.IdentityID__c)
   }
 
   def enhanceSubsWithIdentityConsents(
-      subs: Seq[SFSubscription.Record]
+    subs: Seq[SFSubscription.Record]
   ): Seq[SFSubscription.Record] = {
     subs.map(sub =>
       sub.copy(IdentityConsents =
-        Some(getIdentityConsentsSpecificToProduct(sub.Product__c))
-      )
-    )
+        Some(getIdentityConsentsSpecificToProduct(sub.Product__c))))
   }
 
   //Mapping needed here
@@ -346,17 +350,18 @@ object Main extends App {
   }
 
   def updateSubsInSf(
-      sfAuthDetails: SfAuthDetails,
-      updateJsonBody: String
+    sfAuthDetails: SfAuthDetails,
+    updateJsonBody: String
   ): Unit = {
     println("updateJsonBody:" + updateJsonBody)
     doSfCompositeRequest(sfAuthDetails, updateJsonBody, "PATCH")
 
   }
+
   def doSfCompositeRequest(
-      sfAuthDetails: SfAuthDetails,
-      jsonBody: String,
-      requestType: String
+    sfAuthDetails: SfAuthDetails,
+    jsonBody: String,
+    requestType: String
   ): String = {
 
     val updateResponseFromSf = Http(
