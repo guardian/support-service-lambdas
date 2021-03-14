@@ -1,6 +1,8 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
+import io.circe.generic.auto._
+import io.circe.syntax._
 
 object ConsentsCalculator {
   def consentsMappings = Map(
@@ -40,5 +42,9 @@ object ConsentsCalculator {
       })
   }
 
-  def buildConsentsBody(consents: Set[String], state: Boolean): String = ???
+  def buildConsentsBody(consents: Set[String], state: Boolean): String = {
+    case class consentsObject(id: String, consented: Boolean)
+
+    consents.toList.map(consentsObject(_, state)).asJson.toString()
+  }
 }
