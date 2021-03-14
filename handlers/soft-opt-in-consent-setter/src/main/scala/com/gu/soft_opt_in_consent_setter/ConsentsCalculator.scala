@@ -4,14 +4,14 @@ import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
 
 object ConsentsCalculator {
   def consentsMappings = Map(
-    "membership" -> Set("support_onboarding", "similar_products", "supporter_newsletter"),
-    "contributions" -> Set("support_onboarding", "similar_products", "supporter_newsletter"),
-    "newspaper" -> Set("support_onboarding", "similar_products", "subscriber_preview", "supporter_newsletter"),
-    "homedelivery" -> Set("support_onboarding", "similar_products", "subscriber_preview", "supporter_newsletter"),
-    "voucher" -> Set("support_onboarding", "similar_products", "subscriber_preview", "supporter_newsletter"),
-    "digitalvoucher" -> Set("support_onboarding", "similar_products", "subscriber_preview", "supporter_newsletter"),
-    "guardianweekly" -> Set("support_onboarding", "guardian_weekly_newsletter"),
-    "digipack" -> Set("support_onboarding", "similar_products", "supporter_newsletter", "digi_subscriber_preview")
+    "membership" -> Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter"),
+    "contributions" -> Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter"),
+    "newspaper" -> Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter"),
+    "homedelivery" -> Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter"),
+    "voucher" -> Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter"),
+    "digitalvoucher" -> Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter"),
+    "guardianweekly" -> Set("your_support_onboarding", "guardian_weekly_newsletter"),
+    "digipack" -> Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter", "digital_subscriber_preview")
   )
 
   def getAcqConsents(productName: String): Either[SoftOptInError, Set[String]] =
