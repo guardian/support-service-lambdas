@@ -167,11 +167,15 @@ object Main extends App {
   def processAcqSubs(
     acqSubs: Seq[SFSubscription.Record]
   ): Seq[SFSubscription.UpdateRecord] = {
+
+    // TODO: Get these from env variables
+    val IDAPIConnector = new IdentityConnector("someHost.com", "some token")
+
     acqSubs.map(sub => {
       buildSfResponse(sub, "Acquisition", for {
         consents <- ConsentsCalculator.getAcqConsents(sub.Name)
         consentsBody = ConsentsCalculator.buildConsentsBody(consents, true)
-        result <- IdentityConnector.sendConsentsReq(sub.Id, consentsBody)
+        result <- IDAPIConnector.sendConsentsReq(sub.Id, consentsBody)
       } yield result)
     })
   }
