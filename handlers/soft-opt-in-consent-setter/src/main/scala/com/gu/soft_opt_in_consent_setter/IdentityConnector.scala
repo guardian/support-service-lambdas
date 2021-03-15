@@ -22,8 +22,6 @@ class IdentityConnector(IdentityHost: String, authToken: String) {
         if (response.isSuccess)
           Right()
         else
-          Left(SoftOptInError("IdentityConnector", s"Identity request failed while processing $identityId with body $body. Status code: ${response.code}"))
-
-      )
+          Left(SoftOptInError("IdentityConnector", s"Identity request failed while processing $identityId with body $body. Status code: ${response.code}")))
   }
 }
