@@ -31,7 +31,6 @@ object Processor {
     resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
     writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
-    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
     previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse],
   ): ProcessResult[Result] = {
 
@@ -60,7 +59,6 @@ object Processor {
       updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
-      getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
       previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse],
     )
   }
@@ -77,7 +75,6 @@ object Processor {
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
     writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
-    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
     previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse],
   ): ProcessResult[Result] = {
     val creditRequestsFromSalesforce = for {
@@ -102,7 +99,6 @@ object Processor {
             updateToApply,
             updateSubscription,
             resultOfZuoraCreditAdd,
-            getNextInvoiceDate,
             previewPublications,
           )
         )
@@ -117,26 +113,6 @@ object Processor {
         )
     }
   }
-
-  // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20
-  import scala.concurrent.{ExecutionContext, Future}
-  import java.util.concurrent.Executors
-  private val ecForTestInProd = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor)
-  private def testInProdNextInvoiceDate(
-    subscription: Subscription,
-    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
-    expected: SubscriptionUpdate,
-  ): Future[_] = Future {
-    (getNextInvoiceDate(subscription.subscriptionNumber).map { actual =>
-      if (expected.add.forall(_.contractEffectiveDate == actual)) {
-        // logger.info("testInProdNextInvoiceDate OK")
-      } else {
-        logger.error(s"testInProdNextInvoiceDate failed because ${expected.add.head} =/= $actual")
-      }
-    }).left.map { e =>
-      logger.error(s"testInProdNextInvoiceDate failed because invoicing-api error: $e")
-    }
-  }(ecForTestInProd)
 
   def findAffectedPublication(previewedPubs: List[Publication], affectedPubDate: LocalDate): Option[IssueData] = {
     previewedPubs.find(_.publicationDate == affectedPubDate)
@@ -153,7 +129,6 @@ object Processor {
     updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request, IssueData) => SubscriptionUpdate,
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     result: (Request, RatePlanCharge) => Result,
-    getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
     previewPublications: (String, String, String) => Either[ZuoraApiFailure, PreviewPublicationsResponse],
   )(request: Request): ZuoraApiResponse[Result] =
     for {
@@ -162,10 +137,7 @@ object Processor {
       _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};")) else Right(())
       publications <- previewPublications(subscription.subscriptionNumber, request.publicationDate.value.toString, request.publicationDate.value.toString)
       issueData <- findAffectedPublication(publications.publicationsWithinRange, request.publicationDate.value).toRight(ZuoraApiFailure(s"Cannot find affected publication in previewed publications: ${request.publicationDate}; ${subscription.subscriptionNumber}"))
-      subscriptionUpdate = updateToApply(creditProduct, subscription, account, request, issueData) // FIXME: Deprecated
-      _ = testInProdNextInvoiceDate(subscription, getNextInvoiceDate, subscriptionUpdate)
-      // FIXME: nextInvoiceDate <- getNextInvoiceDate(subscription.subscriptionNumber)
-      // FIXME: subscriptionUpdate <- SubscriptionUpdate(creditProduct(subscription), subscription, account, request.publicationDate, Some(InvoiceDate(nextInvoiceDate)))
+      subscriptionUpdate = updateToApply(creditProduct, subscription, account, request, issueData)
       _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write credit amendment to Zuora: $request"))

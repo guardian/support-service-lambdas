@@ -103,7 +103,7 @@ object DeliveryCreditProcessor extends Logging {
             resultOfZuoraCreditAdd,
             writeCreditResultsToSalesforce(sfAuthConfig),
             Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend),
-            previewPublications = PreviewPublications.preview,
+            PreviewPublications.preview,
           )
       )
     } yield processResult

@@ -94,7 +94,6 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce,
-      null,
       Fixtures.mockPreviewPublications(
         affectedPublicationDate1,
         affectedPublicationDate3,
@@ -130,7 +129,6 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce,
-      null,
       Fixtures.mockPreviewPublications(
         affectedPublicationDate1,
         affectedPublicationDate2,
@@ -167,7 +165,6 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce,
-      null,
       Fixtures.mockPreviewPublications(),
     )
 
@@ -199,7 +196,6 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce,
-      null,
       Fixtures.mockPreviewPublications(
         affectedPublicationDate1,
         affectedPublicationDate2,
