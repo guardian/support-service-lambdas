@@ -12,31 +12,7 @@ case class RatePlanChargeData(
   billingPeriodName: String,
   issueDayOfWeek: DayOfWeek,
   issueCreditAmount: Double
-) {
-  def getIssuesForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
-    @tailrec
-    def getIssuesForPeriod(firstIssueDate: LocalDate, endDateInclusive: LocalDate, issueData: List[IssueData]): List[IssueData] = {
-      if (firstIssueDate.isAfter(endDateInclusive)) {
-        issueData
-      } else {
-        getIssuesForPeriod(
-          firstIssueDate.`with`(TemporalAdjusters.next(issueDayOfWeek)),
-          endDateInclusive,
-          billingSchedule.billDatesCoveringDate(firstIssueDate) match {
-            case Left(_) => issueData
-            case Right(billingPeriod) => IssueData(firstIssueDate, billingPeriod, issueCreditAmount) :: issueData
-          }
-        )
-      }
-    }
-
-    getIssuesForPeriod(
-      startDateInclusive.`with`(TemporalAdjusters.nextOrSame(issueDayOfWeek)),
-      endDateInclusive,
-      Nil
-    )
-  }
-}
+)
 
 object RatePlanChargeData {
   def apply(

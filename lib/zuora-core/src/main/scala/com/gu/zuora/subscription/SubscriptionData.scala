@@ -3,10 +3,6 @@ package com.gu.zuora.subscription
 import java.time.{DayOfWeek, LocalDate}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import cats.syntax.all._
-import RatePlanChargeData.round2Places
-
-import math.abs
-import scala.util.chaining.scalaUtilChainingOps
 
 // FIXME: We need to make sure credit calculation goes through a single code path. Right now onus is on the user to make sure discounts are applied to credit.
 case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
@@ -29,7 +25,6 @@ case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double)
 }
 
 trait SubscriptionData {
-  @deprecated("Migrate to https://github.com/guardian/invoicing-api/pull/20") def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData]
   def productType: ZuoraProductType
   def subscriptionAnnualIssueLimit: Int
   def editionDaysOfWeek: List[DayOfWeek]
@@ -70,49 +65,6 @@ object SubscriptionData {
     subscription: Subscription,
   ): SubscriptionData = {
     new SubscriptionData {
-      def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData] = {
-        for {
-          ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
-          billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
-        } yield {
-          applyAnyDiscounts(IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount))
-        }
-      }
-
-      // Calculate credit by taking into account potential discounts, otherwise return original credit
-      def applyAnyDiscounts(issueData: IssueData): IssueData = {
-        import issueData._
-
-        def isActiveDiscount(start: LocalDate, end: LocalDate): Boolean =
-          (start.isEqual(issueDate) || start.isBefore(issueDate)) && end.isAfter(issueDate)
-
-        val discounts: List[Double] =
-          subscription
-            .ratePlans
-            .iterator
-            .filter(_.productName == "Discounts")
-            .flatMap(_.ratePlanCharges.map(rpc => (rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)))
-            .collect { case (percent, start, end) if percent.isDefined && isActiveDiscount(start, end) => percent }
-            .flatten
-            .map(_ / 100)
-            .toList
-
-        def verify(discountedCredit: Double): Double = {
-          discountedCredit
-            .tap(v => assert(abs(v) <= abs(issueData.credit), "Discounted credit should not be more than un-discounted"))
-            .tap(v => assert(v <= 0, "Credit should be negative"))
-            .tap(v => assert(v.toString.dropWhile(_ != '.').tail.length <= 2, "Credit should have up to two decimal places"))
-            .tap(v => assert(abs(v) < 10.0, "Credit should not go beyond maximum bound"))
-            .tap(v => if (discounts.isEmpty) assert(v == issueData.credit, "Credit should not be affected if there are no discounts"))
-          }
-
-        discounts
-          .foldLeft(issueData.credit) { case (acc, next) => acc * (1 - next) }
-          .pipe(round2Places)
-          .pipe(verify)
-          .pipe(discountedCredit => issueData.copy(credit = discountedCredit))
-      }
-
       override def productType: ZuoraProductType = {
         zuoraProductType
       }
@@ -140,17 +92,6 @@ object SubscriptionData {
 
   private def getUnexpiredRatePlanCharges(ratePlan: RatePlan) = {
     ratePlan.ratePlanCharges.filter(_.chargedThroughDate.map(!_.isBefore(MutableCalendar.today)).getOrElse(true))
-  }
-
-  def ratePlanChargeDataForDate(ratePlanChargeData: List[RatePlanChargeData], date: LocalDate): Either[ZuoraApiFailure, RatePlanChargeData] = {
-    ratePlanChargeData
-      .find { ratePlanCharge =>
-        ratePlanCharge.billingSchedule.isDateCoveredBySchedule(date) &&
-          ratePlanCharge.issueDayOfWeek == date.getDayOfWeek
-      }
-      .toRight(
-        ZuoraApiFailure(s"Subscription does not have a rate plan for date $date")
-      )
   }
 
   private def getZuoraProductType(supportedProducts: List[SupportedProduct]): Either[ZuoraApiFailure, ZuoraProductType] = {
