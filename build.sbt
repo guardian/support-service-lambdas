@@ -332,6 +332,11 @@ lazy val `sf-billing-account-remover` = lambdaProject(
   "Removes Billing Accounts and related records from Salesforce",
   Seq(circe, circeParser, scalajHttp))
 
+lazy val `soft-opt-in-consent-setter` = lambdaProject(
+  "soft-opt-in-consent-setter",
+  "Updates user's consents for soft in when they acquire or cancel a product",
+  Seq(circe, circeParser, scalajHttp))
+
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",
   "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",

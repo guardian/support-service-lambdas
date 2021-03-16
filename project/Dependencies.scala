@@ -7,7 +7,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.16.12"
+  val awsSdkVersion = "2.16.17"
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
   val http4sVersion = "0.21.20"
@@ -60,7 +60,7 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.4"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.5"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.13"
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.5"
@@ -72,8 +72,8 @@ object Dependencies {
   val stripe = "com.stripe" % "stripe-java" % "20.41.0"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.4.3" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.4" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.4.4" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.6" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.15.3" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.1.0" % Test
 
