@@ -7,18 +7,20 @@ import io.circe.parser._
 import io.circe.syntax.EncoderOps
 import scalaj.http.{Http, HttpOptions}
 
-// TODO get Identity callout working
-// TODO (DONE) get write back to SF for cancellations
-// TODO get list added to list for full cycle
-// TODO add to support service Lambdas repo
-// TODO (DONE) ensure that canc subs where identity update not needed are written back to sf
-// TODO can(/should?) we omit subs from checking immediately when no associated subs
-// TODO test the postman script
+// TODO Move all Comnfig code to its own file with class + companion object
+// TODO Move all SF code to it own file with class
+// TODO: Read Identity config from env variables
+// TODO: Do functional testing
+// TODO: Introduce error handling
+// TODO: Add unit testing
+
 object Main extends App {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
 
-  case class BodyForWriteBackToSf(allOrNone: Boolean = false, records: Seq[SFSubscription.UpdateRecord])
+  case class BodyForWriteBackToSf(records: Seq[SFSubscription.UpdateRecord]) {
+    def allOrNone = false
+  }
 
   case class EnhancedCancelledSub(identityId: String, cancelledSub: SFSubscription.Record, associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record])
 
@@ -55,24 +57,24 @@ object Main extends App {
     val acqSubUpdatesToWriteBackToSf = processAcqSubs(
       sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
     )
-    updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(false, acqSubUpdatesToWriteBackToSf).asJson.spaces2)
+    updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(acqSubUpdatesToWriteBackToSf).asJson.spaces2)
 
     val cancSubUpdatesToWriteBackToSf = processCancSubs(
       sfAuthDetails,
       sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
     )
-    updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(false, cancSubUpdatesToWriteBackToSf).asJson.spaces2)
+    updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(cancSubUpdatesToWriteBackToSf).asJson.spaces2)
   }
 
   def processAcqSubs(acqSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
     // TODO: Get these from env variables
-    val IDAPIConnector = new IdentityConnector("someHost.com", "some token")
+    val identityConnector = new IdentityConnector("someHost.com", "some token")
 
     acqSubs.map(sub => {
       buildSfResponse(sub, "Acquisition", for {
         consents <- ConsentsCalculator.getAcqConsents(sub.Name)
         consentsBody = ConsentsCalculator.buildConsentsBody(consents, state = true)
-        result <- IDAPIConnector.sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
+        result <- identityConnector.sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
       } yield result)
     })
   }
@@ -112,11 +114,10 @@ object Main extends App {
   def buildSfResponse(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {
     result match {
       case Right(_) => successfulSFResponse(sub, stage)
-      case Left(failure) => {
+      case Left(failure) =>
         // TODO: Log error
         println(failure)
         failureSFResponse(sub)
-      }
     }
   }
 
@@ -247,29 +248,12 @@ object Main extends App {
 
   }
 
-  def getIdentityIdsFromSubs(subs: Seq[SFSubscription.Record]): Seq[String] = {
-    subs.map(sub => sub.Buyer__r.IdentityID__c)
-  }
-
-  //Mapping needed here
-  def getIdentityConsentsSpecificToProduct(productName: String): Seq[String] = {
-    val identityConsents: Seq[String] = Seq("consent1", "consent2")
-    identityConsents
-  }
-
-  //Callout to Identity here
-  def setConsentsInIdentityForSub(identityId: String, consents: Set[String]): Boolean = {
-    true
-  }
-
   def updateSubsInSf(sfAuthDetails: SfAuthDetails, updateJsonBody: String): Unit = {
     println("updateJsonBody:" + updateJsonBody)
     doSfCompositeRequest(sfAuthDetails, updateJsonBody, "PATCH")
-
   }
 
   def doSfCompositeRequest(sfAuthDetails: SfAuthDetails, jsonBody: String, requestType: String): String = {
-
     val updateResponseFromSf = Http(
       s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
     ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")

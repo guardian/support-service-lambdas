@@ -40,9 +40,6 @@ object ConsentsCalculator {
           .flatMap(canceledProductConsents =>
             Right(canceledProductConsents.diff(ownedProductConsents)))
       })
-//      .map[Option[Set[String]]] (result =>
-//        if (result.isEmpty) None else Some(result)
-//      )
   }
 
   def buildConsentsBody(consents: Set[String], state: Boolean): String = {
