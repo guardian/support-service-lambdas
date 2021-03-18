@@ -25,14 +25,15 @@ object Main extends App {
   case class EnhancedCancelledSub(identityId: String, cancelledSub: SFSubscription.Record, associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record])
 
   val optConfig = for {
-    sfUserName <- Option(System.getenv("username"))
-    sfClientId <- Option(System.getenv("clientId"))
-    sfClientSecret <- Option(System.getenv("clientSecret"))
-    sfPassword <- Option(System.getenv("password"))
-    sfToken <- Option(System.getenv("token"))
-    sfAuthUrl <- Option(System.getenv("authUrl"))
-
-  } yield Config(
+    sfUserName <- sys.env.get("username")
+    sfClientId <- sys.env.get("clientId")
+    sfClientSecret <- sys.env.get("clientSecret")
+    sfPassword <- sys.env.get("password")
+    sfToken <- sys.env.get("token")
+    sfAuthUrl <- sys.env.get("authUrl")
+    identityUrl <- sys.env.get("identityUrl")
+    identityToken <- sys.env.get("identityToken")
+  } yield SoftOptInConfig(
     SalesforceConfig(
       userName = sfUserName,
       clientId = sfClientId,
@@ -40,36 +41,35 @@ object Main extends App {
       password = sfPassword,
       token = sfToken,
       authUrl = sfAuthUrl
-    )
+    ),
+    IdentityConfig(identityUrl, identityToken)
   )
 
   for {
     config <- optConfig.toRight(new RuntimeException("Missing config value"))
-    sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
-
-    allSubsToProcessFromSf <- getSfSubs(
-      sfAuthDetails
-    )
+    sfAuthDetails <- decode[SfAuthDetails](auth(config.sfConfig))
+    allSubsToProcessFromSf <- getSfSubs(sfAuthDetails)
   } yield {
     val sfRecords = allSubsToProcessFromSf.records
     println("sfRecords:" + sfRecords)
 
+    val identityConnector = new IdentityConnector(config.identityConfig)
+
     val acqSubUpdatesToWriteBackToSf = processAcqSubs(
+      identityConnector,
       sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
     )
     updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(acqSubUpdatesToWriteBackToSf).asJson.spaces2)
 
     val cancSubUpdatesToWriteBackToSf = processCancSubs(
+      identityConnector,
       sfAuthDetails,
       sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
     )
     updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(cancSubUpdatesToWriteBackToSf).asJson.spaces2)
   }
 
-  def processAcqSubs(acqSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
-    // TODO: Get these from env variables
-    val identityConnector = new IdentityConnector("someHost.com", "some token")
-
+  def processAcqSubs(identityConnector: IdentityConnector, acqSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
     acqSubs.map(sub => {
       buildSfResponse(sub, "Acquisition", for {
         consents <- ConsentsCalculator.getAcqConsents(sub.Name)
@@ -79,15 +79,9 @@ object Main extends App {
     })
   }
 
-  def processCancSubs(sfAuthDetails: SfAuthDetails, cancSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
-    // TODO: Get these from env variables
-    val identityHost = "someHost.com"
-    val authToken = "some token"
-
+  def processCancSubs(identityConnector: IdentityConnector, sfAuthDetails: SfAuthDetails, cancSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
     getSfSubsOverlapCheck(sfAuthDetails, cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
       case Right(activeSubs) =>
-        val identityConnector = new IdentityConnector(identityHost, authToken)
-
         getEnhancedCancSubs(cancSubs, activeSubs.records)
           .map(sub => {
             buildSfResponse(sub.cancelledSub, "Cancellation",
