@@ -2,7 +2,7 @@ package com.gu.soft_opt_in_consent_setter
 
 object SfQueries {
 
-  def getAllSubsQuery(): String = {
+  def getAllSubsQuery: String = {
     val limit = 2
     val sfSubName = "A-S00161734"
     val query =

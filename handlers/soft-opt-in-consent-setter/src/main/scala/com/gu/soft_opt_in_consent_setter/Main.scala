@@ -1,11 +1,8 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models._
-import io.circe._
 import io.circe.generic.auto._
-import io.circe.parser._
 import io.circe.syntax.EncoderOps
-import scalaj.http.{Http, HttpOptions}
 
 // TODO Move all Comnfig code to its own file with class + companion object
 // TODO Move all SF code to it own file with class
@@ -16,19 +13,14 @@ import scalaj.http.{Http, HttpOptions}
 
 object Main extends App {
 
-  case class SfAuthDetails(access_token: String, instance_url: String)
-
-  case class BodyForWriteBackToSf(records: Seq[SFSubscription.UpdateRecord]) {
-    def allOrNone = false
-  }
-
-  case class EnhancedCancelledSub(identityId: String, cancelledSub: SFSubscription.Record, associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record])
 
   for {
     config <- SoftOptInConfig.get
-    sfAuthDetails <- decode[SfAuthDetails](auth(config.sfConfig))
-    allSubsToProcessFromSf <- getSfSubs(sfAuthDetails)
+    sfAuthDetails <- SalesforceConnector.auth(config.sfConfig)
+    sfConnector = new SalesforceConnector(sfAuthDetails)
+    allSubsToProcessFromSf <- sfConnector.getSfSubs()
   } yield {
+
     val sfRecords = allSubsToProcessFromSf.records
     println("sfRecords:" + sfRecords)
 
@@ -38,15 +30,15 @@ object Main extends App {
       identityConnector,
       sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
     )
-    updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(acqSubUpdatesToWriteBackToSf).asJson.spaces2)
+    sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(acqSubUpdatesToWriteBackToSf).asJson.spaces2)
 
     val cancSubUpdatesToWriteBackToSf = processCancSubs(
       identityConnector,
-      sfAuthDetails,
+      sfConnector,
       sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
     )
 
-    updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(cancSubUpdatesToWriteBackToSf).asJson.spaces2)
+    sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(cancSubUpdatesToWriteBackToSf).asJson.spaces2)
   }
 
   def processAcqSubs(identityConnector: IdentityConnector, acqSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
@@ -62,9 +54,9 @@ object Main extends App {
     })
   }
 
-  def processCancSubs(identityConnector: IdentityConnector, sfAuthDetails: SfAuthDetails, cancSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
+  def processCancSubs(identityConnector: IdentityConnector, sfConnector: SalesforceConnector, cancSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
 
-    getActiveSubs(sfAuthDetails, cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
+    sfConnector.getActiveSubs(cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
       case Right(activeSubs) =>
         getEnhancedCancSubs(cancSubs, activeSubs.records)
           .map(sub => {
@@ -123,23 +115,12 @@ object Main extends App {
 
   }
 
-  def getSfSubs(sfAuthentication: SfAuthDetails): Either[Error, SFSubscription.RootInterface] = {
-    decode[SFSubscription.RootInterface](
-      doSfGetWithQuery(sfAuthentication, SfQueries.getAllSubsQuery())
-    )
-  }
 
-  def getActiveSubs(sfAuthentication: SfAuthDetails, IdentityIds: Seq[String]): Either[Error, AssociatedSFSubscription.RootInterface] = {
-    decode[AssociatedSFSubscription.RootInterface](
-      doSfGetWithQuery(sfAuthentication, SfQueries.getSubsOverlapCheckQuery(IdentityIds))
-    )
-  }
-
-  def getEnhancedCancSubs(cancSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[EnhancedCancelledSub] = {
+  def getEnhancedCancSubs(cancSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[SFSubscription.EnhancedCancelledSub] = {
     cancSubs.map(a => {
       val associatedActiveNonGiftSubs = associatedSubs.filter(_.IdentityID__c.equals(a.Buyer__r.IdentityID__c))
 
-      EnhancedCancelledSub(
+      SFSubscription.EnhancedCancelledSub(
         identityId = a.Buyer__r.IdentityID__c,
         cancelledSub = a,
         associatedActiveNonGiftSubs = associatedActiveNonGiftSubs
@@ -149,51 +130,4 @@ object Main extends App {
 
 
 
-
-
-  def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    // TODO: Wrap this in a try
-    val response =
-      Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
-        .param("q", query)
-        .option(HttpOptions.readTimeout(30000))
-        .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-        .method("GET")
-        .asString
-        .body
-
-    println("response:" + response)
-    response
-  }
-
-  def auth(sfConfig: SalesforceConfig): String = {
-    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
-      .postForm(
-        Seq(
-          "grant_type" -> "password",
-          "client_id" -> sfConfig.sfClientId,
-          "client_secret" -> sfConfig.sfClientSecret,
-          "username" -> sfConfig.sfUsername,
-          "password" -> s"${sfConfig.sfPassword}${sfConfig.sfToken}"
-        )
-      )
-      .asString
-      .body
-
-  }
-
-  def updateSubsInSf(sfAuthDetails: SfAuthDetails, updateJsonBody: String): Unit = {
-    println("updateJsonBody:" + updateJsonBody)
-    doSfCompositeRequest(sfAuthDetails, updateJsonBody, "PATCH")
-  }
-
-  def doSfCompositeRequest(sfAuthDetails: SfAuthDetails, jsonBody: String, requestType: String): String = {
-    Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
-      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-      .header("Content-Type", "application/json")
-      .put(jsonBody)
-      .method(requestType)
-      .asString
-      .body
-  }
 }

@@ -1,75 +1,12 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.SoftOptInConfig
+import com.gu.soft_opt_in_consent_setter.models.{SalesforceConfig, SfAuthDetails}
 import io.circe.Error
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import scalaj.http.{Http, HttpOptions}
-class SalesforceConnector(config: SalesforceConfig) {
 
-  case class SfAuthDetails(access_token: String, instance_url: String)
-
-  def getSfAuthDetails(): Either[Object, SfAuthDetails] = {
-    for {
-      config <- SoftOptInConfig.optConfig
-      sfAuthDetails <- decode[SfAuthDetails](auth(config))
-    } yield sfAuthDetails
-  }
-
-  def getAllSubsQuery(): String = {
-    val limit = 2
-    val sfSubName = "A-S00121178"
-    val query =
-      s"""
-         |SELECT
-         |	Id,
-         |	Name,
-         |	Product__c,
-         |	SF_Status__c,
-         |	Soft_Opt_in_Status__c,
-         |	Soft_Opt_in_Last_Stage_Processed__c,
-         |	Soft_Opt_in_Number_of_Attempts__c, 
-         |	Buyer__r.IdentityID__c
-         |FROM 
-         |	SF_Subscription__c 
-         |WHERE 
-         |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation') AND 
-         |	name in ('$sfSubName') 
-         |LIMIT 
-         |	$limit
-  """.stripMargin //, 'A-S00135386'
-    query
-  }
-
-  def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    val response =
-      Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
-        .param("q", query)
-        .option(HttpOptions.readTimeout(30000))
-        .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-        .method("GET")
-        .asString
-        .body
-
-    println("response:" + response)
-    response
-  }
-
-  def auth(softOptInConfig: SoftOptInConfig): String = {
-    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
-      .postForm(
-        Seq(
-          "grant_type" -> "password",
-          "client_id" -> softOptInConfig.clientId,
-          "client_secret" -> softOptInConfig.clientSecret,
-          "username" -> softOptInConfig.userName,
-          "password" -> s"${softOptInConfig.password}${softOptInConfig.token}"
-        )
-      )
-      .asString
-      .body
-
-  }
+class SalesforceConnector(sfAuthDetails: SfAuthDetails) {
 
   def getSubsOverlapCheckQuery(IdentityIds: Seq[String]): String = {
     val identityId = "abc123-1-781"
@@ -90,15 +27,25 @@ class SalesforceConnector(config: SalesforceConfig) {
     query
   }
 
-  def doSfCompositeRequest(
-      sfAuthDetails: SfAuthDetails,
-      jsonBody: String,
-      requestType: String
-  ): String = {
+  def doSfGetWithQuery(query: String): String = {
+    val response =
+      Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
+        .param("q", query)
+        .option(HttpOptions.readTimeout(30000))
+        .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+        .method("GET")
+        .asString
+        .body
 
-    val updateResponseFromSf = Http(
-      s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
-    ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+    println("response:" + response)
+    response
+  }
+
+  def doSfCompositeRequest(jsonBody: String, requestType: String): String = {
+
+  val updateResponseFromSf =
+    Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .header("Content-Type", "application/json")
       .put(jsonBody)
       .method(requestType)
@@ -109,18 +56,39 @@ class SalesforceConnector(config: SalesforceConfig) {
     updateResponseFromSf
   }
 
-  def getSfSubs(
-      sfAuthentication: SfAuthDetails
-  ): Either[Error, SFSubscription.RootInterface] = {
+  def getSfSubs(): Either[Error, SFSubscription.Response] = {
 
-    decode[SFSubscription.RootInterface](
-      doSfGetWithQuery(sfAuthentication, getAllSubsQuery())
-    )
+    decode[SFSubscription.Response](doSfGetWithQuery(SfQueries.getAllSubsQuery))
 
   }
+  def getActiveSubs(IdentityIds: Seq[String]): Either[Error, AssociatedSFSubscription.RootInterface] = {
+    decode[AssociatedSFSubscription.RootInterface](
+      doSfGetWithQuery(SfQueries.getSubsOverlapCheckQuery(IdentityIds))
+    )
+  }
 
-  case class BodyForWriteBackToSf(
-      allOrNone: Boolean = false,
-      records: Seq[SFSubscription.UpdateRecord]
-  )
+
+  def updateSubsInSf(updateJsonBody: String): Unit = {
+    println("updateJsonBody:" + updateJsonBody)
+    doSfCompositeRequest(updateJsonBody, "PATCH")
+  }
+
+}
+
+object SalesforceConnector {
+  def auth(sfConfig: SalesforceConfig): Either[Error, SfAuthDetails] = {
+    decode[SfAuthDetails](Http(s"${System.getenv("authUrl")}/services/oauth2/token")
+      .postForm(
+        Seq(
+          "grant_type" -> "password",
+          "client_id" -> sfConfig.sfClientId,
+          "client_secret" -> sfConfig.sfClientSecret,
+          "username" -> sfConfig.sfUsername,
+          "password" -> s"${sfConfig.sfPassword}${sfConfig.sfToken}"
+        )
+      )
+      .asString
+      .body)
+
+  }
 }
