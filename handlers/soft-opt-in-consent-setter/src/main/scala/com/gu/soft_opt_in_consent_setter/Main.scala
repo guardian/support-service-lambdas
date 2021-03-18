@@ -82,53 +82,46 @@ object Main extends App {
     val identityHost = "someHost.com"
     val authToken = "some token"
 
-
     getSfSubsOverlapCheck(sfAuthDetails, cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
-      case Right(activeSubs) => {
-        val IDAPIConnector = new IdentityConnector(identityHost, authToken)
-        val enhancedCancelledSubs = getEnhancedCancSubs(cancSubs, activeSubs.records)
+      case Right(activeSubs) =>
+        val identityConnector = new IdentityConnector(identityHost, authToken)
 
-        enhancedCancelledSubs.map(sub => {
-          buildSfResponse(sub.cancelledSub, "Cancellation", for {
-            consents <- ConsentsCalculator.getCancConsents(sub.cancelledSub.Name, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
-            result <- if (consents.isEmpty) {
-              val consentsBody = ConsentsCalculator.buildConsentsBody(consents, state = true)
-              IDAPIConnector.sendConsentsReq(sub.identityId, consentsBody)
-            } else {
-              Right(())
-            }
-          } yield result)
-        })
-      }
-      case Left(_) => {
+        getEnhancedCancSubs(cancSubs, activeSubs.records)
+          .map(sub => {
+            buildSfResponse(sub.cancelledSub, "Cancellation",
+              for {
+                consents <- ConsentsCalculator.getCancConsents(sub.cancelledSub.Name, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
+                _ <- sendCancConsentsIfPresent(identityConnector, sub.identityId, consents)
+              } yield ())
+          })
+      case Left(_) =>
         // TODO: Log Error
-        cancSubs.map(failedUpdateToIdentityConsents(_))
-      }
+        cancSubs.map(failureSFResponse)
+    }
+  }
+
+  def sendCancConsentsIfPresent(identityConnector: IdentityConnector, identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
+    if (consents.isEmpty) {
+      val consentsBody = ConsentsCalculator.buildConsentsBody(consents, state = false)
+      identityConnector.sendConsentsReq(identityId, consentsBody)
+    } else {
+      Right(())
     }
   }
 
   def buildSfResponse(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {
     result match {
-      case Right(_) => successfulUpdateToIdentityConsents(sub, stage)
+      case Right(_) => successfulSFResponse(sub, stage)
       case Left(failure) => {
         // TODO: Log error
         println(failure)
-        failedUpdateToIdentityConsents(sub)
+        failureSFResponse(sub)
       }
     }
   }
 
-  def processIdentityConsentUpdates(subs: Seq[SFSubscription.Record], softOptInStage: String): Seq[SFSubscription.UpdateRecord] = {
-    subs.map(sub => {
-      if (setConsentsInIdentityForSub(sub.Id, Set())) {
-        successfulUpdateToIdentityConsents(sub, softOptInStage)
-      } else {
-        failedUpdateToIdentityConsents(sub)
-      }
-    })
-  }
 
-  def successfulUpdateToIdentityConsents(sub: SFSubscription.Record, softOptInStage: String): SFSubscription.UpdateRecord = {
+  def successfulSFResponse(sub: SFSubscription.Record, softOptInStage: String): SFSubscription.UpdateRecord = {
     println("I succeeded!")
 
     SFSubscription.UpdateRecord(
@@ -138,7 +131,7 @@ object Main extends App {
     )
   }
 
-  def failedUpdateToIdentityConsents(sub: SFSubscription.Record): SFSubscription.UpdateRecord = {
+  def failureSFResponse(sub: SFSubscription.Record): SFSubscription.UpdateRecord = {
     println("I failed!")
 
     SFSubscription.UpdateRecord(
@@ -186,13 +179,13 @@ object Main extends App {
          |SELECT
          |	buyer__r.identityId__c,
          |	Product__c
-         |FROM 
-         |	SF_Subscription__c 
-         |WHERE 
-         |	SF_Status__c in ('Active', 'Voucher Pending', 'Cancellation Pending') AND 
+         |FROM
+         |	SF_Subscription__c
+         |WHERE
+         |	SF_Status__c in ('Active', 'Voucher Pending', 'Cancellation Pending') AND
          |	Soft_Opt_in_Eligible__c = true AND
          |	buyer__r.identityId__c in  ('$identityId')
-         |GROUP BY 
+         |GROUP BY
          |	buyer__r.identityId__c, product__c
   """.stripMargin
     query
@@ -210,14 +203,14 @@ object Main extends App {
          |	SF_Status__c,
          |	Soft_Opt_in_Status__c,
          |	Soft_Opt_in_Last_Stage_Processed__c,
-         |	Soft_Opt_in_Number_of_Attempts__c, 
+         |	Soft_Opt_in_Number_of_Attempts__c,
          |	Buyer__r.IdentityID__c
-         |FROM 
-         |	SF_Subscription__c 
-         |WHERE 
-         |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation') AND 
-         |	name in ('$sfSubName') 
-         |LIMIT 
+         |FROM
+         |	SF_Subscription__c
+         |WHERE
+         |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation') AND
+         |	name in ('$sfSubName')
+         |LIMIT
          |	$limit
   """.stripMargin //, 'A-S00135386'
     query
