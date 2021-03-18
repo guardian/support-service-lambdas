@@ -20,7 +20,7 @@ class IdentityConnector(IdentityHost: String, authToken: String) {
       .map(i => SoftOptInError("IdentityConnector", s"Identity request failed: $i"))
       .flatMap(response =>
         if (response.isSuccess)
-          Right()
+          Right(())
         else
           Left(SoftOptInError("IdentityConnector", s"Identity request failed while processing $identityId with body $body. Status code: ${response.code}")))
   }

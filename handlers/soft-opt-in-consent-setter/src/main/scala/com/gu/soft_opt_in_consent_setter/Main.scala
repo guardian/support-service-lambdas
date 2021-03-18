@@ -20,7 +20,7 @@ object Main extends App {
 
   case class BodyForWriteBackToSf(allOrNone: Boolean = false, records: Seq[SFSubscription.UpdateRecord])
 
-  case class EnhancedCancelledSub(identityId: String, cancelledSub: SFSubscription.Record, associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record], identityUpdateNeeded: Boolean)
+  case class EnhancedCancelledSub(identityId: String, cancelledSub: SFSubscription.Record, associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record])
 
   val optConfig = for {
     sfUserName <- Option(System.getenv("username"))
@@ -53,62 +53,18 @@ object Main extends App {
     println("sfRecords:" + sfRecords)
 
     val acqSubUpdatesToWriteBackToSf = processAcqSubs(
-      sfRecords.filter(
-        _.Soft_Opt_in_Status__c.equals("Ready to process acquisition")
-      )
+      sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
     )
-    updateSubsInSf(
+    updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(false, acqSubUpdatesToWriteBackToSf).asJson.spaces2)
+
+    val cancSubUpdatesToWriteBackToSf = processCancSubs(
       sfAuthDetails,
-      BodyForWriteBackToSf(false, acqSubUpdatesToWriteBackToSf).asJson.spaces2
+      sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
     )
-
-    val cancellationSubs =
-      sfRecords.filter(
-        _.Soft_Opt_in_Status__c.equals("Ready to process cancellation")
-      )
-
-    val cancSubUpdatesToWriteBackToSf =
-      processCancSubs(sfAuthDetails, cancellationSubs)
-
-    cancSubUpdatesToWriteBackToSf map (subList => { // What happens when it throws?
-      updateSubsInSf(
-        sfAuthDetails,
-        BodyForWriteBackToSf(false, subList).asJson.spaces2
-      )
-
-    })
-
-  }
-
-  def getEnhancedCancSubs(cancSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[EnhancedCancelledSub] = {
-
-    cancSubs.map(a => {
-
-      val associatedActiveNonGiftSubs =
-        associatedSubs
-          .filter(
-            _.IdentityID__c.equals(a.Buyer__r.IdentityID__c)
-          )
-
-      EnhancedCancelledSub(
-        identityId = a.Buyer__r.IdentityID__c,
-        cancelledSub = a,
-        associatedActiveNonGiftSubs = associatedActiveNonGiftSubs,
-        identityUpdateNeeded = !consentOverlapExists(
-          a,
-          associatedActiveNonGiftSubs
-        )
-      )
-    })
-
-  }
-
-  def consentOverlapExists(sub: SFSubscription.Record, AssociatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record]): Boolean = {
-    false
+    updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(false, cancSubUpdatesToWriteBackToSf).asJson.spaces2)
   }
 
   def processAcqSubs(acqSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
-
     // TODO: Get these from env variables
     val IDAPIConnector = new IdentityConnector("someHost.com", "some token")
 
@@ -116,48 +72,39 @@ object Main extends App {
       buildSfResponse(sub, "Acquisition", for {
         consents <- ConsentsCalculator.getAcqConsents(sub.Name)
         consentsBody = ConsentsCalculator.buildConsentsBody(consents, state = true)
-        result <- IDAPIConnector.sendConsentsReq(sub.Id, consentsBody)
+        result <- IDAPIConnector.sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
       } yield result)
     })
   }
 
-  def processCancSubs(sfAuthDetails: SfAuthDetails, cancSubs: Seq[SFSubscription.Record]): Either[Throwable, Seq[SFSubscription.UpdateRecord]] = {
-    val identityIds = getIdentityIdsFromSubs(cancSubs)
-    println("identityIds:" + identityIds)
+  def processCancSubs(sfAuthDetails: SfAuthDetails, cancSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
+    // TODO: Get these from env variables
+    val identityHost = "someHost.com"
+    val authToken = "some token"
 
-    for {
-      subsToCheckConsentOverlapAgainst <- getSfSubsOverlapCheck(sfAuthDetails, identityIds)
-    } yield {
-      val sfSubsAssociatedWithIdentityIdsOnCancSubs =
-        subsToCheckConsentOverlapAgainst.records
 
-      val enhancedCancelledSubs =
-        getEnhancedCancSubs(cancSubs, sfSubsAssociatedWithIdentityIdsOnCancSubs)
+    getSfSubsOverlapCheck(sfAuthDetails, cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
+      case Right(activeSubs) => {
+        val IDAPIConnector = new IdentityConnector(identityHost, authToken)
+        val enhancedCancelledSubs = getEnhancedCancSubs(cancSubs, activeSubs.records)
 
-      val updatedConsentSubs = processIdentityConsentUpdates(
-        enhancedCancelledSubs
-          .filter(_.identityUpdateNeeded.equals(true))
-          .map(enhancedSub => enhancedSub.cancelledSub),
-        "Cancellation"
-      )
-
-      val cancSubsWhereIdentityUpdateIsNOTNeeded =
-        enhancedCancelledSubs
-          .filter(_.identityUpdateNeeded.equals(false))
-          .map(enhancedSub => enhancedSub.cancelledSub)
-          .map(sub => successfulUpdateToIdentityConsents(sub, "Cancellation"))
-
-      val cancSubsToUpdateInSf =
-        (updatedConsentSubs ++ cancSubsWhereIdentityUpdateIsNOTNeeded)
-          .map(sub =>
-            SFSubscription.UpdateRecord(
-              sub.Id,
-              sub.Soft_Opt_in_Last_Stage_Processed__c,
-              sub.Soft_Opt_in_Number_of_Attempts__c
-            ))
-      cancSubsToUpdateInSf
+        enhancedCancelledSubs.map(sub => {
+          buildSfResponse(sub.cancelledSub, "Cancellation", for {
+            consents <- ConsentsCalculator.getCancConsents(sub.cancelledSub.Name, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
+            result <- if (consents.isEmpty) {
+              val consentsBody = ConsentsCalculator.buildConsentsBody(consents, state = true)
+              IDAPIConnector.sendConsentsReq(sub.identityId, consentsBody)
+            } else {
+              Right(())
+            }
+          } yield result)
+        })
+      }
+      case Left(_) => {
+        // TODO: Log Error
+        cancSubs.map(failedUpdateToIdentityConsents(_))
+      }
     }
-
   }
 
   def buildSfResponse(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {
@@ -173,12 +120,11 @@ object Main extends App {
 
   def processIdentityConsentUpdates(subs: Seq[SFSubscription.Record], softOptInStage: String): Seq[SFSubscription.UpdateRecord] = {
     subs.map(sub => {
-
-      setConsentsInIdentityForSub(sub.Id, Set()) match {
-        case true => successfulUpdateToIdentityConsents(sub, softOptInStage)
-        case false => failedUpdateToIdentityConsents(sub)
+      if (setConsentsInIdentityForSub(sub.Id, Set())) {
+        successfulUpdateToIdentityConsents(sub, softOptInStage)
+      } else {
+        failedUpdateToIdentityConsents(sub)
       }
-
     })
   }
 
@@ -206,18 +152,31 @@ object Main extends App {
   }
 
   def getSfSubs(sfAuthentication: SfAuthDetails): Either[Error, SFSubscription.RootInterface] = {
-
     decode[SFSubscription.RootInterface](
       doSfGetWithQuery(sfAuthentication, getAllSubsQuery())
     )
-
   }
 
   def getSfSubsOverlapCheck(sfAuthentication: SfAuthDetails, IdentityIds: Seq[String]): Either[Error, AssociatedSFSubscription.RootInterface] = {
-
     decode[AssociatedSFSubscription.RootInterface](
       doSfGetWithQuery(sfAuthentication, getSubsOverlapCheckQuery(IdentityIds))
     )
+  }
+
+  def getEnhancedCancSubs(cancSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[EnhancedCancelledSub] = {
+    cancSubs.map(a => {
+      val associatedActiveNonGiftSubs =
+        associatedSubs
+          .filter(
+            _.IdentityID__c.equals(a.Buyer__r.IdentityID__c)
+          )
+
+      EnhancedCancelledSub(
+        identityId = a.Buyer__r.IdentityID__c,
+        cancelledSub = a,
+        associatedActiveNonGiftSubs = associatedActiveNonGiftSubs,
+      )
+    })
   }
 
   def getSubsOverlapCheckQuery(IdentityIds: Seq[String]): String = {
@@ -265,6 +224,7 @@ object Main extends App {
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
+    // TODO: Wrap this in a try
     val response =
       Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
         .param("q", query)
