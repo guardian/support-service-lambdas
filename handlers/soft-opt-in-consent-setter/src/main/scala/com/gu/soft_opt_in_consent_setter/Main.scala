@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
+import com.gu.soft_opt_in_consent_setter.models._
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -24,29 +24,8 @@ object Main extends App {
 
   case class EnhancedCancelledSub(identityId: String, cancelledSub: SFSubscription.Record, associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record])
 
-  val optConfig = for {
-    sfUserName <- sys.env.get("username")
-    sfClientId <- sys.env.get("clientId")
-    sfClientSecret <- sys.env.get("clientSecret")
-    sfPassword <- sys.env.get("password")
-    sfToken <- sys.env.get("token")
-    sfAuthUrl <- sys.env.get("authUrl")
-    identityUrl <- sys.env.get("identityUrl")
-    identityToken <- sys.env.get("identityToken")
-  } yield SoftOptInConfig(
-    SalesforceConfig(
-      userName = sfUserName,
-      clientId = sfClientId,
-      clientSecret = sfClientSecret,
-      password = sfPassword,
-      token = sfToken,
-      authUrl = sfAuthUrl
-    ),
-    IdentityConfig(identityUrl, identityToken)
-  )
-
   for {
-    config <- optConfig.toRight(new RuntimeException("Missing config value"))
+    config <- SoftOptInConfig.get
     sfAuthDetails <- decode[SfAuthDetails](auth(config.sfConfig))
     allSubsToProcessFromSf <- getSfSubs(sfAuthDetails)
   } yield {
@@ -66,29 +45,35 @@ object Main extends App {
       sfAuthDetails,
       sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
     )
+
     updateSubsInSf(sfAuthDetails, BodyForWriteBackToSf(cancSubUpdatesToWriteBackToSf).asJson.spaces2)
   }
 
   def processAcqSubs(identityConnector: IdentityConnector, acqSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
+
     acqSubs.map(sub => {
-      buildSfResponse(sub, "Acquisition", for {
-        consents <- ConsentsCalculator.getAcqConsents(sub.Name)
-        consentsBody = ConsentsCalculator.buildConsentsBody(consents, state = true)
-        result <- identityConnector.sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
-      } yield result)
+      buildSfResponse(sub, "Acquisition",
+        for {
+          consents <- ConsentsCalculator.getAcqConsents(sub.Product__c)
+          consentsBody = ConsentsCalculator.buildConsentsBody(consents, state = true)
+          _ <- identityConnector.sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
+        } yield ()
+      )
     })
   }
 
   def processCancSubs(identityConnector: IdentityConnector, sfAuthDetails: SfAuthDetails, cancSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
+
     getActiveSubs(sfAuthDetails, cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
       case Right(activeSubs) =>
         getEnhancedCancSubs(cancSubs, activeSubs.records)
           .map(sub => {
             buildSfResponse(sub.cancelledSub, "Cancellation",
               for {
-                consents <- ConsentsCalculator.getCancConsents(sub.cancelledSub.Name, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
+                consents <- ConsentsCalculator.getCancConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
                 _ <- sendCancConsentsIfPresent(identityConnector, sub.identityId, consents)
-              } yield ())
+              } yield ()
+            )
           })
       case Left(_) =>
         // TODO: Log Error
@@ -114,7 +99,6 @@ object Main extends App {
         failureSFResponse(sub)
     }
   }
-
 
   def successfulSFResponse(sub: SFSubscription.Record, softOptInStage: String): SFSubscription.UpdateRecord = {
     println("I succeeded!")
@@ -153,16 +137,12 @@ object Main extends App {
 
   def getEnhancedCancSubs(cancSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[EnhancedCancelledSub] = {
     cancSubs.map(a => {
-      val associatedActiveNonGiftSubs =
-        associatedSubs
-          .filter(
-            _.IdentityID__c.equals(a.Buyer__r.IdentityID__c)
-          )
+      val associatedActiveNonGiftSubs = associatedSubs.filter(_.IdentityID__c.equals(a.Buyer__r.IdentityID__c))
 
       EnhancedCancelledSub(
         identityId = a.Buyer__r.IdentityID__c,
         cancelledSub = a,
-        associatedActiveNonGiftSubs = associatedActiveNonGiftSubs,
+        associatedActiveNonGiftSubs = associatedActiveNonGiftSubs
       )
     })
   }
@@ -226,15 +206,15 @@ object Main extends App {
     response
   }
 
-  def auth(salesforceConfig: SalesforceConfig): String = {
+  def auth(sfConfig: SalesforceConfig): String = {
     Http(s"${System.getenv("authUrl")}/services/oauth2/token")
       .postForm(
         Seq(
           "grant_type" -> "password",
-          "client_id" -> salesforceConfig.clientId,
-          "client_secret" -> salesforceConfig.clientSecret,
-          "username" -> salesforceConfig.userName,
-          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
+          "client_id" -> sfConfig.sfClientId,
+          "client_secret" -> sfConfig.sfClientSecret,
+          "username" -> sfConfig.sfUsername,
+          "password" -> s"${sfConfig.sfPassword}${sfConfig.sfToken}"
         )
       )
       .asString
@@ -248,16 +228,12 @@ object Main extends App {
   }
 
   def doSfCompositeRequest(sfAuthDetails: SfAuthDetails, jsonBody: String, requestType: String): String = {
-    val updateResponseFromSf = Http(
-      s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
-    ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+    Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .header("Content-Type", "application/json")
       .put(jsonBody)
       .method(requestType)
       .asString
       .body
-
-    println("updateResponseFromSf:" + updateResponseFromSf)
-    updateResponseFromSf
   }
 }
