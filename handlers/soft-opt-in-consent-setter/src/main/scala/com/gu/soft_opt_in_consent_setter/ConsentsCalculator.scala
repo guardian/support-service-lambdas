@@ -1,44 +1,110 @@
 package com.gu.soft_opt_in_consent_setter
 
+import com.gu.effects.GetFromS3.fetchString
+import com.gu.effects.S3Location
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
+import io.circe._
 import io.circe.generic.auto._
-import io.circe.syntax._
+import io.circe.parser._
+import io.circe.syntax.EncoderOps
+
+import scala.util.{Failure, Success}
 
 object ConsentsCalculator {
-  def consentsMappings = Map(
-    "membership" -> Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter"),
-    "contributions" -> Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter"),
-    "newspaper" -> Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter"),
-    "homedelivery" -> Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter"),
-    "voucher" -> Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter"),
-    "digitalvoucher" -> Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter"),
-    "guardianweekly" -> Set("your_support_onboarding", "guardian_weekly_newsletter"),
-    "digipack" -> Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter", "digital_subscriber_preview")
-  )
 
-  def getAcqConsents(productName: String): Either[SoftOptInError, Set[String]] =
-    consentsMappings
-      .get(productName)
-      .toRight(SoftOptInError("ConsentsCalculator", s"getAcqConsents couldn't find $productName in consentsMappings"))
+  def consentsMappings(): Either[Error, Map[String, Set[String]]] = {
+    val bucketName = "kelvin-test"
+    val fileName = "ConsentsByProductMapping.json"
 
-  def getCancConsents(canceledProductName: String, ownedProductNames: Set[String]): Either[SoftOptInError, Set[String]] = {
-    ownedProductNames.foldLeft[Either[SoftOptInError, Set[String]]](Right(Set())) { (acc, ownedProductName) =>
-      consentsMappings
-        .get(ownedProductName)
-        .toRight(SoftOptInError("ConsentsCalculator", s"getCancConsents couldn't find $ownedProductName in consentsMappings"))
-        .flatMap(productConsents =>
-          acc match {
-            case Right(ownedProductConsents) => Right(ownedProductConsents.union(productConsents))
-            case other => other
+    val consentsByProductJson: String = fetchString(
+      S3Location(bucketName, fileName)
+    ) match {
+        case Success(jsonContent) => jsonContent
+        case Failure(f) => "error"
+      }
 
-          })
+    decode[Map[String, Set[String]]](consentsByProductJson)
+  }
+
+  def getAcqConsents(
+    productName: String
+  ): Either[SoftOptInError, Set[String]] = {
+
+    consentsMappings match {
+      case Left(error) =>
+        Left(
+          SoftOptInError(
+            "ConsentsCalculator",
+            s"Error occurred getting AcqConsents: ${error.toString}"
+          )
+        )
+      case Right(mapContent) =>
+        mapContent
+          .get(productName)
+          .toRight(
+            SoftOptInError(
+              "ConsentsCalculator",
+              s"getAcqConsents couldn't find $productName in consentsMappings"
+            )
+          )
     }
+  }
+
+  def getCancConsents(
+    canceledProductName: String,
+    ownedProductNames: Set[String]
+  ): Either[SoftOptInError, Set[String]] = {
+    ownedProductNames
+      .foldLeft[Either[SoftOptInError, Set[String]]](Right(Set())) {
+        (acc, ownedProductName) =>
+          consentsMappings match {
+            case Left(error) =>
+              Left(
+                SoftOptInError(
+                  "ConsentsCalculator",
+                  s"Error occurred getting CancConsents: ${error.toString}"
+                )
+              )
+            case Right(mapContent) =>
+              mapContent
+                .get(ownedProductName)
+                .toRight(
+                  SoftOptInError(
+                    "ConsentsCalculator",
+                    s"getCancConsents couldn't find $ownedProductName in consentsMappings"
+                  )
+                )
+                .flatMap(productConsents =>
+                  acc match {
+                    case Right(ownedProductConsents) =>
+                      Right(ownedProductConsents.union(productConsents))
+                    case other => other
+                  })
+          }
+
+      }
       .flatMap(ownedProductConsents => {
-        consentsMappings
-          .get(canceledProductName)
-          .toRight(SoftOptInError("ConsentsCalculator", s"getCancConsents couldn't find $canceledProductName in consentsMappings"))
-          .flatMap(canceledProductConsents =>
-            Right(canceledProductConsents.diff(ownedProductConsents)))
+        consentsMappings match {
+          case Left(error) =>
+            Left(
+              SoftOptInError(
+                "ConsentsCalculator",
+                s"Error occurred getting AcqConsents: ${error.toString}"
+              )
+            )
+          case Right(mapContent) =>
+            mapContent
+              .get(canceledProductName)
+              .toRight(
+                SoftOptInError(
+                  "ConsentsCalculator",
+                  s"getCancConsents couldn't find $canceledProductName in consentsMappings"
+                )
+              )
+              .flatMap(canceledProductConsents =>
+                Right(canceledProductConsents.diff(ownedProductConsents)))
+        }
+
       })
   }
 
