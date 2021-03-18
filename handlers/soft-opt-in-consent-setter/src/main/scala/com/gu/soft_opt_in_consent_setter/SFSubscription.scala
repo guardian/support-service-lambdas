@@ -18,7 +18,6 @@ object SFSubscription {
     Buyer__r: Buyer__r,
     Soft_Opt_in_Last_Stage_Processed__c: Option[String] = None,
     Soft_Opt_in_Number_of_Attempts__c: Int, //TODO we need to handle potential nulls on this field
-    IdentityConsents: Option[Seq[String]] = None
   )
 
   case class UpdateRecord(

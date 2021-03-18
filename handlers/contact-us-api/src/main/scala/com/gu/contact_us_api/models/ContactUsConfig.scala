@@ -23,5 +23,4 @@ object ContactUsConfig {
       s"https://$reqDomain/services/data/v43.0/composite/",
     )).toRight(ContactUsError("Environment", "Could not obtain all environment variables."))
   }
-
 }
