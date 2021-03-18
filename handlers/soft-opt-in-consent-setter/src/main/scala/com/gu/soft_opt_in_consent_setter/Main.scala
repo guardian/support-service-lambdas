@@ -80,7 +80,7 @@ object Main extends App {
   }
 
   def processCancSubs(identityConnector: IdentityConnector, sfAuthDetails: SfAuthDetails, cancSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
-    getSfSubsOverlapCheck(sfAuthDetails, cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
+    getActiveSubs(sfAuthDetails, cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
       case Right(activeSubs) =>
         getEnhancedCancSubs(cancSubs, activeSubs.records)
           .map(sub => {
@@ -145,7 +145,7 @@ object Main extends App {
     )
   }
 
-  def getSfSubsOverlapCheck(sfAuthentication: SfAuthDetails, IdentityIds: Seq[String]): Either[Error, AssociatedSFSubscription.RootInterface] = {
+  def getActiveSubs(sfAuthentication: SfAuthDetails, IdentityIds: Seq[String]): Either[Error, AssociatedSFSubscription.RootInterface] = {
     decode[AssociatedSFSubscription.RootInterface](
       doSfGetWithQuery(sfAuthentication, getSubsOverlapCheckQuery(IdentityIds))
     )
