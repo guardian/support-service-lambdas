@@ -7,7 +7,6 @@ import io.circe.syntax.EncoderOps
 class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
 
   def getAcqConsents(productName: String): Either[SoftOptInError, Set[String]] = {
-
     consentsMappings
       .get(productName)
       .toRight(
@@ -16,7 +15,6 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
           s"getAcqConsents couldn't find $productName in consentsMappings"
         )
       )
-
   }
 
   def getCancConsents(canceledProductName: String, ownedProductNames: Set[String]): Either[SoftOptInError, Set[String]] = {
