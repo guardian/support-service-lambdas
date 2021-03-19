@@ -13,7 +13,6 @@ import io.circe.syntax.EncoderOps
 
 object Main extends App {
 
-
   for {
     config <- SoftOptInConfig.get
     sfAuthDetails <- SalesforceConnector.auth(config.sfConfig)
@@ -42,7 +41,6 @@ object Main extends App {
   }
 
   def processAcqSubs(identityConnector: IdentityConnector, acqSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
-
     acqSubs.map(sub => {
       buildSfResponse(sub, "Acquisition",
         for {
@@ -55,7 +53,6 @@ object Main extends App {
   }
 
   def processCancSubs(identityConnector: IdentityConnector, sfConnector: SalesforceConnector, cancSubs: Seq[SFSubscription.Record]): Seq[SFSubscription.UpdateRecord] = {
-
     sfConnector.getActiveSubs(cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
       case Right(activeSubs) =>
         getEnhancedCancSubs(cancSubs, activeSubs.records)
@@ -93,8 +90,6 @@ object Main extends App {
   }
 
   def successfulSFResponse(sub: SFSubscription.Record, softOptInStage: String): SFSubscription.UpdateRecord = {
-    println("I succeeded!")
-
     SFSubscription.UpdateRecord(
       Id = sub.Id,
       Soft_Opt_in_Number_of_Attempts__c = 0,
@@ -103,18 +98,12 @@ object Main extends App {
   }
 
   def failureSFResponse(sub: SFSubscription.Record): SFSubscription.UpdateRecord = {
-    println("I failed!")
-
     SFSubscription.UpdateRecord(
       Id = sub.Id,
-      Soft_Opt_in_Number_of_Attempts__c =
-        sub.Soft_Opt_in_Number_of_Attempts__c + 1,
-      Soft_Opt_in_Last_Stage_Processed__c =
-        sub.Soft_Opt_in_Last_Stage_Processed__c
+      Soft_Opt_in_Number_of_Attempts__c = sub.Soft_Opt_in_Number_of_Attempts__c + 1,
+      Soft_Opt_in_Last_Stage_Processed__c = sub.Soft_Opt_in_Last_Stage_Processed__c
     )
-
   }
-
 
   def getEnhancedCancSubs(cancSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[SFSubscription.EnhancedCancelledSub] = {
     cancSubs.map(a => {
@@ -127,7 +116,5 @@ object Main extends App {
       )
     })
   }
-
-
 
 }
