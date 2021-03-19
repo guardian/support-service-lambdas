@@ -17,7 +17,6 @@ object Main extends App {
   } yield {
 
     val sfRecords = allSubsToProcessFromSf.records
-    println("sfRecords:" + sfRecords)
 
     val identityConnector = new IdentityConnector(config.identityConfig)
     val consentsCalculator = new ConsentsCalculator(config.consentsMapping)
