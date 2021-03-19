@@ -43,14 +43,14 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails) {
 
   def doSfCompositeRequest(jsonBody: String, requestType: String): String = {
 
-  val updateResponseFromSf =
-    Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
-      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-      .header("Content-Type", "application/json")
-      .put(jsonBody)
-      .method(requestType)
-      .asString
-      .body
+    val updateResponseFromSf =
+      Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
+        .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+        .header("Content-Type", "application/json")
+        .put(jsonBody)
+        .method(requestType)
+        .asString
+        .body
 
     println("updateResponseFromSf:" + updateResponseFromSf)
     updateResponseFromSf
@@ -67,9 +67,7 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails) {
     )
   }
 
-
   def updateSubsInSf(updateJsonBody: String): Unit = {
-    println("updateJsonBody:" + updateJsonBody)
     doSfCompositeRequest(updateJsonBody, "PATCH")
   }
 
@@ -77,7 +75,8 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails) {
 
 object SalesforceConnector {
   def auth(sfConfig: SalesforceConfig): Either[Error, SfAuthDetails] = {
-    decode[SfAuthDetails](Http(s"${System.getenv("authUrl")}/services/oauth2/token")
+
+    decode[SfAuthDetails](Http(s"${sfConfig.sfAuthUrl}/services/oauth2/token")
       .postForm(
         Seq(
           "grant_type" -> "password",
@@ -89,6 +88,5 @@ object SalesforceConnector {
       )
       .asString
       .body)
-
   }
 }
