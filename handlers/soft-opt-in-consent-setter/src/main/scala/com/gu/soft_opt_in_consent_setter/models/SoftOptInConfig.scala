@@ -7,18 +7,18 @@ import io.circe.parser.decode
 import scala.util.{Failure, Success}
 
 case class SoftOptInConfig(
-    sfConfig: SalesforceConfig,
-    identityConfig: IdentityConfig,
-    consentsMapping: Map[String, Set[String]]
+  sfConfig: SalesforceConfig,
+  identityConfig: IdentityConfig,
+  consentsMapping: Map[String, Set[String]]
 )
 
 case class SalesforceConfig(
-    sfAuthUrl: String,
-    sfClientId: String,
-    sfClientSecret: String,
-    sfUsername: String,
-    sfPassword: String,
-    sfToken: String
+  sfAuthUrl: String,
+  sfClientId: String,
+  sfClientSecret: String,
+  sfUsername: String,
+  sfPassword: String,
+  sfToken: String
 )
 case class IdentityConfig(identityUrl: String, identityToken: String)
 
@@ -37,12 +37,12 @@ object SoftOptInConfig {
       consentsMapping <- getConsentsByProductMapping()
     } yield SoftOptInConfig(
       SalesforceConfig(
-        sfUsername,
+        sfAuthUrl,
         sfClientId,
         sfClientSecret,
+        sfUsername,
         sfPassword,
-        sfToken,
-        sfAuthUrl
+        sfToken
       ),
       IdentityConfig(
         identityUrl,
