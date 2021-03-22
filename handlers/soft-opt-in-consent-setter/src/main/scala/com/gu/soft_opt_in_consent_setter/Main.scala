@@ -21,26 +21,34 @@ object Main extends App {
     val identityConnector = new IdentityConnector(config.identityConfig)
     val consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
-    val acqSubUpdatesToWriteBackToSf = processAcqSubs(
-      identityConnector,
-      sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition")),
-      consentsCalculator
-    )
+    val acquisitionSubs = sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
 
-    sfConnector.updateSubsInSf(
-      SFSubscription.UpdateRecordRequest(acqSubUpdatesToWriteBackToSf).asJson.spaces2
-    )
+    if(acquisitionSubs.nonEmpty) {
+      val acqSubUpdatesToWriteBackToSf = processAcqSubs(
+        identityConnector,
+        acquisitionSubs,
+        consentsCalculator
+      )
 
-    val cancSubUpdatesToWriteBackToSf = processCancSubs(
-      identityConnector,
-      sfConnector,
-      sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation")),
-      consentsCalculator
-    )
+      sfConnector.updateSubsInSf(
+        SFSubscription.UpdateRecordRequest(acqSubUpdatesToWriteBackToSf).asJson.spaces2
+      )
+    }
 
-    sfConnector.updateSubsInSf(
-      SFSubscription.UpdateRecordRequest(cancSubUpdatesToWriteBackToSf).asJson.spaces2
-    )
+    val cancellationSubs = sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
+
+    if(cancellationSubs.nonEmpty) {
+      val cancSubUpdatesToWriteBackToSf = processCancSubs(
+        identityConnector,
+        sfConnector,
+        cancellationSubs,
+        consentsCalculator
+      )
+
+      sfConnector.updateSubsInSf(
+        SFSubscription.UpdateRecordRequest(cancSubUpdatesToWriteBackToSf).asJson.spaces2
+      )
+    }
   }
 
   def processAcqSubs(identityConnector: IdentityConnector, acqSubs: Seq[SFSubscription.Record], consentsCalculator: ConsentsCalculator): Seq[SFSubscription.UpdateRecord] = {
