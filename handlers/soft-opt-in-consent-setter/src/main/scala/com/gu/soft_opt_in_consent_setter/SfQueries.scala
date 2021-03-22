@@ -4,7 +4,7 @@ object SfQueries {
 
   def getAllSubsQuery: String = {
     val limit = 2
-    val sfSubName = "A-S00161734"
+    val sfSubName = "A-S00103472"
     val query =
       s"""
          |SELECT
@@ -20,15 +20,15 @@ object SfQueries {
          |	SF_Subscription__c
          |WHERE
          |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation') AND
-         |	name in ('$sfSubName')
+         |
+         |	name in ('A-S00169422','A-S00169443')
          |LIMIT
          |	$limit
   """.stripMargin //, 'A-S00135386'
     query
   }
-
-  def getSubsOverlapCheckQuery(IdentityIds: Seq[String]): String = {
-    val identityId = "softOptInTest-863"
+  def getActiveSubsQuery(IdentityIds: Seq[String]): String = {
+    val identityId = "200004784"
     val query =
       s"""
          |SELECT

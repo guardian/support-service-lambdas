@@ -8,25 +8,6 @@ import scalaj.http.{Http, HttpOptions}
 
 class SalesforceConnector(sfAuthDetails: SfAuthDetails) {
 
-  def getSubsOverlapCheckQuery(IdentityIds: Seq[String]): String = {
-    val identityId = "abc123-1-781"
-    val query =
-      s"""
-         |SELECT
-         |	buyer__r.identityId__c,
-         |	Product__c
-         |FROM 
-         |	SF_Subscription__c 
-         |WHERE 
-         |	SF_Status__c in ('Active', 'Voucher Pending', 'Cancellation Pending') AND 
-         |	Soft_Opt_in_Eligible__c = true AND
-         |	buyer__r.identityId__c in  ('$identityId')
-         |GROUP BY 
-         |	buyer__r.identityId__c, product__c
-  """.stripMargin
-    query
-  }
-
   def doSfGetWithQuery(query: String): String = {
     val response =
       Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
@@ -63,7 +44,7 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails) {
   }
   def getActiveSubs(IdentityIds: Seq[String]): Either[Error, AssociatedSFSubscription.RootInterface] = {
     decode[AssociatedSFSubscription.RootInterface](
-      doSfGetWithQuery(SfQueries.getSubsOverlapCheckQuery(IdentityIds))
+      doSfGetWithQuery(SfQueries.getActiveSubsQuery(IdentityIds))
     )
   }
 
