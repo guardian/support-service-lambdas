@@ -1,86 +1,73 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models._
-// TODO: introduce notifications when number of attempts is incremented to 5
-// TODO: Do functional testing
-// TODO: Introduce error handling
-// TODO: Add unit testing
+import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
-object Main extends App {
 
-  for {
+// TODO: introduce notifications when number of attempts is incremented to 5
+// TODO: Do functional testing
+// TODO: Add unit testing
+
+object Main extends App with LazyLogging {
+
+  (for {
     config <- SoftOptInConfig.get
     sfAuthDetails <- SalesforceConnector.auth(config.sfConfig)
     sfConnector = new SalesforceConnector(sfAuthDetails)
-    allSubsToProcessFromSf <- sfConnector.getSfSubs()
-  } yield {
 
-    val sfRecords = allSubsToProcessFromSf.records
+    allSubs <- sfConnector.getSfSubs()
+    identityConnector = new IdentityConnector(config.identityConfig)
+    consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
-    val identityConnector = new IdentityConnector(config.identityConfig)
-    val consentsCalculator = new ConsentsCalculator(config.consentsMapping)
+    acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
+    _ <- processAcqSubs(acqSubs, identityConnector, sfConnector, consentsCalculator)
 
-    val acquisitionSubs = sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
+    cancSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
+    cancSubsIdentityIds = cancSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
-    if(acquisitionSubs.nonEmpty) {
-      val acqSubUpdatesToWriteBackToSf = processAcqSubs(
-        identityConnector,
-        acquisitionSubs,
-        consentsCalculator
-      )
-
-      sfConnector.updateSubsInSf(
-        SFSubscription.UpdateRecordRequest(acqSubUpdatesToWriteBackToSf).asJson.spaces2
-      )
-    }
-
-    val cancellationSubs = sfRecords.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
-
-    if(cancellationSubs.nonEmpty) {
-      val cancSubUpdatesToWriteBackToSf = processCancSubs(
-        identityConnector,
-        sfConnector,
-        cancellationSubs,
-        consentsCalculator
-      )
-
-      sfConnector.updateSubsInSf(
-        SFSubscription.UpdateRecordRequest(cancSubUpdatesToWriteBackToSf).asJson.spaces2
-      )
-    }
-  }
-
-  def processAcqSubs(identityConnector: IdentityConnector, acqSubs: Seq[SFSubscription.Record], consentsCalculator: ConsentsCalculator): Seq[SFSubscription.UpdateRecord] = {
-    acqSubs.map(sub => {
-      buildSfResponse(sub, "Acquisition",
-        for {
-          consents <- consentsCalculator.getAcqConsents(sub.Product__c)
-          consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
-          _ <- identityConnector.sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
-        } yield ())
+    activeSubs <- sfConnector.getActiveSubs(cancSubsIdentityIds)
+    _ <- processCancSubs(cancSubs, activeSubs, identityConnector, sfConnector, consentsCalculator)
+  } yield ())
+    .left
+    .map(error => {
+      // TODO: Surface this error outside of the lambda
+      logger.error(s"${error.errorType}: ${error.errorDetails}")
+      println(error)
     })
+
+
+  def processAcqSubs(acqSubs: Seq[SFSubscription.Record], identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+    val test = acqSubs
+      .map(sub => {
+        buildSfResponse(sub, "Acquisition",
+          for {
+            consents <- consentsCalculator.getAcqConsents(sub.Product__c)
+            consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
+            _ <- identityConnector.sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
+          } yield ())
+      })
+
+    if (test.isEmpty) Right(())
+    else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(test).asJson.spaces2)
   }
 
-  def processCancSubs(identityConnector: IdentityConnector, sfConnector: SalesforceConnector, cancSubs: Seq[SFSubscription.Record], consentsCalculator: ConsentsCalculator): Seq[SFSubscription.UpdateRecord] = {
-    sfConnector.getActiveSubs(cancSubs.map(sub => sub.Buyer__r.IdentityID__c)) match {
-      case Right(activeSubs) =>
-        getEnhancedCancSubs(cancSubs, activeSubs.records)
-          .map(sub => {
-            buildSfResponse(sub.cancelledSub, "Cancellation",
-              for {
-                consents <- consentsCalculator.getCancConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
-                _ <- sendCancConsentsIfPresent(identityConnector, sub.identityId, consents, consentsCalculator)
-              } yield ())
-          })
-      case Left(_) =>
-        // TODO: Log Error
-        cancSubs.map(failureSFResponse)
-    }
+  def processCancSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.RootInterface, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+    val test = getEnhancedCancSubs(cancSubs, activeSubs.records)
+      .map(sub => {
+        buildSfResponse(sub.cancelledSub, "Cancellation",
+          for {
+            consents <- consentsCalculator.getCancConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
+            _ <- sendCancConsentsIfPresent(identityConnector, sub.identityId, consents, consentsCalculator)
+          } yield ())
+      })
+
+    if (test.isEmpty) Right(())
+    else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(test).asJson.spaces2)
   }
 
   def sendCancConsentsIfPresent(identityConnector: IdentityConnector, identityId: String, consents: Set[String], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
-    if (!consents.isEmpty) {
+    if (consents.nonEmpty) {
       val consentsBody = consentsCalculator.buildConsentsBody(consents, state = false)
       identityConnector.sendConsentsReq(identityId, consentsBody)
     } else {
@@ -91,9 +78,8 @@ object Main extends App {
   def buildSfResponse(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {
     result match {
       case Right(_) => successfulSFResponse(sub, stage)
-      case Left(failure) =>
-        // TODO: Log error
-        println(failure)
+      case Left(error) =>
+        logger.warn(s"${error.errorType}: ${error.errorDetails}")
         failureSFResponse(sub)
     }
   }

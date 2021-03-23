@@ -7,6 +7,7 @@ import scala.util.Try
 //TODO: To make this more testable a (http: HttpRequest): Either[Throwable, HttpResponse[String]] function should
 // be passed into the class. This function should take care of the Try(http.asString).toEither
 // or it can be Either[SoftOptInError, HttpResponse[String]] and take care of the .left.map(SoftOptInError(...)) as well
+
 class IdentityConnector(config: IdentityConfig) {
 
   def sendConsentsReq(identityId: String, body: String): Either[SoftOptInError, Unit] = {
