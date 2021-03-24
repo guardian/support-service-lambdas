@@ -26,6 +26,7 @@ object Main extends App with LazyLogging {
     cancSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
     cancSubsIdentityIds = cancSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
+    //TODO do we need to get the active subs even if there are no canc subs to process?
     activeSubs <- sfConnector.getActiveSubs(cancSubsIdentityIds)
     _ <- processCancSubs(cancSubs, activeSubs, identityConnector, sfConnector, consentsCalculator)
   } yield ())
@@ -36,9 +37,8 @@ object Main extends App with LazyLogging {
       println(error)
     })
 
-
   def processAcqSubs(acqSubs: Seq[SFSubscription.Record], identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
-    val test = acqSubs
+    val recordsToUpdate = acqSubs
       .map(sub => {
         buildSfUpdateRequest(sub, "Acquisition",
           for {
@@ -48,12 +48,12 @@ object Main extends App with LazyLogging {
           } yield ())
       })
 
-    if (test.isEmpty) Right(())
-    else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(test).asJson.spaces2)
+    if (recordsToUpdate.isEmpty) Right(())
+    else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def processCancSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
-    val test = getEnhancedCancSubs(cancSubs, activeSubs.records)
+    val recordsToUpdate = getEnhancedCancSubs(cancSubs, activeSubs.records)
       .map(sub => {
         buildSfUpdateRequest(sub.cancelledSub, "Cancellation",
           for {
@@ -62,8 +62,8 @@ object Main extends App with LazyLogging {
           } yield ())
       })
 
-    if (test.isEmpty) Right(())
-    else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(test).asJson.spaces2)
+    if (recordsToUpdate.isEmpty) Right(())
+    else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def sendCancConsentsIfPresent(identityConnector: IdentityConnector, identityId: String, consents: Set[String], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
