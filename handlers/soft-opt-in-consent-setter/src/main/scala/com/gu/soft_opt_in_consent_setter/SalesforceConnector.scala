@@ -31,8 +31,8 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails) extends LazyLogging{
           .map(i => SoftOptInError("SalesforceConnector", s"Could not decode SFSubscription.Response: $i. String to decode: $result")))
   }
 
-  def getActiveSubs(IdentityIds: Seq[String]): Either[SoftOptInError, AssociatedSFSubscription.Response] = {
-    doSfGetWithQuery(SfQueries.getActiveSubsQuery(IdentityIds))
+  def getActiveSubs(identityIds: Seq[String]): Either[SoftOptInError, AssociatedSFSubscription.Response] = {
+    doSfGetWithQuery(SfQueries.getActiveSubsQuery(identityIds))
       .flatMap(result =>
         decode[AssociatedSFSubscription.Response](result)
           .left
