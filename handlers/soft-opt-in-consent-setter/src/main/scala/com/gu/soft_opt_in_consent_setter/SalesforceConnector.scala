@@ -47,12 +47,12 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails) {
       )
   }
 
-  def getActiveSubs(IdentityIds: Seq[String]): Either[SoftOptInError, AssociatedSFSubscription.RootInterface] = {
+  def getActiveSubs(IdentityIds: Seq[String]): Either[SoftOptInError, AssociatedSFSubscription.Response] = {
     doSfGetWithQuery(SfQueries.getActiveSubsQuery(IdentityIds))
       .flatMap(result =>
-        decode[AssociatedSFSubscription.RootInterface](result)
+        decode[AssociatedSFSubscription.Response](result)
           .left
-          .map(i => SoftOptInError("SalesforceConnector", s"Could not decode AssociatedSFSubscription.RootInterface: $i. String to decode: $result")))
+          .map(i => SoftOptInError("SalesforceConnector", s"Could not decode AssociatedSFSubscription.Response: $i. String to decode: $result")))
   }
 
   def updateSubsInSf(updateJsonBody: String): Either[SoftOptInError, Unit] = {

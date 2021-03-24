@@ -52,7 +52,7 @@ object Main extends App with LazyLogging {
     else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(test).asJson.spaces2)
   }
 
-  def processCancSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.RootInterface, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+  def processCancSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     val test = getEnhancedCancSubs(cancSubs, activeSubs.records)
       .map(sub => {
         buildSfResponse(sub.cancelledSub, "Cancellation",

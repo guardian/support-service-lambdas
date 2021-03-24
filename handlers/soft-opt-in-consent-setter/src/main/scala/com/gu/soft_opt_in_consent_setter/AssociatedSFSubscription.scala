@@ -1,7 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
 object AssociatedSFSubscription {
-  case class RootInterface(
+  case class Response(
     totalSize: Int,
     done: Boolean,
     records: Seq[Record]
