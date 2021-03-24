@@ -40,7 +40,7 @@ object Main extends App with LazyLogging {
   def processAcqSubs(acqSubs: Seq[SFSubscription.Record], identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     val test = acqSubs
       .map(sub => {
-        buildSfResponse(sub, "Acquisition",
+        buildSfUpdateRequest(sub, "Acquisition",
           for {
             consents <- consentsCalculator.getAcqConsents(sub.Product__c)
             consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
@@ -55,7 +55,7 @@ object Main extends App with LazyLogging {
   def processCancSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     val test = getEnhancedCancSubs(cancSubs, activeSubs.records)
       .map(sub => {
-        buildSfResponse(sub.cancelledSub, "Cancellation",
+        buildSfUpdateRequest(sub.cancelledSub, "Cancellation",
           for {
             consents <- consentsCalculator.getCancConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
             _ <- sendCancConsentsIfPresent(identityConnector, sub.identityId, consents, consentsCalculator)
@@ -75,16 +75,16 @@ object Main extends App with LazyLogging {
     }
   }
 
-  def buildSfResponse(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {
+  def buildSfUpdateRequest(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {
     result match {
-      case Right(_) => successfulSFResponse(sub, stage)
+      case Right(_) => successfulUpdateToRecordBody(sub, stage)
       case Left(error) =>
         logger.warn(s"${error.errorType}: ${error.errorDetails}")
-        failureSFResponse(sub)
+        failedUpdateToRecordBody(sub)
     }
   }
 
-  def successfulSFResponse(sub: SFSubscription.Record, softOptInStage: String): SFSubscription.UpdateRecord = {
+  def successfulUpdateToRecordBody(sub: SFSubscription.Record, softOptInStage: String): SFSubscription.UpdateRecord = {
     SFSubscription.UpdateRecord(
       Id = sub.Id,
       Soft_Opt_in_Number_of_Attempts__c = 0,
@@ -92,7 +92,7 @@ object Main extends App with LazyLogging {
     )
   }
 
-  def failureSFResponse(sub: SFSubscription.Record): SFSubscription.UpdateRecord = {
+  def failedUpdateToRecordBody(sub: SFSubscription.Record): SFSubscription.UpdateRecord = {
     SFSubscription.UpdateRecord(
       Id = sub.Id,
       Soft_Opt_in_Number_of_Attempts__c = sub.Soft_Opt_in_Number_of_Attempts__c + 1,
