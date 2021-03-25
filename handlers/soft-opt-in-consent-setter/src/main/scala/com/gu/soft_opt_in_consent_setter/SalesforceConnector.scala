@@ -1,6 +1,5 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.AssociatedSFSubscription.Record
 import com.gu.soft_opt_in_consent_setter.models.{SalesforceConfig, SfAuthDetails, SfCompositeResponse, SfResponse, SoftOptInError}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
@@ -40,7 +39,7 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails) extends LazyLogging{
             .left
             .map(i => SoftOptInError("SalesforceConnector", s"Could not decode AssociatedSFSubscription.Response: $i. String to decode: $result")))
     }else{
-      new Right(AssociatedSFSubscription.Response(0, true, Seq[Record]()))
+      new Right(AssociatedSFSubscription.Response(0, true, Seq[AssociatedSFSubscription.Record]()))
     }
   }
 
