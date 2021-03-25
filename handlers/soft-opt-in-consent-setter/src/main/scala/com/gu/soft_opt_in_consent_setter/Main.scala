@@ -95,7 +95,7 @@ object Main extends App with LazyLogging {
   def failedUpdateToRecordBody(sub: SFSubscription.Record): SFSubscription.UpdateRecord = {
     SFSubscription.UpdateRecord(
       Id = sub.Id,
-      Soft_Opt_in_Number_of_Attempts__c = sub.Soft_Opt_in_Number_of_Attempts__c + 1,
+      Soft_Opt_in_Number_of_Attempts__c = sub.Soft_Opt_in_Number_of_Attempts__c.getOrElse(0) + 1,
       Soft_Opt_in_Last_Stage_Processed__c = sub.Soft_Opt_in_Last_Stage_Processed__c
     )
   }
