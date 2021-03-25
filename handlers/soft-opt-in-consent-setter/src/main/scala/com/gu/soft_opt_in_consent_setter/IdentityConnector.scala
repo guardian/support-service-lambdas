@@ -11,6 +11,9 @@ import scala.util.Try
 class IdentityConnector(config: IdentityConfig) {
 
   def sendConsentsReq(identityId: String, body: String): Either[SoftOptInError, Unit] = {
+    //returns 204 No Content if successful
+    //returns 404 Not Found if user not found
+    //returns 400 Bad Request if body is malformed
     Try(
       Http(s"${config.identityUrl}/users/$identityId/consents")
         .header("Content-Type", "application/json")
