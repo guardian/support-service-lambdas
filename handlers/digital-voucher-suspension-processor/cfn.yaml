@@ -24,7 +24,7 @@ Mappings:
     PROD:
       SalesforceUrl: https://gnmtouchpoint.my.salesforce.com
       SalesforceConnectedApp: TouchpointUpdate
-      ImovoUrlVersion: 2
+      ImovoUrlVersion: 3
 
 Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
