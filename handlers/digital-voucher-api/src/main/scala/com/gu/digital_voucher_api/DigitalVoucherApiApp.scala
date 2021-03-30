@@ -2,7 +2,7 @@ package com.gu.digital_voucher_api
 
 import cats.data.EitherT
 import cats.syntax.all._
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import com.gu.AppIdentity
 import com.gu.imovo.{ImovoClient, ImovoConfig}
 import com.gu.util.config.ConfigLoader
