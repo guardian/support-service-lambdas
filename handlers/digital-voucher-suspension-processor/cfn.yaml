@@ -20,11 +20,11 @@ Mappings:
     CODE:
       SalesforceUrl: https://test.salesforce.com
       SalesforceConnectedApp: AwsConnectorSandbox
-      ImovoUrl: https://core-uat-api.azurewebsites.net
+      ImovoUrlVersion: 1
     PROD:
       SalesforceUrl: https://gnmtouchpoint.my.salesforce.com
       SalesforceConnectedApp: TouchpointUpdate
-      ImovoUrl: https://imovo.org
+      ImovoUrlVersion: 3
 
 Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
@@ -37,7 +37,7 @@ Resources:
       FunctionName: !Sub digital-voucher-suspension-processor-${Stage}
       Description: >
         Suspends fulfilment of digital voucher subscriptions.
-        Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor
+        Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor.
       Runtime: java8
       MemorySize: 1536
       Timeout: 900
@@ -59,7 +59,10 @@ Resources:
           salesforceUserName: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataAPI:SecretString:username}}'
           salesforcePassword: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataAPI:SecretString:password}}'
           salesforceToken: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataAPI:SecretString:token}}'
-          imovoUrl: !FindInMap [ StageMap, !Ref Stage, ImovoUrl ]
+          imovoUrl:
+            !Sub
+            - '{{resolve:ssm:/${Stage}/membership/support-service-lambdas-shared-imovo/imovoBaseUrl:${Version}}}'
+            - Version: !FindInMap [StageMap, !Ref Stage, ImovoUrlVersion]
           imovoApiKey: !Sub '{{resolve:secretsmanager:${Stage}/Imovo:SecretString:apiKey}}'
 
   LambdaLogGroup:
