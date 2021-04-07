@@ -6,14 +6,10 @@ case class SfCompositeResponse(responses: List[SfResponse]) {
 }
 
 case class SfResponse(id: Option[String], success: Boolean, errors: List[SfResponseError]) {
-
   def errorAsString: Option[String] = if (success) None else Some(s"RecordId: ${id.getOrElse("N/A")}; Errors: ${errors.map(a => a.errorAsString)}.")
-
 }
 
 case class SfResponseError(statusCode: String, message: String, fields: List[String]) {
-
   def errorAsString: String = s"statusCode: $statusCode; message: $message; fields: ${fields.mkString(", ")};"
-
 }
 

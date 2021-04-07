@@ -27,6 +27,7 @@ object SfQueries {
   """.stripMargin //, 'A-S00135386'
     query
   }
+
   def getActiveSubsQuery(IdentityIds: Seq[String]): String = {
     val identityId = "200004784"
     val query =

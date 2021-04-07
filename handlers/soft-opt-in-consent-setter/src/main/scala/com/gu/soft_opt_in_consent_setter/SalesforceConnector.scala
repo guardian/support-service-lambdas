@@ -8,7 +8,7 @@ import scalaj.http.{Http, HttpOptions}
 
 import scala.util.Try
 
-class SalesforceConnector(sfAuthDetails: SfAuthDetails) extends LazyLogging{
+class SalesforceConnector(sfAuthDetails: SfAuthDetails) extends LazyLogging {
 
   def doSfGetWithQuery(query: String): Either[SoftOptInError, String] = {
     Try(Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
@@ -32,13 +32,13 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails) extends LazyLogging{
   }
 
   def getActiveSubs(identityIds: Seq[String]): Either[SoftOptInError, AssociatedSFSubscription.Response] = {
-    if(identityIds.nonEmpty) {
+    if (identityIds.nonEmpty) {
       doSfGetWithQuery(SfQueries.getActiveSubsQuery(identityIds))
         .flatMap(result =>
           decode[AssociatedSFSubscription.Response](result)
             .left
             .map(i => SoftOptInError("SalesforceConnector", s"Could not decode AssociatedSFSubscription.Response: $i. String to decode: $result")))
-    }else{
+    } else {
       new Right(AssociatedSFSubscription.Response(0, true, Seq[AssociatedSFSubscription.Record]()))
     }
   }

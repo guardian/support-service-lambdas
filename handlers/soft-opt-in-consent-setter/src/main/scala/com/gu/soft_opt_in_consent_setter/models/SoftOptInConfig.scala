@@ -3,7 +3,6 @@ package com.gu.soft_opt_in_consent_setter.models
 import com.gu.effects.GetFromS3.fetchString
 import com.gu.effects.S3Location
 import io.circe.parser.decode
-
 import scala.util.{Failure, Success}
 
 case class SoftOptInConfig(
