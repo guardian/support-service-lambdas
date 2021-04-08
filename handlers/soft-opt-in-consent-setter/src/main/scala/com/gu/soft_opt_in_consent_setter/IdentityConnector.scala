@@ -17,10 +17,11 @@ class IdentityConnector(config: IdentityConfig, runRequest: HttpRequest => Eithe
         .method("PATCH")
     )
       .left.map(i => SoftOptInError("IdentityConnector", s"Identity request failed: $i"))
-      .flatMap(response =>
+      .flatMap { response =>
         if (response.isSuccess)
           Right(())
         else
-          Left(SoftOptInError("IdentityConnector", s"Identity request failed while processing $identityId with body $body. Status code: ${response.code}")))
+          Left(SoftOptInError("IdentityConnector", s"Identity request failed while processing $identityId with body $body. Status code: ${response.code}"))
+      }
   }
 }

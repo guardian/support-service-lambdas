@@ -13,8 +13,8 @@ object Main extends App with LazyLogging {
 
   (for {
     config <- SoftOptInConfig.get
-    sfAuthDetails <- SalesforceConnector.auth(config.sfConfig)
-    sfConnector = new SalesforceConnector(sfAuthDetails)
+    sfAuthDetails <- SalesforceConnector.auth(config.sfConfig, HttpRequestUtils.tryRequest)
+    sfConnector = new SalesforceConnector(sfAuthDetails, HttpRequestUtils.tryRequest)
 
     allSubs <- sfConnector.getSfSubs()
     identityConnector = new IdentityConnector(config.identityConfig, HttpRequestUtils.tryRequest)
@@ -26,7 +26,6 @@ object Main extends App with LazyLogging {
     cancSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
     cancSubsIdentityIds = cancSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
-    //TODO do we need to get the active subs even if there are no canc subs to process?
     activeSubs <- sfConnector.getActiveSubs(cancSubsIdentityIds)
     _ <- processCancSubs(cancSubs, activeSubs, identityConnector, sfConnector, consentsCalculator)
   } yield ())
