@@ -1,10 +1,11 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
+import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
-class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers {
+class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with EitherValues {
 
   private val membershipMapping = Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter")
   private val contributionMapping = Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter")
@@ -29,7 +30,11 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers {
 
   // getAcqConsents failure cases
   "getAcqConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
-    calculator.getAcqConsents("nonexistentProduct") shouldBe Left(SoftOptInError("ConsentsCalculator", "getAcqConsents couldn't find nonexistentProduct in consentsMappings"))
+    val result = calculator.getAcqConsents("nonexistentProduct")
+
+    result.isLeft shouldBe true
+    result.left.value shouldBe a[SoftOptInError]
+    result.left.value.errorType shouldBe "ConsentsCalculator"
   }
 
   // getCancConsents success cases
@@ -59,11 +64,19 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers {
 
   // getCancConsents failure cases
   "getCancConsents" should "correctly return a SoftOptInError when a unknown product is passed and there are no owned products" in {
-    calculator.getCancConsents("nonexistentProduct", Set()) shouldBe Left(SoftOptInError("ConsentsCalculator", "getCancConsents couldn't find nonexistentProduct in consentsMappings"))
+    val result = calculator.getCancConsents("nonexistentProduct", Set())
+
+    result.isLeft shouldBe true
+    result.left.value shouldBe a[SoftOptInError]
+    result.left.value.errorType shouldBe "ConsentsCalculator"
   }
 
   "getCancConsents" should "correctly return a SoftOptInError when a known product is passed and an unknown product is present in the owned products" in {
-    calculator.getCancConsents("membership", Set("nonexistentProduct")) shouldBe Left(SoftOptInError("ConsentsCalculator", "getCancConsents couldn't find nonexistentProduct in consentsMappings"))
+    val result = calculator.getCancConsents("membership", Set("nonexistentProduct"))
+
+    result.isLeft shouldBe true
+    result.left.value shouldBe a[SoftOptInError]
+    result.left.value.errorType shouldBe "ConsentsCalculator"
   }
 
   // buildConsentsBody success cases
