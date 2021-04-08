@@ -17,7 +17,7 @@ object Main extends App with LazyLogging {
     sfConnector = new SalesforceConnector(sfAuthDetails)
 
     allSubs <- sfConnector.getSfSubs()
-    identityConnector = new IdentityConnector(config.identityConfig)
+    identityConnector = new IdentityConnector(config.identityConfig, HttpRequestUtils.tryRequest)
     consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
     acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
