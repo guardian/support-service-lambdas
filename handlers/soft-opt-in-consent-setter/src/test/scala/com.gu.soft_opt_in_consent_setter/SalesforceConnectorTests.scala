@@ -69,7 +69,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   }
 
   "doSfCompositeRequest" should "returns a SoftOptInError on an unsuccessful request" in {
-    val result = new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest("this body", forceThrow = true)).doSfCompositeRequest("body", "PATCH")
+    val result = new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest("this body", forceThrow = true)).doSfCompositeRequest("body")
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
