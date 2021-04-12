@@ -1,4 +1,4 @@
-package com.gu.soft_opt_in_consent_setter
+package com.gu.soft_opt_in_consent_setter.models
 
 object AssociatedSFSubscription {
   case class Response(

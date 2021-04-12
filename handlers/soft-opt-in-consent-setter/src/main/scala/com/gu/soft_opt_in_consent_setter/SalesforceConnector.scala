@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{SalesforceConfig, SfAuthDetails, SfCompositeResponse, SfResponse, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{AssociatedSFSubscription, SFSubscription, SalesforceConfig, SfAuthDetails, SfCompositeResponse, SfResponse, SoftOptInError}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser.decode
