@@ -7,6 +7,7 @@ import scala.util.{Failure, Success}
 
 case class SoftOptInConfig(
   sfConfig: SalesforceConfig,
+  sfApiVersion: String,
   identityConfig: IdentityConfig,
   consentsMapping: Map[String, Set[String]]
 )
@@ -31,6 +32,7 @@ object SoftOptInConfig {
       sfPassword <- sys.env.get("sfPassword")
       sfToken <- sys.env.get("sfToken")
       sfAuthUrl <- sys.env.get("sfAuthUrl")
+      sfApiVersion <- sys.env.get("sfApiVersion")
       identityUrl <- sys.env.get("identityUrl")
       identityToken <- sys.env.get("identityToken")
       consentsMapping <- getConsentsByProductMapping()
@@ -43,6 +45,7 @@ object SoftOptInConfig {
         sfPassword,
         sfToken
       ),
+      sfApiVersion,
       IdentityConfig(
         identityUrl,
         identityToken

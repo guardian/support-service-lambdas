@@ -6,11 +6,11 @@ import io.circe.generic.auto._
 import io.circe.parser.decode
 import scalaj.http.{Http, HttpOptions, HttpRequest, HttpResponse}
 
-class SalesforceConnector(sfAuthDetails: SfAuthDetails, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]) extends LazyLogging {
+class SalesforceConnector(sfAuthDetails: SfAuthDetails, sfApiVersion: String, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]) extends LazyLogging {
 
   def doSfGetWithQuery(query: String): Either[SoftOptInError, String] = {
     runRequest(
-      Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
+      Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
         .option(HttpOptions.readTimeout(30000))
         .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
@@ -44,7 +44,7 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails, runRequest: HttpRequest 
 
   def doSfCompositeRequest(jsonBody: String): Either[SoftOptInError, String] = {
     runRequest(
-      Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
+      Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/composite/sobjects")
         .option(HttpOptions.readTimeout(30000))
         .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")

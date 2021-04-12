@@ -25,7 +25,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
   val fakeAccessToken = "access_token"
   val fakeInstanceUrl = "url.com"
-  val fakeAuthDetails = SfAuthDetails(fakeAccessToken, fakeInstanceUrl)
+  val fakeAuthDetails: SfAuthDetails = SfAuthDetails(fakeAccessToken, fakeInstanceUrl)
   val fakeAuthResponse =
     s"""{
        | "access_token": "$fakeAccessToken",
@@ -53,11 +53,11 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   }
 
   "doSfGetWithQuery" should "returns the body on a successful request" in {
-    new SalesforceConnector(fakeAuthDetails, getRunRequest("this body")).doSfGetWithQuery("query") shouldBe Right("this body")
+    new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest("this body")).doSfGetWithQuery("query") shouldBe Right("this body")
   }
 
   "doSfGetWithQuery" should "returns a SoftOptInError on an unsuccessful request" in {
-    val result = new SalesforceConnector(fakeAuthDetails, getRunRequest("this body", forceThrow = true)).doSfGetWithQuery("query")
+    val result = new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest("this body", forceThrow = true)).doSfGetWithQuery("query")
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
@@ -65,11 +65,11 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   }
 
   "doSfCompositeRequest" should "returns the body on a successful request" in {
-    new SalesforceConnector(fakeAuthDetails, getRunRequest("this body")).doSfCompositeRequest("body") shouldBe Right("this body")
+    new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest("this body")).doSfCompositeRequest("body") shouldBe Right("this body")
   }
 
   "doSfCompositeRequest" should "returns a SoftOptInError on an unsuccessful request" in {
-    val result = new SalesforceConnector(fakeAuthDetails, getRunRequest("this body", forceThrow = true)).doSfCompositeRequest("body", "PATCH")
+    val result = new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest("this body", forceThrow = true)).doSfCompositeRequest("body", "PATCH")
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
