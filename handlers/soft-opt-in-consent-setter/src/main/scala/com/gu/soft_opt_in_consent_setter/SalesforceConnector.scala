@@ -11,9 +11,10 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails, runRequest: HttpRequest 
   def doSfGetWithQuery(query: String): Either[SoftOptInError, String] = {
     runRequest(
       Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
-        .param("q", query)
         .option(HttpOptions.readTimeout(30000))
         .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+        .header("Content-Type", "application/json")
+        .param("q", query)
         .method("GET")
     )
       .map(_.body)
@@ -41,20 +42,21 @@ class SalesforceConnector(sfAuthDetails: SfAuthDetails, runRequest: HttpRequest 
       Right(AssociatedSFSubscription.Response(0, true, Seq[AssociatedSFSubscription.Record]()))
   }
 
-  def doSfCompositeRequest(jsonBody: String, requestType: String): Either[SoftOptInError, String] = {
+  def doSfCompositeRequest(jsonBody: String): Either[SoftOptInError, String] = {
     runRequest(
       Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
+        .option(HttpOptions.readTimeout(30000))
         .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
-        .put(jsonBody)
-        .method(requestType)
+        .postData(jsonBody)
+        .method("PATCH")
     )
       .map(_.body)
       .left.map(i => SoftOptInError("SalesforceConnector", s"Salesforce composite request failed: $i"))
   }
 
   def updateSubsInSf(updateJsonBody: String): Either[SoftOptInError, Unit] = {
-    doSfCompositeRequest(updateJsonBody, "PATCH")
+    doSfCompositeRequest(updateJsonBody)
       .flatMap { result =>
         decode[List[SfResponse]](result) match {
           case Right(compositeResponse) =>

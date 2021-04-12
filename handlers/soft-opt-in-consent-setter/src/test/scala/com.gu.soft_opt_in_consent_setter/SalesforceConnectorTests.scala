@@ -65,7 +65,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   }
 
   "doSfCompositeRequest" should "returns the body on a successful request" in {
-    new SalesforceConnector(fakeAuthDetails, getRunRequest("this body")).doSfCompositeRequest("body", "PATCH") shouldBe Right("this body")
+    new SalesforceConnector(fakeAuthDetails, getRunRequest("this body")).doSfCompositeRequest("body") shouldBe Right("this body")
   }
 
   "doSfCompositeRequest" should "returns a SoftOptInError on an unsuccessful request" in {
