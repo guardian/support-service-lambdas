@@ -46,7 +46,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     calculator.getCancConsents("membership", Set("testproduct")) shouldBe Right(membershipMapping)
   }
 
-  "getCancConsents" should "correctly returns the mapping when a known product is passed and there is an owned products partially overlaps" in {
+  "getCancConsents" should "correctly returns the mapping when a known product is passed and there is an owned product that partially overlaps" in {
     calculator.getCancConsents("newspaper", Set("guardianweekly")) shouldBe Right(newspaperMapping.diff(guWeeklyMapping))
   }
 
