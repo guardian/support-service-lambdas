@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{SalesforceConfig, SfAuthDetails, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{SFSubscription, SalesforceConfig, SfAuthDetails, SoftOptInError}
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -32,10 +32,20 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
        | "instance_url": "$fakeInstanceUrl"
        |}""".stripMargin
 
+  val fakeSfSubs = SFSubscription.Response(0, true, Seq())
+  val fakeSfSubsResponse =
+    s"""{
+       | "totalSize": 0,
+       | "done": true,
+       | "records": []
+       |}""".stripMargin
+
+  // auth success cases
   "auth" should "returns authentication details on a successful request" in {
     SalesforceConnector.auth(fakeConfig, getRunRequest(fakeAuthResponse)) shouldBe Right(fakeAuthDetails)
   }
 
+  // auth failure cases
   "auth" should "returns a SoftOptInError on an unsuccessful request" in {
     val result = SalesforceConnector.auth(fakeConfig, getRunRequest(fakeAuthResponse, forceThrow = true))
 
@@ -44,7 +54,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
     result.left.value.errorType shouldBe "SalesforceConnector"
   }
 
-  "auth" should "returns a SoftOptInError if the body is unrecognised" in {
+  "auth" should "returns a SoftOptInError if an unexpected body is found" in {
     val result = SalesforceConnector.auth(fakeConfig, getRunRequest("broken body"))
 
     result.isLeft shouldBe true
@@ -70,6 +80,18 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
   "doSfCompositeRequest" should "returns a SoftOptInError on an unsuccessful request" in {
     val result = new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest("this body", forceThrow = true)).doSfCompositeRequest("body")
+
+    result.isLeft shouldBe true
+    result.left.value shouldBe a[SoftOptInError]
+    result.left.value.errorType shouldBe "SalesforceConnector"
+  }
+
+  "getSfSubs" should "returns the body on a successful request" in {
+    new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest(fakeSfSubsResponse)).getSfSubs() shouldBe Right(fakeSfSubs)
+  }
+
+  "getSfSubs" should "returns a SoftOptInError if an unexpected body is found" in {
+    val result = new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest("broken body", forceThrow = true)).getSfSubs()
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
