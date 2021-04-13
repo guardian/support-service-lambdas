@@ -1,5 +1,54 @@
 # Zuora to Datalake incremental export
 
+## How do we know when it fails?
+
+* Cloudwatch Alert email is sent to SX mailing list.
+* Ophan alerts if it detects out-of-date CSV in raw buckets by sending an email with says something like `supporter-experience team has out-of-date tables`
+
+## How to retry the export manually (via incrementalTime)?
+
+### tdlr:
+
+1. Run zuora-datalake-export-PROD lambda with `{"exportFromDate": "2022-05-04"}`
+1. If lambda is successfull, run Spark jobs by clearing zuora_account table
+1. If lambda is not successfull due to time or memory, wait for Zuora aqua jobs to finish, and then run the following app to complete the remaining steps https://github.com/guardian/support-service-lambdas/pull/769, and then run Spark jobs by clearing zuora_account table
+
+### More detailed explanation of steps:
+
+1. Say, alarm email is sent to SX mailbox saying tables are out of date on 06.04.2021
+1. Go to zuora-datalake-export-PROD lambda in AWS Console
+1. Run the lambda with `{"exportFromDate": "2022-05-04"}` which fetches incremental changes from that date
+1. If the date is not to far back in the past then the lambda will likely complete within 15mintes and within memory limit
+1. If lambda is successfull, 
+   1. fresh CSV files will have been dropped in ophan buckets, so optionally check the timestamps on them, for example, `ophan-raw-zuora-increment-invoiceitem` bucket. 
+   1. If lambda is successfull, run spark jobs via [airflow](https://zc6e7edd5b7c7cbb9p-tp.appspot.com/admin/airflow/graph?dag_id=supporter-experience) by clicking `Clear` on `zuora_account`. This should trigger all the children jobs as well as all zuora_* tables depend on zuora_account.
+1. If lambda is not successful due to running out of time or memory, 
+   1. then monitor Zuora batch jobs either via Zuora UI https://www.zuora.com/apps/BatchQuery.do or via API endpoints `GET /v1/batch-query/jobs/{{jobId}}`
+   1. once it completes, csv files should be in ophan buckets, so run spark jobs via [airflow](https://zc6e7edd5b7c7cbb9p-tp.appspot.com/admin/airflow/graph?dag_id=supporter-experience) by clicking `Clear` on `zuora_account`. This should trigger all the children jobs as well as all zuora_* tables depend on zuora_account.
+
+### Backbround regarding incrementalTime:
+
+Export is **NOT** idempotent. Do not blindly re-run the export. Lake must ingest the latest increment before 
+lambda can be executed again with `{"exportFromDate": "afterLastIncrement"}`. If the lambda is executed before
+lake ingests the latest increment, then the increment is lost. (If this happens use `incrementalTime` method \
+described below to retrieve the lost increment.) 
+
+However it seems to be safe to re-run the export with `incrementalTime` provided. This will get the changes since
+`incrementalTime` but it will not modify the session so when lambda runs again with `{"exportFromDate": "afterLastIncrement"}` 
+it will pick up from the last time it ran:
+
+* To manually re-run the export, pass date as string in the following format `"2019-01-20"` to export lambda. 
+This will export changes since 2019-01-19.
+* The export lambda is **idempotent** as long as `incrementalTime` is present.
+
+| Load changes since...   |      lambda input                             |
+|-------------------------|:---------------------------------------------:|
+| Continue session        | `{"exportFromDate": "afterLastIncrement"}`    |
+| Since particular date   | `{"exportFromDate": "2020-01-20"}`            |
+| Since beginning of time | `{"exportFromDate": "beginning"}` DO NOT USE! |
+
+If extracting via postman make sure to use the **exact same** `partner` and `project` values as in lambda.
+
 ## How does export work?
 
 1. [Trigger lambda](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#rules:)
@@ -69,33 +118,7 @@ object AccountQuery extends Query(
 AWS Cloudwatch Event Rule triggers the export lambda once per day. Each execution exports changes 
 since last time export ran. Rule passes `{"exportFromDate": "afterLastIncrement"}` to lambda.
 
-## How do we know when it fails?
 
-* Cloudwatch Alert email is sent to SX mailing list.
-* Ophan alerts if it detects out-of-date CSV in raw buckets.
-
-## How to retry the export manually (via incrementalTime)?
-
-Export is **NOT** idempotent. Do not blindly re-run the export. Lake must ingest the latest increment before 
-lambda can be executed again with `{"exportFromDate": "afterLastIncrement"}`. If the lambda is executed before
-lake ingests the latest increment, then the increment is lost. (If this happens use `incrementalTime` method \
-described below to retrieve the lost increment.) 
-
-However it seems to be safe to re-run the export with `incrementalTime` provided. This will get the changes since
-`incrementalTime` but it will not modify the session so when lambda runs again with `{"exportFromDate": "afterLastIncrement"}` 
-it will pick up from the last time it ran:
-
-* To manually re-run the export, pass date as string in the following format `"2019-01-20"` to export lambda. 
-This will export changes since 2019-01-19.
-* The export lambda is **idempotent** as long as `incrementalTime` is present.
-
-| Load changes since...   |      lambda input                             |
-|-------------------------|:---------------------------------------------:|
-| Continue session        | `{"exportFromDate": "afterLastIncrement"}`    |
-| Since particular date   | `{"exportFromDate": "2020-01-20"}`            |
-| Since beginning of time | `{"exportFromDate": "beginning"}` DO NOT USE! |
-
-If extracting via postman make sure to use the **exact same** `partner` and `project` values as in lambda.
 
 
 ## How to perform full export?
