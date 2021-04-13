@@ -23,7 +23,8 @@
    1. fresh CSV files will have been dropped in ophan buckets, so optionally check the timestamps on them, for example, `ophan-raw-zuora-increment-invoiceitem` bucket. 
    1. If lambda is successfull, run spark jobs via [airflow](https://zc6e7edd5b7c7cbb9p-tp.appspot.com/admin/airflow/graph?dag_id=supporter-experience) by clicking `Clear` on `zuora_account`. This should trigger all the children jobs as well as all zuora_* tables depend on zuora_account.
 1. If lambda is not successful due to running out of time or memory, 
-   1. then monitor Zuora batch jobs either via Zuora UI https://www.zuora.com/apps/BatchQuery.do or via API endpoints `GET /v1/batch-query/jobs/{{jobId}}`
+   1. then monitor Zuora batch jobs either via Zuora UI https://www.zuora.com/apps/BatchQuery.do or via API endpoints `GET /v1/batch-query/jobs/{{jobId}}` ![image](https://user-images.githubusercontent.com/13835317/114559021-359b5600-9c63-11eb-9d1c-8974c066ddf6.png)
+
    1. once it completes, run the following app to copy over CSVs from zuora to ophan buckets https://github.com/guardian/support-service-lambdas/pull/769 
    1. csv files should be in ophan buckets, so run spark jobs via [airflow](https://zc6e7edd5b7c7cbb9p-tp.appspot.com/admin/airflow/graph?dag_id=supporter-experience) by clicking `Clear` on `zuora_account`. This should trigger all the children jobs as well as all zuora_* tables depend on zuora_account.
 
