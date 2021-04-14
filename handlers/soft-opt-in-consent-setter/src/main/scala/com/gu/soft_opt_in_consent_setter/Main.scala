@@ -6,8 +6,6 @@ import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
 
 // TODO: introduce notifications when number of attempts is incremented to 5
-// TODO: Do functional testing
-// TODO: Add unit testing
 
 object Main extends App with LazyLogging {
 
