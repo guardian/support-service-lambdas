@@ -25,7 +25,9 @@ object SfQueries {
   }
 
   def getActiveSubsQuery(identityIds: Seq[String]): String = {
-    s"""
+    val identityIdsAsString = identityIds.mkString("\'", "\',\'", "\'")
+
+      s"""
        |SELECT
        |	buyer__r.identityId__c,
        |	Product__c
@@ -34,10 +36,9 @@ object SfQueries {
        |WHERE
        |	SF_Status__c in ('Active', 'Voucher Pending', 'Cancellation Pending') AND
        |	Soft_Opt_in_Eligible__c = true AND
-       |	buyer__r.identityId__c in  ($identityIds)
+       |	buyer__r.identityId__c in  ($identityIdsAsString)
        |GROUP BY
        |	buyer__r.identityId__c, product__c
     """.stripMargin
-
   }
 }
