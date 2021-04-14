@@ -3,8 +3,8 @@ package com.gu.soft_opt_in_consent_setter
 object SfQueries {
 
   def getAllSubsQuery: String = {
-    val limit = 2
-    val sfSubName = "A-S00103472"
+    val limit = 200
+
     s"""
        |SELECT
        |	Id,
@@ -18,16 +18,13 @@ object SfQueries {
        |FROM
        |	SF_Subscription__c
        |WHERE
-       |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation') AND
-       |
-       |	name in ('A-S00169422','A-S00169443')
+       |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation')
        |LIMIT
        |	$limit
-    """.stripMargin //, 'A-S00135386'
+    """.stripMargin
   }
 
-  def getActiveSubsQuery(IdentityIds: Seq[String]): String = {
-    val identityId = "200004784"
+  def getActiveSubsQuery(identityIds: Seq[String]): String = {
     s"""
        |SELECT
        |	buyer__r.identityId__c,
@@ -37,7 +34,7 @@ object SfQueries {
        |WHERE
        |	SF_Status__c in ('Active', 'Voucher Pending', 'Cancellation Pending') AND
        |	Soft_Opt_in_Eligible__c = true AND
-       |	buyer__r.identityId__c in  ('$identityId')
+       |	buyer__r.identityId__c in  ($identityIds)
        |GROUP BY
        |	buyer__r.identityId__c, product__c
     """.stripMargin
