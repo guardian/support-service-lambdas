@@ -1,30 +1,15 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
+import com.gu.soft_opt_in_consent_setter.testData.Consents.{calculator, contributionMapping, guWeeklyMapping, membershipMapping, newspaperMapping}
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with EitherValues {
 
-  private val membershipMapping = Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter")
-  private val contributionMapping = Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter")
-  private val newspaperMapping = Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter")
-  private val guWeeklyMapping = Set("your_support_onboarding", "guardian_weekly_newsletter")
-  private val testProductMapping = Set("unique_consent")
-
-  private val testConsentMappings = Map(
-    "membership" -> membershipMapping,
-    "contributions" -> contributionMapping,
-    "newspaper" -> newspaperMapping,
-    "guardianweekly" -> guWeeklyMapping,
-    "testproduct" -> testProductMapping,
-  )
-
-  val calculator = new ConsentsCalculator(testConsentMappings)
-
   // getAcqConsents success cases
-  "getAcqConsents" should "correctly returns the mapping when a known product is passed" in {
+  "getAcqConsents" should "correctly return the mapping when a known product is passed" in {
     calculator.getAcqConsents("membership") shouldBe Right(membershipMapping)
   }
 
@@ -38,27 +23,27 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   // getCancConsents success cases
-  "getCancConsents" should "correctly returns the mapping when a known product is passed and there are no owned products" in {
+  "getCancConsents" should "correctly return the mapping when a known product is passed and there are no owned products" in {
     calculator.getCancConsents("membership", Set()) shouldBe Right(membershipMapping)
   }
 
-  "getCancConsents" should "correctly returns the mapping when a known product is passed and there are owned products but do not overlap" in {
+  "getCancConsents" should "correctly return the mapping when a known product is passed and there are owned products but do not overlap" in {
     calculator.getCancConsents("membership", Set("testproduct")) shouldBe Right(membershipMapping)
   }
 
-  "getCancConsents" should "correctly returns the mapping when a known product is passed and there is an owned product that partially overlaps" in {
+  "getCancConsents" should "correctly return the mapping when a known product is passed and there is an owned product that partially overlaps" in {
     calculator.getCancConsents("newspaper", Set("guardianweekly")) shouldBe Right(newspaperMapping.diff(guWeeklyMapping))
   }
 
-  "getCancConsents" should "correctly returns the mapping when a known product is passed and there are multiple owned products that partially overlap" in {
+  "getCancConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that partially overlap" in {
     calculator.getCancConsents("newspaper", Set("membership", "guardianweekly")) shouldBe Right(newspaperMapping.diff(membershipMapping ++ guWeeklyMapping))
   }
 
-  "getCancConsents" should "correctly returns the mapping when a known product is passed and there is an owned products completely overlaps" in {
+  "getCancConsents" should "correctly return the mapping when a known product is passed and there is an owned products completely overlaps" in {
     calculator.getCancConsents("guardianweekly", Set("membership")) shouldBe Right(guWeeklyMapping.diff(membershipMapping))
   }
 
-  "getCancConsents" should "correctly returns the mapping when a known product is passed and there are multiple owned products that completely overlap" in {
+  "getCancConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that completely overlap" in {
     calculator.getCancConsents("guardianweekly", Set("membership", "contributions")) shouldBe Right(guWeeklyMapping.diff(membershipMapping ++ contributionMapping))
   }
 
@@ -81,35 +66,39 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   // buildConsentsBody success cases
   "buildConsentsBody" should "return an empty JSON array when consents is empty" in {
-    calculator.buildConsentsBody(Set(), true) shouldBe """[
-                                                         |]""".stripMargin
+    removeWhitespace(calculator.buildConsentsBody(Set(), true)) shouldBe removeWhitespace("""[]""".stripMargin)
   }
 
   "buildConsentsBody" should "return a correctly populated JSON array when consents is not empty and state is true" in {
-    calculator.buildConsentsBody(guWeeklyMapping, true) shouldBe """[
-                                                                   |  {
-                                                                   |    "id" : "your_support_onboarding",
-                                                                   |    "consented" : true
-                                                                   |  },
-                                                                   |  {
-                                                                   |    "id" : "guardian_weekly_newsletter",
-                                                                   |    "consented" : true
-                                                                   |  }
-                                                                   |]""".stripMargin
+    removeWhitespace(calculator.buildConsentsBody(guWeeklyMapping, true)) shouldBe
+      removeWhitespace("""[
+    |  {
+    |    "id" : "your_support_onboarding",
+    |    "consented" : true
+    |  },
+    |  {
+    |    "id" : "guardian_weekly_newsletter",
+    |    "consented" : true
+    |  }
+    |]""".stripMargin)
   }
 
   "buildConsentsBody" should "return a correctly populated JSON array when consents is not empty and state is false" in {
-    calculator.buildConsentsBody(guWeeklyMapping, false) shouldBe """[
-                                                                   |  {
-                                                                   |    "id" : "your_support_onboarding",
-                                                                   |    "consented" : false
-                                                                   |  },
-                                                                   |  {
-                                                                   |    "id" : "guardian_weekly_newsletter",
-                                                                   |    "consented" : false
-                                                                   |  }
-                                                                   |]""".stripMargin
+    removeWhitespace(calculator.buildConsentsBody(guWeeklyMapping, false)) shouldBe
+      removeWhitespace("""[
+    |  {
+    |    "id" : "your_support_onboarding",
+    |    "consented" : false
+    |  },
+    |  {
+    |    "id" : "guardian_weekly_newsletter",
+    |    "consented" : false
+    |  }
+    |]""".stripMargin)
   }
 
+  def removeWhitespace(stringToRemoveWhitespaceFrom: String): String = {
+    stringToRemoveWhitespaceFrom.replaceAll("\\s", "")
+  }
 }
 
