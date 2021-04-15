@@ -57,7 +57,6 @@ class MainTests extends AnyFlatSpec with should.Matchers with EitherValues {
   "buildSfUpdateRequest" should "return a SFSubscription.UpdateRecord with values representing a failed update to Identity when provided with a SoftOptInError" in {
     val result = Main.buildSfUpdateRequest(fakeSfSub, "Acquisition", Left(SoftOptInError("IdentityConnector", "Identity request failed: java.lang.Throwable")))
 
-    result shouldBe a[SFSubscription.UpdateRecord]
     result.Soft_Opt_in_Last_Stage_Processed__c shouldBe Some("")
     result.Soft_Opt_in_Number_of_Attempts__c shouldBe 2
   }
@@ -65,7 +64,6 @@ class MainTests extends AnyFlatSpec with should.Matchers with EitherValues {
   "buildSfUpdateRequest" should "return a SFSubscription.UpdateRecord with values representing a successful update to Identity when provided with a Unit" in {
     val result = Main.buildSfUpdateRequest(fakeSfSub, "Acquisition", Right(()))
 
-    result shouldBe a[SFSubscription.UpdateRecord]
     result.Soft_Opt_in_Last_Stage_Processed__c shouldBe Some("Acquisition")
     result.Soft_Opt_in_Number_of_Attempts__c shouldBe 0
   }
@@ -74,7 +72,6 @@ class MainTests extends AnyFlatSpec with should.Matchers with EitherValues {
     val result = Main.getEnhancedCancSubs(Seq[SFSubscription.Record](fakeSfSub_withCancelledStatus), Seq[AssociatedSFSubscription.Record](fakeAssociatedSfSub))
 
     result.size shouldBe 1
-    result shouldBe a[Seq[SFSubscription.EnhancedCancelledSub]]
 
     result.head.identityId shouldBe fakeBuyer.IdentityID__c
     result.head.cancelledSub shouldBe fakeSfSub_withCancelledStatus
