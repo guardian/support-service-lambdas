@@ -29,7 +29,7 @@ object SfQueries {
   def getActiveSubsQuery(identityIds: Seq[String]): String = {
     val identityIdsAsString = identityIds.mkString("\'", "\',\'", "\'")
 
-      s"""
+    s"""
        |SELECT
        |	buyer__r.identityId__c,
        |	Product__c
