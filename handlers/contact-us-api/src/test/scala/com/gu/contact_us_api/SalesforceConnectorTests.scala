@@ -41,7 +41,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   private val failedCompositeStatusCode = 500
   private val failedCompositeReqJson = s"""[{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }]"""
 
-  "auth" should "return a token when the request is successful" in {
+  "auth" should "return a token when the request is successful " in {
     new SalesforceConnector(getRunRequest(successfulAuthRequestJson))
       .auth(fakeConfg) shouldBe Right(authToken)
   }

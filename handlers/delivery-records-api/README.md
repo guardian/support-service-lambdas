@@ -95,7 +95,7 @@ Similar to the [`/cancel` endpoint of `holiday-stop-api`](https://github.com/gua
 ##### Sample Request
 ```json
 {
-    "ownedProductName": "Guardian Weekly",
+    "productName": "Guardian Weekly",
     "description": "description",
     "problemType": "No Delivery",
     "repeatDeliveryProblem": true,
