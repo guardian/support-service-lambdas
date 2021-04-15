@@ -2,12 +2,11 @@ import Dependencies._
 
 val scalaSettings = Seq(
   ThisBuild / scalaVersion := "2.13.4",
-  version := "0.0.1",
+  version      := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
     "-deprecation",
-    "-encoding",
-    "UTF-8",
+    "-encoding", "UTF-8",
     "-feature",
     "-target:jvm-1.8",
     "-language:existentials",
@@ -19,44 +18,37 @@ val scalaSettings = Seq(
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
   ),
-  fork in Test := true, {
+  fork in Test := true,
+  {
     import scalariform.formatter.preferences._
     scalariformPreferences := scalariformPreferences.value
       .setPreference(DanglingCloseParenthesis, Force)
       .setPreference(SpacesAroundMultiImports, false)
       .setPreference(NewlineAtEndOfFile, true)
   },
+
   autoCompilerPlugins := true,
   resolvers += "Guardian Platform Bintray" at "https://dl.bintray.com/guardian/platforms"
 )
 
 // fixme this whole file needs splitting down appropriately
 
-lazy val EffectsTest =
-  config("effectsTest") extend (Test) describedAs ("run the edge tests")
-lazy val HealthCheckTest = config(
-  "healthCheck"
-) extend (Test) describedAs ("run the health checks against prod/code")
-val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(
-  HealthCheckTest
-)(Defaults.testTasks) ++ Seq(
+lazy val EffectsTest = config("effectsTest") extend(Test) describedAs("run the edge tests")
+lazy val HealthCheckTest = config("healthCheck") extend(Test) describedAs("run the health checks against prod/code")
+val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthCheckTest)(Defaults.testTasks) ++ Seq(
   testOptions in Test += Tests.Argument("-l", "com.gu.test.EffectsTest"),
   testOptions in Test += Tests.Argument("-l", "com.gu.test.HealthCheck"),
+
   testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
   testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
   testOptions in EffectsTest += Tests.Argument("-n", "com.gu.test.EffectsTest"),
-  testOptions in HealthCheckTest -= Tests
-    .Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in HealthCheckTest -= Tests
-    .Argument("-l", "com.gu.test.HealthCheck"),
-  testOptions in HealthCheckTest += Tests
-    .Argument("-n", "com.gu.test.HealthCheck")
+
+  testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
+  testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
+  testOptions in HealthCheckTest += Tests.Argument("-n", "com.gu.test.HealthCheck")
 )
 
-def library(theProject: Project) =
-  theProject
-    .settings(scalaSettings, testSettings)
-    .configs(EffectsTest, HealthCheckTest)
+def library(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
 
 // ==== START libraries ====
 
@@ -74,7 +66,7 @@ lazy val zuora = library(project in file("lib/zuora"))
   .dependsOn(
     restHttp,
     testDep,
-    handler, // TODO only for the config, which needs to be split out
+    handler,// TODO only for the config, which needs to be split out
     effects % "test->test"
   )
   .settings(
@@ -90,47 +82,32 @@ lazy val `salesforce-core` = library(project in file("lib/salesforce/core"))
 lazy val `salesforce-client` = library(project in file("lib/salesforce/client"))
   .dependsOn(
     restHttp,
-    handler, // % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
+    handler,// % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
     effects % "test->test",
     testDep,
     `salesforce-core`
   )
   .settings(
-    libraryDependencies ++= Seq(
-      okhttp3,
-      catsCore,
-      playJson,
-      scalatest
-    ) ++ logging
+    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging
   )
 
-lazy val `salesforce-sttp-client` =
-  library(project in file("lib/salesforce/sttp-client"))
-    .dependsOn(
-      `salesforce-core`,
-      `salesforce-sttp-test-stub` % Test
-    )
-    .settings(
-      libraryDependencies ++=
-        Seq(
-          sttp,
-          sttpCirce,
-          sttpCats % Test,
-          scalatest,
-          catsCore,
-          catsEffect,
-          circe
-        ) ++ logging
-    )
+lazy val `salesforce-sttp-client` = library(project in file("lib/salesforce/sttp-client"))
+  .dependsOn(
+    `salesforce-core`,
+    `salesforce-sttp-test-stub` % Test
+  )
+  .settings(
+    libraryDependencies ++=
+      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
+  )
 
-lazy val `salesforce-sttp-test-stub` =
-  library(project in file("lib/salesforce/sttp-test-stub"))
-    .dependsOn(
-      `salesforce-core`
-    )
-    .settings(
-      libraryDependencies ++= Seq(sttp, sttpCirce, scalatest) ++ logging
-    )
+lazy val `salesforce-sttp-test-stub` = library(project in file("lib/salesforce/sttp-test-stub"))
+  .dependsOn(
+    `salesforce-core`
+  )
+  .settings(
+    libraryDependencies ++= Seq(sttp, sttpCirce, scalatest) ++ logging
+  )
 
 lazy val `holiday-stops` = library(project in file("lib/holiday-stops"))
   .dependsOn(
@@ -158,12 +135,7 @@ lazy val `holiday-stops` = library(project in file("lib/holiday-stops"))
 lazy val restHttp = library(project in file("lib/restHttp"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(
-      okhttp3,
-      catsCore,
-      playJson,
-      scalatest
-    ) ++ logging
+    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging
   )
 
 lazy val s3ConfigValidator = library(project in file("lib/s3ConfigValidator"))
@@ -185,13 +157,7 @@ lazy val s3ConfigValidator = library(project in file("lib/s3ConfigValidator"))
 lazy val handler = library(project in file("lib/handler"))
   .dependsOn(`effects-s3`, `config-core`)
   .settings(
-    libraryDependencies ++= Seq(
-      okhttp3,
-      catsCore,
-      playJson,
-      scalatest,
-      awsLambda
-    ) ++ logging
+    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest, awsLambda) ++ logging
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
@@ -204,12 +170,11 @@ lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
     libraryDependencies ++= Seq(awsS3) ++ logging
   )
-lazy val `effects-cloudwatch` =
-  library(project in file("lib/effects-cloudwatch"))
-    .dependsOn(testDep)
-    .settings(
-      libraryDependencies ++= Seq(awsCloudwatch) ++ logging
-    )
+lazy val `effects-cloudwatch` = library(project in file("lib/effects-cloudwatch"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(awsCloudwatch) ++ logging
+  )
 lazy val `effects-sqs` = library(project in file("lib/effects-sqs"))
   .dependsOn(testDep)
   .settings(
@@ -228,8 +193,7 @@ lazy val `config-cats` = library(project in file("lib/config-cats"))
     libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig)
   )
 
-val effectsDepIncludingTestFolder: ClasspathDependency =
-  effects % "compile->compile;test->test"
+val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
 lazy val `zuora-reports` = library(project in file("lib/zuora-reports"))
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
@@ -251,7 +215,7 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
       sttp,
       sttpCirce,
       scalatest,
-      diffx
+      diffx,
     ) ++ logging
   )
 
@@ -259,39 +223,23 @@ lazy val `credit-processor` = library(project in file("lib/credit-processor"))
   .dependsOn(
     `zuora-core`,
     `fulfilment-dates`
-  )
+  ).settings(
+  libraryDependencies ++= logging
+)
+
+lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-client"))
   .settings(
-    libraryDependencies ++= logging
+    libraryDependencies ++=
+      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
-lazy val `imovo-sttp-client` =
-  library(project in file("lib/imovo/imovo-sttp-client"))
-    .settings(
-      libraryDependencies ++=
-        Seq(
-          sttp,
-          sttpCirce,
-          sttpCats % Test,
-          scalatest,
-          catsCore,
-          catsEffect,
-          circe
-        ) ++ logging
-    )
+lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-test-stub"))
+  .dependsOn(`imovo-sttp-client`)
+  .settings(
+    libraryDependencies ++= Seq(scalatest)
+  )
 
-lazy val `imovo-sttp-test-stub` =
-  library(project in file("lib/imovo/imovo-sttp-test-stub"))
-    .dependsOn(`imovo-sttp-client`)
-    .settings(
-      libraryDependencies ++= Seq(scalatest)
-    )
-
-def lambdaProject(
-    projectName: String,
-    projectDescription: String,
-    dependencies: Seq[sbt.ModuleID] = Nil,
-    isCdk: Boolean = false
-) = {
+def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil, isCdk: Boolean = false) = {
   val cfName = if (isCdk) "cdk-cfn.yaml" else "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
@@ -299,16 +247,14 @@ def lambdaProject(
     .settings(scalaSettings, testSettings)
     .settings(
       name := projectName,
-      description := projectDescription,
+      description:= projectDescription,
       assemblyJarName := s"$projectName.jar",
       assemblyMergeStrategyDiscardModuleInfo,
       riffRaffPackageType := assembly.value,
       riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
       riffRaffUploadManifestBucket := Option("riffraff-builds"),
       riffRaffManifestProjectName := s"support-service-lambdas::$projectName",
-      riffRaffArtifactResources += (file(
-        s"handlers/$projectName/$cfName"
-      ), s"cfn/$cfName"),
+      riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
       libraryDependencies ++= dependencies ++ logging
     )
 }
@@ -316,22 +262,11 @@ def lambdaProject(
 // FIXME: This seems to be non-standard
 // FIXME: Why is the name in sub-project build.sbt support-service-lambda
 // FIXME: Why is riff-raff not refering to CF?
-lazy val `zuora-callout-apis` =
-  library(project in file("handlers/zuora-callout-apis"))
-    .enablePlugins(RiffRaffArtifact)
-    .dependsOn(
-      zuora,
-      handler,
-      effectsDepIncludingTestFolder,
-      `effects-sqs`,
-      testDep
-    )
+lazy val `zuora-callout-apis` = library(project in file("handlers/zuora-callout-apis"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
-lazy val `identity-backfill` = lambdaProject(
-  "identity-backfill",
-  "links subscriptions with identity accounts",
-  Seq(supportInternationalisation)
-).dependsOn(
+lazy val `identity-backfill` = lambdaProject("identity-backfill", "links subscriptions with identity accounts", Seq(supportInternationalisation)).dependsOn(
   zuora,
   `salesforce-client` % "compile->compile;test->test",
   handler,
@@ -359,13 +294,7 @@ lazy val `new-product-api` = lambdaProject(
   "new-product-api",
   "Add subscription to account",
   Seq(supportInternationalisation)
-).dependsOn(
-  zuora,
-  handler,
-  `effects-sqs`,
-  effectsDepIncludingTestFolder,
-  testDep
-)
+).dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
@@ -376,60 +305,32 @@ lazy val `zuora-sar` = lambdaProject(
   "zuora-sar",
   "Performs a Subject Access Requests against Zuora",
   Seq(catsEffect, circeParser, circe)
-).dependsOn(
-  `zuora-reports`,
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep,
-  `effects-s3`,
-  `effects-lambda`
-)
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",
   "Cleans up the salesforce to free up storage via 360 sync/zuora",
   Seq()
-).dependsOn(
-  `zuora-reports`,
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep,
-  `effects-s3`,
-  `effects-cloudwatch`
-)
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
 
 lazy val `revenue-recogniser-job` = lambdaProject(
   "revenue-recogniser-job",
   "Finds unrecognised revenue in zuora and recognises it appropariately",
   Seq(
     "com.nrinaudo" %% "kantan.csv-generic" % "0.6.1",
-    "com.nrinaudo" %% "kantan.csv-java8" % "0.6.1"
+    "com.nrinaudo" %% "kantan.csv-java8" % "0.6.1",
   )
-).dependsOn(
-  `zuora-reports`,
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep,
-  `effects-s3`,
-  `effects-cloudwatch`
-)
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
 
 lazy val `sf-contact-merge` = lambdaProject(
   "sf-contact-merge",
   "Merges together the salesforce account referenced by a set of zuora accounts"
-).dependsOn(
-  zuora,
-  `salesforce-client` % "compile->compile;test->test",
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep
-)
+).dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-billing-account-remover` = lambdaProject(
   "sf-billing-account-remover",
   "Removes Billing Accounts and related records from Salesforce",
-  Seq(circe, circeParser, scalajHttp)
-)
+  Seq(circe, circeParser, scalajHttp))
 
 lazy val `soft-opt-in-consent-setter` = lambdaProject(
   "soft-opt-in-consent-setter",
@@ -440,59 +341,36 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",
   "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
-  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3)
-)
+  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3))
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
   "cancellation-sf-cases-api",
   "Create/update SalesForce cases for self service cancellation tracking",
   Seq(playJsonExtensions)
-).dependsOn(
-  `salesforce-client`,
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep
-)
+).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-gocardless-sync` = lambdaProject(
   "sf-gocardless-sync",
   "Polls GoCardless for direct debit mandate events and pushes into SalesForce",
   Seq(playJsonExtensions)
-).dependsOn(
-  `salesforce-client`,
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep
-)
+).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `holiday-stop-api` = lambdaProject(
   "holiday-stop-api",
   "CRUD API for Holiday Stop Requests stored in SalesForce",
   Seq(playJsonExtensions)
-).dependsOn(
-  `holiday-stops` % "compile->compile;test->test",
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep,
-  `fulfilment-dates`
-)
+).dependsOn(`holiday-stops` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep, `fulfilment-dates`)
 
 lazy val `sf-datalake-export` = lambdaProject(
   "sf-datalake-export",
   "Export salesforce data to the data lake",
   Seq(scalaXml)
-).dependsOn(
-  `salesforce-client`,
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep
-)
+).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
   "Zuora to Datalake export using Stateful AQuA API which exports incremental changes",
-  Seq(scalaLambda, scalajHttp, awsS3, enumeratum)
-)
+  Seq(scalaLambda, scalajHttp, awsS3, enumeratum))
 
 lazy val `batch-email-sender` = lambdaProject(
   "batch-email-sender",
@@ -525,8 +403,7 @@ lazy val `delivery-problem-credit-processor` = lambdaProject(
 
 lazy val `metric-push-api` = lambdaProject(
   "metric-push-api",
-  "HTTP API to push a metric to cloudwatch so we can alarm on errors"
-)
+  "HTTP API to push a metric to cloudwatch so we can alarm on errors")
 
 lazy val `sf-move-subscriptions-api` = lambdaProject(
   "sf-move-subscriptions-api",
@@ -553,14 +430,7 @@ lazy val `fulfilment-date-calculator` = lambdaProject(
 lazy val `delivery-records-api` = lambdaProject(
   "delivery-records-api",
   "API for accessing delivery records in Salesforce",
-  Seq(
-    http4sDsl,
-    http4sCirce,
-    http4sServer,
-    circe,
-    sttpAsyncHttpClientBackendCats,
-    scalatest
-  )
+  Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest)
 ).dependsOn(
   `effects-s3`,
   `config-core`,
@@ -579,15 +449,9 @@ lazy val `digital-voucher-api` = lambdaProject(
     sttpAsyncHttpClientBackendCats,
     scalatest,
     diffx,
-    scalaMock
+    scalaMock,
   )
-).dependsOn(
-  `effects-s3`,
-  `config-cats`,
-  `imovo-sttp-client`,
-  `imovo-sttp-test-stub` % Test,
-  `http4s-lambda-handler`
-)
+).dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`)
 
 lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   "digital-voucher-cancellation-processor",
@@ -630,31 +494,21 @@ lazy val `contact-us-api` = lambdaProject(
   )
 ).dependsOn(handler)
 
-lazy val `http4s-lambda-handler` =
-  library(project in file("lib/http4s-lambda-handler"))
-    .settings(
-      libraryDependencies ++= Seq(
-        circe,
-        circeParser,
-        http4sCore,
-        http4sDsl % Test,
-        scalatest
-      ) ++ logging
-    )
+lazy val `http4s-lambda-handler` = library(project in file("lib/http4s-lambda-handler"))
+  .settings(
+    libraryDependencies ++= Seq(circe, circeParser, http4sCore, http4sDsl % Test, scalatest) ++ logging
+  )
+
 
 // ==== END handlers ====
 
 initialize := {
   val _ = initialize.value
-  assert(
-    List("1.8", "11").contains(sys.props("java.specification.version")),
-    "Java 8 or 11 is required for this project."
-  )
+  assert(List("1.8", "11").contains(sys.props("java.specification.version")),
+    "Java 8 or 11 is required for this project.")
 }
 
-lazy val deployAwsLambda = inputKey[Unit](
-  "Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop"
-)
+lazy val deployAwsLambda = inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
 deployAwsLambda := {
   import scala.sys.process._
   import complete.DefaultParsers._
@@ -665,5 +519,5 @@ deployAwsLambda := {
 // run from root project: deploy holiday-stop-processor CODE
 commands += Command.args("deploy", "<name stage>") { (state, args) =>
   val Seq(name, stage) = args
-  s"""$name/assembly""" :: s"deployAwsLambda $name $stage" :: state
+  s"""$name/assembly""":: s"deployAwsLambda $name $stage" :: state
 }
