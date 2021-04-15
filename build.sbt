@@ -224,8 +224,8 @@ lazy val `credit-processor` = library(project in file("lib/credit-processor"))
     `zuora-core`,
     `fulfilment-dates`
   ).settings(
-  libraryDependencies ++= logging
-)
+    libraryDependencies ++= logging
+  )
 
 lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-client"))
   .settings(
