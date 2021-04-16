@@ -336,7 +336,7 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
   "soft-opt-in-consent-setter",
   "sets or unsets soft opt in consents dependent on subscription product",
   Seq(awsSecretsManager, circe, circeParser, scalatest, scalajHttp, awsS3, simpleConfig) ++ logging
-).dependsOn(`effects-s3`)
+).dependsOn(`effects-s3`, `salesforce-core`)
 
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",
