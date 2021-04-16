@@ -74,6 +74,11 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String, r
 }
 
 object SalesforceConnector {
+  def apply(sfConfig: SFAuthConfig, sfApiVersion: String, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, SalesforceConnector] = {
+    auth(sfConfig, runRequest)
+      .map(new SalesforceConnector(_, sfApiVersion, runRequest))
+  }
+
   def auth(sfConfig: SFAuthConfig, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, SalesforceAuth] = {
 
     runRequest(

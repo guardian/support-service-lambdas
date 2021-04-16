@@ -14,8 +14,7 @@ object Main extends App with LazyLogging {
 
   (for {
     config <- SoftOptInConfig.get
-    sfAuthDetails <- SalesforceConnector.auth(config.sfConfig, HttpRequestUtils.tryRequest)
-    sfConnector = new SalesforceConnector(sfAuthDetails, config.sfApiVersion, HttpRequestUtils.tryRequest)
+    sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion, HttpRequestUtils.tryRequest)
 
     allSubs <- sfConnector.getSfSubs()
     identityConnector = new IdentityConnector(config.identityConfig, HttpRequestUtils.tryRequest)
