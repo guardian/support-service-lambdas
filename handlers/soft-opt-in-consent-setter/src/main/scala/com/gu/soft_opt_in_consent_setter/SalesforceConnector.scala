@@ -40,7 +40,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String, r
             .map(i => SoftOptInError("SalesforceConnector", s"Could not decode AssociatedSFSubscription.Response: $i. String to decode: $result"))
         }
     else
-      Right(AssociatedSFSubscription.Response(0, true, Seq[AssociatedSFSubscription.Record]()))
+      Right(AssociatedSFSubscription.Response(0, done = true, Seq[AssociatedSFSubscription.Record]()))
   }
 
   def doSfCompositeRequest(jsonBody: String): Either[SoftOptInError, String] = {
