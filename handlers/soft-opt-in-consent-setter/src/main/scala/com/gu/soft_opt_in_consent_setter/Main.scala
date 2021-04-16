@@ -47,8 +47,10 @@ object Main extends App with LazyLogging {
           } yield ())
       })
 
-    if (recordsToUpdate.isEmpty) Right(())
-    else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
+    if (recordsToUpdate.isEmpty)
+      Right(())
+    else
+      sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def processCancSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
@@ -61,17 +63,21 @@ object Main extends App with LazyLogging {
           } yield ())
       })
 
-    if (recordsToUpdate.isEmpty) Right(())
-    else sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
+    if (recordsToUpdate.isEmpty)
+      Right(())
+    else
+      sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def sendCancConsentsIfPresent(identityConnector: IdentityConnector, identityId: String, consents: Set[String], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
-    if (consents.nonEmpty) {
-      val consentsBody = consentsCalculator.buildConsentsBody(consents, state = false)
-      identityConnector.sendConsentsReq(identityId, consentsBody)
-    } else {
+    if (consents.nonEmpty)
+      identityConnector
+        .sendConsentsReq(
+          identityId,
+          consentsCalculator.buildConsentsBody(consents, state = false)
+        )
+    else
       Right(())
-    }
   }
 
   def buildSfUpdateRequest(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {
