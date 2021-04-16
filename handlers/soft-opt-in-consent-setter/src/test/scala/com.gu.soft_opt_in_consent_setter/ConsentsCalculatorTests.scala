@@ -8,56 +8,56 @@ import org.scalatest.matchers.should
 
 class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with EitherValues {
 
-  // getAcqConsents success cases
-  "getAcqConsents" should "correctly return the mapping when a known product is passed" in {
-    calculator.getAcqConsents("membership") shouldBe Right(membershipMapping)
+  // getAcquisitionConsents success cases
+  "getAcquisitionConsents" should "correctly return the mapping when a known product is passed" in {
+    calculator.getAcquisitionConsents("membership") shouldBe Right(membershipMapping)
   }
 
-  // getAcqConsents failure cases
-  "getAcqConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
-    val result = calculator.getAcqConsents("nonexistentProduct")
+  // getAcquisitionConsents failure cases
+  "getAcquisitionConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
+    val result = calculator.getAcquisitionConsents("nonexistentProduct")
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
     result.left.value.errorType shouldBe "ConsentsCalculator"
   }
 
-  // getCancConsents success cases
-  "getCancConsents" should "correctly return the mapping when a known product is passed and there are no owned products" in {
-    calculator.getCancConsents("membership", Set()) shouldBe Right(membershipMapping)
+  // getCancelationConsents success cases
+  "getCancelationConsents" should "correctly return the mapping when a known product is passed and there are no owned products" in {
+    calculator.getCancelationConsents("membership", Set()) shouldBe Right(membershipMapping)
   }
 
-  "getCancConsents" should "correctly return the mapping when a known product is passed and there are owned products but do not overlap" in {
-    calculator.getCancConsents("membership", Set("testproduct")) shouldBe Right(membershipMapping)
+  "getCancelationConsents" should "correctly return the mapping when a known product is passed and there are owned products but do not overlap" in {
+    calculator.getCancelationConsents("membership", Set("testproduct")) shouldBe Right(membershipMapping)
   }
 
-  "getCancConsents" should "correctly return the mapping when a known product is passed and there is an owned product that partially overlaps" in {
-    calculator.getCancConsents("newspaper", Set("guardianweekly")) shouldBe Right(newspaperMapping.diff(guWeeklyMapping))
+  "getCancelationConsents" should "correctly return the mapping when a known product is passed and there is an owned product that partially overlaps" in {
+    calculator.getCancelationConsents("newspaper", Set("guardianweekly")) shouldBe Right(newspaperMapping.diff(guWeeklyMapping))
   }
 
-  "getCancConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that partially overlap" in {
-    calculator.getCancConsents("newspaper", Set("membership", "guardianweekly")) shouldBe Right(newspaperMapping.diff(membershipMapping ++ guWeeklyMapping))
+  "getCancelationConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that partially overlap" in {
+    calculator.getCancelationConsents("newspaper", Set("membership", "guardianweekly")) shouldBe Right(newspaperMapping.diff(membershipMapping ++ guWeeklyMapping))
   }
 
-  "getCancConsents" should "correctly return the mapping when a known product is passed and there is an owned products completely overlaps" in {
-    calculator.getCancConsents("guardianweekly", Set("membership")) shouldBe Right(guWeeklyMapping.diff(membershipMapping))
+  "getCancelationConsents" should "correctly return the mapping when a known product is passed and there is an owned products completely overlaps" in {
+    calculator.getCancelationConsents("guardianweekly", Set("membership")) shouldBe Right(guWeeklyMapping.diff(membershipMapping))
   }
 
-  "getCancConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that completely overlap" in {
-    calculator.getCancConsents("guardianweekly", Set("membership", "contributions")) shouldBe Right(guWeeklyMapping.diff(membershipMapping ++ contributionMapping))
+  "getCancelationConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that completely overlap" in {
+    calculator.getCancelationConsents("guardianweekly", Set("membership", "contributions")) shouldBe Right(guWeeklyMapping.diff(membershipMapping ++ contributionMapping))
   }
 
-  // getCancConsents failure cases
-  "getCancConsents" should "correctly return a SoftOptInError when a unknown product is passed and there are no owned products" in {
-    val result = calculator.getCancConsents("nonexistentProduct", Set())
+  // getCancelationConsents failure cases
+  "getCancelationConsents" should "correctly return a SoftOptInError when a unknown product is passed and there are no owned products" in {
+    val result = calculator.getCancelationConsents("nonexistentProduct", Set())
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
     result.left.value.errorType shouldBe "ConsentsCalculator"
   }
 
-  "getCancConsents" should "correctly return a SoftOptInError when a known product is passed and an unknown product is present in the owned products" in {
-    val result = calculator.getCancConsents("membership", Set("nonexistentProduct"))
+  "getCancelationConsents" should "correctly return a SoftOptInError when a known product is passed and an unknown product is present in the owned products" in {
+    val result = calculator.getCancelationConsents("membership", Set("nonexistentProduct"))
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]

@@ -68,8 +68,8 @@ class MainTests extends AnyFlatSpec with should.Matchers with EitherValues {
     result.Soft_Opt_in_Number_of_Attempts__c shouldBe 0
   }
 
-  "getEnhancedCancSubs" should "return a Seq[SFSubscription.EnhancedCancelledSub] containing a Seq[AssociatedSFSubscription.Record] matched on Identity Id" in {
-    val result = Main.getEnhancedCancSubs(Seq[SFSubscription.Record](fakeSfSub_withCancelledStatus), Seq[AssociatedSFSubscription.Record](fakeAssociatedSfSub))
+  "getEnhancedCancelledSubs" should "return a Seq[SFSubscription.EnhancedCancelledSub] containing a Seq[AssociatedSFSubscription.Record] matched on Identity Id" in {
+    val result = Main.getEnhancedCancelledSubs(Seq[SFSubscription.Record](fakeSfSub_withCancelledStatus), Seq[AssociatedSFSubscription.Record](fakeAssociatedSfSub))
 
     result.size shouldBe 1
 

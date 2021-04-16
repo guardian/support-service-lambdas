@@ -22,13 +22,13 @@ object Main extends App with LazyLogging {
     consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
     acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcqStatus))
-    _ <- processAcqSubs(acqSubs, identityConnector, sfConnector, consentsCalculator)
+    _ <- processAcqquiredSubs(acqSubs, identityConnector, sfConnector, consentsCalculator)
 
     cancSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancStatus))
     cancSubsIdentityIds = cancSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
     activeSubs <- sfConnector.getActiveSubs(cancSubsIdentityIds)
-    _ <- processCancSubs(cancSubs, activeSubs, identityConnector, sfConnector, consentsCalculator)
+    _ <- processCancelledSubs(cancSubs, activeSubs, identityConnector, sfConnector, consentsCalculator)
   } yield ())
     .left
     .map(error => {
@@ -36,12 +36,12 @@ object Main extends App with LazyLogging {
       logger.error(s"${error.errorType}: ${error.errorDetails}")
     })
 
-  def processAcqSubs(acqSubs: Seq[SFSubscription.Record], identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
-    val recordsToUpdate = acqSubs
+  def processAcqquiredSubs(acquiredSubs: Seq[SFSubscription.Record], identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+    val recordsToUpdate = acquiredSubs
       .map(sub => {
         buildSfUpdateRequest(sub, "Acquisition",
           for {
-            consents <- consentsCalculator.getAcqConsents(sub.Product__c)
+            consents <- consentsCalculator.getAcquisitionConsents(sub.Product__c)
             consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
             _ <- identityConnector.sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
           } yield ())
@@ -53,12 +53,12 @@ object Main extends App with LazyLogging {
       sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  def processCancSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
-    val recordsToUpdate = getEnhancedCancSubs(cancSubs, activeSubs.records)
+  def processCancelledSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+    val recordsToUpdate = getEnhancedCancelledSubs(cancSubs, activeSubs.records)
       .map(sub => {
         buildSfUpdateRequest(sub.cancelledSub, "Cancellation",
           for {
-            consents <- consentsCalculator.getCancConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
+            consents <- consentsCalculator.getCancelationConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
             _ <- sendCancConsentsIfPresent(identityConnector, sub.identityId, consents, consentsCalculator)
           } yield ())
       })
@@ -105,13 +105,13 @@ object Main extends App with LazyLogging {
     )
   }
 
-  def getEnhancedCancSubs(cancSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[SFSubscription.EnhancedCancelledSub] = {
-    cancSubs.map(cancelledSub => {
-      val associatedActiveNonGiftSubs = associatedSubs.filter(_.IdentityID__c.equals(cancelledSub.Buyer__r.IdentityID__c))
+  def getEnhancedCancelledSubs(cancelledSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[SFSubscription.EnhancedCancelledSub] = {
+    cancelledSubs.map(sub => {
+      val associatedActiveNonGiftSubs = associatedSubs.filter(_.IdentityID__c.equals(sub.Buyer__r.IdentityID__c))
 
       SFSubscription.EnhancedCancelledSub(
-        identityId = cancelledSub.Buyer__r.IdentityID__c,
-        cancelledSub = cancelledSub,
+        identityId = sub.Buyer__r.IdentityID__c,
+        cancelledSub = sub,
         associatedActiveNonGiftSubs = associatedActiveNonGiftSubs
       )
     })
