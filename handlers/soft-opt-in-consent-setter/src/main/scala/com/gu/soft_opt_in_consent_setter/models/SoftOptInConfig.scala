@@ -60,7 +60,8 @@ object SoftOptInConfig {
   }
 
   def getConsentsByProductMapping(): Option[Map[String, Set[String]]] = {
-    fetchString(S3Location("kelvin-test", "ConsentsByProductMapping.json")) match {
+    // TODO: Obtain CODE/PROD version of file depending on env variable
+    fetchString(S3Location("soft-opt-in-consent-setter", "CODE/ConsentsByProductMapping.json")) match {
       case Success(jsonContent) => decode[Map[String, Set[String]]](jsonContent).toOption
       case Failure(f) => None
     }
