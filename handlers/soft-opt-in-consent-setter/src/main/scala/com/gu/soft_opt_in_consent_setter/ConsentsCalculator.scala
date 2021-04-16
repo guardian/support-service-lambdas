@@ -52,7 +52,7 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
   }
 
   def buildConsentsBody(consents: Set[String], state: Boolean): String = {
-    case class consentsObject(id: String, consented: Boolean)
-    consents.map(consentsObject(_, state)).asJson.toString()
+    case class ConsentsObject(id: String, consented: Boolean)
+    consents.map(ConsentsObject(_, state)).asJson.toString()
   }
 }
