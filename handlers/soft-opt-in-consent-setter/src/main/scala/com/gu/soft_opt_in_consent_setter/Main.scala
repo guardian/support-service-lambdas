@@ -58,7 +58,7 @@ object Main extends App with LazyLogging {
       .map(sub => {
         buildSfUpdateRequest(sub.cancelledSub, "Cancellation",
           for {
-            consents <- consentsCalculator.getCancelationConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
+            consents <- consentsCalculator.getCancellationConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
             _ <- sendCancConsentsIfPresent(identityConnector, sub.identityId, consents, consentsCalculator)
           } yield ())
       })
