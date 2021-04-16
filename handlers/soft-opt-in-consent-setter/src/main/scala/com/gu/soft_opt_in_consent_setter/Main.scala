@@ -9,6 +9,9 @@ import io.circe.syntax.EncoderOps
 
 object Main extends App with LazyLogging {
 
+  val readyToProcessAcqStatus = "Ready to process acquisition"
+  val readyToProcessCancStatus = "Ready to process cancellation"
+
   (for {
     config <- SoftOptInConfig.get
     sfAuthDetails <- SalesforceConnector.auth(config.sfConfig, HttpRequestUtils.tryRequest)
@@ -18,10 +21,10 @@ object Main extends App with LazyLogging {
     identityConnector = new IdentityConnector(config.identityConfig, HttpRequestUtils.tryRequest)
     consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
-    acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals("Ready to process acquisition"))
+    acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcqStatus))
     _ <- processAcqSubs(acqSubs, identityConnector, sfConnector, consentsCalculator)
 
-    cancSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals("Ready to process cancellation"))
+    cancSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancStatus))
     cancSubsIdentityIds = cancSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
     activeSubs <- sfConnector.getActiveSubs(cancSubsIdentityIds)
