@@ -24,7 +24,7 @@ case class IdentityConfig(identityUrl: String, identityToken: String)
 
 object SoftOptInConfig {
 
-  def get: Either[SoftOptInError, SoftOptInConfig] = {
+  val get: Either[SoftOptInError, SoftOptInConfig] = {
     (for {
       sfUsername <- sys.env.get("sfUsername")
       sfClientId <- sys.env.get("sfClientId")
