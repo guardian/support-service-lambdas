@@ -34,7 +34,6 @@ object Main extends App with LazyLogging {
     .map(error => {
       // TODO: Surface this error outside of the lambda
       logger.error(s"${error.errorType}: ${error.errorDetails}")
-      println(error)
     })
 
   def processAcqSubs(acqSubs: Seq[SFSubscription.Record], identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
