@@ -6,6 +6,8 @@ import io.circe.syntax.EncoderOps
 
 class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
 
+  private case class ConsentsObject(id: String, consented: Boolean)
+
   def getAcquisitionConsents(productName: String): Either[SoftOptInError, Set[String]] = {
     consentsMappings
       .get(productName)
@@ -52,7 +54,6 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
   }
 
   def buildConsentsBody(consents: Set[String], state: Boolean): String = {
-    case class ConsentsObject(id: String, consented: Boolean)
     consents.map(ConsentsObject(_, state)).asJson.toString()
   }
 }
