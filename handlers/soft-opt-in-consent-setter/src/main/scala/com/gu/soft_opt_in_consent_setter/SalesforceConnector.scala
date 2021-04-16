@@ -80,7 +80,6 @@ object SalesforceConnector {
   }
 
   def auth(sfConfig: SFAuthConfig, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, SalesforceAuth] = {
-
     runRequest(
       Http(s"${sfConfig.url}/services/oauth2/token")
         .postForm(
