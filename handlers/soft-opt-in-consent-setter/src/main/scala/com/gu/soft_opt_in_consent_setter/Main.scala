@@ -21,7 +21,7 @@ object Main extends App with LazyLogging {
     consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
     acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcqStatus))
-    _ <- processAcqquiredSubs(acqSubs, identityConnector, sfConnector, consentsCalculator)
+    _ <- processAcquiredSubs(acqSubs, identityConnector, sfConnector, consentsCalculator)
 
     cancSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancStatus))
     cancSubsIdentityIds = cancSubs.map(sub => sub.Buyer__r.IdentityID__c)
@@ -35,7 +35,7 @@ object Main extends App with LazyLogging {
       logger.error(s"${error.errorType}: ${error.errorDetails}")
     })
 
-  def processAcqquiredSubs(acquiredSubs: Seq[SFSubscription.Record], identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+  def processAcquiredSubs(acquiredSubs: Seq[SFSubscription.Record], identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     val recordsToUpdate = acquiredSubs
       .map(sub => {
         buildSfUpdateRequest(sub, "Acquisition",
