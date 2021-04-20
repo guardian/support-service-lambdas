@@ -18,5 +18,4 @@ object Consents {
   )
 
   val calculator = new ConsentsCalculator(testConsentMappings)
-
 }
