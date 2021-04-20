@@ -9,8 +9,8 @@ import scalaj.http.{Http, HttpOptions, HttpRequest, HttpResponse}
 
 class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]) extends LazyLogging {
 
-  private implicit class HttpHeaderUtils(http: HttpRequest) {
-    def sfDefaultHeaders: HttpRequest = http
+  private def sfHttp(url: String): HttpRequest = {
+    Http(url)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .header("Content-Type", "application/json")
@@ -18,8 +18,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String, r
 
   def doSfGetWithQuery(query: String): Either[SoftOptInError, String] = {
     runRequest(
-      Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
-        .sfDefaultHeaders
+      sfHttp(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
         .param("q", query)
         .method("GET")
     )
@@ -50,8 +49,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String, r
 
   def doSfCompositeRequest(jsonBody: String): Either[SoftOptInError, String] = {
     runRequest(
-      Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/composite/sobjects")
-        .sfDefaultHeaders
+      sfHttp(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/composite/sobjects")
         .postData(jsonBody)
         .method("PATCH")
     )
