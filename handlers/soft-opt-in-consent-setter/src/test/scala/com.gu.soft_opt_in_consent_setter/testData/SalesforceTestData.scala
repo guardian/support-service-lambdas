@@ -4,7 +4,7 @@ import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.gu.soft_opt_in_consent_setter.SalesforceConnector
 import com.gu.soft_opt_in_consent_setter.testData.HTTP.getRunRequest
 
-object SalesforceConnector {
+object SalesforceTestData {
   val fakeAccessToken = "access_token"
   val fakeInstanceUrl = "url.com"
   val fakeSfConfig = SFAuthConfig("url", "id", "secret", "username", "password", "token")
