@@ -17,7 +17,7 @@ object Main extends App with LazyLogging {
     sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion, HttpRequestUtils.tryRequest)
 
     allSubs <- sfConnector.getSfSubs()
-    identityConnector = new IdentityConnector(config.identityConfig, HttpRequestUtils.tryRequest)
+    identityConnector = new IdentityConnector(config.identityConfig)
     consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
     acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcqStatus))
@@ -27,7 +27,7 @@ object Main extends App with LazyLogging {
     cancSubsIdentityIds = cancSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
     activeSubs <- sfConnector.getActiveSubs(cancSubsIdentityIds)
-    _ <- processCancelledSubs(cancSubs, activeSubs, identityConnector, sfConnector, consentsCalculator)
+    _ <- processCancelledSubs(cancSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector, consentsCalculator)
   } yield ())
     .left
     .map(error => {
@@ -52,13 +52,13 @@ object Main extends App with LazyLogging {
       sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  def processCancelledSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, identityConnector: IdentityConnector, sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+  def processCancelledSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     val recordsToUpdate = getEnhancedCancelledSubs(cancSubs, activeSubs.records)
       .map(sub => {
         buildSfUpdateRequest(sub.cancelledSub, "Cancellation",
           for {
             consents <- consentsCalculator.getCancellationConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
-            _ <- sendCancConsentsIfPresent(identityConnector, sub.identityId, consents, consentsCalculator)
+            _ <- sendCancConsentsIfPresent(sendConsentsReq, sub.identityId, consents, consentsCalculator)
           } yield ())
       })
 
@@ -68,13 +68,12 @@ object Main extends App with LazyLogging {
       sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  def sendCancConsentsIfPresent(identityConnector: IdentityConnector, identityId: String, consents: Set[String], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+  def sendCancConsentsIfPresent(sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], identityId: String, consents: Set[String], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     if (consents.nonEmpty)
-      identityConnector
-        .sendConsentsReq(
-          identityId,
-          consentsCalculator.buildConsentsBody(consents, state = false)
-        )
+      sendConsentsReq(
+        identityId,
+        consentsCalculator.buildConsentsBody(consents, state = false)
+      )
     else
       Right(())
   }

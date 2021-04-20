@@ -2,7 +2,6 @@ package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{AssociatedSFSubscription, SFSubscription, SoftOptInError}
 import com.gu.soft_opt_in_consent_setter.testData.Consents.calculator
-import com.gu.soft_opt_in_consent_setter.testData.IdentityConnector.{identityConnector_withFailedResponse, identityConnector_withSuccessfulResponse}
 import com.gu.soft_opt_in_consent_setter.testData.SfSubscription._
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
@@ -38,21 +37,21 @@ class MainTests extends AnyFlatSpec with should.Matchers with EitherValues {
     Main.successfulUpdateToRecordBody(fakeSfSub, "Acquisition").Soft_Opt_in_Number_of_Attempts__c shouldBe 0
   }
 
-  "sendCancConsentsIfPresent" should "return a Unit when update to Identity is successful" in {
-    Main.sendCancConsentsIfPresent(identityConnector_withSuccessfulResponse, "123456789", Set[String]("a consent"), calculator) shouldBe Right(())
-  }
-
-  "sendCancConsentsIfPresent" should "return a Unit when there are no consents to update" in {
-    Main.sendCancConsentsIfPresent(identityConnector_withSuccessfulResponse, "123456789", Set[String](), calculator) shouldBe Right(())
-  }
-
-  "sendCancConsentsIfPresent" should "return a SoftOptInError when update to Identity fails" in {
-    val result = Main.sendCancConsentsIfPresent(identityConnector_withFailedResponse, "123456789", Set[String]("a consent"), calculator)
-
-    result.isLeft shouldBe true
-    result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "IdentityConnector"
-  }
+  //  "sendCancConsentsIfPresent" should "return a Unit when update to Identity is successful" in {
+  //    Main.sendCancConsentsIfPresent(identityConnector_withSuccessfulResponse, "123456789", Set[String]("a consent"), calculator) shouldBe Right(())
+  //  }
+  //
+  //  "sendCancConsentsIfPresent" should "return a Unit when there are no consents to update" in {
+  //    Main.sendCancConsentsIfPresent(identityConnector_withSuccessfulResponse, "123456789", Set[String](), calculator) shouldBe Right(())
+  //  }
+  //
+  //  "sendCancConsentsIfPresent" should "return a SoftOptInError when update to Identity fails" in {
+  //    val result = Main.sendCancConsentsIfPresent(identityConnector_withFailedResponse, "123456789", Set[String]("a consent"), calculator)
+  //
+  //    result.isLeft shouldBe true
+  //    result.left.value shouldBe a[SoftOptInError]
+  //    result.left.value.errorType shouldBe "IdentityConnector"
+  //  }
 
   "buildSfUpdateRequest" should "return a SFSubscription.UpdateRecord with values representing a failed update to Identity when provided with a SoftOptInError" in {
     val result = Main.buildSfUpdateRequest(fakeSfSub, "Acquisition", Left(SoftOptInError("IdentityConnector", "Identity request failed: java.lang.Throwable")))
