@@ -2,7 +2,7 @@ package com.gu.soft_opt_in_consent_setter.models
 
 case class SfCompositeResponse(responses: List[SfResponse]) {
   def hasErrors: Boolean = responses.exists(!_.success)
-  def errorAsString: Option[String] = if (hasErrors) Some(s"Composite Request failed with: ${responses.map(a => a.errorAsString)}") else None
+  def errorsAsString: Option[String] = if (hasErrors) Some(s"Composite Request failed with: ${responses.map(a => a.errorAsString)}") else None
 }
 
 case class SfResponse(id: Option[String], success: Boolean, errors: List[SfResponseError]) {

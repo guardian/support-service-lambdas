@@ -29,39 +29,4 @@ object SfSubscription {
   val fakeSfSub_withCancelledStatus: SFSubscription.Record =
     fakeSfSub.copy(SF_Status__c = "Cancelled")
 
-  val fakeSfSubs = SFSubscription.Response(0, true, Seq())
-  val fakeSfSubsResponse =
-    s"""{
-       | "totalSize": 0,
-       | "done": true,
-       | "records": []
-       |}""".stripMargin
-
-  val fakeAssociatedSfSubs = AssociatedSFSubscription.Response(0, true, Seq())
-  val fakeAssociatedSfSubsResponse =
-    s"""{
-       | "totalSize": 0,
-       | "done": true,
-       | "records": []
-       |}""".stripMargin
-
-  val fakeSfSubsSuccessfulUpdateResponse =
-    s"""[{
-       | "id" : "001RM000003oCprYAE",
-       | "success" : true,
-       | "errors" : [ ]
-   }]""".stripMargin
-
-  val fakeSfSubsFailedUpdateResponse =
-    s"""[{
-       | "success" : false,
-       | "errors" : [
-       |  {
-       |    "statusCode" : "MALFORMED_ID",
-       |    "message" : "Contact ID: id value of incorrect type: 001xx000003DGb2999",
-       |     "fields" : [
-       |        "Id"
-       |      ]
-       |  }]
-   }]""".stripMargin
 }

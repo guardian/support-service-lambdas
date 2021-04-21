@@ -2,7 +2,7 @@ package com.gu.soft_opt_in_consent_setter
 
 object SfQueries {
 
-  val getAllSubsQuery: String = {
+  val getSubsToProcessQuery: String = {
     val limit = 200
 
     s"""

@@ -3,7 +3,7 @@ package com.gu.soft_opt_in_consent_setter
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
-import io.circe.syntax.EncoderOps
+import io.circe.syntax._
 
 // TODO: introduce notifications when number of attempts is incremented to 5
 
@@ -14,9 +14,9 @@ object Main extends App with LazyLogging {
 
   (for {
     config <- SoftOptInConfig.get
-    sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion, HttpRequestUtils.tryRequest)
+    sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 
-    allSubs <- sfConnector.getSfSubs()
+    allSubs <- sfConnector.getSubsToProcess()
     identityConnector = new IdentityConnector(config.identityConfig)
     consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
@@ -49,7 +49,7 @@ object Main extends App with LazyLogging {
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
+      sfConnector.updateSubs(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def processCancelledSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], sfConnector: SalesforceConnector, consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
@@ -75,7 +75,7 @@ object Main extends App with LazyLogging {
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      sfConnector.updateSubsInSf(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
+      sfConnector.updateSubs(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def buildSfUpdateRequest(sub: SFSubscription.Record, stage: String, result: Either[SoftOptInError, Unit]): SFSubscription.UpdateRecord = {

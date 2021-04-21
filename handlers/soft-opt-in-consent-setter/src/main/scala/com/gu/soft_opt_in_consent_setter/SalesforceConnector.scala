@@ -3,11 +3,36 @@ package com.gu.soft_opt_in_consent_setter
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.gu.soft_opt_in_consent_setter.models.{AssociatedSFSubscription, SFSubscription, SfCompositeResponse, SfResponse, SoftOptInError}
 import com.typesafe.scalalogging.LazyLogging
+import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import scalaj.http.{Http, HttpOptions, HttpRequest, HttpResponse}
+import scala.util.Try
 
-class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]) extends LazyLogging {
+class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) extends LazyLogging {
+
+  def getSubsToProcess(): Either[SoftOptInError, SFSubscription.Response] = {
+    handleQueryResp[SFSubscription.Response](
+      sendQueryReq(SfQueries.getSubsToProcessQuery),
+      errorDesc = "Could not decode SFSubscription.Response"
+    )
+  }
+
+  def getActiveSubs(identityIds: Seq[String]): Either[SoftOptInError, AssociatedSFSubscription.Response] = {
+    if (identityIds.nonEmpty)
+      handleQueryResp[AssociatedSFSubscription.Response](
+        sendQueryReq(SfQueries.getActiveSubsQuery(identityIds)),
+        errorDesc = "Could not decode AssociatedSFSubscription.Response"
+      )
+    else
+      Right(AssociatedSFSubscription.Response(0, done = true, Seq[AssociatedSFSubscription.Record]()))
+  }
+
+  def updateSubs(body: String): Either[SoftOptInError, Unit] = {
+    handleCompositeUpdateResp(
+      sendCompositeUpdateReq(body)
+    )
+  }
 
   private def sfHttp(url: String): HttpRequest = {
     Http(url)
@@ -16,58 +41,47 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String, r
       .header("Content-Type", "application/json")
   }
 
-  def doSfGetWithQuery(query: String): Either[SoftOptInError, String] = {
-    runRequest(
-      sfHttp(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
+  def sendQueryReq(query: String): Either[Throwable, HttpResponse[String]] = {
+    Try(
+      sfHttp(url = s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
         .param("q", query)
         .method("GET")
+        .asString
     )
-      .map(_.body)
-      .left.map(i => SoftOptInError("SalesforceConnector", s"Salesforce query request failed: $i"))
+      .toEither
   }
 
-  def getSfSubs(): Either[SoftOptInError, SFSubscription.Response] = {
-    doSfGetWithQuery(SfQueries.getAllSubsQuery)
+  def sendCompositeUpdateReq(body: String): Either[Throwable, HttpResponse[String]] = {
+    Try(
+      sfHttp(url = s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/composite/sobjects")
+        .postData(body)
+        .method("PATCH")
+        .asString
+    )
+      .toEither
+  }
+
+  def handleQueryResp[T: Decoder](response: Either[Throwable, HttpResponse[String]], errorDesc: String = "Decode error"): Either[SoftOptInError, T] = {
+    response
+      .left.map(error => SoftOptInError("SalesforceConnector", s"Salesforce query request failed: $error"))
       .flatMap { result =>
-        decode[SFSubscription.Response](result)
-          .left
-          .map(i => SoftOptInError("SalesforceConnector", s"Could not decode SFSubscription.Response: $i. String to decode: $result"))
+        decode[T](result.body)
+          .left.map(decodeError => SoftOptInError("SalesforceConnector", s"$errorDesc:$decodeError. String to decode ${result.body}"))
       }
   }
 
-  def getActiveSubs(identityIds: Seq[String]): Either[SoftOptInError, AssociatedSFSubscription.Response] = {
-    if (identityIds.nonEmpty)
-      doSfGetWithQuery(SfQueries.getActiveSubsQuery(identityIds))
-        .flatMap { result =>
-          decode[AssociatedSFSubscription.Response](result)
-            .left
-            .map(i => SoftOptInError("SalesforceConnector", s"Could not decode AssociatedSFSubscription.Response: $i. String to decode: $result"))
-        }
-    else
-      Right(AssociatedSFSubscription.Response(0, done = true, Seq[AssociatedSFSubscription.Record]()))
-  }
-
-  def doSfCompositeRequest(jsonBody: String): Either[SoftOptInError, String] = {
-    runRequest(
-      sfHttp(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/composite/sobjects")
-        .postData(jsonBody)
-        .method("PATCH")
-    )
-      .map(_.body)
+  def handleCompositeUpdateResp(response: Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, Unit] = {
+    response
       .left.map(i => SoftOptInError("SalesforceConnector", s"Salesforce composite request failed: $i"))
-  }
-
-  def updateSubsInSf(updateJsonBody: String): Either[SoftOptInError, Unit] = {
-    doSfCompositeRequest(updateJsonBody)
       .flatMap { result =>
-        decode[List[SfResponse]](result) match {
+        decode[List[SfResponse]](result.body) match {
           case Right(compositeResponse) =>
-            SfCompositeResponse(compositeResponse).errorAsString
+            SfCompositeResponse(compositeResponse).errorsAsString
               .foreach(logger.warn(_))
 
             Right(())
-          case Left(error) =>
-            Left(SoftOptInError("SalesforceConnector", s"Could not decode SfCompositeRequest.Response: $error. String to decode: $result"))
+          case Left(decodeError) =>
+            Left(SoftOptInError("SalesforceConnector", s"Could not decode SfCompositeRequest.Response: $decodeError. String to decode: ${result.body}"))
         }
       }
   }
@@ -75,13 +89,19 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String, r
 }
 
 object SalesforceConnector {
-  def apply(sfConfig: SFAuthConfig, sfApiVersion: String, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, SalesforceConnector] = {
-    auth(sfConfig, runRequest)
-      .map(new SalesforceConnector(_, sfApiVersion, runRequest))
+  def apply(sfConfig: SFAuthConfig, sfApiVersion: String): Either[SoftOptInError, SalesforceConnector] = {
+    auth(sfConfig)
+      .map(new SalesforceConnector(_, sfApiVersion))
   }
 
-  def auth(sfConfig: SFAuthConfig, runRequest: HttpRequest => Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, SalesforceAuth] = {
-    runRequest(
+  def auth(sfConfig: SFAuthConfig): Either[SoftOptInError, SalesforceAuth] = {
+    handleAuthResp(
+      sendAuthReq(sfConfig)
+    )
+  }
+
+  def sendAuthReq(sfConfig: SFAuthConfig): Either[Throwable, HttpResponse[String]] = {
+    Try(
       Http(s"${sfConfig.url}/services/oauth2/token")
         .postForm(
           Seq(
@@ -92,7 +112,12 @@ object SalesforceConnector {
             "password" -> s"${sfConfig.password}${sfConfig.token}"
           )
         )
-    )
+        .asString
+    ).toEither
+  }
+
+  def handleAuthResp(response: Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, SalesforceAuth] = {
+    response
       .left.map(i => SoftOptInError("SalesforceConnector", s"Salesforce authentication failed: $i"))
       .flatMap { result =>
         decode[SalesforceAuth](result.body)
@@ -100,4 +125,5 @@ object SalesforceConnector {
           .map(i => SoftOptInError("SalesforceConnector", s"Could not decode SfAuthDetails: $i. String to decode: ${result.body}"))
       }
   }
+
 }

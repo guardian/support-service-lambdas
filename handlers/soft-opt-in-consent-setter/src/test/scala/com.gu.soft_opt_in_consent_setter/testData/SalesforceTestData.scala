@@ -1,20 +1,39 @@
 package com.gu.soft_opt_in_consent_setter.testData
 
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
-import com.gu.soft_opt_in_consent_setter.SalesforceConnector
-import com.gu.soft_opt_in_consent_setter.testData.HTTP.getRunRequest
+import com.gu.soft_opt_in_consent_setter.models.SFSubscription
+import scalaj.http.HttpResponse
 
 object SalesforceTestData {
-  val fakeAccessToken = "access_token"
-  val fakeInstanceUrl = "url.com"
-  val fakeSfConfig = SFAuthConfig("url", "id", "secret", "username", "password", "token")
 
-  val fakeAuthDetails: SalesforceAuth = SalesforceAuth(fakeAccessToken, fakeInstanceUrl)
-  val salesforceConnector = new SalesforceConnector(fakeAuthDetails, "v46.0", getRunRequest(body = ""))
+  val thrownResponse: Either[Throwable, HttpResponse[String]] = Left(new Throwable())
+  val failedResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse("unexpected body", 200, Map.empty[String, IndexedSeq[String]]))
 
-  val fakeAuthResponse = s"""{
-       | "access_token": "$fakeAccessToken",
-       | "instance_url": "$fakeInstanceUrl"
+  val accessToken = "access_token"
+  val instanceUrl = "url.com"
+  val validAuthResponse =
+    s"""{
+       | "access_token": "$accessToken",
+       | "instance_url": "$instanceUrl"
        |}""".stripMargin
+  val authDetails: SalesforceAuth = SalesforceAuth(accessToken, instanceUrl)
+  val successfulAuthResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse(validAuthResponse, 200, Map.empty[String, IndexedSeq[String]]))
+
+  val validSubsToProcessResponse =
+    s"""{
+       | "totalSize": 0,
+       | "done": true,
+       | "records": []
+       |}""".stripMargin
+  val subsToProcess = SFSubscription.Response(0, true, Seq())
+  val successfulQueryResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse(validSubsToProcessResponse, 200, Map.empty[String, IndexedSeq[String]]))
+
+  val validCompositeUpdateResponse =
+    s"""[{
+       | "id" : "something",
+       | "success" : true,
+       | "errors" : [ ]
+   }]""".stripMargin
+  val successfulCompositeUpdateResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse(validCompositeUpdateResponse, 200, Map.empty[String, IndexedSeq[String]]))
 
 }
