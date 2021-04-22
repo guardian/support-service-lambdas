@@ -27,8 +27,7 @@ val scalaSettings = Seq(
       .setPreference(NewlineAtEndOfFile, true)
   },
 
-  autoCompilerPlugins := true,
-  resolvers += "Guardian Platform Bintray" at "https://dl.bintray.com/guardian/platforms"
+  autoCompilerPlugins := true
 )
 
 // fixme this whole file needs splitting down appropriately
