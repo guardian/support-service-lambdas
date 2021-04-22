@@ -14,8 +14,6 @@ case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double)
    *
    * For more details about the calculation of the current billing period see:
    *
-   * [[com.gu.zuora.subscription.RatePlanChargeBillingSchedule]]
-   *
    * @return Date of the first day of the next billing period
    *         following this <code>stoppedPublicationDate</code>.
    */

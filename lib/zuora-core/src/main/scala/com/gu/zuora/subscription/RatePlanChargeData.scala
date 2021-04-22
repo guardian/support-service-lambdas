@@ -8,7 +8,6 @@ import scala.math.BigDecimal.RoundingMode
 
 case class RatePlanChargeData(
   ratePlanCharge: RatePlanCharge,
-  billingSchedule: RatePlanChargeBillingSchedule,
   billingPeriodName: String,
   issueDayOfWeek: DayOfWeek,
   issueCreditAmount: Double
@@ -25,9 +24,8 @@ object RatePlanChargeData {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
-      schedule <- RatePlanChargeBillingSchedule(subscription, ratePlanCharge, account)
       issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge)
-    } yield RatePlanChargeData(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
+    } yield RatePlanChargeData(ratePlanCharge, billingPeriodName, issueDayOfWeek, issueCreditAmount)
   }
 
   private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge) = {
