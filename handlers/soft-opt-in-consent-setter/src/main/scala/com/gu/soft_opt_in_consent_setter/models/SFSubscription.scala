@@ -1,6 +1,8 @@
 package com.gu.soft_opt_in_consent_setter.models
 
-object SFSubscription {
+import com.typesafe.scalalogging.LazyLogging
+
+object SFSubscription extends LazyLogging {
 
   case class Response(
     totalSize: Int,
@@ -30,6 +32,34 @@ object SFSubscription {
     )
   )
 
+  object UpdateRecord {
+    def apply(sub: SFSubscription.Record, softOptInStage: String, updateResult: Either[SoftOptInError, Unit]) = {
+      updateResult match {
+        case Right(_) => successfulUpdate(sub, softOptInStage)
+        case Left(error) =>
+          logger.warn(s"${error.errorType}: ${error.errorDetails}")
+          failedUpdate(sub)
+      }
+    }
+
+    def successfulUpdate(sub: SFSubscription.Record, softOptInStage: String): SFSubscription.UpdateRecord = {
+      UpdateRecord(
+        Id = sub.Id,
+        Soft_Opt_in_Number_of_Attempts__c = 0,
+        Soft_Opt_in_Last_Stage_Processed__c = Some(softOptInStage)
+      )
+    }
+
+    def failedUpdate(sub: SFSubscription.Record): SFSubscription.UpdateRecord = {
+      UpdateRecord(
+        Id = sub.Id,
+        Soft_Opt_in_Number_of_Attempts__c = sub.Soft_Opt_in_Number_of_Attempts__c.getOrElse(0) + 1,
+        Soft_Opt_in_Last_Stage_Processed__c = sub.Soft_Opt_in_Last_Stage_Processed__c
+      )
+    }
+
+  }
+
   case class Attributes(`type`: String)
 
   case class UpdateRecordRequest(records: Seq[SFSubscription.UpdateRecord]) {
@@ -37,5 +67,19 @@ object SFSubscription {
   }
 
   case class EnhancedCancelledSub(identityId: String, cancelledSub: SFSubscription.Record, associatedActiveNonGiftSubs: Seq[AssociatedSFSubscription.Record])
+
+  object EnhancedCancelledSub {
+    def apply(cancelledSub: SFSubscription.Record, associatedSubs: Seq[AssociatedSFSubscription.Record]): EnhancedCancelledSub = {
+      val associatedActiveNonGiftSubs =
+        associatedSubs
+          .filter(_.IdentityID__c.equals(cancelledSub.Buyer__r.IdentityID__c))
+
+      EnhancedCancelledSub(
+        identityId = cancelledSub.Buyer__r.IdentityID__c,
+        cancelledSub = cancelledSub,
+        associatedActiveNonGiftSubs = associatedActiveNonGiftSubs
+      )
+    }
+  }
 
 }
