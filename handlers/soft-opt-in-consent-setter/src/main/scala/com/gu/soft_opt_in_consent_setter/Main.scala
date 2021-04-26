@@ -79,16 +79,4 @@ object Main extends App with LazyLogging {
       updateSubs(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  def getEnhancedCancelledSubs(cancelledSubs: Seq[SFSubscription.Record], associatedSubs: Seq[AssociatedSFSubscription.Record]): Seq[SFSubscription.EnhancedCancelledSub] = {
-    cancelledSubs.map(sub => {
-      val associatedActiveNonGiftSubs = associatedSubs.filter(_.IdentityID__c.equals(sub.Buyer__r.IdentityID__c))
-
-      SFSubscription.EnhancedCancelledSub(
-        identityId = sub.Buyer__r.IdentityID__c,
-        cancelledSub = sub,
-        associatedActiveNonGiftSubs = associatedActiveNonGiftSubs
-      )
-    })
-  }
-
 }

@@ -1,12 +1,14 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
-import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{calculator, contributionMapping, guWeeklyMapping, membershipMapping, newspaperMapping}
+import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{contributionMapping, guWeeklyMapping, membershipMapping, newspaperMapping, testConsentMappings}
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with EitherValues {
+
+  val calculator = new ConsentsCalculator(testConsentMappings)
 
   // getAcquisitionConsents success cases
   "getAcquisitionConsents" should "correctly return the mapping when a known product is passed" in {
