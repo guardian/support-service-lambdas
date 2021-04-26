@@ -2,7 +2,7 @@ package com.gu.soft_opt_in_consent_setter.testData
 
 import com.gu.soft_opt_in_consent_setter.ConsentsCalculator
 
-object Consents {
+object ConsentsCalculatorTestData {
   val membershipMapping = Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter")
   val contributionMapping = Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter")
   val newspaperMapping = Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter")

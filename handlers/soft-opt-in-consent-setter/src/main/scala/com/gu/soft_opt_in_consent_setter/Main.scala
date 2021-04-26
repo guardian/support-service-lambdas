@@ -9,8 +9,8 @@ import io.circe.syntax._
 
 object Main extends App with LazyLogging {
 
-  val readyToProcessAcqStatus = "Ready to process acquisition"
-  val readyToProcessCancStatus = "Ready to process cancellation"
+  val readyToProcessAcquisitionStatus = "Ready to process acquisition"
+  val readyToProcessCancellationStatus = "Ready to process cancellation"
 
   (for {
     config <- SoftOptInConfig.get
@@ -20,14 +20,14 @@ object Main extends App with LazyLogging {
     identityConnector = new IdentityConnector(config.identityConfig)
     consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
-    acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcqStatus))
+    acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcquisitionStatus))
     _ <- processAcquiredSubs(acqSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
 
-    cancSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancStatus))
-    cancSubsIdentityIds = cancSubs.map(sub => sub.Buyer__r.IdentityID__c)
+    cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
+    cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
-    activeSubs <- sfConnector.getActiveSubs(cancSubsIdentityIds)
-    _ <- processCancelledSubs(cancSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
+    activeSubs <- sfConnector.getActiveSubs(cancelledSubsIdentityIds)
+    _ <- processCancelledSubs(cancelledSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
   } yield ())
     .left
     .map(error => {
@@ -53,7 +53,7 @@ object Main extends App with LazyLogging {
   }
 
   def processCancelledSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
-    def sendCancelationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
+    def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
       if (consents.nonEmpty)
         sendConsentsReq(
           identityId,
@@ -69,7 +69,7 @@ object Main extends App with LazyLogging {
         SFSubscription.UpdateRecord(sub.cancelledSub, "Cancellation",
           for {
             consents <- consentsCalculator.getCancellationConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
-            _ <- sendCancelationConsents(sub.identityId, consents)
+            _ <- sendCancellationConsents(sub.identityId, consents)
           } yield ())
       })
 
