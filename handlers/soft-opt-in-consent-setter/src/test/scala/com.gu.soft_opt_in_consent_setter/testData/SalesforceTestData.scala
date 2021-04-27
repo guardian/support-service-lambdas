@@ -1,7 +1,7 @@
 package com.gu.soft_opt_in_consent_setter.testData
 
-import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
-import com.gu.soft_opt_in_consent_setter.models.SFSubscription
+import com.gu.salesforce.SalesforceAuth
+import com.gu.soft_opt_in_consent_setter.models.SFSubRecordResponse
 import scalaj.http.HttpResponse
 
 object SalesforceTestData {
@@ -25,7 +25,7 @@ object SalesforceTestData {
        | "done": true,
        | "records": []
        |}""".stripMargin
-  val subsToProcess = SFSubscription.Response(0, true, Seq())
+  val subsToProcess = SFSubRecordResponse(0, true, Seq())
   val successfulQueryResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse(validSubsToProcessResponse, 200, Map.empty[String, IndexedSeq[String]]))
 
   val validCompositeUpdateResponse =

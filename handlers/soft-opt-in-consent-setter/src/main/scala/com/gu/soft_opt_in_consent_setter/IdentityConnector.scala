@@ -5,6 +5,7 @@ import scalaj.http.{Http, HttpResponse}
 import scala.util.Try
 
 class IdentityConnector(config: IdentityConfig) {
+
   def sendConsentsReq(identityId: String, body: String): Either[SoftOptInError, Unit] = {
     handleConsentsResp(
       sendReq(url = s"${config.identityUrl}/users/$identityId/consents", body),
@@ -36,4 +37,5 @@ class IdentityConnector(config: IdentityConfig) {
           Left(SoftOptInError("IdentityConnector", s"$errorDesc. Status code: ${response.code}"))
       }
   }
+
 }

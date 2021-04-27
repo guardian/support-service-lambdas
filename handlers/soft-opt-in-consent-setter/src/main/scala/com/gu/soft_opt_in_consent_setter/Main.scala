@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{AssociatedSFSubscription, SFSubscription, SoftOptInConfig, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{EnhancedCancelledSub, SFAssociatedSubResponse, SFSubRecord, SFSubRecordUpdate, SFSubRecordUpdateRequest, SoftOptInConfig, SoftOptInError}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -35,10 +35,10 @@ object Main extends App with LazyLogging {
       logger.error(s"${error.errorType}: ${error.errorDetails}")
     })
 
-  def processAcquiredSubs(acquiredSubs: Seq[SFSubscription.Record], sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+  def processAcquiredSubs(acquiredSubs: Seq[SFSubRecord], sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     val recordsToUpdate = acquiredSubs
       .map(sub => {
-        SFSubscription.UpdateRecord(sub, "Acquisition",
+        SFSubRecordUpdate(sub, "Acquisition",
           for {
             consents <- consentsCalculator.getAcquisitionConsents(sub.Product__c)
             consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
@@ -49,10 +49,10 @@ object Main extends App with LazyLogging {
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      updateSubs(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
+      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  def processCancelledSubs(cancSubs: Seq[SFSubscription.Record], activeSubs: AssociatedSFSubscription.Response, sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+  def processCancelledSubs(cancelledSubs: Seq[SFSubRecord], activeSubs: SFAssociatedSubResponse, sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
       if (consents.nonEmpty)
         sendConsentsReq(
@@ -63,10 +63,10 @@ object Main extends App with LazyLogging {
         Right(())
     }
 
-    val recordsToUpdate = cancSubs
-      .map(SFSubscription.EnhancedCancelledSub(_, activeSubs.records))
+    val recordsToUpdate = cancelledSubs
+      .map(EnhancedCancelledSub(_, activeSubs.records))
       .map(sub => {
-        SFSubscription.UpdateRecord(sub.cancelledSub, "Cancellation",
+        SFSubRecordUpdate(sub.cancelledSub, "Cancellation",
           for {
             consents <- consentsCalculator.getCancellationConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
             _ <- sendCancellationConsents(sub.identityId, consents)
@@ -76,7 +76,7 @@ object Main extends App with LazyLogging {
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      updateSubs(SFSubscription.UpdateRecordRequest(recordsToUpdate).asJson.spaces2)
+      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
 }

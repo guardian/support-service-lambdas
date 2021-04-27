@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter.testData
 
-import com.gu.soft_opt_in_consent_setter.models.{SFSubscription, AssociatedSFSubscription}
+import com.gu.soft_opt_in_consent_setter.models.{SFBuyer, SFAssociatedSubRecord, SFSubRecord}
 
 object SFSubscriptionTestData {
 
@@ -8,11 +8,11 @@ object SFSubscriptionTestData {
 
   val subId = "001RM000003oCprYAE"
   val identityId = "12345678"
-  val buyer = SFSubscription.Buyer__r(identityId)
+  val buyer = SFBuyer(identityId)
   val lastProcessedStage = "Last Stage"
   val numberOfAttempts = 1
 
-  val subRecord: SFSubscription.Record = SFSubscription.Record(
+  val subRecord = SFSubRecord(
     subId,
     "A-S000000",
     "membership",
@@ -23,16 +23,14 @@ object SFSubscriptionTestData {
     Some(numberOfAttempts)
   )
 
-  val overlappingAssociatedSub = AssociatedSFSubscription.Record("contribution", identityId)
-  val nonOverlappingAssociatedSub = AssociatedSFSubscription.Record("contribution", s"identityId${0}")
+  val overlappingAssociatedSub = SFAssociatedSubRecord("contribution", identityId)
+  val nonOverlappingAssociatedSub = SFAssociatedSubRecord("contribution", s"identityId${0}")
 
-  val associatedSubsWithOverlap: Seq[AssociatedSFSubscription.Record] = Seq(
+  val associatedSubsWithOverlap: Seq[SFAssociatedSubRecord] = Seq(
     overlappingAssociatedSub,
     nonOverlappingAssociatedSub,
   )
 
-  val associatedSubsWithoutOverlap: Seq[AssociatedSFSubscription.Record] = Seq(nonOverlappingAssociatedSub)
-
-
+  val associatedSubsWithoutOverlap: Seq[SFAssociatedSubRecord] = Seq(nonOverlappingAssociatedSub)
 
 }

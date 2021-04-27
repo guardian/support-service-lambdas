@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{SFSubscription, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{SFSubRecordResponse, SoftOptInError}
 import com.gu.soft_opt_in_consent_setter.testData.SalesforceTestData.{authDetails, failedResponse, subsToProcess, successfulAuthResponse, successfulCompositeUpdateResponse, successfulQueryResponse, thrownResponse}
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
@@ -35,12 +35,12 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
   // handleQueryResp success cases
   "handleQueryResp" should "return the body on a successful request" in {
-    sfConnector.handleQueryResp[SFSubscription.Response](successfulQueryResponse) shouldBe Right(subsToProcess)
+    sfConnector.handleQueryResp[SFSubRecordResponse](successfulQueryResponse) shouldBe Right(subsToProcess)
   }
 
   // handleQueryResp failure cases
   "handleQueryResp" should "return a SoftOptInError on an unsuccessful request" in {
-    val result = sfConnector.handleQueryResp[SFSubscription.Response](thrownResponse)
+    val result = sfConnector.handleQueryResp[SFSubRecordResponse](thrownResponse)
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
@@ -48,7 +48,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   }
 
   "handleQueryResp" should "return a SoftOptInError if an unexpected body is found" in {
-    val result = sfConnector.handleQueryResp[SFSubscription.Response](failedResponse)
+    val result = sfConnector.handleQueryResp[SFSubRecordResponse](failedResponse)
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
@@ -57,7 +57,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
   // handleCompositeUpdateResp success cases
   "handleCompositeUpdateResp" should "return the body on a successful request" in {
-    sfConnector.handleCompositeUpdateResp(successfulCompositeUpdateResponse) shouldBe Right()
+    sfConnector.handleCompositeUpdateResp(successfulCompositeUpdateResponse) shouldBe Right(())
   }
 
   // handleCompositeUpdateResp failure cases

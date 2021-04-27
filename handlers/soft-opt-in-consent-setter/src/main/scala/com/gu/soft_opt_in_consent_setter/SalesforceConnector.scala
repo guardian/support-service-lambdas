@@ -1,31 +1,32 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
-import com.gu.soft_opt_in_consent_setter.models.{AssociatedSFSubscription, SFSubscription, SfCompositeResponse, SfResponse, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{SFAssociatedSubRecord, SFAssociatedSubResponse, SFCompositeResponse, SFResponse, SFSubRecordResponse, SoftOptInError}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import scalaj.http.{Http, HttpOptions, HttpRequest, HttpResponse}
+
 import scala.util.Try
 
 class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) extends LazyLogging {
 
-  def getSubsToProcess(): Either[SoftOptInError, SFSubscription.Response] = {
-    handleQueryResp[SFSubscription.Response](
+  def getSubsToProcess(): Either[SoftOptInError, SFSubRecordResponse] = {
+    handleQueryResp[SFSubRecordResponse](
       sendQueryReq(SfQueries.getSubsToProcessQuery),
       errorDesc = "Could not decode SFSubscription.Response"
     )
   }
 
-  def getActiveSubs(identityIds: Seq[String]): Either[SoftOptInError, AssociatedSFSubscription.Response] = {
+  def getActiveSubs(identityIds: Seq[String]): Either[SoftOptInError, SFAssociatedSubResponse] = {
     if (identityIds.nonEmpty)
-      handleQueryResp[AssociatedSFSubscription.Response](
+      handleQueryResp[SFAssociatedSubResponse](
         sendQueryReq(SfQueries.getActiveSubsQuery(identityIds)),
         errorDesc = "Could not decode AssociatedSFSubscription.Response"
       )
     else
-      Right(AssociatedSFSubscription.Response(0, done = true, Seq[AssociatedSFSubscription.Record]()))
+      Right(SFAssociatedSubResponse(0, done = true, Seq[SFAssociatedSubRecord]()))
   }
 
   def updateSubs(body: String): Either[SoftOptInError, Unit] = {
@@ -74,9 +75,9 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
     response
       .left.map(i => SoftOptInError("SalesforceConnector", s"Salesforce composite request failed: $i"))
       .flatMap { result =>
-        decode[List[SfResponse]](result.body) match {
+        decode[List[SFResponse]](result.body) match {
           case Right(compositeResponse) =>
-            SfCompositeResponse(compositeResponse).errorsAsString
+            SFCompositeResponse(compositeResponse).errorsAsString
               .foreach(logger.warn(_))
 
             Right(())

@@ -43,4 +43,5 @@ object SfQueries {
        |	buyer__r.identityId__c, product__c
     """.stripMargin
   }
+
 }
