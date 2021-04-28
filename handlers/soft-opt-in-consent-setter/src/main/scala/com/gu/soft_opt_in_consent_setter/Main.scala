@@ -13,7 +13,7 @@ object Main extends App with LazyLogging {
   val readyToProcessCancellationStatus = "Ready to process cancellation"
 
   (for {
-    config <- SoftOptInConfig.get
+    config <- SoftOptInConfig()
     sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 
     allSubs <- sfConnector.getSubsToProcess()
