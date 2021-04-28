@@ -32,12 +32,7 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
               )
             )
             .flatMap(productConsents =>
-              acc match {
-                case Right(ownedProductConsents) =>
-                  Right(ownedProductConsents.union(productConsents))
-                case other => other
-
-              })
+              acc.map(_.union(productConsents)))
       }
       .flatMap(ownedProductConsents => {
         consentsMappings
