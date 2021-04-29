@@ -1,0 +1,21 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: soft-opt-in-consent-setter
+    parameters:
+      templatePath: cfn.yaml
+
+  soft-opt-in-consent-setter:
+    type: aws-lambda
+    parameters:
+      fileName: soft-opt-in-consent-setter.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+        - soft-opt-in-consent-setter-
+    dependencies: [ cfn ]

@@ -1,0 +1,55 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+      - DEV
+    Default: CODE
+
+Mappings:
+  StageMap:
+    PROD:
+      Schedule: 'rate(12 hours)'
+    CODE:
+      Schedule: 'rate(365 days)'
+
+Conditions:
+  IsProd: !Equals [ !Ref Stage, PROD ]
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Updates Identity Soft Opt-In Consents upon Acquisition and Cancellation of Subscriptions in Salesforce
+      FunctionName: !Sub soft-opt-in-consent-setter-${Stage}
+      Handler: com.gu.soft_opt_in_consent_setter.Handler::handleRequest
+      CodeUri:
+        Bucket: support-service-lambdas-dist
+        Key: !Sub membership/${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar
+      MemorySize: 2048
+      Runtime: java8
+      Timeout: 900
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Events:
+        ScheduledRun:
+          Type: Schedule
+          Properties:
+            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule]
+            Description: Runs Soft Opt-In Consent Setter
+            Enabled: False
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - !Sub arn:aws:s3:::soft-opt-in-consent-setter/${Stage}/ConsentsByProductMapping.json
+        - Statement:
+            - Effect: Allow
+              Action: cloudwatch:PutMetricData
+              Resource: "*"
