@@ -26,7 +26,6 @@ object BulkApiParams {
   val discount = SfQueryInfo(Soql(SfQueries.discount), ObjectName("Discount"), SfObjectName("Discount__c"))
   val fulfilmentProcessInformation = SfQueryInfo(Soql(SfQueries.fulfilmentProcessInformation), ObjectName("FulfilmentProcessInformation"), SfObjectName("Fulfilment_Process_Information__c"))
   val imovoContract = SfQueryInfo(Soql(SfQueries.imovoContract), ObjectName("ImovoContract"), SfObjectName("Imovo_Contract__c"))
-  val paymentCard = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentCard"), SfObjectName("Payment_Card__c"))
   val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentFailure), ObjectName("PaymentFailure"), SfObjectName("Payment_Failure__c"))
   val directDebitMandateFailure = SfQueryInfo(Soql(SfQueries.directDebitMandateFailure), ObjectName("DirectDebitMandateFailure"), SfObjectName("DD_Mandate_Failure__c"))
   val directDebitMandate = SfQueryInfo(Soql(SfQueries.directDebitMandate), ObjectName("DirectDebitMandate"), SfObjectName("DD_Mandate__c"))
@@ -46,7 +45,6 @@ object BulkApiParams {
     discount,
     fulfilmentProcessInformation,
     imovoContract,
-    paymentCard,
     paymentFailure,
     directDebitMandateFailure,
     directDebitMandate,
@@ -400,40 +398,6 @@ object SfQueries {
       |from
       |Imovo_Contract__c
       |where Contact__r.Account.GDPR_Deletion_Pending__c = false
-    """.stripMargin
-
-  val paymentCard =
-    """
-      |select
-      |AccountID__c,
-      |Zuora_BillingAccount__c,
-      |cc_brand__c,
-      |cc_reference__c,
-      |cc_source_country__c,
-      |CreatedById,
-      |CreatedDate,
-      |Date_time__c,
-      |IsDeleted,
-      |exp_month__c,
-      |exp_year__c,
-      |LastModifiedById,
-      |LastModifiedDate,
-      |LastReferencedDate,
-      |LastViewedDate,
-      |last4__c,
-      |OwnerId,
-      |Name,
-      |payment_ref__c,
-      |Id,
-      |SystemModstamp,
-      |Zuora_AccountingCode__c,
-      |Zuora_GatewayResponse__c,
-      |Zuora_GatewayResponseCode__c,
-      |Zuora_Invoice__c,
-      |Zuora_ReferenceId__c
-      |from
-      |Payment_Card__c
-      |where AccountID__r.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   //Last_Attempt_Error_Code__c doesnt seem to exist

@@ -7,12 +7,12 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.16.39"
+  val awsSdkVersion = "2.16.50"
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
   val http4sVersion = "0.21.22"
-  val catsVersion = "2.6.0"
-  val catsEffectVersion = "2.4.1"
+  val catsVersion = "2.3.1"
+  val catsEffectVersion = "2.5.0"
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.2.3",
@@ -60,20 +60,20 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.5"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.6"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.13"
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.5"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.6"
+  val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.6.1"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
-  val stripe = "com.stripe" % "stripe-java" % "20.47.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.47.1"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.4.5" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.7" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.8" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.15.3" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.1.0" % Test
 
