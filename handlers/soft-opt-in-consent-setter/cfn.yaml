@@ -14,7 +14,23 @@ Mappings:
   StageMap:
     PROD:
       Schedule: 'rate(12 hours)'
+      SalesforceStage: PROD
+      IdentityStage: PROD
+      SalesforceUsername: SoftOptInConsentSetterAPIUser
+      AppName: TouchpointUpdate
+      AppSecretsVersion: d338b761-cb81-4adf-aca4-163678e65a59
+      SalesforceUserSecretsVersion: 3afb6b4e-0a7d-47a0-950c-e9837d13e39d
+      IdentityUserSecretsVersion: fe7df2e2-73a4-4d3f-9513-b8a6e7476aeb
     CODE:
+      Schedule: 'rate(365 days)'
+      SalesforceStage: DEV
+      IdentityStage: CODE
+      SalesforceUsername: SoftOptInConsentSetterAPIUser
+      AppName: AwsConnectorSandbox
+      AppSecretsVersion: b7b63e09-f39f-4e4f-80ef-9dd203c2d59b
+      SalesforceUserSecretsVersion: 08036ddd-9fc0-43b1-b478-4023a936751e
+      IdentityUserSecretsVersion: ec3fd3ca-f237-4d2d-bbb2-0c9482e636c1
+    DEV:
       Schedule: 'rate(365 days)'
       SalesforceStage: DEV
       IdentityStage: CODE
