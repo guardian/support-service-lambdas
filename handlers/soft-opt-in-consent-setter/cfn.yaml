@@ -85,11 +85,11 @@ Resources:
             - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityUrl::${IdentityUserSecretsVersion}}}'
             - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
               IdentityUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, IdentityUserSecretsVersion ]
-                identityToken:
-                  !Sub
-                  - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken::${IdentityUserSecretsVersion}}}'
-                  - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
-                    IdentityUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, IdentityUserSecretsVersion ]
+          identityToken:
+            !Sub
+            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken::${IdentityUserSecretsVersion}}}'
+            - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
+              IdentityUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, IdentityUserSecretsVersion ]
       Events:
         ScheduledRun:
           Type: Schedule
