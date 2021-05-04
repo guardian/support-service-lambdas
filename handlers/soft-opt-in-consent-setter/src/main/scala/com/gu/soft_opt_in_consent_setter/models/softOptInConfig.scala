@@ -56,10 +56,7 @@ object SoftOptInConfig {
     // TODO: Obtain CODE/PROD version of file depending on env variable
     fetchString(S3Location("soft-opt-in-consent-setter", "CODE/ConsentsByProductMapping.json")) match {
       case Success(jsonContent) => decode[Map[String, Set[String]]](jsonContent).toOption
-      case Failure(f) => {
-        println("failure: " + f)
-        None
-      }
+      case Failure(f) => None
     }
   }
 
