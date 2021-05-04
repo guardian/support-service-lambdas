@@ -16,6 +16,13 @@ Mappings:
       Schedule: 'rate(12 hours)'
     CODE:
       Schedule: 'rate(365 days)'
+      SalesforceStage: DEV
+      IdentityStage: CODE
+      SalesforceUsername: SoftOptInConsentSetterAPIUser
+      AppName: AwsConnectorSandbox
+      AppSecretsVersion: b7b63e09-f39f-4e4f-80ef-9dd203c2d59b
+      SalesforceUserSecretsVersion: 08036ddd-9fc0-43b1-b478-4023a936751e
+      IdentityUserSecretsVersion: ec3fd3ca-f237-4d2d-bbb2-0c9482e636c1
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
@@ -36,6 +43,52 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
+          sfAuthUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:authUrl::${AppSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
+          sfClientId:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId::${AppSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
+          sfClientSecret:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret::${AppSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
+          sfPassword:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfPassword::${SalesforceUserSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+              SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
+          sfToken:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfToken::${SalesforceUserSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+              SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
+          sfUsername:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfUsername::${SalesforceUserSecretsVersion}}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+              SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
+          identityUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityUrl::${IdentityUserSecretsVersion}}}'
+            - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
+              IdentityUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, IdentityUserSecretsVersion ]
+          identityToken:
+            !Sub
+            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken::${IdentityUserSecretsVersion}}}'
+            - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
+              IdentityUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, IdentityUserSecretsVersion ]
       Events:
         ScheduledRun:
           Type: Schedule
