@@ -65,19 +65,19 @@ Resources:
             !Sub
             - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfPassword::${SalesforceUserSecretsVersion}}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
           sfToken:
             !Sub
             - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfToken::${SalesforceUserSecretsVersion}}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
           sfUsername:
             !Sub
             - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfUsername::${SalesforceUserSecretsVersion}}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
           identityUrl:
             !Sub
