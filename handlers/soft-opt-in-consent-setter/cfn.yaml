@@ -123,3 +123,9 @@ Resources:
             - Effect: Allow
               Action: cloudwatch:PutMetricData
               Resource: "*"
+        - Statement:
+            - Sid: readDeployedArtefact
+              Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
