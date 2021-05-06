@@ -7,33 +7,41 @@ import io.circe.syntax._
 
 // TODO: introduce notifications when number of attempts is incremented to 5
 
-object Main extends App with LazyLogging {
+object Handler extends LazyLogging {
 
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
 
-  (for {
-    config <- SoftOptInConfig()
-    sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
+  def main(args: Array[String]): Unit = {
+    handleRequest()
+  }
 
-    allSubs <- sfConnector.getSubsToProcess()
-    identityConnector = new IdentityConnector(config.identityConfig)
-    consentsCalculator = new ConsentsCalculator(config.consentsMapping)
+  def handleRequest(): Unit = {
+    (for {
+      config <- SoftOptInConfig()
+      sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 
-    acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcquisitionStatus))
-    _ <- processAcquiredSubs(acqSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
+      allSubs <- sfConnector.getSubsToProcess()
+      identityConnector = new IdentityConnector(config.identityConfig)
+      consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
-    cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
-    cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
+      acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcquisitionStatus))
+      _ <- processAcquiredSubs(acqSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
 
-    activeSubs <- sfConnector.getActiveSubs(cancelledSubsIdentityIds)
-    _ <- processCancelledSubs(cancelledSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
-  } yield ())
-    .left
-    .map(error => {
-      // TODO: Surface this error outside of the lambda for alarm purposes
-      logger.error(s"${error.errorType}: ${error.errorDetails}")
-    })
+      cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
+      cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
+
+      activeSubs <- sfConnector.getActiveSubs(cancelledSubsIdentityIds)
+      _ <- processCancelledSubs(cancelledSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
+    } yield ())
+      .left
+      .map(error => {
+        // TODO: Surface this error outside of the lambda for alarm purposes
+        logger.error(s"${error.errorType}: ${error.errorDetails}")
+      })
+
+    ()
+  }
 
   def processAcquiredSubs(acquiredSubs: Seq[SFSubRecord], sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     val recordsToUpdate = acquiredSubs

@@ -10,7 +10,8 @@ case class SoftOptInConfig(
   sfConfig: SFAuthConfig,
   sfApiVersion: String,
   identityConfig: IdentityConfig,
-  consentsMapping: Map[String, Set[String]]
+  consentsMapping: Map[String, Set[String]],
+  stage: String
 )
 
 case class IdentityConfig(identityUrl: String, identityToken: String)
@@ -28,7 +29,8 @@ object SoftOptInConfig {
       sfApiVersion <- sys.env.get("sfApiVersion")
       identityUrl <- sys.env.get("identityUrl")
       identityToken <- sys.env.get("identityToken")
-      consentsMapping <- getConsentsByProductMapping()
+      stage <- sys.env.get("Stage")
+      consentsMapping <- getConsentsByProductMapping(stage)
     } yield SoftOptInConfig(
       SFAuthConfig(
         sfAuthUrl,
@@ -43,7 +45,8 @@ object SoftOptInConfig {
         identityUrl,
         identityToken
       ),
-      consentsMapping
+      consentsMapping,
+      stage
     )).toRight(
       SoftOptInError(
         "SoftOptInConfig",
@@ -52,9 +55,8 @@ object SoftOptInConfig {
     )
   }
 
-  def getConsentsByProductMapping(): Option[Map[String, Set[String]]] = {
-    // TODO: Obtain CODE/PROD version of file depending on env variable
-    fetchString(S3Location("soft-opt-in-consent-setter", "CODE/ConsentsByProductMapping.json")) match {
+  def getConsentsByProductMapping(stage: String): Option[Map[String, Set[String]]] = {
+    fetchString(S3Location("soft-opt-in-consent-setter", s"$stage/ConsentsByProductMapping.json")) match {
       case Success(jsonContent) => decode[Map[String, Set[String]]](jsonContent).toOption
       case Failure(f) => None
     }
