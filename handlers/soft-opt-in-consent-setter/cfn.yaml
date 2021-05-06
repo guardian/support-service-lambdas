@@ -19,7 +19,7 @@ Mappings:
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: TouchpointUpdate
       AppSecretsVersion: d338b761-cb81-4adf-aca4-163678e65a59
-      SalesforceUserSecretsVersion: 3afb6b4e-0a7d-47a0-950c-e9837d13e39d
+      SalesforceUserSecretsVersion: 31220691-ba9c-44b8-9483-d7939e30779e
       IdentityUserSecretsVersion: fe7df2e2-73a4-4d3f-9513-b8a6e7476aeb
     CODE:
       Schedule: 'rate(365 days)'
