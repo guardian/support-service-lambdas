@@ -14,7 +14,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: zuora-retention.jar
-      bucket: membership-dist
+      bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
       - zuora-retention-querier-
