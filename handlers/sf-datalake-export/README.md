@@ -6,7 +6,7 @@ This state machine is used to generate csv reports from salesforce using their [
 
 The Salesforce data exports run everyday at [1AM UTC](https://github.com/guardian/support-service-lambdas/blob/main/handlers/sf-datalake-export/cfn.yaml#L501) and are kicked off by a CloudWatch Event. The event triggers a step function to run in the AWS Membership account. When they occasionally fail you need to retrigger the failed export through the AWS console. 
 
-There is a generic step function that takes a simple JSON object to export the chosen Salesforce object. (As seen below)
+There is a generic step function, called `salesforce-export-PROD`, that takes a simple JSON object to export the chosen Salesforce object. (As seen below)
 
 ```
 {
