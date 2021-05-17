@@ -57,6 +57,8 @@ object Handler extends LazyLogging {
         SFSubRecordUpdate(sub, "Acquisition", updateResult)
       })
 
+    emitMetrics(recordsToUpdate)
+
     if (recordsToUpdate.isEmpty)
       Right(())
     else
@@ -88,15 +90,25 @@ object Handler extends LazyLogging {
         SFSubRecordUpdate(sub.cancelledSub, "Cancellation", updateResult)
       })
 
+    emitMetrics(recordsToUpdate)
+
     if (recordsToUpdate.isEmpty)
       Right(())
     else
       updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  def logErrors(something: Either[SoftOptInError, Unit]): Unit = {
-    something.left.foreach(error =>
-      logger.warn(s"${error.errorType}: ${error.errorDetails}"))
+  def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {
+    updateResults.left.foreach(error =>
+      logger.warn(s"${error.errorType}: ${error.errorDetails}")
+    )
+  }
+
+  def emitMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
+    val subsWith5Retries = records.filter(_.Soft_Opt_in_Number_of_Attempts__c >= 5).size
+
+    if (subsWith5Retries > 0)
+      Metrics.put(event = "subs_with_five_retries", subsWith5Retries)
   }
 
 }
