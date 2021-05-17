@@ -80,6 +80,10 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
             SFCompositeResponse(compositeResponse).errorsAsString
               .foreach(logger.warn(_))
 
+            // Output metrics before returning
+            Metrics.put("successful_update", compositeResponse.filter(_.success).size)
+            Metrics.put("failed_update", compositeResponse.filter(!_.success).size)
+
             Right(())
           case Left(decodeError) =>
             Left(SoftOptInError("SalesforceConnector", s"Could not decode SfCompositeRequest.Response: $decodeError. String to decode: ${result.body}"))

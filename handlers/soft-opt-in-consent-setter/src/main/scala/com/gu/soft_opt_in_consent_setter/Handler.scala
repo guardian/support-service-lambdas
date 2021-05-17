@@ -33,25 +33,29 @@ object Handler extends LazyLogging {
 
       activeSubs <- sfConnector.getActiveSubs(cancelledSubsIdentityIds)
       _ <- processCancelledSubs(cancelledSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
+      _ = Metrics.put(event = "successful_run")
     } yield ())
       .left
-      .map(error => {
-        // TODO: Surface this error outside of the lambda for alarm purposes
+      .foreach(error => {
+        Metrics.put(event = "failed_run")
         logger.error(s"${error.errorType}: ${error.errorDetails}")
       })
 
-    ()
   }
 
   def processAcquiredSubs(acquiredSubs: Seq[SFSubRecord], sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
     val recordsToUpdate = acquiredSubs
       .map(sub => {
-        SFSubRecordUpdate(sub, "Acquisition",
+        val updateResult =
           for {
             consents <- consentsCalculator.getAcquisitionConsents(sub.Product__c)
             consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
             _ <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
-          } yield ())
+          } yield ()
+
+        logErrors(updateResult)
+
+        SFSubRecordUpdate(sub, "Acquisition", updateResult)
       })
 
     if (recordsToUpdate.isEmpty)
@@ -74,17 +78,26 @@ object Handler extends LazyLogging {
     val recordsToUpdate = cancelledSubs
       .map(EnhancedCancelledSub(_, activeSubs.records))
       .map(sub => {
-        SFSubRecordUpdate(sub.cancelledSub, "Cancellation",
+        val updateResult =
           for {
             consents <- consentsCalculator.getCancellationConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
             _ <- sendCancellationConsents(sub.identityId, consents)
-          } yield ())
+          } yield ()
+
+        logErrors(updateResult)
+
+        SFSubRecordUpdate(sub.cancelledSub, "Cancellation", updateResult)
       })
 
     if (recordsToUpdate.isEmpty)
       Right(())
     else
       updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
+  }
+
+  def logErrors(something: Either[SoftOptInError, Unit]) = {
+    something.left.foreach(error =>
+      logger.warn(s"${error.errorType}: ${error.errorDetails}"))
   }
 
 }
