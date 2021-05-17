@@ -31,7 +31,8 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
 
   def updateSubs(body: String): Either[SoftOptInError, Unit] = {
     handleCompositeUpdateResp(
-      sendCompositeUpdateReq(body)
+      sendCompositeUpdateReq(body),
+      Metrics.put
     )
   }
 
@@ -71,7 +72,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
       }
   }
 
-  def handleCompositeUpdateResp(response: Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, Unit] = {
+  def handleCompositeUpdateResp(response: Either[Throwable, HttpResponse[String]], putMetric: (String, Double) => Unit): Either[SoftOptInError, Unit] = {
     response
       .left.map(i => SoftOptInError("SalesforceConnector", s"Salesforce composite request failed: $i"))
       .flatMap { result =>
@@ -81,8 +82,8 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
               .foreach(logger.warn(_))
 
             // Output metrics before returning
-            Metrics.put("successful_update", compositeResponse.filter(_.success).size)
-            Metrics.put("failed_update", compositeResponse.filter(!_.success).size)
+            putMetric("successful_update", compositeResponse.filter(_.success).size)
+            putMetric("failed_update", compositeResponse.filter(!_.success).size)
 
             Right(())
           case Left(decodeError) =>
