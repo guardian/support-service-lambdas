@@ -100,8 +100,7 @@ object Handler extends LazyLogging {
 
   def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {
     updateResults.left.foreach(error =>
-      logger.warn(s"${error.errorType}: ${error.errorDetails}")
-    )
+      logger.warn(s"${error.errorType}: ${error.errorDetails}"))
   }
 
   def emitMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
