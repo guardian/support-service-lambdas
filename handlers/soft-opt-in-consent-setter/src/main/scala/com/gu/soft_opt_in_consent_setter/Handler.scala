@@ -40,7 +40,6 @@ object Handler extends LazyLogging {
         Metrics.put(event = "failed_run")
         logger.error(s"${error.errorType}: ${error.errorDetails}")
       })
-
   }
 
   def processAcquiredSubs(acquiredSubs: Seq[SFSubRecord], sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
@@ -95,7 +94,7 @@ object Handler extends LazyLogging {
       updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  def logErrors(something: Either[SoftOptInError, Unit]) = {
+  def logErrors(something: Either[SoftOptInError, Unit]): Unit = {
     something.left.foreach(error =>
       logger.warn(s"${error.errorType}: ${error.errorDetails}"))
   }
