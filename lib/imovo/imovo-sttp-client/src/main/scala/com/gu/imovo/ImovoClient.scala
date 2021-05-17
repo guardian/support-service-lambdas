@@ -1,19 +1,20 @@
 package com.gu.imovo
 
-import java.net.URI
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.syntax.all._
-import com.softwaremill.sttp.Method.GET
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
+import sttp.client._
+import sttp.client.circe._
+import sttp.model.Method.GET
+import sttp.model.{Method, Uri}
+
+import java.net.URI
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 case class ImovoConfig(imovoBaseUrl: String, imovoApiKey: String)
 case class SfSubscriptionId(value: String) extends AnyVal
@@ -84,8 +85,8 @@ object ImovoClient extends LazyLogging {
 
   val redemptionHistoryMaxLines = "100"
 
-  def apply[F[_]: Sync, S](backend: SttpBackend[F, S], config: ImovoConfig): EitherT[F, ImovoClientException, ImovoClient[F]] = {
-    implicit val b: SttpBackend[F, S] = backend
+  def apply[F[_]: Sync, S](backend: SttpBackend[F, S, Nothing], config: ImovoConfig): EitherT[F, ImovoClientException, ImovoClient[F]] = {
+    implicit val b: SttpBackend[F, S, Nothing] = backend
 
     def sendAuthenticatedRequest[A: Decoder, B: Encoder](
       apiKey: String,
@@ -94,11 +95,9 @@ object ImovoClient extends LazyLogging {
       body: Option[B]
     ): EitherT[F, ImovoClientException, A] = {
 
-      val requestWithoutBody = sttp
+      val requestWithoutBody = basicRequest
         .method(method, uri)
-        .headers(
-          "X-API-KEY" -> apiKey
-        )
+        .header("X-API-KEY", apiKey)
 
       val request = body.fold(requestWithoutBody)(b => requestWithoutBody.body(b))
 
@@ -109,15 +108,15 @@ object ImovoClient extends LazyLogging {
     }
 
     def decodeResponse[A: Decoder](
-      request: Request[String, S],
-      response: Response[String]
+      request: Request[Either[String, String], Nothing],
+      response: Response[Either[String, String]]
     ): Either[ImovoClientException, A] = {
       response
         .body
         .leftMap(
           errorBody =>
             ImovoClientException(
-              message = s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}",
+              message = s"Request ${request.method} ${request.uri.toString()} failed returning a status ${response.code} with body: $errorBody",
               responseBody = Some(errorBody)
             )
         )
@@ -125,7 +124,7 @@ object ImovoClient extends LazyLogging {
           for {
             parsedResponse <- parse(successBody)
               .leftMap(e => ImovoClientException(
-                message = s"Request ${request.method.m} ${request.uri.toString()} failed to parse response ($successBody): $e",
+                message = s"Request ${request.method} ${request.uri.toString()} failed to parse response ($successBody): $e",
                 responseBody = Some(successBody)
               ))
 
@@ -134,7 +133,7 @@ object ImovoClient extends LazyLogging {
               .downField("successfulRequest")
               .as[Boolean]
               .leftMap(e => ImovoClientException(
-                message = s"Request ${request.method.m} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e",
+                message = s"Request ${request.method} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e",
                 responseBody = Some(successBody)
               ))
 
@@ -143,12 +142,12 @@ object ImovoClient extends LazyLogging {
                 parsedResponse
                   .as[A]
                   .leftMap(e => ImovoClientException(
-                    message = s"Request ${request.method.m} ${request.uri.toString()} failed to decode response ($successBody): $e",
+                    message = s"Request ${request.method} ${request.uri.toString()} failed to decode response ($successBody): $e",
                     responseBody = Some(successBody)
                   ))
               } else {
                 ImovoClientException(
-                  message = s"Request ${request.method.m} ${request.uri.toString()} failed with response ($successBody)",
+                  message = s"Request ${request.method} ${request.uri.toString()} failed with response ($successBody)",
                   responseBody = Some(successBody)
                 ).asLeft[A]
               }

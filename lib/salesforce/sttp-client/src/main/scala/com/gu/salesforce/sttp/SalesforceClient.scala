@@ -1,21 +1,21 @@
 package com.gu.salesforce.sttp
 
 import java.net.URI
-
 import cats.Show
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.syntax.all._
 import com.gu.salesforce.SalesforceConstants.{compositeBaseUrl, sfObjectsBaseUrl, soqlQueryBaseUrl}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth}
-import com.softwaremill.sttp.circe._
-import com.softwaremill.sttp._
+import sttp.client.circe._
+import sttp.client._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, Json, Printer}
+import sttp.model.{Header, Method, Uri}
 
 trait SalesforceClient[F[_]] {
   def query[RESP_BODY: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[RESP_BODY]]
@@ -39,7 +39,7 @@ object SalesforceClient extends LazyLogging {
     implicit val b = backend
 
     def auth(config: SFAuthConfig): EitherT[F, SalesforceClientError, SalesforceAuth] = {
-      sendRequest[SalesforceAuth](sttp
+      sendRequest[SalesforceAuth(basicRequest
         .post(
           Uri(new URI(config.url + "/services/oauth2/token")),
         )
@@ -92,17 +92,17 @@ object SalesforceClient extends LazyLogging {
         parsed.flatMap(_.as[RESP_BODY])
       }
 
-      val requestWithoutBody = sttp
+      val requestWithoutBody = basicRequest
         .method(method, uri)
         .headers(
-          "Authorization" -> s"Bearer ${auth.access_token}",
-          "X-SFDC-Session" -> auth.access_token,
-          "Content-Type" -> "application/json"
+          Header("Authorization", s"Bearer ${auth.access_token}"),
+          Header("X-SFDC-Session" , auth.access_token),
+          Header("Content-Type" , "application/json")
         )
         .mapResponse(responseBodyString => {
           logger.info(responseBodyString)
           decode[RESP_BODY](responseBodyString)
-            .left.map(e => DeserializationError(responseBodyString, e, Show[io.circe.Error].show(e)))
+            .left.map(e => DeserializationError(responseBodyString, e))
         })
 
       val bodyAsStringNoNulls = printer.pretty(body.asJson)

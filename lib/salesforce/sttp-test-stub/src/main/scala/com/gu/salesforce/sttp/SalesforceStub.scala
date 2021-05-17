@@ -1,45 +1,46 @@
 package com.gu.salesforce.sttp
 
+import cats.syntax.all._
+import com.gu.salesforce.{SFAuthConfig, SalesforceAuth, SalesforceConstants}
+import io.circe.parser.decode
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder}
+import sttp.client.testing.SttpBackendStub
+import sttp.client.{Request, Response, StringBody}
+import sttp.model.{MediaType, Method, StatusCode}
+
 import java.net.URLEncoder
 
-import com.gu.salesforce.{SFAuthConfig, SalesforceAuth, SalesforceConstants}
-import com.softwaremill.sttp.{MediaTypes, Method, Request, Response, StringBody}
-import com.softwaremill.sttp.testing.SttpBackendStub
-import io.circe.{Decoder, Encoder}
-import io.circe.syntax._
-import io.circe.parser.decode
-import cats.syntax.all._
-
 object SalesforceStub {
-  class SalesforceStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
-    def stubAuth(config: SFAuthConfig, auth: SalesforceAuth) = {
+  class SalesforceStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S, Nothing]) {
+    def stubAuth(config: SFAuthConfig, auth: SalesforceAuth): SttpBackendStub[F, S, Nothing] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesAuthRequest(config, request) =>
           Response.ok(Right(auth))
       }
     }
 
-    def stubQuery(auth: SalesforceAuth, query: String, responseString: String): SttpBackendStub[F, S] = {
+    def stubQuery(auth: SalesforceAuth, query: String, responseString: String): SttpBackendStub[F, S, Nothing] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesQueryRequest(auth, query, request) =>
           Response.ok(responseString)
       }
     }
 
-    def stubPatch(auth: SalesforceAuth): SttpBackendStub[F, S] = {
+    def stubPatch(auth: SalesforceAuth): SttpBackendStub[F, S, Nothing] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesPatchRequest(auth, request) =>
-          Response(Right(""), 204, "")
+          Response(body = Right(""), code = StatusCode.NoContent, statusText = "")
       }
     }
 
-    def stubNextRecordLink(auth: SalesforceAuth, nextRecordLink: String, responseString: String): SttpBackendStub[F, S] = {
+    def stubNextRecordLink(auth: SalesforceAuth, nextRecordLink: String, responseString: String): SttpBackendStub[F, S, Nothing] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesNextRecordsRequest(auth, nextRecordLink, request) =>
           Response.ok(responseString)
       }
     }
-    def stubQuery[A: Encoder](auth: SalesforceAuth, query: String, response: A): SttpBackendStub[F, S] = {
+    def stubQuery[A: Encoder](auth: SalesforceAuth, query: String, response: A): SttpBackendStub[F, S, Nothing] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesQueryRequest(auth, query, request) =>
           Response.ok(response.asJson.spaces2)
@@ -49,7 +50,7 @@ object SalesforceStub {
       auth: SalesforceAuth,
       expectedRequest: Option[A],
       response: B
-    ): SttpBackendStub[F, S] = {
+    ): SttpBackendStub[F, S, Nothing] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesCompositeRequest(auth, expectedRequest, request) =>
           Response.ok(response.asJson.spaces2)
@@ -66,7 +67,7 @@ object SalesforceStub {
         s"password=${URLEncoder.encode(config.password + config.token, "UTF-8")}&" +
         s"grant_type=password",
       "utf-8",
-      Some(MediaTypes.Text)
+      Some(MediaType.TextPlain)
     )
     urlMatches && bodyMatches
   }
@@ -87,9 +88,7 @@ object SalesforceStub {
   private def matchesCompositeRequest[S, F[_], A: Decoder](auth: SalesforceAuth, optionalExpectedRequestBody: Option[A], request: Request[_, _]) = {
     val urlMatches = urlNoQueryString(request).startsWith(auth.instance_url + SalesforceConstants.compositeBaseUrl)
     val methodMatches = request.method == Method.POST
-    val bodyMatches = optionalExpectedRequestBody
-      .map { expectedRequestBody => getBodyAs[A](request) == Right(expectedRequestBody) }
-      .getOrElse(true)
+    val bodyMatches = optionalExpectedRequestBody.forall { expectedRequestBody => getBodyAs[A](request) == Right(expectedRequestBody) }
 
     urlMatches && methodMatches && bodyMatches
   }
@@ -111,6 +110,6 @@ object SalesforceStub {
     }
   }
 
-  implicit def implicitSalesforceStub[F[_]](sttpStub: SttpBackendStub[F, Nothing]) =
+  implicit def implicitSalesforceStub[F[_]](sttpStub: SttpBackendStub[F, Nothing, Nothing]): SalesforceStubSttpBackendStubOps[F, Nothing] =
     new SalesforceStubSttpBackendStubOps[F, Nothing](sttpStub)
 }
