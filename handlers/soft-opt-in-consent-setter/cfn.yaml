@@ -129,3 +129,53 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+
+  failedRunAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:soft-opt-in-consent-setter-events
+      AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to run
+      AlarmDescription: >
+        Two or more runs found an error and were unable to complete.
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md
+        for possible causes, impacts and fixes.
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: Stage
+          Value: !Sub ${Stage}
+      EvaluationPeriods: 1
+      MetricName: failed_run
+      Namespace: soft-opt-in-consent-setter
+      Period: 3600
+      Statistic: Sum
+      Threshold: 2
+      TreatMissingData: notBreaching
+
+    failedUpdateAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: IsProd
+      DependsOn:
+        - LambdaFunction
+      Properties:
+        AlarmActions:
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:soft-opt-in-consent-setter-events
+        AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to update Salesforce records
+        AlarmDescription: >
+          Three or more runs failed to update (some) records in Salesforce in the last hour.
+          See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md
+          for possible causes, impacts and fixes.
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: failed_update
+        Namespace: soft-opt-in-consent-setter
+        Period: 3600
+        Statistic: Sum
+        Threshold: 3
+        TreatMissingData: notBreaching
