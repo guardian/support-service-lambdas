@@ -10,6 +10,7 @@ object Dependencies {
   val awsSdkVersion = "2.16.58"
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
+  val sttp3Version = "3.3.3"
   val http4sVersion = "0.21.22"
   val catsVersion = "2.6.0"
   val catsEffectVersion = "2.5.0"
@@ -43,6 +44,7 @@ object Dependencies {
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
   // HTTP clients
+
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
@@ -50,6 +52,15 @@ object Dependencies {
     "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
   val sttpOkhttpBackend =
     "com.softwaremill.sttp" %% "okhttp-backend" % sttpVersion
+
+  val sttp3 = "com.softwaremill.sttp.client3" %% "core" % sttp3Version
+  val sttpCirce3 = "com.softwaremill.sttp.client3" %% "circe" % sttp3Version
+  val sttpCats3 = "com.softwaremill.sttp.client3" %% "cats" % sttp3Version
+  val sttpAsyncHttpClientBackendCats3 =
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttp3Version
+  val sttpOkhttpBackend3 =
+    "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttp3Version
+
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.1"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
