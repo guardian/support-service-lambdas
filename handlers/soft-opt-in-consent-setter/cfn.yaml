@@ -143,7 +143,7 @@ Resources:
         Two or more runs found an error and were unable to complete.
         See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md
         for possible causes, impacts and fixes.
-      ComparisonOperator: GreaterThanThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Stage
           Value: !Sub ${Stage}
@@ -165,10 +165,10 @@ Resources:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:soft-opt-in-consent-setter-events
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to update Salesforce records
       AlarmDescription: >
-        Three or more runs failed to update (some) records in Salesforce in the last hour.
+        A run failed to update (some) records in Salesforce in the last hour.
         See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md
         for possible causes, impacts and fixes.
-      ComparisonOperator: GreaterThanThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Stage
           Value: !Sub ${Stage}
@@ -177,7 +177,7 @@ Resources:
       Namespace: soft-opt-in-consent-setter
       Period: 3600
       Statistic: Sum
-      Threshold: 3
+      Threshold: 1
       TreatMissingData: notBreaching
 
   subsWith5RetriesAlarm:
@@ -190,10 +190,10 @@ Resources:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:soft-opt-in-consent-setter-events
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to set consents on a subscription 5 times
       AlarmDescription: >
-        One of more subscription's Soft Opt-In consents failed to be set after five retries.
+        One or more subscription's Soft Opt-In consents failed to be set after five retries.
         See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md
         for possible causes, impacts and fixes.
-      ComparisonOperator: GreaterThanThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Stage
           Value: !Sub ${Stage}
