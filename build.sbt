@@ -229,7 +229,7 @@ lazy val `credit-processor` = library(project in file("lib/credit-processor"))
 lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-client"))
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
+      Seq(sttp3, sttpCirce3, sttpCats3 % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-test-stub"))

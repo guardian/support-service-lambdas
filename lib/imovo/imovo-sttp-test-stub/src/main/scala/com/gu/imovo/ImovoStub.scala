@@ -1,13 +1,14 @@
 package com.gu.imovo
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-import com.softwaremill.sttp.testing.SttpBackendStub
-import com.softwaremill.sttp.{Method, Request, Response}
+import cats.syntax.all._
 import io.circe.Encoder
 import io.circe.syntax._
-import cats.syntax.all._
+import sttp.client3._
+import sttp.client3.testing.SttpBackendStub
+import sttp.model.{Header, Method}
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object ImovoStub {
   class ImovoStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
@@ -49,6 +50,8 @@ object ImovoStub {
 
   }
 
+  private def apiKey(headers: Seq[Header]): Option[String] = headers.find(_.name == "X-API-KEY").map(_.value)
+
   private def matchesQueryCreateSubscription[S, F[_]](config: ImovoConfig, subscriptionId: String, schemeName: String, startDate: String, request: Request[_, _]) = {
     val urlMatches = urlNoQueryString(request) == s"${config.imovoBaseUrl}/Subscription/RequestSubscriptionVouchers"
     val methodMatches = request.method == Method.GET
@@ -58,7 +61,7 @@ object ImovoStub {
         params.get("SchemeName").contains(schemeName) &&
         params.get("StartDate").contains(startDate)
     }
-    val apiKeyMatches = request.headers.toMap.get("X-API-KEY").contains(config.imovoApiKey)
+    val apiKeyMatches = apiKey(request.headers).contains(config.imovoApiKey)
     urlMatches && methodMatches && queryParamsMatch && apiKeyMatches
   }
 
@@ -68,7 +71,7 @@ object ImovoStub {
     val queryParamMatches =
       request.uri.paramsMap.get("SubscriptionId").contains(subscriptionId) &&
         request.uri.paramsMap.get("SubscriptionType").contains(imovoSubscriptionType.value)
-    val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some({ config.imovoApiKey })
+    val apiKeyMatches = apiKey(request.headers).contains(config.imovoApiKey)
     urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }
 
@@ -77,7 +80,7 @@ object ImovoStub {
     val methodMatches = request.method == Method.GET
     val queryParamMatches = request.uri.paramsMap.get("SubscriptionId") === Some(subscriptionId) &&
       request.uri.paramsMap.get("LastActiveDay") === expiryDate.map(DateTimeFormatter.ISO_DATE.format)
-    val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some({ config.imovoApiKey })
+    val apiKeyMatches = apiKey(request.headers).contains(config.imovoApiKey)
     urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }
 
@@ -85,7 +88,7 @@ object ImovoStub {
     val urlMatches = urlNoQueryString(request) === s"${config.imovoBaseUrl}/Subscription/GetSubscriptionVoucherDetails"
     val methodMatches = request.method == Method.GET
     val queryParamMatches = request.uri.paramsMap.get("SubscriptionId") === Some(subscriptionId)
-    val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some({ config.imovoApiKey })
+    val apiKeyMatches = apiKey(request.headers).contains(config.imovoApiKey)
     urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }
 
@@ -93,7 +96,7 @@ object ImovoStub {
     val urlMatches = urlNoQueryString(request) === s"${config.imovoBaseUrl}/Subscription/SubscriptionRedemptionHistory"
     val methodMatches = request.method == Method.GET
     val queryParamMatches = request.uri.paramsMap.get("SubscriptionId") === Some(subscriptionId)
-    val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some({ config.imovoApiKey })
+    val apiKeyMatches = apiKey(request.headers).contains(config.imovoApiKey)
     urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }
 
