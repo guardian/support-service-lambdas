@@ -19,6 +19,7 @@ object Handler extends LazyLogging {
   def handleRequest(): Unit = {
     (for {
       config <- SoftOptInConfig()
+    } yield for {
       sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 
       allSubs <- sfConnector.getSubsToProcess()
@@ -37,8 +38,8 @@ object Handler extends LazyLogging {
     } yield ())
       .left
       .foreach(error => {
-        Metrics.put(event = "failed_run")
         logger.error(s"${error.errorType}: ${error.errorDetails}")
+        Metrics.put(event = "failed_run")
       })
   }
 
