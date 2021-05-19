@@ -36,10 +36,12 @@ object Handler extends LazyLogging {
       _ <- processCancelledSubs(cancelledSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
       _ = Metrics.put(event = "successful_run")
     } yield ())
+      .flatten
       .left
       .foreach(error => {
         logger.error(s"${error.errorType}: ${error.errorDetails}")
         Metrics.put(event = "failed_run")
+        throw new Exception(s"Run failed due to ${error.errorType}: ${error.errorDetails}")
       })
   }
 

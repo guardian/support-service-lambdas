@@ -145,11 +145,11 @@ Resources:
         for possible causes, impacts and fixes.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: Stage
-          Value: !Sub ${Stage}
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
       EvaluationPeriods: 1
-      MetricName: failed_run
-      Namespace: soft-opt-in-consent-setter
+      MetricName: Errors
+      Namespace: AWS/Lambda
       Period: 3600
       Statistic: Sum
       Threshold: 2

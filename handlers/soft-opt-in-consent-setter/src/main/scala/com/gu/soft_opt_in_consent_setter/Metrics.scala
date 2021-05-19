@@ -6,8 +6,7 @@ import com.gu.aws.AwsCloudWatch._
 import scala.util.Try
 
 object Metrics {
-
-  // If Stage env variable isn't present assume PROD so we never miss a config error
+  
   private val stage = sys.env.get("Stage").getOrElse("PROD")
 
   def put(event: String, value: Double = 1.0): Try[Unit] = {
