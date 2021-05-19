@@ -82,8 +82,8 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
               .foreach(logger.warn(_))
 
             // Output metrics before returning
-            putMetric("successful_update", compositeResponse.filter(_.success).size)
-            putMetric("failed_update", compositeResponse.filter(!_.success).size)
+            putMetric("successful_salesforce_update", compositeResponse.filter(_.success).size)
+            putMetric("failed_salesforce_update", compositeResponse.filter(!_.success).size)
 
             Right(())
           case Left(decodeError) =>

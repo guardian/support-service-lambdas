@@ -173,7 +173,7 @@ Resources:
         - Name: Stage
           Value: !Sub ${Stage}
       EvaluationPeriods: 1
-      MetricName: failed_update
+      MetricName: failed_salesforce_update
       Namespace: soft-opt-in-consent-setter
       Period: 3600
       Statistic: Sum
@@ -198,7 +198,7 @@ Resources:
         - Name: Stage
           Value: !Sub ${Stage}
       EvaluationPeriods: 1
-      MetricName: failed_update
+      MetricName: subs_with_five_retries
       Namespace: soft-opt-in-consent-setter
       Period: 3600
       Statistic: Sum
