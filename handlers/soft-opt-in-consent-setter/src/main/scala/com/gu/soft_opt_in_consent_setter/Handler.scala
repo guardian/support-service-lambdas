@@ -46,6 +46,8 @@ object Handler extends LazyLogging {
   }
 
   def processAcquiredSubs(acquiredSubs: Seq[SFSubRecord], sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+    Metrics.put(event = "acquisitions_to_process", acquiredSubs.size)
+
     val recordsToUpdate = acquiredSubs
       .map(sub => {
         val updateResult =
@@ -60,7 +62,7 @@ object Handler extends LazyLogging {
         SFSubRecordUpdate(sub, "Acquisition", updateResult)
       })
 
-    emitMetrics(recordsToUpdate)
+    emitIdentityMetrics(recordsToUpdate)
 
     if (recordsToUpdate.isEmpty)
       Right(())
@@ -79,6 +81,8 @@ object Handler extends LazyLogging {
         Right(())
     }
 
+    Metrics.put(event = "cancellations_to_process", cancelledSubs.size)
+
     val recordsToUpdate = cancelledSubs
       .map(EnhancedCancelledSub(_, activeSubs.records))
       .map(sub => {
@@ -93,7 +97,7 @@ object Handler extends LazyLogging {
         SFSubRecordUpdate(sub.cancelledSub, "Cancellation", updateResult)
       })
 
-    emitMetrics(recordsToUpdate)
+    emitIdentityMetrics(recordsToUpdate)
 
     if (recordsToUpdate.isEmpty)
       Right(())
@@ -106,7 +110,7 @@ object Handler extends LazyLogging {
       logger.warn(s"${error.errorType}: ${error.errorDetails}"))
   }
 
-  def emitMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
+  def emitIdentityMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
     // Soft_Opt_in_Number_of_Attempts__c == 0 means the consents were set successfully
     val successfullyUpdated = records.filter(_.Soft_Opt_in_Number_of_Attempts__c == 0).size
     val unsuccessfullyUpdated = records.filter(_.Soft_Opt_in_Number_of_Attempts__c > 0).size
