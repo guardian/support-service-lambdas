@@ -132,7 +132,7 @@ Resources:
 
   failedRunAlarm:
     Type: AWS::CloudWatch::Alarm
-#    Condition: IsProd
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
@@ -157,7 +157,7 @@ Resources:
 
   failedUpdateAlarm:
     Type: AWS::CloudWatch::Alarm
-#    Condition: IsProd
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
@@ -182,7 +182,7 @@ Resources:
 
   subsWith5RetriesAlarm:
     Type: AWS::CloudWatch::Alarm
-#    Condition: IsProd
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
