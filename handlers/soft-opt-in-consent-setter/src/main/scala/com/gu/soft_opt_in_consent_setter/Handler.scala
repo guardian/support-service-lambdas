@@ -5,8 +5,6 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
 
-// TODO: introduce notifications when number of attempts is incremented to 5
-
 object Handler extends LazyLogging {
 
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
@@ -39,8 +37,8 @@ object Handler extends LazyLogging {
       .flatten
       .left
       .foreach(error => {
-        logger.error(s"${error.errorType}: ${error.errorDetails}")
         Metrics.put(event = "failed_run")
+        logger.error(s"${error.errorType}: ${error.errorDetails}")
         throw new Exception(s"Run failed due to ${error.errorType}: ${error.errorDetails}")
       })
   }
