@@ -141,7 +141,7 @@ Resources:
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to run
       AlarmDescription: >
         Two or more runs found an error and were unable to complete.
-        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedRunAlarm
         for possible causes, impacts and fixes.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
@@ -166,7 +166,7 @@ Resources:
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to update Salesforce records
       AlarmDescription: >
         A run failed to update (some) records in Salesforce in the last hour.
-        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedUpdateAlarm
         for possible causes, impacts and fixes.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
@@ -191,7 +191,7 @@ Resources:
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to set consents for a subscription 5 times
       AlarmDescription: >
         One or more subscription's Soft Opt-In consents failed to be set after five retries.
-        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#subsWith5RetriesAlarm
         for possible causes, impacts and fixes.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
