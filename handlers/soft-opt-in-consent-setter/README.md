@@ -36,14 +36,18 @@ has been created to visualise these metrics and help monitor the lambda.
 
 ## Errors & Alarms
 
-The lambda was created in a way where if there are any errors, fixing the underlying cause and letting the lambda
-continue to run on its schedule will sort out any de-syncs between IDAPI and Salesforce that might have happened.
+The lambda was created robust enough to autonomously recover from errors with minimal developer input. Fixing the
+underlying cause of the error and letting the lambda continue to run on its schedule will cause the lambda to pick up
+where it left off and sort out any de-syncs between IDAPI and Salesforce that might have happened.
 
-When errors do occur they are always logged, and a metric emitted.
+When errors do occur they are always logged, and a metric is emitted.
+
+Because of the robustness of lambda, the `failedRunAlarm` and `failedUpdateAlarm` alarms can safely be configured to
+trigger only after a number of occurrences (instead of on first occurrence). This way these alarms will stay silent in
+the event of temporary problems (such as outage in IDAPI or Salesforce), meaning developers are only alerted when
+something actually needs addressing.
 
 ### failedRunAlarm
-
-Note: This Alarm is set to trigger after 2 failures to avoid alerting developers in case of a temporary failure such as outage of IDAPI or Salesforce.
 
 **CAUSE**: Two or more runs found an error and were unable to complete. This can be due to several reasons:
 
