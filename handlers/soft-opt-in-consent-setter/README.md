@@ -43,6 +43,8 @@ When errors do occur they are always logged, and a metric emitted.
 
 ### failedRunAlarm
 
+Note: This Alarm is set to trigger after 2 failures to avoid alerting developers in case of a temporary failure such as outage of IDAPI or Salesforce.
+
 **CAUSE**: Two or more runs found an error and were unable to complete. This can be due to several reasons:
 
 1. Failed to obtain all environment variables.
