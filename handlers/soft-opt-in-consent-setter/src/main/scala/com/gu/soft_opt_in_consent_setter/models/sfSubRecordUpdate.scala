@@ -1,7 +1,5 @@
 package com.gu.soft_opt_in_consent_setter.models
 
-import com.typesafe.scalalogging.LazyLogging
-
 case class SFSubRecordUpdate(
   Id: String,
   Soft_Opt_in_Last_Stage_Processed__c: Option[String] = None,
@@ -15,14 +13,12 @@ case class SFSubRecordUpdateRequest(records: Seq[SFSubRecordUpdate]) {
   def allOrNone = false
 }
 
-object SFSubRecordUpdate extends LazyLogging {
+object SFSubRecordUpdate {
 
   def apply(sub: SFSubRecord, softOptInStage: String, updateResult: Either[SoftOptInError, Unit]): SFSubRecordUpdate = {
     updateResult match {
       case Right(_) => successfulUpdate(sub, softOptInStage)
-      case Left(error) =>
-        logger.warn(s"${error.errorType}: ${error.errorDetails}")
-        failedUpdate(sub)
+      case Left(_) => failedUpdate(sub)
     }
   }
 

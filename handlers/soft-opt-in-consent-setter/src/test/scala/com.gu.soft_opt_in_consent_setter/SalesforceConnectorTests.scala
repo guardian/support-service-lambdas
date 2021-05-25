@@ -57,12 +57,12 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
   // handleCompositeUpdateResp success cases
   "handleCompositeUpdateResp" should "return the body on a successful request" in {
-    sfConnector.handleCompositeUpdateResp(successfulCompositeUpdateResponse) shouldBe Right(())
+    sfConnector.handleCompositeUpdateResp(successfulCompositeUpdateResponse, (_, _) => ()) shouldBe Right(())
   }
 
   // handleCompositeUpdateResp failure cases
   "handleCompositeUpdateResp" should "return a SoftOptInError on an unsuccessful request" in {
-    val result = sfConnector.handleCompositeUpdateResp(thrownResponse)
+    val result = sfConnector.handleCompositeUpdateResp(thrownResponse, (_, _) => ())
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
@@ -70,7 +70,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   }
 
   "handleCompositeUpdateResp" should "return a SoftOptInError if an unexpected body is found" in {
-    val result = sfConnector.handleCompositeUpdateResp(failedResponse)
+    val result = sfConnector.handleCompositeUpdateResp(failedResponse, (_, _) => ())
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
