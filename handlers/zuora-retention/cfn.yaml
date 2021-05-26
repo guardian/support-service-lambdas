@@ -229,7 +229,7 @@ Resources:
             FunctionName:
                 !Sub zuora-retention-querier-${Stage}
             Code:
-                S3Bucket: membership-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
             Handler: com.gu.zuora.retention.ZuoraRetentionQueryHandler::apply
             Environment:
@@ -249,7 +249,7 @@ Resources:
             FunctionName:
                 !Sub zuora-retention-jobResult-${Stage}
             Code:
-                S3Bucket: membership-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
             Handler: com.gu.zuora.reports.handlers.FetchResultsHandler::apply
             Environment:
@@ -269,7 +269,7 @@ Resources:
             FunctionName:
                 !Sub zuora-retention-fileFetcher-${Stage}
             Code:
-                S3Bucket: membership-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
             Handler: com.gu.zuora.retention.ZuoraRetentionFetchFileHandler::apply
             Environment:
@@ -289,7 +289,7 @@ Resources:
                 FunctionName:
                     !Sub zuora-retention-filter-${Stage}
                 Code:
-                    S3Bucket: membership-dist
+                    S3Bucket: support-service-lambdas-dist
                     S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
                 Handler: com.gu.zuora.retention.filterCandidates.FilterCandidates::apply
                 Environment:
@@ -309,7 +309,7 @@ Resources:
                 FunctionName:
                     !Sub zuora-retention-account-updater-${Stage}
                 Code:
-                    S3Bucket: membership-dist
+                    S3Bucket: support-service-lambdas-dist
                     S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
                 Handler: com.gu.zuora.retention.updateAccounts.Handler::apply
                 Environment:
