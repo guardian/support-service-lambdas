@@ -14,9 +14,6 @@ class IdentityConnector(config: IdentityConfig) {
   }
 
   def sendReq(url: String, body: String): Either[Throwable, HttpResponse[String]] = {
-    //returns 204 No Content if successful
-    //returns 404 Not Found if user not found
-    //returns 400 Bad Request if body is malformed
     Try(
       Http(url)
         .header("Content-Type", "application/json")
