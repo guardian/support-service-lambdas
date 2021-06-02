@@ -20,7 +20,7 @@ object SfQueries {
        |WHERE
        |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation')
        |ORDER BY
-       |  SF_Status__c
+       |  SF_Status__c, Acquisition_Date__c
        |LIMIT
        |	$limit
     """.stripMargin
