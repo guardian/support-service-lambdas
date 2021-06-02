@@ -3,7 +3,7 @@ package com.gu.deliveryproblemcreditprocessor
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 
 import cats.data.EitherT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import cats.syntax.all._
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
