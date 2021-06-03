@@ -11,8 +11,8 @@ object Dependencies {
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
   val http4sVersion = "0.21.24"
-  val catsVersion = "2.6.0"
-  val catsEffectVersion = "2.5.0"
+  val catsVersion = "2.6.1"
+  val catsEffectVersion = "2.5.1"
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.2.3",
@@ -27,7 +27,7 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.8.0"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.9.0"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
@@ -68,8 +68,8 @@ object Dependencies {
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.6.1"
-  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.0.0"
-  val stripe = "com.stripe" % "stripe-java" % "20.52.0"
+  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.53.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.4.5" % Test
