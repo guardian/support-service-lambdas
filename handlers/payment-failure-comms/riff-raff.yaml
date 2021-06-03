@@ -1,0 +1,21 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: payment-failure-comms
+    parameters:
+      templatePath: cfn.yaml
+
+  payment-failure-comms:
+    type: aws-lambda
+    parameters:
+      fileName: payment-failure-comms.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+        - payment-failure-comms-
+    dependencies: [ cfn ]
