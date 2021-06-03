@@ -1,0 +1,52 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+      - DEV
+    Default: CODE
+
+Conditions:
+  IsProd: !Equals [ !Ref Stage, PROD ]
+
+
+Resources:
+  PaymentFailureCommsGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      OpenApiVersion: '2.0'
+      Name: !Sub payment-failure-comms-${Stage}-ApiGateway
+      StageName: !Sub ${Stage}
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: !Sub payment-failure-comms-${Stage}-UsagePlan
+          Description: !Sub Usage plan for payment-failure-comms-${Stage}
+
+  PaymentFailureCommsLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub payment-failure-comms-${Stage}
+      Handler: com.gu.payment_failure_comms.Handler
+      Runtime: java8
+      CodeUri:
+        Bucket: support-service-lambdas-dist
+        Key: !Sub membership/${Stage}/payment-failure-comms/payment-failure-comms.jar
+      Timeout: 120
+      MemorySize: 256
+      Environment:
+        Variables:
+          Stage: !Sub ${Stage}
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: POST
+            RestApiId:
+              Ref: PaymentFailureCommsGateway
