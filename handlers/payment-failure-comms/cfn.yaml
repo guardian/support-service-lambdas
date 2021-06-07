@@ -18,6 +18,12 @@ Conditions:
 
 
 Resources:
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AppName}-${Stage}
+      RetentionInDays: 90
+
   PaymentFailureCommsGateway:
     Type: AWS::Serverless::Api
     Properties:
@@ -33,6 +39,7 @@ Resources:
 
   PaymentFailureCommsLambda:
     Type: AWS::Serverless::Function
+    DependsOn: LogGroup
     Properties:
       FunctionName: !Sub ${AppName}-${Stage}
       Handler: com.gu.payment_failure_comms.Handler
