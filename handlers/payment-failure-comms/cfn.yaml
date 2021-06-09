@@ -30,12 +30,6 @@ Resources:
       OpenApiVersion: '2.0'
       Name: !Sub ${AppName}-${Stage}-ApiGateway
       StageName: !Sub ${Stage}
-      Auth:
-        ApiKeyRequired: true
-        UsagePlan:
-          CreateUsagePlan: PER_API
-          UsagePlanName: !Sub ${AppName}-${Stage}-UsagePlan
-          Description: !Sub Usage plan for ${AppName}-${Stage}
 
   PaymentFailureCommsLambda:
     Type: AWS::Serverless::Function
