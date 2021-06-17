@@ -21,7 +21,8 @@ object SupportedProduct {
         SupportedRatePlan("GW Oct 18 - 3 Month - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - 3 Month - Domestic", DayOfWeek.FRIDAY))),
         SupportedRatePlan("GW Oct 18 - Annual - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - Annual - Domestic", DayOfWeek.FRIDAY))),
         SupportedRatePlan("GW Oct 18 - Quarterly - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - Quarterly - Domestic", DayOfWeek.FRIDAY))),
-        SupportedRatePlan("GW Oct 18 - Six for Six - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - First 6 issues - Domestic", DayOfWeek.FRIDAY)))
+        SupportedRatePlan("GW Oct 18 - Six for Six - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - First 6 issues - Domestic", DayOfWeek.FRIDAY))),
+        SupportedRatePlan("GW Oct 18 - Monthly - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - Monthly - Domestic", DayOfWeek.FRIDAY))),
       )
     ),
     SupportedProduct(
@@ -33,7 +34,8 @@ object SupportedProduct {
         SupportedRatePlan("GW Oct 18 - 3 Month - ROW", List(SupportedRatePlanCharge("GW Oct 18 - 3 Month - ROW", DayOfWeek.FRIDAY))),
         SupportedRatePlan("GW Oct 18 - Annual - ROW", List(SupportedRatePlanCharge("GW Oct 18 - Annual - ROW", DayOfWeek.FRIDAY))),
         SupportedRatePlan("GW Oct 18 - Quarterly - ROW", List(SupportedRatePlanCharge("GW Oct 18 - Quarterly - ROW", DayOfWeek.FRIDAY))),
-        SupportedRatePlan("GW Oct 18 - Six for Six - ROW", List(SupportedRatePlanCharge("GW Oct 18 - First 6 issues - ROW", DayOfWeek.FRIDAY)))
+        SupportedRatePlan("GW Oct 18 - Six for Six - ROW", List(SupportedRatePlanCharge("GW Oct 18 - First 6 issues - ROW", DayOfWeek.FRIDAY))),
+        SupportedRatePlan("GW Oct 18 - Monthly - ROW", List(SupportedRatePlanCharge("GW Oct 18 - Monthly - ROW", DayOfWeek.FRIDAY))),
       )
     ),
     SupportedProduct(
