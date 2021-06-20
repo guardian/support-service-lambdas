@@ -67,7 +67,7 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.7"
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.6.1"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
   val stripe = "com.stripe" % "stripe-java" % "20.58.0"
 
