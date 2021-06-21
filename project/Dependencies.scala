@@ -7,16 +7,16 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.16.58"
+  val awsSdkVersion = "2.16.80"
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
-  val http4sVersion = "0.21.22"
-  val catsVersion = "2.6.0"
-  val catsEffectVersion = "2.5.0"
+  val http4sVersion = "0.21.24"
+  val catsVersion = "2.6.1"
+  val catsEffectVersion = "2.5.1"
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.3"
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
   )
 
   // AWS
@@ -27,7 +27,7 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.8.0"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.9.0"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
@@ -67,13 +67,13 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.7"
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.6.1"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
-  val stripe = "com.stripe" % "stripe-java" % "20.50.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.58.0"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.4.5" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.8" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.5.0" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.15.4" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.1.0" % Test
 
