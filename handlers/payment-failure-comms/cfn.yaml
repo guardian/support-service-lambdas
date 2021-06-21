@@ -16,6 +16,20 @@ Parameters:
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
 
+Mappings:
+  StageMap:
+    PROD:
+      BrazeInstanceUrl: rest.fra-01.braze.eu
+      BrazeAppGroup: DEV
+      BrazeSecretsVersion: 9af74d40-b1a9-433b-b826-232af35f0cf6
+    CODE:
+      BrazeInstanceUrl: rest.fra-01.braze.eu
+      BrazeAppGroup: DEV
+      BrazeSecretsVersion: 9af74d40-b1a9-433b-b826-232af35f0cf6
+    DEV:
+      BrazeInstanceUrl: rest.fra-01.braze.eu
+      BrazeAppGroup: DEV
+      BrazeSecretsVersion: 9af74d40-b1a9-433b-b826-232af35f0cf6
 
 Resources:
   LogGroup:
@@ -45,7 +59,12 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          Stage: !Sub ${Stage}
+          brazeInstanceUrl: !FindInMap [ StageMap, !Ref Stage, BrazeInstanceUrl ]
+          brazeBearerToken:
+            !Sub
+            - '{{resolve:secretsmanager:Braze/${BrazeAppGroup}/${AppName}:SecretString:bearerToken::${BrazeSecretsVersion}}}'
+            - BrazeAppGroup: !FindInMap [ StageMap, !Ref Stage, BrazeAppGroup ]
+              BrazeSecretsVersion: !FindInMap [ StageMap, !Ref Stage, BrazeSecretsVersion ]
       Events:
         ApiEvent:
           Type: Api
