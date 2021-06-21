@@ -21,15 +21,15 @@ Mappings:
     PROD:
       BrazeInstanceUrl: rest.fra-01.braze.eu
       BrazeAppGroup: DEV
-      BrazeSecretsVersion: 9af74d40-b1a9-433b-b826-232af35f0cf6
+      BrazeSecretsVersion: 454bfb7f-ea8f-4870-be4b-a7068d2e16f4
     CODE:
       BrazeInstanceUrl: rest.fra-01.braze.eu
       BrazeAppGroup: DEV
-      BrazeSecretsVersion: 9af74d40-b1a9-433b-b826-232af35f0cf6
+      BrazeSecretsVersion: 454bfb7f-ea8f-4870-be4b-a7068d2e16f4
     DEV:
       BrazeInstanceUrl: rest.fra-01.braze.eu
       BrazeAppGroup: DEV
-      BrazeSecretsVersion: 9af74d40-b1a9-433b-b826-232af35f0cf6
+      BrazeSecretsVersion: 454bfb7f-ea8f-4870-be4b-a7068d2e16f4
 
 Resources:
   LogGroup:
@@ -63,6 +63,11 @@ Resources:
           brazeBearerToken:
             !Sub
             - '{{resolve:secretsmanager:Braze/${BrazeAppGroup}/${AppName}:SecretString:bearerToken::${BrazeSecretsVersion}}}'
+            - BrazeAppGroup: !FindInMap [ StageMap, !Ref Stage, BrazeAppGroup ]
+              BrazeSecretsVersion: !FindInMap [ StageMap, !Ref Stage, BrazeSecretsVersion ]
+          zuoraAppIdForBraze:
+            !Sub
+            - '{{resolve:secretsmanager:Braze/${BrazeAppGroup}/${AppName}:SecretString:zuoraAppId::${BrazeSecretsVersion}}}'
             - BrazeAppGroup: !FindInMap [ StageMap, !Ref Stage, BrazeAppGroup ]
               BrazeSecretsVersion: !FindInMap [ StageMap, !Ref Stage, BrazeSecretsVersion ]
       Events:

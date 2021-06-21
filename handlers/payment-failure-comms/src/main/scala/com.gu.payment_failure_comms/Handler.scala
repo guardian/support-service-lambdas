@@ -12,7 +12,7 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
     for {
       config <- Config()
     } yield {
-      logger.info(s"Read config with: ${config.braze.instanceUrl} ${config.braze.bearerToken.charAt(0)}")
+      logger.info(s"Read config with: ${config.braze.instanceUrl} ${config.braze.bearerToken.charAt(0)} ${config.braze.zuoraAppId}")
       logger.info("Received request with body: " + event.getBody)
     }
 
