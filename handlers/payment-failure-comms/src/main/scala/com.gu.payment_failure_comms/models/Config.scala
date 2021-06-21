@@ -5,7 +5,7 @@ case class Config(braze: BrazeConfig)
 case class BrazeConfig(instanceUrl: String, bearerToken: String)
 
 object Config {
-  def apply(): Either[Throwable, Config] = {
+  def apply(): Either[Failure, Config] = {
     (for {
       instanceUrl <- sys.env.get("brazeInstanceUrl")
       bearerToken <- sys.env.get("brazeBearerToken")
@@ -13,7 +13,7 @@ object Config {
       BrazeConfig(instanceUrl, bearerToken)
     ))
       .toRight(
-        new Throwable("Could not obtain all config.")
+        ConfigFailure("Could not obtain all config.")
       )
   }
 }
