@@ -8,7 +8,6 @@ import com.gu.util.Logging
 class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] with Logging {
 
   def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
-
     for {
       config <- Config()
     } yield {
@@ -18,4 +17,5 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
 
     new APIGatewayProxyResponseEvent().withStatusCode(200)
   }
+  
 }
