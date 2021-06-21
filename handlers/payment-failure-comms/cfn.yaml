@@ -36,7 +36,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AppName}-${Stage}
-      RetentionInDays: 30
+      RetentionInDays: 14
 
   PaymentFailureCommsGateway:
     Type: AWS::Serverless::Api
