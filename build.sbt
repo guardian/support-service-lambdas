@@ -498,6 +498,17 @@ lazy val `http4s-lambda-handler` = library(project in file("lib/http4s-lambda-ha
     libraryDependencies ++= Seq(circe, circeParser, http4sCore, http4sDsl % Test, scalatest) ++ logging
   )
 
+lazy val `payment-failure-comms` = lambdaProject(
+  "payment-failure-comms",
+  "Transforms calls from Zuora's payment failures into Braze custom events",
+  Seq(
+    circe,
+    circeParser,
+    scalatest,
+    scalajHttp,
+    awsEvents
+  )
+).dependsOn(handler)
 
 // ==== END handlers ====
 
