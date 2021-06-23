@@ -76,6 +76,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
     response
       .left.map(i => SoftOptInError("SalesforceConnector", s"Salesforce composite request failed: $i"))
       .flatMap { result =>
+        logger.info(result.body)
         decode[List[SFResponse]](result.body) match {
           case Right(compositeResponse) =>
             SFCompositeResponse(compositeResponse).errorsAsString
