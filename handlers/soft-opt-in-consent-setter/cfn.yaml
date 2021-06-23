@@ -13,7 +13,7 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      Schedule: 'rate(5 minutes)'
+      Schedule: 'rate(15 minutes)'
       SalesforceStage: PROD
       IdentityStage: PROD
       SalesforceUsername: SoftOptInConsentSetterAPIUser
