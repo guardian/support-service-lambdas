@@ -6,13 +6,13 @@ case class BrazeConfig(instanceUrl: String, bearerToken: String, zuoraAppId: Str
 
 object Config {
   def apply(): Either[Failure, Config] = {
+    def getFromEnv(prop: String): Either[ConfigFailure, String] =
+      sys.env.get(prop).toRight(ConfigFailure(s"Could not obtain $prop"))
+
     for {
-      instanceUrl <- sys.env.get("brazeInstanceUrl")
-        .toRight(ConfigFailure("Could not obtain brazeInstanceUrl."))
-      bearerToken <- sys.env.get("brazeBearerToken")
-        .toRight(ConfigFailure("Could not obtain brazeBearerToken."))
-      zuoraAppId <- sys.env.get("zuoraAppIdForBraze")
-        .toRight(ConfigFailure("Could not obtain zuoraAppIdForBraze."))
+      instanceUrl <- getFromEnv("brazeInstanceUrl")
+      bearerToken <- getFromEnv("brazeBearerToken")
+      zuoraAppId <- getFromEnv("zuoraAppIdForBraze")
     } yield Config(
       BrazeConfig(instanceUrl, bearerToken, zuoraAppId)
     )
