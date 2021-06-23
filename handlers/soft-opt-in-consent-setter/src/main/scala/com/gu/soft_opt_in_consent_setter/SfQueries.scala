@@ -19,7 +19,6 @@ object SfQueries {
        |	SF_Subscription__c
        |WHERE
        |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation')
-       |  AND AcquisitionCase__c = NULL
        |ORDER BY
        |  SF_Status__c, Acquisition_Date__c
        |LIMIT
