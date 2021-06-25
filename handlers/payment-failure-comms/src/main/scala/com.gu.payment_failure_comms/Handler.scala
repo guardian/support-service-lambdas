@@ -7,8 +7,7 @@ import com.gu.util.Logging
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
-
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] with Logging {
@@ -52,7 +51,7 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
       braze_id = brazeId,
       app_id = zuoraAppId,
       name = request.event,
-      time = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss:SSSZ").format(LocalDateTime.now),
+      time = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss:SSSZ").format(ZonedDateTime.now),
       properties = request.properties)
   }
 
