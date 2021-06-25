@@ -24,7 +24,7 @@ object BrazeConnector {
         .header("Content-Type", "application/json")
         .header("Authorization", s"Bearer ${bearerToken}")
         .postData(payload)
-        .method("PATCH")
+        .method("POST")
         .asString
     )
       .toEither
