@@ -23,10 +23,11 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
       customEvent = convertToCustomEventRequest(request = request, brazeId = "", zuoraAppId = config.braze.zuoraAppId)
       _ <- BrazeConnector.sendCustomEvent(config.braze, customEvent.asJson.toString)
     } yield ()) match {
-      case Right(_) => new APIGatewayProxyResponseEvent().withStatusCode(200)
+      case Right(_) =>
+        logger.info(s"The request was successful.")
+        new APIGatewayProxyResponseEvent().withStatusCode(200)
       case Left(failure) =>
-        logger.error(s"An error happened. ${failure.kind}: ${failure.details}")
-
+        logger.error(s"An error occurred. ${failure.kind}: ${failure.details}")
         new APIGatewayProxyResponseEvent().withStatusCode(500)
     }
 
