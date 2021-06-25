@@ -2,7 +2,6 @@ package com.gu.payment_failure_comms
 
 import com.gu.payment_failure_comms.models.{BrazeConfig, BrazeRequestFailure, BrazeResponseFailure, Failure}
 import scalaj.http.{Http, HttpResponse}
-
 import scala.util.Try
 
 object BrazeConnector {
