@@ -13,7 +13,7 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      Schedule: 'rate(15 minutes)'
+      Schedule: 'rate(30 minutes)'
       SalesforceStage: PROD
       IdentityStage: PROD
       SalesforceUsername: SoftOptInConsentSetterAPIUser
@@ -53,7 +53,7 @@ Resources:
       CodeUri:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar
-      MemorySize: 2048
+      MemorySize: 256
       Runtime: java8
       Timeout: 900
       Environment:
@@ -112,7 +112,7 @@ Resources:
           Properties:
             Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule]
             Description: Runs Soft Opt-In Consent Setter
-            Enabled: False
+            Enabled: True
       Policies:
         - Statement:
             - Effect: Allow
