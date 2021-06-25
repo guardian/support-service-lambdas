@@ -17,8 +17,6 @@ object BrazeConnector {
   }
 
   def sendRequest(url: String, bearerToken: String, payload: String): Either[Throwable, HttpResponse[String]] = {
-    println(s"Sending request to $url")
-
     Try(
       Http(url)
         .header("Content-Type", "application/json")
