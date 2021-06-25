@@ -20,7 +20,7 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
     (for {
       config <- Config()
       request <- decodeMessage(event.getBody)
-      brazeRequest = convertToEventsRequest(
+      brazeRequest = BrazeTrackRequest.fromPaymentFailureCommsRequest(
         request = request,
         brazeId = "1bd449f3-4326-4ae5-89dd-35cce2d50944",
         zuoraAppId = config.braze.zuoraAppId)
@@ -45,20 +45,6 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
           case _ => Left(RequestFailure(s"Invalid event."))
         }
       )
-  }
-
-  def convertToEventsRequest(request: PaymentFailureCommsRequest, brazeId: String, zuoraAppId: String): BrazeTrackRequest = {
-    BrazeTrackRequest(
-      List(
-        CustomEvent(
-          external_id = brazeId,
-          app_id = zuoraAppId,
-          name = request.event,
-          time = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss:SSSZ").format(ZonedDateTime.now),
-          properties = request.properties
-        )
-      )
-    )
   }
 
 }
