@@ -22,5 +22,8 @@ jobs:
         with:
           java-version: 11
       - 
+        name: Compile production and test code
+        run: sbt Test/compile
+      - 
         name: Run tests
         run: sbt test
