@@ -112,7 +112,7 @@ Resources:
           Properties:
             Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule]
             Description: Runs Soft Opt-In Consent Setter
-            Enabled: False
+            Enabled: True
       Policies:
         - Statement:
             - Effect: Allow
