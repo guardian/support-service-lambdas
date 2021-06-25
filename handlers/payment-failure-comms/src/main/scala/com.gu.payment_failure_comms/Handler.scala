@@ -20,7 +20,10 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
     (for {
       config <- Config()
       request <- decodeMessage(event.getBody)
-      customEvent = convertToCustomEventRequest(request = request, brazeId = "", zuoraAppId = config.braze.zuoraAppId)
+      customEvent = convertToCustomEventRequest(
+        request = request,
+        brazeId = "1bd449f3-4326-4ae5-89dd-35cce2d50944",
+        zuoraAppId = config.braze.zuoraAppId)
       _ <- BrazeConnector.sendCustomEvent(config.braze, customEvent.asJson.toString)
     } yield ()) match {
       case Right(_) =>
