@@ -51,7 +51,7 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
     BrazeTrackRequest(
       List(
         CustomEvent(
-          braze_id = brazeId,
+          external_id = brazeId,
           app_id = zuoraAppId,
           name = request.event,
           time = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss:SSSZ").format(ZonedDateTime.now),
