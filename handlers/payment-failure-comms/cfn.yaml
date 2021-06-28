@@ -16,13 +16,27 @@ Parameters:
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
 
+Mappings:
+  StageMap:
+    PROD:
+      BrazeInstanceUrl: rest.fra-01.braze.eu
+      BrazeAppGroup: DEV
+      BrazeSecretsVersion: 454bfb7f-ea8f-4870-be4b-a7068d2e16f4
+    CODE:
+      BrazeInstanceUrl: rest.fra-01.braze.eu
+      BrazeAppGroup: DEV
+      BrazeSecretsVersion: 454bfb7f-ea8f-4870-be4b-a7068d2e16f4
+    DEV:
+      BrazeInstanceUrl: rest.fra-01.braze.eu
+      BrazeAppGroup: DEV
+      BrazeSecretsVersion: 454bfb7f-ea8f-4870-be4b-a7068d2e16f4
 
 Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AppName}-${Stage}
-      RetentionInDays: 90
+      RetentionInDays: 14
 
   PaymentFailureCommsGateway:
     Type: AWS::Serverless::Api
@@ -45,7 +59,17 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          Stage: !Sub ${Stage}
+          brazeInstanceUrl: !FindInMap [ StageMap, !Ref Stage, BrazeInstanceUrl ]
+          brazeBearerToken:
+            !Sub
+            - '{{resolve:secretsmanager:Braze/${BrazeAppGroup}/${AppName}:SecretString:bearerToken::${BrazeSecretsVersion}}}'
+            - BrazeAppGroup: !FindInMap [ StageMap, !Ref Stage, BrazeAppGroup ]
+              BrazeSecretsVersion: !FindInMap [ StageMap, !Ref Stage, BrazeSecretsVersion ]
+          zuoraAppIdForBraze:
+            !Sub
+            - '{{resolve:secretsmanager:Braze/${BrazeAppGroup}/${AppName}:SecretString:zuoraAppId::${BrazeSecretsVersion}}}'
+            - BrazeAppGroup: !FindInMap [ StageMap, !Ref Stage, BrazeAppGroup ]
+              BrazeSecretsVersion: !FindInMap [ StageMap, !Ref Stage, BrazeSecretsVersion ]
       Events:
         ApiEvent:
           Type: Api
