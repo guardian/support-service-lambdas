@@ -6,7 +6,7 @@ case class SFCompositeResponse(responses: List[SFResponse]) {
 }
 
 case class SFResponse(id: Option[String], success: Boolean, errors: List[SFResponseError]) {
-  def errorAsString: Option[String] = if (success) None else Some(s"RecordId: ${id.getOrElse("N/A")}; Errors: ${errors.map(a => a.errorAsString)}.")
+  def errorAsString: Option[String] = if (success) None else Some(s"Errors: ${errors.map(a => a.errorAsString)}.")
 }
 
 case class SFResponseError(statusCode: String, message: String, fields: List[String]) {
