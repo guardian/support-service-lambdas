@@ -156,6 +156,7 @@ Resources:
 
   noRequestsAlarm:
     Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
     DependsOn:
       - ContactUsApiGateway
     Properties:
