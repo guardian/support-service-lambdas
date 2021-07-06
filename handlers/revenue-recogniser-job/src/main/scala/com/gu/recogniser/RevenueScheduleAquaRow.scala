@@ -5,8 +5,7 @@ import kantan.csv.HeaderDecoder
 case class RevenueScheduleAquaRow(
   number: String,
   undistributedAmountInPence: Int,
-  chargeId: String,
-  isRedeemed: Boolean
+  subscriptionNumber: String,
 )
 
 object RevenueScheduleAquaRow {
@@ -14,24 +13,21 @@ object RevenueScheduleAquaRow {
   val csvFields = List(
     "RevenueSchedule.Number",
     "RevenueSchedule.UndistributedAmount",
-    "RatePlanCharge.Id",
-    "Subscription.GifteeIdentityId__c"
+    "Subscription.Name",
   )
 
   implicit val decoder: HeaderDecoder[RevenueScheduleAquaRow] = csvFields match {
-    case a1 :: a2 :: a3 :: a4 :: Nil =>
-      HeaderDecoder.decoder(a1, a2, a3, a4) {
+    case a1 :: a2 :: a3 :: Nil =>
+      HeaderDecoder.decoder(a1, a2, a3) {
         (
         number: String,
         amount: Double,
-        chargeId: String,
-        gifteeIdentityId: String
+        subscriptionNumber: String,
       ) =>
           RevenueScheduleAquaRow(
             number,
             (amount * 100).toInt,
-            chargeId,
-            gifteeIdentityId.nonEmpty
+            subscriptionNumber,
           )
       }
     case _ => throw new RuntimeException("coding error - number of fields doesn't match the decoder")

@@ -50,6 +50,47 @@ object CreateRefundedBeforeRedemptionTestSubscriptionManualTest {
   }
 }
 
+object RunQueryManualTest {
+
+  def main(args: Array[String]): Unit = {
+
+    val actual = for {
+      zuoraRestConfig <- LoadConfigModule(Stage("PROD"), GetFromS3.fetchString)[ZuoraRestConfig]
+      downloadRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
+      aquaQuerier = Querier.lowLevel(downloadRequests) _
+      schedules <- new RevenueSchedulesQuerier(
+        println,
+        new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, println),
+        GetSubscription(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)),
+      ).execute()
+    } yield schedules
+    println("result: " + actual.map(_.mkString("\n")))
+
+  }
+
+}
+
+object RunQueryAndPartitionManualTest {
+
+  def main(args: Array[String]): Unit = {
+
+    val actual = for {
+      zuoraRestConfig <- LoadConfigModule(Stage("PROD"), GetFromS3.fetchString)[ZuoraRestConfig]
+      downloadRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
+      aquaQuerier = Querier.lowLevel(downloadRequests) _
+      schedules <- new RevenueSchedulesQuerier(
+        println,
+        new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, println),
+        GetSubscription(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)),
+      ).execute()
+    } yield new PartitionSchedules(() => LocalDate.now(), println, println).partition(schedules)
+    println("\n\nresult1:\n" + actual.map(_._1.mkString("\n")))
+    println("\n\nresult2:\n" + actual.map(_._2.mkString("\n")))
+
+  }
+
+}
+
 object RunLambdaManualTest {
 
   def main(args: Array[String]): Unit = {
@@ -75,37 +116,32 @@ object RunLambdaManualTest {
     zuoraRestConfig: ZuoraRestConfig,
     today: () => LocalDate
   ): Steps = {
-    val requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
     val downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
+    val requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
     val aquaQuerier = Querier.lowLevel(downloadRequests) _
-    val getRevenueSchedules = GetRevenueSchedules(requests)
-    val distributeRevenueOnSpecificDate = new DistributeRevenueOnSpecificDate(null) {
+    val fakeDistributeRevenueOnSpecificDate = new DistributeRevenueOnSpecificDate(null) {
       override def distribute(revenueScheduleNumber: String, dateToDistribute: LocalDate): ClientFailableOp[Unit] = {
         log(s"trying to distribute $revenueScheduleNumber on $dateToDistribute")
         ClientSuccess(())
       }
     }
+    val fakeDistributeRevenueWithDateRange = new DistributeRevenueWithDateRange(null) {
+      override def distribute(revenueScheduleNumber: String, startDate: LocalDate, endDate: LocalDate): ClientFailableOp[Unit] = {
+        log(s"trying to distribute $revenueScheduleNumber across dates $startDate - $endDate")
+        ClientSuccess(())
+      }
+    }
     new Steps(
       log,
-      new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, log),
       today,
-      distributeRevenueOnSpecificDate,
-      new DistributeRedeemedSub(
-        new DistributeRevenueAcrossAccountingPeriods(null) {
-          override def distribute(revenueScheduleNumber: String, revenueDistributions: List[DistributeRevenueAcrossAccountingPeriods.RevenueDistribution]): ClientFailableOp[Unit] = {
-            log(s"trying to distribute $revenueScheduleNumber as $revenueDistributions")
-            ClientSuccess(())
-          }
-        },
-        distributeRevenueOnSpecificDate,
-        getRevenueSchedules,
-        today
+      log,
+      new RevenueSchedulesQuerier(
+        log,
+        new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, log),
+        GetSubscription(requests),
       ),
-      new DistributeUnredeemedSub(
-        distributeRevenueOnSpecificDate,
-        getRevenueSchedules,
-        today
-      )
+      fakeDistributeRevenueOnSpecificDate,
+      fakeDistributeRevenueWithDateRange,
     )
   }
 
