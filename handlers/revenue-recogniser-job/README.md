@@ -25,3 +25,7 @@ If the job fails, an alarm will be sent saying that there is an issue.
 
 The accounts are not urgent so this does not need immediate investigation, a card can be planned in.
 It will need fixing in due course so that it can catch up with any outstanding subscriptions.
+
+There are further helpful documents in the DS Gifting section of the Subscriptions team shared drive e.g.: 
+https://docs.google.com/document/d/1M7dC2CasahE6XUJDcLNvKVjO376sLVpfPgHXUeGoBoE/edit#
+https://docs.google.com/document/d/1yNeaR2l1Ss_unXygntuntmRX-GicDelryuK25vmqToc/edit#
