@@ -112,10 +112,7 @@ class Steps(
       undistributedScheduled <- revenueSchedulesQuerier.execute()
       (revenueSchedulesToDistributeToday, revenueSchedulesToDistributeRange) = partitionSchedules.partition(undistributedScheduled)
       _ <- distributeForQueryRow(revenueSchedulesToDistributeToday, revenueSchedulesToDistributeRange)
-//      _ = log("now query again and assert there are none")
-//      stillUndistributedRevenue <- revenueSchedulesQuerier.execute()
-//      numberNotDone = stillUndistributedRevenue.to(LazyList).length
-//      _ <- if (numberNotDone > 0) Left(s"there were still revenue schedules: $numberNotDone") else Right(())
+      // would be nice to confirm success by querying zuora again, or cross check against the number of unredeemed subs
     } yield ()
 
   }
