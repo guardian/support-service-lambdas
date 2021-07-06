@@ -42,7 +42,7 @@ object Handler extends RequestStreamHandler {
   this is alarmed in the cfn
    */
   def error(stage: Stage, message: String) = {
-    println(s"FAILURE - sending metric: $message")
+    println(s"ERROR recognising revenue: $message")
     AwsCloudWatch.metricPut(MetricRequest(
       MetricNamespace("support-service-lambdas"),
       MetricName("could-not-recognise-revenue"),
