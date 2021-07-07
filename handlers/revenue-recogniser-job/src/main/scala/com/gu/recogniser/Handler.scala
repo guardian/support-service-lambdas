@@ -5,7 +5,6 @@ import com.amazonaws.services.lambda.runtime._
 import com.gu.aws.AwsCloudWatch
 import com.gu.aws.AwsCloudWatch._
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.recogniser.RevenueSchedule.csvFields
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.zuora.reports._
@@ -13,7 +12,7 @@ import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import okhttp3.{Request, Response}
 
 import java.io.{InputStream, OutputStream}
-import scala.util.Try
+import java.time.LocalDate
 
 object Handler extends RequestStreamHandler {
 
@@ -27,21 +26,37 @@ object Handler extends RequestStreamHandler {
 
     log("starting lambda!")
     val stage = RawEffects.stage
+
     val loadConfig = LoadConfigModule(stage, GetFromS3.fetchString)
     val maybeSuccess = for {
       zuoraRestConfig <- loadConfig[ZuoraRestConfig]
-      steps = Steps(log, RawEffects.downloadResponse, RawEffects.response, zuoraRestConfig, () => RawEffects.now().toLocalDate)
+      steps = Steps(log, error(stage, _), RawEffects.downloadResponse, RawEffects.response, zuoraRestConfig, () => RawEffects.now().toLocalDate)
       _ <- steps.execute().leftMap(failure => new RuntimeException(s"execution has failed: $failure"))
     } yield ()
     val _ = maybeSuccess.toTry.get // throws exception if something failed
     log("finished successfully - sending metric!")
-    putMetric(stage).get
+    putMetric(stage)
   }
 
   /*
   this is alarmed in the cfn
    */
-  def putMetric(stage: Stage): Try[Unit] = {
+  def error(stage: Stage, message: String) = {
+    println(s"ERROR recognising revenue: $message")
+    AwsCloudWatch.metricPut(MetricRequest(
+      MetricNamespace("support-service-lambdas"),
+      MetricName("could-not-recognise-revenue"),
+      Map(
+        MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
+        MetricDimensionName("app") -> MetricDimensionValue("revenue-recogniser-job")
+      )
+    )).get // rethrow errors
+  }
+
+  /*
+  this is alarmed in the cfn
+   */
+  def putMetric(stage: Stage): Unit = {
     AwsCloudWatch.metricPut(MetricRequest(
       MetricNamespace("support-service-lambdas"),
       MetricName("job-succeeded"),
@@ -49,30 +64,7 @@ object Handler extends RequestStreamHandler {
         MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
         MetricDimensionName("app") -> MetricDimensionValue("revenue-recogniser-job")
       )
-    ))
-  }
-
-}
-import kantan.csv.HeaderDecoder
-
-import java.time.LocalDate
-
-case class RevenueSchedule(
-  number: String,
-  undistributedAmountInPence: Int
-)
-
-object RevenueSchedule {
-
-  val csvFields = List(
-    "RevenueSchedule.Number",
-    "RevenueSchedule.UndistributedAmount"
-  )
-
-  implicit val decoder: HeaderDecoder[RevenueSchedule] = csvFields match {
-    case a1 :: a2 :: Nil =>
-      HeaderDecoder.decoder(a1, a2)((number: String, amount: Double) => RevenueSchedule(number, (amount * 100).toInt))
-    case _ => throw new RuntimeException("coding error - number of fields doesn't match the decoder")
+    )).get // rethrow errors
   }
 
 }
@@ -80,6 +72,7 @@ object RevenueSchedule {
 object Steps {
   def apply(
     log: String => Unit,
+    error: String => Unit,
     downloadResponse: Request => Response,
     response: Request => Response,
     zuoraRestConfig: ZuoraRestConfig,
@@ -90,8 +83,13 @@ object Steps {
     val aquaQuerier = Querier.lowLevel(downloadRequests) _
     new Steps(
       log,
-      new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, log),
       today,
+      error,
+      new RevenueSchedulesQuerier(
+        log,
+        new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, log),
+        GetSubscription(requests)
+      ),
       DistributeRevenueOnSpecificDate(requests),
       DistributeRevenueWithDateRange(requests)
     )
@@ -100,41 +98,40 @@ object Steps {
 
 class Steps(
   log: String => Unit,
-  blockingAquaQuery: BlockingAquaQuery,
   today: () => LocalDate,
+  error: String => Unit,
+  revenueSchedulesQuerier: RevenueSchedulesQuerier,
   distributeRevenueOnSpecificDate: DistributeRevenueOnSpecificDate,
-  distributeRevenueWithDateRange: DistributeRevenueWithDateRange
+  distributeRevenueWithDateRange: DistributeRevenueWithDateRange,
 ) {
+  val partitionSchedules: PartitionSchedules = new PartitionSchedules(today, log, error)
 
   def execute(): Either[String, Unit] = {
-    val oneYearAgo: LocalDate = today().minusYears(1)
-    val expiredGiftsAndRefunds =
-      s"""select ${csvFields.mkString(", ")}
-         |from RevenueSchedule
-         |where Rule = 'Digital Subscription Gift Rule'
-         | AND (
-         |     (UndistributedAmount > 0 AND subscription.termstartdate <= '$oneYearAgo')
-         | )
-         |""".stripMargin
+
     for {
-      undistributedRevenue <- blockingAquaQuery.executeQuery[RevenueSchedule](expiredGiftsAndRefunds).toDisjunction.leftMap(_.toString)
-      revenueSchedulesToDistribute <- undistributedRevenue.toList.sequence.leftMap(_.toString)
-      _ = revenueSchedulesToDistribute.map {
-        case RevenueSchedule(expiredCodeSchedule, amount) if amount > 0 =>
-          log(s"distribute on a single day: $expiredCodeSchedule $amount")
-          distributeRevenueOnSpecificDate.distribute(expiredCodeSchedule, today())
-        case RevenueSchedule(refundSchedule, amount) if amount < 0 =>
-          log(s"distribute refund: $refundSchedule $amount")
-        //TODO
-        case RevenueSchedule(refundSchedule, amount) =>
-          log(s"mistake in query - no refund to make on: $refundSchedule $amount")
-      }
-      _ = log("now query again and assert there are none")
-      stillUndistributedRevenue <- blockingAquaQuery.executeQuery[RevenueSchedule](expiredGiftsAndRefunds).toDisjunction.leftMap(_.toString)
-      numberNotDone = stillUndistributedRevenue.to(LazyList).length
-      _ <- if (numberNotDone > 0) Left(s"there were still revenue schedules: $numberNotDone") else Right(())
+      undistributedScheduled <- revenueSchedulesQuerier.execute()
+      (revenueSchedulesToDistributeToday, revenueSchedulesToDistributeRange) = partitionSchedules.partition(undistributedScheduled)
+      _ <- distributeForQueryRow(revenueSchedulesToDistributeToday, revenueSchedulesToDistributeRange)
+      // would be nice to confirm success by querying zuora again, or cross check against the number of unredeemed subs
     } yield ()
 
+  }
+
+  private def distributeForQueryRow(revenueSchedulesToDistributeToday: List[DistributeToday], revenueSchedulesToDistributeRange: List[DistributeRange]): Either[String, Unit] = {
+    for {
+      _ <- revenueSchedulesToDistributeToday.traverse { distributeToday =>
+        import distributeToday._
+        // Find all undistributed rev sch on unredeemed subs >12 months old and distribute “today”
+        log(s"sub is expired, recognise today only: $distributeToday")
+        distributeRevenueOnSpecificDate.distribute(expiredCodeSchedule, today()).toDisjunction.leftMap(_.toString)
+      }
+      _ <- revenueSchedulesToDistributeRange.traverse { distributeRange =>
+        import distributeRange._
+        // Find all undistributed rev sch on redeemed subs and distribute across the redemptiondate->termenddate
+        log(s"sub is redeemed then refunded, so recognise over the same period it was purchased: $distributeRange")
+        distributeRevenueWithDateRange.distribute(refundSchedule, recognitionStart, recognitionEnd).toDisjunction.leftMap(_.toString)
+      }
+    } yield ()
   }
 
 }

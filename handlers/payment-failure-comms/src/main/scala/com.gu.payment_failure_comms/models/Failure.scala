@@ -9,6 +9,10 @@ case class ConfigFailure(details: String) extends Failure {
   val kind: String = "Config"
 }
 
+case class RequestFailure(details: String) extends Failure {
+  val kind: String = "Request"
+}
+
 case class BrazeRequestFailure(details: String) extends Failure {
   val kind: String = "Braze Request"
 }
