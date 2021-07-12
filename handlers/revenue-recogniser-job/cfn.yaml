@@ -110,3 +110,29 @@ Resources:
       Threshold: 1
       EvaluationPeriods: 24
       TreatMissingData: breaching
+
+  FailedRecognitionAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ProdOnlyResource
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+      AlarmName: !Join
+        - ' '
+        - - 'non urgent -'
+          - 'revenue recogniser job could not process a record'
+      AlarmDescription: !Join
+        - ' '
+        - - 'Impact - Accounts team will not see all revenue correctly for manually recognised subs'
+          - !FindInMap [ Constants, Alarm, Process ]
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Stage
+          Value: !Ref Stage
+      EvaluationPeriods: 1
+      MetricName: could-not-recognise-revenue
+      Namespace: support-service-lambdas
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
