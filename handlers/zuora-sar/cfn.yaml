@@ -176,7 +176,7 @@ Resources:
                 Variables:
                   Stage: !Ref Stage
             MemorySize: 384
-            Runtime: java8
+            Runtime: java8.al2
             Timeout: 120
             VpcConfig:
                 SecurityGroupIds:
@@ -199,7 +199,7 @@ Resources:
                 Variables:
                     Stage: !Ref Stage
             MemorySize: 1024
-            Runtime: java8
+            Runtime: java8.al2
             Timeout: 900
             VpcConfig:
                 SecurityGroupIds:

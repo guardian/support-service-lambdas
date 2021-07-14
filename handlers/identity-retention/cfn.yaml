@@ -77,7 +77,7 @@ Resources:
                 - "IdentityRetentionRole"
                 - Arn
             MemorySize: 1536
-            Runtime: java8
+            Runtime: java8.al2
             Timeout: 300
         DependsOn:
         - "IdentityRetentionRole"
