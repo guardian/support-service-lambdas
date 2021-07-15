@@ -238,7 +238,7 @@ Resources:
             Role:
                 !GetAtt ZuoraQuerierRole.Arn
             MemorySize: 1536
-            Runtime: java8
+            Runtime: java8.al2
             Timeout: 300
         DependsOn:
         - ZuoraQuerierRole
@@ -258,7 +258,7 @@ Resources:
             Role:
                 !GetAtt ZuoraResultsRole.Arn
             MemorySize: 1536
-            Runtime: java8
+            Runtime: java8.al2
             Timeout: 300
         DependsOn:
         - ZuoraResultsRole
@@ -278,7 +278,7 @@ Resources:
             Role:
                 !GetAtt ZuoraFileFetcherRole.Arn
             MemorySize: 1536
-            Runtime: java8
+            Runtime: java8.al2
             Timeout: 300
         DependsOn:
         - ZuoraFileFetcherRole
@@ -298,7 +298,7 @@ Resources:
                 Role:
                     !GetAtt FilterRole.Arn
                 MemorySize: 1536
-                Runtime: java8
+                Runtime: java8.al2
                 Timeout: 300
             DependsOn:
             - FilterRole
@@ -318,7 +318,7 @@ Resources:
                 Role:
                     !GetAtt UpdaterRole.Arn
                 MemorySize: 1536
-                Runtime: java8
+                Runtime: java8.al2
                 Timeout: 300
             DependsOn:
             - UpdaterRole

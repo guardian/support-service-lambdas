@@ -71,7 +71,7 @@ Resources:
                   Stage: !Ref Stage
             Role: !GetAtt ExportLambdaRole.Arn
             MemorySize: 3008
-            Runtime: java8
+            Runtime: java8.al2
             Timeout: 900
         DependsOn:
         - ExportLambdaRole

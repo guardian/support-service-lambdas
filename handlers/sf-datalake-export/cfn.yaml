@@ -80,7 +80,7 @@ Resources:
       Role:
         !GetAtt StartJobRole.Arn
       MemorySize: 1536
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 300
     DependsOn:
     - StartJobRole
@@ -129,7 +129,7 @@ Resources:
       Role:
         !GetAtt BatchStateRole.Arn
       MemorySize: 1536
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 300
     DependsOn:
     - BatchStateRole
@@ -223,7 +223,7 @@ Resources:
       Role:
         !GetAtt DownloadBatchRole.Arn
       MemorySize: 1536
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 900
     DependsOn:
     - DownloadBatchRole
@@ -280,7 +280,7 @@ Resources:
       Role:
         !GetAtt CleanBucketRole.Arn
       MemorySize: 1536
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 900
     DependsOn:
       - CleanBucketRole
@@ -300,7 +300,7 @@ Resources:
       Role:
         !GetAtt EndJobRole.Arn
       MemorySize: 1536
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 300
     DependsOn:
     - EndJobRole
