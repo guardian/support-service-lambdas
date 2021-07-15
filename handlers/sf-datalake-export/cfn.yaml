@@ -223,7 +223,7 @@ Resources:
       Role:
         !GetAtt DownloadBatchRole.Arn
       MemorySize: 1536
-      Runtime: java8.al2
+      Runtime: java8
       Timeout: 900
     DependsOn:
     - DownloadBatchRole
