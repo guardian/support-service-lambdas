@@ -80,7 +80,7 @@ Resources:
       Role:
         !GetAtt StartJobRole.Arn
       MemorySize: 1536
-      Runtime: java8.al2
+      Runtime: java8
       Timeout: 300
     DependsOn:
     - StartJobRole
