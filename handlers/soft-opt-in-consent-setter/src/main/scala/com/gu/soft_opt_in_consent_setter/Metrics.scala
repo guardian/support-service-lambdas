@@ -6,7 +6,7 @@ import com.gu.aws.AwsCloudWatch._
 import scala.util.Try
 
 object Metrics {
-  
+
   private val stage = sys.env.getOrElse("Stage", "DEV")
 
   def put(event: String, value: Double = 1.0): Try[Unit] = {

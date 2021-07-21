@@ -6,8 +6,6 @@ import com.gu.imovo.ImovoStub._
 import com.gu.imovo._
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffMatcher
-import com.softwaremill.sttp.impl.cats.CatsMonadError
-import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -17,36 +15,42 @@ import org.scalatest.EitherValues
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+import sttp.client3.impl.cats.CatsMonadAsyncError
+import sttp.client3.testing.SttpBackendStub
 
 import java.time.LocalDate
+import scala.concurrent.ExecutionContext
 
 class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with EitherValues {
+
+  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
   private val imovoConfig = ImovoConfig("https://imovo.test.com", "imovo-test-api-key")
   private val subscriptionId = SfSubscriptionId("123456")
   private val tomorrow = LocalDate.now.plusDays(1).toString
 
   "DigitalVoucherApi" should "return voucher details for create subscription request" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubCreateSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        schemeName = "Guardian7Day",
-        startDate = tomorrow,
-        response = ImovoSubscriptionResponse(
-          schemeName = "Guardian7Day",
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubCreateSubscription(
+          imovoConfig,
           subscriptionId = subscriptionId.value,
-          successfulRequest = true,
-          subscriptionVouchers = List(
-            ImovoVoucherResponse("ActiveCard", "new-card-code"),
-            ImovoVoucherResponse("ActiveLetter", "new-letter-code")
+          schemeName = "Guardian7Day",
+          startDate = tomorrow,
+          response = ImovoSubscriptionResponse(
+            schemeName = "Guardian7Day",
+            subscriptionId = subscriptionId.value,
+            successfulRequest = true,
+            subscriptionVouchers = List(
+              ImovoVoucherResponse("ActiveCard", "new-card-code"),
+              ImovoVoucherResponse("ActiveLetter", "new-letter-code")
+            )
           )
         )
-      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
@@ -57,34 +61,35 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   }
 
   it should "get existing voucher details from imovo if create fails because the vouchers already exist" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubCreateSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        schemeName = "Guardian7Day",
-        startDate = tomorrow,
-        response = ImovoErrorResponse(
-          List("Unable to create vouchers: live subscription vouchers already exist for the supplied subscription ID"),
-          successfulRequest = false
-        )
-      )
-      .stubGetSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        response = ImovoSubscriptionResponse(
-          schemeName = "Guardian7Day",
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubCreateSubscription(
+          imovoConfig,
           subscriptionId = subscriptionId.value,
-          successfulRequest = true,
-          subscriptionVouchers = List(
-            ImovoVoucherResponse("ActiveCard", "existing-card-code"),
-            ImovoVoucherResponse("ActiveLetter", "existing-letter-code")
+          schemeName = "Guardian7Day",
+          startDate = tomorrow,
+          response = ImovoErrorResponse(
+            List("Unable to create vouchers: live subscription vouchers already exist for the supplied subscription ID"),
+            successfulRequest = false
           )
         )
-      )
+        .stubGetSubscription(
+          imovoConfig,
+          subscriptionId = subscriptionId.value,
+          response = ImovoSubscriptionResponse(
+            schemeName = "Guardian7Day",
+            subscriptionId = subscriptionId.value,
+            successfulRequest = true,
+            subscriptionVouchers = List(
+              ImovoVoucherResponse("ActiveCard", "existing-card-code"),
+              ImovoVoucherResponse("ActiveLetter", "existing-letter-code")
+            )
+          )
+        )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
@@ -95,22 +100,23 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   }
 
   it should "return a 502 when both create subscription and get subscriptions requests to imovo fail" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubCreateSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        schemeName = "Guardian7Day",
-        startDate = tomorrow,
-        response = ImovoErrorResponse(List("imovo-error-1"), successfulRequest = false)
-      )
-      .stubGetSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        response = ImovoErrorResponse(List("imovo-error-2"), successfulRequest = false)
-      )
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubCreateSubscription(
+          imovoConfig,
+          subscriptionId = subscriptionId.value,
+          schemeName = "Guardian7Day",
+          startDate = tomorrow,
+          response = ImovoErrorResponse(List("imovo-error-1"), successfulRequest = false)
+        )
+        .stubGetSubscription(
+          imovoConfig,
+          subscriptionId = subscriptionId.value,
+          response = ImovoErrorResponse(List("imovo-error-2"), successfulRequest = false)
+        )
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
@@ -133,11 +139,12 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   }
 
   it should "return a 422 when ratePlanName in create subscription request param doesn't have a scheme name" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("HomeDelivery").asJson.spaces2)
@@ -150,25 +157,26 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   }
 
   it should "return voucher details for replace request with subscriptionId" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubReplaceSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        imovoSubscriptionType = ImovoSubscriptionType.Both,
-        response = ImovoSubscriptionResponse(
-          schemeName = "Guardian7Day",
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubReplaceSubscription(
+          imovoConfig,
           subscriptionId = subscriptionId.value,
-          successfulRequest = true,
-          subscriptionVouchers = List(
-            ImovoVoucherResponse("ActiveCard", "replaced-card-test-voucher-code"),
-            ImovoVoucherResponse("ActiveLetter", "replaced-letter-test-voucher-code")
+          imovoSubscriptionType = ImovoSubscriptionType.Both,
+          response = ImovoSubscriptionResponse(
+            schemeName = "Guardian7Day",
+            subscriptionId = subscriptionId.value,
+            successfulRequest = true,
+            subscriptionVouchers = List(
+              ImovoVoucherResponse("ActiveCard", "replaced-card-test-voucher-code"),
+              ImovoVoucherResponse("ActiveLetter", "replaced-letter-test-voucher-code")
+            )
           )
         )
-      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
       ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
@@ -181,24 +189,25 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   }
 
   it should "return replaced letter details for replace only letter request with subscriptionId" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubReplaceSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        imovoSubscriptionType = ImovoSubscriptionType.ActiveLetter,
-        response = ImovoSubscriptionResponse(
-          schemeName = "Guardian7Day",
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubReplaceSubscription(
+          imovoConfig,
           subscriptionId = subscriptionId.value,
-          successfulRequest = true,
-          subscriptionVouchers = List(
-            ImovoVoucherResponse("ActiveLetter", "replaced-letter-test-voucher-code")
+          imovoSubscriptionType = ImovoSubscriptionType.ActiveLetter,
+          response = ImovoSubscriptionResponse(
+            schemeName = "Guardian7Day",
+            subscriptionId = subscriptionId.value,
+            successfulRequest = true,
+            subscriptionVouchers = List(
+              ImovoVoucherResponse("ActiveLetter", "replaced-letter-test-voucher-code")
+            )
           )
         )
-      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
       ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(false), Some(true)).asJson.spaces2)
@@ -211,24 +220,25 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   }
 
   it should "return replaced card details for replace only card request with subscriptionId" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubReplaceSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        imovoSubscriptionType = ImovoSubscriptionType.ActiveCard,
-        response = ImovoSubscriptionResponse(
-          schemeName = "Guardian7Day",
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubReplaceSubscription(
+          imovoConfig,
           subscriptionId = subscriptionId.value,
-          successfulRequest = true,
-          subscriptionVouchers = List(
-            ImovoVoucherResponse("ActiveCard", "replaced-card-test-voucher-code")
+          imovoSubscriptionType = ImovoSubscriptionType.ActiveCard,
+          response = ImovoSubscriptionResponse(
+            schemeName = "Guardian7Day",
+            subscriptionId = subscriptionId.value,
+            successfulRequest = true,
+            subscriptionVouchers = List(
+              ImovoVoucherResponse("ActiveCard", "replaced-card-test-voucher-code")
+            )
           )
         )
-      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
       ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(false)).asJson.spaces2)
@@ -241,17 +251,18 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   }
 
   it should "return error response when one imovo replace request fails" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubReplaceSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        imovoSubscriptionType = ImovoSubscriptionType.Both,
-        response = ImovoErrorResponse(Nil, false)
-      )
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubReplaceSubscription(
+          imovoConfig,
+          subscriptionId = subscriptionId.value,
+          imovoSubscriptionType = ImovoSubscriptionType.Both,
+          response = ImovoErrorResponse(Nil, false)
+        )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
       ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
@@ -261,20 +272,21 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   }
 
   it should "return voucher details for get subscription request" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubGetSubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        response = ImovoSubscriptionResponse(
-          schemeName = "Guardian7Day",
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubGetSubscription(
+          imovoConfig,
           subscriptionId = subscriptionId.value,
-          successfulRequest = true,
-          subscriptionVouchers = List(
-            ImovoVoucherResponse("ActiveCard", "card-code"),
-            ImovoVoucherResponse("ActiveLetter", "letter-code")
+          response = ImovoSubscriptionResponse(
+            schemeName = "Guardian7Day",
+            subscriptionId = subscriptionId.value,
+            successfulRequest = true,
+            subscriptionVouchers = List(
+              ImovoVoucherResponse("ActiveCard", "card-code"),
+              ImovoVoucherResponse("ActiveLetter", "letter-code")
+            )
           )
         )
-      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
@@ -291,17 +303,18 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   it should "return 200 response for cancel request" in {
     val cancellationDate = LocalDate.now().plusWeeks(1)
 
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubSubscriptionCancel(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        lastActiveDate = Some(cancellationDate.minusDays(1)),
-        response = ImovoSuccessResponse("OK", true)
-      )
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubSubscriptionCancel(
+          imovoConfig,
+          subscriptionId = subscriptionId.value,
+          lastActiveDate = Some(cancellationDate.minusDays(1)),
+          response = ImovoSuccessResponse("OK", true)
+        )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
-      Request(
+      Request[IO](
         method = Method.POST,
         Uri(path = "/digital-voucher/cancel")
       ).withEntity[String](CancelSubscriptionVoucherRequestBody(subscriptionId.value, cancellationDate).asJson.spaces2)
@@ -314,17 +327,18 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
 
   it should "return 200 response for redemption history request with no redemption history" in {
 
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubRedemptionHistorySubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        response = ImovoRedemptionHistoryResponse(
-          subscriptionId.value,
-          0,
-          List.empty[ImovoSubscriptionHistoryItem],
-          true
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubRedemptionHistorySubscription(
+          imovoConfig,
+          subscriptionId = subscriptionId.value,
+          response = ImovoRedemptionHistoryResponse(
+            subscriptionId.value,
+            0,
+            List.empty[ImovoSubscriptionHistoryItem],
+            true
+          )
         )
-      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
@@ -389,17 +403,18 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       )
     )
 
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubRedemptionHistorySubscription(
-        imovoConfig,
-        subscriptionId = subscriptionId.value,
-        response = ImovoRedemptionHistoryResponse(
-          subscriptionId.value,
-          0,
-          redemptionHistoryResponse,
-          true
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubRedemptionHistorySubscription(
+          imovoConfig,
+          subscriptionId = subscriptionId.value,
+          response = ImovoRedemptionHistoryResponse(
+            subscriptionId.value,
+            0,
+            redemptionHistoryResponse,
+            true
+          )
         )
-      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
@@ -422,7 +437,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
 
   private def getBody[A: Decoder](response: Response[IO]) = {
     val bodyString = response
-      .bodyAsText()
+      .bodyText
       .compile
       .toList
       .unsafeRunSync()

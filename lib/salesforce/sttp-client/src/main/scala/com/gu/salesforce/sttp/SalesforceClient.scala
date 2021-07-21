@@ -1,25 +1,27 @@
 package com.gu.salesforce.sttp
 
-import java.net.URI
-
-import cats.Show
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.syntax.all._
 import com.gu.salesforce.SalesforceConstants.{compositeBaseUrl, sfObjectsBaseUrl, soqlQueryBaseUrl}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth}
-import com.softwaremill.sttp.circe._
-import com.softwaremill.sttp._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, Json, Printer}
+import io.circe._
+import sttp.client3._
+import sttp.client3.circe._
+import sttp.model.{Method, Uri}
+
+import java.net.URI
 
 trait SalesforceClient[F[_]] {
   def query[RESP_BODY: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[RESP_BODY]]
+
   def patch[REQ_BODY: Encoder](objectName: String, objectId: String, body: REQ_BODY): EitherT[F, SalesforceClientError, Unit]
+
   def composite[PART_BODY: Encoder](body: SFApiCompositeRequest[PART_BODY]): EitherT[F, SalesforceClientError, SFApiCompositeResponse]
 }
 
@@ -36,10 +38,9 @@ object SalesforceClient extends LazyLogging {
     backend: SttpBackend[F, S],
     config: SFAuthConfig
   ): EitherT[F, SalesforceClientError, SalesforceClient[F]] = {
-    implicit val b = backend
 
     def auth(config: SFAuthConfig): EitherT[F, SalesforceClientError, SalesforceAuth] = {
-      sendRequest[SalesforceAuth](sttp
+      sendRequest[SalesforceAuth](basicRequest
         .post(
           Uri(new URI(config.url + "/services/oauth2/token")),
         )
@@ -50,7 +51,9 @@ object SalesforceClient extends LazyLogging {
           "password" -> (config.password + config.token),
           "grant_type" -> "password"
         )
-        .response(asJson[SalesforceAuth]))
+        .response(asJson[SalesforceAuth])
+        .mapResponse(_.left.map(e => DeserializationException(e.getMessage, DecodingFailure(e.getMessage, Nil))))
+      )
     }
 
     def followNextRecordsLinks[A: Decoder](
@@ -92,20 +95,28 @@ object SalesforceClient extends LazyLogging {
         parsed.flatMap(_.as[RESP_BODY])
       }
 
-      val requestWithoutBody = sttp
-        .method(method, uri)
-        .headers(
-          "Authorization" -> s"Bearer ${auth.access_token}",
-          "X-SFDC-Session" -> auth.access_token,
-          "Content-Type" -> "application/json"
-        )
-        .mapResponse(responseBodyString => {
-          logger.info(responseBodyString)
-          decode[RESP_BODY](responseBodyString)
-            .left.map(e => DeserializationError(responseBodyString, e, Show[io.circe.Error].show(e)))
-        })
+      val requestWithoutBody: Request[Either[DeserializationException[circe.Error], RESP_BODY], Any] =
+        basicRequest
+          .method(method, uri)
+          .headers(Map(
+            "Authorization" -> s"Bearer ${ auth.access_token }",
+            "X-SFDC-Session" -> auth.access_token,
+            "Content-Type" -> "application/json"
+          ))
+          .mapResponse {
+            case Left(failure) =>
+              logger.info(failure)
+              decode[RESP_BODY](failure)
+                .left.map(e => DeserializationException(e.getMessage, e))
 
-      val bodyAsStringNoNulls = printer.pretty(body.asJson)
+            case Right(success) =>
+              logger.info(success)
+              val errorOrRespbody: Either[circe.Error, RESP_BODY] = decode[RESP_BODY](success)
+              errorOrRespbody
+                .left.map(e => DeserializationException(e.getMessage, e))
+          }
+
+      val bodyAsStringNoNulls = printer.print(body.asJson)
 
       sendRequest[RESP_BODY](
         body.fold(requestWithoutBody)(_ => requestWithoutBody.body(bodyAsStringNoNulls))
@@ -124,33 +135,26 @@ object SalesforceClient extends LazyLogging {
     )
 
     def sendRequest[A](
-      request: RequestT[Id, Either[DeserializationError[io.circe.Error], A], Nothing]
+      request: Request[Either[DeserializationException[circe.Error], A], Any]
     ): EitherT[F, SalesforceClientError, A] = {
       for {
-        response <- EitherT.right[SalesforceClientError](request.send())
+        response <- EitherT.right[SalesforceClientError](request.send(backend))
         responseBody <- EitherT.fromEither[F](formatError[A](request, response))
       } yield responseBody
     }
 
     def formatError[A](
-      request: Request[Either[DeserializationError[circe.Error], A], S],
-      response: Response[Either[DeserializationError[circe.Error], A]]
+      request: Request[Either[DeserializationException[circe.Error], A], S],
+      response: Response[Either[DeserializationException[circe.Error], A]]
     ): Either[SalesforceClientError, A] = {
       response
         .body
         .left.map(
-          errorBody =>
-            SalesforceClientError(
-              s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}"
-            )
-        )
-        .flatMap { parsedBody =>
-          parsedBody.left.map(deserializationError =>
-            SalesforceClientError(
-              s"Request ${request.method.m} ${request.uri.toString()} failed to parse response: $deserializationError"
-            )
+        errorBody =>
+          SalesforceClientError(
+            s"Request ${ request.method.method } ${ request.uri.toString() } failed returning a status ${ response.code } with body: ${ errorBody }"
           )
-        }
+      )
     }
 
     def logQuery(query: String) =
@@ -166,7 +170,7 @@ object SalesforceClient extends LazyLogging {
         override def query[A: Decoder](
           query: String
         ): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]] = {
-          val initialQueryUri = Uri(new URI(auth.instance_url + soqlQueryBaseUrl)).param("q", query)
+          val initialQueryUri = Uri(new URI(auth.instance_url + soqlQueryBaseUrl)).addParam("q", query)
           for {
             _ <- logQuery(query)
             initialQueryResults <- sendAuthenticatedRequest[QueryRecordsWrapperCaseClass[A]](

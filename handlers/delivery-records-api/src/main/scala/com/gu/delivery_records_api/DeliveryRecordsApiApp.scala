@@ -5,11 +5,12 @@ import cats.effect.{ContextShift, IO}
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.Stage
-import com.softwaremill.sttp.SttpBackend
-import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
+import sttp.client3.SttpBackend
+import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import com.typesafe.scalalogging.LazyLogging
 import org.http4s.HttpRoutes
 import io.circe.generic.auto._
+import org.asynchttpclient.DefaultAsyncHttpClient
 import org.http4s.server.middleware.Logger
 import org.http4s.util.CaseInsensitiveString
 
@@ -22,7 +23,7 @@ object DeliveryRecordsApiApp extends LazyLogging {
   def apply(): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
     for {
       config <- loadSalesforceConfig()
-      app <- DeliveryRecordsApiApp(config, AsyncHttpClientCatsBackend[cats.effect.IO]())
+      app <- DeliveryRecordsApiApp(config, AsyncHttpClientCatsBackend.usingClient[cats.effect.IO](new DefaultAsyncHttpClient()))
     } yield app
   }
 

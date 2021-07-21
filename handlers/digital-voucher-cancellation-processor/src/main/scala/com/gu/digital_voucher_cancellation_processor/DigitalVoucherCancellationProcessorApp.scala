@@ -1,8 +1,5 @@
 package com.gu.digital_voucher_cancellation_processor
 
-import java.time.Clock
-
-import cats.arrow.FunctionK
 import cats.data.EitherT
 import cats.effect.{IO, Sync}
 import com.gu.AppIdentity
@@ -11,19 +8,31 @@ import com.gu.imovo.{ImovoClient, ImovoConfig}
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.ConfigLoader
-import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
-import io.circe.generic.auto._
 import com.typesafe.scalalogging.LazyLogging
+import io.circe.generic.auto._
+import org.asynchttpclient.DefaultAsyncHttpClient
+import sttp.client3.SttpBackend
+import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
+
+import java.time.Clock
+import scala.concurrent.ExecutionContext
 
 case class DigitalVoucherCancellationProcessorAppError(message: String)
 
 case class DigitalVoucherCancellationProcessorConfig(imovo: ImovoConfig, salesforce: SFAuthConfig)
 
 object DigitalVoucherCancellationProcessorApp extends LazyLogging {
+
+  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
+
   def apply(
     appIdentity: AppIdentity
   ): EitherT[IO, DigitalVoucherCancellationProcessorAppError, ImovoCancellationResults] = {
-    apply(appIdentity, urlConnectionSttpBackend(), Clock.systemDefaultZone())
+    apply(
+      appIdentity = appIdentity,
+      sttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient()),
+      clock = Clock.systemDefaultZone()
+    )
   }
 
   def apply[F[_]: Sync, S](
@@ -53,12 +62,5 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
         .loadConfig[F, SFAuthConfig]("support-service-lambdas-shared-salesforce", appIdentity)
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to load salesforce config: ${error.message} "))
     } yield DigitalVoucherCancellationProcessorConfig(imovoConfig, salesforceConfig)
-  }
-
-  private def urlConnectionSttpBackend(): SttpBackend[IO, Nothing] = {
-    import com.softwaremill.sttp.impl.cats.implicits._
-
-    sttpBackendToCatsMappableSttpBackend[Id, Nothing](HttpURLConnectionBackend())
-      .mapK(FunctionK.lift[Id, IO](IO.delay))
   }
 }

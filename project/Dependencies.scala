@@ -9,7 +9,7 @@ import sbtassembly.PathList
 object Dependencies {
   val awsSdkVersion = "2.16.100"
   val circeVersion = "0.13.0"
-  val sttpVersion = "1.7.2"
+  val sttpVersion = "3.3.11"
   val http4sVersion = "0.21.28"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "2.5.1"
@@ -43,13 +43,12 @@ object Dependencies {
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
   // HTTP clients
-  val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
-  val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
-  val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
+  val sttp = "com.softwaremill.sttp.client3" %% "core" % sttpVersion
+  val sttpCirce = "com.softwaremill.sttp.client3" %% "circe" % sttpVersion
   val sttpAsyncHttpClientBackendCats =
-    "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
   val sttpOkhttpBackend =
-    "com.softwaremill.sttp" %% "okhttp-backend" % sttpVersion
+    "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.1"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 

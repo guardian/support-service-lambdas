@@ -5,8 +5,8 @@ import com.gu.DevIdentity
 import com.gu.zuora.MoveSubscriptionAtZuoraAccountResponse
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffMatcher
-import com.softwaremill.sttp.Id
-import com.softwaremill.sttp.testing.SttpBackendStub
+import sttp.client3.Identity
+import sttp.client3.testing.SttpBackendStub
 import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -59,7 +59,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      FetchZuoraAccessTokenError(accessTokenUnAuthError.body.swap.getOrElse(throw new RuntimeException)).toString
+      FetchZuoraAccessTokenError(accessTokenUnAuthError.body.swap.map(_.reason).getOrElse(throw new RuntimeException)).toString
     ))
   }
 
@@ -81,7 +81,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      FetchZuoraSubscriptionError(fetchSubscriptionFailedRes.body.swap.getOrElse(throw new RuntimeException)).toString
+      FetchZuoraSubscriptionError(fetchSubscriptionFailedRes.body.swap.map(_.reason).getOrElse(throw new RuntimeException)).toString
     ))
   }
 
@@ -103,7 +103,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      UpdateZuoraAccountError(updateAccountFailedRes.body.swap.getOrElse(throw new RuntimeException)).toString
+      UpdateZuoraAccountError(updateAccountFailedRes.body.swap.map(_.reason).getOrElse(throw new RuntimeException)).toString
     ))
   }
 
@@ -130,7 +130,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     ))
   }
 
-  private def createApp(backendStub: SttpBackendStub[Id, Nothing]) = {
+  private def createApp(backendStub: SttpBackendStub[Identity, Any]) = {
     SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api"), backendStub)
       .value.unsafeRunSync()
       .getOrElse(throw new RuntimeException)

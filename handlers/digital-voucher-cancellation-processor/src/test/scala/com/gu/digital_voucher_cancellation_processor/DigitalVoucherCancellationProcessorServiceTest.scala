@@ -1,7 +1,5 @@
 package com.gu.digital_voucher_cancellation_processor
 
-import java.time.{Clock, Instant, ZoneId}
-
 import cats.effect.IO
 import cats.syntax.all._
 import com.gu.DevIdentity
@@ -11,14 +9,20 @@ import com.gu.imovo.{ImovoClientException, ImovoConfig, ImovoErrorResponse, Imov
 import com.gu.salesforce.sttp.SalesforceStub._
 import com.gu.salesforce.sttp._
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
-import com.softwaremill.sttp.impl.cats.CatsMonadError
-import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.generic.auto._
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sttp.client3.impl.cats.CatsMonadAsyncError
+import sttp.client3.testing.SttpBackendStub
+
+import java.time.{Clock, Instant, ZoneId}
+import scala.concurrent.ExecutionContext
 
 class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Matchers {
+
+  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
+
   val authConfig = SFAuthConfig(
     url = "https://unit-test.salesforce.com",
     client_id = "unit-test-client-id",
@@ -60,7 +64,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
   "DigitalVoucherCancellationProcessor" should "query salesforce for subscriptions, call imovo to cancel sub " +
     "and update Cancellation_Process_On in SF" in {
       val salesforceBackendStub =
-        SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+        SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
           .stubAuth(authConfig, authResponse)
           .stubQuery(
             auth = authResponse,
@@ -112,9 +116,10 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
         )
       )
     }
+
   it should "still update salesforce if subscription has already been cancelled in imovo" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           auth = authResponse,
@@ -171,9 +176,10 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
         )
     }
   }
+
   it should "not update salesforce if imovo request fails" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           auth = authResponse,
@@ -223,19 +229,20 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           successfullyCancelled = List(voucherToCancelQueryResult("valid-sub")),
           cancellationFailures = List(
             ImovoClientException(
-              message = """Request GET https://unit-test.imovo.com/Subscription/CancelSubscriptionVoucher?SubscriptionId=sf-subscription-id-imovo-failure failed with response ({
-                |  "errorMessages" : [
-                |    "Unexpected error"
-                |  ],
-                |  "successfulRequest" : false
-                |})""".stripMargin,
+              message =
+                """Request GET https://unit-test.imovo.com/Subscription/CancelSubscriptionVoucher?SubscriptionId=sf-subscription-id-imovo-failure failed with response ({
+                  |  "errorMessages" : [
+                  |    "Unexpected error"
+                  |  ],
+                  |  "successfulRequest" : false
+                  |})""".stripMargin,
               responseBody = Some(
                 """{
-                |  "errorMessages" : [
-                |    "Unexpected error"
-                |  ],
-                |  "successfulRequest" : false
-                |}""".stripMargin
+                  |  "errorMessages" : [
+                  |    "Unexpected error"
+                  |  ],
+                  |  "successfulRequest" : false
+                  |}""".stripMargin
               )
             )
           )
@@ -243,9 +250,10 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
       )
     )
   }
+
   it should "successfully return empty results if there are no subscriptions to cancel" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           auth = authResponse,
@@ -258,9 +266,10 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
 
     runApp(salesforceBackendStub, testClock) should ===(Right(ImovoCancellationResults()))
   }
+
   it should "return error if a salesforce update fails" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           auth = authResponse,

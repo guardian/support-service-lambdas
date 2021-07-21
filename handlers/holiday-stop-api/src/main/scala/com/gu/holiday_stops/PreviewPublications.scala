@@ -3,8 +3,8 @@ package com.gu.holiday_stops
 import java.time.LocalDate
 
 import com.gu.zuora.subscription.ZuoraApiFailure
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
+import sttp.client3._
+import sttp.client3.circe._
 import io.circe.generic.auto._
 
 /** https://github.com/guardian/invoicing-api/blob/master/src/main/scala/com/gu/invoicing/preview/README.md */
@@ -26,7 +26,7 @@ case class PreviewPublicationsResponse(
 )
 
 object PreviewPublications {
-  private implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
+  private lazy val sttpBackend: SttpBackend[Identity, Any] = HttpURLConnectionBackend()
   private lazy val xApiKey = sys.env.getOrElse("InvoicingApiKey", throw new RuntimeException("Missing x-api-key for invoicing-api"))
   private lazy val invoicingApiUrl = sys.env.getOrElse("InvoicingApiUrl", throw new RuntimeException("Missing invoicing-api url"))
 
@@ -34,14 +34,12 @@ object PreviewPublications {
     subscriptionName: String,
     startDate: String,
     endDate: String
-  ): Either[ZuoraApiFailure, PreviewPublicationsResponse] = {
-    sttp
+  ): Either[ZuoraApiFailure, PreviewPublicationsResponse] =
+    basicRequest
       .get(uri"$invoicingApiUrl/preview/$subscriptionName?startDate=$startDate&endDate=$endDate")
       .header("x-api-key", xApiKey)
       .response(asJson[PreviewPublicationsResponse])
-      .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))
-      .send()
-      .body.left.map(ZuoraApiFailure)
-      .joinRight
-  }
+      .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
+      .send(sttpBackend)
+      .body
 }
