@@ -1,7 +1,7 @@
 package com.gu.delivery_records_api
 
 import cats.data.EitherT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.Stage
