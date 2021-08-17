@@ -510,6 +510,21 @@ lazy val `payment-failure-comms` = lambdaProject(
   )
 ).dependsOn(handler)
 
+lazy val `stripe-webhook-endpoints` = lambdaProject(
+  "stripe-webhook-endpoints",
+  "Endpoints to handle stripe webhooks",
+  Seq(
+    circe,
+    circeParser,
+    scalatest,
+    stripe,
+    awsEvents,
+    sttp,
+    sttpCirce
+  )
+).dependsOn(`config-cats`, `zuora-core`)
+
+
 // ==== END handlers ====
 
 initialize := {
