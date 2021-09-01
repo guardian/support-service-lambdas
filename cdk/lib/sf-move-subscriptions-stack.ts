@@ -86,7 +86,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
         'sfMoveSubscriptionsLambda',
         {
           functionName: `${appName}-${stageParameter.valueAsString}`,
-          runtime: lambda.Runtime.JAVA_8,
+          runtime: lambda.Runtime.JAVA_8_CORRETTO,
           memorySize: 1536,
           timeout: Duration.seconds(300),
           code: Code.bucket(
