@@ -11,7 +11,8 @@ object BrazeConnector {
       sendRequest(
         url = s"https://${brazeConfig.instanceUrl}/users/track",
         bearerToken = brazeConfig.bearerToken,
-        payload = payload)
+        payload = payload
+      )
     )
   }
 
@@ -35,8 +36,7 @@ object BrazeConnector {
           Right(())
         } else {
           Left(BrazeResponseFailure(s"The request to Braze was unsuccessful: ${response.code} - ${response.body}"))
-        }
-      )
+        })
   }
 
 }
