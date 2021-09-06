@@ -156,12 +156,12 @@ Resources:
           - ' '
           - - !FindInMap [ Constants, Alarm, Urgent ]
             - !Ref 'Stage'
-            - !FindInMap [StageMap, !Ref Stage, ApiName]
-            - 'fatal client side errors are being reported'
+            - 'client-side fatal errors are being reported to sentry for support-frontend'
         AlarmDescription: !Join
           - ' '
-          - - 'Impact - some or all browsers are failing to render support client side pages'
+          - - 'Impact - some or all browsers are failing to render support client side pages. Log in to Sentry.io to investigate.'
             - !FindInMap [ Constants, Alarm, Process ]
+            - !FindInMap [StageMap, !Ref Stage, ApiName]
         MetricName: Count
         Namespace: AWS/ApiGateway
         Dimensions:

@@ -10,7 +10,7 @@ object Dependencies {
   val awsSdkVersion = "2.16.100"
   val circeVersion = "0.13.0"
   val sttpVersion = "1.7.2"
-  val http4sVersion = "0.21.24"
+  val http4sVersion = "0.21.28"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "2.5.1"
 
@@ -68,8 +68,8 @@ object Dependencies {
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
-  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.0.1"
-  val stripe = "com.stripe" % "stripe-java" % "20.64.0"
+  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.73.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.5.3" % Test
