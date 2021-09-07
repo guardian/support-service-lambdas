@@ -1,0 +1,268 @@
+Parameters:
+  Stage:
+    Type: String
+    Description: Stage
+Conditions:
+  IsProd:
+    Fn::Equals:
+      - Ref: Stage
+      - PROD
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-2
+Resources:
+  DigitalVoucherCancellationProcessorFnRole9BC677A8:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      Tags:
+        - Key: App
+          Value: digital-voucher-cancellation-processor
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+    Metadata:
+      aws:cdk:path: digital-voucher-cancellation-processor/DigitalVoucherCancellationProcessorFnRole/Resource
+  DigitalVoucherCancellationProcessorFnRoleDefaultPolicy0592FCB9:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: ssm:GetParametersByPath
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:aws:ssm:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :parameter/
+                    - Ref: Stage
+                    - /membership/support-service-lambdas-shared-salesforce
+              - Fn::Join:
+                  - ""
+                  - - "arn:aws:ssm:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :parameter/
+                    - Ref: Stage
+                    - /membership/support-service-lambdas-shared-imovo
+          - Action: kms:Decrypt
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:kms:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - :alias/aws/ssm
+          - Action: logs:CreateLogGroup
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:logs:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - :*
+          - Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:logs:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - :log-group:/aws/lambda/digital-voucher-cancellation-processor-
+                  - Ref: Stage
+                  - :*
+        Version: "2012-10-17"
+      PolicyName: DigitalVoucherCancellationProcessorFnRoleDefaultPolicy0592FCB9
+      Roles:
+        - Ref: DigitalVoucherCancellationProcessorFnRole9BC677A8
+    Metadata:
+      aws:cdk:path: digital-voucher-cancellation-processor/DigitalVoucherCancellationProcessorFnRole/DefaultPolicy/Resource
+  DigitalVoucherCancellationProcessorLambdaCA1ECC62:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key:
+          Fn::Join:
+            - ""
+            - - membership/
+              - Ref: Stage
+              - /digital-voucher-cancellation-processor/digital-voucher-cancellation-processor.jar
+      Handler: com.gu.digital_voucher_cancellation_processor.Handler::handle
+      Role:
+        Fn::GetAtt:
+          - DigitalVoucherCancellationProcessorFnRole9BC677A8
+          - Arn
+      Runtime: java8
+      Environment:
+        Variables:
+          App: digital-voucher-cancellation-processor
+          Stage:
+            Ref: Stage
+          Stack: membership
+      FunctionName:
+        Fn::Join:
+          - ""
+          - - digital-voucher-cancellation-processor-
+            - Ref: Stage
+      MemorySize: 1536
+      Tags:
+        - Key: App
+          Value: digital-voucher-cancellation-processor
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+      Timeout: 300
+    DependsOn:
+      - DigitalVoucherCancellationProcessorFnRoleDefaultPolicy0592FCB9
+      - DigitalVoucherCancellationProcessorFnRole9BC677A8
+    Metadata:
+      aws:cdk:path: digital-voucher-cancellation-processor/DigitalVoucherCancellationProcessorLambda/Resource
+  DigitalVoucherCancellationProcessorLambdaAllowEventRuledigitalvouchercancellationprocessorDigitalVoucherCancellationProcessorSchedule4B74A65D3684A4A6:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - DigitalVoucherCancellationProcessorLambdaCA1ECC62
+          - Arn
+      Principal: events.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+          - DigitalVoucherCancellationProcessorSchedule5BB23F75
+          - Arn
+    Metadata:
+      aws:cdk:path: digital-voucher-cancellation-processor/DigitalVoucherCancellationProcessorLambda/AllowEventRuledigitalvouchercancellationprocessorDigitalVoucherCancellationProcessorSchedule4B74A65D
+  DigitalVoucherCancellationProcessorSchedule5BB23F75:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: cron(0 * * * ? *)
+      State: ENABLED
+      Targets:
+        - Arn:
+            Fn::GetAtt:
+              - DigitalVoucherCancellationProcessorLambdaCA1ECC62
+              - Arn
+          Id: Target0
+    Metadata:
+      aws:cdk:path: digital-voucher-cancellation-processor/DigitalVoucherCancellationProcessorSchedule/Resource
+  ErrorAlarmC73DBEA2:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      AlarmActions:
+        - Fn::Join:
+            - ""
+            - - "arn:aws:sns:"
+              - Ref: AWS::Region
+              - ":"
+              - Ref: AWS::AccountId
+              - :fulfilment-dev
+      AlarmDescription: "IMPACT: If this goes unaddressed at least one subscription that was supposed to be cancelled will be available for fulfilment. For troubleshooting, see https://github.com/guardian/support-service-lambdas/blob/main/handlers/digital-voucher-cancellation-processor/README.md."
+      AlarmName: "URGENT 9-5 - PROD: Failed to cancel digital voucher subscriptions"
+      Dimensions:
+        - Name: FunctionName
+          Value:
+            Ref: DigitalVoucherCancellationProcessorLambdaCA1ECC62
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: missing
+    DependsOn:
+      - DigitalVoucherCancellationProcessorLambdaAllowEventRuledigitalvouchercancellationprocessorDigitalVoucherCancellationProcessorSchedule4B74A65D3684A4A6
+      - DigitalVoucherCancellationProcessorLambdaCA1ECC62
+    Metadata:
+      aws:cdk:path: digital-voucher-cancellation-processor/ErrorAlarm/Resource
+    Condition: IsProd
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Modules: aws-cdk=1.27.0,@aws-cdk/assets=1.27.0,@aws-cdk/aws-apigateway=1.27.0,@aws-cdk/aws-applicationautoscaling=1.27.0,@aws-cdk/aws-autoscaling=1.27.0,@aws-cdk/aws-autoscaling-common=1.27.0,@aws-cdk/aws-autoscaling-hooktargets=1.27.0,@aws-cdk/aws-cloudwatch=1.27.0,@aws-cdk/aws-ec2=1.27.0,@aws-cdk/aws-ecr=1.27.0,@aws-cdk/aws-ecr-assets=1.27.0,@aws-cdk/aws-ecs=1.27.0,@aws-cdk/aws-elasticloadbalancingv2=1.27.0,@aws-cdk/aws-events=1.27.0,@aws-cdk/aws-events-targets=1.27.0,@aws-cdk/aws-iam=1.27.0,@aws-cdk/aws-kms=1.27.0,@aws-cdk/aws-lambda=1.27.0,@aws-cdk/aws-logs=1.27.0,@aws-cdk/aws-s3=1.27.0,@aws-cdk/aws-s3-assets=1.27.0,@aws-cdk/aws-servicediscovery=1.27.0,@aws-cdk/aws-sns=1.27.0,@aws-cdk/aws-sns-subscriptions=1.27.0,@aws-cdk/aws-sqs=1.27.0,@aws-cdk/aws-ssm=1.27.0,@aws-cdk/core=1.27.0,@aws-cdk/cx-api=1.27.0,@aws-cdk/region-info=1.27.0,jsii-runtime=node.js/v16.2.0
+    Condition: CDKMetadataAvailable
+
