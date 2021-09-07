@@ -1,0 +1,330 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Stage
+    AllowedValues:
+      - PROD
+      - CODE
+      - DEV
+    Default: CODE
+  officeIpRange:
+    Type: String
+    Description: officeIpRange
+  salesForceIpRanges:
+    Type: CommaDelimitedList
+    Description: salesForceIpRanges
+
+Resources:
+  sfMoveSubscriptionsFnRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      Tags:
+        - Key: App
+          Value: sf-move-subscriptions-api
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+  sfMoveSubscriptionsFnRoleDefaultPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: ssm:GetParametersByPath
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership/sf-move-subscriptions-api"
+          - Action: kms:Decrypt
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/ssm"
+          - Action: logs:CreateLogGroup
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+          - Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-move-subscriptions-api-${Stage}:*"
+        Version: "2012-10-17"
+      PolicyName: sfMoveSubscriptionsFnRoleDefaultPolicy
+      Roles:
+        - Ref: sfMoveSubscriptionsFnRole
+  sfMoveSubscriptionsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key:
+          - !Sub "membership/${Stage}/sf-move-subscriptions-api/sf-move-subscriptions-api.jar"
+      Handler: com.gu.sf.move.subscriptions.api.Handler::handle
+      Role:
+        Fn::GetAtt:
+          - sfMoveSubscriptionsFnRole
+          - Arn
+      Runtime: java8.al2
+      Environment:
+        Variables:
+          App: sf-move-subscriptions-api
+          Stage:
+            Ref: Stage
+          Stack: membership
+      FunctionName:
+        - !Sub "sf-move-subscriptions-api-${Stage}"
+      MemorySize: 1536
+      Tags:
+        - Key: App
+          Value: sf-move-subscriptions-api
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+      Timeout: 300
+    DependsOn:
+      - sfMoveSubscriptionsFnRoleDefaultPolicy
+      - sfMoveSubscriptionsFnRole
+  sfmovesubscriptionsapi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      ApiKeySourceType: HEADER
+      Description: >
+        API for for moving subscriptions in Salesforce in ${Stage} env
+      Name:
+        - !Sub "sf-move-subscriptions-api-${Stage}"
+      Policy:
+        Statement:
+          - Action: execute-api:Invoke
+            Effect: Allow
+            Principal: "*"
+            Resource: execute-api:/*/*/*
+          - Action: execute-api:Invoke
+            Condition:
+              NotIpAddress:
+                aws:SourceIp:
+                  # is this okay or do we need the below?
+                  - salesForceIpRanges
+                  - officeIpRange
+            #                  Fn::Split:
+            #                    - ","
+            #                    - Fn::Join:
+            #                        - ""
+            #                        - - Fn::Join:
+            #                              - ","
+            #                              - Ref: salesForceIpRanges
+            #                          - ","
+            #                          - Ref: officeIpRange
+            Effect: Deny
+            Principal: "*"
+            Resource: execute-api:/*/*/*
+        Version: "2012-10-17"
+      Tags:
+        - Key: App
+          Value: sf-move-subscriptions-api
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+  sfmovesubscriptionsapiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId:
+        Ref: sfmovesubscriptionsapi
+      Description: Automatically created by the RestApi construct
+    DependsOn:
+      - sfmovesubscriptionsapiproxy
+      - sfmovesubscriptionsapiproxy
+      - sfmovesubscriptionsapi
+  sfmovesubscriptionsapiDeploymentStageobjectObject:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId:
+        Ref: sfmovesubscriptionsapi
+      DeploymentId:
+        Ref: sfmovesubscriptionsapiDeployment
+      StageName:
+        Ref: Stage
+      Tags:
+        - Key: App
+          Value: sf-move-subscriptions-api
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+  sfmovesubscriptionsapiCloudWatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}::iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+      Tags:
+        - Key: App
+          Value: sf-move-subscriptions-api
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+  sfmovesubscriptionsapiAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn:
+        Fn::GetAtt:
+          - sfmovesubscriptionsapiCloudWatchRole
+          - Arn
+    DependsOn:
+      - sfmovesubscriptionsapi
+  sfmovesubscriptionsapiANYApiPermissionsfmovesubscriptionsapi:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - sfMoveSubscriptionsLambda
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        - !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${sfmovesubscriptionsapi}/${sfmovesubscriptionsapiDeploymentStageobjectObject}/*/"
+  sfmovesubscriptionsapiANYApiPermissionTestsfmovesubscriptionsapi:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - sfMoveSubscriptionsLambda
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        - !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${sfmovesubscriptionsapi}/test-invoke-stage/*/"
+  sfmovesubscriptionsapiANY:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: ANY
+      ResourceId:
+        Fn::GetAtt:
+          - sfmovesubscriptionsapi
+          - RootResourceId
+      RestApiId:
+        Ref: sfmovesubscriptionsapi
+      ApiKeyRequired: true
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::GetAtt:
+                  - sfMoveSubscriptionsLambda
+                  - Arn
+              - /invocations
+  sfmovesubscriptionsapiproxy:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt:
+          - sfmovesubscriptionsapi
+          - RootResourceId
+      PathPart: "{proxy+}"
+      RestApiId:
+        Ref: sfmovesubscriptionsapi
+  sfmovesubscriptionsapiproxyANYApiPermissionsfmovesubscriptionsapi:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - sfMoveSubscriptionsLambda
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        - !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${sfmovesubscriptionsapi}/${sfmovesubscriptionsapiDeploymentStageobjectObject}/*/{proxy+}"
+
+  sfmovesubscriptionsapiproxyANYApiPermissionTestsfmovesubscriptionsapi:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - sfMoveSubscriptionsLambda
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        - !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${sfmovesubscriptionsapi}/test-invoke-stage/*/{proxy+}"
+
+  sfmovesubscriptionsapiproxyANY:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: ANY
+      ResourceId:
+        Ref: sfmovesubscriptionsapiproxy
+      RestApiId:
+        Ref: sfmovesubscriptionsapi
+      ApiKeyRequired: true
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::GetAtt:
+                  - sfMoveSubscriptionsLambda
+                  - Arn
+              - /invocations
+  sfMoveSubscriptionsApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Enabled: true
+      Name:
+        - !Sub "sf-move-subscriptions-api-key-${Stage}"
+      StageKeys:
+        - RestApiId:
+            Ref: sfmovesubscriptionsapi
+          StageName:
+            Ref: sfmovesubscriptionsapiDeploymentStageobjectObject
+  sfMoveSubscriptionsApiUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      ApiStages:
+        - ApiId:
+            Ref: sfmovesubscriptionsapi
+          Stage:
+            Ref: sfmovesubscriptionsapiDeploymentStageobjectObject
+          Throttle: { }
+      UsagePlanName:
+        - !Sub "sf-move-subscriptions-api-usage-plan-${Stage}"
+  sfMoveSubscriptionsApiUsagePlanUsagePlanKeyResource:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId:
+        Ref: sfMoveSubscriptionsApiKey
+      KeyType: API_KEY
+      UsagePlanId:
+        Ref: sfMoveSubscriptionsApiUsagePlan
+Outputs:
+  sfmovesubscriptionsapiEndpoint:
+    Value: !Sub "https://${sfmovesubscriptionsapi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/sfmovesubscriptionsapiDeploymentStageobjectObject/"
+
