@@ -238,8 +238,8 @@ lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-
     libraryDependencies ++= Seq(scalatest)
   )
 
-def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil, isCdk: Boolean = false) = {
-  val cfName = if (isCdk) "cdk-cfn.yaml" else "cfn.yaml"
+def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil) = {
+  val cfName = "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
     .configs(EffectsTest, HealthCheckTest)
@@ -416,8 +416,7 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
     sttpAsyncHttpClientBackendCats,
     scalatest,
     diffx
-  ),
-  isCdk = true
+  )
 ).dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
 lazy val `fulfilment-date-calculator` = lambdaProject(
@@ -459,8 +458,7 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
     scalatest,
     diffx,
     sttpCats
-  ),
-  isCdk = true
+  )
 ).dependsOn(
   `config-cats`,
   `salesforce-sttp-client`,
