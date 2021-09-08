@@ -183,5 +183,5 @@ Resources:
     DependsOn:
       - DigitalVoucherCancellationProcessorLambdaAllowEventRuledigitalvouchercancellationprocessorDigitalVoucherCancellationProcessorSchedule4B74A65D3684A4A6
       - DigitalVoucherCancellationProcessorLambdaCA1ECC62
-
+    Condition: IsProd
 
