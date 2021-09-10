@@ -75,7 +75,9 @@ object Lambda extends LazyLogging {
   def processPaymentIntent(intent: PaymentIntent, config: Config): Either[Error, Unit] =
     intent match {
       case SepaPaymentIntent(paymentNumber, paymentIntentObject) => refundZuoraPayment(paymentNumber, paymentIntentObject, config)
-      case OtherPaymentIntent() => Right(())
+      case OtherPaymentIntent() =>
+        logger.info(s"Ignoring non-SEPA event")
+        Right(())
     }
 
   def refundZuoraPayment(paymentNumber: String, paymentIntentObject: PaymentIntentObject, config: Config): Either[Error, Unit] = {
@@ -89,7 +91,7 @@ object Lambda extends LazyLogging {
       restConfig = ZuoraRestConfig(config.zuoraBaseUrl, token.access_token)
       paymentResponse <- queryPayments(paymentNumber, restConfig)
       payment <- paymentResponse.records.headOption.toRight(ZuoraApiError(s"No payments for for number: $paymentNumber"))
-      _ <- rejectPayment(payment.`Id`, paymentIntentObject: PaymentIntentObject, restConfig)
+//      _ <- rejectPayment(payment.`Id`, paymentIntentObject: PaymentIntentObject, restConfig)
     } yield ()
   }
 
