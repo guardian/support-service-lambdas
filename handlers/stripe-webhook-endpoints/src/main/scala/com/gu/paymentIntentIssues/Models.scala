@@ -4,19 +4,28 @@ import io.circe.{Decoder, Encoder}
 import io.circe.parser.decode
 import io.circe.generic.auto._
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 // ----- Config ----- //
 
 case class Config(endpointSecret: String, zuoraBaseUrl: String, zuoraClientId: String, zuoraSecret: String)
 
 // ----- Stripe webhook ----- //
 
-case class PaymentIntentEvent(data: PaymentIntentData)
+case class PaymentIntentMetaData(zpayment_number: Option[String])
+
+case class PaymentIntentObject(
+  id: String,
+  metadata: PaymentIntentMetaData,
+  payment_method_types: List[String],
+  status: String,
+  created: Long
+)
 
 case class PaymentIntentData(`object`: PaymentIntentObject)
 
-case class PaymentIntentObject(metadata: PaymentIntentMetaData, payment_method_types: List[String])
-
-case class PaymentIntentMetaData(zpayment_number: Option[String])
+case class PaymentIntentEvent(data: PaymentIntentData)
 
 object PaymentIntentEvent {
   implicit val decoder = Decoder[PaymentIntentEvent]
@@ -27,7 +36,7 @@ object PaymentIntentEvent {
 
 sealed trait PaymentIntent
 
-case class SepaPaymentIntent(paymentNumber: String) extends PaymentIntent
+case class SepaPaymentIntent(paymentNumber: String, paymentIntentObject: PaymentIntentObject) extends PaymentIntent
 
 case class OtherPaymentIntent() extends PaymentIntent
 
@@ -37,7 +46,7 @@ object PaymentIntent {
 
     if (obj.payment_method_types.contains("sepa_debit")) {
       obj.metadata.zpayment_number match {
-        case Some(paymentNumber) => Right(SepaPaymentIntent(paymentNumber))
+        case Some(paymentNumber) => Right(SepaPaymentIntent(paymentNumber, obj))
         case None => Left(MissingPaymentNumberError("No zuora payment number"))
       }
     } else {
@@ -80,6 +89,19 @@ case class ZuoraRejectPaymentBody(gatewayResponse: String, gatewayResponseCode: 
 
 object ZuoraRejectPaymentBody {
   implicit val encoder = Encoder[ZuoraRejectPaymentBody]
+
+  private val dtFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+  private def zuoraTimestampFromStripeTimestamp(secondsSinceEpoch: Long): String =
+    new LocalDateTime(secondsSinceEpoch * 1000).format(dtFormat)
+
+
+  def fromStripePaymentIntentObject(paymentIntentObject: PaymentIntentObject) = ZuoraRejectPaymentBody(
+    gatewayResponse = paymentIntentObject.status,
+    gatewayResponseCode = paymentIntentObject.status,
+    referenceId = paymentIntentObject.id,
+    secondReferenceId = paymentIntentObject.id,
+    settledOn = zuoraTimestampFromStripeTimestamp(paymentIntentObject.created)
+  )
 }
 
 case class ZuoraRejectPaymentResponse(success: Boolean)

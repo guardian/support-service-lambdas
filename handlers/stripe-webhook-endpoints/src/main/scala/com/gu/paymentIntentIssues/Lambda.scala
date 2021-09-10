@@ -41,7 +41,7 @@ object Lambda extends LazyLogging {
         logger.error(error.message)
         response.setStatusCode(400)
       case Left(error @ (MissingPaymentNumberError(_) | ZuoraApiError(_))) =>
-        // TODO: alamrm
+        // TODO: alarm
         logger.error(error.message)
         response.setStatusCode(200)
       case Right(_) =>
@@ -75,31 +75,29 @@ object Lambda extends LazyLogging {
 
 	def processPaymentIntent(intent: PaymentIntent, config: Config): Either[Error, Unit] = 
     intent match {
-      case SepaPaymentIntent(paymentNumber) => refundZuoraPayment(paymentNumber, config)
+      case SepaPaymentIntent(paymentNumber, paymentIntentObject) => refundZuoraPayment(paymentNumber, paymentIntentObject, config)
       case OtherPaymentIntent() => Right(())
     }
 
-  def refundZuoraPayment(paymentNumber: String, config: Config): Either[Error, Unit] = {
+  def refundZuoraPayment(paymentNumber: String, paymentIntentObject: PaymentIntentObject, config: Config): Either[Error, Unit] = {
     logger.info(s"Zuora payment number: $paymentNumber")
 
-    val backend = HttpURLConnectionBackend()
+    implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
     val oauthConfig = ZuoraRestOauthConfig(config.zuoraBaseUrl, Oauth(config.zuoraClientId, config.zuoraSecret))
 
     for {
-      token <- getAccessToken(oauthConfig, backend)
+      token <- getAccessToken(oauthConfig)
       restConfig = ZuoraRestConfig(config.zuoraBaseUrl, token.access_token)
-      paymentResponse <- queryPayments(paymentNumber, restConfig, backend)
+      paymentResponse <- queryPayments(paymentNumber, restConfig)
       payment <- paymentResponse.records.headOption.toRight(ZuoraApiError(s"No payments for for number: $paymentNumber"))
-      _ <- rejectPayment(payment.`Id`, restConfig, backend)
+      _ <- rejectPayment(payment.`Id`, paymentIntentObject: PaymentIntentObject, restConfig)
     } yield ()
   }
 
-  def getAccessToken(oauthConfig: ZuoraRestOauthConfig, backend: SttpBackend[Id, Nothing]): Either[Error, AccessToken] =
+  def getAccessToken(oauthConfig: ZuoraRestOauthConfig)(implicit backend: SttpBackend[Id, Nothing]): Either[Error, AccessToken] =
     accessTokenGetResponseV2(oauthConfig, backend).left.map(e => ZuoraApiError(e.reason))
 
-  def queryPayments(paymentNumber: String, config: ZuoraRestConfig, backend: SttpBackend[Id, Nothing]): Either[Error, ZuoraPaymentQueryResponse] = {
-    implicit val b = backend
-
+  def queryPayments(paymentNumber: String, config: ZuoraRestConfig)(implicit backend: SttpBackend[Id, Nothing]): Either[Error, ZuoraPaymentQueryResponse] =
     sttp.post(uri"${config.baseUrl}/action/query")
       .header("Authorization", s"Bearer ${config.accessToken}")
       .body(s"""{"queryString": "select Id from Payment where PaymentNumber = '$paymentNumber'" }""")
@@ -108,13 +106,9 @@ object Lambda extends LazyLogging {
       .send()
       .body.left.map(ZuoraApiError)
       .joinRight
-  }
 
-  def rejectPayment(paymentId: String, config: ZuoraRestConfig, backend: SttpBackend[Id, Nothing]): Either[Error, ZuoraRejectPaymentResponse] = {
-    implicit val b = backend
-
-    // TODO: fill this with real data
-    val body = ZuoraRejectPaymentBody(gatewayResponse = "foo", gatewayResponseCode = "foo", referenceId = "foo", secondReferenceId = "foo", settledOn = "2021-08-20 10:00:00")
+  def rejectPayment(paymentId: String, paymentIntentObject: PaymentIntentObject, config: ZuoraRestConfig)(implicit backend: SttpBackend[Id, Nothing]): Either[Error, ZuoraRejectPaymentResponse] = {
+    val body = ZuoraRejectPaymentBody.fromStripePaymentIntentObject(paymentIntentObject)
 
     sttp.post(uri"${config.baseUrl}/gateway-settlement/payments/$paymentId/reject")
       .header("Authorization", s"Bearer ${config.accessToken}")
