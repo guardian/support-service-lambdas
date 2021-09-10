@@ -4,8 +4,9 @@ import io.circe.{Decoder, Encoder}
 import io.circe.parser.decode
 import io.circe.generic.auto._
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 import java.time.format.DateTimeFormatter
+import java.util.TimeZone
 
 // ----- Config ----- //
 
@@ -92,7 +93,9 @@ object ZuoraRejectPaymentBody {
 
   private val dtFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
   private def zuoraTimestampFromStripeTimestamp(secondsSinceEpoch: Long): String =
-    new LocalDateTime(secondsSinceEpoch * 1000).format(dtFormat)
+    LocalDateTime
+      .ofInstant(Instant.ofEpochMilli(secondsSinceEpoch * 1000), ZoneOffset.UTC)
+      .format(dtFormat)
 
 
   def fromStripePaymentIntentObject(paymentIntentObject: PaymentIntentObject) = ZuoraRejectPaymentBody(
