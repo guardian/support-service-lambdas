@@ -5,10 +5,12 @@ name := "support-service-lambdas"
 description:= "Handles auto-cancellations for membership and subscriptions"
 
 assemblyJarName := "support-service-lambdas.jar"
+
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Zuora Auto Cancel"
+riffRaffArtifactResources += (file("handlers/zuora-callout-apis/cloudformation.yaml"), "cfn/cfn.yaml")
 
 addCommandAlias("dist", ";riffRaffArtifact")
 
