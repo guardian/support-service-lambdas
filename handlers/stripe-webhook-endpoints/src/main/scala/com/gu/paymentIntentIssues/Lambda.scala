@@ -23,12 +23,11 @@ object Lambda extends LazyLogging {
   def handler(event: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent = {
     val identity = AppIdentity.whoAmI(defaultAppName = "payment-intent-issues")
 
-    val program = loadConfig(identity).subflatMap(config => 
+    val program = loadConfig(identity).subflatMap(config =>
       for {
         payload <- getPayload(event, config.endpointSecret)
         _ <- processEvent(payload, config)
-      } yield ()
-    )
+      } yield ())
 
     val result = program.value.unsafeRunSync()
 
@@ -52,7 +51,7 @@ object Lambda extends LazyLogging {
   }
 
   def loadConfig(identity: AppIdentity): EitherT[IO, Error, Config] =
-      ConfigLoader.loadConfig[IO, Config](identity).leftMap(e => ConfigLoadingError(e.message))
+    ConfigLoader.loadConfig[IO, Config](identity).leftMap(e => ConfigLoadingError(e.message))
 
   def getPayload(event: APIGatewayProxyRequestEvent, endpointSecret: String): Either[Error, String] =
     for {
@@ -71,9 +70,9 @@ object Lambda extends LazyLogging {
     for {
       event <- PaymentIntentEvent.fromJson(payload)
       intent <- PaymentIntent.fromEvent(event)
-     } yield intent
+    } yield intent
 
-	def processPaymentIntent(intent: PaymentIntent, config: Config): Either[Error, Unit] = 
+  def processPaymentIntent(intent: PaymentIntent, config: Config): Either[Error, Unit] =
     intent match {
       case SepaPaymentIntent(paymentNumber, paymentIntentObject) => refundZuoraPayment(paymentNumber, paymentIntentObject, config)
       case OtherPaymentIntent() => Right(())
@@ -107,7 +106,7 @@ object Lambda extends LazyLogging {
       .body.left.map(ZuoraApiError)
       .joinRight
 
-  def rejectPayment(paymentId: String, paymentIntentObject: PaymentIntentObject, config: ZuoraRestConfig)(implicit backend: SttpBackend[Id, Nothing]): Either[Error, ZuoraRejectPaymentResponse] = {
+  def rejectPayment(paymentId: String, paymentIntentObject: PaymentIntentObject, config: ZuoraRestConfig)(implicit backend: SttpBackend[Id, Nothing]): Either[Error, Unit] = {
     val body = ZuoraRejectPaymentBody.fromStripePaymentIntentObject(paymentIntentObject)
 
     sttp.post(uri"${config.baseUrl}/gateway-settlement/payments/$paymentId/reject")
@@ -115,7 +114,13 @@ object Lambda extends LazyLogging {
       .header("Content-Type", "application/json")
       .body(body.asJson.noSpaces)
       .response(asJson[ZuoraRejectPaymentResponse])
-      .mapResponse(_.left.map(e => ZuoraApiError(s"Decode error: ${e.error}, original: ${e.original}")))
+      .mapResponse {
+        case Right(ZuoraRejectPaymentResponse(true, _)) => Right(())
+        case Right(ZuoraRejectPaymentResponse(false, reasons)) => Left(ZuoraApiError(
+          reasons.getOrElse(Nil).map(_.message).mkString(", ")
+        ))
+        case Left(e) => Left(ZuoraApiError(s"Decode error: ${e.error}, original: ${e.original}"))
+      }
       .send()
       .body.left.map(ZuoraApiError)
       .joinRight

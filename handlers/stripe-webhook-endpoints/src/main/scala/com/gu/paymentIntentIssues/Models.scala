@@ -6,7 +6,6 @@ import io.circe.generic.auto._
 
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import java.time.format.DateTimeFormatter
-import java.util.TimeZone
 
 // ----- Config ----- //
 
@@ -86,25 +85,23 @@ case class ZuoraPayment(`Id`: String)
 
 // Reject payment
 
-case class ZuoraRejectPaymentBody(gatewayResponse: String, gatewayResponseCode: String, referenceId: String, secondReferenceId: String, settledOn: String)
+case class ZuoraRejectPaymentBody(gatewayResponse: String, referenceId: String, settledOn: String)
 
 object ZuoraRejectPaymentBody {
   implicit val encoder = Encoder[ZuoraRejectPaymentBody]
 
-  private val dtFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
-  private def zuoraTimestampFromStripeTimestamp(secondsSinceEpoch: Long): String =
+  private val dtFormat = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss")
+  private def zuoraTimestampFromSecondsSinceEpoch(secondsSinceEpoch: Long): String =
     LocalDateTime
       .ofInstant(Instant.ofEpochMilli(secondsSinceEpoch * 1000), ZoneOffset.UTC)
       .format(dtFormat)
 
-
   def fromStripePaymentIntentObject(paymentIntentObject: PaymentIntentObject) = ZuoraRejectPaymentBody(
     gatewayResponse = paymentIntentObject.status,
-    gatewayResponseCode = paymentIntentObject.status,
     referenceId = paymentIntentObject.id,
-    secondReferenceId = paymentIntentObject.id,
-    settledOn = zuoraTimestampFromStripeTimestamp(paymentIntentObject.created)
+    settledOn = zuoraTimestampFromSecondsSinceEpoch(paymentIntentObject.created)
   )
 }
 
-case class ZuoraRejectPaymentResponse(success: Boolean)
+case class ZuoraFailureReason(code: Long, message: String)
+case class ZuoraRejectPaymentResponse(success: Boolean, reasons: Option[List[ZuoraFailureReason]])
