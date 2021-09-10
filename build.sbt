@@ -14,6 +14,7 @@ val scalaSettings = Seq(
     "-language:implicitConversions",
     "-unchecked",
     "-Xlint",
+    "-Xlint:-byname-implicit",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
