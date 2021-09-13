@@ -325,7 +325,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val response = app.run(
       Request(
         method = Method.GET,
-        Uri(path = s"/delivery-records/${ subscriptionNumber }"),
+        Uri(path = s"/delivery-records/${subscriptionNumber}"),
         headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
       ).withEntity(
         createDeliveryProblemBody
@@ -347,7 +347,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val response = app.run(
       Request(
         method = Method.POST,
-        Uri(path = s"/delivery-records/${ subscriptionNumber }"),
+        Uri(path = s"/delivery-records/${subscriptionNumber}"),
         headers = Headers.of(Header("x-identity-id", identityId)),
       ).withEntity(
         createDeliveryProblemBody
@@ -366,7 +366,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val response = app.run(
       Request(
         method = Method.GET,
-        Uri(path = s"/delivery-records/${ subscriptionNumber }"),
+        Uri(path = s"/delivery-records/${subscriptionNumber}"),
         headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
       )
     ).value.unsafeRunSync().get
@@ -383,7 +383,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val response = app.run(
       Request(
         method = Method.GET,
-        Uri(path = s"/delivery-records/${ subscriptionNumber }")
+        Uri(path = s"/delivery-records/${subscriptionNumber}")
       )
     ).value.unsafeRunSync().get
 

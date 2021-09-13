@@ -21,10 +21,10 @@ class SalesforceClientTest extends flatspec.FixtureAnyFlatSpec with Matchers {
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
   case class FixtureParam(
-                           config: SFAuthConfig,
-                           auth: SalesforceAuth,
-                           backendStub: SttpBackendStub[IO, Nothing]
-                         )
+    config: SFAuthConfig,
+    auth: SalesforceAuth,
+    backendStub: SttpBackendStub[IO, Nothing]
+  )
 
   def withFixture(test: OneArgTest) = {
     val config = SFAuthConfig(
@@ -47,10 +47,10 @@ class SalesforceClientTest extends flatspec.FixtureAnyFlatSpec with Matchers {
   "SalesforceClient" should "make query request and parse response" in { fixture =>
     val query = "SELECT  Id,  CreatedDate, Name FROM SF_Subscription__c WHERE Name = 'A-S00052409'"
     val backendStub = fixture.backendStub.stubQuery(
-      fixture.auth,
-      query,
-      Source.fromResource("subscription-query-response1.json").mkString
-    )
+        fixture.auth,
+        query,
+        Source.fromResource("subscription-query-response1.json").mkString
+      )
       .stubNextRecordLink(
         fixture.auth,
         "/next-records-link",
@@ -60,26 +60,26 @@ class SalesforceClientTest extends flatspec.FixtureAnyFlatSpec with Matchers {
     inside(
       SalesforceClient(backendStub, fixture.config).flatMap(_.query[QueryResults](query)).value.unsafeRunSync()
     ) {
-      case Right(response) =>
-        response.records should equal(
-          List(
-            QueryResults(
-              "000000001",
-              Instant.parse(
-                "2019-11-18T16:59:24Z",
+        case Right(response) =>
+          response.records should equal(
+            List(
+              QueryResults(
+                "000000001",
+                Instant.parse(
+                  "2019-11-18T16:59:24Z",
+                ),
+                "A-000000001"
               ),
-              "A-000000001"
-            ),
-            QueryResults(
-              "000000002",
-              Instant.parse(
-                "2019-11-18T16:59:24Z",
-              ),
-              "A-000000002"
+              QueryResults(
+                "000000002",
+                Instant.parse(
+                  "2019-11-18T16:59:24Z",
+                ),
+                "A-000000002"
+              )
             )
           )
-        )
-    }
+      }
   }
 
   it should "make patch request" in { fixture =>

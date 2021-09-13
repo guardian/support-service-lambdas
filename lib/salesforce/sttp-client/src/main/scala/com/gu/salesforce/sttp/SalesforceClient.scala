@@ -99,7 +99,7 @@ object SalesforceClient extends LazyLogging {
         basicRequest
           .method(method, uri)
           .headers(Map(
-            "Authorization" -> s"Bearer ${ auth.access_token }",
+            "Authorization" -> s"Bearer ${auth.access_token}",
             "X-SFDC-Session" -> auth.access_token,
             "Content-Type" -> "application/json"
           ))
@@ -152,7 +152,7 @@ object SalesforceClient extends LazyLogging {
         .left.map(
         errorBody =>
           SalesforceClientError(
-            s"Request ${ request.method.method } ${ request.uri.toString() } failed returning a status ${ response.code } with body: ${ errorBody }"
+            s"Request ${request.method.method} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}"
           )
       )
     }
@@ -187,7 +187,7 @@ object SalesforceClient extends LazyLogging {
         }
 
         override def patch[REQ_BODY: Encoder](objectName: String, objectId: String, body: REQ_BODY): EitherT[F, SalesforceClientError, Unit] = {
-          val uri = Uri(new URI(s"${ auth.instance_url }$sfObjectsBaseUrl$objectName/$objectId"))
+          val uri = Uri(new URI(s"${auth.instance_url}$sfObjectsBaseUrl$objectName/$objectId"))
           for {
             _ <- logQuery(s"$objectName $objectId PATCH with '$body'")
             _ <- sendAuthenticatedRequestWithOptionalBody[REQ_BODY, Unit](auth, Method.PATCH, uri, Some(body))
