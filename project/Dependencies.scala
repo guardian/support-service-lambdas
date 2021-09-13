@@ -63,7 +63,7 @@ object Dependencies {
   val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.6"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.13"
-  val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.5"
+  val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.7"
