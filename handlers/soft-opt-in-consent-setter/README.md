@@ -111,7 +111,10 @@ will provide more details regarding which of these is taking place.
 
 1. Check that the IDAPI endpoints are correct and online.
 1. Check the logs for the error code being returned by the endpoint and contact the Identity team to understand why
-   IDAPI was unable to set the user's Soft Opt-In consents.
+   IDAPI was unable to set the user's Soft Opt-In consents. Most of the time this will be a user who no longer has an 
+   Identity account (ID stored in `SF_Subscription__c.Buyer__r.IdentityID__c`), in which case no action is necessary. *
+
+\* You can use the [useradmin tool](https://useradmin.gutools.co.uk/) to find out if an Identity ID exists in the Identity system. This is a tool that allows you to tie together identities with email addresses, subscriptions, physical addresses etc. If the ID doesn't exist in the system, there's no need to take any further action.
 
 For all the above, after the underlying issue is resolved, the `Soft_Opt_in_Number_of_Attempts__c` fields needs to be
-reset to 0 for reach of the affected records. After that the lambda will pick up those record for processing again.
+reset to 0 for each of the affected records. After that the lambda will pick up those records for processing again.
