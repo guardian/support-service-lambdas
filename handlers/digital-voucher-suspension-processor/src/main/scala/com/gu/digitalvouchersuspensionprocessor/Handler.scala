@@ -12,6 +12,7 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure => TryFailure, Success, Try}
 
 object Handler extends LazyLogging {
 
@@ -23,7 +24,8 @@ object Handler extends LazyLogging {
   def main(args: Array[String]): Unit = processSuspensions()
 
   def processSuspensions(): Unit = {
-    val sttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient())
+    val httpClient = new DefaultAsyncHttpClient()
+    val sttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](httpClient)
     val processed = for {
       config <- EitherT.fromEither[IO](Config.fromEnv()).leftWiden[Failure]
       salesforce <- SalesforceClient(sttpBackend, config.salesforce)
@@ -34,10 +36,18 @@ object Handler extends LazyLogging {
       _ <- suspensions.map(sendSuspensionToDigitalVoucherApi(salesforce, imovo, LocalDateTime.now))
         .toList.sequence.map(_ => ())
     } yield ()
-    processed.value.unsafeRunSync().valueOr { e =>
-      logger.error(s"Processing failed: $e")
-      throw new RuntimeException(e.toString)
-    }
+    Try(
+      processed.value.unsafeRunSync().valueOr { e =>
+        logger.error(s"Processing failed: $e")
+        throw new RuntimeException(e.toString)
+      }
+    ) match {
+        case TryFailure(exception) =>
+          httpClient.close()
+          throw exception
+        case Success(_) =>
+          httpClient.close()
+      }
   }
 
   def fetchSuspensionsToBeProcessed[F[_]: Sync](salesforce: SalesforceClient[F]): EitherT[F, SalesforceFetchFailure, Seq[Suspension]] =

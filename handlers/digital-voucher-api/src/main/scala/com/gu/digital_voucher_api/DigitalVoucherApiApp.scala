@@ -1,14 +1,14 @@
 package com.gu.digital_voucher_api
 
 import cats.data.EitherT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import cats.syntax.all._
 import com.gu.AppIdentity
 import com.gu.imovo.{ImovoClient, ImovoConfig}
 import com.gu.util.config.ConfigLoader
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
-import org.asynchttpclient.DefaultAsyncHttpClient
+import org.asynchttpclient.AsyncHttpClient
 import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
 import org.http4s.util.CaseInsensitiveString
@@ -23,8 +23,8 @@ object DigitalVoucherApiApp extends LazyLogging {
 
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
-  def apply(appIdentity: AppIdentity): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
-    DigitalVoucherApiApp(appIdentity, AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient()))
+  def apply(appIdentity: AppIdentity, httpClient: AsyncHttpClient): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
+    DigitalVoucherApiApp(appIdentity, AsyncHttpClientCatsBackend.usingClient[IO](httpClient))
   }
 
   def apply[S](appIdentity: AppIdentity, backend: SttpBackend[IO, S]): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {

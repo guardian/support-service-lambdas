@@ -1,7 +1,7 @@
 package com.gu.deliveryproblemcreditprocessor
 
 import cats.data.EitherT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import cats.syntax.all._
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
@@ -16,7 +16,7 @@ import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, Zu
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._
-import org.asynchttpclient.DefaultAsyncHttpClient
+import org.asynchttpclient.AsyncHttpClient
 import sttp.client3.HttpURLConnectionBackend
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import zio.Schedule.{exponential, recurs}
@@ -27,11 +27,11 @@ import zio.{RIO, Task, ZIO}
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
-object DeliveryCreditProcessor extends Logging {
+class DeliveryCreditProcessor(httpClient: AsyncHttpClient) extends Logging {
 
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
   private val zuoraSttpBackend = HttpURLConnectionBackend()
-  private val sfSttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient())
+  private val sfSttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](httpClient)
 
   private lazy val stage = Stage()
 
