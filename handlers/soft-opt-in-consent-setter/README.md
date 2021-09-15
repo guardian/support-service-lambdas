@@ -115,4 +115,4 @@ will provide more details regarding which of these is taking place.
    Identity account, in which case no action is necessary.
 
 For all the above, after the underlying issue is resolved, the `Soft_Opt_in_Number_of_Attempts__c` fields needs to be
-reset to 0 for reach of the affected records. After that the lambda will pick up those record for processing again.
+reset to 0 for each of the affected records. After that the lambda will pick up those records for processing again.
