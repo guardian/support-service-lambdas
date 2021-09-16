@@ -18,7 +18,7 @@ You can generate the clouformation template cdk-cfm.yaml using the script:
 You can manually deploy the generated cloudformation template using the aws cli as follows:
 
 ```bash
- aws --profile membership cloudformation deploy --template-file ./cdk-cfn.yaml --stack-name membership-DEV-digital-voucher-cancellation-processor --parameter-overrides Stage=DEV --capabilities CAPABILITY_IAM
+ aws --profile membership cloudformation deploy --template-file ./cfn.yaml --stack-name membership-DEV-digital-voucher-cancellation-processor --parameter-overrides Stage=DEV --capabilities CAPABILITY_IAM
 ```
 
 #Config

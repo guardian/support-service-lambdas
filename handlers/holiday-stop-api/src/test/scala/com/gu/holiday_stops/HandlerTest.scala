@@ -1,10 +1,5 @@
 package com.gu.holiday_stops
 
-import java.io.Serializable
-import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAdjusters.next
-import java.time.{DayOfWeek, LocalDate}
-
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
@@ -15,13 +10,18 @@ import com.gu.util.config.Stage
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.zuora.subscription.{Credit, MutableCalendar, RatePlan, RatePlanCharge, Subscription, SubscriptionName, Fixtures => SubscriptionFixtures}
-import com.softwaremill.sttp.testing.SttpBackendStub
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsObject, JsString, JsSuccess, Json}
-import zio.console.Console
+import sttp.client3.testing.SttpBackendStub
 import zio.ZIO
+import zio.console.Console
+
+import java.io.Serializable
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters.next
+import java.time.{DayOfWeek, LocalDate}
 
 class HandlerTest extends AnyFlatSpec with Matchers {
   val testId = "test-generated-id"
