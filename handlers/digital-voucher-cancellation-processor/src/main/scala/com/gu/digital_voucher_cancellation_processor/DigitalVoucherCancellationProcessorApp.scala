@@ -25,8 +25,9 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
 
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
-  def apply(
-    appIdentity: AppIdentity
+  def apply[F[_]: Sync, S](
+    appIdentity: AppIdentity,
+    sttpBackend: SttpBackend[F, S]
   ): EitherT[IO, DigitalVoucherCancellationProcessorAppError, ImovoCancellationResults] = {
     apply(
       appIdentity = appIdentity,

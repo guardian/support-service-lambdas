@@ -7,7 +7,7 @@ import com.gu.digitalvouchersuspensionprocessor.Salesforce.Suspension
 import com.gu.imovo.ImovoClient
 import com.gu.salesforce.sttp.SalesforceClient
 import com.typesafe.scalalogging.LazyLogging
-import org.asynchttpclient.DefaultAsyncHttpClient
+import sttp.client3.SttpBackend
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import java.time.LocalDateTime
@@ -23,8 +23,8 @@ object Handler extends LazyLogging {
   def main(args: Array[String]): Unit = processSuspensions()
 
   def processSuspensions(): Unit = {
-    val sttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient())
-    val processed = for {
+
+    def processed(sttpBackend: SttpBackend[IO, Any]) = for {
       config <- EitherT.fromEither[IO](Config.fromEnv()).leftWiden[Failure]
       salesforce <- SalesforceClient(sttpBackend, config.salesforce)
         .leftMap(e => SalesforceFetchFailure(s"Failed to create Salesforce client: $e"))
@@ -34,7 +34,10 @@ object Handler extends LazyLogging {
       _ <- suspensions.map(sendSuspensionToDigitalVoucherApi(salesforce, imovo, LocalDateTime.now))
         .toList.sequence.map(_ => ())
     } yield ()
-    processed.value.unsafeRunSync().valueOr { e =>
+
+    AsyncHttpClientCatsBackend[IO]().flatMap { sttpBackend =>
+      processed(sttpBackend).value
+    }.unsafeRunSync().valueOr { e =>
       logger.error(s"Processing failed: $e")
       throw new RuntimeException(e.toString)
     }
