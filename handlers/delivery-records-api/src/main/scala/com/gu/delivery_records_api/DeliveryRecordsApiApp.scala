@@ -1,29 +1,29 @@
 package com.gu.delivery_records_api
 
 import cats.data.EitherT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.Stage
-import sttp.client3.SttpBackend
-import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import com.typesafe.scalalogging.LazyLogging
-import org.http4s.HttpRoutes
 import io.circe.generic.auto._
-import org.asynchttpclient.DefaultAsyncHttpClient
+import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
 import org.http4s.util.CaseInsensitiveString
+import sttp.client3.SttpBackend
+
+import scala.concurrent.ExecutionContext
 
 final case class DeliveryRecordsApiError(message: String)
 
 object DeliveryRecordsApiApp extends LazyLogging {
 
-  private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
-  def apply(): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
+  def apply(sttpBackend: SttpBackend[IO, Any]): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
     for {
       config <- loadSalesforceConfig()
-      app <- DeliveryRecordsApiApp(config, AsyncHttpClientCatsBackend.usingClient[cats.effect.IO](new DefaultAsyncHttpClient()))
+      app <- DeliveryRecordsApiApp(config, sttpBackend)
     } yield app
   }
 
