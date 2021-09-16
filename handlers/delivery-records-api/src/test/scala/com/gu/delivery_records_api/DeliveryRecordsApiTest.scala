@@ -1,25 +1,29 @@
 package com.gu.delivery_records_api
 
-import java.time.LocalDate
-
 import cats.effect.IO
 import com.gu.delivery_records_api.DeliveryRecordsService.deliveryRecordsQuery
+import sttp.client3.impl.cats.CatsMonadAsyncError
+import sttp.client3.testing.SttpBackendStub
+import com.gu.salesforce._
+import com.gu.salesforce.sttp.SalesforceStub.implicitSalesforceStub
 import com.gu.salesforce.sttp.{SFApiCompositeResponse, SFApiCompositeResponsePart}
-import com.gu.salesforce.sttp.SalesforceStub._
-import com.gu.salesforce.{IdentityId, RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth, SalesforceContactId}
-import com.softwaremill.sttp.impl.cats.CatsMonadError
-import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Decoder
-import org.http4s.{Header, Headers, Method, Query, Request, Response, Uri}
-import org.scalatest.{EitherValues, Inside}
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
+import org.http4s._
 import org.http4s.circe._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.{EitherValues, Inside}
+
+import java.time.LocalDate
+import scala.concurrent._
 
 class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues {
+
+  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
+
   val config = SFAuthConfig("https://salesforceAuthUrl", "sfClientId", "sfClientSecret", "sfUsername", "sfPassword", "sfToken")
   val auth = SalesforceAuth("salesforce-access-token", "https://salesforceInstanceUrl")
   val subscriptionNumber = "A-213123"
@@ -182,7 +186,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
 
   "DeliveryRecordsApp" should "lookup subscription with identity id" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
 
@@ -198,9 +202,10 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
   }
+
   it should "lookup subscription with contact id" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
 
@@ -221,7 +226,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val startDate = endDate.minusDays(1)
 
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubQuery(
           auth,
@@ -252,7 +257,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
   }
   it should "return 404 if no subscription returned from salesforce" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubQuery(
           auth,
@@ -289,7 +294,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
 
   it should "create a delivery problem case and update contact with identity id" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, validCompositeResponse)
         .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
@@ -311,7 +316,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
 
   it should "create a delivery problem case and update contact with contact id" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, validCompositeResponse)
         .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
@@ -333,7 +338,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
 
   it should "fail to create a delivery problem case when parts of the composite request fail" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, failedCompositeResponse)
         .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
@@ -353,9 +358,9 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
   }
 
   it should "return 500 request if salesforce fails" in {
-    val salesforceBackendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+    val salesforceBackendStub = SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
       .stubAuth(config, auth)
-    //will return 404 for query endpoint
+      .stubFailingQuery
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -368,9 +373,10 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
 
     response.status.code should equal(500)
   }
+
   it should "lookup return 400 if no auth headers" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
 
     val app = createApp(salesforceBackendStub)
@@ -383,8 +389,11 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
 
     response.status.code should equal(400)
   }
+
   it should "fail to initialise if salesforce auth fails" in {
-    val salesforceBackendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO]) //Auth call not stubbed
+    val salesforceBackendStub =
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+        .stubFailingAuth
 
     DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(true)
   }
@@ -392,13 +401,13 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
   private def getBody[A: Decoder](response: Response[IO]) = {
     parse(
       response
-        .bodyAsText()
+        .bodyText
         .compile
         .toList
         .unsafeRunSync()
         .mkString("")
-    ).right.value
-      .as[A].right.value
+    ).value
+      .as[A].value
   }
 
   private def createApp(salesforceBackendStub: SttpBackendStub[IO, Nothing]) = {
