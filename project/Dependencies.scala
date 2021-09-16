@@ -9,8 +9,8 @@ import sbtassembly.PathList
 object Dependencies {
   val awsSdkVersion = "2.16.100"
   val circeVersion = "0.13.0"
-  val sttpVersion = "1.7.2"
-  val http4sVersion = "0.23.3"
+  val sttpVersion = "3.3.11"
+  val http4sVersion = "0.21.28"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "2.5.1"
 
@@ -43,13 +43,12 @@ object Dependencies {
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
   // HTTP clients
-  val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
-  val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
-  val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
+  val sttp = "com.softwaremill.sttp.client3" %% "core" % sttpVersion
+  val sttpCirce = "com.softwaremill.sttp.client3" %% "circe" % sttpVersion
   val sttpAsyncHttpClientBackendCats =
-    "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
   val sttpOkhttpBackend =
-    "com.softwaremill.sttp" %% "okhttp-backend" % sttpVersion
+    "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.1"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
@@ -63,13 +62,13 @@ object Dependencies {
   val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.6"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.13"
-  val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.5"
+  val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
-  val stripe = "com.stripe" % "stripe-java" % "20.64.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.74.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.5.3" % Test

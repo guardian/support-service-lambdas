@@ -1,19 +1,20 @@
 package com.gu.imovo
 
-import java.net.URI
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.syntax.all._
-import com.softwaremill.sttp.Method.GET
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
+import sttp.client3._
+import sttp.client3.circe._
+import sttp.model.Method.GET
+import sttp.model.{Method, Uri}
+
+import java.net.URI
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 case class ImovoConfig(imovoBaseUrl: String, imovoApiKey: String)
 case class SfSubscriptionId(value: String) extends AnyVal
@@ -85,7 +86,6 @@ object ImovoClient extends LazyLogging {
   val redemptionHistoryMaxLines = "100"
 
   def apply[F[_]: Sync, S](backend: SttpBackend[F, S], config: ImovoConfig): EitherT[F, ImovoClientException, ImovoClient[F]] = {
-    implicit val b: SttpBackend[F, S] = backend
 
     def sendAuthenticatedRequest[A: Decoder, B: Encoder](
       apiKey: String,
@@ -94,30 +94,30 @@ object ImovoClient extends LazyLogging {
       body: Option[B]
     ): EitherT[F, ImovoClientException, A] = {
 
-      val requestWithoutBody = sttp
+      val requestWithoutBody = basicRequest
         .method(method, uri)
-        .headers(
+        .headers(Map(
           "X-API-KEY" -> apiKey
-        )
+        ))
 
       val request = body.fold(requestWithoutBody)(b => requestWithoutBody.body(b))
 
       for {
-        response <- request.send().attemptT.leftMap(e => ImovoClientException(e.toString))
+        response <- request.send(backend).attemptT.leftMap(e => ImovoClientException(e.toString))
         responseBody <- EitherT.fromEither[F](decodeResponse[A](request, response))
       } yield responseBody
     }
 
     def decodeResponse[A: Decoder](
-      request: Request[String, S],
-      response: Response[String]
+      request: Request[Either[String, String], Any],
+      response: Response[Either[String, String]]
     ): Either[ImovoClientException, A] = {
       response
         .body
-        .leftMap(
+        .left.map(
           errorBody =>
             ImovoClientException(
-              message = s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}",
+              message = s"Request ${request.method.method} ${request.uri.toString()} failed returning a status ${response.code} with body: $errorBody",
               responseBody = Some(errorBody)
             )
         )
@@ -125,7 +125,7 @@ object ImovoClient extends LazyLogging {
           for {
             parsedResponse <- parse(successBody)
               .leftMap(e => ImovoClientException(
-                message = s"Request ${request.method.m} ${request.uri.toString()} failed to parse response ($successBody): $e",
+                message = s"Request ${request.method.method} ${request.uri.toString()} failed to parse response ($successBody): $e",
                 responseBody = Some(successBody)
               ))
 
@@ -134,7 +134,7 @@ object ImovoClient extends LazyLogging {
               .downField("successfulRequest")
               .as[Boolean]
               .leftMap(e => ImovoClientException(
-                message = s"Request ${request.method.m} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e",
+                message = s"Request ${request.method.method} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e",
                 responseBody = Some(successBody)
               ))
 
@@ -143,12 +143,12 @@ object ImovoClient extends LazyLogging {
                 parsedResponse
                   .as[A]
                   .leftMap(e => ImovoClientException(
-                    message = s"Request ${request.method.m} ${request.uri.toString()} failed to decode response ($successBody): $e",
+                    message = s"Request ${request.method.method} ${request.uri.toString()} failed to decode response ($successBody): $e",
                     responseBody = Some(successBody)
                   ))
               } else {
                 ImovoClientException(
-                  message = s"Request ${request.method.m} ${request.uri.toString()} failed with response ($successBody)",
+                  message = s"Request ${request.method.method} ${request.uri.toString()} failed with response ($successBody)",
                   responseBody = Some(successBody)
                 ).asLeft[A]
               }
@@ -170,9 +170,9 @@ object ImovoClient extends LazyLogging {
           config.imovoApiKey,
           Method.GET,
           Uri(new URI(s"${config.imovoBaseUrl}/Subscription/RequestSubscriptionVouchers"))
-            .param("SubscriptionId", subscriptionId.value)
-            .param("SchemeName", schemeName.value)
-            .param("StartDate", imovoDateFormat.format(startDate)),
+            .addParam("SubscriptionId", subscriptionId.value)
+            .addParam("SchemeName", schemeName.value)
+            .addParam("StartDate", imovoDateFormat.format(startDate)),
           None
         )
 
@@ -181,7 +181,7 @@ object ImovoClient extends LazyLogging {
           config.imovoApiKey,
           Method.GET,
           Uri(new URI(s"${config.imovoBaseUrl}/Subscription/GetSubscriptionVoucherDetails"))
-            .param("SubscriptionId", subscriptionId),
+            .addParam("SubscriptionId", subscriptionId),
           None
         )
       }
@@ -194,17 +194,17 @@ object ImovoClient extends LazyLogging {
           config.imovoApiKey,
           Method.GET,
           Uri(new URI(s"${config.imovoBaseUrl}/Subscription/ReplaceVoucherBySubscriptionId"))
-            .param("SubscriptionId", subscriptionId.value)
-            .param("SubscriptionType", subscriptionType.value),
+            .addParam("SubscriptionId", subscriptionId.value)
+            .addParam("SubscriptionType", subscriptionType.value),
           None
         )
       }
 
       override def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, optionalLastActiveDay: Option[LocalDate]): EitherT[F, ImovoClientException, ImovoSuccessResponse] = {
         val uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/CancelSubscriptionVoucher"))
-          .param("SubscriptionId", subscriptionId.value)
+          .addParam("SubscriptionId", subscriptionId.value)
         val uriWithLastActiveDay = optionalLastActiveDay
-          .map(lastActiveDay => uri.param("LastActiveDay", imovoDateFormat.format(lastActiveDay)))
+          .map(lastActiveDay => uri.addParam("LastActiveDay", imovoDateFormat.format(lastActiveDay)))
           .getOrElse(uri)
         sendAuthenticatedRequest[ImovoSuccessResponse, String](
           config.imovoApiKey,
@@ -219,9 +219,9 @@ object ImovoClient extends LazyLogging {
           apiKey = config.imovoApiKey,
           method = GET,
           uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/SetHoliday"))
-            .param("SubscriptionId", subscriptionId.value)
-            .param("StartDate", startDate.toString)
-            .param("ReactivationDate", endDateExclusive.toString),
+            .addParam("SubscriptionId", subscriptionId.value)
+            .addParam("StartDate", startDate.toString)
+            .addParam("ReactivationDate", endDateExclusive.toString),
           body = None
         ).map(_ => ())
 
@@ -244,13 +244,12 @@ object ImovoClient extends LazyLogging {
        *
        *    MaxLines - integer
        *
-       * @param subscriptionId
        * @return Either[F, ImovoClientException, ImovoRedemptionHistoryResponse]
        */
       override def getRedemptionHistory(subscriptionId: SfSubscriptionId): EitherT[F, ImovoClientException, ImovoRedemptionHistoryResponse] = {
         val uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/SubscriptionRedemptionHistory"))
-          .param("SubscriptionId", subscriptionId.value)
-          .param("MaxLines", redemptionHistoryMaxLines)
+          .addParam("SubscriptionId", subscriptionId.value)
+          .addParam("MaxLines", redemptionHistoryMaxLines)
 
         sendAuthenticatedRequest[ImovoRedemptionHistoryResponse, String](
           config.imovoApiKey,

@@ -8,7 +8,7 @@ deployments:
     type: cloud-formation
     app: sf-move-subscriptions-api
     parameters:
-      templatePath: cdk-cfn.yaml
+      templatePath: cfn.yaml
 
   sf-move-subscriptions-api:
     type: aws-lambda

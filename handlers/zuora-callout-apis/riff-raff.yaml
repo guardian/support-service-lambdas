@@ -3,6 +3,14 @@ stacks:
 regions:
 - eu-west-1
 deployments:
+  cfn:
+    type: cloud-formation
+    parameters:
+      templatePath: cfn.yaml
+      cloudFormationStackName: zuora-auto-cancel
+      cloudFormationStackByTags: false
+      prependStackToCloudFormationStackName: false
+      createStackIfAbsent: false
   support-service-lambdas:
     type: aws-lambda
     parameters:
@@ -13,3 +21,5 @@ deployments:
       - zuora-auto-cancel-
       - payment-failure-
       - stripe-customer-source-updated-
+    dependencies: [cfn]
+    

@@ -26,7 +26,7 @@ import com.gu.util.resthttp.Types.ClientFailure
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, Zuora}
-import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
+import sttp.client3.{HttpURLConnectionBackend, Identity, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads, Writes}
 import zio.console.Console
@@ -57,7 +57,7 @@ object Handler extends Logging {
     response: Request => Response,
     stage: Stage,
     fetchString: StringFromS3,
-    backend: SttpBackend[Id, Nothing],
+    backend: SttpBackend[Identity, Any],
     idGenerator: => String,
   ): ZIO[Console with Configuration, Serializable, ApiGatewayOp[Operation]] =
     Configuration.config.map(config =>
@@ -75,7 +75,7 @@ object Handler extends Logging {
     response: Request => Response,
     stage: Stage,
     fetchString: StringFromS3,
-    backend: SttpBackend[Id, Nothing],
+    backend: SttpBackend[Identity, Any],
     idGenerator: => String,
     config: Config
   ): ApiGatewayOp[Operation] = {
@@ -480,7 +480,7 @@ object Handler extends Logging {
 
   def getSubscriptionFromZuora(
     config: Config,
-    backend: SttpBackend[Id, Nothing]
+    backend: SttpBackend[Identity, Any]
   )(
     accessToken: AccessToken,
     subscriptionName: SubscriptionName
@@ -488,7 +488,7 @@ object Handler extends Logging {
 
   def getAccountFromZuora(
     config: Config,
-    backend: SttpBackend[Id, Nothing]
+    backend: SttpBackend[Identity, Any]
   )(
     accessToken: AccessToken,
     accountKey: String
@@ -496,7 +496,7 @@ object Handler extends Logging {
 
   def getAccessTokenFromZuora(
     config: Config,
-    backend: SttpBackend[Id, Nothing]
+    backend: SttpBackend[Identity, Any]
   )(): Either[ApiFailure, AccessToken] = Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
 
 

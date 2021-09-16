@@ -1,11 +1,12 @@
 package com.gu.sf.move.subscriptions.api
 
-import java.time.LocalDate
-
+import com.gu.zuora.subscription.{Subscription, ZuoraApiFailure}
 import com.gu.zuora.{AccessToken, MoveSubscriptionAtZuoraAccountResponse}
-import com.gu.zuora.subscription.Subscription
-import com.softwaremill.sttp.testing.SttpBackendStub
-import com.softwaremill.sttp.{Id, Response, StatusCodes}
+import sttp.client3.testing.SttpBackendStub
+import sttp.client3.{Identity, Response}
+import sttp.model.StatusCode
+
+import java.time.LocalDate
 
 trait ZuoraTestBackendMixin {
 
@@ -25,29 +26,29 @@ trait ZuoraTestBackendMixin {
     accountNumber = accountNumber
   )
 
-  protected val fetchAccessTokenSuccessRes: Response[Either[Nothing, AccessToken]] =
+  protected val fetchAccessTokenSuccessRes: Response[Either[ZuoraApiFailure, AccessToken]] =
     Response.ok(Right(AccessToken(accessToken)))
 
-  protected val fetchSubscriptionSuccessRes: Response[Either[Nothing, Subscription]] =
+  protected val fetchSubscriptionSuccessRes: Response[Either[ZuoraApiFailure, Subscription]] =
     Response.ok(Right(sub))
 
-  protected val updateAccountSuccessRes: Response[Either[Nothing, MoveSubscriptionAtZuoraAccountResponse]] =
+  protected val updateAccountSuccessRes: Response[Either[ZuoraApiFailure, MoveSubscriptionAtZuoraAccountResponse]] =
     Response.ok(Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS")))
 
-  protected val accessTokenUnAuthError: Response[Either[Nothing, AccessToken]] =
-    Response.error("Unable to generate token", StatusCodes.Unauthorized)
+  protected val accessTokenUnAuthError: Response[Either[ZuoraApiFailure, AccessToken]] =
+    Response(Left(ZuoraApiFailure("Unable to generate token")), StatusCode.Unauthorized)
 
-  protected val fetchSubscriptionFailedRes: Response[Either[Nothing, Subscription]] =
-    Response.error("get Subscription failure", StatusCodes.InternalServerError)
+  protected val fetchSubscriptionFailedRes: Response[Either[ZuoraApiFailure, Subscription]] =
+    Response(Left(ZuoraApiFailure("get Subscription failure")), StatusCode.InternalServerError)
 
-  protected val updateAccountFailedRes: Response[Either[Nothing, MoveSubscriptionAtZuoraAccountResponse]] =
-    Response.error("update ZuoraAccount failure", StatusCodes.InternalServerError)
+  protected val updateAccountFailedRes: Response[Either[ZuoraApiFailure, MoveSubscriptionAtZuoraAccountResponse]] =
+    Response(Left(ZuoraApiFailure("update ZuoraAccount failure")), StatusCode.InternalServerError)
 
   def createZuoraBackendStub(
-    oauthResponse: Response[Either[Nothing, AccessToken]],
-    getSubscriptionRes: Response[Either[Nothing, Subscription]],
-    updateAccountRes: Response[Either[Nothing, MoveSubscriptionAtZuoraAccountResponse]]
-  ): SttpBackendStub[Id, Nothing] = {
+    oauthResponse: Response[Either[ZuoraApiFailure, AccessToken]],
+    getSubscriptionRes: Response[Either[ZuoraApiFailure, Subscription]],
+    updateAccountRes: Response[Either[ZuoraApiFailure, MoveSubscriptionAtZuoraAccountResponse]]
+  ): SttpBackendStub[Identity, Any] = {
     SttpBackendStub.synchronous
       .whenRequestMatchesPartial {
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/oauth/token" =>

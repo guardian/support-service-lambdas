@@ -1,7 +1,5 @@
 package com.gu.holidaystopprocessor
 
-import java.time.LocalDate
-
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{NextInvoiceDate, ProcessResult, Processor}
 import com.gu.effects.S3Location
@@ -12,8 +10,9 @@ import com.gu.util.config.Stage
 import com.gu.zuora.Zuora
 import com.gu.zuora.ZuoraProductTypes._
 import com.gu.zuora.subscription.{OverallFailure, Subscription, SubscriptionUpdate, ZuoraAccount}
-import com.softwaremill.sttp.{Id, SttpBackend}
+import sttp.client3.{Identity, SttpBackend}
 
+import java.time.LocalDate
 import scala.util.Try
 
 object HolidayStopCreditProcessor {
@@ -34,7 +33,7 @@ object HolidayStopCreditProcessor {
   def processAllProducts(
     config: Config,
     productTypeAndStopDateOverride: Option[ProductTypeAndStopDate],
-    backend: SttpBackend[Id, Nothing],
+    backend: SttpBackend[Identity, Any],
     fetchFromS3: S3Location => Try[String]
   ): List[ProcessResult[ZuoraHolidayCreditAddResult]] = {
 

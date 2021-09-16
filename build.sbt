@@ -97,7 +97,7 @@ lazy val `salesforce-sttp-client` = library(project in file("lib/salesforce/sttp
   )
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
+      Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `salesforce-sttp-test-stub` = library(project in file("lib/salesforce/sttp-test-stub"))
@@ -229,7 +229,7 @@ lazy val `credit-processor` = library(project in file("lib/credit-processor"))
 lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-client"))
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
+      Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-test-stub"))
@@ -238,8 +238,8 @@ lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-
     libraryDependencies ++= Seq(scalatest)
   )
 
-def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil, isCdk: Boolean = false) = {
-  val cfName = if (isCdk) "cdk-cfn.yaml" else "cfn.yaml"
+def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil) = {
+  val cfName = "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
     .configs(EffectsTest, HealthCheckTest)
@@ -416,8 +416,7 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
     sttpAsyncHttpClientBackendCats,
     scalatest,
     diffx
-  ),
-  isCdk = true
+  )
 ).dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
 lazy val `fulfilment-date-calculator` = lambdaProject(
@@ -458,9 +457,8 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   Seq(
     scalatest,
     diffx,
-    sttpCats
-  ),
-  isCdk = true
+    sttpAsyncHttpClientBackendCats
+  )
 ).dependsOn(
   `config-cats`,
   `salesforce-sttp-client`,
