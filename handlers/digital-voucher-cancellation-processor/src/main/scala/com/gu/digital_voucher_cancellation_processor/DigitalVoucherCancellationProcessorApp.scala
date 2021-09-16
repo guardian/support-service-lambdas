@@ -10,7 +10,7 @@ import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.ConfigLoader
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
-import org.asynchttpclient.AsyncHttpClient
+import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.SttpBackend
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
@@ -25,10 +25,12 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
 
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
-  def apply(appIdentity: AppIdentity, httpClient: AsyncHttpClient): EitherT[IO, DigitalVoucherCancellationProcessorAppError, ImovoCancellationResults] = {
+  def apply(
+    appIdentity: AppIdentity
+  ): EitherT[IO, DigitalVoucherCancellationProcessorAppError, ImovoCancellationResults] = {
     apply(
       appIdentity = appIdentity,
-      sttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](httpClient),
+      sttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient()),
       clock = Clock.systemDefaultZone()
     )
   }

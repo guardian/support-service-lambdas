@@ -1,28 +1,13 @@
 package com.gu.deliveryproblemcreditprocessor
 
-import org.asynchttpclient.{AsyncHttpClient, DefaultAsyncHttpClient}
-import zio.{ZEnv, ZIO, console}
-
-import scala.util.{Failure, Success, Try}
+import com.gu.deliveryproblemcreditprocessor.DeliveryCreditProcessor.processAllProducts
+import zio._
 
 // For functional testing locally
 object StandaloneApp extends App {
 
-  private val runtime = zio.Runtime.default
-
-  def program(httpClient: AsyncHttpClient): ZIO[ZEnv, Throwable, List[DeliveryCreditResult]] = {
-    new DeliveryCreditProcessor(httpClient).processAllProducts
+  def run(args: List[String]): URIO[ZEnv, ExitCode] =
+    processAllProducts
       .tapError(e => console.putStrLn(e.toString))
-  }
-
-  val httpClient = new DefaultAsyncHttpClient()
-  Try(runtime.unsafeRun {
-    program(httpClient).either
-  }) match {
-    case Failure(exception) =>
-      httpClient.close()
-      throw exception
-    case Success(_) =>
-      httpClient.close()
-  }
+      .exitCode
 }
