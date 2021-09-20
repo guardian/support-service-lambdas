@@ -1,25 +1,24 @@
 package com.gu.salesforce.sttp
 
-import java.time.Instant
-
-import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
-import org.scalatest.Inside
-import com.gu.salesforce.sttp.SalesforceStub._
-import com.softwaremill.sttp.impl.cats.CatsMonadError
-import com.softwaremill.sttp.testing.SttpBackendStub
-import io.circe.generic.auto._
-import SalesforceCirceImplicits._
 import cats.effect.IO
-
-import scala.io.Source
-import org.scalatest.fixture
+import com.gu.salesforce.sttp.SalesforceStub.implicitSalesforceStub
+import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
+import io.circe.generic.auto._
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec
 import org.scalatest.matchers.should.Matchers
+import sttp.client3.impl.cats.CatsMonadAsyncError
+import sttp.client3.testing.SttpBackendStub
+
+import java.time.Instant
+import scala.concurrent.ExecutionContext
+import scala.io.Source
 
 case class QueryResults(Id: String, CreatedDate: Instant, Name: String)
 
 class SalesforceClientTest extends flatspec.FixtureAnyFlatSpec with Matchers {
+
+  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
   case class FixtureParam(
     config: SFAuthConfig,
@@ -37,7 +36,7 @@ class SalesforceClientTest extends flatspec.FixtureAnyFlatSpec with Matchers {
       "sfToken"
     )
     val auth = SalesforceAuth("salesforce-access-token", "https://salesforceInstanceUrl")
-    val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO]).stubAuth(config, auth)
+    val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO]).stubAuth(config, auth)
     withFixture(test.toNoArgTest(FixtureParam(
       config,
       auth,

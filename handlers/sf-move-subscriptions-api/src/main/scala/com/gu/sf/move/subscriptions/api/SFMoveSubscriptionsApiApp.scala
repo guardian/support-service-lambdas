@@ -5,7 +5,7 @@ import cats.effect.{ContextShift, IO}
 import cats.syntax.all._
 import com.gu.AppIdentity
 import com.gu.util.config.ConfigLoader
-import com.softwaremill.sttp.{Id, SttpBackend}
+import sttp.client3.{Identity, SttpBackend}
 import com.typesafe.scalalogging.LazyLogging
 import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
@@ -20,7 +20,7 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
-  def apply(appIdentity: AppIdentity, backend: SttpBackend[Id, Nothing]): EitherT[IO, MoveSubscriptionApiError, HttpRoutes[IO]] = {
+  def apply(appIdentity: AppIdentity, backend: SttpBackend[Identity, Any]): EitherT[IO, MoveSubscriptionApiError, HttpRoutes[IO]] = {
     for {
       apiConfig <- ConfigLoader.loadConfig[IO, MoveSubscriptionApiConfig](appIdentity)
         .leftMap(error => MoveSubscriptionApiError(error.toString))

@@ -9,7 +9,7 @@ import com.gu.effects.GetFromS3
 import com.gu.holiday_stops.{Configuration, ConfigurationLive}
 import com.gu.holidaystopprocessor.HolidayStopCreditProcessor.{ProductTypeAndStopDate, processAllProducts}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import com.softwaremill.sttp.HttpURLConnectionBackend
+import sttp.client3.HttpURLConnectionBackend
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._

@@ -6,7 +6,7 @@ import cats.syntax.all._
 import com.gu.zuora.Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
 import com.gu.zuora._
 import com.gu.zuora.subscription._
-import com.softwaremill.sttp._
+import sttp.client3._
 import com.typesafe.scalalogging.LazyLogging
 
 final case class MoveSubscriptionServiceSuccess(message: String)
@@ -23,7 +23,7 @@ case class UpdateZuoraAccountError(message: String) extends MoveSubscriptionServ
 
 class SFMoveSubscriptionsService[F[_]: Monad](
   apiCfg: MoveSubscriptionApiConfig,
-  backend: SttpBackend[Id, Nothing]
+  backend: SttpBackend[Identity, Any]
 ) extends LazyLogging {
 
   private val ZuoraConfig = ZuoraRestOauthConfig(
@@ -44,7 +44,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](
 
   private def moveSubscriptionInternal(
     moveSubscriptionData: MoveSubscriptionReqBody,
-    updateAccountByMovingSubscription: (AccessToken, SttpBackend[Id, Nothing]) => (Subscription, ZuoraAccountMoveSubscriptionCommand) => ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse]
+    updateAccountByMovingSubscription: (AccessToken, SttpBackend[Identity, Any]) => (Subscription, ZuoraAccountMoveSubscriptionCommand) => ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse]
   ): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     import moveSubscriptionData._
 
@@ -66,7 +66,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](
       .map(res => MoveSubscriptionServiceSuccess(res.toString))
   }
 
-  private def updateAccountByMovingSubscriptionDryRun(accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(
+  private def updateAccountByMovingSubscriptionDryRun(accessToken: AccessToken, backend: SttpBackend[Identity, Any])(
     subscription: Subscription,
     moveSubCommand: ZuoraAccountMoveSubscriptionCommand
   ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
@@ -74,7 +74,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](
     Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS_DRY_RUN"))
   }
 
-  private def updateAccountByMovingSubscriptionRun(accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(
+  private def updateAccountByMovingSubscriptionRun(accessToken: AccessToken, backend: SttpBackend[Identity, Any])(
     subscription: Subscription,
     moveSubCommand: ZuoraAccountMoveSubscriptionCommand
   ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
@@ -84,6 +84,6 @@ class SFMoveSubscriptionsService[F[_]: Monad](
 }
 
 object SFMoveSubscriptionsService {
-  def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
+  def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Identity, Any]): SFMoveSubscriptionsService[F] =
     new SFMoveSubscriptionsService(apiCfg, backend)
 }
