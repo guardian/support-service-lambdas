@@ -91,7 +91,7 @@ object Lambda extends LazyLogging {
       restConfig = ZuoraRestConfig(config.zuoraBaseUrl, token.access_token)
       paymentResponse <- queryPayments(paymentNumber, restConfig)
       payment <- paymentResponse.records.headOption.toRight(ZuoraApiError(s"No payments for for number: $paymentNumber"))
-//      _ <- rejectPayment(payment.`Id`, paymentIntentObject: PaymentIntentObject, restConfig)
+      _ <- rejectPayment(payment.`Id`, paymentIntentObject: PaymentIntentObject, restConfig)
     } yield ()
   }
 
