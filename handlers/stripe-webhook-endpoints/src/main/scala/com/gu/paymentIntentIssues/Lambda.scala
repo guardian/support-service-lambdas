@@ -44,7 +44,6 @@ object Lambda extends LazyLogging {
         logger.error(error.message)
         response.setStatusCode(200)
       case Right(_) =>
-        logger.info(event.toString)
         response.setStatusCode(200)
     }
     response
@@ -117,7 +116,9 @@ object Lambda extends LazyLogging {
       .body(body.asJson.noSpaces)
       .response(asJson[ZuoraRejectPaymentResponse])
       .mapResponse {
-        case Right(ZuoraRejectPaymentResponse(true, _)) => Right(())
+        case Right(ZuoraRejectPaymentResponse(true, _)) =>
+          logger.info(s"Successfully rejected SEPA payment: $paymentId")
+          Right(())
         case Right(ZuoraRejectPaymentResponse(false, reasons)) => Left(ZuoraApiError(
           reasons.getOrElse(Nil).map(_.message).mkString(", ")
         ))
