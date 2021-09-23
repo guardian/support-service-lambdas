@@ -14,6 +14,7 @@ val scalaSettings = Seq(
     "-language:implicitConversions",
     "-unchecked",
     "-Xlint",
+    "-Xlint:-byname-implicit",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
@@ -507,6 +508,21 @@ lazy val `payment-failure-comms` = lambdaProject(
     awsEvents
   )
 ).dependsOn(handler)
+
+lazy val `stripe-webhook-endpoints` = lambdaProject(
+  "stripe-webhook-endpoints",
+  "Endpoints to handle stripe webhooks",
+  Seq(
+    circe,
+    circeParser,
+    scalatest,
+    stripe,
+    awsEvents,
+    sttp,
+    sttpCirce
+  )
+).dependsOn(`config-cats`, `zuora-core`)
+
 
 // ==== END handlers ====
 
