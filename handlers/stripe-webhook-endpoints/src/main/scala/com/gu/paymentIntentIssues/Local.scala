@@ -1,21 +1,26 @@
 package com.gu.paymentIntentIssues
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.Ignore
-import scala.jdk.CollectionConverters._
 import com.stripe.net.Webhook
+import scala.jdk.CollectionConverters._
 
-@Ignore
-class LambdaSpec extends AnyFlatSpec with Matchers {
-  it should "run locally" in {
+object Local {
+  /**
+   * For testing locally against zuora sandbox.
+   * Requires the following environment variables:
+   * - endpointSecret
+   * - zuoraClientId
+   * - zuoraSecret
+   *
+   * Note - this does not test the Stripe signature verification logic. This needs to be done in aws with a real Stripe event.
+   */
+  def main(args: Array[String]): Unit = {
+    println(s"Processing test SEPA payment failure event...")
     val timestamp = getTimestamp
     val json = getJson(timestamp)
     val config = getConfig.get
 
     val result = Lambda.processEvent(json, config)
-
-    result should be(Right(()))
+    println(s"Result: $result")
   }
 
   def getConfig =
@@ -68,7 +73,7 @@ class LambdaSpec extends AnyFlatSpec with Matchers {
                 "postal_code": null,
                 "state": null
               },
-              "email": "tom.forbes%5C%2Bsepa31@guardian.co.uk",
+              "email": "mr.test@guardian.co.uk",
               "name": "mr test",
               "phone": null
             },
@@ -163,7 +168,7 @@ class LambdaSpec extends AnyFlatSpec with Matchers {
               "postal_code": null,
               "state": null
             },
-            "email": "tom.forbes%5C%2Bsepa31@guardian.co.uk",
+            "email": "mr.test@guardian.co.uk",
             "name": "mr test",
             "phone": null
           },
@@ -229,4 +234,3 @@ class LambdaSpec extends AnyFlatSpec with Matchers {
     Map("Stripe-Signature" -> s"t=$timestamp,v1=$signature").asJava
   }
 }
-
