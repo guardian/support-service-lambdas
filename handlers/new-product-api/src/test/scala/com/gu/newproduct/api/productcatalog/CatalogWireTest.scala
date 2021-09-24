@@ -854,6 +854,46 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
         |          "paymentPlan": "GBP 70.02 every month"
         |        },
         |        {
+        |          "id": "digital_voucher_saturday",
+        |          "label": "Saturday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-04",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.07 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.07 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_saturday_plus",
+        |          "label": "Saturday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-04",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.08 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.08 every month"
+        |        },
+        |        {
         |          "id": "digital_voucher_sunday",
         |          "label": "Sunday",
         |          "startDateRules": {
@@ -1016,6 +1056,8 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
       case DigitalVoucherSixdayPlus => gbpPrice(7004)
       case DigitalVoucherWeekend => gbpPrice(7005)
       case DigitalVoucherWeekendPlus => gbpPrice(7006)
+      case DigitalVoucherSaturday => gbpPrice(7007)
+      case DigitalVoucherSaturdayPlus => gbpPrice(7008)
       case DigitalVoucherSunday => gbpPrice(7009)
       case DigitalVoucherSundayPlus => gbpPrice(7010)
     }
