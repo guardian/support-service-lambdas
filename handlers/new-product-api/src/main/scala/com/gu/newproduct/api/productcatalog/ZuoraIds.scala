@@ -144,10 +144,12 @@ object ZuoraIds {
       DigitalVoucherEveryday -> everyday,
       DigitalVoucherWeekend -> weekend,
       DigitalVoucherSixday -> sixDay,
+      DigitalVoucherSaturday -> saturday,
       DigitalVoucherSunday -> sunday,
       DigitalVoucherEverydayPlus -> everydayPlus,
       DigitalVoucherWeekendPlus -> weekendPlus,
       DigitalVoucherSixdayPlus -> sixDayPlus,
+      DigitalVoucherSaturdayPlus -> saturdayPlus,
       DigitalVoucherSundayPlus -> sundayPlus,
     )
 
