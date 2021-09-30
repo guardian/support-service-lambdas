@@ -14,6 +14,7 @@ Parameters:
 
 Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
+  IsNotDev: !Not [!Equals [!Ref "Stage", "DEV"]]
 
 Mappings:
   StageMap:
@@ -21,8 +22,6 @@ Mappings:
       ScheduleName: delivery-problem-credit-processor-schedule-prod
     CODE:
       ScheduleName: delivery-problem-credit-processor-schedule-code
-    DEV:
-      ScheduleName: delivery-problem-credit-processor-schedule-dev
 
 Resources:
 
@@ -112,6 +111,8 @@ Resources:
 
   DeliveryProblemCreditProcessorScheduleRule:
     Type: AWS::Events::Rule
+    # No need to run on a schedule in Dev stage
+    Condition: IsNotDev
     Properties:
       Description: Trigger processing of delivery-problem credits every 20 mins
       Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
@@ -126,11 +127,21 @@ Resources:
 
   DeliveryProblemCreditProcessorLambdaInvokePermission:
     Type: AWS::Lambda::Permission
+    Condition: IsNotDev
     Properties:
       Action: lambda:invokeFunction
       FunctionName: !Ref DeliveryProblemCreditProcessor
       Principal: events.amazonaws.com
       SourceArn: !GetAtt DeliveryProblemCreditProcessorScheduleRule.Arn
     DependsOn:
-      - DeliveryProblemCreditProcessor
       - DeliveryProblemCreditProcessorScheduleRule
+
+  # As processor runs every 20 mins anyway, there's no point in retrying on failure
+  DeliveryProblemCreditProcessorLambdaInvokeConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref DeliveryProblemCreditProcessor
+      MaximumRetryAttempts: 0
+      Qualifier: '$LATEST'
+    DependsOn:
+      - DeliveryProblemCreditProcessor
