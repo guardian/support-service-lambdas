@@ -78,7 +78,7 @@ object Dependencies {
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
-  val assemblyMergeStrategyDiscardModuleInfo = assemblyMergeStrategy in assembly := {
+  val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
     case PathList("module-info.class") => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
@@ -89,7 +89,7 @@ object Dependencies {
      */
     case PathList("codegen-resources", _*) => MergeStrategy.discard
     case x =>
-      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      val oldStrategy = (assembly / assemblyMergeStrategy).value
       oldStrategy(x)
   }
 
