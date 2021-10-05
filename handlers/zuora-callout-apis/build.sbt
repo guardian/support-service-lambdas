@@ -6,6 +6,7 @@ description:= "Handles auto-cancellations for membership and subscriptions"
 
 assemblyJarName := "support-service-lambdas.jar"
 
+riffRaffAwsRegion := "eu-west-1"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
