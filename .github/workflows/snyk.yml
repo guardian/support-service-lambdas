@@ -13,15 +13,12 @@ jobs:
   security:
     runs-on: ubuntu-latest
 
-    env:
-      SNYK_ACTION: snyk/actions/scala@0.3.0
-
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
 
       - name: Update Snyk UI with current vulnerabilities
-        uses: ${{ env.SNYK_ACTION }}
+        uses: snyk/actions/scala@0.3.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -29,7 +26,7 @@ jobs:
           args: --org=the-guardian-cuu --project-name=${{ github.repository }}
 
       - name: Update Github Code Scanning file with current vulnerabilities
-        uses: ${{ env.SNYK_ACTION }}
+        uses: snyk/actions/scala@0.3.0
         continue-on-error: true # To make sure that SARIF upload gets called
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
