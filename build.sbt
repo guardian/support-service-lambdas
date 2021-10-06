@@ -250,6 +250,7 @@ def lambdaProject(projectName: String, projectDescription: String, dependencies:
       description:= projectDescription,
       assemblyJarName := s"$projectName.jar",
       assemblyMergeStrategyDiscardModuleInfo,
+      riffRaffAwsRegion := "eu-west-1",
       riffRaffPackageType := assembly.value,
       riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
       riffRaffUploadManifestBucket := Option("riffraff-builds"),
