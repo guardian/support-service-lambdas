@@ -19,7 +19,7 @@ val scalaSettings = Seq(
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
   ),
-  fork in Test := true,
+  Test / fork := true,
   {
     import scalariform.formatter.preferences._
     scalariformPreferences := scalariformPreferences.value
@@ -36,16 +36,16 @@ val scalaSettings = Seq(
 lazy val EffectsTest = config("effectsTest") extend(Test) describedAs("run the edge tests")
 lazy val HealthCheckTest = config("healthCheck") extend(Test) describedAs("run the health checks against prod/code")
 val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthCheckTest)(Defaults.testTasks) ++ Seq(
-  testOptions in Test += Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in Test += Tests.Argument("-l", "com.gu.test.HealthCheck"),
+  Test / testOptions += Tests.Argument("-l", "com.gu.test.EffectsTest"),
+  Test / testOptions += Tests.Argument("-l", "com.gu.test.HealthCheck"),
 
-  testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
-  testOptions in EffectsTest += Tests.Argument("-n", "com.gu.test.EffectsTest"),
+  EffectsTest / testOptions -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
+  EffectsTest / testOptions -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
+  EffectsTest / testOptions += Tests.Argument("-n", "com.gu.test.EffectsTest"),
 
-  testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
-  testOptions in HealthCheckTest += Tests.Argument("-n", "com.gu.test.HealthCheck")
+  HealthCheckTest / testOptions -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
+  HealthCheckTest / testOptions -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
+  HealthCheckTest / testOptions += Tests.Argument("-n", "com.gu.test.HealthCheck")
 )
 
 def library(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
