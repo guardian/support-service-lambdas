@@ -1,0 +1,17 @@
+stacks: [membership]
+regions: [eu-west-1]
+
+deployments:
+  stripe-webhook-endpoints:
+    type: aws-lambda
+    parameters:
+      bucket: membership-dist
+      functionNames: [payment-intent-issues-]
+      fileName: stripe-webhook-endpoints.jar
+      prefixStack: false
+    dependencies: [ cfn ]
+  cfn:
+    type: cloud-formation
+    app: stripe-webhook-endpoints
+    parameters:
+      templatePath: cfn.yaml

@@ -7,8 +7,8 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.16.100"
-  val circeVersion = "0.14.1"
+  val awsSdkVersion = "2.16.104"
+  val circeVersion = "0.13.0"
   val sttpVersion = "3.3.11"
   val http4sVersion = "0.21.28"
   val catsVersion = "2.6.1"
@@ -49,7 +49,7 @@ object Dependencies {
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
   val sttpOkhttpBackend =
     "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
-  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.1"
+  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.2"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
   // HTTP4S
@@ -78,7 +78,7 @@ object Dependencies {
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
-  val assemblyMergeStrategyDiscardModuleInfo = assemblyMergeStrategy in assembly := {
+  val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
     case PathList("module-info.class") => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
@@ -89,7 +89,7 @@ object Dependencies {
      */
     case PathList("codegen-resources", _*) => MergeStrategy.discard
     case x =>
-      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      val oldStrategy = (assembly / assemblyMergeStrategy).value
       oldStrategy(x)
   }
 
