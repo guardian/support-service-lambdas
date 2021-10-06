@@ -470,7 +470,7 @@ object SaveCsvToBucket extends LazyLogging {
 
       case "PROD" =>
         val bucket = Query.withName(batch.name).s3Bucket
-        val metadata: String = Printer.spaces2.pretty(Metadata(job, batch).asJson)
+        val metadata: String = Printer.spaces2.print(Metadata(job, batch).asJson)
         val csvRequestWithAcl = putRequestWithAcl(bucket, key = Query.withName(batch.name).s3Key)
         val metadataRequestWithAcl = putRequestWithAcl(bucket, key = s"metadata/${batch.name}.json")
         s3Client.putObject(
