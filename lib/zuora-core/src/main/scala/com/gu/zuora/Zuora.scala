@@ -1,10 +1,11 @@
 package com.gu.zuora
 
 import com.gu.zuora.subscription._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
+import sttp.client3._
+import sttp.client3.circe._
+
 import scala.annotation.tailrec
 
 case class ZuoraAccountMoveSubscriptionCommand(
@@ -24,7 +25,7 @@ object Zuora {
    */
   def accessTokenGetResponse(
     config: HolidayStopProcessorZuoraConfig,
-    backend: SttpBackend[Id, Nothing]
+    backend: SttpBackend[Identity, Any]
   ): ZuoraApiResponse[AccessToken] = {
     val genericConfig = ZuoraRestOauthConfig(
       baseUrl = config.baseUrl,
@@ -35,96 +36,86 @@ object Zuora {
 
   def accessTokenGetResponseV2(
     config: ZuoraRestOauthConfig,
-    backend: SttpBackend[Id, Nothing]
+    backend: SttpBackend[Identity, Any]
   ): ZuoraApiResponse[AccessToken] = {
-    implicit val b: SttpBackend[Id, Nothing] = backend
-    sttp.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
+    basicRequest.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
         "grant_type" -> "client_credentials",
         "client_id" -> s"${config.oauth.clientId}",
         "client_secret" -> s"${config.oauth.clientSecret}"
       )
       .response(asJson[AccessToken])
-      .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))
-      .send()
-      .body.left.map(e => ZuoraApiFailure(e))
-      .joinRight
+      .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
+      .send(backend)
+      .body
   }
 
-  def subscriptionGetResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): ZuoraApiResponse[Subscription] = {
-    implicit val b: SttpBackend[Id, Nothing] = backend
-    sttp.get(uri"${config.baseUrl}/subscriptions/${subscriptionName.value}")
+  def subscriptionGetResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Identity, Any])(subscriptionName: SubscriptionName): ZuoraApiResponse[Subscription] = {
+    basicRequest.get(uri"${config.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[Subscription])
-      .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))
-      .send()
-      .body.left.map(ZuoraApiFailure)
-      .joinRight
+      .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
+      .send(backend)
+      .body
   }
 
-  def subscriptionUpdateResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: SubscriptionUpdate): ZuoraApiResponse[Unit] = {
-    implicit val b: SttpBackend[Id, Nothing] = backend
+  def subscriptionUpdateResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Identity, Any])(subscription: Subscription, update: SubscriptionUpdate): ZuoraApiResponse[Unit] = {
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
-    sttp.put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
+    basicRequest.put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(update)
       .response(asJson[ZuoraStatusResponse])
       .mapResponse {
-        case Left(e) => Left(ZuoraApiFailure(errMsg(e.message)))
+        case Left(e) => Left(ZuoraApiFailure(errMsg(e.getMessage)))
         case Right(status) =>
           import ZuoraLockingContention._
           if (status.success) Right(())
           else if (isLockingContentionError(status)) Left(ZuoraApiFailure(LockingContentionCode.toString))
           else Left(ZuoraApiFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
-      .send()
-      .body.left.map(reason => ZuoraApiFailure(errMsg(reason)))
-      .joinRight
+      .send(backend)
+      .body.left.map(failure => ZuoraApiFailure(errMsg(failure.reason)))
   }
 
   def accountGetResponse(
     config: ZuoraConfig,
     accessToken: AccessToken,
-    backend: SttpBackend[Id, Nothing]
+    backend: SttpBackend[Identity, Any]
   )(
     accountNumber: String
   ): ZuoraApiResponse[ZuoraAccount] = {
-    implicit val b = backend
-    sttp.get(uri"${config.baseUrl}/accounts/$accountNumber")
+    basicRequest.get(uri"${config.baseUrl}/accounts/$accountNumber")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[ZuoraAccount])
-      .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))
-      .send()
-      .body.left.map(ZuoraApiFailure)
-      .joinRight
+      .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
+      .send(backend)
+      .body
   }
 
   def updateAccountByMovingSubscription(
     config: ZuoraConfig,
     accessToken: AccessToken,
-    backend: SttpBackend[Id, Nothing]
+    backend: SttpBackend[Identity, Any]
   )(
     subscription: Subscription,
     updateCommandData: ZuoraAccountMoveSubscriptionCommand
   ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
-    implicit val b: SttpBackend[Id, Nothing] = backend
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' " +
       s"with $updateCommandData. Reason: $reason"
-    sttp.put(uri"${config.baseUrl}/accounts/${subscription.accountNumber}")
+    basicRequest.put(uri"${config.baseUrl}/accounts/${subscription.accountNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(updateCommandData)
       .response(asJson[ZuoraStatusResponse])
       .mapResponse {
-        case Left(e) => Left(ZuoraApiFailure(errMsg(e.message)))
+        case Left(e) => Left(ZuoraApiFailure(errMsg(e.getMessage)))
         case Right(status) =>
           if (status.success) {
             Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS"))
           } else Left(ZuoraApiFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
-      .send()
+      .send(backend)
       .body
-      .left.map(ZuoraApiFailure)
-      .joinRight
+
   }
 }
 

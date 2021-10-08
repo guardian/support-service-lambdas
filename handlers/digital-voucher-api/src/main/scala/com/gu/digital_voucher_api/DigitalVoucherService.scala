@@ -20,6 +20,7 @@ object DigitalVoucherService {
 
   private val schemeNames: Map[RatePlanName, SchemeName] = {
     val everydaySchemeName = SchemeName("Guardian7Day")
+    val saturdaySchemeName = SchemeName("GuardianSaturday")
     val sundaySchemeName = SchemeName("GuardianSunday")
     val weekendSchemeName = SchemeName("GuardianWeekend")
     val sixDaySchemeName = SchemeName("Guardian6Day")
@@ -27,6 +28,8 @@ object DigitalVoucherService {
     Map(
       RatePlanName("Everyday") -> everydaySchemeName,
       RatePlanName("Everyday+") -> everydaySchemeName,
+      RatePlanName("Saturday") -> saturdaySchemeName,
+      RatePlanName("Saturday+") -> saturdaySchemeName,
       RatePlanName("Sunday") -> sundaySchemeName,
       RatePlanName("Sunday+") -> sundaySchemeName,
       RatePlanName("Weekend") -> weekendSchemeName,

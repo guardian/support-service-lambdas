@@ -1,7 +1,5 @@
 package com.gu.deliveryproblemcreditprocessor
 
-import java.time.{DayOfWeek, LocalDate, LocalDateTime}
-
 import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
 import cats.syntax.all._
@@ -17,19 +15,23 @@ import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
-import com.softwaremill.sttp.HttpURLConnectionBackend
-import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import io.circe.generic.auto._
+import org.asynchttpclient.DefaultAsyncHttpClient
+import sttp.client3.HttpURLConnectionBackend
+import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import zio.Schedule.{exponential, recurs}
 import zio.clock.Clock
 import zio.duration._
 import zio.{RIO, Task, ZIO}
 
+import java.time.{DayOfWeek, LocalDate, LocalDateTime}
+import scala.concurrent.ExecutionContext
+
 object DeliveryCreditProcessor extends Logging {
 
-  implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
   private val zuoraSttpBackend = HttpURLConnectionBackend()
-  private val sfSttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
+  private val sfSttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient())
 
   private lazy val stage = Stage()
 

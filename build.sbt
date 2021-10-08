@@ -14,11 +14,12 @@ val scalaSettings = Seq(
     "-language:implicitConversions",
     "-unchecked",
     "-Xlint",
+    "-Xlint:-byname-implicit",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
   ),
-  fork in Test := true,
+  Test / fork := true,
   {
     import scalariform.formatter.preferences._
     scalariformPreferences := scalariformPreferences.value
@@ -35,16 +36,16 @@ val scalaSettings = Seq(
 lazy val EffectsTest = config("effectsTest") extend(Test) describedAs("run the edge tests")
 lazy val HealthCheckTest = config("healthCheck") extend(Test) describedAs("run the health checks against prod/code")
 val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthCheckTest)(Defaults.testTasks) ++ Seq(
-  testOptions in Test += Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in Test += Tests.Argument("-l", "com.gu.test.HealthCheck"),
+  Test / testOptions += Tests.Argument("-l", "com.gu.test.EffectsTest"),
+  Test / testOptions += Tests.Argument("-l", "com.gu.test.HealthCheck"),
 
-  testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
-  testOptions in EffectsTest += Tests.Argument("-n", "com.gu.test.EffectsTest"),
+  EffectsTest / testOptions -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
+  EffectsTest / testOptions -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
+  EffectsTest / testOptions += Tests.Argument("-n", "com.gu.test.EffectsTest"),
 
-  testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
-  testOptions in HealthCheckTest += Tests.Argument("-n", "com.gu.test.HealthCheck")
+  HealthCheckTest / testOptions -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
+  HealthCheckTest / testOptions -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
+  HealthCheckTest / testOptions += Tests.Argument("-n", "com.gu.test.HealthCheck")
 )
 
 def library(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
@@ -97,7 +98,7 @@ lazy val `salesforce-sttp-client` = library(project in file("lib/salesforce/sttp
   )
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
+      Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `salesforce-sttp-test-stub` = library(project in file("lib/salesforce/sttp-test-stub"))
@@ -229,7 +230,7 @@ lazy val `credit-processor` = library(project in file("lib/credit-processor"))
 lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-client"))
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
+      Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-test-stub"))
@@ -249,6 +250,7 @@ def lambdaProject(projectName: String, projectDescription: String, dependencies:
       description:= projectDescription,
       assemblyJarName := s"$projectName.jar",
       assemblyMergeStrategyDiscardModuleInfo,
+      riffRaffAwsRegion := "eu-west-1",
       riffRaffPackageType := assembly.value,
       riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
       riffRaffUploadManifestBucket := Option("riffraff-builds"),
@@ -457,7 +459,7 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   Seq(
     scalatest,
     diffx,
-    sttpCats
+    sttpAsyncHttpClientBackendCats
   )
 ).dependsOn(
   `config-cats`,
@@ -507,6 +509,21 @@ lazy val `payment-failure-comms` = lambdaProject(
     awsEvents
   )
 ).dependsOn(handler)
+
+lazy val `stripe-webhook-endpoints` = lambdaProject(
+  "stripe-webhook-endpoints",
+  "Endpoints to handle stripe webhooks",
+  Seq(
+    circe,
+    circeParser,
+    scalatest,
+    stripe,
+    awsEvents,
+    sttp,
+    sttpCirce
+  )
+).dependsOn(`config-cats`, `zuora-core`)
+
 
 // ==== END handlers ====
 

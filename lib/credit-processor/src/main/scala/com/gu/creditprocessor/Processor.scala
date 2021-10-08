@@ -1,15 +1,15 @@
 package com.gu.creditprocessor
 
-import java.time.LocalDate
 import cats.syntax.all._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.zuora.ZuoraLockingContention.retryLockingContention
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
-import com.softwaremill.sttp.{Id, SttpBackend}
 import org.slf4j.LoggerFactory
-import scala.util.Try
+import sttp.client3.{Identity, SttpBackend}
+
+import java.time.LocalDate
 
 object Processor {
 
@@ -20,7 +20,7 @@ object Processor {
   def processLiveProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
     config: HolidayStopProcessorZuoraConfig,
     zuoraAccessToken: AccessToken,
-    sttpBackend: SttpBackend[Id, Nothing],
+    sttpBackend: SttpBackend[Identity, Any],
     creditProduct: CreditProductForSubscription,
     getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
@@ -116,6 +116,7 @@ object Processor {
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20
   import scala.concurrent.{ExecutionContext, Future}
   import java.util.concurrent.Executors
+
   private val ecForTestInProd = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor)
   private def testInProdNextInvoiceDate(
     subscription: Subscription,
