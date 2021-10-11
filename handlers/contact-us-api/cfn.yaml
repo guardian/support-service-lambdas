@@ -27,14 +27,14 @@ Mappings:
       reqDomain: gnmtouchpoint--DEV1.my.salesforce.com
       SalesforceStage: DEV
       AppName: AwsConnectorSandbox
-      AppSecretsVersion: b7b63e09-f39f-4e4f-80ef-9dd203c2d59b
+      AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
       UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
     DEV:
       authDomain: test.salesforce.com
       reqDomain: gnmtouchpoint--DEV1.my.salesforce.com
       SalesforceStage: DEV
       AppName: AwsConnectorSandbox
-      AppSecretsVersion: b7b63e09-f39f-4e4f-80ef-9dd203c2d59b
+      AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
       UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
 
 Resources:

@@ -27,7 +27,7 @@ Mappings:
       IdentityStage: CODE
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: AwsConnectorSandbox
-      AppSecretsVersion: 81f50c47-b1f3-400b-94b3-46413377f3d3
+      AppSecretsVersion: 6fc22312-3ddb-4577-8a37-d58222a09db4
       SalesforceUserSecretsVersion: 9d7777f6-78d7-4ec3-8c93-d4912ce6316e
       IdentityUserSecretsVersion: ec3fd3ca-f237-4d2d-bbb2-0c9482e636c1
     DEV:
@@ -36,7 +36,7 @@ Mappings:
       IdentityStage: CODE
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: AwsConnectorSandbox
-      AppSecretsVersion: b7b63e09-f39f-4e4f-80ef-9dd203c2d59b
+      AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
       SalesforceUserSecretsVersion: 08036ddd-9fc0-43b1-b478-4023a936751e
       IdentityUserSecretsVersion: ec3fd3ca-f237-4d2d-bbb2-0c9482e636c1
 
