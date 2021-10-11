@@ -10,7 +10,7 @@ object Dependencies {
   val awsSdkVersion = "2.17.56"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.3.15"
-  val http4sVersion = "0.21.30"
+  val http4sVersion = "0.23.5"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "2.5.4"
 
