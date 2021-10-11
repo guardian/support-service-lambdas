@@ -33,7 +33,7 @@ trait ZuoraHandler[Req, Res] {
         )
         response <- handle(request)
       } yield response
-      output.write(response.unsafeRunSync.asJson.pretty(jsonPrinter).getBytes)
+      output.write(response.unsafeRunSync().asJson.printWith(jsonPrinter).getBytes)
     } finally {
       output.close()
     }
