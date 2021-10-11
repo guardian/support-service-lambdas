@@ -7,15 +7,15 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.17.53"
-  val circeVersion = "0.14.1"
+  val awsSdkVersion = "2.17.56"
+  val circeVersion = "0.13.0"
   val sttpVersion = "3.3.11"
   val http4sVersion = "0.21.28"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "2.5.1"
 
   val logging = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.2.3",
+    "ch.qos.logback" % "logback-classic" % "1.2.6",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
   )
 
@@ -68,10 +68,10 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
-  val stripe = "com.stripe" % "stripe-java" % "20.74.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.80.0"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.5.3" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.5.6" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.15.4" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.1.0" % Test
