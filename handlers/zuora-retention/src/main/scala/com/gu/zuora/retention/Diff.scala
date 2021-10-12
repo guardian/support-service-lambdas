@@ -10,7 +10,7 @@ object Diff {
    * The point of this is to avoid loading the whole exclusionLines in memory.
    */
   def apply(candidateLines: Iterator[String], exclusionLines: Iterator[String]): Iterator[String] = {
-    exclusionLines.next //skip header
+    exclusionLines.next() //skip header
     val exclusionCrmIds = SortedCrmIdIterator(exclusionLines)
     val candidatesHeader = candidateLines.next()
     val crmidLocation = candidatesHeader.split(",").indexOf(crmIdColName)
@@ -39,7 +39,7 @@ case class SortedCrmIdIterator(crmIdIterator: Iterator[String]) {
       we need to do case insensitive comparsion to match the alphabetical order in Zuora query results
     */
     while (crmIdIterator.hasNext && !currentCrmId.exists(_.toLowerCase >= crmId.toLowerCase)) {
-      currentCrmId = Some(crmIdIterator.next)
+      currentCrmId = Some(crmIdIterator.next())
     }
     currentCrmId
   }

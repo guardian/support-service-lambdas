@@ -63,7 +63,7 @@ object SalesforceClient extends LazyLogging {
     Json.parse(errorBody).as[List[SalesforceErrorResponseBody]] match {
       case singleSfError :: Nil => CustomError(singleSfError.toString)
       case multipleSfErrors => CustomError(
-        multipleSfErrors.groupBy(_.errorCode).mapValues(_.map(_.message)).mkString.take(500)
+        multipleSfErrors.groupBy(_.errorCode).view.mapValues(_.map(_.message)).mkString.take(500)
       )
       case _ =>
         logger.warn("Salesforce error response didn't contain any detail")
