@@ -318,8 +318,8 @@ lazy val `revenue-recogniser-job` = lambdaProject(
   "revenue-recogniser-job",
   "Finds unrecognised revenue in zuora and recognises it appropariately",
   Seq(
-    "com.nrinaudo" %% "kantan.csv-generic" % "0.6.1",
-    "com.nrinaudo" %% "kantan.csv-java8" % "0.6.1",
+    "com.nrinaudo" %% "kantan.csv-generic" % "0.6.2",
+    "com.nrinaudo" %% "kantan.csv-java8" % "0.6.2",
   )
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
 
