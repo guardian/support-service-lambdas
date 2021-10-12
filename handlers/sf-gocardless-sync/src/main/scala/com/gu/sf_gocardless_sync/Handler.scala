@@ -184,7 +184,7 @@ object Handler extends Logging {
     newMandateEventId: MandateEventSfId,
     mandateSfId: MandateSfId,
     sfPaymentMethodDetailOption: Option[SfPaymentMethodDetail]
-  )(): ClientFailableOp[Unit] =
+  ): ClientFailableOp[Unit] =
     SalesforceDDMandate.Update(sf.client.wrapWith(JsonHttp.patch))(mandateSfId)(WirePatchMandate(
       Last_Mandate_Event__c = newMandateEventId,
       Payment_Method__c = sfPaymentMethodDetailOption.map(_.Id),
