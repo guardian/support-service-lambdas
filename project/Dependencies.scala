@@ -7,10 +7,10 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.17.57"
+  val awsSdkVersion = "2.17.59"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.3.15"
-  val http4sVersion = "0.21.30"
+  val http4sVersion = "0.21.31"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "2.5.4"
 
@@ -27,7 +27,7 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.9.0"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.10.0"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
@@ -67,8 +67,8 @@ object Dependencies {
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
-  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.0.1"
-  val stripe = "com.stripe" % "stripe-java" % "20.82.0"
+  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.83.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.5.6" % Test
