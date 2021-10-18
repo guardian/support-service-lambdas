@@ -76,6 +76,21 @@ object Dependencies {
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.15.4" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.1.0" % Test
 
+  /*
+   * ===============================================================================================
+   * These are versions of transitive dependencies in which a vulnerability has been resolved.
+   * These are only here because there was no other resolution available.
+   *
+   * These dependencies should be removed as soon as the direct dependency they are consumed
+   * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
+   */
+  val nettyCodec = "io.netty" % "netty-codec" % "4.1.68.Final"
+  /*
+   * End of vulnerability fixes
+   * ===============================================================================================
+   */
+
+
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
   val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {

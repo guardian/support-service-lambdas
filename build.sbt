@@ -190,7 +190,7 @@ lazy val `config-core` = library(project in file("lib/config-core"))
 
 lazy val `config-cats` = library(project in file("lib/config-cats"))
   .settings(
-    libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig)
+    libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig, nettyCodec)
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
@@ -477,7 +477,8 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
     sttpAsyncHttpClientBackendCats,
     sttpOkhttpBackend,
     scalatest,
-    scalaMock
+    scalaMock,
+    nettyCodec
   )
 ).dependsOn(`salesforce-sttp-client`, `imovo-sttp-client`)
 
