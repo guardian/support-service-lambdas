@@ -67,8 +67,8 @@ object Dependencies {
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
-  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.0.1"
-  val stripe = "com.stripe" % "stripe-java" % "20.84.0"
+  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.85.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.5.6" % Test
