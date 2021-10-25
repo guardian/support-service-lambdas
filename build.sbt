@@ -190,7 +190,7 @@ lazy val `config-core` = library(project in file("lib/config-core"))
 
 lazy val `config-cats` = library(project in file("lib/config-cats"))
   .settings(
-    libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig)
+    libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig, nettyCodec)
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
@@ -477,7 +477,8 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
     sttpAsyncHttpClientBackendCats,
     sttpOkhttpBackend,
     scalatest,
-    scalaMock
+    scalaMock,
+    nettyCodec
   )
 ).dependsOn(`salesforce-sttp-client`, `imovo-sttp-client`)
 
@@ -497,18 +498,6 @@ lazy val `http4s-lambda-handler` = library(project in file("lib/http4s-lambda-ha
   .settings(
     libraryDependencies ++= Seq(circe, circeParser, http4sCore, http4sDsl % Test, scalatest) ++ logging
   )
-
-lazy val `payment-failure-comms` = lambdaProject(
-  "payment-failure-comms",
-  "Transforms calls from Zuora's payment failures into Braze custom events",
-  Seq(
-    circe,
-    circeParser,
-    scalatest,
-    scalajHttp,
-    awsEvents
-  )
-).dependsOn(handler)
 
 lazy val `stripe-webhook-endpoints` = lambdaProject(
   "stripe-webhook-endpoints",
