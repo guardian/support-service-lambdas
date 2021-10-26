@@ -179,28 +179,3 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
-
-  subsWith5RetriesAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsProd
-    DependsOn:
-      - LambdaFunction
-    Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:soft-opt-in-consent-setter-events
-      AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to set consents for a subscription 5 times
-      AlarmDescription: >
-        One or more subscription's Soft Opt-In consents failed to be set after five retries.
-        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#subsWith5RetriesAlarm
-        for possible causes, impacts and fixes.
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: Stage
-          Value: !Sub ${Stage}
-      EvaluationPeriods: 1
-      MetricName: subs_with_five_retries
-      Namespace: soft-opt-in-consent-setter
-      Period: 3600
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
