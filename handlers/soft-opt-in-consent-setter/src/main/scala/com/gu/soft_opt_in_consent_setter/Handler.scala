@@ -110,13 +110,11 @@ object Handler extends LazyLogging {
 
   def emitIdentityMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
     // Soft_Opt_in_Number_of_Attempts__c == 0 means the consents were set successfully
-    val successfullyUpdated = records.filter(_.Soft_Opt_in_Number_of_Attempts__c == 0).size
-    val unsuccessfullyUpdated = records.filter(_.Soft_Opt_in_Number_of_Attempts__c > 0).size
-    val subsWith5Retries = records.filter(_.Soft_Opt_in_Number_of_Attempts__c >= 5).size
+    val successfullyUpdated = records.count(_.Soft_Opt_in_Number_of_Attempts__c == 0)
+    val unsuccessfullyUpdated = records.count(_.Soft_Opt_in_Number_of_Attempts__c > 0)
 
     Metrics.put(event = "successful_consents_updates", successfullyUpdated)
     Metrics.put(event = "failed_consents_updates", unsuccessfullyUpdated)
-    Metrics.put(event = "subs_with_five_retries", subsWith5Retries)
   }
 
 }
