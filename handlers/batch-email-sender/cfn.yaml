@@ -63,7 +63,7 @@ Resources:
       AlarmName: "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - 5XXError"
       AlarmDescription: API responded with 5xx to Salesforce meaning some emails failed to send. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       MetricName: 5XXError
       Namespace: AWS/ApiGateway
       Dimensions:
@@ -86,7 +86,7 @@ Resources:
       AlarmName: "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - Lambda crash"
       AlarmDescription: Lambda crashed unexpectedely meaning email message sent from Salesforce to the Service Layer could not be processed. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName

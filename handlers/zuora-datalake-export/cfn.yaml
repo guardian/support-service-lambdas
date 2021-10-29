@@ -105,7 +105,7 @@ Resources:
         AlarmName: zuora-datalake-export
         AlarmDescription: Failed to export Zuora to Datalake. Corresponding Ophan clean tables, such as clean.zuora_account, will go out-of-date. Refer to https://github.com/guardian/support-service-lambdas/blob/main/handlers/sf-datalake-export/README.md on how to debug and retry.
         AlarmActions:
-          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
         ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:
           - Name: FunctionName

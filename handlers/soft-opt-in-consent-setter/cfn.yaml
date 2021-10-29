@@ -137,7 +137,7 @@ Resources:
       - LambdaFunction
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:soft-opt-in-consent-setter-events
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to run
       AlarmDescription: >
         Two or more runs found an error and were unable to complete.
@@ -162,7 +162,7 @@ Resources:
       - LambdaFunction
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:soft-opt-in-consent-setter-events
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to update Salesforce records
       AlarmDescription: >
         A run failed to update (some) records in Salesforce in the last hour.
