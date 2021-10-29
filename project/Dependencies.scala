@@ -8,7 +8,7 @@ import sbtassembly.PathList
 
 object Dependencies {
   val awsSdkVersion = "2.17.70"
-  val circeVersion = "0.13.0"
+  val circeVersion = "0.14.1"
   val sttpVersion = "3.3.16"
   val http4sVersion = "0.21.31"
   val catsVersion = "2.6.1"
