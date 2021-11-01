@@ -107,7 +107,7 @@ Resources:
         For general advice, see
         https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
@@ -115,9 +115,9 @@ Resources:
       EvaluationPeriods: 1
       MetricName: Errors
       Namespace: AWS/Lambda
-      Period: 3600
+      Period: 4500
       Statistic: Sum
-      Threshold: 2
+      Threshold: 3
       TreatMissingData: notBreaching
     DependsOn:
       - HolidayStopProcessor
