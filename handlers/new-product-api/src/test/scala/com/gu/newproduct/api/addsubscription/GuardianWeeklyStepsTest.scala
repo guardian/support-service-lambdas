@@ -151,7 +151,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
   }
 
   it should "create subscription for 6-for-6 rate plan" in {
-    val monthlySubscriptionStartDate = testFirstPaymentDate.plusWeeks(6)
+    val monthlySubscriptionStartDate = testFirstPaymentDate.plusWeeks(7)
 
     def stubCreate(request: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       request shouldBe ZuoraCreateSubRequest(
