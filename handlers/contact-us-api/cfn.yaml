@@ -109,7 +109,7 @@ Resources:
       - ContactUsApiGateway
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub 4XX rate from contact-us-api-${Stage}
       AlarmDescription: >
         See https://github.com/guardian/support-service-lambdas/blob/main/handlers/contact-us-api/README.md#4XX-Errors
@@ -135,7 +135,7 @@ Resources:
       - ContactUsApiGateway
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub 5XX rate from contact-us-api-${Stage}
       AlarmDescription: >
         See https://github.com/guardian/support-service-lambdas/blob/main/handlers/contact-us-api/README.md#5XX-Errors
@@ -161,7 +161,7 @@ Resources:
       - ContactUsApiGateway
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub No requests coming into contact-us-api-${Stage}
       AlarmDescription: >
         This is a last line catch-all alarm. It means no requests were received in the last 6 hours.

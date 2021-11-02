@@ -129,7 +129,7 @@ Resources:
     Condition: CreateProdMonitoring
     Properties:
       AlarmActions:
-      - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+      - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub "URGENT 9-5 - ${Stage} ${LogGroupNamePrefix} - sustained errors observed"
       AlarmDescription: "IMPACT: If this goes unaddressed CSRs won't be able to see Direct Debit Mandate failures AND no DD failure emails will go out to customers. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit"
       ComparisonOperator: GreaterThanOrEqualToThreshold
