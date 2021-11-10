@@ -7,8 +7,8 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.17.72"
-  val circeVersion = "0.14.1"
+  val awsSdkVersion = "2.17.78"
+  val circeVersion = "0.13.0"
   val sttpVersion = "3.3.16"
   val http4sVersion = "0.21.31"
   val catsVersion = "2.6.1"
@@ -68,7 +68,7 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.0.1"
-  val stripe = "com.stripe" % "stripe-java" % "20.86.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.86.1"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.6.0" % Test
@@ -84,7 +84,7 @@ object Dependencies {
    * These dependencies should be removed as soon as the direct dependency they are consumed
    * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
    */
-  val nettyCodec = "io.netty" % "netty-codec" % "4.1.69.Final"
+  val nettyCodec = "io.netty" % "netty-codec" % "4.1.70.Final"
   /*
    * End of vulnerability fixes
    * ===============================================================================================
