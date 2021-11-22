@@ -8,14 +8,14 @@ import sbtassembly.PathList
 
 object Dependencies {
   val awsSdkVersion = "2.17.78"
-  val circeVersion = "0.14.1"
-  val sttpVersion = "3.3.16"
+  val circeVersion = "0.13.0"
+  val sttpVersion = "3.3.17"
   val http4sVersion = "0.21.31"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "2.5.4"
 
   val logging = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.2.6",
+    "ch.qos.logback" % "logback-classic" % "1.2.7",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
   )
 
@@ -68,7 +68,7 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.0.1"
-  val stripe = "com.stripe" % "stripe-java" % "20.86.1"
+  val stripe = "com.stripe" % "stripe-java" % "20.89.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.6.0" % Test
