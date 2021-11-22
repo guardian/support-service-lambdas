@@ -129,7 +129,7 @@ Resources:
       AlarmName: fulfilment-date-calculator
       AlarmDescription: Failed to generate fulfilment-dates files in fulfilment-date-calculator S3 bucket for today
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:MarioTest
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName

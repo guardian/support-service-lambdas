@@ -193,7 +193,7 @@ Resources:
           IMPACT: If this goes unaddressed, some digital vouchers will not be generated or provisioned.
           It's likely that a SF subscription has been misconfigured.
         AlarmActions:
-          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
         ComparisonOperator: GreaterThanThreshold
         Dimensions:
           - Name: ApiName
@@ -217,7 +217,7 @@ Resources:
           IMPACT: If this goes unaddressed, some digital vouchers will not be generated or provisioned.
           It's likely that there's an error upstream in the voucher provider's API.
         AlarmActions:
-          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
         ComparisonOperator: GreaterThanThreshold
         Dimensions:
           - Name: ApiName

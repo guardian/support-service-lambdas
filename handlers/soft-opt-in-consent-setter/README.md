@@ -28,8 +28,6 @@ has been created to visualise these metrics and help monitor the lambda.
 
 **failed_consents_updates**: Shows how many failed IDAPI Soft Opt-In consent updates took place.
 
-**subs_with_five_retries**: Shows how many subscriptions reached 5 retries during the run.
-
 **successful_salesforce_update**: Shows how many successful Salesforce record updates took place.
 
 **failed_salesforce_update**: Shows how many failed Salesforce record updates took place.
@@ -93,28 +91,6 @@ anomaly.
 
 After the underlying issue is fixed, letting the lambda continue to run on schedule will update Salesforce to the
 correct state.
-
-### subsWith5RetriesAlarm
-
-**CAUSE**: One or more subscription's Soft Opt-In consents failed to be set after five retries. This can be due to
-several reasons:
-
-1. Failed to contact the IDAPI endpoint
-1. IDAPI was unable to set the user's Soft Opt-In consents.
-
-The [lambda's logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fsoft-opt-in-consent-setter-PROD)
-will provide more details regarding which of these is taking place.
-
-**IMPACT**: The lambda will no longer try to process this request.
-
-**FIX**: For each corresponding cause:
-
-1. Check that the IDAPI endpoints are correct and online.
-1. Check the logs for the error code being returned by the endpoint and contact the Identity team to understand why
-   IDAPI was unable to set the user's Soft Opt-In consents. Most of the time this will be a user who no longer has an 
-   Identity account (ID stored in `SF_Subscription__c.Buyer__r.IdentityID__c`), in which case no action is necessary. *
-
-\* You can use the [useradmin tool](https://useradmin.gutools.co.uk/) to find out if an Identity ID exists in the Identity system. This is a tool that allows you to tie together identities with email addresses, subscriptions, physical addresses etc. If the ID doesn't exist in the system, there's no need to take any further action.
 
 For all the above, after the underlying issue is resolved, the `Soft_Opt_in_Number_of_Attempts__c` fields needs to be
 reset to 0 for each of the affected records. After that the lambda will pick up those records for processing again.
