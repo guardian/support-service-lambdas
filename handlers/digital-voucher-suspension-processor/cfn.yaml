@@ -92,10 +92,10 @@ Resources:
       EvaluationPeriods: 1
       MetricName: Errors
       Namespace: AWS/Lambda
-      Period: 300
+      Period: 3600
       Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
+      Threshold: 3
+      TreatMissingData: ignore
 
   LambdaScheduleRule:
     Type: AWS::Events::Rule
