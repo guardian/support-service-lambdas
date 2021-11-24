@@ -27,7 +27,7 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.10.0"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.0"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
