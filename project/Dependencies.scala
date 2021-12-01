@@ -8,10 +8,10 @@ import sbtassembly.PathList
 
 object Dependencies {
   val awsSdkVersion = "2.17.78"
-  val circeVersion = "0.14.1"
-  val sttpVersion = "3.3.17"
+  val circeVersion = "0.13.0"
+  val sttpVersion = "3.3.18"
   val http4sVersion = "0.21.31"
-  val catsVersion = "2.6.1"
+  val catsVersion = "2.7.0"
   val catsEffectVersion = "2.5.4"
 
   val logging = Seq(
@@ -27,7 +27,7 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.10.0"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.0"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
@@ -49,7 +49,7 @@ object Dependencies {
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
   val sttpOkhttpBackend =
     "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
-  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.2"
+  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.3"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
   // HTTP4S
