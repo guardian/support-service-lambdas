@@ -103,7 +103,8 @@ object SubscriptionData {
             .tap(v => assert(abs(v) <= abs(issueData.credit), "Discounted credit should not be more than un-discounted"))
             .tap(v => assert(v <= 0, "Credit should be negative"))
             .tap(v => assert(v.toString.dropWhile(_ != '.').tail.length <= 2, "Credit should have up to two decimal places"))
-            .tap(v => assert(abs(v) < 10.0, "Credit should not go beyond maximum bound"))
+            // an arbitrarily high threshold - any discount higher than this is probably a mistaken calculation
+            .tap(v => assert(abs(v) < 15.0, "Credit should not go beyond maximum bound"))
             .tap(v => if (discounts.isEmpty) assert(v == issueData.credit, "Credit should not be affected if there are no discounts"))
           }
 
@@ -147,7 +148,7 @@ object SubscriptionData {
   }
 
   private def getUnexpiredRatePlanCharges(ratePlan: RatePlan) = {
-    ratePlan.ratePlanCharges.filter(_.chargedThroughDate.map(!_.isBefore(MutableCalendar.today)).getOrElse(true))
+    ratePlan.ratePlanCharges.filter(_.chargedThroughDate.forall(!_.isBefore(MutableCalendar.today)))
   }
 
   def ratePlanChargeDataForDate(ratePlanChargeData: List[RatePlanChargeData], date: LocalDate): Either[ZuoraApiFailure, RatePlanChargeData] = {
