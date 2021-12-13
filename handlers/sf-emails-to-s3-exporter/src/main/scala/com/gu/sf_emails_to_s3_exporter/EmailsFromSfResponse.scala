@@ -21,10 +21,15 @@ object EmailsFromSfResponse {
     Incoming: Boolean,
     LastOpenedDate: Option[String] = None,
     MessageDate: String,
-    ParentId: String,
+    Parent: Parent,
     Status: String,
     Subject: Option[String] = None,
     TextBody: Option[String] = None,
     ToAddress: String
+  )
+
+  case class Parent(
+    CaseNumber: String,
+    Id: String
   )
 }
