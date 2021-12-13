@@ -8,6 +8,28 @@ import scalaj.http.{Http, HttpOptions}
 
 object SFConnector {
 
+  lazy val optConfig = for {
+    sfUserName <- Option(System.getenv("username"))
+    sfClientId <- Option(System.getenv("clientId"))
+    sfClientSecret <- Option(System.getenv("clientSecret"))
+    sfPassword <- Option(System.getenv("password"))
+    sfToken <- Option(System.getenv("token"))
+    sfAuthUrl <- Option(System.getenv("authUrl"))
+    stage <- Option(System.getenv("stageName"))
+  } yield Config(
+    SalesforceConfig(
+      userName = sfUserName,
+      clientId = sfClientId,
+      clientSecret = sfClientSecret,
+      password = sfPassword,
+      token = sfToken,
+      authUrl = sfAuthUrl
+    ),
+    AwsConfig(
+      stageName = stage
+    )
+  )
+
   def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
     val responseBody = doSfGetWithQuery(sfAuthDetails, GetEmailsQuery.query)
     println("response body:" + responseBody)
