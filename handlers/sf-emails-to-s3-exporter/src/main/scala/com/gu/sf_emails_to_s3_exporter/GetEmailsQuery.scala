@@ -23,13 +23,13 @@ object GetEmailsQuery {
        | TextBody,
        | ToAddress
        |FROM
-       |	emailmessage
+       | emailmessage
        |WHERE
-       |	Export_Status__c in ('Ready for export to s3')
+       | Export_Status__c in ('Ready for export to s3')
        |ORDER BY
-       |  ParentId
+       | ParentId
        |LIMIT
-       |	1
+       | 1
     """.stripMargin
   }
 }
