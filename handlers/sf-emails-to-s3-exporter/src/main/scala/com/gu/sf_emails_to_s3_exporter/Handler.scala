@@ -9,17 +9,6 @@ import scalaj.http.{Http, HttpOptions}
 object Handler extends LazyLogging {
   case class SfAuthDetails(access_token: String, instance_url: String)
 
-  case class EmailsFromSfResponse(
-    done: Boolean,
-    records: Seq[Records],
-    nextRecordsUrl: Option[String] = None
-  )
-
-  case class Records(
-    Id: String,
-    FromAddress: String
-  )
-
   lazy val optConfig = for {
     sfUserName <- Option(System.getenv("username"))
     sfClientId <- Option(System.getenv("clientId"))
@@ -47,21 +36,23 @@ object Handler extends LazyLogging {
   }
 
   def handleRequest(): Unit = {
-    for {
+    val emails = for {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
       sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
       emailsForExportFromSf <- getEmailsFromSf(sfAuthDetails)
-    } yield ()
+    } yield emailsForExportFromSf
+
+    logger.info("emails:" + emails)
   }
 
-  def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse] = {
+  def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
     logger.info("Getting emails from Salesforce...")
 
-    val query = getEmailsToProcessQuery
+    val query = GetEmailsQuery.query
 
     val responseBody = doSfGetWithQuery(sfAuthDetails, query)
     println("response body:" + responseBody)
-    decode[EmailsFromSfResponse](responseBody)
+    decode[EmailsFromSfResponse.Response](responseBody)
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
@@ -90,19 +81,5 @@ object Handler extends LazyLogging {
       .body
   }
 
-  val getEmailsToProcessQuery: String = {
-    s"""
-       |SELECT
-       |	Id,
-       |	FromAddress
-       |FROM
-       |	emailmessage
-       |WHERE
-       |	Export_Status__c in ('Ready for export to s3')
-       |ORDER BY
-       |  ParentId
-       |LIMIT
-       |	1
-    """.stripMargin
-  }
+
 }
