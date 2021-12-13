@@ -12,13 +12,11 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      SalesforceStage: ${Stage}
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
       AppSecretsVersion: de769b81-3245-414a-acfb-a15c8ead92e5
       SalesforceUserSecretsVersion: f0ef9b35-de4c-4fc7-a566-81aab194b9f4
     DEV:
-      SalesforceStage: ${Stage}
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
       AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
@@ -46,39 +44,33 @@ Resources:
           sfApiVersion: v46.0
           sfAuthUrl:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:authUrl::${AppSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${AppName}:SecretString:authUrl::${AppSecretsVersion}}}'
+            - AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
               AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
           sfClientId:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId::${AppSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId::${AppSecretsVersion}}}'
+            - AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
               AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
           sfClientSecret:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret::${AppSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret::${AppSecretsVersion}}}'
+            - AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
               AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
           sfPassword:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfPassword::${SalesforceUserSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${SalesforceUsername}:SecretString:sfPassword::${SalesforceUserSecretsVersion}}}'
+            - SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
           sfToken:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfToken::${SalesforceUserSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${SalesforceUsername}:SecretString:sfToken::${SalesforceUserSecretsVersion}}}'
+            - SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
           sfUsername:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfUsername::${SalesforceUserSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${SalesforceUsername}:SecretString:sfUsername::${SalesforceUserSecretsVersion}}}'
+            - SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
       Policies:
         - Statement:
