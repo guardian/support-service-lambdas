@@ -1,12 +1,24 @@
 package com.gu.sf_emails_to_s3_exporter
 
 import com.typesafe.scalalogging.LazyLogging
+import io.circe.Error
 import io.circe.generic.auto.exportDecoder
 import io.circe.parser.decode
-import scalaj.http.Http
+import scalaj.http.{Http, HttpOptions}
 
 object Handler extends LazyLogging {
   case class SfAuthDetails(access_token: String, instance_url: String)
+
+  case class EmailsFromSfResponse(
+    done: Boolean,
+    records: Seq[Records],
+    nextRecordsUrl: Option[String] = None
+  )
+
+  case class Records(
+    Id: String,
+    FromAddress: String
+  )
 
   lazy val optConfig = for {
     sfUserName <- Option(System.getenv("username"))
@@ -38,7 +50,28 @@ object Handler extends LazyLogging {
     for {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
       sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
+      emailsForExportFromSf <- getEmailsFromSf(sfAuthDetails)
     } yield ()
+  }
+
+  def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse] = {
+    logger.info("Getting emails from Salesforce...")
+
+    val query = getEmailsToProcessQuery
+
+    val responseBody = doSfGetWithQuery(sfAuthDetails, query)
+    println("response body:" + responseBody)
+    decode[EmailsFromSfResponse](responseBody)
+  }
+
+  def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
+    Http(s"${sfAuthDetails.instance_url}/services/data/v50.0/query/")
+      .param("q", query)
+      .option(HttpOptions.readTimeout(30000))
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .method("GET")
+      .asString
+      .body
   }
 
   def auth(salesforceConfig: SalesforceConfig): String = {
@@ -55,5 +88,21 @@ object Handler extends LazyLogging {
       )
       .asString
       .body
+  }
+
+  val getEmailsToProcessQuery: String = {
+    s"""
+       |SELECT
+       |	Id,
+       |	FromAddress
+       |FROM
+       |	emailmessage
+       |WHERE
+       |	Export_Status__c in ('Ready for export to s3')
+       |ORDER BY
+       |  ParentId
+       |LIMIT
+       |	1
+    """.stripMargin
   }
 }
