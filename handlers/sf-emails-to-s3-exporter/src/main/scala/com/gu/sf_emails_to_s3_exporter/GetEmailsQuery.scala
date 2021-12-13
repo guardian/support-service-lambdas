@@ -4,8 +4,8 @@ object GetEmailsQuery {
   val query: String = {
     s"""
        |SELECT
-       |	Id,
-       |	BccAddress,
+       | Id,
+       | BccAddress,
        | CcAddress,
        | FirstOpenedDate,
        | ValidatedFromAddress,
