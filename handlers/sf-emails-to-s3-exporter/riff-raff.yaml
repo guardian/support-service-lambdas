@@ -1,0 +1,21 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: sf-emails-to-s3-exporter
+    parameters:
+      templatePath: cfn.yaml
+
+  sf-emails-to-s3-exporter:
+    type: aws-lambda
+    parameters:
+      fileName: sf-emails-to-s3-exporter.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+        - sf-emails-to-s3-exporter-
+    dependencies: [ cfn ]
