@@ -20,12 +20,8 @@ object S3Connector extends LazyLogging{
 
     val requestBody = RequestBody.fromString(caseEmailsJson, StandardCharsets.UTF_8)
 
-    val uploadAttempt = for {
-      result <- s3Write(putRequest, requestBody)
-    } yield {
-      result
-    }
-    uploadAttempt.fold(
+    s3Write(putRequest, requestBody)
+      .fold(
       ex => {
         logger.info(s"Upload failed due to $ex")
         Left(s"Upload failed due to $ex")
