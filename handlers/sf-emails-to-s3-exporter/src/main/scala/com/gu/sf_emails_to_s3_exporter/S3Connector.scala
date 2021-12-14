@@ -5,22 +5,22 @@ import java.nio.charset.StandardCharsets
 import com.gu.effects.UploadToS3
 import com.typesafe.scalalogging.LazyLogging
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.{PutObjectRequest, PutObjectResponse}
-
-import scala.util.Try
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 
 object S3Connector extends LazyLogging{
+
+  val bucketName = "emails-from-sf"
 
   def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String): Unit = {
 
     val putRequest = PutObjectRequest.builder
-      .bucket("emails-from-sf")
+      .bucket(bucketName)
       .key(s"${fileName}.json")
       .build()
 
     val requestBody = RequestBody.fromString(caseEmailsJson, StandardCharsets.UTF_8)
 
-    s3Write(putRequest, requestBody)
+    UploadToS3.putObject(putRequest, requestBody)
       .fold(
       ex => {
         logger.info(s"Upload failed due to $ex")
@@ -32,5 +32,4 @@ object S3Connector extends LazyLogging{
       }
     )
   }
-  def s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse] = UploadToS3.putObject
 }
