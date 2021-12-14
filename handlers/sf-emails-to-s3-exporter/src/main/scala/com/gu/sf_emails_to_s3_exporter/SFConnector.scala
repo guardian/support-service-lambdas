@@ -7,21 +7,6 @@ import scalaj.http.Http
 
 object SFConnector {
 
-  lazy val optConfig = for {
-    sfUserName <- Option(System.getenv("username"))
-    sfClientId <- Option(System.getenv("clientId"))
-    sfClientSecret <- Option(System.getenv("clientSecret"))
-    sfPassword <- Option(System.getenv("password"))
-    sfToken <- Option(System.getenv("token"))
-    sfAuthUrl <- Option(System.getenv("authUrl"))
-  } SalesforceConfig(
-      userName = sfUserName,
-      clientId = sfClientId,
-      clientSecret = sfClientSecret,
-      password = sfPassword,
-      token = sfToken,
-      authUrl = sfAuthUrl
-  )
   case class SfAuthDetails(access_token: String, instance_url: String)
 
   def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
