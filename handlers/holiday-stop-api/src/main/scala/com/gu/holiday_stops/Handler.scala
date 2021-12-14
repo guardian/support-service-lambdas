@@ -3,7 +3,6 @@ package com.gu.holiday_stops
 import java.io.{InputStream, OutputStream, Serializable}
 import java.time.LocalDate
 import java.util.UUID
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
@@ -32,6 +31,8 @@ import play.api.libs.json.{Json, Reads, Writes}
 import zio.console.Console
 import zio.ZIO
 
+import scala.util.Try
+
 object Handler extends Logging {
 
   type SfClient = HttpOp[StringHttpRequest, BodyAsString]
@@ -50,7 +51,13 @@ object Handler extends Logging {
       ).provideCustomLayer(ConfigurationLive.impl)
     }
 
-    ApiGatewayHandler(LambdaIO(inputStream, outputStream, context))(configOp)
+    Try(ApiGatewayHandler(LambdaIO(inputStream, outputStream, context))(configOp)).fold(
+      { failure =>
+        logger.error(failure.getMessage, failure)
+        throw failure
+      },
+      _ => ()
+    )
   }
 
   def operationForEffects(
