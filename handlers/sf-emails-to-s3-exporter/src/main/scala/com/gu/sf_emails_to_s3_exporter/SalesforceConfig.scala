@@ -6,7 +6,8 @@ case class SalesforceConfig(
   clientSecret: String,
   userName: String,
   password: String,
-  token: String
+  token: String,
+  apiVersion: String
 )
 
 object SalesforceConfig{
@@ -19,13 +20,15 @@ object SalesforceConfig{
       sfPassword <- Option(System.getenv("password"))
       sfToken <- Option(System.getenv("token"))
       sfAuthUrl <- Option(System.getenv("authUrl"))
+      sfApiVersion <- Option(System.getenv("apiVersion"))
     } yield SalesforceConfig(
       userName = sfUserName,
       clientId = sfClientId,
       clientSecret = sfClientSecret,
       password = sfPassword,
       token = sfToken,
-      authUrl = sfAuthUrl
+      authUrl = sfAuthUrl,
+      apiVersion = sfApiVersion
     )
 }
 
