@@ -1,12 +1,13 @@
 package com.gu.sf_emails_to_s3_exporter
 
-import com.gu.sf_emails_to_s3_exporter.Handler.SfAuthDetails
 import io.circe.Error
 import io.circe.generic.auto.exportDecoder
 import io.circe.parser.decode
 import scalaj.http.Http
 
 object SFConnector {
+
+  case class SfAuthDetails(access_token: String, instance_url: String)
 
   def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
     val responseBody = doSfGetWithQuery(sfAuthDetails, GetEmailsQuery.query)

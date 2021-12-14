@@ -1,13 +1,11 @@
 package com.gu.sf_emails_to_s3_exporter
 
-import com.gu.sf_emails_to_s3_exporter.SFConnector.{auth, getEmailsFromSf}
+import com.gu.sf_emails_to_s3_exporter.SFConnector.{SfAuthDetails, auth, getEmailsFromSf}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.decoding.DerivedDecoder.deriveDecoder
 import io.circe.parser.decode
 
 object Handler extends LazyLogging {
-
-  case class SfAuthDetails(access_token: String, instance_url: String)
 
   def main(args: Array[String]): Unit = {
     handleRequest()
