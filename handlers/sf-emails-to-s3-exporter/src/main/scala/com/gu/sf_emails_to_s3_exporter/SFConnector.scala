@@ -28,7 +28,6 @@ object SFConnector {
 
   def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
     val responseBody = doSfGetWithQuery(sfAuthDetails, GetEmailsQuery.query)
-    println("response body:" + responseBody)
     decode[EmailsFromSfResponse.Response](responseBody)
   }
 
