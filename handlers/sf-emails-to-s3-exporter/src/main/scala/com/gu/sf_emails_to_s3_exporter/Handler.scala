@@ -25,7 +25,7 @@ object Handler extends LazyLogging {
     emails match {
 
       case Left(failure) => {
-        logger.error("Missing config value. details: " + failure)
+        logger.error("Error occurred. details: " + failure)
         throw new RuntimeException("Missing config value")
       }
 
