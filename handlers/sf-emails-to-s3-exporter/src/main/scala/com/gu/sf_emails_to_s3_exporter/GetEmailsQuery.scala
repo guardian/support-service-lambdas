@@ -22,7 +22,9 @@ object GetEmailsQuery {
        | Status,
        | Subject,
        | TextBody,
-       | ToAddress
+       | ToAddress,
+       | Composite_Key__c,
+       | Resolve_on_Send__c
        |FROM
        | emailmessage
        |WHERE
