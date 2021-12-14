@@ -37,7 +37,7 @@ object Handler extends LazyLogging {
         emailsGroupedByCaseNumber.foreach {
           case (caseNumber, caseRecords) =>
             writeEmailsJsonToS3(
-              caseNumber,
+              caseNumber +".json",
               caseRecords.asJson.toString()
             )
         }

@@ -15,7 +15,7 @@ object S3Connector extends LazyLogging{
 
     val putRequest = PutObjectRequest.builder
       .bucket(bucketName)
-      .key(s"${fileName}.json")
+      .key(s"${fileName}")
       .build()
 
     val requestBody = RequestBody.fromString(caseEmailsJson, StandardCharsets.UTF_8)
