@@ -37,7 +37,7 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
-          sfApiVersion: v46.0
+          sfApiVersion: v50.0
           sfAuthUrl:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${AppName}:SecretString:authUrl}}'
