@@ -24,9 +24,6 @@ object SFConnector {
       password = sfPassword,
       token = sfToken,
       authUrl = sfAuthUrl
-    ),
-    AwsConfig(
-      stageName = stage
     )
   )
 
