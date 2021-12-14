@@ -34,11 +34,13 @@ object Handler extends LazyLogging {
           .records
           .groupBy(_.Parent.CaseNumber)
 
-        emailsGroupedByCaseNumber.foreach(p =>
-          writeEmailsJsonToS3(
-            p._1,
-            p._2.asJson.toString()
-          ))
+        emailsGroupedByCaseNumber.foreach {
+          case (caseNumber, caseRecords) =>
+            writeEmailsJsonToS3(
+              caseNumber,
+              caseRecords.asJson.toString()
+            )
+        }
       }
     }
   }
