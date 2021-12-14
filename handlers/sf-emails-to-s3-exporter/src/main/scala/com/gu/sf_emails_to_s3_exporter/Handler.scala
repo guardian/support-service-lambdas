@@ -1,7 +1,7 @@
 package com.gu.sf_emails_to_s3_exporter
 
 import com.gu.sf_emails_to_s3_exporter.S3Connector.writeEmailsJsonToS3
-import com.gu.sf_emails_to_s3_exporter.SFConnector.{SfAuthDetails, auth, getEmailsFromSf}
+import com.gu.sf_emails_to_s3_exporter.SFConnector.{SfAuthDetails, auth, getEmailsFromSf, optConfig}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.generic.decoding.DerivedDecoder.deriveDecoder
@@ -18,9 +18,6 @@ object Handler extends LazyLogging {
     val emails  = for {
       config <- SalesforceConfig.fromEnvironment.toRight("Missing config value")
       sfAuthDetails <- decode[SfAuthDetails](auth(config))
-    for{
-      config <- optConfig.toRight(new RuntimeException("Missing config value"))
-      sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
       emailsForExportFromSf <- getEmailsFromSf(sfAuthDetails)
     } yield emailsForExportFromSf
 
