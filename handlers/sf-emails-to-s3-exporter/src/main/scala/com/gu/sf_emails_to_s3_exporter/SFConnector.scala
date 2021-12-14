@@ -34,7 +34,6 @@ object SFConnector {
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
     Http(s"${sfAuthDetails.instance_url}/services/data/v50.0/query/")
       .param("q", query)
-      .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .method("GET")
       .asString
