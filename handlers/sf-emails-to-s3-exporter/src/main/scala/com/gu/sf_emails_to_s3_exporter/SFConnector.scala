@@ -14,15 +14,13 @@ object SFConnector {
     sfPassword <- Option(System.getenv("password"))
     sfToken <- Option(System.getenv("token"))
     sfAuthUrl <- Option(System.getenv("authUrl"))
-  } yield Config(
-    SalesforceConfig(
+  } SalesforceConfig(
       userName = sfUserName,
       clientId = sfClientId,
       clientSecret = sfClientSecret,
       password = sfPassword,
       token = sfToken,
       authUrl = sfAuthUrl
-    )
   )
   case class SfAuthDetails(access_token: String, instance_url: String)
 
