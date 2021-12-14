@@ -25,7 +25,9 @@ object EmailsFromSfResponse {
     Status: String,
     Subject: Option[String] = None,
     TextBody: Option[String] = None,
-    ToAddress: String
+    ToAddress: String,
+    Composite_Key__c:String,
+    Resolve_on_Send__c:Boolean
   )
 
   case class Parent(
