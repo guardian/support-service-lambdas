@@ -15,7 +15,6 @@ object SFConnector {
     sfPassword <- Option(System.getenv("password"))
     sfToken <- Option(System.getenv("token"))
     sfAuthUrl <- Option(System.getenv("authUrl"))
-    stage <- Option(System.getenv("stageName"))
   } yield Config(
     SalesforceConfig(
       userName = sfUserName,
@@ -24,9 +23,6 @@ object SFConnector {
       password = sfPassword,
       token = sfToken,
       authUrl = sfAuthUrl
-    ),
-    AwsConfig(
-      stageName = stage
     )
   )
 
