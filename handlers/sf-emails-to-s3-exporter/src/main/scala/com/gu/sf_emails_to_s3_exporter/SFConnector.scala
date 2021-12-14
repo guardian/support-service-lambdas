@@ -4,27 +4,9 @@ import com.gu.sf_emails_to_s3_exporter.Handler.SfAuthDetails
 import io.circe.Error
 import io.circe.generic.auto.exportDecoder
 import io.circe.parser.decode
-import scalaj.http.{Http, HttpOptions}
+import scalaj.http.Http
 
 object SFConnector {
-
-  lazy val optConfig = for {
-    sfUserName <- Option(System.getenv("username"))
-    sfClientId <- Option(System.getenv("clientId"))
-    sfClientSecret <- Option(System.getenv("clientSecret"))
-    sfPassword <- Option(System.getenv("password"))
-    sfToken <- Option(System.getenv("token"))
-    sfAuthUrl <- Option(System.getenv("authUrl"))
-  } yield Config(
-    SalesforceConfig(
-      userName = sfUserName,
-      clientId = sfClientId,
-      clientSecret = sfClientSecret,
-      password = sfPassword,
-      token = sfToken,
-      authUrl = sfAuthUrl
-    )
-  )
 
   def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
     val responseBody = doSfGetWithQuery(sfAuthDetails, GetEmailsQuery.query)
