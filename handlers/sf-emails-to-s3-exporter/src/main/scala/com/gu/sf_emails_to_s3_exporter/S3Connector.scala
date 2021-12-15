@@ -5,8 +5,9 @@ import java.nio.charset.StandardCharsets
 import com.gu.effects.{AwsS3, Key, UploadToS3}
 import com.typesafe.scalalogging.LazyLogging
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.{ListObjectsRequest, PutObjectRequest}
+import software.amazon.awssdk.services.s3.model.{GetObjectRequest, ListObjectsRequest, PutObjectRequest}
 
+import scala.io.Source
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object S3Connector extends LazyLogging{
@@ -48,5 +49,16 @@ object S3Connector extends LazyLogging{
       .map(
         objSummary => Key(objSummary.key)
       ).contains(Key(fileName))
+  }
+
+  def getEmailsJsonFromS3File(bucketName: String, fileName: String): String = {
+    val inputStream = AwsS3.client.getObject(
+      GetObjectRequest.builder
+        .bucket("emails-from-sf")
+        .key(fileName + ".json")
+        .build()
+    )
+
+    Source.fromInputStream(inputStream).mkString
   }
 }
