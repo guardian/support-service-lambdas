@@ -30,13 +30,13 @@ object Handler extends LazyLogging {
         for {
           emailsForExportFromSf <- getEmailsFromSfByQuery(successfulAuth)
         } yield {
-          processEmails(successfulAuth, emailsForExportFromSf)
+          saveEmailsToS3AndQueryForMoreIfTheyExist(successfulAuth, emailsForExportFromSf)
         }
       }
     }
   }
 
-  def processEmails(sfAuthDetails: SfAuthDetails, response: EmailsFromSfResponse.Response): Unit = {
+  def saveEmailsToS3AndQueryForMoreIfTheyExist(sfAuthDetails: SfAuthDetails, response: EmailsFromSfResponse.Response): Unit = {
 
     val sfEmailsGroupedByCaseNumber = response
       .records
@@ -50,7 +50,7 @@ object Handler extends LazyLogging {
         for {
           nextPageEmails <- getEmailsFromSfByRecordsetReference(sfAuthDetails, response.nextRecordsUrl.get)
         } yield {
-          processEmails(sfAuthDetails, nextPageEmails)
+          saveEmailsToS3AndQueryForMoreIfTheyExist(sfAuthDetails, nextPageEmails)
         }
       }
     }
