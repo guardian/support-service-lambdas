@@ -2,10 +2,12 @@ package com.gu.sf_emails_to_s3_exporter
 
 import java.nio.charset.StandardCharsets
 
-import com.gu.effects.UploadToS3
+import com.gu.effects.{AwsS3, Key, UploadToS3}
 import com.typesafe.scalalogging.LazyLogging
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.{ListObjectsRequest, PutObjectRequest}
+
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object S3Connector extends LazyLogging{
 
@@ -22,14 +24,29 @@ object S3Connector extends LazyLogging{
 
     UploadToS3.putObject(putRequest, requestBody)
       .fold(
-      ex => {
-        logger.info(s"Upload failed due to $ex")
-        Left(s"Upload failed due to $ex")
-      },
-      result => {
-        logger.info(s"Successfully saved Case emails ($fileName) to S3")
-        Right(result)
-      }
-    )
+        ex => {
+          logger.info(s"Upload failed due to $ex")
+          Left(s"Upload failed due to $ex")
+        },
+        result => {
+          logger.info(s"Successfully saved Case emails ($fileName) to S3")
+          Right(result)
+        }
+      )
+  }
+
+  def fileExistsInS3(fileName: String): Boolean = {
+
+    val filesInS3MatchingFileName = AwsS3.client.listObjects(
+      ListObjectsRequest.builder
+        .bucket("emails-from-sf")
+        .prefix(fileName)
+        .build()
+    ).contents.asScala.toList
+
+    filesInS3MatchingFileName
+      .map(
+        objSummary => Key(objSummary.key)
+      ).contains(Key(fileName))
   }
 }
