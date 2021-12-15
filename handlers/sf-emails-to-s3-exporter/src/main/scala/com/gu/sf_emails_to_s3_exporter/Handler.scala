@@ -14,26 +14,34 @@ object Handler extends LazyLogging {
   }
 
   def handleRequest(): Unit = {
-    for {
-      config <- SalesforceConfig.fromEnvironment.toRight(new RuntimeException("Missing config value"))
+    val emails = for {
+      config <- SalesforceConfig.fromEnvironment.toRight("Missing config value")
       sfAuthDetails <- decode[SfAuthDetails](auth(config))
       emailsForExportFromSf <- getEmailsFromSf(sfAuthDetails)
-    } {
+    } yield emailsForExportFromSf
 
-      println("emailsForExportFromSf.size:" + emailsForExportFromSf.records.size)
+    logger.info("emails:" + emails)
 
-      val sfEmailsGroupedByCaseNumber = emailsForExportFromSf
-        .records
-        .groupBy(_.Parent.CaseNumber)
+    emails match {
 
-      createOrAppendToS3Files(sfEmailsGroupedByCaseNumber)
+      case Left(failure) => {
+        logger.error("Error occurred. details: " + failure)
+        throw new RuntimeException("Missing config value")
+      }
 
+      case Right(emailsFromSF) => {
+        val sfEmailsGroupedByCaseNumber = emailsFromSF
+          .records
+          .groupBy(_.Parent.CaseNumber)
+
+        createOrAppendToS3Files(sfEmailsGroupedByCaseNumber)
+      }
     }
   }
 
   def createOrAppendToS3Files(sfEmailsByCaseNumber: Map[String, Seq[EmailsFromSfResponse.Records]]): Unit = {
 
-    val abc = sfEmailsByCaseNumber.foreach {
+    sfEmailsByCaseNumber.foreach {
       case (caseNumber, caseRecords) =>
 
         fileExistsInS3(caseNumber + ".json") match {
