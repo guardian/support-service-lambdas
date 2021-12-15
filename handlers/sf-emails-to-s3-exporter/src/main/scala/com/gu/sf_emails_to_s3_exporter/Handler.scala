@@ -30,6 +30,8 @@ object Handler extends LazyLogging {
       }
 
       case Right(emailsFromSF) => {
+        logger.info("emailsFromSF size:" + emailsFromSF.records.size)
+
         val sfEmailsGroupedByCaseNumber = emailsFromSF
           .records
           .groupBy(_.Parent.CaseNumber)
@@ -44,7 +46,7 @@ object Handler extends LazyLogging {
     sfEmailsByCaseNumber.foreach {
       case (caseNumber, caseRecords) =>
 
-        fileExistsInS3(caseNumber + ".json") match {
+        fileExistsInS3(caseNumber) match {
 
           case true => {
             appendToFileInS3(

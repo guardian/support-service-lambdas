@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.s3.model.{GetObjectRequest, ListObjectsRe
 import scala.io.Source
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-object S3Connector extends LazyLogging{
+object S3Connector extends LazyLogging {
 
   val bucketName = "emails-from-sf"
 
@@ -58,7 +58,7 @@ object S3Connector extends LazyLogging{
     val inputStream = AwsS3.client.getObject(
       GetObjectRequest.builder
         .bucket("emails-from-sf")
-        .key(fileName + ".json")
+        .key(fileName)
         .build()
     )
 
