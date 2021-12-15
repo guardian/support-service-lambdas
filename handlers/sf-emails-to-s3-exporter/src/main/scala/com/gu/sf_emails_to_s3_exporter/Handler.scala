@@ -1,7 +1,7 @@
 package com.gu.sf_emails_to_s3_exporter
 
-import com.gu.sf_emails_to_s3_exporter.S3Connector.writeEmailsJsonToS3
-import com.gu.sf_emails_to_s3_exporter.SFConnector.{SfAuthDetails, auth, getEmailsFromSf}
+import com.gu.sf_emails_to_s3_exporter.S3Connector.{appendToFileInS3, fileExistsInS3, writeEmailsJsonToS3}
+import com.gu.sf_emails_to_s3_exporter.SFConnector.{auth, getEmailsFromSf, SfAuthDetails}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -14,34 +14,44 @@ object Handler extends LazyLogging {
   }
 
   def handleRequest(): Unit = {
-    val emails = for {
-      config <- SalesforceConfig.fromEnvironment.toRight("Missing config value")
+    for {
+      config <- SalesforceConfig.fromEnvironment.toRight(new RuntimeException("Missing config value"))
       sfAuthDetails <- decode[SfAuthDetails](auth(config))
       emailsForExportFromSf <- getEmailsFromSf(sfAuthDetails)
-    } yield emailsForExportFromSf
+    } {
 
-    logger.info("emails:" + emails)
+      println("emailsForExportFromSf.size:" + emailsForExportFromSf.records.size)
 
-    emails match {
+      val sfEmailsGroupedByCaseNumber = emailsForExportFromSf
+        .records
+        .groupBy(_.Parent.CaseNumber)
 
-      case Left(failure) => {
-        logger.error("Error occurred. details: " + failure)
-        throw new RuntimeException("Missing config value")
-      }
+      createOrAppendToS3Files(sfEmailsGroupedByCaseNumber)
 
-      case Right(emailsFromSF) => {
-        val emailsGroupedByCaseNumber = emailsFromSF
-          .records
-          .groupBy(_.Parent.CaseNumber)
+    }
+  }
 
-        emailsGroupedByCaseNumber.foreach {
-          case (caseNumber, caseRecords) =>
+  def createOrAppendToS3Files(sfEmailsByCaseNumber: Map[String, Seq[EmailsFromSfResponse.Records]]): Unit = {
+
+    val abc = sfEmailsByCaseNumber.foreach {
+      case (caseNumber, caseRecords) =>
+
+        fileExistsInS3(caseNumber + ".json") match {
+
+          case true => {
+            appendToFileInS3(
+              caseNumber,
+              caseRecords
+            )
+          }
+
+          case false => {
             writeEmailsJsonToS3(
-              caseNumber +".json",
+              caseNumber,
               caseRecords.asJson.toString()
             )
+          }
         }
-      }
     }
   }
 }
