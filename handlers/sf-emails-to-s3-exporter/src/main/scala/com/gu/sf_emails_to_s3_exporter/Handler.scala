@@ -19,9 +19,7 @@ object Handler extends LazyLogging {
       sfAuthDetails <- decode[SfAuthDetails](auth(config))
       emailsForExportFromSf <- getEmailsFromSf(sfAuthDetails)
     } yield emailsForExportFromSf
-
-    logger.info("emails:" + emails)
-
+    
     emails match {
 
       case Left(failure) => {
@@ -30,8 +28,6 @@ object Handler extends LazyLogging {
       }
 
       case Right(emailsFromSF) => {
-        logger.info("emailsFromSF size:" + emailsFromSF.records.size)
-
         val sfEmailsGroupedByCaseNumber = emailsFromSF
           .records
           .groupBy(_.Parent.CaseNumber)
