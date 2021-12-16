@@ -22,7 +22,7 @@ object Handler extends LazyLogging {
     sfAuth match {
 
       case Left(failure) => {
-        logger.error("Error occurred. details: " + failure)
+        logger.error("Error occurred. details:" + failure)
         throw new RuntimeException("Error occurred. details: " + failure)
       }
 
