@@ -139,7 +139,7 @@ object AddGuardianWeeklySub {
          */
         createSubRequest = ZuoraCreateSubRequest(
           request = request,
-          acceptanceDate = request.startDate.plusWeeks(7), // revert after christmas 2021 BEFORE reverting the zuora catalog changes https://github.com/guardian/support-frontend/pull/3319
+          acceptanceDate = request.startDate.plusWeeks(6),
           ratePlans = List(
             ZuoraCreateSubRequestRatePlan(
               productRatePlanId = zuora6for6RatePlanAndCharge.productRatePlanId,
