@@ -17,7 +17,7 @@ object S3Connector extends LazyLogging {
 
   val bucketName = "emails-from-sf"
 
-  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String): Unit = {
+  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String): Either[Throwable, Seq[String]] = {
 
     val putRequest = PutObjectRequest.builder
       .bucket(bucketName)
@@ -30,13 +30,28 @@ object S3Connector extends LazyLogging {
       .fold(
         ex => {
           logger.info(s"Upload failed due to $ex")
-          Left(s"Upload failed due to $ex")
+          Left(ex)
         },
         result => {
+          println("result:" + result)
           logger.info(s"Successfully saved Case emails ($fileName) to S3")
-          Right(result)
+
+          //get the email Ids from caseEmailsJson
+          val decodedJson = decode[Seq[EmailsFromSfResponse.Records]](caseEmailsJson)
+
+          for {
+            ids <- decodedJson.map(p => p.map(a => a.Id))
+          } yield {
+            ids
+          }
+          //          val ids = decodedJson.map(p => p.map(a => a.Id))
+          //          println("decodedJson:" + decodedJson)
+          //          println("ids:" + ids)
+          //          ids
         }
       )
+
+    //println("awsResponse:" + awsResponse)
   }
 
   def fileExistsInS3(fileName: String): Boolean = {
@@ -74,6 +89,19 @@ object S3Connector extends LazyLogging {
       case Right(caseEmailsFromS3) => {
         val mergedEmails = mergeSfEmailsWithS3Emails(caseEmailsFromSf, caseEmailsFromS3)
         writeEmailsJsonToS3(fileName, mergedEmails.asJson.toString())
+      }
+      case Left(error) => throw new RuntimeException(s"something went wrong $error")
+    }
+  }
+
+  def getJsonForAppend(fileName: String, caseEmailsFromSf: Seq[EmailsFromSfResponse.Records]): String = {
+
+    val emailsJsonFromS3File = getEmailsJsonFromS3File("emails-from-sf", fileName)
+    val decodedCaseEmailsFromS3 = decode[Seq[EmailsFromSfResponse.Records]](emailsJsonFromS3File)
+
+    decodedCaseEmailsFromS3 match {
+      case Right(caseEmailsFromS3) => {
+        mergeSfEmailsWithS3Emails(caseEmailsFromSf, caseEmailsFromS3).asJson.toString()
       }
       case Left(error) => throw new RuntimeException(s"something went wrong $error")
     }

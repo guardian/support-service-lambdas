@@ -5,6 +5,8 @@ import io.circe.generic.auto.exportDecoder
 import io.circe.parser.decode
 import scalaj.http.Http
 
+import scala.util.Try
+
 object SFConnector {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
@@ -43,5 +45,23 @@ object SFConnector {
       )
       .asString
       .body
+  }
+
+  def doSfCompositeRequest(
+    sfAuthDetails: SfAuthDetails,
+    jsonBody: String,
+    requestType: String
+  ): Either[Throwable, String] = {
+
+    Try {
+      Http(
+        s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
+      ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+        .header("Content-Type", "application/json")
+        .put(jsonBody)
+        .method(requestType)
+        .asString
+        .body
+    }.toEither
   }
 }
