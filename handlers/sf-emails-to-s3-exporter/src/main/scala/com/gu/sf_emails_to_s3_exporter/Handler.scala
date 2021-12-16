@@ -27,11 +27,8 @@ object Handler extends LazyLogging {
       }
 
       case Right(successfulAuth) => {
-        for {
-          emailsForExportFromSf <- getEmailsFromSfByQuery(successfulAuth)
-        } yield {
-          saveEmailsToS3AndQueryForMoreIfTheyExist(successfulAuth, emailsForExportFromSf)
-        }
+        getEmailsFromSfByQuery(successfulAuth).map(emailsForExportFromSf =>
+          saveEmailsToS3AndQueryForMoreIfTheyExist(successfulAuth, emailsForExportFromSf))
       }
     }
   }
@@ -44,16 +41,10 @@ object Handler extends LazyLogging {
 
     createOrAppendToS3Files(sfEmailsGroupedByCaseNumber)
 
-    response.done match {
-      case true => logger.info("Batch Complete")
-      case false => {
-        for {
-          nextPageEmails <- getEmailsFromSfByRecordsetReference(sfAuthDetails, response.nextRecordsUrl.get)
-        } yield {
-          saveEmailsToS3AndQueryForMoreIfTheyExist(sfAuthDetails, nextPageEmails)
-        }
-      }
-    }
+    if (response.done) logger.info("Batch Complete")
+    else
+      getEmailsFromSfByRecordsetReference(sfAuthDetails, response.nextRecordsUrl.get)
+        .map(nextPageEmails => saveEmailsToS3AndQueryForMoreIfTheyExist(sfAuthDetails, nextPageEmails))
   }
 
   def createOrAppendToS3Files(sfEmailsByCaseNumber: Map[String, Seq[EmailsFromSfResponse.Records]]): Unit = {
