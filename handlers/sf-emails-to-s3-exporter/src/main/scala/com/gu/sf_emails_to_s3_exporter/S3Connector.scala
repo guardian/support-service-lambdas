@@ -43,7 +43,7 @@ object S3Connector extends LazyLogging {
 
     val filesInS3MatchingFileName = AwsS3.client.listObjects(
       ListObjectsRequest.builder
-        .bucket("emails-from-sf")
+        .bucket(bucketName)
         .prefix(fileName)
         .build()
     ).contents.asScala.toList
@@ -57,7 +57,7 @@ object S3Connector extends LazyLogging {
   def getEmailsJsonFromS3File(bucketName: String, fileName: String): String = {
     val inputStream = AwsS3.client.getObject(
       GetObjectRequest.builder
-        .bucket("emails-from-sf")
+        .bucket(bucketName)
         .key(fileName)
         .build()
     )
@@ -72,9 +72,7 @@ object S3Connector extends LazyLogging {
 
     decodedCaseEmailsFromS3 match {
       case Right(caseEmailsFromS3) => {
-        println("decoded from s3:" + caseEmailsFromS3)
         val mergedEmails = mergeSfEmailsWithS3Emails(caseEmailsFromSf, caseEmailsFromS3)
-
         writeEmailsJsonToS3(fileName, mergedEmails.asJson.toString())
       }
       case Left(error) => throw new RuntimeException(s"something went wrong $error")

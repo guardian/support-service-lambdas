@@ -9,18 +9,25 @@ object SFConnector {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
 
-  def getEmailsFromSf(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
-    val responseBody = doSfGetWithQuery(sfAuthDetails, GetEmailsQuery.query)
-    decode[EmailsFromSfResponse.Response](responseBody)
-  }
-
-  def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    Http(s"${sfAuthDetails.instance_url}/services/data/${System.getenv("apiVersion")}/query/")
-      .param("q", query)
+  def getEmailsFromSfByQuery(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
+    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/${System.getenv("apiVersion")}/query/")
+      .param("q", GetEmailsQuery.query)
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .method("GET")
       .asString
       .body
+
+    decode[EmailsFromSfResponse.Response](responseBody)
+  }
+
+  def getEmailsFromSfByRecordsetReference(sfAuthDetails: SfAuthDetails, nextRecordsURL: String): Either[Error, EmailsFromSfResponse.Response] = {
+    val responseBody = Http(s"${sfAuthDetails.instance_url}" + nextRecordsURL)
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .method("GET")
+      .asString
+      .body
+
+    decode[EmailsFromSfResponse.Response](responseBody)
   }
 
   def auth(salesforceConfig: SalesforceConfig): String = {
