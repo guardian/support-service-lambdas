@@ -10,10 +10,10 @@ case class SalesforceConfig(
   apiVersion: String
 )
 
-object SalesforceConfig{
+object SalesforceConfig {
 
-  lazy val fromEnvironment : Option[SalesforceConfig] = {
-    for{
+  lazy val fromEnvironment: Option[SalesforceConfig] = {
+    for {
       sfUserName <- Option(System.getenv("username"))
       sfClientId <- Option(System.getenv("clientId"))
       sfClientSecret <- Option(System.getenv("clientSecret"))
