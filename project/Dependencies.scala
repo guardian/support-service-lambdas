@@ -71,7 +71,7 @@ object Dependencies {
   val stripe = "com.stripe" % "stripe-java" % "20.92.0"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.6.0" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.7.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.10" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.15.4" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
