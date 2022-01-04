@@ -30,6 +30,6 @@ object SalesforceConfig{
       authUrl = sfAuthUrl,
       apiVersion = sfApiVersion
     )
-}
+  }
 
 }
