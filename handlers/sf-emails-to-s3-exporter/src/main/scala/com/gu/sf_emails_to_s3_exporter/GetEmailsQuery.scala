@@ -5,6 +5,7 @@ object GetEmailsQuery {
     s"""
        |SELECT
        | Id,
+       | ParentId,
        | BccAddress,
        | CcAddress,
        | FirstOpenedDate,
