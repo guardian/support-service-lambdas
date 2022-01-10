@@ -1,7 +1,6 @@
 package com.gu.sf_emails_to_s3_exporter
 
-import java.time.LocalDateTime
-
+import com.gu.sf_emails_to_s3_exporter.ConfirmationWriteBackToSF.{EmailMessageToUpdate, EmailMessagesToUpdate}
 import com.gu.sf_emails_to_s3_exporter.S3Connector.{fileExistsInS3, getJsonForAppend, writeEmailsJsonToS3}
 import com.gu.sf_emails_to_s3_exporter.SFConnector.{SfAuthDetails, auth, doSfCompositeRequest, getEmailsFromSfByQuery}
 import com.typesafe.scalalogging.LazyLogging
@@ -10,20 +9,6 @@ import io.circe.parser._
 import io.circe.syntax._
 
 object Handler extends LazyLogging {
-
-  case class EmailMessageToUpdate(
-    id: String,
-    //Subject: String = "I have been updated",
-    Most_Recent_Export__c: LocalDateTime = LocalDateTime.now(),
-    attributes: Attributes = Attributes(`type` = "EmailMessage")
-  )
-
-  case class EmailMessagesToUpdate(
-    allOrNone: Boolean,
-    records: Seq[EmailMessageToUpdate]
-  )
-
-  case class Attributes(`type`: String)
 
   def main(args: Array[String]): Unit = {
     handleRequest()
