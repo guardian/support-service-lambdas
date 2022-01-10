@@ -4,10 +4,10 @@ import java.time.LocalDateTime
 
 object ConfirmationWriteBackToSF {
   case class EmailMessageToUpdate(
-   id: String,
-   Most_Recent_Export__c: LocalDateTime = LocalDateTime.now(),
-   attributes: Attributes = Attributes(`type` = "EmailMessage")
- )
+    id: String,
+    Most_Recent_Export__c: LocalDateTime = LocalDateTime.now(), //todo for some reason this is giving dodgy datetimes
+    attributes: Attributes = Attributes(`type` = "EmailMessage")
+  )
 
   case class EmailMessagesToUpdate(
     allOrNone: Boolean,

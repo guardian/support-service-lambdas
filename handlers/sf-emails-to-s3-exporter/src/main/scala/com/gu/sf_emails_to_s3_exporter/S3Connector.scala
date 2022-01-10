@@ -16,6 +16,27 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 object S3Connector extends LazyLogging {
 
   val bucketName = "emails-from-sf"
+  def saveEmailsToS3(response: EmailsFromSfResponse.Response): Seq[String] = {
+    val sfEmailsGroupedByCaseNumber = response
+      .records
+      .groupBy(_.Parent.CaseNumber)
+
+    //save files to s3 and return successes
+
+    val ghu = sfEmailsGroupedByCaseNumber.map {
+      case (caseNumber, caseRecords) => {
+
+        writeEmailsJsonToS3(
+          caseNumber,
+          getCreateOrAppendJson(caseNumber, caseRecords)
+        )
+
+      }
+    }.toSeq
+      .filter(_.isRight).flatMap(_.right.get)
+    println("ghu.size:" + ghu.size);
+    ghu
+  }
 
   def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String): Either[Throwable, Seq[String]] = {
 
@@ -97,6 +118,7 @@ object S3Connector extends LazyLogging {
   def getJsonForAppend(fileName: String, caseEmailsFromSf: Seq[EmailsFromSfResponse.Records]): String = {
 
     val emailsJsonFromS3File = getEmailsJsonFromS3File("emails-from-sf", fileName)
+
     val decodedCaseEmailsFromS3 = decode[Seq[EmailsFromSfResponse.Records]](emailsJsonFromS3File)
 
     decodedCaseEmailsFromS3 match {
@@ -118,5 +140,25 @@ object S3Connector extends LazyLogging {
           S3Email.Composite_Key__c == sfEmail.Composite_Key__c) == 0)
 
     fileContentFromS3 ++ emailsThatExistInSfButNotS3
+  }
+
+  def getCreateOrAppendJson(caseNumber: String, caseRecords: Seq[EmailsFromSfResponse.Records]): String = {
+
+    fileExistsInS3(caseNumber) match {
+
+      case true => {
+        println("IS APPEND")
+        getJsonForAppend(
+          caseNumber,
+          caseRecords
+        )
+      }
+
+      case false => {
+        println("IS CREATE")
+        caseRecords.asJson.toString()
+      }
+    }
+
   }
 }
