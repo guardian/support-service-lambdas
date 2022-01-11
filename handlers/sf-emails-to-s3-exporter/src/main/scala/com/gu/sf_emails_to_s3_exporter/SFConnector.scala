@@ -37,7 +37,7 @@ object SFConnector {
       "PATCH"
     )
   }
-  
+
   def getEmailsFromSfByRecordsetReference(sfAuthDetails: SfAuthDetails, nextRecordsURL: String): Either[Error, EmailsFromSfResponse.Response] = {
     val responseBody = Http(s"${sfAuthDetails.instance_url}" + nextRecordsURL)
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")

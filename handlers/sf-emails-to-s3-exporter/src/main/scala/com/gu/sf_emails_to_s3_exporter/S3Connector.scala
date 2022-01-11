@@ -55,7 +55,7 @@ object S3Connector extends LazyLogging {
   }
 
   def updateS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records): String = {
-    //get json body of file
+
     val s3FileJsonBody = getEmailsJsonFromS3File(bucketName, caseEmail.Parent.CaseNumber)
     val decodedCaseEmailsFromS3 = decode[Seq[EmailsFromSfResponse.Records]](s3FileJsonBody)
     val emailsInS3File = decodedCaseEmailsFromS3.getOrElse(Seq[EmailsFromSfResponse.Records]())
