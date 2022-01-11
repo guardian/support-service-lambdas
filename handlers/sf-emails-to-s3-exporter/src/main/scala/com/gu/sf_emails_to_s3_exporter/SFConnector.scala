@@ -26,7 +26,7 @@ object SFConnector {
   }
 
   def writebackSuccessesToSf(sfAuthDetails: SfAuthDetails, successIds: Seq[String]): Either[Throwable, String] = {
-    val writebackResponse = doSfCompositeRequest(
+    doSfCompositeRequest(
       sfAuthDetails,
       EmailMessagesToUpdate(
         false,
@@ -36,9 +36,8 @@ object SFConnector {
       ).asJson.toString(),
       "PATCH"
     )
-    println("writebackResponse:" + writebackResponse)
-    writebackResponse
   }
+  
   def getEmailsFromSfByRecordsetReference(sfAuthDetails: SfAuthDetails, nextRecordsURL: String): Either[Error, EmailsFromSfResponse.Response] = {
     val responseBody = Http(s"${sfAuthDetails.instance_url}" + nextRecordsURL)
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
