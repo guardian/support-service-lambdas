@@ -29,9 +29,11 @@ object GetEmailsQuery {
        |FROM
        | emailmessage
        |WHERE
-       | Export_Status__c in ('Ready for export to s3') and parent.casenumber in ('01564462','01564463')
+       | export_Status__c in ('Ready for export to s3')
        |ORDER BY
        | ParentId
+       |LIMIT
+       | 1000
     """.stripMargin
   }
 }
