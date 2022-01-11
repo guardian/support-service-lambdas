@@ -26,7 +26,6 @@ object SFConnector {
   }
 
   def writebackSuccessesToSf(sfAuthDetails: SfAuthDetails, successIds: Seq[String]): Either[Throwable, String] = {
-    println("writing success back to SF")
     val writebackResponse = doSfCompositeRequest(
       sfAuthDetails,
       EmailMessagesToUpdate(
