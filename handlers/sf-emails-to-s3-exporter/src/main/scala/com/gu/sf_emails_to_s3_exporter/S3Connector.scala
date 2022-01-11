@@ -16,29 +16,67 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 object S3Connector extends LazyLogging {
 
   val bucketName = "emails-from-sf"
-  def saveEmailsToS3(response: EmailsFromSfResponse.Response): Seq[String] = {
-    val sfEmailsGroupedByCaseNumber = response
-      .records
-      .groupBy(_.Parent.CaseNumber)
 
-    //save files to s3 and return successes
+  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records): String = {
+    val fileExistsInS3 = fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber)
 
-    val ghu = sfEmailsGroupedByCaseNumber.map {
-      case (caseNumber, caseRecords) => {
+    fileExistsInS3 match {
 
-        writeEmailsJsonToS3(
-          caseNumber,
-          getCreateOrAppendJson(caseNumber, caseRecords)
-        )
-
+      //Append
+      case true => {
+        updateS3FileIfEmailDoesNotExist(caseEmail)
       }
-    }.toSeq
-      .filter(_.isRight).flatMap(_.right.get)
-    println("ghu.size:" + ghu.size);
-    ghu
+
+      //Create
+      case false => {
+        val successfulEmailId = writeEmailsJsonToS3(
+          caseEmail.Parent.CaseNumber,
+          Seq[EmailsFromSfResponse.Records](caseEmail).asJson.toString(),
+          caseEmail.Id
+        )
+        caseEmail.Id
+      }
+    }
   }
 
-  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String): Either[Throwable, Seq[String]] = {
+  def fileAlreadyExistsInS3(fileName: String): Boolean = {
+
+    val filesInS3MatchingFileName = AwsS3.client.listObjects(
+      ListObjectsRequest.builder
+        .bucket(bucketName)
+        .prefix(fileName)
+        .build()
+    ).contents.asScala.toList
+
+    filesInS3MatchingFileName
+      .map(
+        objSummary => Key(objSummary.key)
+      ).contains(Key(fileName))
+  }
+
+  def updateS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records): String = {
+    //get json body of file
+    val s3FileJsonBody = getEmailsJsonFromS3File(bucketName, caseEmail.Parent.CaseNumber)
+    val decodedCaseEmailsFromS3 = decode[Seq[EmailsFromSfResponse.Records]](s3FileJsonBody)
+    val emailsInS3File = decodedCaseEmailsFromS3.getOrElse(Seq[EmailsFromSfResponse.Records]())
+
+    val emailAlreadyExistsInS3File = emailsInS3File.exists(s3Email =>
+      s3Email.Composite_Key__c == caseEmail.Composite_Key__c)
+
+    emailAlreadyExistsInS3File match {
+      case true => {
+        //do nothing
+        ""
+      }
+      case false => {
+        val caseEmailsToSaveToS3 = emailsInS3File :+ caseEmail
+        val successfulEmailId = writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, caseEmailsToSaveToS3.asJson.toString(), caseEmail.Id)
+        caseEmail.Id
+      }
+    }
+  }
+
+  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String, emailId: String): Either[Throwable, String] = {
 
     val putRequest = PutObjectRequest.builder
       .bucket(bucketName)
@@ -57,37 +95,9 @@ object S3Connector extends LazyLogging {
           println("result:" + result)
           logger.info(s"Successfully saved Case emails ($fileName) to S3")
 
-          //get the email Ids from caseEmailsJson
-          val decodedJson = decode[Seq[EmailsFromSfResponse.Records]](caseEmailsJson)
-
-          for {
-            ids <- decodedJson.map(p => p.map(a => a.Id))
-          } yield {
-            ids
-          }
-          //          val ids = decodedJson.map(p => p.map(a => a.Id))
-          //          println("decodedJson:" + decodedJson)
-          //          println("ids:" + ids)
-          //          ids
+          Right(emailId)
         }
       )
-
-    //println("awsResponse:" + awsResponse)
-  }
-
-  def fileExistsInS3(fileName: String): Boolean = {
-
-    val filesInS3MatchingFileName = AwsS3.client.listObjects(
-      ListObjectsRequest.builder
-        .bucket(bucketName)
-        .prefix(fileName)
-        .build()
-    ).contents.asScala.toList
-
-    filesInS3MatchingFileName
-      .map(
-        objSummary => Key(objSummary.key)
-      ).contains(Key(fileName))
   }
 
   def getEmailsJsonFromS3File(bucketName: String, fileName: String): String = {
@@ -97,68 +107,7 @@ object S3Connector extends LazyLogging {
         .key(fileName)
         .build()
     )
-
     Source.fromInputStream(inputStream).mkString
   }
 
-  def appendToFileInS3(fileName: String, caseEmailsFromSf: Seq[EmailsFromSfResponse.Records]): Unit = {
-
-    val emailsJsonFromS3File = getEmailsJsonFromS3File("emails-from-sf", fileName)
-    val decodedCaseEmailsFromS3 = decode[Seq[EmailsFromSfResponse.Records]](emailsJsonFromS3File)
-
-    decodedCaseEmailsFromS3 match {
-      case Right(caseEmailsFromS3) => {
-        val mergedEmails = mergeSfEmailsWithS3Emails(caseEmailsFromSf, caseEmailsFromS3)
-        writeEmailsJsonToS3(fileName, mergedEmails.asJson.toString())
-      }
-      case Left(error) => throw new RuntimeException(s"something went wrong $error")
-    }
-  }
-
-  def getJsonForAppend(fileName: String, caseEmailsFromSf: Seq[EmailsFromSfResponse.Records]): String = {
-
-    val emailsJsonFromS3File = getEmailsJsonFromS3File("emails-from-sf", fileName)
-
-    val decodedCaseEmailsFromS3 = decode[Seq[EmailsFromSfResponse.Records]](emailsJsonFromS3File)
-
-    decodedCaseEmailsFromS3 match {
-      case Right(caseEmailsFromS3) => {
-        mergeSfEmailsWithS3Emails(caseEmailsFromSf, caseEmailsFromS3).asJson.toString()
-      }
-      case Left(error) => throw new RuntimeException(s"something went wrong $error")
-    }
-  }
-
-  def mergeSfEmailsWithS3Emails(
-    caseEmailsFromSf: Seq[EmailsFromSfResponse.Records],
-    fileContentFromS3: Seq[EmailsFromSfResponse.Records]
-  ): Seq[EmailsFromSfResponse.Records] = {
-
-    val emailsThatExistInSfButNotS3 =
-      caseEmailsFromSf.filter(sfEmail =>
-        fileContentFromS3.count(S3Email =>
-          S3Email.Composite_Key__c == sfEmail.Composite_Key__c) == 0)
-
-    fileContentFromS3 ++ emailsThatExistInSfButNotS3
-  }
-
-  def getCreateOrAppendJson(caseNumber: String, caseRecords: Seq[EmailsFromSfResponse.Records]): String = {
-
-    fileExistsInS3(caseNumber) match {
-
-      case true => {
-        println("IS APPEND")
-        getJsonForAppend(
-          caseNumber,
-          caseRecords
-        )
-      }
-
-      case false => {
-        println("IS CREATE")
-        caseRecords.asJson.toString()
-      }
-    }
-
-  }
 }
