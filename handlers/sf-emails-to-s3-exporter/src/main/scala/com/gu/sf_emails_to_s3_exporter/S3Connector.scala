@@ -18,24 +18,15 @@ object S3Connector extends LazyLogging {
   val bucketName = "emails-from-sf"
 
   def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records): String = {
-    val fileExistsInS3 = fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber)
-
-    fileExistsInS3 match {
-
-      //Append
-      case true => {
-        updateS3FileIfEmailDoesNotExist(caseEmail)
-      }
-
-      //Create
-      case false => {
-        val successfulEmailId = writeEmailsJsonToS3(
-          caseEmail.Parent.CaseNumber,
-          Seq[EmailsFromSfResponse.Records](caseEmail).asJson.toString(),
-          caseEmail.Id
-        )
+    if (fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber))
+      updateS3FileIfEmailDoesNotExist(caseEmail)
+    else {
+      writeEmailsJsonToS3(
+        caseEmail.Parent.CaseNumber,
+        Seq[EmailsFromSfResponse.Records](caseEmail).asJson.toString(),
         caseEmail.Id
-      }
+      )
+      caseEmail.Id
     }
   }
 
