@@ -1,7 +1,7 @@
 package com.gu.sf_emails_to_s3_exporter
 
 import com.gu.sf_emails_to_s3_exporter.S3Connector.saveEmailToS3
-import com.gu.sf_emails_to_s3_exporter.SFConnector.{getEmailsFromSfByRecordsetReference, _}
+import com.gu.sf_emails_to_s3_exporter.SFConnector._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._

@@ -2,7 +2,7 @@ package com.gu.sf_emails_to_s3_exporter
 
 import com.gu.sf_emails_to_s3_exporter.ConfirmationWriteBackToSF.{EmailMessageToUpdate, EmailMessagesToUpdate}
 import io.circe.Error
-import io.circe.generic.auto.{_}
+import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import scalaj.http.Http
