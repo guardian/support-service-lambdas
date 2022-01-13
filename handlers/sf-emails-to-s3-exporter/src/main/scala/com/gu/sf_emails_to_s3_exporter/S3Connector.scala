@@ -51,19 +51,14 @@ object S3Connector extends LazyLogging {
     val decodedCaseEmailsFromS3 = decode[Seq[EmailsFromSfResponse.Records]](s3FileJsonBody)
     val emailsInS3File = decodedCaseEmailsFromS3.getOrElse(Seq[EmailsFromSfResponse.Records]())
 
-    val emailAlreadyExistsInS3File = emailsInS3File.exists(s3Email =>
-      s3Email.Composite_Key__c == caseEmail.Composite_Key__c)
+    val emailAlreadyExistsInS3File = emailsInS3File.exists(_.Composite_Key__c == caseEmail.Composite_Key__c)
 
-    emailAlreadyExistsInS3File match {
-      case true => {
-        //do nothing
-        ""
-      }
-      case false => {
-        val caseEmailsToSaveToS3 = emailsInS3File :+ caseEmail
-        val successfulEmailId = writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, caseEmailsToSaveToS3.asJson.toString(), caseEmail.Id)
-        caseEmail.Id
-      }
+    if (emailAlreadyExistsInS3File)
+      ""
+    else {
+      val caseEmailsToSaveToS3 = emailsInS3File :+ caseEmail
+      val successfulEmailId = writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, caseEmailsToSaveToS3.asJson.toString(), caseEmail.Id)
+      caseEmail.Id
     }
   }
 
