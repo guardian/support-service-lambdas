@@ -17,16 +17,13 @@ object Handler extends LazyLogging {
       config <- SalesforceConfig.fromEnvironment.toRight("Missing config value")
       sfAuthDetails <- decode[SfAuthDetails](auth(config))
       emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails)
-      _ = processEmails(sfAuthDetails, emailsFromSF)
-    } yield ()
+    } yield processEmails(sfAuthDetails, emailsFromSF)
 
   }
 
   def processEmails(sfAuthDetails: SfAuthDetails, emailsDataFromSF: EmailsFromSfResponse.Response): Unit = {
 
-    val emailIdsSuccessfullySavedToS3 = emailsDataFromSF.records.map(caseEmail => {
-      saveEmailToS3(caseEmail)
-    })
+    val emailIdsSuccessfullySavedToS3 = emailsDataFromSF.records.map(saveEmailToS3)
 
     writebackSuccessesToSf(sfAuthDetails, emailIdsSuccessfullySavedToS3)
 
@@ -35,8 +32,7 @@ object Handler extends LazyLogging {
 
       for {
         nextBatchOfEmails <- getEmailsFromSfByRecordsetReference(sfAuthDetails, emailsDataFromSF.nextRecordsUrl.get)
-        _ = processEmails(sfAuthDetails, nextBatchOfEmails)
-      } yield ()
+      } yield processEmails(sfAuthDetails, nextBatchOfEmails)
 
     }
   }
