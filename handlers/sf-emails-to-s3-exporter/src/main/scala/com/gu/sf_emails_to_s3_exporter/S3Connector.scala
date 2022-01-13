@@ -58,6 +58,7 @@ object S3Connector extends LazyLogging {
     else {
       val caseEmailsToSaveToS3 = emailsInS3File :+ caseEmail
       val successfulEmailId = writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, caseEmailsToSaveToS3.asJson.toString(), caseEmail.Id)
+      //todo what happens if there is a failure writing to S3?
       caseEmail.Id
     }
   }
