@@ -67,7 +67,7 @@ object SFConnector {
     sfAuthDetails: SfAuthDetails,
     jsonBody: String,
     requestType: String
-  ): Either[Throwable, String] = {
+  ): Try[String] = {
 
     Try {
       Http(
@@ -78,6 +78,6 @@ object SFConnector {
         .method(requestType)
         .asString
         .body
-    }.toEither
+    }
   }
 }
