@@ -25,7 +25,7 @@ object SFConnector {
     decode[EmailsFromSfResponse.Response](responseBody)
   }
 
-  def writebackSuccessesToSf(sfAuthDetails: SfAuthDetails, successIds: Seq[String]): Either[Throwable, String] = {
+  def writebackSuccessesToSf(sfAuthDetails: SfAuthDetails, successIds: Seq[String]): Try[String] = {
     doSfCompositeRequest(
       sfAuthDetails,
       EmailMessagesToUpdate(
