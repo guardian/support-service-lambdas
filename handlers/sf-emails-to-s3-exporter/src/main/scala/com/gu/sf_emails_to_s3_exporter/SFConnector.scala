@@ -7,7 +7,7 @@ import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import scalaj.http.Http
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object SFConnector {
 
@@ -25,7 +25,8 @@ object SFConnector {
     decode[EmailsFromSfResponse.Response](responseBody)
   }
 
-  def writebackSuccessesToSf(sfAuthDetails: SfAuthDetails, successIds: Seq[String]): Try[String] = {
+  def writebackSuccessesToSf(sfAuthDetails: SfAuthDetails, successIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
+
     doSfCompositeRequest(
       sfAuthDetails,
       EmailMessagesToUpdate(
@@ -36,6 +37,7 @@ object SFConnector {
       ).asJson.toString(),
       "PATCH"
     )
+
   }
 
   def getEmailsFromSfByRecordsetReference(sfAuthDetails: SfAuthDetails, nextRecordsURL: String): Either[Error, EmailsFromSfResponse.Response] = {
@@ -48,36 +50,50 @@ object SFConnector {
     decode[EmailsFromSfResponse.Response](responseBody)
   }
 
-  def auth(salesforceConfig: SalesforceConfig): String = {
-    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
-      .postForm(
-        Seq(
-          "grant_type" -> "password",
-          "client_id" -> salesforceConfig.clientId,
-          "client_secret" -> salesforceConfig.clientSecret,
-          "username" -> salesforceConfig.userName,
-          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
+  def auth(salesforceConfig: SalesforceConfig): Either[CustomFailure, String] = {
+    Try {
+      Http(s"${System.getenv("authUrl")}/services/oauth2/token")
+        .postForm(
+          Seq(
+            "grant_type" -> "password",
+            "client_id" -> salesforceConfig.clientId,
+            "client_secret" -> salesforceConfig.clientSecret,
+            "username" -> salesforceConfig.userName,
+            "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
+          )
         )
-      )
-      .asString
-      .body
+        .asString
+        .body
+    } match {
+      case Failure(f) => { Left(CustomFailure.fromThrowable(f)) }
+      case Success(s) => { Right(s) }
+    }
   }
 
   def doSfCompositeRequest(
     sfAuthDetails: SfAuthDetails,
     jsonBody: String,
     requestType: String
-  ): Try[String] = {
+  ): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
 
-    Try {
-      Http(
-        s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
-      ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-        .header("Content-Type", "application/json")
-        .put(jsonBody)
-        .method(requestType)
-        .asString
-        .body
-    }
+    val responseBody = Http(
+      s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
+    ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .header("Content-Type", "application/json")
+      .put(jsonBody)
+      .method(requestType)
+      .asString
+      .body
+    println("sf response:" + responseBody)
+    decode[Seq[WritebackToSFResponse.WritebackResponse]](responseBody)
+    //    match {
+    //      case Failure(f) => {
+    //        Left(CustomFailure.fromThrowable(f))
+    //      }
+    //      case Success(s) => {
+    //        Right(s)
+    //      }
+    //    }
   }
+
 }
