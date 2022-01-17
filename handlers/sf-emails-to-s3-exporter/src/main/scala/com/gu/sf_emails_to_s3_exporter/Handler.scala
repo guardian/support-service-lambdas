@@ -13,26 +13,31 @@ object Handler extends LazyLogging {
   }
 
   def handleRequest(): Unit = {
-    (for {
+
+    val emailsFromSF = for {
       config <- SalesforceConfig.fromEnvironment.toRight("Missing config value")
-    } yield for {
-      sfAuthDetails <- decode[SfAuthDetails](auth(config).getOrElse(throw new RuntimeException("Error in SF Authentication")))
+      authentication <- auth(config)
+      sfAuthDetails <- decode[SfAuthDetails](authentication)
       emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails)
-    } yield processEmails(sfAuthDetails, emailsFromSF)) match {
-      case Left(abc) => { println(abc) }
-      case Right(fff) => { println(fff) }
+    } yield processEmails(sfAuthDetails, emailsFromSF)
+
+    emailsFromSF match {
+      case Left(ex) => {
+        logger.error("Error: " + ex)
+      }
+      case Right(success) => {
+        logger.info("Processing complete")
+      }
     }
+
   }
 
   def processEmails(sfAuthDetails: SfAuthDetails, emailsDataFromSF: EmailsFromSfResponse.Response): Any = {
 
     val emailIdsSuccessfullySavedToS3 = getEmailIdsSuccessfullySavedToS3(emailsDataFromSF)
 
-    println("emailIdsSuccessfullySavedToS3:" + emailIdsSuccessfullySavedToS3)
-
     if (!emailIdsSuccessfullySavedToS3.isEmpty) {
       val sfWritebackResponse = writebackSuccessesToSf(sfAuthDetails, emailIdsSuccessfullySavedToS3)
-      println("sfWritebackResponse:" + sfWritebackResponse)
     }
 
     //process more emails if they exist
@@ -46,8 +51,8 @@ object Handler extends LazyLogging {
     emailsDataFromSF
       .records
       .map(saveEmailToS3)
+      .filter(id => id != Right(""))
       .collect { case Right(value) => value }
-      .flatten
   }
 
   def processNextPageOfEmails(sfAuthDetails: SfAuthDetails, url: String): Unit = {

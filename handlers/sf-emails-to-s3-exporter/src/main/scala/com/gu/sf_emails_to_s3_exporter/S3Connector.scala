@@ -7,8 +7,9 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
+import software.amazon.awssdk.core.ResponseInputStream
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.{GetObjectRequest, ListObjectsRequest, PutObjectRequest}
+import software.amazon.awssdk.services.s3.model._
 
 import scala.io.Source
 import scala.jdk.CollectionConverters.CollectionHasAsScala
@@ -18,23 +19,50 @@ object S3Connector extends LazyLogging {
 
   val bucketName = "emails-from-sf"
 
-  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, Option[String]] = {
+  def generateJson(fileIsInS3: Boolean, caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, String] = {
 
-    for {
+    Right(if (fileIsInS3)
+      generateJsonForS3FileIfEmailDoesNotExist(caseEmail)
+    else {
+      generateJsonForS3FileIfFileDoesNotExist(Seq[EmailsFromSfResponse.Records](caseEmail))
+    })
+
+  }
+
+  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, String] = {
+
+    val fileExists = for {
       fileIsInS3 <- fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber)
-    } yield {
-      if (fileIsInS3)
-        updateS3FileIfEmailDoesNotExist(caseEmail)
-      else {
-        writeEmailsJsonToS3(
-          caseEmail.Parent.CaseNumber,
-          Seq[EmailsFromSfResponse.Records](caseEmail).asJson.toString(),
-          caseEmail.Id
-        )
-        Some(caseEmail.Id)
+    } yield fileIsInS3
+
+    fileExists match {
+      case Left(ex) => {
+        Left(CustomFailure(ex.message))
+      }
+      case Right(value) => {
+        value match {
+          case false => {
+            val json = generateJsonForS3FileIfFileDoesNotExist(Seq[EmailsFromSfResponse.Records](caseEmail))
+            writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id)
+          }
+
+          case true => {
+            val emailsInS3File = getEmailsInS3File(caseEmail)
+
+            val emailAlreadyExistsInS3File = emailsInS3File
+              .getOrElse(Seq[EmailsFromSfResponse.Records]())
+              .exists(_.Composite_Key__c == caseEmail.Composite_Key__c)
+
+            if (!emailAlreadyExistsInS3File) {
+              val json = generateJsonForS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records)
+              writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id)
+            } else {
+              Right("")
+            }
+          }
+        }
       }
     }
-
   }
 
   def fileAlreadyExistsInS3(fileName: String): Either[CustomFailure, Boolean] = {
@@ -52,13 +80,82 @@ object S3Connector extends LazyLogging {
           objSummary => Key(objSummary.key)
         ).contains(Key(fileName))
     } match {
-      case Failure(f) => { Left(CustomFailure.fromThrowable(f)) }
-      case Success(s) => { Right(s) }
+      case Failure(f) => {
+        Left(CustomFailure.fromThrowable(f))
+      }
+      case Success(s) => {
+        Right(s)
+      }
     }
   }
 
-  def updateS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records): Option[String] = {
-    println("updateS3FileIfEmailDoesNotExist...")
+  def getEmailsInS3File(caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, Seq[EmailsFromSfResponse.Records]] = for {
+    s3FileJsonBody <- getEmailsJsonFromS3File(caseEmail.Parent.CaseNumber)
+    decodedEmails <- decode[Seq[EmailsFromSfResponse.Records]](s3FileJsonBody)
+      .left
+      .map(CustomFailure.fromThrowable)
+  } yield decodedEmails
+
+  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String, emailId: String): Either[CustomFailure, String] = {
+
+    val uploadResponse = for {
+      putRequest <- generateS3PutRequest(bucketName, fileName)
+      requestBody <- generatePutRequestBody(caseEmailsJson)
+      uploadResult <- uploadFileToS3(putRequest, requestBody)
+    } yield uploadResult
+
+    uploadResponse match {
+      case Left(ex) => { Left(CustomFailure(ex.message)) }
+      case Right(value) => { Right(emailId) }
+    }
+  }
+
+  def getEmailsJsonFromS3File(fileName: String): Either[CustomFailure, String] = {
+
+    for {
+      inputStream <- getS3File(fileName)
+    } yield {
+      Source.fromInputStream(inputStream).mkString
+    }
+  }
+
+  def getS3File(fileName: String): Either[CustomFailure, ResponseInputStream[GetObjectResponse]] = Try(
+    AwsS3.client.getObject(
+      GetObjectRequest.builder
+        .bucket(bucketName)
+        .key(fileName)
+        .build()
+    )
+  ) match {
+      case Failure(ex) => { Left(CustomFailure(ex.getMessage)) }
+      case Success(s) => { Right(s) }
+    }
+
+  def generatePutRequestBody(caseEmailsJson: String): Either[CustomFailure, RequestBody] = Try(
+    RequestBody.fromString(caseEmailsJson, StandardCharsets.UTF_8)
+  ) match {
+      case Failure(ex) => { Left(CustomFailure(ex.getMessage)) }
+      case Success(s) => { Right(s) }
+    }
+
+  def uploadFileToS3(putRequest: PutObjectRequest, requestBody: RequestBody): Either[CustomFailure, PutObjectResponse] =
+    UploadToS3.putObject(putRequest, requestBody) match {
+      case Failure(ex) => { Left(CustomFailure.fromThrowable(ex)) }
+      case Success(s) => { Right(s) }
+    }
+
+  def generateS3PutRequest(bucketName: String, fileName: String): Either[CustomFailure, PutObjectRequest] = Try(
+    PutObjectRequest
+      .builder
+      .bucket(bucketName)
+      .key(s"${fileName}")
+      .build()
+  ) match {
+      case Failure(ex) => { Left(CustomFailure(ex.getMessage)) }
+      case Success(s) => { Right(s) }
+    }
+
+  def generateJsonForS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records): String = {
     val emailsInS3File = getEmailsInS3File(caseEmail)
 
     val emailAlreadyExistsInS3File = emailsInS3File
@@ -66,65 +163,13 @@ object S3Connector extends LazyLogging {
       .exists(_.Composite_Key__c == caseEmail.Composite_Key__c)
 
     if (emailAlreadyExistsInS3File)
-      None
+      ""
     else {
-      val caseEmailsToSaveToS3 = emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()) :+ caseEmail
-      val successfulEmailId = writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, caseEmailsToSaveToS3.asJson.toString(), caseEmail.Id)
-      //todo what happens if there is a failure writing to S3?
-      Some(caseEmail.Id)
+      (emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()) :+ caseEmail).asJson.toString()
     }
   }
 
-  def getEmailsInS3File(caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, Seq[EmailsFromSfResponse.Records]] = for {
-    s3FileJsonBody <- getEmailsJsonFromS3File(bucketName, caseEmail.Parent.CaseNumber)
-    decodedEmails <- decode[Seq[EmailsFromSfResponse.Records]](s3FileJsonBody)
-      .left
-      .map(CustomFailure.fromThrowable)
-  } yield decodedEmails
-
-  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String, emailId: String): Either[Throwable, String] = {
-
-    val putRequest = PutObjectRequest.builder
-      .bucket(bucketName)
-      .key(s"${fileName}")
-      .build()
-
-    val requestBody = RequestBody.fromString(caseEmailsJson, StandardCharsets.UTF_8)
-
-    UploadToS3.putObject(putRequest, requestBody)
-      .fold(
-        ex => {
-          logger.info(s"Upload failed due to $ex")
-          Left(ex)
-        },
-        result => {
-          println("result:" + result)
-          logger.info(s"Successfully saved Case emails ($fileName) to S3")
-
-          Right(emailId)
-        }
-      )
+  def generateJsonForS3FileIfFileDoesNotExist(caseEmailsToSaveToS3: Seq[EmailsFromSfResponse.Records]): String = {
+    caseEmailsToSaveToS3.asJson.toString()
   }
-
-  def getEmailsJsonFromS3File(bucketName: String, fileName: String): Either[CustomFailure, String] = {
-    println("get file from S3.....")
-    Try {
-      val inputStream = AwsS3.client.getObject(
-        GetObjectRequest.builder
-          .bucket(bucketName)
-          .key(fileName)
-          .build()
-      )
-      Source.fromInputStream(inputStream).mkString
-    } match {
-      case Success(s) => {
-        Right(s)
-      }
-      case Failure(ex) => {
-        println("ABC")
-        Left(CustomFailure(ex.getMessage))
-      }
-    }
-  }
-
 }
