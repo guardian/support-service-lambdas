@@ -48,11 +48,12 @@ object Handler extends LazyLogging {
   }
 
   def getEmailIdsSuccessfullySavedToS3(emailsDataFromSF: EmailsFromSfResponse.Response): Seq[String] = {
+
     emailsDataFromSF
       .records
       .map(saveEmailToS3)
-      .filter(id => id != Right(""))
       .collect { case Right(value) => value }
+      .flatten
   }
 
   def processNextPageOfEmails(sfAuthDetails: SfAuthDetails, url: String): Unit = {
