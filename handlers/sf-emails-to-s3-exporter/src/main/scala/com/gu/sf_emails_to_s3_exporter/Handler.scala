@@ -24,6 +24,7 @@ object Handler extends LazyLogging {
     emailsFromSF match {
       case Left(ex) => {
         logger.error("Error: " + ex)
+        throw new RuntimeException(ex.toString)
       }
       case Right(success) => {
         logger.info("Processing complete")
