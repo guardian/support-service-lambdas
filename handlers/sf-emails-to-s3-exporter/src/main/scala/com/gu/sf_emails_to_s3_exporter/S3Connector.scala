@@ -31,14 +31,12 @@ object S3Connector extends LazyLogging {
 
   def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, Option[String]] = {
 
-    val fileExists = for {
-      fileIsInS3 <- fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber)
-    } yield fileIsInS3
+    val fileExists = fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber)
 
     fileExists match {
 
       case Left(ex) => {
-        Left(CustomFailure(ex.message))
+        Left(CustomFailure.fromThrowable(ex))
       }
 
       case Right(false) => {
