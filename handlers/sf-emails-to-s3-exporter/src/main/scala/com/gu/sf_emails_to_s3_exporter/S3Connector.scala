@@ -29,7 +29,7 @@ object S3Connector extends LazyLogging {
 
   }
 
-  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, String] = {
+  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, Option[String]] = {
 
     val fileExists = for {
       fileIsInS3 <- fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber)
@@ -57,7 +57,7 @@ object S3Connector extends LazyLogging {
               val json = generateJsonForS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records)
               writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id)
             } else {
-              Right("")
+              Right(None)
             }
           }
         }
@@ -96,7 +96,7 @@ object S3Connector extends LazyLogging {
       .map(CustomFailure.fromThrowable)
   } yield decodedEmails
 
-  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String, emailId: String): Either[CustomFailure, String] = {
+  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String, emailId: String): Either[CustomFailure, Option[String]] = {
 
     val uploadResponse = for {
       putRequest <- generateS3PutRequest(bucketName, fileName)
@@ -106,7 +106,7 @@ object S3Connector extends LazyLogging {
 
     uploadResponse match {
       case Left(ex) => { Left(CustomFailure(ex.message)) }
-      case Right(value) => { Right(emailId) }
+      case Right(value) => { Right(Some(emailId)) }
     }
   }
 
