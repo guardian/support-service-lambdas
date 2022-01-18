@@ -1,13 +1,12 @@
 package com.gu.sf_emails_to_s3_exporter
 
 import com.gu.sf_emails_to_s3_exporter.ConfirmationWriteBackToSF.{EmailMessageToUpdate, EmailMessagesToUpdate}
+import com.gu.sf_emails_to_s3_exporter.Handler.safely
 import io.circe.Error
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import scalaj.http.Http
-
-import scala.util.{Failure, Success, Try}
 
 object SFConnector {
 
@@ -50,25 +49,20 @@ object SFConnector {
     decode[EmailsFromSfResponse.Response](responseBody)
   }
 
-  def auth(salesforceConfig: SalesforceConfig): Either[CustomFailure, String] = {
-    Try {
-      Http(s"${System.getenv("authUrl")}/services/oauth2/token")
-        .postForm(
-          Seq(
-            "grant_type" -> "password",
-            "client_id" -> salesforceConfig.clientId,
-            "client_secret" -> salesforceConfig.clientSecret,
-            "username" -> salesforceConfig.userName,
-            "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
-          )
+  def auth(salesforceConfig: SalesforceConfig): Either[CustomFailure, String] = safely(
+    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
+      .postForm(
+        Seq(
+          "grant_type" -> "password",
+          "client_id" -> salesforceConfig.clientId,
+          "client_secret" -> salesforceConfig.clientSecret,
+          "username" -> salesforceConfig.userName,
+          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
         )
-        .asString
-        .body
-    } match {
-      case Failure(f) => { Left(CustomFailure.fromThrowable(f)) }
-      case Success(s) => { Right(s) }
-    }
-  }
+      )
+      .asString
+      .body
+    )
 
   def doSfCompositeRequest(
     sfAuthDetails: SfAuthDetails,
