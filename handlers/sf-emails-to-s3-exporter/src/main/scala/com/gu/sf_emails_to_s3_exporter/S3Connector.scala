@@ -36,9 +36,7 @@ object S3Connector extends LazyLogging {
 
     fileExists match {
 
-      case Left(ex) => {
-        Left(CustomFailure(ex.message))
-      }
+      case Left(ex) => { Left(ex) }
 
       case Right(false) => {
         val json = generateJsonForS3FileIfFileDoesNotExist(Seq[EmailsFromSfResponse.Records](caseEmail))
@@ -92,7 +90,7 @@ object S3Connector extends LazyLogging {
     } yield uploadResult
 
     uploadResponse match {
-      case Left(ex) => { Left(CustomFailure(ex.message)) }
+      case Left(ex) => { Left(ex) }
       case Right(value) => { Right(Some(emailId)) }
     }
   }
