@@ -2,13 +2,14 @@ package com.gu.sf_emails_to_s3_exporter
 
 import com.gu.sf_emails_to_s3_exporter.ConfirmationWriteBackToSF.{EmailMessageToUpdate, EmailMessagesToUpdate}
 import com.gu.sf_emails_to_s3_exporter.Handler.safely
+import com.typesafe.scalalogging.LazyLogging
 import io.circe.Error
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import scalaj.http.Http
 
-object SFConnector {
+object SFConnector extends LazyLogging {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
 
@@ -35,7 +36,15 @@ object SFConnector {
         )
       ).asJson.toString(),
       "PATCH"
-    )
+    ) match {
+        case Left(ex) => {
+          logger.error(ex.toString)
+          Left(ex)
+        }
+        case Right(value) => {
+          Right(value)
+        }
+      }
 
   }
 
@@ -62,7 +71,7 @@ object SFConnector {
       )
       .asString
       .body
-    )
+  )
 
   def doSfCompositeRequest(
     sfAuthDetails: SfAuthDetails,
@@ -78,16 +87,8 @@ object SFConnector {
       .method(requestType)
       .asString
       .body
-    println("sf response:" + responseBody)
+
     decode[Seq[WritebackToSFResponse.WritebackResponse]](responseBody)
-    //    match {
-    //      case Failure(f) => {
-    //        Left(CustomFailure.fromThrowable(f))
-    //      }
-    //      case Success(s) => {
-    //        Right(s)
-    //      }
-    //    }
   }
 
 }

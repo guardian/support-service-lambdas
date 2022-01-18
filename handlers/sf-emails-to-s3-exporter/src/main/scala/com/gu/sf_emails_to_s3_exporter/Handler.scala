@@ -40,7 +40,15 @@ object Handler extends LazyLogging {
     val emailIdsSuccessfullySavedToS3 = getEmailIdsSuccessfullySavedToS3(emailsDataFromSF)
 
     if (!emailIdsSuccessfullySavedToS3.isEmpty) {
-      val sfWritebackResponse = writebackSuccessesToSf(sfAuthDetails, emailIdsSuccessfullySavedToS3)
+      writebackSuccessesToSf(sfAuthDetails, emailIdsSuccessfullySavedToS3).map(
+        response => response.map(
+          individualEmailUpdateAttempt =>
+            if (individualEmailUpdateAttempt.success.get) {
+              logger.info("Successful write back to sf for record:" + individualEmailUpdateAttempt.id)
+            } else {
+              logger.info("Failed to write back to sf for record:" + individualEmailUpdateAttempt)
+            })
+      )
     }
 
     //process more emails if they exist
