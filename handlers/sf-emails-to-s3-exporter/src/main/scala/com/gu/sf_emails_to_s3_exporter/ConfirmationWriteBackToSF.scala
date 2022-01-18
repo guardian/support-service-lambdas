@@ -1,11 +1,12 @@
 package com.gu.sf_emails_to_s3_exporter
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object ConfirmationWriteBackToSF {
   case class EmailMessageToUpdate(
     id: String,
-    Most_Recent_Export__c: LocalDateTime = LocalDateTime.now(), //todo for some reason this is giving dodgy datetimes
+    Most_Recent_Export__c: String = getCurrentDateTimeForWriteback(),
     attributes: Attributes = Attributes(`type` = "EmailMessage")
   )
 
@@ -15,4 +16,11 @@ object ConfirmationWriteBackToSF {
   )
 
   case class Attributes(`type`: String)
+
+  def getCurrentDateTimeForWriteback(): String = {
+    DateTimeFormatter.ofPattern("YYYY-MM-DD").format(LocalDateTime.now) +
+      "T" +
+      DateTimeFormatter.ofPattern("HH:mm:SS").format(LocalDateTime.now) +
+      "Z"
+  }
 }
