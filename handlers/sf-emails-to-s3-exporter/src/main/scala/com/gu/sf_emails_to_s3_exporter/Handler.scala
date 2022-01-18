@@ -6,6 +6,8 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
 
+import scala.util.Try
+
 object Handler extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
@@ -62,4 +64,7 @@ object Handler extends LazyLogging {
       nextBatchOfEmails <- getEmailsFromSfByRecordsetReference(sfAuthDetails, url)
     } yield processEmails(sfAuthDetails, nextBatchOfEmails)
   }
+
+  def safely[A](doSomething: => A): Either[CustomFailure, A] =
+    Try(doSomething).toEither.left.map(CustomFailure.fromThrowable)
 }

@@ -3,6 +3,7 @@ package com.gu.sf_emails_to_s3_exporter
 import java.nio.charset.StandardCharsets
 
 import com.gu.effects.{AwsS3, Key, UploadToS3}
+import com.gu.sf_emails_to_s3_exporter.Handler.safely
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -13,7 +14,7 @@ import software.amazon.awssdk.services.s3.model._
 
 import scala.io.Source
 import scala.jdk.CollectionConverters.CollectionHasAsScala
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object S3Connector extends LazyLogging {
 
@@ -36,7 +37,7 @@ object S3Connector extends LazyLogging {
     fileExists match {
 
       case Left(ex) => {
-        Left(CustomFailure.fromThrowable(ex))
+        Left(CustomFailure(ex.message))
       }
 
       case Right(false) => {
@@ -61,29 +62,19 @@ object S3Connector extends LazyLogging {
     }
   }
 
-  def fileAlreadyExistsInS3(fileName: String): Either[CustomFailure, Boolean] = {
+  def fileAlreadyExistsInS3(fileName: String): Either[CustomFailure, Boolean] = safely({
+    val filesInS3MatchingFileName = AwsS3.client.listObjects(
+      ListObjectsRequest.builder
+        .bucket(bucketName)
+        .prefix(fileName)
+        .build()
+    ).contents.asScala.toList
 
-    Try {
-      val filesInS3MatchingFileName = AwsS3.client.listObjects(
-        ListObjectsRequest.builder
-          .bucket(bucketName)
-          .prefix(fileName)
-          .build()
-      ).contents.asScala.toList
-
-      filesInS3MatchingFileName
-        .map(
-          objSummary => Key(objSummary.key)
-        ).contains(Key(fileName))
-    } match {
-      case Failure(f) => {
-        Left(CustomFailure.fromThrowable(f))
-      }
-      case Success(s) => {
-        Right(s)
-      }
-    }
-  }
+    filesInS3MatchingFileName
+      .map(
+        objSummary => Key(objSummary.key)
+      ).contains(Key(fileName))
+  })
 
   def getEmailsInS3File(caseEmail: EmailsFromSfResponse.Records): Either[CustomFailure, Seq[EmailsFromSfResponse.Records]] = for {
     s3FileJsonBody <- getEmailsJsonFromS3File(caseEmail.Parent.CaseNumber)
@@ -106,50 +97,36 @@ object S3Connector extends LazyLogging {
     }
   }
 
-  def getEmailsJsonFromS3File(fileName: String): Either[CustomFailure, String] = {
-
-    for {
-      inputStream <- getS3File(fileName)
-    } yield {
-      Source.fromInputStream(inputStream).mkString
-    }
+  def getEmailsJsonFromS3File(fileName: String): Either[CustomFailure, String] = for {
+    inputStream <- getS3File(fileName)
+  } yield {
+    Source.fromInputStream(inputStream).mkString
   }
 
-  def getS3File(fileName: String): Either[CustomFailure, ResponseInputStream[GetObjectResponse]] = Try(
+  def getS3File(fileName: String): Either[CustomFailure, ResponseInputStream[GetObjectResponse]] = safely(
     AwsS3.client.getObject(
       GetObjectRequest.builder
         .bucket(bucketName)
         .key(fileName)
         .build()
     )
-  ) match {
-      case Failure(ex) => { Left(CustomFailure(ex.getMessage)) }
-      case Success(s) => { Right(s) }
-    }
+  )
 
-  def generatePutRequestBody(caseEmailsJson: String): Either[CustomFailure, RequestBody] = Try(
+  def generatePutRequestBody(caseEmailsJson: String): Either[CustomFailure, RequestBody] = safely(
     RequestBody.fromString(caseEmailsJson, StandardCharsets.UTF_8)
-  ) match {
-      case Failure(ex) => { Left(CustomFailure(ex.getMessage)) }
-      case Success(s) => { Right(s) }
-    }
+  )
 
-  def uploadFileToS3(putRequest: PutObjectRequest, requestBody: RequestBody): Either[CustomFailure, PutObjectResponse] =
-    UploadToS3.putObject(putRequest, requestBody) match {
-      case Failure(ex) => { Left(CustomFailure.fromThrowable(ex)) }
-      case Success(s) => { Right(s) }
-    }
+  def uploadFileToS3(putRequest: PutObjectRequest, requestBody: RequestBody): Either[CustomFailure, Try[PutObjectResponse]] = safely(
+    UploadToS3.putObject(putRequest, requestBody)
+  )
 
-  def generateS3PutRequest(bucketName: String, fileName: String): Either[CustomFailure, PutObjectRequest] = Try(
+  def generateS3PutRequest(bucketName: String, fileName: String): Either[CustomFailure, PutObjectRequest] = safely(
     PutObjectRequest
       .builder
       .bucket(bucketName)
       .key(s"${fileName}")
       .build()
-  ) match {
-      case Failure(ex) => { Left(CustomFailure(ex.getMessage)) }
-      case Success(s) => { Right(s) }
-    }
+  )
 
   def generateJsonForS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records): String = {
     val emailsInS3File = getEmailsInS3File(caseEmail)
