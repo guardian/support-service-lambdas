@@ -36,30 +36,28 @@ object S3Connector extends LazyLogging {
     } yield fileIsInS3
 
     fileExists match {
+
       case Left(ex) => {
         Left(CustomFailure(ex.message))
       }
-      case Right(value) => {
-        value match {
-          case false => {
-            val json = generateJsonForS3FileIfFileDoesNotExist(Seq[EmailsFromSfResponse.Records](caseEmail))
-            writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id)
-          }
 
-          case true => {
-            val emailsInS3File = getEmailsInS3File(caseEmail)
+      case Right(false) => {
+        val json = generateJsonForS3FileIfFileDoesNotExist(Seq[EmailsFromSfResponse.Records](caseEmail))
+        writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id)
+      }
 
-            val emailAlreadyExistsInS3File = emailsInS3File
-              .getOrElse(Seq[EmailsFromSfResponse.Records]())
-              .exists(_.Composite_Key__c == caseEmail.Composite_Key__c)
+      case Right(true) => {
+        val emailsInS3File = getEmailsInS3File(caseEmail)
 
-            if (!emailAlreadyExistsInS3File) {
-              val json = generateJsonForS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records)
-              writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id)
-            } else {
-              Right(None)
-            }
-          }
+        val emailAlreadyExistsInS3File = emailsInS3File
+          .getOrElse(Seq[EmailsFromSfResponse.Records]())
+          .exists(_.Composite_Key__c == caseEmail.Composite_Key__c)
+
+        if (!emailAlreadyExistsInS3File) {
+          val json = generateJsonForS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records)
+          writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id)
+        } else {
+          Right(None)
         }
       }
     }
