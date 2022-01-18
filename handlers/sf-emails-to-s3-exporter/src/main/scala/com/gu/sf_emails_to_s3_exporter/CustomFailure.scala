@@ -4,9 +4,7 @@ case class CustomFailure(message: String)
 
 object CustomFailure {
   def fromThrowable(throwable: Throwable): CustomFailure = {
-    print("Something went wrong:" + throwable.getMessage)
     CustomFailure(throwable.getMessage)
-
   }
 
 }
