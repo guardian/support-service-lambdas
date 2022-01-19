@@ -54,6 +54,7 @@ object S3Connector extends LazyLogging {
           val json = generateJsonForS3FileIfEmailDoesNotExist(caseEmail: EmailsFromSfResponse.Records)
           writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id)
         } else {
+          logger.warn(s"${caseEmail.Composite_Key__c} already exists in S3")
           Right(None)
         }
       }
