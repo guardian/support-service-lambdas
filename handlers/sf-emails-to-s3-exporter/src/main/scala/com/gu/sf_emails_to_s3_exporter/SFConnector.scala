@@ -59,7 +59,8 @@ object SFConnector extends LazyLogging {
   }
 
   def auth(salesforceConfig: SalesforceConfig): Either[CustomFailure, String] = safely(
-    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
+
+    Http(s"${salesforceConfig.authUrl}/services/oauth2/token")
       .postForm(
         Seq(
           "grant_type" -> "password",
