@@ -17,11 +17,11 @@ object Handler extends LazyLogging {
   def handleRequest(): Unit = {
 
     val emailsFromSF = for {
-      config <- SalesforceConfig.fromEnvironment.toRight("Missing config value")
-      authentication <- auth(config)
+      config <- Config.fromEnvironment.toRight("Missing config value")
+      authentication <- auth(config.sfConfig)
       sfAuthDetails <- decode[SfAuthDetails](authentication)
       emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails)
-    } yield processEmails(sfAuthDetails, emailsFromSF)
+    } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
 
     emailsFromSF match {
       case Left(ex) => {
@@ -35,9 +35,9 @@ object Handler extends LazyLogging {
 
   }
 
-  def processEmails(sfAuthDetails: SfAuthDetails, emailsDataFromSF: EmailsFromSfResponse.Response): Any = {
+  def processEmails(sfAuthDetails: SfAuthDetails, emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Any = {
 
-    val emailIdsSuccessfullySavedToS3 = getEmailIdsSuccessfullySavedToS3(emailsDataFromSF)
+    val emailIdsSuccessfullySavedToS3 = getEmailIdsSuccessfullySavedToS3(emailsDataFromSF, bucketName)
 
     if (!emailIdsSuccessfullySavedToS3.isEmpty) {
       writebackSuccessesToSf(sfAuthDetails, emailIdsSuccessfullySavedToS3).map(
@@ -47,30 +47,31 @@ object Handler extends LazyLogging {
               logger.info("Successful write back to sf for record:" + individualEmailUpdateAttempt.id)
             } else {
               logger.info("Failed to write back to sf for record:" + individualEmailUpdateAttempt)
-            })
+            }
+        )
       )
     }
 
     //process more emails if they exist
     if (!emailsDataFromSF.done) {
-      processNextPageOfEmails(sfAuthDetails, emailsDataFromSF.nextRecordsUrl.get)
+      processNextPageOfEmails(sfAuthDetails, emailsDataFromSF.nextRecordsUrl.get, bucketName)
     }
 
   }
 
-  def getEmailIdsSuccessfullySavedToS3(emailsDataFromSF: EmailsFromSfResponse.Response): Seq[String] = {
-
+  def getEmailIdsSuccessfullySavedToS3(emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
+    println("bucketName:" + bucketName)
     emailsDataFromSF
       .records
-      .map(saveEmailToS3)
+      .map(email => saveEmailToS3(email, bucketName))
       .collect { case Right(value) => value }
       .flatten
   }
 
-  def processNextPageOfEmails(sfAuthDetails: SfAuthDetails, url: String): Unit = {
+  def processNextPageOfEmails(sfAuthDetails: SfAuthDetails, url: String, bucketName: String): Unit = {
     for {
       nextBatchOfEmails <- getEmailsFromSfByRecordsetReference(sfAuthDetails, url)
-    } yield processEmails(sfAuthDetails, nextBatchOfEmails)
+    } yield processEmails(sfAuthDetails, nextBatchOfEmails, bucketName)
   }
 
   def safely[A](doSomething: => A): Either[CustomFailure, A] =
