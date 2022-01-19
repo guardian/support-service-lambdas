@@ -37,6 +37,7 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
+          bucketName: emails-from-sf-${Stage}
           sfApiVersion: v50.0
           sfAuthUrl:
             !Sub
@@ -67,17 +68,17 @@ Resources:
             - Effect: Allow
               Action: s3:GetObject
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf/${Stage}/*
+                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
         - Statement:
             - Effect: Allow
               Action: s3:PutObject
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf/${Stage}/*
+                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
         - Statement:
             - Effect: Allow
               Action: s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf/${Stage}/*
+                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
         - Statement:
             - Sid: readDeployedArtefact
               Effect: Allow
