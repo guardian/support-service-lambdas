@@ -38,7 +38,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
 
   private def sfHttp(url: String): HttpRequest = {
     Http(url)
-      .option(HttpOptions.readTimeout(30000))
+      .option(HttpOptions.readTimeout(60000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .header("Content-Type", "application/json")
   }

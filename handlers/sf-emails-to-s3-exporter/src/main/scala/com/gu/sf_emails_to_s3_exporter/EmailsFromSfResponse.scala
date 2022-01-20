@@ -9,6 +9,7 @@ object EmailsFromSfResponse {
 
   case class Records(
     Id: String,
+    ParentId: String,
     FromAddress: String,
     BccAddress: Option[String] = None,
     CcAddress: Option[String] = None,

@@ -5,6 +5,7 @@ object GetEmailsQuery {
     s"""
        |SELECT
        | Id,
+       | ParentId,
        | BccAddress,
        | CcAddress,
        | FirstOpenedDate,
@@ -28,11 +29,11 @@ object GetEmailsQuery {
        |FROM
        | emailmessage
        |WHERE
-       | Export_Status__c in ('Ready for export to s3')
+       | export_Status__c in ('Ready for export to s3')
        |ORDER BY
        | ParentId
        |LIMIT
-       | 1
+       | 1000
     """.stripMargin
   }
 }
