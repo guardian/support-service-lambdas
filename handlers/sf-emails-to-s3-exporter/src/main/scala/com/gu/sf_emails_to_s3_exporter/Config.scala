@@ -41,7 +41,7 @@ object Config {
         apiVersion = sfApiVersion
       ),
       S3Config(
-        bucketName = s3BucketName
+        bucketName = s3BucketName.toLowerCase()
       )
     )
   }
