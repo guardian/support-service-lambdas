@@ -18,16 +18,6 @@ import scala.util.Try
 
 object S3Connector extends LazyLogging {
 
-  def generateJson(fileIsInS3: Boolean, caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, String] = {
-
-    Right(if (fileIsInS3)
-      generateJsonForS3FileIfEmailDoesNotExist(caseEmail, bucketName)
-    else {
-      generateJsonForS3FileIfFileDoesNotExist(Seq[EmailsFromSfResponse.Records](caseEmail), bucketName)
-    })
-
-  }
-
   def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, Option[String]] = {
 
     val fileExists = fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber, bucketName)
