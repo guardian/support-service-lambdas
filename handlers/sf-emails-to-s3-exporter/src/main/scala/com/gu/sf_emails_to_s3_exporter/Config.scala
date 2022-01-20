@@ -30,7 +30,6 @@ object Config {
       sfAuthUrl <- Option(System.getenv("authUrl"))
       sfApiVersion <- Option(System.getenv("apiVersion"))
       s3BucketName <- Option(System.getenv("bucketName"))
-      s3Stage <- Option(System.getenv("stage"))
     } yield Config(
       SalesforceConfig(
         userName = sfUserName,
@@ -42,7 +41,7 @@ object Config {
         apiVersion = sfApiVersion
       ),
       S3Config(
-        bucketName = s3BucketName + "-" + s3Stage.toLowerCase()
+        bucketName = s3BucketName
       )
     )
   }
