@@ -60,7 +60,7 @@ object Handler extends LazyLogging {
   }
 
   def getEmailIdsSuccessfullySavedToS3(emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
-    println("bucketName:" + bucketName)
+
     emailsDataFromSF
       .records
       .map(email => saveEmailToS3(email, bucketName))
