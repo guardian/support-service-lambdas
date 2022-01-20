@@ -37,7 +37,7 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
-          bucketName: emails-from-sf-!Ref Stage
+          bucketName: !Sub emails-from-sf-${Stage}
           sfApiVersion: v50.0
           sfAuthUrl:
             !Sub
