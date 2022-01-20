@@ -1,5 +1,10 @@
 package com.gu.sf_emails_to_s3_exporter
 
+case class Config(
+  sfConfig: SalesforceConfig,
+  s3Config: S3Config
+)
+
 case class SalesforceConfig(
   authUrl: String,
   clientId: String,
@@ -10,9 +15,12 @@ case class SalesforceConfig(
   apiVersion: String
 )
 
-object SalesforceConfig {
+case class S3Config(
+  bucketName: String
+)
 
-  lazy val fromEnvironment: Option[SalesforceConfig] = {
+object Config {
+  lazy val fromEnvironment: Option[Config] = {
     for {
       sfUserName <- Option(System.getenv("username"))
       sfClientId <- Option(System.getenv("clientId"))
@@ -21,15 +29,21 @@ object SalesforceConfig {
       sfToken <- Option(System.getenv("token"))
       sfAuthUrl <- Option(System.getenv("authUrl"))
       sfApiVersion <- Option(System.getenv("apiVersion"))
-    } yield SalesforceConfig(
-      userName = sfUserName,
-      clientId = sfClientId,
-      clientSecret = sfClientSecret,
-      password = sfPassword,
-      token = sfToken,
-      authUrl = sfAuthUrl,
-      apiVersion = sfApiVersion
+      s3BucketName <- Option(System.getenv("bucketName"))
+    } yield Config(
+      SalesforceConfig(
+        userName = sfUserName,
+        clientId = sfClientId,
+        clientSecret = sfClientSecret,
+        password = sfPassword,
+        token = sfToken,
+        authUrl = sfAuthUrl,
+        apiVersion = sfApiVersion
+      ),
+      S3Config(
+        bucketName = s3BucketName.toLowerCase()
+      )
     )
   }
-
 }
+
