@@ -1,6 +1,5 @@
 package com.gu.sf_emails_to_s3_exporter
 
-import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
 import com.gu.sf_emails_to_s3_exporter.S3Connector.saveEmailToS3
 import com.gu.sf_emails_to_s3_exporter.SFConnector._
 import com.typesafe.scalalogging.LazyLogging
@@ -15,7 +14,7 @@ object Handler extends LazyLogging {
     handleRequest()
   }
 
-  def handleRequest(): APIGatewayProxyResponseEvent = {
+  def handleRequest(): Unit = {
 
     val emailsFromSF = for {
       config <- Config.fromEnvironment.toRight("Missing config value")
