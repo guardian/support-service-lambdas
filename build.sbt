@@ -342,7 +342,7 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
 lazy val `sf-emails-to-s3-exporter` = lambdaProject(
   "sf-emails-to-s3-exporter",
   "Runs regularly to retrieve emails from Salesforce and save as json in S3",
-  Seq(circe, circeParser, scalajHttp, awsS3)).dependsOn(`effects-s3`)
+  Seq(circe, circeParser, scalajHttp, awsS3, awsEvents)).dependsOn(`effects-s3`)
 
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",
