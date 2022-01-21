@@ -106,7 +106,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: Retrieves emails from Salesforce and saves as Json to S3
-      FunctionName: !Sub sf-emails-to-s3-exporter-${Stage}
+      FunctionName: !Sub sf-emails-to-s3-exporter2-${Stage}
       Handler: com.gu.sf_emails_to_s3_exporter.Handler2::standloneHandler
       CodeUri:
         Bucket: support-service-lambdas-dist
