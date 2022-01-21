@@ -22,6 +22,20 @@ Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
 
 Resources:
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    DependsOn:
+      - Lambda
+      - TakingDownLambda
+    Properties:
+      Name: !Sub ${AppName}-${Stage}-api-gateway
+      StageName: !Sub ${Stage}
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: !Sub ${AppName}-${Stage}-usage-plan
+
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -85,3 +99,18 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{caseNumber}
+            Method: GET
+            RestApiId:
+              Ref: ApiGateway
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{caseNumber}
+            Method: DELETE
+            RestApiId:
+              Ref: ApiGateway
