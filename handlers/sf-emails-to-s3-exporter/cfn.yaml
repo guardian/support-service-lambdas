@@ -34,169 +34,182 @@ Resources:
         Types:
           - "EDGE"
 
-    ApiGatewayResource:
-      Type: "AWS::ApiGateway::Resource"
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        PathPart: "{bucketName}"
-        ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+  ApiGatewayResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: "{bucketName}"
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
 
-    ApiGatewayResource2:
-      Type: "AWS::ApiGateway::Resource"
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        PathPart: "{caseNumber}"
-        ParentId: !Ref ApiGatewayResource
+  ApiGatewayResource2:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: "{caseNumber}"
+      ParentId: !Ref ApiGatewayResource
 
-    ApiGatewayMethod:
-      Type: "AWS::ApiGateway::Method"
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        ResourceId: !Ref ApiGatewayResource2
-        HttpMethod: "GET"
-        AuthorizationType: "NONE"
-        ApiKeyRequired: true
-        RequestParameters:
-          "method.request.path.bucketName": true
-          "method.request.path.caseNumber": true
-        MethodResponses:
+  ApiGatewayApiKey:
+    Type: "AWS::ApiGateway::ApiKey"
+    Properties:
+      Enabled: true
+      Name: !Sub "sf-emails-to-s3-exporter-${Stage}-api-key"
+
+  ApiGatewayStage:
+    Type: "AWS::ApiGateway::Stage"
+    Properties:
+      StageName: "DEV"
+      DeploymentId: !Ref ApiGatewayDeployment
+      RestApiId: !Ref ApiGatewayRestApi
+      CacheClusterEnabled: false
+      MethodSettings:
+        - CacheDataEncrypted: false
+          CacheTtlInSeconds: 300
+          CachingEnabled: false
+          DataTraceEnabled: true
+          HttpMethod: "*"
+          LoggingLevel: "INFO"
+          MetricsEnabled: false
+          ResourcePath: "/*"
+          ThrottlingBurstLimit: 5000
+          ThrottlingRateLimit: 10000
+      TracingEnabled: false
+      Tags:
+        - Key: "App"
+          Value: "sf-emails-to-s3-exporter"
+        - Key: "Stack"
+          Value: "membership"
+        - Key: "Stage"
+          Value: "DEV"
+
+  ApiGatewayMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResource2
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      ApiKeyRequired: true
+      RequestParameters:
+        "method.request.path.bucketName": true
+        "method.request.path.caseNumber": true
+      MethodResponses:
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "200"
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "400"
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "500"
+      Integration:
+        CacheNamespace: !Ref ApiGatewayResource2
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite"
+        IntegrationHttpMethod: "GET"
+        IntegrationResponses:
           - ResponseParameters:
-              "method.response.header.Content-Length": false
-              "method.response.header.Content-Type": false
-              "method.response.header.Timestamp": false
+              "method.response.header.Content-Length": "integration.response.header.Content-Length"
+              "method.response.header.Content-Type": "integration.response.header.Content-Type"
+              "method.response.header.Timestamp": "integration.response.header.Date"
+            ResponseTemplates: { }
+            SelectionPattern: "2\\d{2}"
             StatusCode: "200"
-          - ResponseParameters:
-              "method.response.header.Content-Length": false
-              "method.response.header.Content-Type": false
-              "method.response.header.Timestamp": false
+          - SelectionPattern: "4\\d{2}"
             StatusCode: "400"
-          - ResponseParameters:
-              "method.response.header.Content-Length": false
-              "method.response.header.Content-Type": false
-              "method.response.header.Timestamp": false
+          - SelectionPattern: "5\\d{2}"
             StatusCode: "500"
-        Integration:
-          CacheNamespace: !Ref ApiGatewayResource2
-          Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite"
-          IntegrationHttpMethod: "GET"
-          IntegrationResponses:
-            - ResponseParameters:
-                "method.response.header.Content-Length": "integration.response.header.Content-Length"
-                "method.response.header.Content-Type": "integration.response.header.Content-Type"
-                "method.response.header.Timestamp": "integration.response.header.Date"
-              ResponseTemplates: { }
-              SelectionPattern: "2\\d{2}"
-              StatusCode: "200"
-            - SelectionPattern: "4\\d{2}"
-              StatusCode: "400"
-            - SelectionPattern: "5\\d{2}"
-              StatusCode: "500"
-          PassthroughBehavior: "WHEN_NO_MATCH"
-          RequestParameters:
-            "integration.request.path.folder": "method.request.path.bucketName"
-            "integration.request.path.item": "method.request.path.caseNumber"
-          TimeoutInMillis: 29000
-          Type: "AWS"
-          Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        RequestParameters:
+          "integration.request.path.folder": "method.request.path.bucketName"
+          "integration.request.path.item": "method.request.path.caseNumber"
+        TimeoutInMillis: 29000
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
 
-      ApiGatewayApiKey:
-        Type: "AWS::ApiGateway::ApiKey"
-        Properties:
-          Enabled: true
-          Name: !Sub "sf-emails-to-s3-exporter-${Stage}-api-key"
+  ApiGatewayMethod2:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResource2
+      HttpMethod: "DELETE"
+      AuthorizationType: "NONE"
+      ApiKeyRequired: true
+      RequestParameters:
+        "method.request.path.bucketName": true
+        "method.request.path.caseNumber": true
+      MethodResponses:
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "200"
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "400"
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "500"
+      Integration:
+        CacheNamespace: !Ref ApiGatewayResource2
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite"
+        IntegrationHttpMethod: "DELETE"
+        IntegrationResponses:
+          - ResponseParameters:
+              "method.response.header.Content-Length": "integration.response.header.Content-Length"
+              "method.response.header.Content-Type": "integration.response.header.Content-Type"
+              "method.response.header.Timestamp": "integration.response.header.Date"
+            ResponseTemplates: { }
+            SelectionPattern: "2\\d{2}"
+            StatusCode: "200"
+          - SelectionPattern: "4\\d{2}"
+            StatusCode: "400"
+          - SelectionPattern: "5\\d{2}"
+            StatusCode: "500"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        RequestParameters:
+          "integration.request.path.folder": "method.request.path.bucketName"
+          "integration.request.path.item": "method.request.path.caseNumber"
+        TimeoutInMillis: 29000
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
 
-      ApiGatewayUsagePlan:
-        Type: "AWS::ApiGateway::UsagePlan"
-        Properties:
-          UsagePlanName: !Sub "sf-emails-to-s3-exporter-${Stage}-usage-plan"
-          ApiStages:
-            - ApiId: !Ref ApiGatewayRestApi
-              Stage: !Ref Stage
+  ApiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - ApiGatewayMethod
+      - ApiGatewayMethod2
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
 
-      ApiGatewayUsagePlanKey:
-        Type: "AWS::ApiGateway::UsagePlanKey"
-        Properties:
-          KeyId: !GetAtt ApiGatewayApiKey.APIKeyId
-          KeyType: "API_KEY"
-          UsagePlanId: "WwFavQs8QN7ktHxrxuTb29S43VMQMX6V7mF6kr2G"
+  ApiGatewayUsagePlan:
+    Type: "AWS::ApiGateway::UsagePlan"
+    DependsOn:
+      - ApiGatewayStage
+    Properties:
+      UsagePlanName: !Sub "sf-emails-to-s3-exporter-${Stage}-usage-plan"
+      ApiStages:
+        - ApiId: !Ref ApiGatewayRestApi
+          Stage: "DEV"
 
-      ApiGatewayStage:
-        Type: "AWS::ApiGateway::Stage"
-        Properties:
-          StageName: "DEV"
-          DeploymentId: "awso7c"
-          RestApiId: "tgmly5oxz7"
-          CacheClusterEnabled: false
-          MethodSettings:
-            - CacheDataEncrypted: false
-              CacheTtlInSeconds: 300
-              CachingEnabled: false
-              DataTraceEnabled: true
-              HttpMethod: "*"
-              LoggingLevel: "INFO"
-              MetricsEnabled: false
-              ResourcePath: "/*"
-              ThrottlingBurstLimit: 5000
-              ThrottlingRateLimit: 10000
-          TracingEnabled: false
-          Tags:
-            - Key: "App"
-              Value: "sf-emails-to-s3-exporter"
-            - Key: "Stack"
-              Value: "membership"
-            - Key: "Stage"
-              Value: "DEV"
-
-      ApiGatewayMethod2:
-        Type: "AWS::ApiGateway::Method"
-        Properties:
-          RestApiId: !Ref ApiGatewayRestApi
-          ResourceId: !Ref ApiGatewayResource2
-          HttpMethod: "DELETE"
-          AuthorizationType: "NONE"
-          ApiKeyRequired: true
-          RequestParameters:
-            "method.request.path.bucketName": true
-            "method.request.path.caseNumber": true
-          MethodResponses:
-            - ResponseParameters:
-                "method.response.header.Content-Length": false
-                "method.response.header.Content-Type": false
-                "method.response.header.Timestamp": false
-              StatusCode: "200"
-            - ResponseParameters:
-                "method.response.header.Content-Length": false
-                "method.response.header.Content-Type": false
-                "method.response.header.Timestamp": false
-              StatusCode: "400"
-            - ResponseParameters:
-                "method.response.header.Content-Length": false
-                "method.response.header.Content-Type": false
-                "method.response.header.Timestamp": false
-              StatusCode: "500"
-          Integration:
-            CacheNamespace: !Ref ApiGatewayResource2
-            Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite"
-            IntegrationHttpMethod: "DELETE"
-            IntegrationResponses:
-              - ResponseParameters:
-                  "method.response.header.Content-Length": "integration.response.header.Content-Length"
-                  "method.response.header.Content-Type": "integration.response.header.Content-Type"
-                  "method.response.header.Timestamp": "integration.response.header.Date"
-                ResponseTemplates: { }
-                SelectionPattern: "2\\d{2}"
-                StatusCode: "200"
-              - SelectionPattern: "4\\d{2}"
-                StatusCode: "400"
-              - SelectionPattern: "5\\d{2}"
-                StatusCode: "500"
-            PassthroughBehavior: "WHEN_NO_MATCH"
-            RequestParameters:
-              "integration.request.path.folder": "method.request.path.bucketName"
-              "integration.request.path.item": "method.request.path.caseNumber"
-            TimeoutInMillis: 29000
-            Type: "AWS"
-            Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
+  ApiGatewayUsagePlanKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    DependsOn:
+      - ApiGatewayUsagePlan
+      - ApiGatewayStage
+    Properties:
+      KeyId: !GetAtt ApiGatewayApiKey.APIKeyId
+      KeyType: "API_KEY"
+      UsagePlanId: !Ref ApiGatewayUsagePlan
 
   LambdaFunction:
     Type: AWS::Serverless::Function
