@@ -38,21 +38,17 @@ object S3Connector extends LazyLogging {
           .getOrElse(Seq[EmailsFromSfResponse.Records]())
           .exists(_.Composite_Key__c == caseEmail.Composite_Key__c)
 
-        if (!emailAlreadyExistsInS3File) {
-          val json = generateJsonForS3FileIfEmailDoesNotExist(emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()), caseEmail)
-          writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id, bucketName)
+        val json = (if (emailAlreadyExistsInS3File) {
+          generateJsonForS3FileIfEmailAlreadyExists(emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()), caseEmail)
         } else {
-          val json = generateJsonForS3FileIfEmailAlreadyExists(emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()), caseEmail)
-          writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id, bucketName)
-        }
+          generateJsonForS3FileIfEmailDoesNotExist(emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()), caseEmail)
+        })
+        writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id, bucketName)
+
       }
     }
   }
 
-  def generateJsonForS3FileIfEmailAlreadyExists(emailsInS3File: Seq[EmailsFromSfResponse.Records], caseEmail: EmailsFromSfResponse.Records): String = {
-    (emailsInS3File.filter(_.Composite_Key__c != caseEmail.Composite_Key__c) :+ caseEmail).asJson.toString()
-  }
-  
   def fileAlreadyExistsInS3(fileName: String, bucketName: String): Either[CustomFailure, Boolean] = safely({
     val filesInS3MatchingFileName = AwsS3.client.listObjects(
       ListObjectsRequest.builder
@@ -127,5 +123,9 @@ object S3Connector extends LazyLogging {
 
   def generateJsonForS3FileIfFileDoesNotExist(caseEmailsToSaveToS3: Seq[EmailsFromSfResponse.Records], bucketName: String): String = {
     caseEmailsToSaveToS3.asJson.toString()
+  }
+
+  def generateJsonForS3FileIfEmailAlreadyExists(emailsInS3File: Seq[EmailsFromSfResponse.Records], caseEmail: EmailsFromSfResponse.Records): String = {
+    (emailsInS3File.filter(_.Composite_Key__c != caseEmail.Composite_Key__c) :+ caseEmail).asJson.toString()
   }
 }
