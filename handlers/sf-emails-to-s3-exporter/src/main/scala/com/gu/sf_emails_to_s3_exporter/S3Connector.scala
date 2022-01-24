@@ -42,13 +42,17 @@ object S3Connector extends LazyLogging {
           val json = generateJsonForS3FileIfEmailDoesNotExist(emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()), caseEmail)
           writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id, bucketName)
         } else {
-          logger.warn(s"${caseEmail.Composite_Key__c} already exists in S3")
-          Right(None)
+          val json = generateJsonForS3FileIfEmailAlreadyExists(emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()), caseEmail)
+          writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id, bucketName)
         }
       }
     }
   }
 
+  def generateJsonForS3FileIfEmailAlreadyExists(emailsInS3File: Seq[EmailsFromSfResponse.Records], caseEmail: EmailsFromSfResponse.Records): String = {
+    (emailsInS3File.filter(_.Composite_Key__c != caseEmail.Composite_Key__c) :+ caseEmail).asJson.toString()
+  }
+  
   def fileAlreadyExistsInS3(fileName: String, bucketName: String): Either[CustomFailure, Boolean] = safely({
     val filesInS3MatchingFileName = AwsS3.client.listObjects(
       ListObjectsRequest.builder
@@ -115,9 +119,9 @@ object S3Connector extends LazyLogging {
       .build()
   )
 
-  def generateJsonForS3FileIfEmailDoesNotExist(emailsInS3File:  Seq[EmailsFromSfResponse.Records], caseEmail: EmailsFromSfResponse.Records): String = {
+  def generateJsonForS3FileIfEmailDoesNotExist(emailsInS3File: Seq[EmailsFromSfResponse.Records], caseEmail: EmailsFromSfResponse.Records): String = {
 
-      (emailsInS3File :+ caseEmail).asJson.toString()
+    (emailsInS3File :+ caseEmail).asJson.toString()
 
   }
 
