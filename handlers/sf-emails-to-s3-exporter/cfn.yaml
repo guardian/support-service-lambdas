@@ -78,12 +78,14 @@ Resources:
             - Effect: Allow
               Action: s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-dev/*
+                - arn:aws:s3:::emails-from-sf-dev
+                - arn:aws:s3:::emails-from-sf-dev/*
         - Statement:
             - Effect: Allow
               Action: s3:ListObjectV2
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-dev/*
+                - arn:aws:s3:::emails-from-sf-dev
+                - arn:aws:s3:::emails-from-sf-dev/*
         - Statement:
             - Sid: readDeployedArtefact
               Effect: Allow
