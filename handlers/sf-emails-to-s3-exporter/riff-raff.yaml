@@ -6,16 +6,16 @@ deployments:
 
   cfn:
     type: cloud-formation
-    app: sf-emails-to-s3-exporter
+    app: export-emails-from-sf-to-s3
     parameters:
       templatePath: cfn.yaml
 
-  sf-emails-to-s3-exporter:
+  export-emails-from-sf-to-s3:
     type: aws-lambda
     parameters:
       fileName: sf-emails-to-s3-exporter.jar
       bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
-        - sf-emails-to-s3-exporter-
+        - export-emails-from-sf-to-s3-
     dependencies: [ cfn ]
