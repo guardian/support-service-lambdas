@@ -32,7 +32,7 @@ Resources:
     Properties:
       Path: "/"
       RoleName: !Sub APIGatewayS3ReadWrite-${Stage}
-      AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"s3:ListBucket\"},{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"s3:GetObject\",\"s3:DeleteObject\"}]}"
+      AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"s3:ListBucket\"},{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":[\"s3:GetObject\",\"s3:DeleteObject\"]}]}"
       MaxSessionDuration: 3600
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
