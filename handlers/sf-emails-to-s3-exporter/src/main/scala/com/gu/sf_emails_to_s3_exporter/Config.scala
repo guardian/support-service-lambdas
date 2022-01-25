@@ -22,7 +22,7 @@ case class S3Config(
 object Config {
   lazy val fromEnvironment: Option[Config] = {
     for {
-      sfUserName <- Option(System.getenv("sfUserName"))
+      sfUserName <- Option(System.getenv("sfUsername"))
       sfClientId <- Option(System.getenv("sfClientId"))
       sfClientSecret <- Option(System.getenv("sfClientSecret"))
       sfPassword <- Option(System.getenv("sfPassword"))
