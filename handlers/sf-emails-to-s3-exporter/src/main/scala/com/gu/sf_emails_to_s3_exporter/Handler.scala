@@ -3,8 +3,6 @@ package com.gu.sf_emails_to_s3_exporter
 import com.gu.sf_emails_to_s3_exporter.S3Connector.saveEmailToS3
 import com.gu.sf_emails_to_s3_exporter.SFConnector._
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.generic.auto._
-import io.circe.parser._
 
 import scala.util.Try
 
@@ -16,22 +14,33 @@ object Handler extends LazyLogging {
 
   def handleRequest(): Unit = {
 
-    val emailsFromSF = for {
-      config <- Config.fromEnvironment.toRight("Missing config value")
-      authentication <- auth(config.sfConfig)
-      sfAuthDetails <- decode[SfAuthDetails](authentication)
-      emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails, config.sfConfig.apiVersion)
-    } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
+    println("sfUserName:"+System.getenv("sfUserName"))
+    println("sfClientId:"+System.getenv("sfClientId"))
+    println("sfClientSecret:"+System.getenv("sfClientSecret"))
+    println("sfPassword:"+System.getenv("sfPassword"))
+    println("sfToken:"+System.getenv("sfToken"))
+    println("sfAuthUrl:"+System.getenv("sfAuthUrl"))
+    println("sfApiVersion:"+System.getenv("sfApiVersion"))
+    println("bucketName:"+System.getenv("bucketName"))
 
-    emailsFromSF match {
-      case Left(ex) => {
-        logger.error("Error: " + ex)
-        throw new RuntimeException(ex.toString)
-      }
-      case Right(success) => {
-        logger.info("Processing complete")
-      }
-    }
+//    val emailsFromSF = for {
+//      config <- Config.fromEnvironment.toRight("Missing config value")
+//      authentication <- auth(config.sfConfig)
+//      sfAuthDetails <- decode[SfAuthDetails](authentication)
+//      emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails, config.sfConfig.apiVersion)
+//    } yield config
+
+
+
+//    emailsFromSF match {
+//      case Left(ex) => {
+//        logger.error("Error: " + ex)
+//        throw new RuntimeException(ex.toString)
+//      }
+//      case Right(success) => {
+//        logger.info("Processing complete")
+//      }
+//    }
 
   }
 
