@@ -68,17 +68,17 @@ Resources:
             - Effect: Allow
               Action: s3:GetObject
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub arn:aws:s3:::emails-from-sf-dev/*
         - Statement:
             - Effect: Allow
               Action: s3:PutObject
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub arn:aws:s3:::emails-from-sf-dev/*
         - Statement:
             - Effect: Allow
               Action: s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub arn:aws:s3:::emails-from-sf-dev/*
         - Statement:
             - Sid: readDeployedArtefact
               Effect: Allow
