@@ -89,6 +89,8 @@ Resources:
 
   ApiGatewayMethodGET:
     Type: "AWS::ApiGateway::Method"
+    DependsOn:
+      - IAMRoleS3ReadWrite
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceS3File
@@ -140,6 +142,8 @@ Resources:
 
   ApiGatewayMethodDELETE:
     Type: "AWS::ApiGateway::Method"
+    DependsOn:
+      - IAMRoleS3ReadWrite
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceS3File
