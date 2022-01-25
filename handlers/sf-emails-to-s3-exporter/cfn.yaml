@@ -14,9 +14,11 @@ Mappings:
     PROD:
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
+      ToLowerCase: prod
     DEV:
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
+      ToLowerCase: dev
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
@@ -68,17 +70,36 @@ Resources:
             - Effect: Allow
               Action: s3:GetObject
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
         - Statement:
             - Effect: Allow
               Action: s3:PutObject
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
         - Statement:
             - Effect: Allow
               Action: s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+        - Statement:
+            - Effect: Allow
+              Action: s3:ListObjectV2
+              Resource:
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
         - Statement:
             - Sid: readDeployedArtefact
               Effect: Allow
