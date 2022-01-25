@@ -25,10 +25,23 @@ Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
 
 Resources:
+  IAMRoleS3ReadWrite:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Sub APIGatewayS3ReadWrite-${Stage}
+      AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - !Sub "arn:aws:iam::${AWS::AccountId}:policy/S3ReadWrite"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+      Description: "Allows API Gateway to Read/Write/Delete from S3."
+
   ApiGatewayRestApi:
     Type: "AWS::ApiGateway::RestApi"
     Properties:
-      Name: !Sub $import-emails-from-s3-to-sf-${Stage}-api-gateway
+      Name: !Sub import-emails-from-s3-to-sf-${Stage}-api-gateway
       ApiKeySourceType: "HEADER"
       EndpointConfiguration:
         Types:
@@ -103,7 +116,7 @@ Resources:
           StatusCode: "500"
       Integration:
         CacheNamespace: !Ref ApiGatewayResourceS3File
-        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite"
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite-${Stage}"
         IntegrationHttpMethod: "GET"
         IntegrationResponses:
           - ResponseParameters:
@@ -154,7 +167,7 @@ Resources:
           StatusCode: "500"
       Integration:
         CacheNamespace: !Ref ApiGatewayResourceS3File
-        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite"
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite-${Stage}"
         IntegrationHttpMethod: "DELETE"
         IntegrationResponses:
           - ResponseParameters:
