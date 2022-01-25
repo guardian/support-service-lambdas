@@ -10,7 +10,7 @@ Parameters:
     Default: DEV
   StackName:
     Type: String
-    Default: sf-emails-to-s3-exporter
+    Default: emails-transporter-between-sf-and-s3
 
 Mappings:
   StageMap:
@@ -28,36 +28,36 @@ Resources:
   ApiGatewayRestApi:
     Type: "AWS::ApiGateway::RestApi"
     Properties:
-      Name: !Sub ${StackName}-${Stage}-api-gateway
+      Name: !Sub $import-emails-from-s3-to-sf-${Stage}-api-gateway
       ApiKeySourceType: "HEADER"
       EndpointConfiguration:
         Types:
           - "EDGE"
 
-  ApiGatewayResource:
+  ApiGatewayResourceS3Bucket:
     Type: "AWS::ApiGateway::Resource"
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       PathPart: "{bucketName}"
       ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
 
-  ApiGatewayResource2:
+  ApiGatewayResourceS3File:
     Type: "AWS::ApiGateway::Resource"
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       PathPart: "{caseNumber}"
-      ParentId: !Ref ApiGatewayResource
+      ParentId: !Ref ApiGatewayResourceS3Bucket
 
   ApiGatewayApiKey:
     Type: "AWS::ApiGateway::ApiKey"
     Properties:
       Enabled: true
-      Name: !Sub "sf-emails-to-s3-exporter-${Stage}-api-key"
+      Name: !Sub import-emails-from-s3-to-sf-${Stage}-api-key
 
   ApiGatewayStage:
     Type: "AWS::ApiGateway::Stage"
     Properties:
-      StageName: "DEV"
+      StageName: !Sub ${Stage}
       DeploymentId: !Ref ApiGatewayDeployment
       RestApiId: !Ref ApiGatewayRestApi
       CacheClusterEnabled: false
@@ -73,19 +73,12 @@ Resources:
           ThrottlingBurstLimit: 5000
           ThrottlingRateLimit: 10000
       TracingEnabled: false
-      Tags:
-        - Key: "App"
-          Value: "sf-emails-to-s3-exporter"
-        - Key: "Stack"
-          Value: "membership"
-        - Key: "Stage"
-          Value: "DEV"
 
-  ApiGatewayMethod:
+  ApiGatewayMethodGET:
     Type: "AWS::ApiGateway::Method"
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResource2
+      ResourceId: !Ref ApiGatewayResourceS3File
       HttpMethod: "GET"
       AuthorizationType: "NONE"
       ApiKeyRequired: true
@@ -109,7 +102,7 @@ Resources:
             "method.response.header.Timestamp": false
           StatusCode: "500"
       Integration:
-        CacheNamespace: !Ref ApiGatewayResource2
+        CacheNamespace: !Ref ApiGatewayResourceS3File
         Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite"
         IntegrationHttpMethod: "GET"
         IntegrationResponses:
@@ -132,11 +125,11 @@ Resources:
         Type: "AWS"
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
 
-  ApiGatewayMethod2:
+  ApiGatewayMethodDELETE:
     Type: "AWS::ApiGateway::Method"
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResource2
+      ResourceId: !Ref ApiGatewayResourceS3File
       HttpMethod: "DELETE"
       AuthorizationType: "NONE"
       ApiKeyRequired: true
@@ -160,7 +153,7 @@ Resources:
             "method.response.header.Timestamp": false
           StatusCode: "500"
       Integration:
-        CacheNamespace: !Ref ApiGatewayResource2
+        CacheNamespace: !Ref ApiGatewayResourceS3File
         Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite"
         IntegrationHttpMethod: "DELETE"
         IntegrationResponses:
@@ -186,8 +179,8 @@ Resources:
   ApiGatewayDeployment:
     Type: "AWS::ApiGateway::Deployment"
     DependsOn:
-      - ApiGatewayMethod
-      - ApiGatewayMethod2
+      - ApiGatewayMethodGET
+      - ApiGatewayMethodDELETE
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
 
@@ -196,7 +189,7 @@ Resources:
     DependsOn:
       - ApiGatewayStage
     Properties:
-      UsagePlanName: !Sub "sf-emails-to-s3-exporter-${Stage}-usage-plan"
+      UsagePlanName: !Sub import-emails-from-s3-to-sf-${Stage}-usage-plan
       ApiStages:
         - ApiId: !Ref ApiGatewayRestApi
           Stage: "DEV"
@@ -215,7 +208,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: Retrieves emails from Salesforce and saves as Json to S3
-      FunctionName: !Sub sf-emails-to-s3-exporter-${Stage}
+      FunctionName: !Sub export-emails-from-sf-to-s3-${Stage}
       Handler: com.gu.sf_emails_to_s3_exporter.Handler::handleRequest
       CodeUri:
         Bucket: support-service-lambdas-dist
