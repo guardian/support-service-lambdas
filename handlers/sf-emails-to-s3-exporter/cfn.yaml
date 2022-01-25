@@ -32,7 +32,21 @@ Resources:
     Properties:
       Path: "/"
       RoleName: !Sub APIGatewayS3ReadWrite-${Stage}
-      AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"s3:ListBucket\"},{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":[\"s3:GetObject\",\"s3:DeleteObject\"]}]}"
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource:
+            - !Sub
+          - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+          - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+        - Statement:
+          - Effect: Allow
+            Action: s3:DeleteObject
+            Resource:
+          - !Sub
+            - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+            - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
       MaxSessionDuration: 3600
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
