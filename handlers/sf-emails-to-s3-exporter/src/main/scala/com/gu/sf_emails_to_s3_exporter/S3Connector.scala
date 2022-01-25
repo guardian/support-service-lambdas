@@ -50,12 +50,14 @@ object S3Connector extends LazyLogging {
   }
 
   def fileAlreadyExistsInS3(fileName: String, bucketName: String): Either[CustomFailure, Boolean] = safely({
+    println("bucketName:"+bucketName)
     val filesInS3MatchingFileName = AwsS3.client.listObjects(
       ListObjectsRequest.builder
         .bucket(bucketName)
         .prefix(fileName)
         .build()
     ).contents.asScala.toList
+    println("filesInS3MatchingFileName:"+filesInS3MatchingFileName)
 
     filesInS3MatchingFileName
       .map(
