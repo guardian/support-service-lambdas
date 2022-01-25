@@ -13,8 +13,8 @@ object SFConnector extends LazyLogging {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
 
-  def getEmailsFromSfByQuery(sfAuthDetails: SfAuthDetails): Either[Error, EmailsFromSfResponse.Response] = {
-    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/${System.getenv("apiVersion")}/query/")
+  def getEmailsFromSfByQuery(sfAuthDetails: SfAuthDetails, sfApiVersion:String): Either[Error, EmailsFromSfResponse.Response] = {
+    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
       .param("q", GetEmailsQuery.query)
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .header("Sforce-Query-Options", "batchSize=200")

@@ -20,7 +20,7 @@ object Handler extends LazyLogging {
       config <- Config.fromEnvironment.toRight("Missing config value")
       authentication <- auth(config.sfConfig)
       sfAuthDetails <- decode[SfAuthDetails](authentication)
-      emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails)
+      emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails, config.sfConfig.apiVersion)
     } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
 
     emailsFromSF match {
