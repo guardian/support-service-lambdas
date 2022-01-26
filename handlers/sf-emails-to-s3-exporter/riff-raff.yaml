@@ -6,11 +6,11 @@ deployments:
 
   cfn:
     type: cloud-formation
-    app: emails-transporter-between-sf-and-s3
+    app: sf-emails-to-s3-exporter
     parameters:
       templatePath: cfn.yaml
 
-  emails-transporter-between-sf-and-s3:
+  sf-emails-to-s3-exporter:
     type: aws-lambda
     parameters:
       fileName: sf-emails-to-s3-exporter.jar
