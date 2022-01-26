@@ -44,7 +44,7 @@ Resources:
     Properties:
       ManagedPolicyName: !Sub "s3-emails-from-sf-${Stage}-get-delete"
       Path: "/"
-      PolicyDocument: |
+      PolicyDocument: !Sub |
         {
             "Version": "2012-10-17",
             "Statement": [
@@ -54,7 +54,7 @@ Resources:
                         "s3:GetObject",
                         "s3:DeleteObject"
                     ],
-                    "Resource": "arn:aws:s3:::emails-from-sf-dev/*"
+                    "Resource": "arn:aws:s3:::emails-from-sf-${Stage}/*"
                 }
             ]
         }
