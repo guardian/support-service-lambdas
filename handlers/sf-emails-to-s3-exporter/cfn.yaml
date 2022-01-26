@@ -31,14 +31,33 @@ Resources:
     Type: "AWS::IAM::Role"
     Properties:
       Path: "/"
-      RoleName: !Sub APIGatewayS3ReadWrite-${Stage}
+      RoleName: !Sub emails-to-sf-api-${Stage}-api-gateway-role
       AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
       MaxSessionDuration: 3600
       ManagedPolicyArns:
-        - !Sub "arn:aws:iam::${AWS::AccountId}:policy/S3ReadWrite"
-        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - !Ref IAMManagedPolicy
         - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
       Description: "Allows API Gateway to Read/Write/Delete from S3."
+
+  IAMManagedPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: "s3-emails-from-sf-get-delete"
+      Path: "/"
+      PolicyDocument: |
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:GetObject",
+                        "s3:DeleteObject"
+                    ],
+                    "Resource": "arn:aws:s3:::emails-from-sf-dev/*"
+                }
+            ]
+        }
 
   ApiGatewayRestApi:
     Type: "AWS::ApiGateway::RestApi"
@@ -120,7 +139,7 @@ Resources:
           StatusCode: "500"
       Integration:
         CacheNamespace: !Ref ApiGatewayResourceS3File
-        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite-${Stage}"
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/emails-to-sf-api-${Stage}-api-gateway-role"
         IntegrationHttpMethod: "GET"
         IntegrationResponses:
           - ResponseParameters:
@@ -173,7 +192,7 @@ Resources:
           StatusCode: "500"
       Integration:
         CacheNamespace: !Ref ApiGatewayResourceS3File
-        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/APIGatewayS3ReadWrite-${Stage}"
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/emails-to-sf-api-${Stage}-api-gateway-role"
         IntegrationHttpMethod: "DELETE"
         IntegrationResponses:
           - ResponseParameters:
