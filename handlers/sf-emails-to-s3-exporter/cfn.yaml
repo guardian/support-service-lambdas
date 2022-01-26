@@ -42,7 +42,7 @@ Resources:
   IAMManagedPolicy:
     Type: "AWS::IAM::ManagedPolicy"
     Properties:
-      ManagedPolicyName: "s3-emails-from-sf-get-delete"
+      ManagedPolicyName: !Sub "s3-emails-from-sf-${Stage}-get-delete"
       Path: "/"
       PolicyDocument: |
         {
