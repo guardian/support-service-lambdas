@@ -14,7 +14,7 @@ case class AutoCancelCallout(
   creditCardExpirationYear: String,
   invoiceId: String,
   currency: String,
-  sfContactId: String
+  sfContactId: String // NOTE: if this payload is changed, you MUST change all the notification "profiles" in zuora to match
 ) {
   def isAutoPay = autoPay == "true"
   def nonDirectDebit = paymentMethodType != "BankTransfer"
