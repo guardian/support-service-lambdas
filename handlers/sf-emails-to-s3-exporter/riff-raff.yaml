@@ -17,5 +17,5 @@ deployments:
       bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
-        - sf-emails-to-s3-exporter-
+        - export-emails-from-sf-to-s3-
     dependencies: [ cfn ]
