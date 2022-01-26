@@ -32,25 +32,13 @@ Resources:
     Properties:
       Path: "/"
       RoleName: !Sub APIGatewayS3ReadWrite-${Stage}
-      Policies:
-        - Statement:
-          - Effect: Allow
-            Action: s3:GetObject
-            Resource:
-            - !Sub
-          - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
-          - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
-        - Statement:
-          - Effect: Allow
-            Action: s3:DeleteObject
-            Resource:
-          - !Sub
-            - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
-            - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+      AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
       MaxSessionDuration: 3600
       ManagedPolicyArns:
+        - !Sub "arn:aws:iam::${AWS::AccountId}:policy/S3ReadWrite"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
         - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
-      Description: "Allows API Gateway to Read/Write/Delete to/from S3."
+      Description: "Allows API Gateway to Read/Write/Delete from S3."
 
   ApiGatewayRestApi:
     Type: "AWS::ApiGateway::RestApi"
