@@ -44,20 +44,9 @@ Resources:
     Properties:
       ManagedPolicyName: !Sub "s3-emails-from-sf-${Stage}-get-delete"
       Path: "/"
-      PolicyDocument: !Sub |
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Effect": "Allow",
-                    "Action": [
-                        "s3:GetObject",
-                        "s3:DeleteObject"
-                    ],
-                    "Resource": "arn:aws:s3:::emails-from-sf-${Stage}/*"
-                }
-            ]
-        }
+      PolicyDocument: !Sub
+          - "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Action\": [\"s3:GetObject\",\"s3:DeleteObject\"],\"Resource\": \"arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*\"}]}"
+          - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
 
   ApiGatewayRestApi:
     Type: "AWS::ApiGateway::RestApi"
