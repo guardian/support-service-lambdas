@@ -219,7 +219,7 @@ Resources:
       UsagePlanName: !Sub import-emails-from-s3-to-sf-${Stage}-usage-plan
       ApiStages:
         - ApiId: !Ref ApiGatewayRestApi
-          Stage: "DEV"
+          Stage: !Sub ${Stage}
 
   ApiGatewayUsagePlanKey:
     Type: "AWS::ApiGateway::UsagePlanKey"
