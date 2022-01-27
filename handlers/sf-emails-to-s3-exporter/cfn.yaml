@@ -8,25 +8,234 @@ Parameters:
       - PROD
       - DEV
     Default: DEV
+  StackName:
+    Type: String
+    Default: emails-transporter-between-sf-and-s3
 
 Mappings:
   StageMap:
     PROD:
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
+      ToLowerCase: prod
     DEV:
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
+      ToLowerCase: dev
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
 
 Resources:
+  IAMRoleS3ReadWrite:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Sub emails-to-sf-api-${Stage}-api-gateway-role
+      AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicy
+        - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+      Description: "Allows API Gateway to Read/Write/Delete from S3."
+
+  IAMManagedPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: !Sub "s3-emails-from-sf-${Stage}-get-delete"
+      Path: "/"
+      PolicyDocument: !Sub
+          - "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Action\": [\"s3:GetObject\",\"s3:DeleteObject\"],\"Resource\": \"arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*\"}]}"
+          - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+
+  ApiGatewayRestApi:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: !Sub import-emails-from-s3-to-sf-${Stage}-api-gateway
+      ApiKeySourceType: "HEADER"
+      EndpointConfiguration:
+        Types:
+          - "EDGE"
+
+  ApiGatewayResourceS3Bucket:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: "{bucketName}"
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+
+  ApiGatewayResourceS3File:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: "{caseNumber}"
+      ParentId: !Ref ApiGatewayResourceS3Bucket
+
+  ApiGatewayApiKey:
+    Type: "AWS::ApiGateway::ApiKey"
+    Properties:
+      Enabled: true
+      Name: !Sub import-emails-from-s3-to-sf-${Stage}-api-key
+
+  ApiGatewayStage:
+    Type: "AWS::ApiGateway::Stage"
+    Properties:
+      StageName: !Sub ${Stage}
+      DeploymentId: !Ref ApiGatewayDeployment
+      RestApiId: !Ref ApiGatewayRestApi
+      CacheClusterEnabled: false
+      MethodSettings:
+        - CacheDataEncrypted: false
+          CacheTtlInSeconds: 300
+          CachingEnabled: false
+          DataTraceEnabled: true
+          HttpMethod: "*"
+          LoggingLevel: "INFO"
+          MetricsEnabled: false
+          ResourcePath: "/*"
+          ThrottlingBurstLimit: 5000
+          ThrottlingRateLimit: 10000
+      TracingEnabled: false
+
+  ApiGatewayMethodGET:
+    Type: "AWS::ApiGateway::Method"
+    DependsOn:
+      - IAMRoleS3ReadWrite
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceS3File
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      ApiKeyRequired: true
+      RequestParameters:
+        "method.request.path.bucketName": true
+        "method.request.path.caseNumber": true
+      MethodResponses:
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "200"
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "400"
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "500"
+      Integration:
+        CacheNamespace: !Ref ApiGatewayResourceS3File
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/emails-to-sf-api-${Stage}-api-gateway-role"
+        IntegrationHttpMethod: "GET"
+        IntegrationResponses:
+          - ResponseParameters:
+              "method.response.header.Content-Length": "integration.response.header.Content-Length"
+              "method.response.header.Content-Type": "integration.response.header.Content-Type"
+              "method.response.header.Timestamp": "integration.response.header.Date"
+            ResponseTemplates: { }
+            SelectionPattern: "2\\d{2}"
+            StatusCode: "200"
+          - SelectionPattern: "4\\d{2}"
+            StatusCode: "400"
+          - SelectionPattern: "5\\d{2}"
+            StatusCode: "500"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        RequestParameters:
+          "integration.request.path.folder": "method.request.path.bucketName"
+          "integration.request.path.item": "method.request.path.caseNumber"
+        TimeoutInMillis: 29000
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
+
+  ApiGatewayMethodDELETE:
+    Type: "AWS::ApiGateway::Method"
+    DependsOn:
+      - IAMRoleS3ReadWrite
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceS3File
+      HttpMethod: "DELETE"
+      AuthorizationType: "NONE"
+      ApiKeyRequired: true
+      RequestParameters:
+        "method.request.path.bucketName": true
+        "method.request.path.caseNumber": true
+      MethodResponses:
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "200"
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "400"
+        - ResponseParameters:
+            "method.response.header.Content-Length": false
+            "method.response.header.Content-Type": false
+            "method.response.header.Timestamp": false
+          StatusCode: "500"
+      Integration:
+        CacheNamespace: !Ref ApiGatewayResourceS3File
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/emails-to-sf-api-${Stage}-api-gateway-role"
+        IntegrationHttpMethod: "DELETE"
+        IntegrationResponses:
+          - ResponseParameters:
+              "method.response.header.Content-Length": "integration.response.header.Content-Length"
+              "method.response.header.Content-Type": "integration.response.header.Content-Type"
+              "method.response.header.Timestamp": "integration.response.header.Date"
+            ResponseTemplates: { }
+            SelectionPattern: "2\\d{2}"
+            StatusCode: "200"
+          - SelectionPattern: "4\\d{2}"
+            StatusCode: "400"
+          - SelectionPattern: "5\\d{2}"
+            StatusCode: "500"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        RequestParameters:
+          "integration.request.path.folder": "method.request.path.bucketName"
+          "integration.request.path.item": "method.request.path.caseNumber"
+        TimeoutInMillis: 29000
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
+
+  ApiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - ApiGatewayMethodGET
+      - ApiGatewayMethodDELETE
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayUsagePlan:
+    Type: "AWS::ApiGateway::UsagePlan"
+    DependsOn:
+      - ApiGatewayStage
+    Properties:
+      UsagePlanName: !Sub import-emails-from-s3-to-sf-${Stage}-usage-plan
+      ApiStages:
+        - ApiId: !Ref ApiGatewayRestApi
+          Stage: !Sub ${Stage}
+
+  ApiGatewayUsagePlanKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    DependsOn:
+      - ApiGatewayUsagePlan
+      - ApiGatewayStage
+    Properties:
+      KeyId: !GetAtt ApiGatewayApiKey.APIKeyId
+      KeyType: "API_KEY"
+      UsagePlanId: !Ref ApiGatewayUsagePlan
+
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Description: Retrieves emails from Salesforce and saves as Json to S3
-      FunctionName: !Sub sf-emails-to-s3-exporter-${Stage}
+      FunctionName: !Sub export-emails-from-sf-to-s3-${Stage}
       Handler: com.gu.sf_emails_to_s3_exporter.Handler::handleRequest
       CodeUri:
         Bucket: support-service-lambdas-dist
@@ -68,17 +277,36 @@ Resources:
             - Effect: Allow
               Action: s3:GetObject
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
         - Statement:
             - Effect: Allow
               Action: s3:PutObject
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
         - Statement:
             - Effect: Allow
               Action: s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::emails-from-sf-${Stage}/*
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+        - Statement:
+            - Effect: Allow
+              Action: s3:ListObjectV2
+              Resource:
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+                - !Sub
+                  - "arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*"
+                  - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
         - Statement:
             - Sid: readDeployedArtefact
               Effect: Allow
