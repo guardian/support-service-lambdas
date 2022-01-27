@@ -7,7 +7,7 @@ import io.circe.Error
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-import scalaj.http.Http
+import scalaj.http.{Http, HttpOptions}
 
 object SFConnector extends LazyLogging {
 
@@ -16,6 +16,7 @@ object SFConnector extends LazyLogging {
   def getEmailsFromSfByQuery(sfAuthDetails: SfAuthDetails, sfApiVersion:String): Either[Error, EmailsFromSfResponse.Response] = {
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
       .param("q", GetEmailsQuery.query)
+      .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .header("Sforce-Query-Options", "batchSize=200")
       .method("GET")
@@ -51,6 +52,7 @@ object SFConnector extends LazyLogging {
   def getEmailsFromSfByRecordsetReference(sfAuthDetails: SfAuthDetails, nextRecordsURL: String): Either[Error, EmailsFromSfResponse.Response] = {
     val responseBody = Http(s"${sfAuthDetails.instance_url}" + nextRecordsURL)
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .option(HttpOptions.readTimeout(30000))
       .method("GET")
       .asString
       .body
@@ -80,9 +82,9 @@ object SFConnector extends LazyLogging {
     requestType: String
   ): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
 
-    val responseBody = Http(
-      s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
-    ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .option(HttpOptions.readTimeout(30000))
       .header("Content-Type", "application/json")
       .put(jsonBody)
       .method(requestType)
