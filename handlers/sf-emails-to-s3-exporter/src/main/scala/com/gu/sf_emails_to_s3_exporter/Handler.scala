@@ -36,6 +36,7 @@ object Handler extends LazyLogging {
   }
 
   def processEmails(sfAuthDetails: SfAuthDetails, emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Any = {
+    logger.info(s"Start processing ${emailsDataFromSF.records.size} emails...")
 
     val emailIdsSuccessfullySavedToS3 = getEmailIdsSuccessfullySavedToS3(emailsDataFromSF, bucketName)
 
@@ -52,6 +53,7 @@ object Handler extends LazyLogging {
       )
     }
 
+    logger.info("More emails to retrieve from Salesforce:" + !emailsDataFromSF.done)
     //process more emails if they exist
     if (!emailsDataFromSF.done) {
       processNextPageOfEmails(sfAuthDetails, emailsDataFromSF.nextRecordsUrl.get, bucketName)
