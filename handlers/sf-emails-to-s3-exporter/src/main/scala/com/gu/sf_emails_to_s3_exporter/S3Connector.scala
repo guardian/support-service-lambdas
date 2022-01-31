@@ -18,16 +18,15 @@ import scala.util.Try
 
 object S3Connector extends LazyLogging {
 
-  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, Option[String]] = {
+  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, String] = {
 
-    val fileExists = fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber, bucketName)
-    logger.info(s"${caseEmail.Parent.CaseNumber} already exists in S3: " + fileExists)
+    val fileExists = for {
+      exists <- fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber, bucketName)
+    } yield exists
 
     fileExists match {
 
-      case Left(ex) => {
-        Left(ex)
-      }
+      case Left(ex) => { Left(ex) }
 
       case Right(false) => {
         val json = generateJsonForS3FileIfFileDoesNotExist(Seq[EmailsFromSfResponse.Records](caseEmail), bucketName)
@@ -52,6 +51,7 @@ object S3Connector extends LazyLogging {
 
       }
     }
+
   }
 
   def fileAlreadyExistsInS3(fileName: String, bucketName: String): Either[CustomFailure, Boolean] = {
@@ -83,7 +83,7 @@ object S3Connector extends LazyLogging {
     } yield decodedEmails
   }
 
-  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String, emailId: String, bucketName: String): Either[CustomFailure, Option[String]] = {
+  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String, emailId: String, bucketName: String): Either[CustomFailure, String] = {
 
     val uploadResponse = for {
       putRequest <- generateS3PutRequest(bucketName, fileName)
@@ -95,7 +95,7 @@ object S3Connector extends LazyLogging {
       case Left(ex) => { Left(ex) }
       case Right(value) => {
         logger.info(s"$fileName successfully saved to S3")
-        Right(Some(emailId))
+        Right(emailId)
       }
     }
   }
