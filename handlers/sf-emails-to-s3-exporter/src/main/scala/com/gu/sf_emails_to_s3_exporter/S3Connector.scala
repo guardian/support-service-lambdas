@@ -48,7 +48,6 @@ object S3Connector extends LazyLogging {
           generateJsonForS3FileIfEmailDoesNotExist(emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()), caseEmail)
         })
         writeEmailsJsonToS3(caseEmail.Parent.CaseNumber, json, caseEmail.Id, bucketName)
-
       }
     }
 
