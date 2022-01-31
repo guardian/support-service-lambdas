@@ -24,6 +24,8 @@ object S3Connector extends LazyLogging {
       exists <- fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber, bucketName)
     } yield exists
 
+    logger.info(s"${caseEmail.Parent.CaseNumber} already exists in S3: " + fileExists)
+
     fileExists match {
 
       case Left(ex) => { Left(ex) }
@@ -39,9 +41,7 @@ object S3Connector extends LazyLogging {
         val emailAlreadyExistsInS3File = emailsInS3File
           .getOrElse(Seq[EmailsFromSfResponse.Records]())
           .exists(_.Composite_Key__c == caseEmail.Composite_Key__c)
-
-        logger.info(s" ${caseEmail.Composite_Key__c} already exists in file: ${emailAlreadyExistsInS3File} ")
-
+        
         val json = (if (emailAlreadyExistsInS3File) {
           generateJsonForS3FileIfEmailAlreadyExists(emailsInS3File.getOrElse(Seq[EmailsFromSfResponse.Records]()), caseEmail)
         } else {
