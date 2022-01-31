@@ -70,7 +70,6 @@ object Handler extends LazyLogging {
     } yield saveToS3Attempt
 
     saveToS3Attempts.collect { case Right(value) => value }
-
   }
 
   def processNextPageOfEmails(sfAuthDetails: SfAuthDetails, url: String, bucketName: String): Unit = {

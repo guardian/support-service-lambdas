@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.s3.model._
 
 import scala.io.Source
 import scala.jdk.CollectionConverters.CollectionHasAsScala
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object S3Connector extends LazyLogging {
 
@@ -93,8 +93,13 @@ object S3Connector extends LazyLogging {
     uploadResponse match {
       case Left(ex) => { Left(ex) }
       case Right(value) => {
-        logger.info(s"$fileName successfully saved to S3")
-        Right(emailId)
+        value match {
+          case Failure(ex) => { Left(CustomFailure.fromThrowable(ex)) }
+          case Success(success) => {
+            logger.info(s"$fileName successfully saved to S3")
+            Right(emailId)
+          }
+        }
       }
     }
   }
