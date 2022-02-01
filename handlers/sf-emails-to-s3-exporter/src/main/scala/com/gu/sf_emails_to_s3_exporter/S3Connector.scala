@@ -156,20 +156,6 @@ object S3Connector extends LazyLogging {
     )
   }
 
-  def updateFileContentsWithNewEmail(
-    emailsAlreadyInFile: Seq[EmailsFromSfResponse.Records],
-    newEmail: EmailsFromSfResponse.Records,
-    bucketName: String,
-    newEmailAlreadyExistsInFile: Boolean
-  ): Either[CustomFailure, String] =
-
-    writeEmailsJsonToS3(
-      newEmail.Parent.CaseNumber,
-      generateJsonForExistingFile(emailsAlreadyInFile, newEmail, newEmailAlreadyExistsInFile),
-      newEmail.Id,
-      bucketName
-    )
-
   def generateJsonForExistingFile(
     emailsAlreadyInFile: Seq[EmailsFromSfResponse.Records],
     newEmail: EmailsFromSfResponse.Records,
