@@ -121,7 +121,7 @@ object S3Connector extends LazyLogging {
     safely(
       AwsS3.client.getObject(
         GetObjectRequest.builder
-          .bucket(bucketName + "22")
+          .bucket(bucketName)
           .key(fileName)
           .build()
       )
@@ -156,23 +156,28 @@ object S3Connector extends LazyLogging {
     )
   }
 
-  def updateFileContentsWithNewEmail(emailsAlreadyInFile: Seq[EmailsFromSfResponse.Records],
-                                     newEmail: EmailsFromSfResponse.Records,
-                                     bucketName: String,
-                                     newEmailAlreadyExistsInFile: Boolean): Either[CustomFailure, String] =
+  def updateFileContentsWithNewEmail(
+    emailsAlreadyInFile: Seq[EmailsFromSfResponse.Records],
+    newEmail: EmailsFromSfResponse.Records,
+    bucketName: String,
+    newEmailAlreadyExistsInFile: Boolean
+  ): Either[CustomFailure, String] =
 
-      writeEmailsJsonToS3(newEmail.Parent.CaseNumber,
-                          generateJsonForExistingFile(emailsAlreadyInFile, newEmail, newEmailAlreadyExistsInFile),
-                          newEmail.Id,
-                          bucketName)
+    writeEmailsJsonToS3(
+      newEmail.Parent.CaseNumber,
+      generateJsonForExistingFile(emailsAlreadyInFile, newEmail, newEmailAlreadyExistsInFile),
+      newEmail.Id,
+      bucketName
+    )
 
-
-  def generateJsonForExistingFile(emailsAlreadyInFile: Seq[EmailsFromSfResponse.Records],
-                                  newEmail: EmailsFromSfResponse.Records,
-                                  newEmailAlreadyExistsInFile: Boolean): String = {
+  def generateJsonForExistingFile(
+    emailsAlreadyInFile: Seq[EmailsFromSfResponse.Records],
+    newEmail: EmailsFromSfResponse.Records,
+    newEmailAlreadyExistsInFile: Boolean
+  ): String = {
     logger.info(s"Generating json for ${newEmail.Composite_Key__c}... ")
 
-    if (newEmailAlreadyExistsInFile){
+    if (newEmailAlreadyExistsInFile) {
       (emailsAlreadyInFile.filter(_.Composite_Key__c != newEmail.Composite_Key__c) :+ newEmail).asJson.toString()
     } else {
       (emailsAlreadyInFile :+ newEmail).asJson.toString()
