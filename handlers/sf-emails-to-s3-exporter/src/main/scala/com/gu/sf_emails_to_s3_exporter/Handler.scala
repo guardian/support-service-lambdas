@@ -63,11 +63,13 @@ object Handler extends LazyLogging {
 
   def getEmailIdsSuccessfullySavedToS3(emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
 
-    emailsDataFromSF
-      .records
-      .map(email => saveEmailToS3(email, bucketName))
-      .collect { case Right(value) => value }
-      .flatten
+    val saveToS3Attempts = for {
+      saveToS3Attempt <- emailsDataFromSF
+        .records
+        .map(email => saveEmailToS3(email, bucketName))
+    } yield saveToS3Attempt
+
+    saveToS3Attempts.collect { case Right(value) => value }
   }
 
   def processNextPageOfEmails(sfAuthDetails: SfAuthDetails, url: String, bucketName: String): Unit = {
