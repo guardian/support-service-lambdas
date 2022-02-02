@@ -38,16 +38,25 @@ object Handler extends LazyLogging {
   def processEmails(sfAuthDetails: SfAuthDetails, emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Any = {
     logger.info(s"Start processing ${emailsDataFromSF.records.size} emails...")
 
-    val emailIdsSuccessfullySavedToS3 = getEmailIdsSuccessfullySavedToS3(emailsDataFromSF, bucketName)
+    val emailIdsSuccessfullySavedToS3 = saveEmailsToS3(emailsDataFromSF, bucketName)
 
     if (!emailIdsSuccessfullySavedToS3.isEmpty) {
       writebackSuccessesToSf(sfAuthDetails, emailIdsSuccessfullySavedToS3).map(
-        response => response.map(
-          individualEmailUpdateAttempt =>
-            if (individualEmailUpdateAttempt.success.get) {
-              logger.info("Successful write back to sf for record:" + individualEmailUpdateAttempt.id)
-            } else {
-              logger.info("Failed to write back to sf for record:" + individualEmailUpdateAttempt)
+
+        responseArray => responseArray.map(
+
+          responseArrayItem =>
+
+            responseArrayItem.success.getOrElse(None) match {
+              case true => {
+                logger.info(s"Successful write back to sf for record:${responseArrayItem.id}")
+              }
+              case false => {
+                logger.error(s"Failed to write back to sf for record:$responseArrayItem")
+              }
+              case none => {
+                logger.error(s"Failed write back Request. errorCode(${responseArrayItem.errorCode}), message: ${responseArrayItem.message}")
+              }
             }
         )
       )
@@ -61,7 +70,7 @@ object Handler extends LazyLogging {
 
   }
 
-  def getEmailIdsSuccessfullySavedToS3(emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
+  def saveEmailsToS3(emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
 
     val saveToS3Attempts = for {
       saveToS3Attempt <- emailsDataFromSF
