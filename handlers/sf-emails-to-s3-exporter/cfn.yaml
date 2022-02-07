@@ -276,6 +276,10 @@ Resources:
       Policies:
         - Statement:
             - Effect: Allow
+              Action: cloudwatch:PutMetricData
+              Resource: "*"
+        - Statement:
+            - Effect: Allow
               Action: s3:GetObject
               Resource:
                 - !Sub
