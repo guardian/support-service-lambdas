@@ -7,19 +7,18 @@ case class CustomFailure(message: String)
 object CustomFailure extends LazyLogging {
 
   def toMetric(eventName: String, message:String): CustomFailure = {
-    logger.error("CustomFailure:" + message)
+    logger.error(s"CustomFailure.toMetric message: $message | eventName: $eventName")
     Metrics.put(event = eventName)
     CustomFailure(message)
   }
 
   def fromThrowable(throwable: Throwable): CustomFailure = {
-    logger.error("CustomFailure:" + throwable.getMessage)
+    logger.error("CustomFailure.fromThrowable throwable.getMessage:" + throwable.getMessage)
     CustomFailure(throwable.getMessage)
   }
 
   def fromThrowableToMetric(throwable: Throwable, eventName: String): CustomFailure = {
-    logger.error("CustomFailure:" + throwable.getMessage)
-    println("putting metric with event name: "+eventName)
+    logger.error(s"CustomFailure.fromThrowableToMetric throwable.getMessage: ${throwable.getMessage} | eventName: $eventName")
     Metrics.put(event = eventName)
     CustomFailure(throwable.getMessage)
   }
