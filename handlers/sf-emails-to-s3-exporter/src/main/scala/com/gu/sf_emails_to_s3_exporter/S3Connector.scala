@@ -159,6 +159,7 @@ object S3Connector extends LazyLogging {
     newEmail: EmailsFromSfResponse.Records,
     newEmailAlreadyExistsInFile: Boolean
   ): String = {
+    logger.info(s"${newEmail.Composite_Key__c} already exists in File: $newEmailAlreadyExistsInFile")
     logger.info(s"Generating json for ${newEmail.Composite_Key__c}... ")
 
     if (newEmailAlreadyExistsInFile) {
