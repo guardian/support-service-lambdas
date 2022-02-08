@@ -5,9 +5,21 @@ import com.typesafe.scalalogging.LazyLogging
 case class CustomFailure(message: String)
 
 object CustomFailure extends LazyLogging {
+
+  def toMetric(eventName: String, message:String): CustomFailure = {
+    logger.error("CustomFailure:" + message)
+    Metrics.put(event = eventName)
+    CustomFailure(eventName)
+  }
+
   def fromThrowable(throwable: Throwable): CustomFailure = {
     logger.error("CustomFailure:" + throwable.getMessage)
-    Metrics.put(event = "failed_s3_write_file")
+    CustomFailure(throwable.getMessage)
+  }
+
+  def fromThrowableToMetric(throwable: Throwable, eventName: String): CustomFailure = {
+    logger.error("CustomFailure:" + throwable.getMessage)
+    Metrics.put(event = eventName)
     CustomFailure(throwable.getMessage)
   }
 
