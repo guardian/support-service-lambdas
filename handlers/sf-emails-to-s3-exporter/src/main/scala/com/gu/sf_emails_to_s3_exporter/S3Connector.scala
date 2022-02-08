@@ -97,7 +97,12 @@ object S3Connector extends LazyLogging {
       case Left(ex) => { Left(ex) }
       case Right(value) => {
         value match {
-          case Failure(ex) => { Left(CustomFailure.fromThrowable(ex)) }
+          case Failure(ex) => {
+            Left(CustomFailure.fromThrowableToMetric(
+              ex,
+              "failed_s3_write_file"
+            ))
+          }
           case Success(success) => {
             logger.info(s"$fileName successfully saved to S3")
             Right(emailId)
@@ -137,9 +142,9 @@ object S3Connector extends LazyLogging {
   def uploadFileToS3(putRequest: PutObjectRequest, requestBody: RequestBody): Either[CustomFailure, Try[PutObjectResponse]] = {
     logger.info(s"saving file (${putRequest.key()}) to S3... ")
 
-    safelyWithMetric({
+    safely(
       UploadToS3.putObject(putRequest, requestBody)
-    })("failed_s3_write_file")
+    )
   }
 
   def generateS3PutRequest(bucketName: String, fileName: String): Either[CustomFailure, PutObjectRequest] = {
