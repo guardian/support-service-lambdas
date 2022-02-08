@@ -359,7 +359,7 @@ Resources:
           Value: !Ref LambdaFunction
       EvaluationPeriods: 1
       MetricName: failed_writeback_to_sf
-      Namespace: AWS/Lambda
+      Namespace: s3-emails-from-sf
       Period: 3600
       Statistic: Sum
       Threshold: 1
@@ -382,7 +382,7 @@ Resources:
           Value: !Ref LambdaFunction
       EvaluationPeriods: 1
       MetricName: failed_s3_check_file_exists
-      Namespace: AWS/Lambda
+      Namespace: s3-emails-from-sf
       Period: 3600
       Statistic: Sum
       Threshold: 1
@@ -405,7 +405,7 @@ Resources:
           Value: !Ref LambdaFunction
       EvaluationPeriods: 1
       MetricName: failed_s3_get_file
-      Namespace: AWS/Lambda
+      Namespace: s3-emails-from-sf
       Period: 3600
       Statistic: Sum
       Threshold: 1
@@ -428,7 +428,7 @@ Resources:
           Value: !Ref LambdaFunction
       EvaluationPeriods: 1
       MetricName: failed_s3_write_file
-      Namespace: AWS/Lambda
+      Namespace: s3-emails-from-sf
       Period: 3600
       Statistic: Sum
       Threshold: 1
