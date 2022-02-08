@@ -364,3 +364,72 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+
+  failedS3CheckFileExistsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsDev
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: !Sub emails-from-sf-${Stage} failed when checking if a file exists in s3
+      AlarmDescription: >
+        Something went wrong when checking if a file exists in s3
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
+      EvaluationPeriods: 1
+      MetricName: failed_s3_check_file_exists
+      Namespace: AWS/Lambda
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+
+  failedS3GetFileAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsDev
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: !Sub emails-from-sf-${Stage} failed when getting file from s3
+      AlarmDescription: >
+        Something went wrong when getting file from s3
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
+      EvaluationPeriods: 1
+      MetricName: failed_s3_get_file
+      Namespace: AWS/Lambda
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+
+  failedS3WriteFileAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsDev
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: !Sub emails-from-sf-${Stage} failed when writing file to s3
+      AlarmDescription: >
+        Something went wrong when writing file to s3
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
+      EvaluationPeriods: 1
+      MetricName: failed_s3_write_file
+      Namespace: AWS/Lambda
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

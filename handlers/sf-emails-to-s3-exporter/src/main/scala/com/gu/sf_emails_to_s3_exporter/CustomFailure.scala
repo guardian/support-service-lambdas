@@ -7,7 +7,7 @@ case class CustomFailure(message: String)
 object CustomFailure extends LazyLogging {
   def fromThrowable(throwable: Throwable): CustomFailure = {
     logger.error("CustomFailure:" + throwable.getMessage)
-    Metrics.put(event = "failed_writeback_to_sf")
+    Metrics.put(event = "failed_s3_write_file")
     CustomFailure(throwable.getMessage)
   }
 
