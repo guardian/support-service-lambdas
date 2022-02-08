@@ -3,7 +3,7 @@ package com.gu.sf_emails_to_s3_exporter
 import java.nio.charset.StandardCharsets
 
 import com.gu.effects.{AwsS3, Key, UploadToS3}
-import com.gu.sf_emails_to_s3_exporter.Handler.safely
+import com.gu.sf_emails_to_s3_exporter.Handler.{safely, safelyWithMetric}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -59,7 +59,7 @@ object S3Connector extends LazyLogging {
   def fileAlreadyExistsInS3(fileName: String, bucketName: String): Either[CustomFailure, Boolean] = {
     logger.info(s"Checking if $fileName exists in S3...")
 
-    safely({
+    safelyWithMetric({
       val filesInS3MatchingFileName = AwsS3.client.listObjects(
         ListObjectsRequest.builder
           .bucket(bucketName)
@@ -71,7 +71,7 @@ object S3Connector extends LazyLogging {
         .map(
           objSummary => Key(objSummary.key)
         ).contains(Key(fileName))
-    })
+    })("failed_s3_check_file_exists")
   }
 
   def emailsInS3File(caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, Seq[EmailsFromSfResponse.Records]] = {
@@ -116,14 +116,14 @@ object S3Connector extends LazyLogging {
   def getS3File(fileName: String, bucketName: String): Either[CustomFailure, ResponseInputStream[GetObjectResponse]] = {
     logger.info(s"Getting $fileName from S3")
 
-    safely(
+    safelyWithMetric({
       AwsS3.client.getObject(
         GetObjectRequest.builder
           .bucket(bucketName)
           .key(fileName)
           .build()
       )
-    )
+    })("failed_s3_get_file")
   }
 
   def generatePutRequestBody(caseEmailsJson: String): Either[CustomFailure, RequestBody] = {
@@ -137,9 +137,9 @@ object S3Connector extends LazyLogging {
   def uploadFileToS3(putRequest: PutObjectRequest, requestBody: RequestBody): Either[CustomFailure, Try[PutObjectResponse]] = {
     logger.info(s"saving file (${putRequest.key()}) to S3... ")
 
-    safely(
+    safelyWithMetric({
       UploadToS3.putObject(putRequest, requestBody)
-    )
+    })("failed_s3_write_file")
   }
 
   def generateS3PutRequest(bucketName: String, fileName: String): Either[CustomFailure, PutObjectRequest] = {
