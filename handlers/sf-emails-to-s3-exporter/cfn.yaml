@@ -342,101 +342,77 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
 
-  failedS3CheckFileExistsAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
-    DependsOn:
-      - LambdaFunction
-    Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed when checking if a file exists in s3
-      AlarmDescription: >
-        Something went wrong when checking if a file exists in s3
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: Stage
-          Value: !Ref Stage
-      DatapointsToAlarm: 1
-      EvaluationPeriods: 1
-      MetricName: failed_s3_check_file_exists
-      Namespace: s3-emails-from-sf
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
+    failedS3CheckFileExistsAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: IsDev
+      DependsOn:
+        - LambdaFunction
+      Properties:
+        AlarmActions:
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        AlarmName: !Sub emails-from-sf-${Stage} failed when checking if a file exists in s3
+        AlarmDescription: >
+          Something went wrong when checking if a file exists in s3
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        Dimensions:
+          - Name: "Stage"
+            Value: !Ref Stage
+        DatapointsToAlarm: 1
+        EvaluationPeriods: 1
+        MetricName: failed_s3_check_file_exists
+        Namespace: s3-emails-from-sf
+        Period: 60
+        Statistic: Sum
+        Threshold: 1
+        TreatMissingData: notBreaching
 
-  failedS3GetFileAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
-    DependsOn:
-      - LambdaFunction
-    Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed when getting file from s3
-      AlarmDescription: >
-        Something went wrong when getting file from s3
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: Stage
-          Value: !Ref Stage
-      DatapointsToAlarm: 1
-      EvaluationPeriods: 1
-      MetricName: failed_s3_get_file
-      Namespace: s3-emails-from-sf
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
+    failedS3GetFileAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: IsDev
+      DependsOn:
+        - LambdaFunction
+      Properties:
+        AlarmActions:
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        AlarmName: !Sub emails-from-sf-${Stage} failed when getting file from s3
+        AlarmDescription: >
+          Something went wrong when getting file from s3
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        Dimensions:
+          - Name: "Stage"
+            Value: !Ref Stage
+        DatapointsToAlarm: 1
+        EvaluationPeriods: 1
+        MetricName: failed_s3_get_file
+        Namespace: s3-emails-from-sf
+        Period: 60
+        Statistic: Sum
+        Threshold: 1
+        TreatMissingData: notBreaching
 
-  failedS3WriteFileAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
-    DependsOn:
-      - LambdaFunction
-    Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed when writing file to s3
-      AlarmDescription: >
-        Something went wrong when writing file to s3
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: Stage
-          Value: !Ref Stage
-      DatapointsToAlarm: 1
-      EvaluationPeriods: 1
-      MetricName: failed_s3_write_file
-      Namespace: s3-emails-from-sf
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
-
-  failedWritebackToSFRequestAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
-    DependsOn:
-      - LambdaFunction
-    Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed request to sf
-      AlarmDescription: >
-        Something went wrong writing successes back to SF (Bad Request)
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: Stage
-          Value: !Ref Stage
-      DatapointsToAlarm: 1
-      EvaluationPeriods: 1
-      MetricName: failed_writeback_request_to_sf
-      Namespace: s3-emails-from-sf
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
+    failedWritebackToSFRequestAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: IsDev
+      DependsOn:
+        - LambdaFunction
+      Properties:
+        AlarmActions:
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        AlarmName: !Sub emails-from-sf-${Stage} failed request to sf
+        AlarmDescription: >
+          Something went wrong writing successes back to SF (Bad Request)
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        Dimensions:
+          - Name: "Stage"
+            Value: !Ref Stage
+        DatapointsToAlarm: 1
+        EvaluationPeriods: 1
+        MetricName: failed_writeback_request_to_sf
+        Namespace: s3-emails-from-sf
+        Period: 60
+        Statistic: Sum
+        Threshold: 1
+        TreatMissingData: notBreaching
 
 
   failedWritebackToSFRecordAlarm:
@@ -447,12 +423,12 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed writeback to sf record
+      AlarmName: !Sub test1 emails-from-sf-${Stage} failed writeback to sf record
       AlarmDescription: >
-        Something went wrong writing success back to SF record
+        testing alarm creation with cfn.yaml this alarm will be deleted.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: Stage
+        - Name: "Stage"
           Value: !Ref Stage
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
