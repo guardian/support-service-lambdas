@@ -319,7 +319,7 @@ Resources:
               Resource:
                 - arn:aws:s3::*:membership-dist/*
 
-  failedWritebackToSFRecordAlarm:
+  failedS3WriteFileAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsDev
     DependsOn:
@@ -327,16 +327,16 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub test1 emails-from-sf-${Stage} failed writeback to sf record
+      AlarmName: !Sub test-2 emails-from-sf-${Stage} failed when writing file to s3
       AlarmDescription: >
-        testing alarm creation with cfn.yaml this alarm will be deleted.
+        Testing with cfn.yaml. this alarm will be deleted
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: "Stage"
           Value: !Ref Stage
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: failed_writeback_to_sf_record
+      MetricName: failed_s3_write_file
       Namespace: s3-emails-from-sf
       Period: 60
       Statistic: Sum
