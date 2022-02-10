@@ -10,15 +10,14 @@ object Metrics extends LazyLogging{
 
   private val stage = sys.env.getOrElse("Stage", "DEV")
 
-  def put(event: String, value: Double = 1.0): Unit = {
+  def put(event: String): Unit = {
 
-    //currently fire and forget
     AwsCloudWatch.metricPut(
       MetricRequest(
         MetricNamespace("s3-emails-from-sf"),
         MetricName(event),
         Map(MetricDimensionName("Stage") -> MetricDimensionValue(stage)),
-        value
+        1.0
       )
     ) match {
       case Failure(exception) => {
