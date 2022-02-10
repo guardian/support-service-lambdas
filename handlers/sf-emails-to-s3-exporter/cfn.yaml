@@ -338,7 +338,7 @@ Resources:
       EvaluationPeriods: 1
       MetricName: failed_s3_write_file
       Namespace: s3-emails-from-sf
-      Period: 60
+      Period: 3600
       Statistic: Sum
       Threshold: 1
       TreatMissingData: ignore
@@ -362,7 +362,7 @@ Resources:
       EvaluationPeriods: 1
       MetricName: failed_s3_check_file_exists
       Namespace: s3-emails-from-sf
-      Period: 60
+      Period: 3600
       Statistic: Sum
       Threshold: 1
       TreatMissingData: ignore
@@ -386,7 +386,7 @@ Resources:
       EvaluationPeriods: 1
       MetricName: failed_s3_get_file
       Namespace: s3-emails-from-sf
-      Period: 60
+      Period: 3600
       Statistic: Sum
       Threshold: 1
       TreatMissingData: ignore
@@ -410,7 +410,7 @@ Resources:
       EvaluationPeriods: 1
       MetricName: failed_writeback_request_to_sf
       Namespace: s3-emails-from-sf
-      Period: 60
+      Period: 3600
       Statistic: Sum
       Threshold: 1
       TreatMissingData: ignore
@@ -434,7 +434,7 @@ Resources:
       EvaluationPeriods: 1
       MetricName: failed_writeback_to_sf_record
       Namespace: s3-emails-from-sf
-      Period: 60
+      Period: 3600
       Statistic: Sum
       Threshold: 1
       TreatMissingData: ignore
@@ -458,7 +458,7 @@ Resources:
       EvaluationPeriods: 1
       MetricName: Errors
       Namespace: AWS/Lambda
-      Period: 60
+      Period: 3600
       Statistic: Sum
       Threshold: 1
       TreatMissingData: ignore
