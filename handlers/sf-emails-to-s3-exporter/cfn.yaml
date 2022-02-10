@@ -327,7 +327,7 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed when writing file to s3
+      AlarmName: emails-from-sf failed when writing file to s3
       AlarmDescription: >
         !Sub Something went wrong when writing a file to S3 bucket emails-from-sf-${Stage}
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -351,7 +351,7 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed when checking if a file exists in s3
+      AlarmName: emails-from-sf failed when checking if a file exists in s3
       AlarmDescription: >
         !Sub Something went wrong when checking if a file exists in S3 bucket emails-from-sf-${Stage}
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -375,7 +375,7 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed when getting file from s3
+      AlarmName: emails-from-sf failed when getting file from s3
       AlarmDescription: >
         !Sub Something went wrong when getting file from S3 bucket emails-from-sf-${Stage}
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -399,7 +399,7 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed request to Salesforce
+      AlarmName: emails-from-sf failed request to Salesforce
       AlarmDescription: >
         !Sub Something went wrong writing successes back to Salesforce (Bad Request)
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -423,7 +423,7 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed writeback to Salesforce record
+      AlarmName: emails-from-sf failed writeback to Salesforce record
       AlarmDescription: >
         Something went wrong writing success back to Salesforce record
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -447,7 +447,7 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed to retrieve emails from Salesforce
+      AlarmName: emails-from-sf failed to retrieve emails from Salesforce
       AlarmDescription: >
         Something went wrong retrieving emails from Salesforce
       ComparisonOperator: GreaterThanOrEqualToThreshold
