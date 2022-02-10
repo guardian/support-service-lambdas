@@ -341,7 +341,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: ignore
 
   failedS3CheckFileExistsAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -365,7 +365,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: ignore
 
   failedS3GetFileAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -389,7 +389,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: ignore
 
   failedWritebackToSFRequestAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -413,7 +413,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: ignore
 
   failedWritebackToSFRecordAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -437,7 +437,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: ignore
 
   failedToRetrieveEmailsFromSalesforceAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -461,4 +461,4 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: ignore
