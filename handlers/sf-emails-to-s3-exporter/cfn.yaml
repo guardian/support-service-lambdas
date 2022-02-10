@@ -439,30 +439,6 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
 
-  failedToAuthenticateWithSFAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
-    DependsOn:
-      - LambdaFunction
-    Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub emails-from-sf-${Stage} failed to authenticate with Salesforce
-      AlarmDescription: >
-        Something went wrong authenticating with Salesforce
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: "Stage"
-          Value: !Ref Stage
-      DatapointsToAlarm: 1
-      EvaluationPeriods: 1
-      MetricName: failed_to_authenticate_with_sf
-      Namespace: s3-emails-from-sf
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
-
   failedToRetrieveEmailsFromSalesforceAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsDev
@@ -476,12 +452,12 @@ Resources:
         Something went wrong retrieving emails from Salesforce
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: "Stage"
-          Value: !Ref Stage
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: failed_to_retrieve_records_from_sf
-      Namespace: s3-emails-from-sf
+      MetricName: Errors
+      Namespace: AWS/Lambda
       Period: 60
       Statistic: Sum
       Threshold: 1
