@@ -321,7 +321,7 @@ Resources:
 
   failedS3WriteFileAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
@@ -345,7 +345,7 @@ Resources:
 
   failedS3CheckFileExistsAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
@@ -369,7 +369,7 @@ Resources:
 
   failedS3GetFileAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
@@ -393,7 +393,7 @@ Resources:
 
   failedWritebackToSFRequestAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
@@ -417,7 +417,7 @@ Resources:
 
   failedWritebackToSFRecordAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
@@ -441,7 +441,7 @@ Resources:
 
   failedToRetrieveEmailsFromSalesforceAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsDev
+    Condition: IsProd
     DependsOn:
       - LambdaFunction
     Properties:
