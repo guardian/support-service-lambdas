@@ -8,35 +8,35 @@ import org.scalatest.matchers.should.Matchers
 class AssertSameEmailsTest extends AnyFlatSpec with Matchers {
 
   it should "be all ok with the same email addresses" in {
-    val testData = List("hi@gu.com", "hi@gu.com").map(email => EmailAddress(email))
+    val testData = List("hi@theguardian.com", "hi@theguardian.com").map(email => EmailAddress(email))
 
-    GetVariations.forEmailAddress.apply(testData) should be(HasNoVariations(EmailAddress("hi@gu.com")))
+    GetVariations.forEmailAddress.apply(testData) should be(HasNoVariations(EmailAddress("hi@theguardian.com")))
 
   }
 
   it should "complain with different email addresses" in {
-    val testData = List("hi@gu.com", "lo@gu.com").map(email => EmailAddress(email))
+    val testData = List("hi@theguardian.com", "lo@theguardian.com").map(email => EmailAddress(email))
 
     GetVariations.forEmailAddress.apply(testData) should be(Differing(testData))
 
   }
 
   it should "complain with different email addresses even if +gnm is elsewhere" in {
-    val testData = List("hi@gu.com", "l+gnmo@gu.com").map(email => EmailAddress(email))
+    val testData = List("hi@theguardian.com", "l+gnmo@theguardian.com").map(email => EmailAddress(email))
 
     GetVariations.forEmailAddress.apply(testData) should be(Differing(testData))
 
   }
 
   it should "be all ok with the same email addresses only differ by gnm" in {
-    val testData = List("hi@gu.com", "hi+gnm@gu.com").map(email => EmailAddress(email))
+    val testData = List("hi@theguardian.com", "hi+gnm@theguardian.com").map(email => EmailAddress(email))
 
-    GetVariations.forEmailAddress.apply(testData) should be(HasAllowableVariations(EmailAddress("hi@gu.com")))
+    GetVariations.forEmailAddress.apply(testData) should be(HasAllowableVariations(EmailAddress("hi@theguardian.com")))
 
   }
 
   it should "be all ok with the same email addresses only differ by gnm with a number" in {
-    val testData = List("hi@gu.com", "hi+gnm1@gu.com").map(email => EmailAddress(email))
+    val testData = List("hi@theguardian.com", "hi+gnm1@theguardian.com").map(email => EmailAddress(email))
 
     GetVariations.forEmailAddress.apply(testData) should be(HasAllowableVariations(EmailAddress("hi@gu.com")))
 
