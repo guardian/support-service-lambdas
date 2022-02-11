@@ -38,7 +38,7 @@ class AssertSameEmailsTest extends AnyFlatSpec with Matchers {
   it should "be all ok with the same email addresses only differ by gnm with a number" in {
     val testData = List("hi@theguardian.com", "hi+gnm1@theguardian.com").map(email => EmailAddress(email))
 
-    GetVariations.forEmailAddress.apply(testData) should be(HasAllowableVariations(EmailAddress("hi@gu.com")))
+    GetVariations.forEmailAddress.apply(testData) should be(HasAllowableVariations(EmailAddress("hi@theguardian.com")))
 
   }
 
