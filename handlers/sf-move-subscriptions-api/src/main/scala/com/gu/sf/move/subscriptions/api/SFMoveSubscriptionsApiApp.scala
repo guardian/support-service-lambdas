@@ -9,8 +9,8 @@ import sttp.client3.{Identity, SttpBackend}
 import com.typesafe.scalalogging.LazyLogging
 import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
+import org.http4s.util.CaseInsensitiveString
 import io.circe.generic.auto._
-import org.typelevel.ci.CIString
 
 final case class MoveSubscriptionApiError(message: String)
 
@@ -34,7 +34,7 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
     Logger.httpRoutes(
       logHeaders = true,
       logBody = true,
-      redactHeadersWhen = { headerKey: CIString => headerKey.toString == "x-api-key" },
+      redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey.value == "x-api-key" },
       logAction = Some({ message: String => IO.delay(logger.info(message)) })
     )
   }
