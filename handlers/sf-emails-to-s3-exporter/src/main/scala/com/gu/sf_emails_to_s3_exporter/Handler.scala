@@ -1,11 +1,12 @@
 package com.gu.sf_emails_to_s3_exporter
 
-import com.gu.sf_emails_to_s3_exporter.S3Connector.{appendToFileInS3, fileExistsInS3, writeEmailsJsonToS3}
-import com.gu.sf_emails_to_s3_exporter.SFConnector.{SfAuthDetails, auth, getEmailsFromSfByQuery, getEmailsFromSfByRecordsetReference}
+import com.gu.sf_emails_to_s3_exporter.S3Connector.saveEmailToS3
+import com.gu.sf_emails_to_s3_exporter.SFConnector._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
-import io.circe.syntax._
+
+import scala.util.Try
 
 object Handler extends LazyLogging {
 
@@ -14,60 +15,78 @@ object Handler extends LazyLogging {
   }
 
   def handleRequest(): Unit = {
-    val sfAuth = for {
-      config <- SalesforceConfig.fromEnvironment.toRight("Missing config value")
-      sfAuthDetails <- decode[SfAuthDetails](auth(config))
-    } yield sfAuthDetails
 
-    sfAuth match {
+    val emailsFromSF = for {
+      config <- Config.fromEnvironment.toRight("Missing config value")
+      authentication <- auth(config.sfConfig)
+      sfAuthDetails <- decode[SfAuthDetails](authentication)
+      emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails, config.sfConfig.apiVersion)
+    } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
 
-      case Left(failure) => {
-        logger.error("Error occurred. details:" + failure)
-        throw new RuntimeException("Error occurred. details: " + failure)
+    emailsFromSF match {
+      case Left(ex) => {
+        logger.error("Error: " + ex)
+        throw new RuntimeException(ex.toString)
       }
-
-      case Right(successfulAuth) => {
-        getEmailsFromSfByQuery(successfulAuth).map(emailsForExportFromSf =>
-          saveEmailsToS3AndQueryForMoreIfTheyExist(successfulAuth, emailsForExportFromSf))
+      case Right(success) => {
+        logger.info("Processing complete")
       }
     }
+
   }
 
-  def saveEmailsToS3AndQueryForMoreIfTheyExist(sfAuthDetails: SfAuthDetails, response: EmailsFromSfResponse.Response): Unit = {
+  def processEmails(sfAuthDetails: SfAuthDetails, emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Any = {
+    logger.info(s"Start processing ${emailsDataFromSF.records.size} emails...")
 
-    val sfEmailsGroupedByCaseNumber = response
-      .records
-      .groupBy(_.Parent.CaseNumber)
+    val emailIdsSuccessfullySavedToS3 = saveEmailsToS3(emailsDataFromSF, bucketName)
 
-    createOrAppendToS3Files(sfEmailsGroupedByCaseNumber)
+    if (!emailIdsSuccessfullySavedToS3.isEmpty) {
+      writebackSuccessesToSf(sfAuthDetails, emailIdsSuccessfullySavedToS3).map(
 
-    if (response.done) logger.info("Batch Complete")
-    else
-      getEmailsFromSfByRecordsetReference(sfAuthDetails, response.nextRecordsUrl.get)
-        .map(nextPageEmails => saveEmailsToS3AndQueryForMoreIfTheyExist(sfAuthDetails, nextPageEmails))
-  }
+        responseArray => responseArray.map(
 
-  def createOrAppendToS3Files(sfEmailsByCaseNumber: Map[String, Seq[EmailsFromSfResponse.Records]]): Unit = {
+          responseArrayItem =>
 
-    sfEmailsByCaseNumber.foreach {
-      case (caseNumber, caseRecords) =>
-
-        fileExistsInS3(caseNumber) match {
-
-          case true => {
-            appendToFileInS3(
-              caseNumber,
-              caseRecords
-            )
-          }
-
-          case false => {
-            writeEmailsJsonToS3(
-              caseNumber,
-              caseRecords.asJson.toString()
-            )
-          }
-        }
+            responseArrayItem.success.getOrElse(None) match {
+              case true => {
+                logger.info(s"Successful write back to sf for record:${responseArrayItem.id}")
+              }
+              case false => {
+                logger.error(s"Failed to write back to sf for record:$responseArrayItem")
+              }
+              case none => {
+                logger.error(s"Failed write back Request. errorCode(${responseArrayItem.errorCode}), message: ${responseArrayItem.message}")
+              }
+            }
+        )
+      )
     }
+
+    logger.info("More emails to retrieve from Salesforce:" + !emailsDataFromSF.done)
+    //process more emails if they exist
+    if (!emailsDataFromSF.done) {
+      processNextPageOfEmails(sfAuthDetails, emailsDataFromSF.nextRecordsUrl.get, bucketName)
+    }
+
   }
+
+  def saveEmailsToS3(emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
+
+    val saveToS3Attempts = for {
+      saveToS3Attempt <- emailsDataFromSF
+        .records
+        .map(email => saveEmailToS3(email, bucketName))
+    } yield saveToS3Attempt
+
+    saveToS3Attempts.collect { case Right(value) => value }
+  }
+
+  def processNextPageOfEmails(sfAuthDetails: SfAuthDetails, url: String, bucketName: String): Unit = {
+    for {
+      nextBatchOfEmails <- getEmailsFromSfByRecordsetReference(sfAuthDetails, url)
+    } yield processEmails(sfAuthDetails, nextBatchOfEmails, bucketName)
+  }
+
+  def safely[A](doSomething: => A): Either[CustomFailure, A] =
+    Try(doSomething).toEither.left.map(CustomFailure.fromThrowable)
 }

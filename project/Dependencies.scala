@@ -9,8 +9,8 @@ import sbtassembly.PathList
 object Dependencies {
   val awsSdkVersion = "2.17.103"
   val circeVersion = "0.13.0"
-  val sttpVersion = "3.3.18"
-  val http4sVersion = "0.21.31"
+  val sttpVersion = "3.5.0"
+  val http4sVersion = "0.21.32"
   val catsVersion = "2.7.0"
   val catsEffectVersion = "2.5.4"
 
@@ -68,11 +68,11 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.0.1"
-  val stripe = "com.stripe" % "stripe-java" % "20.94.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.100.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.7.0" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.10" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.11" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.15.4" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
 
@@ -84,7 +84,7 @@ object Dependencies {
    * These dependencies should be removed as soon as the direct dependency they are consumed
    * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
    */
-  val nettyCodec = "io.netty" % "netty-codec" % "4.1.72.Final"
+  val nettyCodec = "io.netty" % "netty-codec" % "4.1.74.Final"
   /*
    * End of vulnerability fixes
    * ===============================================================================================
