@@ -52,10 +52,16 @@ object Handler extends LazyLogging {
                 logger.info(s"Successful write back to sf for record:${responseArrayItem.id}")
               }
               case false => {
-                logger.error(s"Failed to write back to sf for record:$responseArrayItem")
+                CustomFailure.toMetric(
+                  "failed_writeback_to_sf_record",
+                  s"Failed to write back to sf for record:$responseArrayItem"
+                )
               }
               case none => {
-                logger.error(s"Failed write back Request. errorCode(${responseArrayItem.errorCode}), message: ${responseArrayItem.message}")
+                CustomFailure.toMetric(
+                  "failed_writeback_request_to_sf",
+                  s"Failed write back Request. errorCode(${responseArrayItem.errorCode}), message: ${responseArrayItem.message}"
+                )
               }
             }
         )
@@ -89,4 +95,7 @@ object Handler extends LazyLogging {
 
   def safely[A](doSomething: => A): Either[CustomFailure, A] =
     Try(doSomething).toEither.left.map(CustomFailure.fromThrowable)
+
+  def safelyWithMetric[A](doSomething: => A)(eventName:String): Either[CustomFailure, A] =
+    Try(doSomething).toEither.left.map(CustomFailure.fromThrowableToMetric(_, eventName))
 }

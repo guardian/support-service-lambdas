@@ -25,6 +25,7 @@ Mappings:
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
+  IsDev: !Equals [ !Ref Stage, DEV ]
 
 Resources:
   IAMRoleS3ReadWrite:
@@ -275,6 +276,10 @@ Resources:
       Policies:
         - Statement:
             - Effect: Allow
+              Action: cloudwatch:PutMetricData
+              Resource: "*"
+        - Statement:
+            - Effect: Allow
               Action: s3:GetObject
               Resource:
                 - !Sub
@@ -313,3 +318,147 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+
+  failedS3WriteFileAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: emails-from-sf failed when writing file to s3
+      AlarmDescription: >
+        !Sub Something went wrong when writing a file to S3 bucket emails-from-sf-${Stage}
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: "Stage"
+          Value: !Ref Stage
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: failed_s3_write_file
+      Namespace: s3-emails-from-sf
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: ignore
+
+  failedS3CheckFileExistsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: emails-from-sf failed when checking if a file exists in s3
+      AlarmDescription: >
+        !Sub Something went wrong when checking if a file exists in S3 bucket emails-from-sf-${Stage}
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: "Stage"
+          Value: !Ref Stage
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: failed_s3_check_file_exists
+      Namespace: s3-emails-from-sf
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: ignore
+
+  failedS3GetFileAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: emails-from-sf failed when getting file from s3
+      AlarmDescription: >
+        !Sub Something went wrong when getting file from S3 bucket emails-from-sf-${Stage}
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: "Stage"
+          Value: !Ref Stage
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: failed_s3_get_file
+      Namespace: s3-emails-from-sf
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: ignore
+
+  failedWritebackToSFRequestAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: emails-from-sf failed request to Salesforce
+      AlarmDescription: >
+        !Sub Something went wrong writing successes back to Salesforce (Bad Request)
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: "Stage"
+          Value: !Ref Stage
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: failed_writeback_request_to_sf
+      Namespace: s3-emails-from-sf
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: ignore
+
+  failedWritebackToSFRecordAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: emails-from-sf failed writeback to Salesforce record
+      AlarmDescription: >
+        Something went wrong writing success back to Salesforce record
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: "Stage"
+          Value: !Ref Stage
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: failed_writeback_to_sf_record
+      Namespace: s3-emails-from-sf
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: ignore
+
+  failedToRetrieveEmailsFromSalesforceAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: emails-from-sf failed to retrieve emails from Salesforce
+      AlarmDescription: >
+        Something went wrong retrieving emails from Salesforce
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: ignore
