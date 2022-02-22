@@ -1,11 +1,10 @@
 package com.gu.autoCancel
 
 import java.time.LocalDate
-
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
-import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
+import com.gu.util.apigateway.ApiGatewayResponse.{internalServerError, noActionRequired}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -30,9 +29,10 @@ object AutoCancelDataCollectionFilter extends Logging {
         .withLogging("getAccountSubscriptions")
       subsToCancel <- filterNotActiveSubscriptions(subsOnAccount, subsOnInvoice).withLogging("filterNotActiveSubscriptions")
       cancellationDate <- getCancellationDateFromInvoice(invoiceId, accountSummary, now).withLogging("getCancellationDateFromInvoice")
+      invoiceAmount <- getInvoiceBalance(invoiceId, accountSummary).withLogging("getInvoiceBalance")
     } yield subsToCancel
       .map { subToCancel =>
-        AutoCancelRequest(accountId, subToCancel, cancellationDate)
+        AutoCancelRequest(accountId, subToCancel, cancellationDate, autoCancelCallout.invoiceId, invoiceAmount)
       }
   }
 
@@ -51,6 +51,20 @@ object AutoCancelDataCollectionFilter extends Logging {
           ContinueProcessing(inv.dueDate)
       }
   }
+
+  def getInvoiceBalance(invoiceId: String, accountSummary: AccountSummary): ApiGatewayOp[BigDecimal] =
+    accountSummary.invoices
+      .find(inv => {
+        logger.info(s"found callout invoice in accountSummary: $inv")
+        inv.id == invoiceId
+      }) match {
+        case None =>
+          logger.error(s"Failed to get invoice balance: invoiceId: $invoiceId")
+          ReturnWithResponse(internalServerError("Invoice not found in account!"))
+        case Some(inv) =>
+          logger.info(s"Found invoice balance: ${inv.balance}. Invoice: $inv")
+          ContinueProcessing(inv.balance)
+      }
 
   def invoiceOverdue(invoice: Invoice, dateToday: LocalDate): Boolean = {
     /**

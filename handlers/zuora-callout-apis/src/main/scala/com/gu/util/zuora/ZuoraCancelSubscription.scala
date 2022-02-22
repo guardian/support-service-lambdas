@@ -1,11 +1,11 @@
 package com.gu.util.zuora
 
-import java.time.LocalDate
-
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.typesafe.scalalogging.LazyLogging
-import play.api.libs.json.{JsSuccess, Json, Reads, Writes}
+import play.api.libs.json.{JsNull, JsValue, Json, Writes}
+
+import java.time.LocalDate
 
 object ZuoraCancelSubscription extends LazyLogging {
 
@@ -20,21 +20,18 @@ object ZuoraCancelSubscription extends LazyLogging {
     )
   }
 
-  implicit val unitReads: Reads[Unit] =
-    Reads(_ => JsSuccess(()))
-
   private def toBodyAndPath(subscription: SubscriptionNumber, cancellationDate: LocalDate) =
     (SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.value}/cancel")
 
-  def apply(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[Unit] = {
+  def apply(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[JsValue] = {
     val (body, path) = toBodyAndPath(subscription, cancellationDate)
-    requests.put(body, path)
+    requests.put[SubscriptionCancellation, JsValue](body, path)
   }
 
-  def dryRun(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[Unit] = {
+  def dryRun(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[JsValue] = {
     val (body, path) = toBodyAndPath(subscription, cancellationDate)
     val msg = s"DryRun for ZuoraCancelSubscription: body=$body, path=$path"
     logger.info(msg)
-    ClientSuccess(())
+    ClientSuccess(JsNull)
   }
 }
