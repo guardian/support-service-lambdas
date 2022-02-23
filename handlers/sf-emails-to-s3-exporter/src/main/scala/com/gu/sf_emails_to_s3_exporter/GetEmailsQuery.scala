@@ -31,9 +31,9 @@ object GetEmailsQuery {
        |WHERE
        | export_Status__c in ('Ready for export to s3')
        |ORDER BY
-       | ParentId
+       | Createddate
        |LIMIT
-       | 1000
+       | 2000
     """.stripMargin
   }
 }
