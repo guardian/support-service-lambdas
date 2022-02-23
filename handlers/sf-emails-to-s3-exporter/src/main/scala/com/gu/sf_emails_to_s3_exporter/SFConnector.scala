@@ -24,7 +24,7 @@ object SFConnector extends LazyLogging {
       .method("GET")
       .asString
       .body
-
+    logger.info(s"responseBody:$responseBody")
     decode[EmailsFromSfResponse.Response](responseBody)
   }
 
