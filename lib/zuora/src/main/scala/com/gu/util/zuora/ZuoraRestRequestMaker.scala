@@ -10,12 +10,9 @@ import play.api.libs.json._
 
 object ZuoraRestRequestMaker extends LazyLogging {
 
-  private val zuoraApiMinorVersion = "315.0"
-
   def apply(response: Request => Response, config: ZuoraRestConfig): RestRequestMaker.Requests = {
     new RestRequestMaker.Requests(
       headers = Map(
-        "zuora-version" -> zuoraApiMinorVersion,
         "apiSecretAccessKey" -> config.password,
         "apiAccessKeyId" -> config.username
       ),

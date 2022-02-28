@@ -15,8 +15,7 @@ object ZuoraCancelSubscription extends LazyLogging {
     def writes(subscriptionCancellation: SubscriptionCancellation) = Json.obj(
       "cancellationEffectiveDate" -> subscriptionCancellation.cancellationEffectiveDate,
       "cancellationPolicy" -> "SpecificDate",
-      "runBilling" -> true,
-      "collect" -> false
+      "invoiceCollect" -> false
     )
   }
 
