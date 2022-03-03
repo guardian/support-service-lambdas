@@ -23,8 +23,6 @@ import scala.util.Try
 
 object AutoCancelHandler extends App with Logging {
 
-  private val zuoraApiMinorVersion = "315.0"
-
   def operationForEffects(
     stage: Stage,
     fetchString: StringFromS3,
@@ -36,7 +34,7 @@ object AutoCancelHandler extends App with Logging {
     for {
       zuoraRestConfig <- loadConfigModule[ZuoraRestConfig]
         .toApiGatewayOp("load zuora config")
-        .map(_.copy(apiMinorVersion = Some(zuoraApiMinorVersion)))
+        .map(_.copy(apiMinorVersion = Some("315.0")))
     } yield {
       val zuoraRequest = ZuoraRestRequestMaker(response, zuoraRestConfig)
 
