@@ -44,6 +44,7 @@ object RestRequestMaker extends LazyLogging {
 
   trait RequestsPUT {
     def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP]
+    def put[REQ: Writes, RESP: Reads](req: REQ, path: String, apiVersionHeader: (String, String)): ClientFailableOp[RESP]
   }
 
   sealed trait IsCheckNeeded
@@ -117,14 +118,20 @@ object RestRequestMaker extends LazyLogging {
       } yield JsonResponse(bodyAsJson)
     }
 
-    def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP] = {
+    private def put[REQ: Writes, RESP: Reads](req: REQ, path: String, putHeaders: Map[String, String]): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
       for {
-        bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.put(body)), getResponse).map(Json.parse)
+        bodyAsJson <- sendRequest(buildRequest(putHeaders, baseUrl + path, _.put(body)), getResponse).map(Json.parse)
         _ <- jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
     }
+
+    def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP] =
+      put(req, path, headers)
+
+    def put[REQ: Writes, RESP: Reads](req: REQ, path: String, apiVersionHeader: (String, String)): ClientFailableOp[RESP] =
+      put(req, path, headers + apiVersionHeader)
 
     def post[REQ: Writes, RESP: Reads](req: REQ, path: String, skipCheck: IsCheckNeeded = WithCheck): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
