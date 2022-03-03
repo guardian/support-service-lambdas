@@ -44,7 +44,7 @@ object RestRequestMaker extends LazyLogging {
 
   trait RequestsPUT {
     def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP]
-    def put[REQ: Writes, RESP: Reads](req: REQ, path: String, apiVersion: String): ClientFailableOp[RESP]
+    def put[REQ: Writes, RESP: Reads](req: REQ, path: String, apiVersionHeader: (String, String)): ClientFailableOp[RESP]
   }
 
   sealed trait IsCheckNeeded
@@ -130,8 +130,8 @@ object RestRequestMaker extends LazyLogging {
     def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP] =
       put(req, path, headers)
 
-    def put[REQ: Writes, RESP: Reads](req: REQ, path: String, apiVersion: String): ClientFailableOp[RESP] =
-      put(req, path, headers + ("zuora-version" -> apiVersion))
+    def put[REQ: Writes, RESP: Reads](req: REQ, path: String, apiVersionHeader: (String, String)): ClientFailableOp[RESP] =
+      put(req, path, headers + apiVersionHeader)
 
     def post[REQ: Writes, RESP: Reads](req: REQ, path: String, skipCheck: IsCheckNeeded = WithCheck): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
