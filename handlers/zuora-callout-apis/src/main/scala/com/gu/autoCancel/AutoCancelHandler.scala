@@ -32,9 +32,7 @@ object AutoCancelHandler extends App with Logging {
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
     for {
-      zuoraRestConfig <- loadConfigModule[ZuoraRestConfig]
-        .toApiGatewayOp("load zuora config")
-        .map(_.copy(apiMinorVersion = Some("315.0")))
+      zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
     } yield {
       val zuoraRequest = ZuoraRestRequestMaker(response, zuoraRestConfig)
 
