@@ -204,10 +204,9 @@ Resources:
         TimeoutInMillis: 29000
         Type: "AWS"
         Uri:
-          - !Sub
+          !Sub
             - "arn:aws:apigateway:${AWS::Region}:emails-from-sf-${lowerCaseStage}.s3:path/?delete"
-            - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
-
+            - lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ]
   ApiGatewayDeployment:
     Type: "AWS::ApiGateway::Deployment"
     DependsOn:
