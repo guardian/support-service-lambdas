@@ -183,7 +183,7 @@ Resources:
           StatusCode: "500"
       Integration:
         CacheNamespace: !Ref ApiGatewayResourceS3File
-        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/emails-to-sf-api-${ApiGatewayStage}-api-gateway-role"
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/emails-to-sf-api-${Stage}-api-gateway-role"
         IntegrationHttpMethod: "POST"
         IntegrationResponses:
           - ResponseParameters:
