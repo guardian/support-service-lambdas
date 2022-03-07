@@ -157,7 +157,7 @@ Resources:
       - IAMRoleS3ReadWrite
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResourceS3File
+      ResourceId: !Ref ApiGatewayResourceS3Bucket
       HttpMethod: "POST"
       AuthorizationType: "NONE"
       ApiKeyRequired: true
