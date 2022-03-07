@@ -32,6 +32,6 @@ object ZuoraCancelSubscription extends LazyLogging {
     val (body, path) = toBodyAndPath(subscription, cancellationDate)
     val msg = s"DryRun for ZuoraCancelSubscription: body=$body, path=$path"
     logger.info(msg)
-    ClientSuccess(JsNull)
+    ClientSuccess(Json.obj("invoiceId" -> "balancingInvoiceId"))
   }
 }

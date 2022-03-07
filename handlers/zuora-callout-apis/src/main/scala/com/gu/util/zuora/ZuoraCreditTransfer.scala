@@ -18,7 +18,7 @@ object ZuoraCreditTransfer extends LazyLogging {
     def writes(transfer: CreditTransfer) = Json.obj(
       "sourceTransactionId" -> transfer.invoiceId,
       "amount" -> transfer.amount,
-      "type" -> {if (transfer.increase) "Increase" else "Decrease"},
+      "type" -> { if (transfer.increase) "Increase" else "Decrease" },
       "comment" -> transfer.comment
     )
   }
