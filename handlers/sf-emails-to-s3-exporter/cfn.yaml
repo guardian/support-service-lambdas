@@ -193,10 +193,10 @@ Resources:
             ResponseTemplates: { }
             SelectionPattern: "2\\d{2}"
             StatusCode: "200"
-            - SelectionPattern: "4\\d{2}"
-              StatusCode: "400"
-            - SelectionPattern: "5\\d{2}"
-              StatusCode: "500"
+          - SelectionPattern: "4\\d{2}"
+            StatusCode: "400"
+          - SelectionPattern: "5\\d{2}"
+            StatusCode: "500"
         PassthroughBehavior: "WHEN_NO_MATCH"
         RequestParameters:
           "integration.request.header.x-amz-checksum-sha1": "method.request.header.x-amz-checksum-sha1"
