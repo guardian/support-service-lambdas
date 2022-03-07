@@ -212,7 +212,7 @@ Resources:
     Type: "AWS::ApiGateway::Deployment"
     DependsOn:
       - ApiGatewayMethodGET
-      - ApiGatewayMethodDELETE
+      - ApiGatewayMethodPOST
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
 
