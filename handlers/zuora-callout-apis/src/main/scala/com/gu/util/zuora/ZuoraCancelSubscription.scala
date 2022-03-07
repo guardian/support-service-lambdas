@@ -9,6 +9,8 @@ import play.api.libs.json.{JsSuccess, Json, Reads, Writes}
 
 object ZuoraCancelSubscription extends LazyLogging {
 
+  private val zuoraApiMinorVersion = "315.0"
+
   case class SubscriptionCancellation(cancellationEffectiveDate: LocalDate)
 
   implicit val subscriptionCancellationWrites = new Writes[SubscriptionCancellation] {
@@ -28,7 +30,7 @@ object ZuoraCancelSubscription extends LazyLogging {
 
   def apply(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[Unit] = {
     val (body, path) = toBodyAndPath(subscription, cancellationDate)
-    requests.put(body, path)
+    requests.put(body, path, "zuora-version" -> zuoraApiMinorVersion)
   }
 
   def dryRun(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[Unit] = {
