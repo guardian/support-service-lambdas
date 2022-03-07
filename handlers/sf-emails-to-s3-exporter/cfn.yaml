@@ -190,13 +190,13 @@ Resources:
               "method.response.header.Content-Length": "integration.response.header.Content-Length"
               "method.response.header.Content-Type": "integration.response.header.Content-Type"
               "method.response.header.Timestamp": "integration.response.header.Date"
-              ResponseTemplates: { }
-              SelectionPattern: "2\\d{2}"
-              StatusCode: "200"
-              - SelectionPattern: "4\\d{2}"
-                StatusCode: "400"
-              - SelectionPattern: "5\\d{2}"
-                StatusCode: "500"
+            ResponseTemplates: { }
+            SelectionPattern: "2\\d{2}"
+            StatusCode: "200"
+            - SelectionPattern: "4\\d{2}"
+              StatusCode: "400"
+            - SelectionPattern: "5\\d{2}"
+              StatusCode: "500"
         PassthroughBehavior: "WHEN_NO_MATCH"
         RequestParameters:
           "integration.request.header.x-amz-checksum-sha1": "method.request.header.x-amz-checksum-sha1"
