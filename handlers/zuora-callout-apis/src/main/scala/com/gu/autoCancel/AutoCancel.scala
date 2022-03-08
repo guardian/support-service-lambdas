@@ -5,9 +5,7 @@ import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, NotFound}
 import com.gu.util.zuora._
-import play.api.libs.json.{JsDefined, JsString, JsValue}
 
 import java.time.LocalDate
 
@@ -30,12 +28,6 @@ object AutoCancel extends Logging {
     responses.head
   }
 
-  private def findBalancingInvoiceId(cancelSubscriptionResponse: JsValue): ClientFailableOp[String] =
-    cancelSubscriptionResponse \ "invoiceId" match {
-      case JsDefined(JsString(value)) => ClientSuccess(value)
-      case _ => NotFound(s"Subscription cancellation response '$cancelSubscriptionResponse' doesn't contain an invoice ID")
-    }
-
   /*
    * This process applies at the subscription level.  It will potentially run multiple times per invoice.
    * The cancellation call generates a balancing invoice that should be negative and the same amount
@@ -53,8 +45,7 @@ object AutoCancel extends Logging {
     val zuoraOp = for {
       _ <- zuoraUpdateCancellationReasonF(subToCancel).withLogging("updateCancellationReason")
       cancellationResponse <- zuoraCancelSubscriptionF(subToCancel, cancellationDate).withLogging("cancelSubscription")
-      balancingInvoiceId <- findBalancingInvoiceId(cancellationResponse)
-      _ <- zuoraTransferToCreditBalanceF(balancingInvoiceId, invoiceAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
+      _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, invoiceAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
       _ <- zuoraApplyCreditBalanceF(invoiceId, invoiceAmount, "Auto-cancellation").withLogging("applyCreditBalance")
     } yield ()
     zuoraOp.toApiGatewayOp("AutoCancel failed")
