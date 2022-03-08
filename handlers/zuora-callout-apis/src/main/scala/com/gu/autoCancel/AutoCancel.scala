@@ -36,6 +36,13 @@ object AutoCancel extends Logging {
       case _ => NotFound(s"Subscription cancellation response '$cancelSubscriptionResponse' doesn't contain an invoice ID")
     }
 
+  /*
+   * This process applies at the subscription level.  It will potentially run multiple times per invoice.
+   * The cancellation call generates a balancing invoice that should be negative and the same amount
+   * as the amount outstanding for the invoice item corresponding to the subscription being processed.
+   * This means that after all subscriptions on an invoice have been cancelled, the balance of all
+   * invoices should be 0.
+   */
   private def executeCancel(requests: Requests, dryRun: Boolean)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
     val AutoCancelRequest(accountId, subToCancel, cancellationDate, invoiceId, invoiceAmount) = acRequest
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}")

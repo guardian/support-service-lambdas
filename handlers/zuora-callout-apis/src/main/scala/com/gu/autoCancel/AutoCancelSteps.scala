@@ -28,6 +28,10 @@ object AutoCancelSteps extends Logging {
     implicit val autoCancelUrlParamsReads: Reads[AutoCancelUrlParams] = json => wireReads.reads(json).map(_.toAutoCancelUrlParams)
   }
 
+  /*
+   * This process applies at the invoice level.
+   * Each invoice can have multiple invoice items applying to a different subscription.
+   */
   def apply(
     callZuoraAutoCancel: (List[AutoCancelRequest], AutoCancelUrlParams) => ApiGatewayOp[Unit],
     autoCancelReqProducer: AutoCancelCallout => ApiGatewayOp[List[AutoCancelRequest]],
