@@ -9,6 +9,8 @@ import java.time.LocalDate
 
 object ZuoraCancelSubscription extends LazyLogging {
 
+  private val zuoraApiMinorVersion = "315.0"
+
   case class SubscriptionCancellation(cancellationEffectiveDate: LocalDate)
 
   case class CancellationResponse(invoiceId: String)
@@ -29,7 +31,7 @@ object ZuoraCancelSubscription extends LazyLogging {
 
   def apply(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[CancellationResponse] = {
     val (body, path) = toBodyAndPath(subscription, cancellationDate)
-    requests.put[SubscriptionCancellation, CancellationResponse](body, path)
+    requests.put[SubscriptionCancellation, CancellationResponse](body, path, "zuora-version" -> zuoraApiMinorVersion)
   }
 
   def dryRun(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[CancellationResponse] = {
