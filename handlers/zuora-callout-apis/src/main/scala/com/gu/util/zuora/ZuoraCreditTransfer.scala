@@ -16,10 +16,10 @@ object ZuoraCreditTransfer extends LazyLogging {
 
   implicit val transferWrites = new Writes[CreditTransfer] {
     def writes(transfer: CreditTransfer) = Json.obj(
-      "sourceTransactionId" -> transfer.invoiceId,
-      "amount" -> transfer.amount,
-      "type" -> { if (transfer.increase) "Increase" else "Decrease" },
-      "comment" -> transfer.comment
+      "SourceTransactionId" -> transfer.invoiceId,
+      "Amount" -> transfer.amount,
+      "Type" -> { if (transfer.increase) "Increase" else "Decrease" },
+      "Comment" -> transfer.comment
     )
   }
 
@@ -34,7 +34,7 @@ object TransferToCreditBalance extends LazyLogging {
 
   def apply(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
     val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, increase = true, comment)
-    requests.put(body, path)
+    requests.post(body, path)
   }
 
   def dryRun(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
@@ -52,7 +52,7 @@ object ApplyCreditBalance extends LazyLogging {
 
   def apply(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
     val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, increase = false, comment)
-    requests.put(body, path)
+    requests.post(body, path)
   }
 
   def dryRun(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
