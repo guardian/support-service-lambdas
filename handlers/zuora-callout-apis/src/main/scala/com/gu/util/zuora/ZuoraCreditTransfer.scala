@@ -2,15 +2,22 @@ package com.gu.util.zuora
 
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.gu.util.zuora.ZuoraCreditTransfer.AdjustmentType
 import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json._
 
 object ZuoraCreditTransfer extends LazyLogging {
 
+  sealed trait AdjustmentType { def value: String }
+  object AdjustmentType {
+    case object Increase extends AdjustmentType { val value = "Increase" }
+    case object Decrease extends AdjustmentType { val value = "Decrease" }
+  }
+
   case class CreditTransfer(
     invoiceId: String,
     amount: BigDecimal,
-    increase: Boolean,
+    adjustmentType: AdjustmentType,
     comment: String
   )
 
@@ -18,13 +25,13 @@ object ZuoraCreditTransfer extends LazyLogging {
     def writes(transfer: CreditTransfer) = Json.obj(
       "SourceTransactionId" -> transfer.invoiceId,
       "Amount" -> transfer.amount,
-      "Type" -> { if (transfer.increase) "Increase" else "Decrease" },
+      "Type" -> transfer.adjustmentType.value,
       "Comment" -> transfer.comment
     )
   }
 
-  def toBodyAndPath(invoiceId: String, amount: BigDecimal, increase: Boolean, comment: String) =
-    (CreditTransfer(invoiceId, amount, increase, comment), "object/credit-balance-adjustment")
+  def toBodyAndPath(invoiceId: String, amount: BigDecimal, adjustmentType: AdjustmentType, comment: String) =
+    (CreditTransfer(invoiceId, amount, adjustmentType, comment), "object/credit-balance-adjustment")
 }
 
 object TransferToCreditBalance extends LazyLogging {
@@ -33,12 +40,12 @@ object TransferToCreditBalance extends LazyLogging {
     Reads(_ => JsSuccess(()))
 
   def apply(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
-    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, increase = true, comment)
+    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Increase, comment)
     requests.post(body, path)
   }
 
   def dryRun(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
-    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, increase = true, comment)
+    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Increase, comment)
     val msg = s"DryRun for ZuoraCreditTransfer: body=$body, path=$path"
     logger.info(msg)
     ClientSuccess(JsNull)
@@ -51,12 +58,12 @@ object ApplyCreditBalance extends LazyLogging {
     Reads(_ => JsSuccess(()))
 
   def apply(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
-    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, increase = false, comment)
+    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Decrease, comment)
     requests.post(body, path)
   }
 
   def dryRun(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
-    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, increase = false, comment)
+    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Decrease, comment)
     val msg = s"DryRun for ZuoraCreditTransfer: body=$body, path=$path"
     logger.info(msg)
     ClientSuccess(JsNull)
