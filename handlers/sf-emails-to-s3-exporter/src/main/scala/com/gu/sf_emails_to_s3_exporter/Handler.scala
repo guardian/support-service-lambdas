@@ -96,6 +96,6 @@ object Handler extends LazyLogging {
   def safely[A](doSomething: => A): Either[CustomFailure, A] =
     Try(doSomething).toEither.left.map(CustomFailure.fromThrowable)
 
-  def safelyWithMetric[A](doSomething: => A)(eventName:String): Either[CustomFailure, A] =
+  def safelyWithMetric[A](doSomething: => A)(eventName: String): Either[CustomFailure, A] =
     Try(doSomething).toEither.left.map(CustomFailure.fromThrowableToMetric(_, eventName))
 }
