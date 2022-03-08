@@ -15,6 +15,7 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
+      Schedule: 'rate(15 minutes)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
       ToLowerCase: prod
