@@ -18,6 +18,6 @@ object ConfirmationWriteBackToSF {
   case class Attributes(`type`: String)
 
   def getCurrentDateTimeForWriteback(): String = {
-    DateTimeFormatter.ofPattern("YYYY-MM-DD'T'HH:mm:SS'Z'").format(LocalDateTime.now)
+    DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:SS'Z'").format(LocalDateTime.now)
   }
 }
