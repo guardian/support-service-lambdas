@@ -3,10 +3,10 @@ package com.gu.sf_emails_to_s3_exporter
 import com.gu.sf_emails_to_s3_exporter.ConfirmationWriteBackToSF.{EmailMessageToUpdate, EmailMessagesToUpdate}
 import com.gu.sf_emails_to_s3_exporter.Handler.safely
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.{Decoder, Error}
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Error}
 import scalaj.http.{Http, HttpOptions}
 
 object SFConnector extends LazyLogging {
@@ -14,7 +14,7 @@ object SFConnector extends LazyLogging {
   case class SfAuthDetails(access_token: String, instance_url: String)
 
   def getRecordsFromSF[A: Decoder](sfAuthDetails: SfAuthDetails, sfApiVersion: String, query: String, batchSize: String): Either[Error, A] = {
-    logger.info("Getting emails from sf by query...")
+    logger.info(s"Getting records from sf...")
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
       .param("q", query)
@@ -24,7 +24,6 @@ object SFConnector extends LazyLogging {
       .method("GET")
       .asString
       .body
-    println("responseBody:", responseBody)
 
     decode[A](responseBody)
   }
@@ -103,7 +102,7 @@ object SFConnector extends LazyLogging {
   }
 
   def deleteAsyncProcessRecs(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
-    logger.info("Getting async process records from sf...")
+    logger.info("Deleting async process records from sf...")
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v52.0/composite/sobjects")
       .param("ids", recordIds.mkString(","))
