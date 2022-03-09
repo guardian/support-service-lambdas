@@ -77,13 +77,6 @@ object ToMessage {
 
   val decimalFormat = new DecimalFormat("###,###.00")
 
-  def price(amount: Double, currency: String): String = {
-    val formattedAmount: String = decimalFormat.format(decimal(amount))
-    val upperCaseCurrency = currency.toUpperCase
-    val symbol: String = currencySymbol.getOrElse(upperCaseCurrency, upperCaseCurrency)
-    symbol + formattedAmount
-  }
-
   def serviceDateFormat(d: LocalDate) = d.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
 
 }

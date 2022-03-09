@@ -14,7 +14,7 @@ object GetPaymentData extends Logging {
     val positiveInvoices = invoiceTransactionSummary.invoices.filter(isPositive)
     positiveInvoices.headOption match {
       case Some(invoice) =>
-        logger.info(s"Found the following latest invoice: $invoice")
+        logger.info(s"Found the following positive invoice: $invoice")
         val positiveInvoiceItems = invoice.invoiceItems.filter(invoiceItemFilter)
         // TODO payment failure may be subjected to invoice that have multiple items not only one
         // here we are generating PaymentFailureInformation based on the head of InvoiceItems
@@ -28,7 +28,7 @@ object GetPaymentData extends Logging {
         }
         maybePaymentFailureInfo.toRight(s"Could not retrieve additional data for account $message")
       case None =>
-        logger.error(s"No invoice found - nothing to do")
+        logger.error(s"No positive invoice found - nothing to do")
         Left(s"Could not retrieve additional data for account $message")
     }
   }
