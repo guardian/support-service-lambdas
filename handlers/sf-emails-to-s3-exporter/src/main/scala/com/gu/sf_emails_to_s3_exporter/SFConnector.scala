@@ -6,24 +6,24 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.Error
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import io.circe.syntax.EncoderOps
 import scalaj.http.{Http, HttpOptions}
 
 object SFConnector extends LazyLogging {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
 
-  def getEmailsFromSfByQuery(sfAuthDetails: SfAuthDetails, sfApiVersion: String): Either[Error, EmailsFromSfResponse.Response] = {
+  def getEmailsFromSfByQuery(sfAuthDetails: SfAuthDetails, sfApiVersion: String, query: String): Either[Error, EmailsFromSfResponse.Response] = {
     logger.info("Getting emails from sf by query...")
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
-      .param("q", GetEmailsQuery.query)
+      .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .header("Sforce-Query-Options", "batchSize=200")
       .method("GET")
       .asString
       .body
+    println("responseBody:", responseBody)
 
     decode[EmailsFromSfResponse.Response](responseBody)
   }
@@ -41,15 +41,29 @@ object SFConnector extends LazyLogging {
       ).asJson.toString(),
       "PATCH"
     ) match {
-        case Left(ex) => {
-          logger.error(ex.toString)
-          Left(ex)
-        }
-        case Right(value) => {
-          Right(value)
-        }
+      case Left(ex) => {
+        logger.error(ex.toString)
+        Left(ex)
       }
+      case Right(value) => {
+        Right(value)
+      }
+    }
+  }
 
+  def getAsyncProcessRecs(sfAuthDetails: SfAuthDetails, sfApiVersion: String, query: String): Either[Error, AsyncProcessRecsFromSfResponse.Response] = {
+    logger.info("Getting async process records from sf...")
+
+    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
+      .param("q", query)
+      .option(HttpOptions.readTimeout(30000))
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .header("Sforce-Query-Options", "batchSize=200")
+      .method("GET")
+      .asString
+      .body
+    println("responseBody:", responseBody)
+    decode[AsyncProcessRecsFromSfResponse.Response](responseBody)
   }
 
   def getEmailsFromSfByRecordsetReference(sfAuthDetails: SfAuthDetails, nextRecordsURL: String): Either[Error, EmailsFromSfResponse.Response] = {
@@ -83,6 +97,38 @@ object SFConnector extends LazyLogging {
         .asString
         .body
     )
+  }
+
+  def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
+    logger.info("Writing successes back to Salesforce...")
+
+    deleteAsyncProcessRecs(
+      sfAuthDetails,
+      recordIds
+    ) match {
+      case Left(ex) => {
+        logger.error(ex.toString)
+        Left(ex)
+      }
+      case Right(value) => {
+        Right(value)
+      }
+    }
+  }
+
+  def deleteAsyncProcessRecs(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
+    logger.info("Getting async process records from sf...")
+
+    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v52.0/composite/sobjects")
+      .param("ids", recordIds.mkString(","))
+      .param("allOrNone", "false")
+      .option(HttpOptions.readTimeout(30000))
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .method("DELETE")
+      .asString
+      .body
+    println("delete responseBody:", responseBody)
+    decode[Seq[WritebackToSFResponse.WritebackResponse]](responseBody)
   }
 
   def doSfCompositeRequest(
