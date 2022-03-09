@@ -29,13 +29,13 @@ object GetEmailsQuery {
          |FROM
          | emailmessage
          |WHERE
-         | Id in (${emailIds.map(a => "'" + a + "'").mkString(",")})
+         | Id in (${emailIds.map(a => "'" + a + "'").mkString(",")}) AND
+         | export_Status__c = 'Ready for export to s3'
          |ORDER BY
          | Createddate
          |LIMIT
-         | 2000
+         | 200
     """.stripMargin
   }
 }
-//and
-// export_Status__c in ('Ready for export to s3')
+
