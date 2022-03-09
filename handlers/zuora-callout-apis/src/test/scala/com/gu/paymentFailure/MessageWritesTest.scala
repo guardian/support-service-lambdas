@@ -22,7 +22,6 @@ class MessageWritesTest extends AnyFlatSpec with EmailSqsSerialisation {
             first_name = "firstNameValue",
             last_name = "lastNameValue",
             primaryKey = PaymentId("paymentId"),
-            price = "49.0 GBP",
             serviceStartDate = "31 January 2016",
             serviceEndDate = "31 January 2017"
           )
@@ -77,7 +76,6 @@ class MessageWritesTest extends AnyFlatSpec with EmailSqsSerialisation {
             first_name = "firstNameValue",
             last_name = "lastNameValue",
             primaryKey = InvoiceId("paymentId"),
-            price = "49.0 GBP",
             serviceStartDate = "31 January 2016",
             serviceEndDate = "31 January 2017"
           )

@@ -26,7 +26,6 @@ object EmailSendTest extends App with Logging {
           first_name = s"firstNameValue",
           last_name = "lastNameValue",
           primaryKey = PaymentId(UUID.randomUUID().toString),
-          price = "49.0 GBP",
           serviceStartDate = "31 January 2016",
           serviceEndDate = "31 January 2017"
         )

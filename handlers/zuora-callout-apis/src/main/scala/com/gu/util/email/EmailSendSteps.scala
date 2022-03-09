@@ -18,7 +18,6 @@ case class SubscriberAttributesDef(
   first_name: String,
   last_name: String,
   primaryKey: PrimaryKey,
-  price: String,
   serviceStartDate: String,
   serviceEndDate: String,
   billing_address1: Option[String] = None,
@@ -68,7 +67,6 @@ trait EmailSqsSerialisation {
           case PaymentId(id) => "paymentId" -> JsString(id)
           case InvoiceId(id) => "invoiceId" -> JsString(id)
         },
-        "price" -> JsString(o.price),
         "serviceStartDate" -> JsString(o.serviceStartDate),
         "serviceEndDate" -> JsString(o.serviceEndDate)
       )

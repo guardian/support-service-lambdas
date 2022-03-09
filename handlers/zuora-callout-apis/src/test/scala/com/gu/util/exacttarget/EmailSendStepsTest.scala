@@ -26,7 +26,6 @@ class EmailSendStepsTest extends AnyFlatSpec with Matchers {
             first_name = "firstNameValue",
             last_name = "lastNameValue",
             primaryKey = PaymentId("paymentId"),
-            price = "49.0 GBP",
             serviceStartDate = "31 January 2016",
             serviceEndDate = "31 January 2017"
           )
