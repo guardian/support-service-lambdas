@@ -82,7 +82,7 @@ object SFConnector extends LazyLogging {
       .method("DELETE")
       .asString
       .body
-    println("delete responseBody:", responseBody)
+
     decode[Seq[WritebackToSFResponse.WritebackResponse]](responseBody)
   }
 
