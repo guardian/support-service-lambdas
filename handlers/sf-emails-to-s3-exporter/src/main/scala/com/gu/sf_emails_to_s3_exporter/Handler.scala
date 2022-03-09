@@ -24,7 +24,7 @@ object Handler extends LazyLogging {
         sfAuthDetails,
         config.sfConfig.apiVersion,
         GetAsyncProcessRecsQuery.query,
-        2000
+        batchSize = 2000
       )
     } yield {
       val asyncProcessRecIds = asyncProcessRecs.records.map(rec => rec.Id)
@@ -48,7 +48,7 @@ object Handler extends LazyLogging {
                 sfAuthDetails,
                 config.sfConfig.apiVersion,
                 GetEmailsQuery(emailIds),
-                200
+                batchSize = 200
               )
 
             } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
