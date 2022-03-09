@@ -33,28 +33,24 @@ object Handler extends LazyLogging {
 
         val batchedAsyncProcessRecs = batchAsyncProcessRecs(asyncProcessRecs.records, 200)
 
-        batchedAsyncProcessRecs.map(
+        batchedAsyncProcessRecs.map { asyncProcessRecGroup =>
 
-          asyncProcessRecGroup => {
+          val groupedAsyncProcessRecIds = asyncProcessRecGroup.map(rec => rec.Id)
 
-            val groupedAsyncProcessRecIds = asyncProcessRecGroup.map(rec => rec.Id)
+          deleteQueueItems(sfAuthDetails, groupedAsyncProcessRecIds)
 
-            deleteQueueItems(sfAuthDetails, groupedAsyncProcessRecIds)
+          val emailIds = asyncProcessRecGroup.map(rec => rec.Record_Id__c)
 
-            val emailIds = asyncProcessRecGroup.map(rec => rec.Record_Id__c)
+          for {
+            emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
+              sfAuthDetails,
+              config.sfConfig.apiVersion,
+              GetEmailsQuery(emailIds),
+              batchSize = 200
+            )
 
-            val emails = for {
-              emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
-                sfAuthDetails,
-                config.sfConfig.apiVersion,
-                GetEmailsQuery(emailIds),
-                batchSize = 200
-              )
-
-            } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
-          }
-        )
-
+          } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
+        }
       }
     }
   }

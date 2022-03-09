@@ -14,7 +14,7 @@ object SFConnector extends LazyLogging {
   case class SfAuthDetails(access_token: String, instance_url: String)
 
   def getRecordsFromSF[A: Decoder](sfAuthDetails: SfAuthDetails, sfApiVersion: String, query: String, batchSize: Integer): Either[Error, A] = {
-    logger.info(s"Getting records from sf...")
+    logger.info("Getting records from sf...")
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
       .param("q", query)
