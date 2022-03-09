@@ -16,23 +16,59 @@ object Handler extends LazyLogging {
 
   def handleRequest(): Unit = {
 
-    val emailsFromSF = for {
+    for {
       config <- Config.fromEnvironment.toRight("Missing config value")
       authentication <- auth(config.sfConfig)
       sfAuthDetails <- decode[SfAuthDetails](authentication)
-      emailsFromSF <- getEmailsFromSfByQuery(sfAuthDetails, config.sfConfig.apiVersion)
-    } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
+      asyncProcessRecs <- getAsyncProcessRecs(
+        sfAuthDetails,
+        config.sfConfig.apiVersion,
+        GetAsyncProcessRecsQuery.query,
+      )
+    } yield {
+        val asyncProcessRecIds = asyncProcessRecs.records.map(rec => rec.Id)
 
-    emailsFromSF match {
+        if (!asyncProcessRecIds.isEmpty) {
+
+          deleteQueueItems(sfAuthDetails, asyncProcessRecIds)
+
+          for {
+            emailsFromSF <- getEmailsFromSfByQuery(
+              sfAuthDetails,
+              config.sfConfig.apiVersion,
+              GetEmailsQuery(asyncProcessRecs.records.map(rec => rec.Record_Id__c))
+            )
+          } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
+        }
+    }
+  }
+
+  def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Any = {
+    val deleteAttempts = for {
+      deletedRecs <- deleteAsyncProcessRecs(
+        sfAuthDetails,
+        recordIds
+      )
+    } yield deletedRecs
+
+    deleteAttempts match {
       case Left(ex) => {
-        logger.error("Error: " + ex)
-        throw new RuntimeException(ex.toString)
+        logger.error(s"error:$ex")
       }
       case Right(success) => {
-        logger.info("Processing complete")
+        success.foreach(a => a.success.getOrElse(None) match {
+          case true => {
+            logger.info(s"Queue Item:${a.id} deleted")
+          }
+          case false => {
+            logger.error(s"Failed to delete Queue Item:${a}")
+          }
+          case none => {
+            logger.error(s"Failed to delete Queue Items. Message:${a.message.getOrElse("Something went wrong")}. ErrorCode:${a.errorCode.getOrElse("No Error Code provided")}")
+          }
+        })
       }
     }
-
   }
 
   def processEmails(sfAuthDetails: SfAuthDetails, emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Any = {
@@ -96,6 +132,6 @@ object Handler extends LazyLogging {
   def safely[A](doSomething: => A): Either[CustomFailure, A] =
     Try(doSomething).toEither.left.map(CustomFailure.fromThrowable)
 
-  def safelyWithMetric[A](doSomething: => A)(eventName:String): Either[CustomFailure, A] =
+  def safelyWithMetric[A](doSomething: => A)(eventName: String): Either[CustomFailure, A] =
     Try(doSomething).toEither.left.map(CustomFailure.fromThrowableToMetric(_, eventName))
 }
