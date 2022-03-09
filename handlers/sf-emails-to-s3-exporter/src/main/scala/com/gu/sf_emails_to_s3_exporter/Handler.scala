@@ -122,13 +122,6 @@ object Handler extends LazyLogging {
         )
       )
     }
-
-    logger.info("More emails to retrieve from Salesforce:" + !emailsDataFromSF.done)
-    //process more emails if they exist
-    if (!emailsDataFromSF.done) {
-      processNextPageOfEmails(sfAuthDetails, emailsDataFromSF.nextRecordsUrl.get, bucketName)
-    }
-
   }
 
   def saveEmailsToS3(emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
@@ -140,12 +133,6 @@ object Handler extends LazyLogging {
     } yield saveToS3Attempt
 
     saveToS3Attempts.collect { case Right(value) => value }
-  }
-
-  def processNextPageOfEmails(sfAuthDetails: SfAuthDetails, url: String, bucketName: String): Unit = {
-    for {
-      nextBatchOfEmails <- getEmailsFromSfByRecordsetReference(sfAuthDetails, url)
-    } yield processEmails(sfAuthDetails, nextBatchOfEmails, bucketName)
   }
 
   def safely[A](doSomething: => A): Either[CustomFailure, A] =

@@ -51,19 +51,6 @@ object SFConnector extends LazyLogging {
       }
   }
 
-  def getEmailsFromSfByRecordsetReference(sfAuthDetails: SfAuthDetails, nextRecordsURL: String): Either[Error, EmailsFromSfResponse.Response] = {
-    logger.info("Getting next batch of emails from sf by recordset reference...")
-
-    val responseBody = Http(s"${sfAuthDetails.instance_url}" + nextRecordsURL)
-      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-      .option(HttpOptions.readTimeout(30000))
-      .method("GET")
-      .asString
-      .body
-
-    decode[EmailsFromSfResponse.Response](responseBody)
-  }
-
   def auth(salesforceConfig: SalesforceConfig): Either[CustomFailure, String] = {
     logger.info("Authenticating with Salesforce...")
 
