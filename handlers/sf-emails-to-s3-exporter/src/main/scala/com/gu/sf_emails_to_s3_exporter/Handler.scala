@@ -24,27 +24,44 @@ object Handler extends LazyLogging {
         sfAuthDetails,
         config.sfConfig.apiVersion,
         GetAsyncProcessRecsQuery.query,
-        "2000"
+        2000
       )
     } yield {
       val asyncProcessRecIds = asyncProcessRecs.records.map(rec => rec.Id)
 
       if (!asyncProcessRecIds.isEmpty) {
 
-        deleteQueueItems(sfAuthDetails, asyncProcessRecIds)
+        val batchedAsyncProcessRecs = batchAsyncProcessRecs(asyncProcessRecs.records, 200)
 
-        for {
-          emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
-            sfAuthDetails,
-            config.sfConfig.apiVersion,
-            GetEmailsQuery(asyncProcessRecs.records.map(rec => rec.Record_Id__c)),
-            "200"
-          )
-        } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
+        batchedAsyncProcessRecs.map(
+
+          asyncProcessRecGroup => {
+
+            val groupedAsyncProcessRecIds = asyncProcessRecGroup.map(rec => rec.Id)
+
+            deleteQueueItems(sfAuthDetails, groupedAsyncProcessRecIds)
+
+            val emailIds = asyncProcessRecGroup.map(rec => rec.Record_Id__c)
+
+            val emails = for {
+              emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
+                sfAuthDetails,
+                config.sfConfig.apiVersion,
+                GetEmailsQuery(emailIds),
+                200
+              )
+
+            } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
+          }
+        )
+
       }
     }
   }
 
+  def batchAsyncProcessRecs(asyncProcessRecs: Seq[AsyncProcessRecsFromSfResponse.Records], batchSize: Integer): Seq[Seq[AsyncProcessRecsFromSfResponse.Records]] = {
+    asyncProcessRecs.grouped(batchSize).toList
+  }
   def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Any = {
     val deleteAttempts = for {
       deletedRecs <- deleteAsyncProcessRecs(
