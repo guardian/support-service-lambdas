@@ -20,49 +20,52 @@ object Handler extends LazyLogging {
       config <- Config.fromEnvironment.toRight("Missing config value")
       authentication <- auth(config.sfConfig)
       sfAuthDetails <- decode[SfAuthDetails](authentication)
-      asyncProcessRecs <- getRecordsFromSF[AsyncProcessRecsFromSfResponse.Response](
+      asyncProcessRecords <- getRecordsFromSF[AsyncProcessRecsFromSfResponse.Response](
         sfAuthDetails,
         config.sfConfig.apiVersion,
         GetAsyncProcessRecsQuery.query,
         batchSize = 2000
       )
-    } yield {
-      val asyncProcessRecIds = asyncProcessRecs.records.map(rec => rec.Id)
+    } yield deleteAsyncProcessRecordsAndExportEmailsFromSfToS3(sfAuthDetails, config, asyncProcessRecords.records)
 
-      if (!asyncProcessRecIds.isEmpty) {
+  }
 
-        val batchedAsyncProcessRecs = batchAsyncProcessRecs(asyncProcessRecs.records, 200)
+  //Break down the Async Process Records returned from Salesforce into groups of 200 for processing (callouts back to Salesforce should contain maximum 200 records)
+  def deleteAsyncProcessRecordsAndExportEmailsFromSfToS3(sfAuthDetails: SfAuthDetails, config: Config, asyncProcessRecords: Seq[AsyncProcessRecsFromSfResponse.Records]):Unit = {
+    if (!asyncProcessRecords.isEmpty) {
+      val batchedAsyncProcessRecords = batchAsyncProcessRecs(asyncProcessRecords, 200)
 
-        batchedAsyncProcessRecs.map { asyncProcessRecGroup =>
+      batchedAsyncProcessRecords.map { asyncProcessRecordGroup =>
 
-          val groupedAsyncProcessRecIds = asyncProcessRecGroup.map(rec => rec.Id)
+        deleteQueueItems(sfAuthDetails, asyncProcessRecordGroup.map(rec => rec.Id))
 
-          deleteQueueItems(sfAuthDetails, groupedAsyncProcessRecIds)
+        val emailIds = asyncProcessRecordGroup.map(rec => rec.Record_Id__c)
 
-          val emailIds = asyncProcessRecGroup.map(rec => rec.Record_Id__c)
+        fetchEmailsFromSalesforceAndExportToS3(sfAuthDetails, config, emailIds)
+      }
+    }
+  }
 
-          val getEmailsAttempt = for {
-            emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
-              sfAuthDetails,
-              config.sfConfig.apiVersion,
-              GetEmailsQuery(emailIds),
-              batchSize = 200
-            )
+  def fetchEmailsFromSalesforceAndExportToS3(sfAuthDetails: SfAuthDetails, config: Config, emailIds: Seq[String]): Unit = {
+    val getEmailsAttempt = for {
+      emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
+        sfAuthDetails,
+        config.sfConfig.apiVersion,
+        GetEmailsQuery(emailIds),
+        batchSize = 200
+      )
 
-          } yield emailsFromSF
+    } yield emailsFromSF
 
-          getEmailsAttempt match {
-            case Left(ex) => {
-              logger.error("Error: " + ex)
-              throw new RuntimeException(ex.toString)
-            }
-            case Right(success) => {
-              processEmails(sfAuthDetails, success, config.s3Config.bucketName)
-              logger.info("Processing complete")
-            }
-          }
-
-        }
+    //TODO decide if subsequent queries to Salesforce should continue if a failure occurs in one callout
+    getEmailsAttempt match {
+      case Left(ex) => {
+        logger.error("Error: " + ex)
+        throw new RuntimeException(ex.toString)
+      }
+      case Right(success) => {
+        processEmails(sfAuthDetails, success, config.s3Config.bucketName)
+        logger.info("Processing complete")
       }
     }
   }
