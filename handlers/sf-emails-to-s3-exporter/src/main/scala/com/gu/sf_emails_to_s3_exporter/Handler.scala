@@ -41,7 +41,7 @@ object Handler extends LazyLogging {
 
           val emailIds = asyncProcessRecGroup.map(rec => rec.Record_Id__c)
 
-          for {
+          val getEmailsAttempt = for {
             emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
               sfAuthDetails,
               config.sfConfig.apiVersion,
@@ -49,7 +49,19 @@ object Handler extends LazyLogging {
               batchSize = 200
             )
 
-          } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
+          } yield emailsFromSF
+
+          getEmailsAttempt match {
+            case Left(ex) => {
+              logger.error("Error: " + ex)
+              throw new RuntimeException(ex.toString)
+            }
+            case Right(success) => {
+              processEmails(sfAuthDetails, success, config.s3Config.bucketName)
+              logger.info("Processing complete")
+            }
+          }
+
         }
       }
     }
@@ -58,7 +70,7 @@ object Handler extends LazyLogging {
   def batchAsyncProcessRecs(asyncProcessRecs: Seq[AsyncProcessRecsFromSfResponse.Records], batchSize: Integer): Seq[Seq[AsyncProcessRecsFromSfResponse.Records]] = {
     asyncProcessRecs.grouped(batchSize).toList
   }
-  
+
   def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Any = {
     val deleteAttempts = for {
       deletedRecs <- deleteAsyncProcessRecs(
