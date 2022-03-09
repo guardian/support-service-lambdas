@@ -16,7 +16,7 @@ object Handler extends LazyLogging {
 
   def handleRequest(): Unit = {
 
-    for {
+    val asyncProcessRecordsAttempt = for {
       config <- Config.fromEnvironment.toRight("Missing config value")
       authentication <- auth(config.sfConfig)
       sfAuthDetails <- decode[SfAuthDetails](authentication)
@@ -26,7 +26,20 @@ object Handler extends LazyLogging {
         GetAsyncProcessRecsQuery.query,
         batchSize = 2000
       )
-    } yield deleteAsyncProcessRecordsAndExportEmailsFromSfToS3(sfAuthDetails, config, asyncProcessRecords.records)
+    } yield {
+      asyncProcessRecordsAttempt match {
+        case Left(ex) => {
+          CustomFailure.toMetric(
+            "failed_to_get_records_from_sf",
+            s"Failed to get records from SF. Error:${ex}"
+          )
+        }
+        case Right(success) => {
+          deleteAsyncProcessRecordsAndExportEmailsFromSfToS3(sfAuthDetails, config, asyncProcessRecords.records)
+        }
+      }
+    }
+
 
   }
 
@@ -59,11 +72,12 @@ object Handler extends LazyLogging {
 
     } yield emailsFromSF
 
-    //TODO decide if subsequent queries to Salesforce should continue if a failure occurs in one callout
     getEmailsAttempt match {
       case Left(ex) => {
-        logger.error("Error: " + ex)
-        throw new RuntimeException(ex.toString)
+        CustomFailure.toMetric(
+          "failed_to_get_records_from_sf",
+          s"Failed to get records from SF. Error:${ex.getMessage}"
+        )
       }
       case Right(success) => {
         processEmails(sfAuthDetails, success, config.s3Config.bucketName)
