@@ -44,7 +44,7 @@ object Handler extends LazyLogging {
   }
 
   //Break down the Async Process Records (max 2000) returned from Salesforce into groups of 200 for processing (callouts back to Salesforce should contain maximum 200 records)
-  def deleteSfQueueItemsAndExportEmailsFromSfToS3(sfAuthDetails: SfAuthDetails, config: Config, queueItems: Seq[QueueItemsFromSfResponse.Records]):Unit = {
+  def deleteSfQueueItemsAndExportEmailsFromSfToS3(sfAuthDetails: SfAuthDetails, config: Config, queueItems: Seq[QueueItemsFromSfResponse.QueueItem]):Unit = {
     if (!queueItems.isEmpty) {
       val batchedQueueItems = batchQueueItems(queueItems, 200)
 
@@ -86,7 +86,7 @@ object Handler extends LazyLogging {
     }
   }
 
-  def batchQueueItems(queueItems: Seq[QueueItemsFromSfResponse.Records], batchSize: Integer): Seq[Seq[QueueItemsFromSfResponse.Records]] = {
+  def batchQueueItems(queueItems: Seq[QueueItemsFromSfResponse.QueueItem], batchSize: Integer): Seq[Seq[QueueItemsFromSfResponse.QueueItem]] = {
     queueItems.grouped(batchSize).toList
   }
 

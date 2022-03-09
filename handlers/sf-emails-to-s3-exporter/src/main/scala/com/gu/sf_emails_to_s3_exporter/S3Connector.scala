@@ -18,7 +18,7 @@ import scala.util.{Failure, Success, Try}
 
 object S3Connector extends LazyLogging {
 
-  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, String] = {
+  def saveEmailToS3(caseEmail: EmailsFromSfResponse.EmailRecord, bucketName: String): Either[CustomFailure, String] = {
 
     fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber, bucketName) match {
 
@@ -29,7 +29,7 @@ object S3Connector extends LazyLogging {
 
         writeEmailsJsonToS3(
           caseEmail.Parent.CaseNumber,
-          Seq[EmailsFromSfResponse.Records](caseEmail).asJson.toString(),
+          Seq[EmailsFromSfResponse.EmailRecord](caseEmail).asJson.toString(),
           caseEmail.Id,
           bucketName
         )
@@ -74,12 +74,12 @@ object S3Connector extends LazyLogging {
     })("failed_s3_check_file_exists")
   }
 
-  def emailsInS3File(caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, Seq[EmailsFromSfResponse.Records]] = {
+  def emailsInS3File(caseEmail: EmailsFromSfResponse.EmailRecord, bucketName: String): Either[CustomFailure, Seq[EmailsFromSfResponse.EmailRecord]] = {
     logger.info(s"Retrieving emails from ${caseEmail.Parent.CaseNumber}... ")
 
     for {
       s3FileJsonBody <- getEmailsJsonFromS3File(caseEmail.Parent.CaseNumber, bucketName)
-      decodedEmails <- decode[Seq[EmailsFromSfResponse.Records]](s3FileJsonBody)
+      decodedEmails <- decode[Seq[EmailsFromSfResponse.EmailRecord]](s3FileJsonBody)
         .left
         .map(CustomFailure.fromThrowable)
     } yield decodedEmails
@@ -160,9 +160,9 @@ object S3Connector extends LazyLogging {
   }
 
   def generateJsonForExistingFile(
-    emailsAlreadyInFile: Seq[EmailsFromSfResponse.Records],
-    newEmail: EmailsFromSfResponse.Records,
-    newEmailAlreadyExistsInFile: Boolean
+                                   emailsAlreadyInFile: Seq[EmailsFromSfResponse.EmailRecord],
+                                   newEmail: EmailsFromSfResponse.EmailRecord,
+                                   newEmailAlreadyExistsInFile: Boolean
   ): String = {
     logger.info(s"${newEmail.Composite_Key__c} already exists in File: $newEmailAlreadyExistsInFile")
     logger.info(s"Generating json for ${newEmail.Composite_Key__c}... ")
