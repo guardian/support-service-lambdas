@@ -71,23 +71,6 @@ object SFConnector extends LazyLogging {
     )
   }
 
-  def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
-    logger.info("Writing successes back to Salesforce...")
-
-    deleteAsyncProcessRecs(
-      sfAuthDetails,
-      recordIds
-    ) match {
-      case Left(ex) => {
-        logger.error(ex.toString)
-        Left(ex)
-      }
-      case Right(value) => {
-        Right(value)
-      }
-    }
-  }
-
   def deleteAsyncProcessRecs(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
     logger.info("Deleting async process records from sf...")
 
