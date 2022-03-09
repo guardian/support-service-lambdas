@@ -71,7 +71,7 @@ object SFConnector extends LazyLogging {
     )
   }
 
-  def deleteAsyncProcessRecords(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
+  def deleteQueueItemsInSf(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
     logger.info("Deleting async process records from sf...")
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v52.0/composite/sobjects")

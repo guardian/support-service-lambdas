@@ -16,18 +16,18 @@ object Handler extends LazyLogging {
 
   def handleRequest(): Unit = {
 
-    val asyncProcessRecordsAttempt = for {
+    val getQueueItemsAttempt = for {
       config <- Config.fromEnvironment.toRight("Missing config value")
       authentication <- auth(config.sfConfig)
       sfAuthDetails <- decode[SfAuthDetails](authentication)
-      asyncProcessRecords <- getRecordsFromSF[AsyncProcessRecsFromSfResponse.Response](
+      sfQueueItems <- getRecordsFromSF[AsyncProcessRecsFromSfResponse.Response](
         sfAuthDetails,
         config.sfConfig.apiVersion,
         GetAsyncProcessRecsQuery.query,
         batchSize = 2000
       )
     } yield {
-      asyncProcessRecordsAttempt match {
+      getQueueItemsAttempt match {
         case Left(ex) => {
           CustomFailure.toMetric(
             "failed_to_get_records_from_sf",
@@ -35,7 +35,7 @@ object Handler extends LazyLogging {
           )
         }
         case Right(success) => {
-          deleteAsyncProcessRecordsAndExportEmailsFromSfToS3(sfAuthDetails, config, asyncProcessRecords.records)
+          deleteSfQueueItemsAndExportEmailsFromSfToS3(sfAuthDetails, config, sfQueueItems.records)
         }
       }
     }
@@ -44,18 +44,18 @@ object Handler extends LazyLogging {
   }
 
   //Break down the Async Process Records (max 2000) returned from Salesforce into groups of 200 for processing (callouts back to Salesforce should contain maximum 200 records)
-  def deleteAsyncProcessRecordsAndExportEmailsFromSfToS3(sfAuthDetails: SfAuthDetails, config: Config, asyncProcessRecords: Seq[AsyncProcessRecsFromSfResponse.Records]):Unit = {
-    if (!asyncProcessRecords.isEmpty) {
-      val batchedAsyncProcessRecords = batchAsyncProcessRecords(asyncProcessRecords, 200)
+  def deleteSfQueueItemsAndExportEmailsFromSfToS3(sfAuthDetails: SfAuthDetails, config: Config, queueItems: Seq[AsyncProcessRecsFromSfResponse.Records]):Unit = {
+    if (!queueItems.isEmpty) {
+      val batchedQueueItems = batchQueueItems(queueItems, 200)
 
-      batchedAsyncProcessRecords.map { asyncProcessRecordGroup =>
+      batchedQueueItems.map { queueItemBatch =>
 
-        deleteQueueItems(sfAuthDetails, asyncProcessRecordGroup.map(record => record.Id))
+        deleteQueueItems(sfAuthDetails, queueItemBatch.map(record => record.Id))
 
         fetchEmailsFromSalesforceAndExportToS3(
           sfAuthDetails,
           config,
-          asyncProcessRecordGroup.map(record => record.Record_Id__c)
+          queueItemBatch.map(record => record.Record_Id__c)
         )
       }
     }
@@ -86,13 +86,13 @@ object Handler extends LazyLogging {
     }
   }
 
-  def batchAsyncProcessRecords(asyncProcessRecords: Seq[AsyncProcessRecsFromSfResponse.Records], batchSize: Integer): Seq[Seq[AsyncProcessRecsFromSfResponse.Records]] = {
-    asyncProcessRecords.grouped(batchSize).toList
+  def batchQueueItems(queueItems: Seq[AsyncProcessRecsFromSfResponse.Records], batchSize: Integer): Seq[Seq[AsyncProcessRecsFromSfResponse.Records]] = {
+    queueItems.grouped(batchSize).toList
   }
 
   def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Any = {
     val deleteAttempts = for {
-      deletedRecs <- deleteAsyncProcessRecords(
+      deletedRecs <- deleteQueueItemsInSf(
         sfAuthDetails,
         recordIds
       )
