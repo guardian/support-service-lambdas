@@ -20,26 +20,28 @@ object Handler extends LazyLogging {
       config <- Config.fromEnvironment.toRight("Missing config value")
       authentication <- auth(config.sfConfig)
       sfAuthDetails <- decode[SfAuthDetails](authentication)
-      asyncProcessRecs <- getAsyncProcessRecs(
+      asyncProcessRecs <- getRecordsFromSF[AsyncProcessRecsFromSfResponse.Response](
         sfAuthDetails,
         config.sfConfig.apiVersion,
         GetAsyncProcessRecsQuery.query,
+        "2000"
       )
     } yield {
-        val asyncProcessRecIds = asyncProcessRecs.records.map(rec => rec.Id)
+      val asyncProcessRecIds = asyncProcessRecs.records.map(rec => rec.Id)
 
-        if (!asyncProcessRecIds.isEmpty) {
+      if (!asyncProcessRecIds.isEmpty) {
 
-          deleteQueueItems(sfAuthDetails, asyncProcessRecIds)
+        deleteQueueItems(sfAuthDetails, asyncProcessRecIds)
 
-          for {
-            emailsFromSF <- getEmailsFromSfByQuery(
-              sfAuthDetails,
-              config.sfConfig.apiVersion,
-              GetEmailsQuery(asyncProcessRecs.records.map(rec => rec.Record_Id__c))
-            )
-          } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
-        }
+        for {
+          emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
+            sfAuthDetails,
+            config.sfConfig.apiVersion,
+            GetEmailsQuery(asyncProcessRecs.records.map(rec => rec.Record_Id__c)),
+            "200"
+          )
+        } yield processEmails(sfAuthDetails, emailsFromSF, config.s3Config.bucketName)
+      }
     }
   }
 
