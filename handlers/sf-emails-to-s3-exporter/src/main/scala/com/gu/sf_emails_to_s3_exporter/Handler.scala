@@ -58,6 +58,7 @@ object Handler extends LazyLogging {
   def batchAsyncProcessRecs(asyncProcessRecs: Seq[AsyncProcessRecsFromSfResponse.Records], batchSize: Integer): Seq[Seq[AsyncProcessRecsFromSfResponse.Records]] = {
     asyncProcessRecs.grouped(batchSize).toList
   }
+  
   def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Any = {
     val deleteAttempts = for {
       deletedRecs <- deleteAsyncProcessRecs(
