@@ -1,6 +1,6 @@
 package com.gu.sf_emails_to_s3_exporter
 
-object GetAsyncProcessRecsQuery {
+object GetQueueItemsQuery {
   val query: String = {
     s"""
        |SELECT

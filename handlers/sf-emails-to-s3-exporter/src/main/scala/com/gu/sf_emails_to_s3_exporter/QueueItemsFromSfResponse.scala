@@ -1,6 +1,6 @@
 package com.gu.sf_emails_to_s3_exporter
 
-object AsyncProcessRecsFromSfResponse {
+object QueueItemsFromSfResponse {
   case class Response(
     done: Boolean,
     records: Seq[Records],

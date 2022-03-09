@@ -20,10 +20,10 @@ object Handler extends LazyLogging {
       config <- Config.fromEnvironment.toRight("Missing config value")
       authentication <- auth(config.sfConfig)
       sfAuthDetails <- decode[SfAuthDetails](authentication)
-      sfQueueItems <- getRecordsFromSF[AsyncProcessRecsFromSfResponse.Response](
+      sfQueueItems <- getRecordsFromSF[QueueItemsFromSfResponse.Response](
         sfAuthDetails,
         config.sfConfig.apiVersion,
-        GetAsyncProcessRecsQuery.query,
+        GetQueueItemsQuery.query,
         batchSize = 2000
       )
     } yield {
@@ -44,7 +44,7 @@ object Handler extends LazyLogging {
   }
 
   //Break down the Async Process Records (max 2000) returned from Salesforce into groups of 200 for processing (callouts back to Salesforce should contain maximum 200 records)
-  def deleteSfQueueItemsAndExportEmailsFromSfToS3(sfAuthDetails: SfAuthDetails, config: Config, queueItems: Seq[AsyncProcessRecsFromSfResponse.Records]):Unit = {
+  def deleteSfQueueItemsAndExportEmailsFromSfToS3(sfAuthDetails: SfAuthDetails, config: Config, queueItems: Seq[QueueItemsFromSfResponse.Records]):Unit = {
     if (!queueItems.isEmpty) {
       val batchedQueueItems = batchQueueItems(queueItems, 200)
 
@@ -86,7 +86,7 @@ object Handler extends LazyLogging {
     }
   }
 
-  def batchQueueItems(queueItems: Seq[AsyncProcessRecsFromSfResponse.Records], batchSize: Integer): Seq[Seq[AsyncProcessRecsFromSfResponse.Records]] = {
+  def batchQueueItems(queueItems: Seq[QueueItemsFromSfResponse.Records], batchSize: Integer): Seq[Seq[QueueItemsFromSfResponse.Records]] = {
     queueItems.grouped(batchSize).toList
   }
 
