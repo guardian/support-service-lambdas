@@ -2,6 +2,9 @@ package com.gu.sf_emails_to_s3_exporter
 
 object GetEmailsQuery {
   def apply(emailIds: Seq[String]): String = {
+
+    val idsForQuery = emailIds.map(id => s"'$id'").mkString(",")
+
     s"""
          |SELECT
          | Id,
@@ -29,7 +32,7 @@ object GetEmailsQuery {
          |FROM
          | emailmessage
          |WHERE
-         | Id in (${emailIds.map(a => "'" + a + "'").mkString(",")}) AND
+         | Id in ($idsForQuery) AND
          | export_Status__c = 'Ready for export to s3'
          |ORDER BY
          | Createddate
