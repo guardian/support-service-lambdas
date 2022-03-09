@@ -30,18 +30,20 @@ object Handler extends LazyLogging {
 
   }
 
-  //Break down the Async Process Records returned from Salesforce into groups of 200 for processing (callouts back to Salesforce should contain maximum 200 records)
+  //Break down the Async Process Records (max 2000) returned from Salesforce into groups of 200 for processing (callouts back to Salesforce should contain maximum 200 records)
   def deleteAsyncProcessRecordsAndExportEmailsFromSfToS3(sfAuthDetails: SfAuthDetails, config: Config, asyncProcessRecords: Seq[AsyncProcessRecsFromSfResponse.Records]):Unit = {
     if (!asyncProcessRecords.isEmpty) {
-      val batchedAsyncProcessRecords = batchAsyncProcessRecs(asyncProcessRecords, 200)
+      val batchedAsyncProcessRecords = batchAsyncProcessRecords(asyncProcessRecords, 200)
 
       batchedAsyncProcessRecords.map { asyncProcessRecordGroup =>
 
-        deleteQueueItems(sfAuthDetails, asyncProcessRecordGroup.map(rec => rec.Id))
+        deleteQueueItems(sfAuthDetails, asyncProcessRecordGroup.map(record => record.Id))
 
-        val emailIds = asyncProcessRecordGroup.map(rec => rec.Record_Id__c)
-
-        fetchEmailsFromSalesforceAndExportToS3(sfAuthDetails, config, emailIds)
+        fetchEmailsFromSalesforceAndExportToS3(
+          sfAuthDetails,
+          config,
+          asyncProcessRecordGroup.map(record => record.Record_Id__c)
+        )
       }
     }
   }
@@ -70,13 +72,13 @@ object Handler extends LazyLogging {
     }
   }
 
-  def batchAsyncProcessRecs(asyncProcessRecs: Seq[AsyncProcessRecsFromSfResponse.Records], batchSize: Integer): Seq[Seq[AsyncProcessRecsFromSfResponse.Records]] = {
-    asyncProcessRecs.grouped(batchSize).toList
+  def batchAsyncProcessRecords(asyncProcessRecords: Seq[AsyncProcessRecsFromSfResponse.Records], batchSize: Integer): Seq[Seq[AsyncProcessRecsFromSfResponse.Records]] = {
+    asyncProcessRecords.grouped(batchSize).toList
   }
 
   def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Any = {
     val deleteAttempts = for {
-      deletedRecs <- deleteAsyncProcessRecs(
+      deletedRecs <- deleteAsyncProcessRecords(
         sfAuthDetails,
         recordIds
       )
