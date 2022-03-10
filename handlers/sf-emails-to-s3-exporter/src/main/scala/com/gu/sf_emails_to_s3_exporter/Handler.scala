@@ -1,5 +1,6 @@
 package com.gu.sf_emails_to_s3_exporter
 
+import com.gu.sf_emails_to_s3_exporter.QueueItemsFromSfResponse.QueueItem
 import com.gu.sf_emails_to_s3_exporter.S3Connector.saveEmailToS3
 import com.gu.sf_emails_to_s3_exporter.SFConnector._
 import com.typesafe.scalalogging.LazyLogging
@@ -41,7 +42,7 @@ object Handler extends LazyLogging {
   def deleteQueueItemsAndThenExportEmailsFromSfToS3InBatches(
     sfAuthDetails: SfAuthDetails,
     config: Config,
-    batchedQueueItems: Seq[Seq[QueueItemsFromSfResponse.QueueItem]]
+    batchedQueueItems: Seq[Seq[QueueItem]]
   ): Any = {
 
     batchedQueueItems.map { queueItemBatch =>
@@ -118,10 +119,10 @@ object Handler extends LazyLogging {
     }
   }
 
-  def saveBatchOfEmailsToS3(emailsDataFromSF: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
+  def saveBatchOfEmailsToS3(batchOfEmailsFromSf: EmailsFromSfResponse.Response, bucketName: String): Seq[String] = {
 
     val saveToS3Attempts = for {
-      saveToS3Attempt <- emailsDataFromSF
+      saveToS3Attempt <- batchOfEmailsFromSf
         .records
         .map(email => saveEmailToS3(email, bucketName))
     } yield saveToS3Attempt
@@ -129,7 +130,7 @@ object Handler extends LazyLogging {
     saveToS3Attempts.collect { case Right(value) => value }
   }
 
-  def fetchQueueItemsFromSf(sfAuthDetails: SfAuthDetails, config: Config): Either[CustomFailure, Seq[QueueItemsFromSfResponse.QueueItem]] = {
+  def fetchQueueItemsFromSf(sfAuthDetails: SfAuthDetails, config: Config): Either[CustomFailure, Seq[QueueItem]] = {
     val getQueueItemsAttempt = for {
       sfQueueItems <- getRecordsFromSF[QueueItemsFromSfResponse.Response](
         sfAuthDetails,
@@ -153,7 +154,7 @@ object Handler extends LazyLogging {
     }
   }
 
-  def batchQueueItems(queueItems: Seq[QueueItemsFromSfResponse.QueueItem], batchSize: Integer): Seq[Seq[QueueItemsFromSfResponse.QueueItem]] =
+  def batchQueueItems(queueItems: Seq[QueueItem], batchSize: Integer): Seq[Seq[QueueItem]] =
     queueItems.grouped(batchSize).toList
 
   def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Unit = {
