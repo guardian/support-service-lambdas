@@ -49,7 +49,7 @@ object AutoCancel extends Logging {
       cancellationNegativeInvoice <- zuoraGetInvoiceF(cancellationResponse.invoiceId)
       creditTransferAmount = -cancellationNegativeInvoice.Balance
       _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
-      _ <- zuoraApplyCreditBalanceF(invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("applyCreditBalance")
+      _ <- zuoraApplyCreditBalanceF(overdueInvoiceId, creditTransferAmount, "Auto-cancellation").withLogging("applyCreditBalance")
     } yield ()
     zuoraOp.toApiGatewayOp("AutoCancel failed")
   }
