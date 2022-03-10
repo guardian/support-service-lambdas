@@ -323,6 +323,13 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+      Events:
+        ScheduledRun:
+          Type: Schedule
+          Properties:
+            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule ]
+            Description: Runs SF Emails to S3 Exporter
+            Enabled: True
 
   failedS3WriteFileAlarm:
     Type: AWS::CloudWatch::Alarm
