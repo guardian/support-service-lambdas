@@ -30,7 +30,8 @@ object AutoCancel extends Logging {
   /*
    * This process applies at the subscription level.  It will potentially run multiple times per invoice.
    * The cancellation call generates a balancing invoice that should be negative and the same amount
-   * as the amount outstanding for the invoice item corresponding to the subscription being processed.
+   * as the amount outstanding for the invoice items corresponding to the subscription being processed
+   * (there could be multiple invoice items per sub - it could include discounts and multi-day paper subs)
    * This means that after all subscriptions on an invoice have been cancelled, the balance of all
    * invoices should be 0.
    */
