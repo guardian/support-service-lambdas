@@ -43,7 +43,7 @@ object Handler extends LazyLogging {
     sfAuthDetails: SfAuthDetails,
     config: Config,
     batchedQueueItems: Seq[Seq[QueueItem]]
-  ): Any = {
+  ): Unit = {
 
     batchedQueueItems.map { queueItemBatch =>
       deleteQueueItems(sfAuthDetails, queueItemBatch.map(_.Id))
@@ -89,7 +89,7 @@ object Handler extends LazyLogging {
     sfAuthDetails: SfAuthDetails,
     batchOfEmailsFromSf: EmailsFromSfResponse.Response,
     bucketName: String
-  ): Any = {
+  ): Unit = {
     logger.info(s"Start processing ${batchOfEmailsFromSf.records.size} emails...")
 
     val emailIdsSuccessfullySavedToS3 = saveBatchOfEmailsToS3(batchOfEmailsFromSf, bucketName)
@@ -153,9 +153,6 @@ object Handler extends LazyLogging {
       }
     }
   }
-
-  def batchQueueItems(queueItems: Seq[QueueItem], batchSize: Integer): Seq[Seq[QueueItem]] =
-    queueItems.grouped(batchSize).toList
 
   def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Unit = {
     val deleteAttempts = for {
