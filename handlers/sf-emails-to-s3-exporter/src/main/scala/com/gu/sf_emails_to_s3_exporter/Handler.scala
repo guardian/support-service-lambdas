@@ -169,15 +169,15 @@ object Handler extends LazyLogging {
         logger.error(s"error:$ex")
       }
       case Right(success) => {
-        success.foreach(a => a.success.getOrElse(None) match {
-          case true => {
-            logger.info(s"Queue Item:${a.id} deleted")
+        success.foreach(response => response.success match {
+          case Some(true) => {
+            logger.info(s"Queue Item:${response.id} deleted")
           }
-          case false => {
-            logger.error(s"Failed to delete Queue Item:${a}")
+          case Some(false) => {
+            logger.error(s"Failed to delete Queue Item:${response}")
           }
-          case none => {
-            logger.error(s"Failed to delete Queue Items. Message:${a.message.getOrElse("Something went wrong")}. ErrorCode:${a.errorCode.getOrElse("No Error Code provided")}")
+          case None => {
+            logger.error(s"Failed to delete Queue Items. Message:${response.message.getOrElse("Something went wrong")}. ErrorCode:${response.errorCode.getOrElse("No Error Code provided")}")
           }
         })
       }
