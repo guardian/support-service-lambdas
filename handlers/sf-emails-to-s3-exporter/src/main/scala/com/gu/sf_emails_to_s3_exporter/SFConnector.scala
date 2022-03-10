@@ -3,29 +3,29 @@ package com.gu.sf_emails_to_s3_exporter
 import com.gu.sf_emails_to_s3_exporter.ConfirmationWriteBackToSF.{EmailMessageToUpdate, EmailMessagesToUpdate}
 import com.gu.sf_emails_to_s3_exporter.Handler.safely
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.Error
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Error}
 import scalaj.http.{Http, HttpOptions}
 
 object SFConnector extends LazyLogging {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
 
-  def getEmailsFromSfByQuery(sfAuthDetails: SfAuthDetails, sfApiVersion: String): Either[Error, EmailsFromSfResponse.Response] = {
-    logger.info("Getting emails from sf by query...")
+  def getRecordsFromSF[A: Decoder](sfAuthDetails: SfAuthDetails, sfApiVersion: String, query: String, batchSize: Integer): Either[Error, A] = {
+    logger.info("Getting records from sf...")
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
-      .param("q", GetEmailsQuery.query)
+      .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-      .header("Sforce-Query-Options", "batchSize=200")
+      .header("Sforce-Query-Options", s"batchSize=$batchSize")
       .method("GET")
       .asString
       .body
 
-    decode[EmailsFromSfResponse.Response](responseBody)
+    decode[A](responseBody)
   }
 
   def writebackSuccessesToSf(sfAuthDetails: SfAuthDetails, successIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
@@ -49,20 +49,6 @@ object SFConnector extends LazyLogging {
           Right(value)
         }
       }
-
-  }
-
-  def getEmailsFromSfByRecordsetReference(sfAuthDetails: SfAuthDetails, nextRecordsURL: String): Either[Error, EmailsFromSfResponse.Response] = {
-    logger.info("Getting next batch of emails from sf by recordset reference...")
-
-    val responseBody = Http(s"${sfAuthDetails.instance_url}" + nextRecordsURL)
-      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-      .option(HttpOptions.readTimeout(30000))
-      .method("GET")
-      .asString
-      .body
-
-    decode[EmailsFromSfResponse.Response](responseBody)
   }
 
   def auth(salesforceConfig: SalesforceConfig): Either[CustomFailure, String] = {
@@ -83,6 +69,21 @@ object SFConnector extends LazyLogging {
         .asString
         .body
     )
+  }
+
+  def deleteQueueItemsInSf(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
+    logger.info("Deleting async process records from sf...")
+
+    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v52.0/composite/sobjects")
+      .param("ids", recordIds.mkString(","))
+      .param("allOrNone", "false")
+      .option(HttpOptions.readTimeout(30000))
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .method("DELETE")
+      .asString
+      .body
+
+    decode[Seq[WritebackToSFResponse.WritebackResponse]](responseBody)
   }
 
   def doSfCompositeRequest(
