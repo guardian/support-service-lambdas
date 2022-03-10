@@ -35,10 +35,14 @@ object Handler extends LazyLogging {
   def fetchQueueItemsFromSfAndThenExportEmailsToS3(sfAuthDetails: SfAuthDetails, config: Config): Unit = {
     for {
       queueItems <- fetchQueueItemsFromSf(sfAuthDetails, config)
-    } yield deleteQueueItemsAndThenExportEmailsFromSfToS3InBatches(sfAuthDetails, config, batchQueueItems(queueItems, batchSize = 200))
+    } yield deleteQueueItemsAndThenExportEmailsFromSfToS3InBatches(sfAuthDetails, config, queueItems.grouped(200).toList)
   }
 
-  def deleteQueueItemsAndThenExportEmailsFromSfToS3InBatches(sfAuthDetails: SfAuthDetails, config: Config, batchedQueueItems: Seq[Seq[QueueItemsFromSfResponse.QueueItem]]): Any = { //Either[CustomFailure, Seq[QueueItemsFromSfResponse.QueueItem]] = {
+  def deleteQueueItemsAndThenExportEmailsFromSfToS3InBatches(
+    sfAuthDetails: SfAuthDetails,
+    config: Config,
+    batchedQueueItems: Seq[Seq[QueueItemsFromSfResponse.QueueItem]]
+  ): Any = {
 
     batchedQueueItems.map { queueItemBatch =>
       deleteQueueItems(sfAuthDetails, queueItemBatch.map(record => record.Id))
@@ -51,7 +55,11 @@ object Handler extends LazyLogging {
     }
   }
 
-  def fetchBatchOfEmailsFromSfAndThenExportToS3(sfAuthDetails: SfAuthDetails, config: Config, emailIds: Seq[String]): Unit = {
+  def fetchBatchOfEmailsFromSfAndThenExportToS3(
+    sfAuthDetails: SfAuthDetails,
+    config: Config,
+    emailIds: Seq[String]
+  ): Unit = {
     val getEmailsAttempt = for {
       emailsFromSF <- getRecordsFromSF[EmailsFromSfResponse.Response](
         sfAuthDetails,
@@ -76,7 +84,11 @@ object Handler extends LazyLogging {
     }
   }
 
-  def saveBatchOfEmailsToS3AndThenWritebackSuccessesToSf(sfAuthDetails: SfAuthDetails, batchOfEmailsFromSf: EmailsFromSfResponse.Response, bucketName: String): Any = {
+  def saveBatchOfEmailsToS3AndThenWritebackSuccessesToSf(
+    sfAuthDetails: SfAuthDetails,
+    batchOfEmailsFromSf: EmailsFromSfResponse.Response,
+    bucketName: String
+  ): Any = {
     logger.info(s"Start processing ${batchOfEmailsFromSf.records.size} emails...")
 
     val emailIdsSuccessfullySavedToS3 = saveBatchOfEmailsToS3(batchOfEmailsFromSf, bucketName)
@@ -141,9 +153,8 @@ object Handler extends LazyLogging {
     }
   }
 
-  def batchQueueItems(queueItems: Seq[QueueItemsFromSfResponse.QueueItem], batchSize: Integer): Seq[Seq[QueueItemsFromSfResponse.QueueItem]] = {
+  def batchQueueItems(queueItems: Seq[QueueItemsFromSfResponse.QueueItem], batchSize: Integer): Seq[Seq[QueueItemsFromSfResponse.QueueItem]] =
     queueItems.grouped(batchSize).toList
-  }
 
   def deleteQueueItems(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Unit = {
     val deleteAttempts = for {
