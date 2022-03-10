@@ -8,10 +8,10 @@ import play.api.libs.json._
 
 object ZuoraCreditTransfer extends LazyLogging {
 
-  sealed trait AdjustmentType { def value: String }
+  sealed abstract class AdjustmentType(val value: String)
   object AdjustmentType {
-    case object Increase extends AdjustmentType { val value = "Increase" }
-    case object Decrease extends AdjustmentType { val value = "Decrease" }
+    case object Increase extends AdjustmentType("Increase")
+    case object Decrease extends AdjustmentType("Decrease")
   }
 
   case class CreditTransfer(
