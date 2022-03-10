@@ -98,17 +98,17 @@ object Handler extends LazyLogging {
 
         responseArray.map(responseArrayItem =>
 
-          responseArrayItem.success.getOrElse(None) match {
-            case true => {
+          responseArrayItem.success match {
+            case Some(true) => {
               logger.info(s"Successful write back to sf for record:${responseArrayItem.id}")
             }
-            case false => {
+            case Some(false) => {
               CustomFailure.toMetric(
                 "failed_writeback_to_sf_record",
                 s"Failed to write back to sf for record:$responseArrayItem"
               )
             }
-            case none => {
+            case None => {
               CustomFailure.toMetric(
                 "failed_writeback_request_to_sf",
                 s"Failed write back Request. errorCode(${responseArrayItem.errorCode}), message: ${responseArrayItem.message}"
