@@ -45,8 +45,8 @@ object AutoCancel extends Logging {
     val zuoraOp = for {
       _ <- zuoraUpdateCancellationReasonF(subToCancel).withLogging("updateCancellationReason")
       cancellationResponse <- zuoraCancelSubscriptionF(subToCancel, cancellationDate).withLogging("cancelSubscription")
-      creditTransferInvoice <- zuoraGetInvoiceF(cancellationResponse.invoiceId)
-      creditTransferAmount = -creditTransferInvoice.Balance
+      cancellationNegativeInvoice <- zuoraGetInvoiceF(cancellationResponse.invoiceId)
+      creditTransferAmount = -cancellationNegativeInvoice.Balance
       _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
       _ <- zuoraApplyCreditBalanceF(invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("applyCreditBalance")
     } yield ()
