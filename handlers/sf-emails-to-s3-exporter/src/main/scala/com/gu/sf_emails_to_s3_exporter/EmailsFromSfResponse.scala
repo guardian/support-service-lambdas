@@ -3,11 +3,11 @@ package com.gu.sf_emails_to_s3_exporter
 object EmailsFromSfResponse {
   case class Response(
     done: Boolean,
-    records: Seq[Records],
+    records: Seq[EmailRecord],
     nextRecordsUrl: Option[String] = None
   )
 
-  case class Records(
+  case class EmailRecord(
     Id: String,
     ParentId: String,
     FromAddress: String,
@@ -22,7 +22,7 @@ object EmailsFromSfResponse {
     Incoming: Boolean,
     LastOpenedDate: Option[String] = None,
     MessageDate: String,
-    Parent: Parent,
+    Parent: ParentCase,
     Status: String,
     Subject: Option[String] = None,
     TextBody: Option[String] = None,
@@ -31,7 +31,7 @@ object EmailsFromSfResponse {
     Resolve_on_Send__c: Boolean
   )
 
-  case class Parent(
+  case class ParentCase(
     CaseNumber: String,
     Id: String
   )

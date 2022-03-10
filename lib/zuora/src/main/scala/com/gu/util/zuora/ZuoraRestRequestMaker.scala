@@ -11,15 +11,11 @@ import play.api.libs.json._
 object ZuoraRestRequestMaker extends LazyLogging {
 
   def apply(response: Request => Response, config: ZuoraRestConfig): RestRequestMaker.Requests = {
-    val apiVersionHeader = config.apiMinorVersion match {
-      case None => Map()
-      case Some(version) => Map("zuora-version" -> version)
-    }
     new RestRequestMaker.Requests(
       headers = Map(
         "apiSecretAccessKey" -> config.password,
         "apiAccessKeyId" -> config.username
-      ) ++ apiVersionHeader,
+      ),
       baseUrl = config.baseUrl + "/", //TODO shouldn't have to add it
       getResponse = response,
       jsonIsSuccessful = zuoraIsSuccessful

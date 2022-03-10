@@ -7,7 +7,6 @@ case class ZuoraRestConfig(
   baseUrl: String,
   username: String,
   password: String,
-  apiMinorVersion: Option[String] = None,
 )
 
 object ZuoraRestConfig {
