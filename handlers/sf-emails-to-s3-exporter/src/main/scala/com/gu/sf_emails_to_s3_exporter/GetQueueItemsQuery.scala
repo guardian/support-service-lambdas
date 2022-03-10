@@ -2,7 +2,7 @@ package com.gu.sf_emails_to_s3_exporter
 
 object GetQueueItemsQuery {
   val query: String = {
-    s"""
+    """
        |SELECT
        | Id,
        | Record_Id__c
