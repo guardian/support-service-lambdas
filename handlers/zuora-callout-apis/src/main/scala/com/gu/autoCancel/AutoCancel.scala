@@ -16,7 +16,6 @@ object AutoCancel extends Logging {
     subToCancel: SubscriptionNumber,
     cancellationDate: LocalDate,
     invoiceId: String,
-    invoiceAmount: BigDecimal
   )
 
   def apply(requests: Requests)(acRequests: List[AutoCancelRequest], urlParams: AutoCancelUrlParams): ApiGatewayOp[Unit] = {
@@ -36,17 +35,20 @@ object AutoCancel extends Logging {
    * invoices should be 0.
    */
   private def executeCancel(requests: Requests, dryRun: Boolean)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
-    val AutoCancelRequest(accountId, subToCancel, cancellationDate, invoiceId, invoiceAmount) = acRequest
+    val AutoCancelRequest(accountId, subToCancel, cancellationDate, invoiceId) = acRequest
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}")
     val zuoraUpdateCancellationReasonF = if (dryRun) ZuoraUpdateCancellationReason.dryRun(requests) _ else ZuoraUpdateCancellationReason(requests) _
     val zuoraCancelSubscriptionF = if (dryRun) ZuoraCancelSubscription.dryRun(requests) _ else ZuoraCancelSubscription(requests) _
+    val zuoraGetInvoiceF = if (dryRun) ZuoraGetInvoice.dryRun(requests) _ else ZuoraGetInvoice(requests) _
     val zuoraTransferToCreditBalanceF = if (dryRun) TransferToCreditBalance.dryRun(requests) _ else TransferToCreditBalance(requests) _
     val zuoraApplyCreditBalanceF = if (dryRun) ApplyCreditBalance.dryRun(requests) _ else ApplyCreditBalance(requests) _
     val zuoraOp = for {
       _ <- zuoraUpdateCancellationReasonF(subToCancel).withLogging("updateCancellationReason")
       cancellationResponse <- zuoraCancelSubscriptionF(subToCancel, cancellationDate).withLogging("cancelSubscription")
-      _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, invoiceAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
-      _ <- zuoraApplyCreditBalanceF(invoiceId, invoiceAmount, "Auto-cancellation").withLogging("applyCreditBalance")
+      creditTransferInvoice <- zuoraGetInvoiceF(cancellationResponse.invoiceId)
+      creditTransferAmount = -creditTransferInvoice.Balance
+      _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
+      _ <- zuoraApplyCreditBalanceF(invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("applyCreditBalance")
     } yield ()
     zuoraOp.toApiGatewayOp("AutoCancel failed")
   }
