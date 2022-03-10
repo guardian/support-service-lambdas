@@ -2,9 +2,9 @@ package com.gu.sf_emails_to_s3_exporter
 
 object EmailsFromSfResponse {
   case class Response(
-     done: Boolean,
-     records: Seq[EmailRecord],
-     nextRecordsUrl: Option[String] = None
+    done: Boolean,
+    records: Seq[EmailRecord],
+    nextRecordsUrl: Option[String] = None
   )
 
   case class EmailRecord(
