@@ -45,12 +45,12 @@ object Handler extends LazyLogging {
   ): Any = {
 
     batchedQueueItems.map { queueItemBatch =>
-      deleteQueueItems(sfAuthDetails, queueItemBatch.map(record => record.Id))
+      deleteQueueItems(sfAuthDetails, queueItemBatch.map(_.Id))
 
       fetchBatchOfEmailsFromSfAndThenExportToS3(
         sfAuthDetails,
         config,
-        queueItemBatch.map(record => record.Record_Id__c)
+        queueItemBatch.map(_.Record_Id__c)
       )
     }
   }
