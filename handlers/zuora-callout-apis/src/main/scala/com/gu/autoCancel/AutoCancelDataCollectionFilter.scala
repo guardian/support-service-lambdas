@@ -32,7 +32,7 @@ object AutoCancelDataCollectionFilter extends Logging {
       invoiceAmount <- getInvoiceBalance(invoiceId, accountSummary).withLogging("getInvoiceBalance")
     } yield subsToCancel
       .map { subToCancel =>
-        AutoCancelRequest(accountId, subToCancel, cancellationDate, autoCancelCallout.invoiceId, invoiceAmount)
+        AutoCancelRequest(accountId, subToCancel, cancellationDate, invoiceId, invoiceAmount)
       }
   }
 
