@@ -35,10 +35,10 @@ object Handler extends LazyLogging {
   def fetchQueueItemsFromSfAndThenExportEmailsToS3(sfAuthDetails: SfAuthDetails, config: Config): Unit = {
     for {
       queueItems <- fetchQueueItemsFromSf(sfAuthDetails, config)
-    } yield deleteQueueItemsExportEmailsFromSfToS3InBatches(sfAuthDetails, config, batchQueueItems(queueItems, batchSize = 2000))
+    } yield deleteQueueItemsAndThenExportEmailsFromSfToS3InBatches(sfAuthDetails, config, batchQueueItems(queueItems, batchSize = 2000))
   }
 
-  def deleteQueueItemsExportEmailsFromSfToS3InBatches(sfAuthDetails: SfAuthDetails, config: Config, batchedQueueItems: Seq[Seq[QueueItemsFromSfResponse.QueueItem]]): Any = { //Either[CustomFailure, Seq[QueueItemsFromSfResponse.QueueItem]] = {
+  def deleteQueueItemsAndThenExportEmailsFromSfToS3InBatches(sfAuthDetails: SfAuthDetails, config: Config, batchedQueueItems: Seq[Seq[QueueItemsFromSfResponse.QueueItem]]): Any = { //Either[CustomFailure, Seq[QueueItemsFromSfResponse.QueueItem]] = {
 
     batchedQueueItems.map { queueItemBatch =>
       deleteQueueItems(sfAuthDetails, queueItemBatch.map(record => record.Id))
