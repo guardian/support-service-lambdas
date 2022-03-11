@@ -84,7 +84,7 @@ object Dependencies {
    * These dependencies should be removed as soon as the direct dependency they are consumed
    * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
    */
-  val nettyCodec = "io.netty" % "netty-codec" % "4.1.74.Final"
+  val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
   /*
    * End of vulnerability fixes
    * ===============================================================================================
