@@ -5,6 +5,8 @@ import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, NotFound}
+import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
 import com.gu.util.zuora._
 
 import java.time.LocalDate
@@ -40,17 +42,34 @@ object AutoCancel extends Logging {
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}")
     val zuoraUpdateCancellationReasonF = if (dryRun) ZuoraUpdateCancellationReason.dryRun(requests) _ else ZuoraUpdateCancellationReason(requests) _
     val zuoraCancelSubscriptionF = if (dryRun) ZuoraCancelSubscription.dryRun(requests) _ else ZuoraCancelSubscription(requests) _
-    val zuoraGetInvoiceF = if (dryRun) ZuoraGetInvoice.dryRun(requests) _ else ZuoraGetInvoice(requests) _
+    val zuoraGetAccountSummaryF = if (dryRun) ZuoraGetAccountSummary.dryRun(requests) _ else ZuoraGetAccountSummary(requests) _
     val zuoraTransferToCreditBalanceF = if (dryRun) TransferToCreditBalance.dryRun(requests) _ else TransferToCreditBalance(requests) _
     val zuoraApplyCreditBalanceF = if (dryRun) ApplyCreditBalance.dryRun(requests) _ else ApplyCreditBalance(requests) _
     val zuoraOp = for {
       _ <- zuoraUpdateCancellationReasonF(subToCancel).withLogging("updateCancellationReason")
       cancellationResponse <- zuoraCancelSubscriptionF(subToCancel, cancellationDate).withLogging("cancelSubscription")
-      cancellationNegativeInvoice <- zuoraGetInvoiceF(cancellationResponse.invoiceId)
-      creditTransferAmount = -cancellationNegativeInvoice.Balance
+      accountSummary <- zuoraGetAccountSummaryF(accountId)
+      invoicesToBalance <- InvoicesToBalance.fromAccountSummary(accountSummary)
+      creditTransferAmount = -invoicesToBalance.negativeInvoice.balance
       _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
-      _ <- zuoraApplyCreditBalanceF(overdueInvoiceId, creditTransferAmount, "Auto-cancellation").withLogging("applyCreditBalance")
+      _ <- zuoraApplyCreditBalanceF(invoicesToBalance.unpaidInvoices, "Auto-cancellation").withLogging("applyCreditBalance")
     } yield ()
     zuoraOp.toApiGatewayOp("AutoCancel failed")
+  }
+
+  case class InvoicesToBalance(negativeInvoice: Invoice, unpaidInvoices: Seq[Invoice])
+
+  object InvoicesToBalance {
+    def fromAccountSummary(accountSummary: AccountSummary):ClientFailableOp[InvoicesToBalance] =
+      for {
+        negativeInvoice <- accountSummary.invoices.find(_.balance < 0) match {
+          case None => NotFound(s"No negative invoice in account ${ accountSummary.basicInfo.id }")
+          case Some(invoice) => ClientSuccess(invoice)
+        }
+        unpaidInvoices <- accountSummary.invoices.filter(_.balance > 0) match {
+           case Nil => NotFound(s"No unpaid invoices in account ${ accountSummary.basicInfo.id }")
+           case invoices => ClientSuccess(invoices)
+         }
+      } yield InvoicesToBalance(negativeInvoice,unpaidInvoices)
   }
 }
