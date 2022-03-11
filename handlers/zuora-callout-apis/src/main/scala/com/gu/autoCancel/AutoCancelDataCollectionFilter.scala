@@ -1,7 +1,5 @@
 package com.gu.autoCancel
 
-import java.time.LocalDate
-
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
@@ -11,6 +9,8 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
 import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
+
+import java.time.LocalDate
 
 object AutoCancelDataCollectionFilter extends Logging {
 
@@ -32,7 +32,7 @@ object AutoCancelDataCollectionFilter extends Logging {
       cancellationDate <- getCancellationDateFromInvoice(invoiceId, accountSummary, now).withLogging("getCancellationDateFromInvoice")
     } yield subsToCancel
       .map { subToCancel =>
-        AutoCancelRequest(accountId, subToCancel, cancellationDate)
+        AutoCancelRequest(accountId, subToCancel, cancellationDate, invoiceId)
       }
   }
 

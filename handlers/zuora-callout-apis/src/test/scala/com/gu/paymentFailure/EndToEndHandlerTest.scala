@@ -165,7 +165,6 @@ object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
       |        "first_name": "eSAFaBwm4WJZNg5xhIc",
       |        "last_name": "eSAFaBwm4WJZNg5xhIc",
       |        "paymentId": "2c92c0f95fc912eb015fcb2a481720e6",
-      |        "price": "$49.00",
       |        "serviceStartDate": "17 November 2017",
       |        "serviceEndDate": "16 November 2018",
       |        "billing_address1": "billingAddress1Value",
@@ -257,7 +256,6 @@ object EndToEndData extends EndtoEndBaseData {
       |        "first_name": "eSAFaBwm4WJZNg5xhIc",
       |        "last_name": "eSAFaBwm4WJZNg5xhIc",
       |        "paymentId": "2c92c0f95fc912eb015fcb2a481720e6",
-      |        "price": "$49.00",
       |        "serviceStartDate": "17 November 2017",
       |        "serviceEndDate": "16 November 2018"
       |      }
