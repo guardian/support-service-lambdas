@@ -59,7 +59,7 @@ object AutoCancel extends Logging {
 
   case class InvoicesToBalance(negativeInvoice: Invoice, unpaidInvoices: Seq[Invoice])
 
-  object InvoicesToBalance {
+  object UnbalancedInvoices {
     def fromAccountSummary(accountSummary: AccountSummary):ClientFailableOp[InvoicesToBalance] =
       for {
         negativeInvoice <- accountSummary.invoices.find(_.balance < 0) match {
