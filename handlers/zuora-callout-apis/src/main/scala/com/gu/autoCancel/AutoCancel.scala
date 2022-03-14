@@ -51,7 +51,7 @@ object AutoCancel extends Logging {
       unbalancedInvoices <- UnbalancedInvoices.fromAccountSummary(accountSummary, cancellationResponse.invoiceId)
       creditTransferAmount = -unbalancedInvoices.negativeInvoice.balance
       _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
-      _ <- zuoraApplyCreditBalanceF(unbalancedInvoices.unpaidInvoices, "Auto-cancellation").withLogging("applyCreditBalance")
+      _ <- zuoraApplyCreditBalanceF(unbalancedInvoices.unpaidInvoices, creditTransferAmount, "Auto-cancellation").withLogging("applyCreditBalance")
     } yield ()
     zuoraOp.toApiGatewayOp("AutoCancel failed")
   }

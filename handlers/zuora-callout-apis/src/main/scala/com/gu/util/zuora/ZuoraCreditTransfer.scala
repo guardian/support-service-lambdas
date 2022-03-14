@@ -1,7 +1,7 @@
 package com.gu.util.zuora
 
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError}
 import com.gu.util.zuora.ZuoraCreditTransfer.AdjustmentType
 import com.gu.util.zuora.ZuoraGetAccountSummary.Invoice
 import com.typesafe.scalalogging.LazyLogging
@@ -58,17 +58,22 @@ object ApplyCreditBalance extends LazyLogging {
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
 
-  def apply(requests: Requests)(invoices: Seq[Invoice], comment: String): ClientFailableOp[Unit] =
-    invoices.map(invoice =>
-      applyToInvoice(requests)(invoice.id, invoice.balance, comment)).collectFirst { case failure: ClientFailure => failure }
-      .getOrElse(ClientSuccess(()))
+  def apply(requests: Requests)(invoices: Seq[Invoice], creditAvailable: Double, comment: String): ClientFailableOp[Unit] = {
+    val totalUnpaidInvoiceBalance = invoices.map(_.balance).sum
+    if (totalUnpaidInvoiceBalance > creditAvailable)
+      GenericError(s"Credit available, $creditAvailable, not enough to cover unpaid invoices balance $totalUnpaidInvoiceBalance")
+    else
+      invoices.map(invoice =>
+        applyToInvoice(requests)(invoice.id, invoice.balance, comment)).collectFirst { case failure: ClientFailure => failure }
+        .getOrElse(ClientSuccess(()))
+  }
 
   private def applyToInvoice(requests: Requests)(invoiceId: String, amount: Double, comment: String): ClientFailableOp[Unit] = {
     val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Decrease, comment)
     requests.post(body, path)
   }
 
-  def dryRun(requests: Requests)(invoices: Seq[Invoice], comment: String): ClientFailableOp[Unit] = {
+  def dryRun(requests: Requests)(invoices: Seq[Invoice], creditAvailable: Double, comment: String): ClientFailableOp[Unit] = {
     invoices.foreach(invoice =>
       dryRunOnInvoice(requests)(invoice.id, invoice.balance, comment))
     ClientSuccess(())
