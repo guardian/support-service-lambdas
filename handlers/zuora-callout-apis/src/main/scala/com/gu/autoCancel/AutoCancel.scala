@@ -49,7 +49,7 @@ object AutoCancel extends Logging {
       _ <- zuoraUpdateCancellationReasonF(subToCancel).withLogging("updateCancellationReason")
       cancellationResponse <- zuoraCancelSubscriptionF(subToCancel, cancellationDate).withLogging("cancelSubscription")
       accountSummary <- zuoraGetAccountSummaryF(accountId)
-      invoicesToBalance <- InvoicesToBalance.fromAccountSummary(accountSummary)
+      invoicesToBalance <- UnbalancedInvoices.fromAccountSummary(accountSummary)
       creditTransferAmount = -invoicesToBalance.negativeInvoice.balance
       _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
       _ <- zuoraApplyCreditBalanceF(invoicesToBalance.unpaidInvoices, "Auto-cancellation").withLogging("applyCreditBalance")
@@ -57,10 +57,10 @@ object AutoCancel extends Logging {
     zuoraOp.toApiGatewayOp("AutoCancel failed")
   }
 
-  case class InvoicesToBalance(negativeInvoice: Invoice, unpaidInvoices: Seq[Invoice])
+  case class UnbalancedInvoices(negativeInvoice: Invoice, unpaidInvoices: Seq[Invoice])
 
   object UnbalancedInvoices {
-    def fromAccountSummary(accountSummary: AccountSummary):ClientFailableOp[InvoicesToBalance] =
+    def fromAccountSummary(accountSummary: AccountSummary):ClientFailableOp[UnbalancedInvoices] =
       for {
         negativeInvoice <- accountSummary.invoices.find(_.balance < 0) match {
           case None => NotFound(s"No negative invoice in account ${ accountSummary.basicInfo.id }")
@@ -70,6 +70,6 @@ object AutoCancel extends Logging {
            case Nil => NotFound(s"No unpaid invoices in account ${ accountSummary.basicInfo.id }")
            case invoices => ClientSuccess(invoices)
          }
-      } yield InvoicesToBalance(negativeInvoice,unpaidInvoices)
+      } yield UnbalancedInvoices(negativeInvoice,unpaidInvoices)
   }
 }
