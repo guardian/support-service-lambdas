@@ -10,7 +10,7 @@ object EmailsFromSfResponse {
   case class EmailRecord(
     Id: String,
     ParentId: String,
-    FromAddress: String,
+    FromAddress: Option[String] = None,
     BccAddress: Option[String] = None,
     CcAddress: Option[String] = None,
     FirstOpenedDate: Option[String] = None,
@@ -26,7 +26,7 @@ object EmailsFromSfResponse {
     Status: String,
     Subject: Option[String] = None,
     TextBody: Option[String] = None,
-    ToAddress: String,
+    ToAddress: Option[String] = None,
     Composite_Key__c: Option[String] = None,
     Resolve_on_Send__c: Boolean
   )
