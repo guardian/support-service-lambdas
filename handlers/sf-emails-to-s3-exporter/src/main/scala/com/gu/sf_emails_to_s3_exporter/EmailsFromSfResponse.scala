@@ -21,7 +21,7 @@ object EmailsFromSfResponse {
     IsExternallyVisible: Boolean,
     Incoming: Boolean,
     LastOpenedDate: Option[String] = None,
-    MessageDate: String,
+    MessageDate: Option[String] = None,
     Parent: ParentCase,
     Status: String,
     Subject: Option[String] = None,
