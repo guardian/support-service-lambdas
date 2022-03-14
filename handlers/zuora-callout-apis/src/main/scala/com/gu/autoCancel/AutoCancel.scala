@@ -17,7 +17,6 @@ object AutoCancel extends Logging {
     accountId: String,
     subToCancel: SubscriptionNumber,
     cancellationDate: LocalDate,
-    invoiceId: String,
   )
 
   def apply(requests: Requests)(acRequests: List[AutoCancelRequest], urlParams: AutoCancelUrlParams): ApiGatewayOp[Unit] = {
@@ -38,7 +37,7 @@ object AutoCancel extends Logging {
    * invoices should be 0.
    */
   private def executeCancel(requests: Requests, dryRun: Boolean)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
-    val AutoCancelRequest(accountId, subToCancel, cancellationDate, overdueInvoiceId) = acRequest
+    val AutoCancelRequest(accountId, subToCancel, cancellationDate) = acRequest
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}")
     val zuoraUpdateCancellationReasonF = if (dryRun) ZuoraUpdateCancellationReason.dryRun(requests) _ else ZuoraUpdateCancellationReason(requests) _
     val zuoraCancelSubscriptionF = if (dryRun) ZuoraCancelSubscription.dryRun(requests) _ else ZuoraCancelSubscription(requests) _
