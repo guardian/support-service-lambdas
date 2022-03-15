@@ -46,10 +46,8 @@ failed_to_authenticate_with_sf
 #### Description
 The user credentials associated with the Lambda do not return a bearer token needed to query for records. 
 No records are retrievable without a bearer token. 
-
 #### Impact
 Emails will accrue in Salesforce.
-
 #### Potential Root Causes and Fixes
 ##### Root Cause
 Running user is inactive or credentials expired
@@ -88,10 +86,8 @@ failed_s3_check_file_exists
 #### Description  
 The lambda will check to see if a file with name matching case number exists in S3. If 
 it does not exist, the lambda will create the file
-
 #### Impact
 Could result in duplicate files being created in S3
-
 #### Potential Root Causes and Fixes
 ##### Root Cause
 Permissions issue for the Account and related S3 bucket
@@ -102,7 +98,6 @@ Ensure the Lambda has permissions to list files in S3 bucket
 failed_s3_write_file
 #### Impact
 Emails will not be saved to S3 and will accrue in Salesforce
-
 #### Potential Root Causes and Fixes
 ##### Root Cause
 Permissions issue for the Account and related S3 bucket
@@ -113,22 +108,18 @@ Ensure the Lambda has permissions to put files in S3 bucket
 failed_writeback_request_to_sf
 #### Description
 The composite request to update multiple email records to indicate a successful export fails, so none of the records in the request body will be updated.
-
 #### Impact
    - If persistent, emails will accrue in Salesforce. 
    - If sporadic, emails should be picked up in subsequent runs of the exporter
-
 #### Potential Root Causes and Fixes
 ##### Root Cause
 Running user does not have access to a field in the request body
 ##### Fix
 Apply edit permissions to running user via permission set or profile
-
 ##### Root Cause
 API version is deprecated
 ##### Fix
 Update api version in environment variable
-
 ##### Root Cause
 Read time out
 ##### Fix
@@ -141,7 +132,6 @@ failed_writeback_to_sf_record
    - An email has been saved to S3 but the success of the operation has not been written back to the record in Salesforce.
 #### Impact
 Dependent on the reason for the error.
-
 #### Potential Root Causes and Fixes
 #### Root Cause
 Record has been deleted in Salesforce
