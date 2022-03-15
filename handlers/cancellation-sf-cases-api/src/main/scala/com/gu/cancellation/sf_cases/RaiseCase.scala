@@ -8,9 +8,9 @@ import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, SfOb
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
 import com.gu.salesforce.cases.SalesforceCase.GetMostRecentCaseByContactId.TGetMostRecentCaseByContactId
-import com.gu.salesforce.cases.SalesforceCase.{CaseId, CaseSubject, CaseWithId, ContactId, SubscriptionId}
+import com.gu.salesforce.cases.SalesforceCase.{CaseId, CaseSubject, CaseWithId, ContactId}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.reader.Types.{ApiGatewayOp, _}
+import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{JsonHttp, Types}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
@@ -31,8 +31,6 @@ object RaiseCase {
 
   final case class ContactIdContainer(Id: String)
   implicit val readsContactIdContainer = Json.reads[ContactIdContainer]
-  final case class SubscriptionIdContainer(Id: String)
-  implicit val readsSubscriptionIdContainer = Json.reads[SubscriptionIdContainer]
 
   case class RaiseCaseDetail(
     product: ProductName,
