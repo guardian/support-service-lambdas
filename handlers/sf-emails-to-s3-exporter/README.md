@@ -39,6 +39,8 @@ Performs 3 high level Operations:
 - failed_writeback_request_to_sf
 - failed_writeback_to_sf_record
 
+## Related Documentation
+[Shared Google Drive Folder: Sf Emails to S3](https://drive.google.com/drive/folders/1vSEIsatZ3DA3YQwGq0my8Gg5byDmTiOj?usp=sharing)
 ## Troubleshooting
 
 ### Metric
