@@ -3,9 +3,9 @@
 ## Description
 Performs 3 high level Operations:
 
-1. Exports emails from Salesforce to S3 (Lambda)
-2. Imports emails from S3 back into Salesforce (API Gateway - GET)
-3. Deletes emails in S3 (API Gateway - POST)
+1. Exports emails from Salesforce to S3 ([Lambda](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/export-emails-from-sf-to-s3-PROD?tab=monitoring), [Handler](https://github.com/guardian/support-service-lambdas/blob/main/handlers/sf-emails-to-s3-exporter/src/main/scala/com/gu/sf_emails_to_s3_exporter/Handler.scala))
+2. Imports emails from S3 back into Salesforce ([API Gateway](https://eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1#/apis/0gtc3s8dj8/resources/btpon2gw75) - [GET](https://eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1#/apis/0gtc3s8dj8/resources/zreeh2/methods/GET))
+3. Deletes emails in S3 ([API Gateway](https://eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1#/apis/0gtc3s8dj8/resources/btpon2gw75) - [POST](https://eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1#/apis/0gtc3s8dj8/resources/u147ua/methods/POST))
 
 ## Operations
 1. Exports emails from Salesforce to S3 (Lambda)
