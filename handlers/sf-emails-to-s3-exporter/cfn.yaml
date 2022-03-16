@@ -15,12 +15,14 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      Schedule: 'rate(15 minutes)'
+      Schedule1: 'rate(cron(00 03 * * ? *))'
+      Schedule2: 'rate(cron(30 03 * * ? *))'
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
       ToLowerCase: prod
     DEV:
-      Schedule: 'rate(365 days)'
+      Schedule1: 'rate(365 days)'
+      Schedule2: 'rate(364 days)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
       ToLowerCase: dev
