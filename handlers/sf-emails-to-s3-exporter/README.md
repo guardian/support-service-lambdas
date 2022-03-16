@@ -44,7 +44,8 @@ Performs 3 high level Operations:
 [Shared Google Drive Folder: Sf Emails to S3](https://drive.google.com/drive/folders/1vSEIsatZ3DA3YQwGq0my8Gg5byDmTiOj?usp=sharing)
 
 ## Related PRs
-[Pull Requests](https://github.com/guardian/salesforce/pulls?q=label%3A%22Emails+to+S3%22)
+[Salesforce](https://github.com/guardian/salesforce/pulls?q=label%3A%22Emails+to+S3%22)
+[AWS] (https://github.com/guardian/support-service-lambdas/pulls?q=label%3A%22Emails+to+S3%22+)
 
 ## Troubleshooting
 
