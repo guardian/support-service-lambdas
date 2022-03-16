@@ -15,10 +15,12 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
+      Schedule: 'rate(15 minutes)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
       ToLowerCase: prod
     DEV:
+      Schedule: 'rate(365 days)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
       ToLowerCase: dev
@@ -322,6 +324,13 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+      Events:
+        ScheduledRun:
+          Type: Schedule
+          Properties:
+            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule ]
+            Description: Runs SF Emails to S3 Exporter
+            Enabled: True
 
   failedS3WriteFileAlarm:
     Type: AWS::CloudWatch::Alarm
