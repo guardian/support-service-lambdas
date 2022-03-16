@@ -31,20 +31,25 @@ Performs 3 high level Operations:
         - Email Deletion when the emails are over 18 months old
 
 ## Metrics
-- failed_to_authenticate_with_sf
-- failed_to_get_records_from_sf
-- failed_s3_get_file
-- failed_s3_check_file_exists
-- failed_s3_write_file
-- failed_writeback_request_to_sf
-- failed_writeback_to_sf_record
+- [failed_to_authenticate_with_sf](#metricfailed_to_authenticate_with_sf)
+- [failed_to_get_records_from_sf](#metricfailed_to_get_records_from_sf)
+- [failed_s3_get_file](#metricfailed_s3_check_file_exists)
+- [failed_s3_check_file_exists](#metricfailed_s3_check_file_exists)
+- [failed_s3_write_file](#metricfailed_s3_write_file)
+- [failed_writeback_request_to_sf](#metricfailed_writeback_request_to_sf)
+- [failed_writeback_to_sf_record](#metricfailed_writeback_to_sf_record)
+
 
 ## Related Documentation
 [Shared Google Drive Folder: Sf Emails to S3](https://drive.google.com/drive/folders/1vSEIsatZ3DA3YQwGq0my8Gg5byDmTiOj?usp=sharing)
+
+## Related PRs
+[Pull Requests](https://github.com/guardian/salesforce/pulls?q=label%3A%22Emails+to+S3%22)
+
 ## Troubleshooting
 
-### Metric
-failed_to_authenticate_with_sf
+###Metric:failed_to_authenticate_with_sf
+
 #### Description
 The user credentials associated with the Lambda do not return a bearer token needed to query for records. 
 No records are retrievable without a bearer token. 
@@ -56,8 +61,9 @@ Running user is inactive or credentials expired
 ##### Fix
 Inspect the credentials associated with the running user and verify that the user is active.
 
-### Metric
-failed_to_get_records_from_sf
+---
+
+###Metric:failed_to_get_records_from_sf
 #### Impact
 Emails will accrue in Salesforce
 #### Potential Root Causes and Fixes
@@ -83,8 +89,8 @@ Permissions issue for the Account and related S3 bucket
 ##### Fix
 Ensure the Lambda has permissions to get files in S3 bucket
 
-### Metric
-failed_s3_check_file_exists
+---
+###Metric:failed_s3_check_file_exists
 #### Description  
 The lambda will check to see if a file with name matching case number exists in S3. If 
 it does not exist, the lambda will create the file
@@ -96,8 +102,8 @@ Permissions issue for the Account and related S3 bucket
 ##### Fix
 Ensure the Lambda has permissions to list files in S3 bucket
 
-### Metric
-failed_s3_write_file
+---
+###Metric:failed_s3_write_file
 #### Impact
 Emails will not be saved to S3 and will accrue in Salesforce
 #### Potential Root Causes and Fixes
@@ -106,8 +112,8 @@ Permissions issue for the Account and related S3 bucket
 ##### Fix
 Ensure the Lambda has permissions to put files in S3 bucket
 
-### Metric
-failed_writeback_request_to_sf
+---
+###Metric:failed_writeback_request_to_sf
 #### Description
 The composite request to update multiple email records to indicate a successful export fails, so none of the records in the request body will be updated.
 #### Impact
@@ -127,8 +133,8 @@ Read time out
 ##### Fix
 Try running the query in postman to determine time taken to return results. Optimise query if needed. Can also try just running the lambda again as once in a while a time out may occur.
 
-### Metric
-failed_writeback_to_sf_record
+---
+###Metric:failed_writeback_to_sf_record
 #### Description
    - An individual record update from the composite request has failed. 
    - An email has been saved to S3 but the success of the operation has not been written back to the record in Salesforce.
@@ -140,3 +146,4 @@ Record has been deleted in Salesforce
 #### Fix
 Depending on the reason the record was deleted in Salesforce, it may be necessary to delete the email content in the relevant file in S3
 
+---
