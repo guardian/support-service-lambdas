@@ -8,7 +8,7 @@ Performs 3 high level Operations:
 3. Deletes emails in S3 ([API Gateway](https://eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1#/apis/0gtc3s8dj8/resources/btpon2gw75) - [POST](https://eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1#/apis/0gtc3s8dj8/resources/u147ua/methods/POST))
 
 ## Operations
-1. Exports emails from Salesforce to S3 (Lambda)
+1. Exports emails from Salesforce to S3 (Lambda) [Diagram](https://docs.google.com/drawings/d/197oBtt4WTpiGfka4bDgKd4aEzKQ9du_IXXF5HW--yp0/edit?usp=sharing)
     - Queries for a maximum of 2000 Email Ids from the Async Process Records object in SF
     - Groups the emails Ids into batches of 200
     - For each group of 200 ids
