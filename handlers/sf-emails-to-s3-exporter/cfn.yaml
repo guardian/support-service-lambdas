@@ -330,10 +330,16 @@ Resources:
         ScheduledRun:
           Type: Schedule
           Properties:
-            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule ]
+            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule1 ]
             Description: Runs SF Emails to S3 Exporter
             Enabled: True
+        ScheduledRun:
+          Type: Schedule
+          Properties:
+            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule2 ]
+            Description: Runs SF Emails to S3 Exporter
 
+            Enabled: True
   failedS3WriteFileAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
