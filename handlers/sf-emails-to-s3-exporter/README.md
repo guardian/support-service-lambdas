@@ -48,7 +48,7 @@ Performs 3 high level Operations:
 
 ## Troubleshooting
 
-###Metric:failed_to_authenticate_with_sf
+### Metric:failed_to_authenticate_with_sf
 
 #### Description
 The user credentials associated with the Lambda do not return a bearer token needed to query for records. 
@@ -63,7 +63,7 @@ Inspect the credentials associated with the running user and verify that the use
 
 ---
 
-###Metric:failed_to_get_records_from_sf
+### Metric:failed_to_get_records_from_sf
 #### Impact
 Emails will accrue in Salesforce
 #### Potential Root Causes and Fixes
@@ -90,7 +90,7 @@ Permissions issue for the Account and related S3 bucket
 Ensure the Lambda has permissions to get files in S3 bucket
 
 ---
-###Metric:failed_s3_check_file_exists
+### Metric:failed_s3_check_file_exists
 #### Description  
 The lambda will check to see if a file with name matching case number exists in S3. If 
 it does not exist, the lambda will create the file
@@ -103,7 +103,7 @@ Permissions issue for the Account and related S3 bucket
 Ensure the Lambda has permissions to list files in S3 bucket
 
 ---
-###Metric:failed_s3_write_file
+### Metric:failed_s3_write_file
 #### Impact
 Emails will not be saved to S3 and will accrue in Salesforce
 #### Potential Root Causes and Fixes
@@ -113,7 +113,7 @@ Permissions issue for the Account and related S3 bucket
 Ensure the Lambda has permissions to put files in S3 bucket
 
 ---
-###Metric:failed_writeback_request_to_sf
+### Metric:failed_writeback_request_to_sf
 #### Description
 The composite request to update multiple email records to indicate a successful export fails, so none of the records in the request body will be updated.
 #### Impact
@@ -134,7 +134,7 @@ Read time out
 Try running the query in postman to determine time taken to return results. Optimise query if needed. Can also try just running the lambda again as once in a while a time out may occur.
 
 ---
-###Metric:failed_writeback_to_sf_record
+### Metric:failed_writeback_to_sf_record
 #### Description
    - An individual record update from the composite request has failed. 
    - An email has been saved to S3 but the success of the operation has not been written back to the record in Salesforce.
