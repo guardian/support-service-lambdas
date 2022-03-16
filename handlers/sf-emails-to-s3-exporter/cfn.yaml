@@ -339,7 +339,7 @@ Resources:
             Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule2 ]
             Description: Runs SF Emails to S3 Exporter
             Enabled: True
-            
+
   failedS3WriteFileAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
@@ -362,7 +362,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedS3CheckFileExistsAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -386,7 +386,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedS3GetFileAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -410,7 +410,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedWritebackToSFRequestAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -434,7 +434,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedWritebackToSFRecordAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -458,7 +458,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedToRetrieveEmailsFromSalesforceAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -482,7 +482,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedToAuthenticateWithSalesforceAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -506,4 +506,4 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
