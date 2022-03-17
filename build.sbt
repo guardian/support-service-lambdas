@@ -265,6 +265,7 @@ def lambdaProject(projectName: String, projectDescription: String, dependencies:
 // FIXME: Why is riff-raff not refering to CF?
 lazy val `zuora-callout-apis` = library(project in file("handlers/zuora-callout-apis"))
   .enablePlugins(RiffRaffArtifact)
+  .settings(libraryDependencies += scalaMock)
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = lambdaProject("identity-backfill", "links subscriptions with identity accounts", Seq(supportInternationalisation)).dependsOn(
