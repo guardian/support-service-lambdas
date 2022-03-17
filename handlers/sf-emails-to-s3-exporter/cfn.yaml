@@ -15,12 +15,12 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      Schedule: 'rate(15 minutes)'
+      Schedule: 'cron(00,30 03 * * ? *)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
       ToLowerCase: prod
     DEV:
-      Schedule: 'rate(365 days)'
+      Schedule: 'cron(00,30 03 * * ? *)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
       ToLowerCase: dev
@@ -354,7 +354,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedS3CheckFileExistsAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -378,7 +378,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedS3GetFileAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -402,7 +402,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedWritebackToSFRequestAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -426,7 +426,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedWritebackToSFRecordAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -450,7 +450,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedToRetrieveEmailsFromSalesforceAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -474,7 +474,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedToAuthenticateWithSalesforceAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -498,4 +498,4 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
