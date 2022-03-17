@@ -15,14 +15,12 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      Schedule1: 'rate(cron(00 03 * * ? *))'
-      Schedule2: 'rate(cron(30 03 * * ? *))'
+      Schedule: 'rate(cron(00,30 03 * * ? *))'
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
       ToLowerCase: prod
     DEV:
-      Schedule1: 'rate(365 days)'
-      Schedule2: 'rate(364 days)'
+      Schedule: 'rate(cron(00,30 03 * * ? *))'
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
       ToLowerCase: dev
@@ -330,13 +328,7 @@ Resources:
         ScheduledRun:
           Type: Schedule
           Properties:
-            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule1 ]
-            Description: Runs SF Emails to S3 Exporter
-            Enabled: True
-        ScheduledRun:
-          Type: Schedule
-          Properties:
-            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule2 ]
+            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule ]
             Description: Runs SF Emails to S3 Exporter
             Enabled: True
 
