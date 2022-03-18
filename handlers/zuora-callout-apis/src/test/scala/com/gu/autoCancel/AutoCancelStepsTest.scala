@@ -57,8 +57,8 @@ class AutoCancelStepsTest extends AnyFlatSpec with Matchers {
 
     val expected = Right(
       List(
-        AutoCancelRequest("accId123", SubscriptionNumber("A-S123"), LocalDate.now.minusDays(14), "inv123"),
-        AutoCancelRequest("accId123", SubscriptionNumber("A-S456"), LocalDate.now.minusDays(14), "inv123")
+        AutoCancelRequest("accId123", SubscriptionNumber("A-S123"), LocalDate.now.minusDays(14)),
+        AutoCancelRequest("accId123", SubscriptionNumber("A-S456"), LocalDate.now.minusDays(14))
       )
     )
 
