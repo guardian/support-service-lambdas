@@ -64,9 +64,11 @@ object AutoCancel extends Logging {
         case 0 => GenericError(s"Invoice ${invoice.id} has no items")
         case 1 => applyCreditBalance(invoice.id, invoice.balance, comment)
         case _ =>
-          invoice.invoiceItems.find(_.subscriptionName == subToCancel.value) match {
-            case None => GenericError(s"Invoice ${invoice.id} isn't for subscription $subToCancel")
-            case Some(item) => applyCreditBalance(invoice.id, item.chargeAmount, comment)
+          invoice.invoiceItems.filter(_.subscriptionName == subToCancel.value) match {
+            case Nil => GenericError(s"Invoice ${invoice.id} isn't for subscription $subToCancel")
+            case items =>
+              val amount = items.map(_.chargeAmount).sum
+              applyCreditBalance(invoice.id, amount, comment)
           }
       }).collectFirst { case failure: ClientFailure => failure }.getOrElse(ClientSuccess(()))
   }
