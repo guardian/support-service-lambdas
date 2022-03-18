@@ -19,6 +19,7 @@ import org.scalatest.{EitherValues, Inside}
 
 import java.time.LocalDate
 import scala.concurrent._
+import org.typelevel.ci._
 
 class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues {
 
@@ -195,7 +196,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       Request(
         method = Method.GET,
         Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-identity-id", identityId))
+        headers = Headers(Header("x-identity-id", identityId))Header.Rawci"x-identity-id"
       )
     ).value.unsafeRunSync().get
 
@@ -214,7 +215,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       Request(
         method = Method.GET,
         Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+        headers = Headers(Header("x-salesforce-contact-id", buyerContactId))Header.Rawci"x-salesforce-contact-id"
       )
     ).value.unsafeRunSync().get
 
@@ -248,7 +249,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
           path = s"/delivery-records/${subscriptionNumber}",
           query = Query("startDate" -> Some(startDate.toString), "endDate" -> Some(endDate.toString))
         ),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+        headers = Headers(Header("x-salesforce-contact-id", buyerContactId))Header.Rawci"x-salesforce-contact-id"
       )
     ).value.unsafeRunSync().get
 
@@ -270,7 +271,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       Request(
         method = Method.GET,
         Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+        headers = Headers(Header("x-salesforce-contact-id", buyerContactId))Header.Rawci"x-salesforce-contact-id"
       )
     ).value.unsafeRunSync().get
 
@@ -304,7 +305,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       Request(
         method = Method.POST,
         Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-identity-id", identityId)),
+        headers = Headers(Header("x-identity-id", identityId))Header.Rawci"x-identity-id",
       ).withEntity(
         createDeliveryProblemBody
       )
@@ -326,7 +327,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       Request(
         method = Method.GET,
         Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+        headers = Headers(Header("x-salesforce-contact-id", buyerContactId))Header.Rawci"x-salesforce-contact-id",
       ).withEntity(
         createDeliveryProblemBody
       )
@@ -348,7 +349,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       Request(
         method = Method.POST,
         Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-identity-id", identityId)),
+        headers = Headers(Header("x-identity-id", identityId))Header.Rawci"x-identity-id",
       ).withEntity(
         createDeliveryProblemBody
       )
@@ -367,7 +368,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       Request(
         method = Method.GET,
         Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+        headers = Headers(Header("x-salesforce-contact-id", buyerContactId))Header.Rawci"x-salesforce-contact-id"
       )
     ).value.unsafeRunSync().get
 
