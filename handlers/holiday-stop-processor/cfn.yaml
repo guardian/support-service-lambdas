@@ -89,7 +89,7 @@ Resources:
           InvoicingApiKey: !Sub '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiKey}}'
       Role:
         !GetAtt HolidayStopProcessorRole.Arn
-      MemorySize: 512
+      MemorySize: 1024
       Runtime: java8.al2
       Timeout: 900
     DependsOn:
