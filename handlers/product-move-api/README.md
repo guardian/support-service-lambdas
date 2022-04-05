@@ -1,5 +1,5 @@
 # Product move api
-This is a lambda API to take a subscription ID for a contribution
+This is an API, implemented by a lambda, to take a subscription ID for a contribution
 and move the subscription to be a digital subscription.
 It would be called from the backend, either manage-frontend or
 possibly support-frontend for acquisition channel based switches.
