@@ -410,7 +410,7 @@ lazy val `delivery-problem-credit-processor` = lambdaProject(
 
 lazy val `product-move-api` = lambdaProject(
   "product-move-api",
-  "moves a reader from one subscription to another.",
+  "moves a supporter from one product to another.",
   Seq(
     zio,
     awsEvents,
