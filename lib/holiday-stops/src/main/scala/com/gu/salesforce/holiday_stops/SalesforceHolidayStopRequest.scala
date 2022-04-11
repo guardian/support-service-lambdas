@@ -302,17 +302,20 @@ object SalesforceHolidayStopRequest extends Logging {
             if (holidayStopRequestDetail.Is_Actioned__c)
               Left("actioned publications cannot be deleted")
             else
-              Right(CompositePart(
-                method = "DELETE",
-                url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
-                referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
-                body = JsNull
-              ))
+              Right(
+                CompositePart(
+                  method = "DELETE",
+                  url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
+                  referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
+                  body = JsNull
+                )
+              )
           })
-      } yield CompositeRequest(
-        allOrNone = true,
-        compositeRequest = masterRecordToBePatched :: detailRecordsToBeAdded ++ detailRecordsToBeDeleted
-      )
+      } yield
+        CompositeRequest(
+          allOrNone = true,
+          compositeRequest = masterRecordToBePatched :: detailRecordsToBeAdded ++ detailRecordsToBeDeleted
+        )
     }
 
   }
