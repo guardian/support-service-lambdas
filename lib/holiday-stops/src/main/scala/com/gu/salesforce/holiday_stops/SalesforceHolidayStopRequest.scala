@@ -293,28 +293,26 @@ object SalesforceHolidayStopRequest extends Logging {
             ))(Json.writes[AddHolidayStopRequestDetailBody])
           )}
 
-      existingPublicationsThatWereToBeStopped
-        .filterNot(holidayStopRequestDetail =>
-          issuesData.map(_.issueDate).contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
-        )
-        .map( holidayStopRequestDetail => {
-          if(holidayStopRequestDetail.Is_Actioned__c){
-            Left("actioned publications cannot be deleted")
-          } else
-            Right(CompositePart(
-              method = "DELETE",
-              url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
-              referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
-              body = JsNull
-            ))
-        }).sequence.map { detailRecordsToBeDeleted =>
-
-          CompositeRequest(
-            allOrNone = true,
-            compositeRequest = masterRecordToBePatched :: detailRecordsToBeAdded ++ detailRecordsToBeDeleted
+      for {
+        detailRecordsToBeDeleted <- existingPublicationsThatWereToBeStopped
+          .filterNot(holidayStopRequestDetail =>
+            issuesData.map(_.issueDate).contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
           )
-
-      }
+          .traverse( holidayStopRequestDetail => {
+            if (holidayStopRequestDetail.Is_Actioned__c)
+              Left("actioned publications cannot be deleted")
+            else
+              Right(CompositePart(
+                method = "DELETE",
+                url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
+                referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
+                body = JsNull
+              ))
+          })
+      } yield CompositeRequest(
+        allOrNone = true,
+        compositeRequest = masterRecordToBePatched :: detailRecordsToBeAdded ++ detailRecordsToBeDeleted
+      )
     }
 
   }
