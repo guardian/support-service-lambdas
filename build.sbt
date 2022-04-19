@@ -164,11 +164,11 @@ lazy val handler = library(project in file("lib/handler"))
 lazy val effects = library(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ jacksonDependencies ++ logging
   )
 lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
-    libraryDependencies ++= Seq(awsS3) ++ logging
+    libraryDependencies ++= Seq(awsS3) ++ jacksonDependencies ++ logging
   )
 lazy val `effects-cloudwatch` = library(project in file("lib/effects-cloudwatch"))
   .dependsOn(testDep)
@@ -178,7 +178,7 @@ lazy val `effects-cloudwatch` = library(project in file("lib/effects-cloudwatch"
 lazy val `effects-sqs` = library(project in file("lib/effects-sqs"))
   .dependsOn(testDep)
   .settings(
-    libraryDependencies ++= Seq(awsSQS) ++ logging
+    libraryDependencies ++= Seq(awsSQS) ++ jacksonDependencies ++ logging
   )
 lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
   .dependsOn(testDep)
@@ -215,8 +215,8 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
       sttp,
       sttpCirce,
       scalatest,
-      diffx,
-    ) ++ logging
+      diffx
+    ) ++ jacksonDependencies ++ logging
   )
 
 lazy val `credit-processor` = library(project in file("lib/credit-processor"))
@@ -337,18 +337,18 @@ lazy val `sf-billing-account-remover` = lambdaProject(
 lazy val `soft-opt-in-consent-setter` = lambdaProject(
   "soft-opt-in-consent-setter",
   "sets or unsets soft opt in consents dependent on subscription product",
-  Seq(awsSecretsManager, circe, circeParser, scalatest, scalajHttp, awsS3, simpleConfig) ++ logging
+  Seq(awsSecretsManager, circe, circeParser, scalatest, scalajHttp, awsS3, simpleConfig) ++ jacksonDependencies ++ logging
 ).dependsOn(`effects-s3`, `effects-cloudwatch`, `salesforce-core`)
 
 lazy val `sf-emails-to-s3-exporter` = lambdaProject(
   "sf-emails-to-s3-exporter",
   "Runs regularly to retrieve emails from Salesforce and save as json in S3",
-  Seq(circe, circeParser, scalajHttp, awsS3)).dependsOn(`effects-s3`, `effects-cloudwatch`)
+  Seq(circe, circeParser, scalajHttp, awsS3) ++ jacksonDependencies).dependsOn(`effects-s3`, `effects-cloudwatch`)
 
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",
   "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
-  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3))
+  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3) ++ jacksonDependencies)
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
   "cancellation-sf-cases-api",
@@ -377,7 +377,7 @@ lazy val `sf-datalake-export` = lambdaProject(
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
   "Zuora to Datalake export using Stateful AQuA API which exports incremental changes",
-  Seq(scalaLambda, scalajHttp, awsS3, enumeratum))
+  Seq(scalaLambda, scalajHttp, awsS3, enumeratum) ++ jacksonDependencies)
 
 lazy val `batch-email-sender` = lambdaProject(
   "batch-email-sender",
@@ -388,7 +388,7 @@ lazy val `batch-email-sender` = lambdaProject(
 lazy val `holiday-stop-processor` = lambdaProject(
   "holiday-stop-processor",
   "Add a holiday credit amendment to a subscription.",
-  Seq(scalaLambda, awsS3)
+  Seq(scalaLambda, awsS3) ++ jacksonDependencies
 ).dependsOn(
   `credit-processor`,
   `holiday-stops` % "compile->compile;test->test",
