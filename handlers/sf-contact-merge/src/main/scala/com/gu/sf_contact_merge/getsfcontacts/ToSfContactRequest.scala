@@ -1,5 +1,6 @@
 package com.gu.sf_contact_merge.getsfcontacts
 
+import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import play.api.libs.json.Json
@@ -19,6 +20,6 @@ object ToSfContactRequest {
   )
   implicit val wireResultReads = Json.reads[WireResult]
 
-  def apply(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v43.0/sobjects/Contact/${sfContactId.value}"))
+  def apply(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sfContactId.value}"))
 
 }

@@ -4,6 +4,8 @@ import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 
 object SFTestEffects {
 
+  val salesforceApiVersion = "54.0"
+
   val authSuccessResponseBody: String =
     s"""
        |{
@@ -28,8 +30,8 @@ object SFTestEffects {
 
   def cancelSuccess(referenceId: String, price: Double) = (
     POSTRequest(
-      "/services/data/v38.0/composite/",
-      s"""{"allOrNone":true,"compositeRequest":[{"method":"PATCH","url":"/services/data/v29.0/sobjects/Holiday_Stop_Requests_Detail__c/HSD-1","referenceId":"CANCEL DETAIL : $referenceId","body":{"Actual_Price__c":$price,"Charge_Code__c":"ManualRefund_Cancellation"}}]}"""
+      s"/services/data/v$salesforceApiVersion/composite/",
+      s"""{"allOrNone":true,"compositeRequest":[{"method":"PATCH","url":"/services/data/v$salesforceApiVersion/sobjects/Holiday_Stop_Requests_Detail__c/HSD-1","referenceId":"CANCEL DETAIL : $referenceId","body":{"Actual_Price__c":$price,"Charge_Code__c":"ManualRefund_Cancellation"}}]}"""
     ),
       HTTPResponse(200, """{ "compositeResponse" : [ { "httpStatusCode": 200 } ]}""".stripMargin)
   )

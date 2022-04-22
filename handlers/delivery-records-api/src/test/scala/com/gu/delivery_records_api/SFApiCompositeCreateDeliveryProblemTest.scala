@@ -1,8 +1,8 @@
 package com.gu.delivery_records_api
 
 import java.time.{LocalDate, LocalDateTime}
-
 import com.gu.salesforce.IdentityId
+import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -49,7 +49,7 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
          |    {
          |      "referenceId" : "CaseCreation",
          |      "method" : "POST",
-         |      "url" : "/services/data/v29.0/sobjects/Case",
+         |      "url" : "/services/data/v$salesforceApiVersion/sobjects/Case",
          |      "body" : {
          |        "Contact" : {
          |          "IdentityID__c" : "123456789"
@@ -73,7 +73,7 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
          |    {
          |      "referenceId" : "LinkDeliveryRecord-deliveryRecordIdA",
          |      "method" : "PATCH",
-         |      "url" : "/services/data/v29.0/sobjects/Delivery__c/deliveryRecordIdA",
+         |      "url" : "/services/data/v$salesforceApiVersion/sobjects/Delivery__c/deliveryRecordIdA",
          |      "body" : {
          |        "Case__c" : "@{CaseCreation.id}",
          |        "Credit_Amount__c" : 1.23,
@@ -84,7 +84,7 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
          |    {
          |      "referenceId" : "LinkDeliveryRecord-deliveryRecordIdB",
          |      "method" : "PATCH",
-         |      "url" : "/services/data/v29.0/sobjects/Delivery__c/deliveryRecordIdB",
+         |      "url" : "/services/data/v$salesforceApiVersion/sobjects/Delivery__c/deliveryRecordIdB",
          |      "body" : {
          |        "Case__c" : "@{CaseCreation.id}",
          |        "Credit_Amount__c" : 3.21,
@@ -95,7 +95,7 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
          |    {
          |      "referenceId" : "UpdateContactPhoneNumbers",
          |      "method" : "PATCH",
-         |      "url" : "/services/data/v29.0/sobjects/Contact/id",
+         |      "url" : "/services/data/v$salesforceApiVersion/sobjects/Contact/id",
          |      "body" : {
          |        "Id" : null,
          |        "Phone" : "1234567890",

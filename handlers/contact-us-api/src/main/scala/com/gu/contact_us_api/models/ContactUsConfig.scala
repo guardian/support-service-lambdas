@@ -4,6 +4,8 @@ case class ContactUsConfig(clientID: String, clientSecret: String, username: Str
 
 object ContactUsConfig {
 
+  val salesforceApiVersion = "54.0"
+
   val env: Either[ContactUsError, ContactUsConfig] = {
     (for {
       clientID <- sys.env.get("clientID")
@@ -20,7 +22,7 @@ object ContactUsConfig {
       password,
       token,
       s"https://$authDomain/services/oauth2/token",
-      s"https://$reqDomain/services/data/v43.0/composite/",
+      s"https://$reqDomain/services/data/v$salesforceApiVersion/composite/",
     )).toRight(ContactUsError("Environment", "Could not obtain all environment variables."))
   }
 
