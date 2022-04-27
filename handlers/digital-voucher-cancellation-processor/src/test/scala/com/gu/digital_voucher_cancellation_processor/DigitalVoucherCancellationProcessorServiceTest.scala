@@ -21,6 +21,8 @@ import scala.concurrent.ExecutionContext
 
 class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Matchers {
 
+  val salesforceApiVersion = "54.0"
+
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
   val authConfig = SFAuthConfig(
@@ -45,10 +47,10 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
 
   def voucherToCancelQueryResult(resultId: String) = DigitalVoucherQueryResult(
     s"digital-voucher-id-$resultId",
-    CObjectAttribues(s"/services/data/v29.0/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId"),
+    CObjectAttribues(s"/services/data/v$salesforceApiVersion/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId"),
     SubscriptionQueryResult(
       s"sf-subscription-id-$resultId",
-      CObjectAttribues(s"/services/data/v29.0/sobjects/SF_Subscription__c/sf-subscription-id-$resultId")
+      CObjectAttribues(s"/services/data/v$salesforceApiVersion/sobjects/SF_Subscription__c/sf-subscription-id-$resultId")
     )
   )
 
@@ -56,7 +58,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
     SFApiCompositePart(
       s"digital-voucher-id-$resultId",
       "PATCH",
-      s"/services/data/v29.0/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId",
+      s"/services/data/v$salesforceApiVersion/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId",
       DigitalVoucherUpdate(now, "Deactivated")
     )
   }
