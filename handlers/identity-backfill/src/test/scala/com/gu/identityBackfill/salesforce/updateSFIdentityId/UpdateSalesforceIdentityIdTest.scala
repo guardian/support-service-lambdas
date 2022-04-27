@@ -2,6 +2,7 @@ package com.gu.identityBackfill.salesforce.updateSFIdentityId
 
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
 import play.api.libs.json.{JsObject, JsString}
@@ -14,7 +15,7 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
 
     val actual = UpdateSalesforceIdentityId.toRequest(SFContactId("contactsf"), IdentityId("identityid"))
     val expectedJson = JsObject(Seq("IdentityID__c" -> JsString("identityid")))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }

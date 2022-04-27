@@ -1,7 +1,5 @@
 package com.gu.identityBackfill
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse, POSTRequest}
 import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.identity.GetByEmailTest.TestData.dummyIdentityResponse
@@ -9,13 +7,16 @@ import com.gu.identityBackfill.EndToEndData._
 import com.gu.identityBackfill.Runner._
 import com.gu.identityBackfill.salesforce.getContact.GetSFContactSyncCheckFieldsTest
 import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityIdData, GetZuoraAccountsForEmailData}
+import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.auth.SalesforceAuthenticateData
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
 import org.scalatest.Assertion
-import play.api.libs.json.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.Json
+
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
 
@@ -34,7 +35,7 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
     responseString jsonMatches expectedResponse
 
     requests should be(List(
-      BasicRequest("GET", ("/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+      BasicRequest("GET", (s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
         "WHERE AccountId = %27crmId%27").replace(" ", "%20"), ""),
       BasicRequest("POST", "/services/oauth2/token", "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
         "&password=passSFpasswordtokentokenSFtoken&grant_type=password"),
@@ -61,9 +62,9 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
     responseString jsonMatches expectedResponse
 
     requests should be(List(
-      BasicRequest("PATCH", "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB", """{"IdentityID__c":"1234"}"""),
+      BasicRequest("PATCH", s"/services/data/v$salesforceApiVersion/sobjects/Contact/00110000011AABBAAB", """{"IdentityID__c":"1234"}"""),
       BasicRequest("PUT", "/accounts/2c92a0fb4a38064e014a3f48f1663ad8", """{"IdentityId__c":"1234"}"""),
-      BasicRequest("GET", ("/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+      BasicRequest("GET", (s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
         "WHERE AccountId = %27crmId%27").replace(" ", "%20"), ""),
       BasicRequest("POST", "/services/oauth2/token", "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
         "&password=passSFpasswordtokentokenSFtoken&grant_type=password"),
@@ -112,7 +113,7 @@ object EndToEndData {
   def responsesGetSFContactSyncCheckFieldsTest: Map[String, HTTPResponse] = {
 
     Map(
-      ("/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+      (s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
         "WHERE AccountId = %27crmId%27").replace(" ", "%20") ->
         HTTPResponse(200, GetSFContactSyncCheckFieldsTest.dummyContact)
     )

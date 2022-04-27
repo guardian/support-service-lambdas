@@ -2,14 +2,16 @@ package com.gu.salesforce
 
 object SalesforceConstants {
 
-  private val sfApiBaseUrl = "/services/data/v29.0"
+  val salesforceApiVersion = "54.0"
 
-  val soqlQueryBaseUrl: String = sfApiBaseUrl + "/query/"
+  private val sfApiBaseUrl = s"/services/data/v$salesforceApiVersion"
 
-  val sfObjectsBaseUrl: String = sfApiBaseUrl + "/sobjects/"
+  val soqlQueryBaseUrl: String = s"$sfApiBaseUrl/query/"
 
-  val compositeBaseUrl: String = "/services/data/v38.0/composite/"
+  val sfObjectsBaseUrl: String = s"$sfApiBaseUrl/sobjects/"
 
-  val compositeTreeBaseUrl: String = compositeBaseUrl + "tree/"
+  val compositeBaseUrl: String = s"$sfApiBaseUrl/composite/"
+
+  val compositeTreeBaseUrl: String = s"${compositeBaseUrl}tree/"
 
 }

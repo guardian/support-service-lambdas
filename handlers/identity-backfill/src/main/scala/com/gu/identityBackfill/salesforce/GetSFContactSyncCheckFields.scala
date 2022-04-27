@@ -3,6 +3,7 @@ package com.gu.identityBackfill.salesforce
 import com.gu.i18n.CountryGroup
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
+import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.TypesForSFEffectsData.{SFAccountId, SFContactId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types
@@ -39,7 +40,7 @@ object GetSFContactSyncCheckFields {
   def toRequest(sfAccountId: SFAccountId) =
     GetRequest(
       RelativePath(
-        s"/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+        s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
           s"WHERE AccountId = '${sfAccountId.value}'"
       )
     )
