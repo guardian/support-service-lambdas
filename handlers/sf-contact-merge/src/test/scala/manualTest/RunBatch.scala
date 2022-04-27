@@ -19,7 +19,7 @@ object RunBatch {
   this is run to process a batch manually that's been extracted from postman
 
   run this first in postman for some suitable date range:
-  {{instance_url}}/services/data/v{{salesforce_api_version}}/query?q=SELECT+Scenario_Type__c,+Recent_Contact_Creation_Date__c,+Json_For_Zuora__c+from+Duplicate_Contact__c+WHERE+Recent_Contact_Creation_Date__c+<+2016-06-16T00:00:00.000Z+AND+Scenario_Type__c+!=+null+AND+No_Of_Billing_Accounts__c+>=+2+ORDER+BY+Recent_Contact_Creation_Date__c
+  {{instance_url}}/services/data/v43.0/query?q=SELECT+Scenario_Type__c,+Recent_Contact_Creation_Date__c,+Json_For_Zuora__c+from+Duplicate_Contact__c+WHERE+Recent_Contact_Creation_Date__c+<+2016-06-16T00:00:00.000Z+AND+Scenario_Type__c+!=+null+AND+No_Of_Billing_Accounts__c+>=+2+ORDER+BY+Recent_Contact_Creation_Date__c
 
   Then run this script with args <sf-contact-merge-apikey> <queryResultFileName>
   If you're using intellij it's easier to just run it once using the green arrow, then use the drop down at the top saying RunBatch to

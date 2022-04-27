@@ -6,7 +6,7 @@ case class CustomFailure(message: String)
 
 object CustomFailure extends LazyLogging {
 
-  def toMetric(eventName: String, message: String): CustomFailure = {
+  def toMetric(eventName: String, message:String): CustomFailure = {
     logger.error(s"CustomFailure.toMetric message: $message | eventName: $eventName")
     Metrics.put(event = eventName)
     CustomFailure(message)

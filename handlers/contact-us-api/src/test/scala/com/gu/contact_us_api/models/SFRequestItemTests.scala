@@ -1,6 +1,5 @@
 package com.gu.contact_us_api.models
 
-import com.gu.contact_us_api.models.ContactUsConfig.salesforceApiVersion
 import com.gu.contact_us_api.models.ContactUsTestVars._
 import io.circe.Json
 import io.circe.syntax._
@@ -8,12 +7,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class SFRequestItemTests extends AnyFlatSpec with should.Matchers {
-
   private val method = "POST"
-  private val caseUrl = s"/services/data/v$salesforceApiVersion/sobjects/Case/"
+  private val caseUrl = "/services/data/v20.0/sobjects/Case/"
   private val caseReferenceId = "newCase"
 
-  private val attachmentUrl = s"/services/data/v$salesforceApiVersion/sobjects/Attachment/"
+  private val attachmentUrl = "/services/data/v20.0/sobjects/Attachment/"
   private val attachmentReferenceId = "newAttachment"
 
   private val caseReqBaseJson = Json.obj(

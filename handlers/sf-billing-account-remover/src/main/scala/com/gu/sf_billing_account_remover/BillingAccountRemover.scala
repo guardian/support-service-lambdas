@@ -11,9 +11,6 @@ import scalaj.http._
 import scala.util.Try
 
 object BillingAccountRemover extends App with LazyLogging {
-
-  val salesforceApiVersion = "54.0"
-
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
 
@@ -172,7 +169,7 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/query/")
+    Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
       .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
@@ -189,7 +186,7 @@ object BillingAccountRemover extends App with LazyLogging {
 
     Try {
       Http(
-        s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/composite/sobjects"
+        s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
       ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
         .put(jsonBody)

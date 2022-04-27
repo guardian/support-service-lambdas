@@ -2,7 +2,6 @@ package com.gu.identityBackfill.salesforce.getContact
 
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.{ContactSyncCheckFields, ContactsByAccountIdQueryResponse}
-import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.TypesForSFEffectsData.SFAccountId
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import play.api.libs.json.{JsSuccess, Json}
@@ -15,7 +14,7 @@ class GetSFContactSyncCheckFieldsTest extends AnyFlatSpec with Matchers {
     val actual = GetSFContactSyncCheckFields.toRequest(SFAccountId("001g000000XrQcaAAF"))
     val expected = GetRequest(
       RelativePath(
-        s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+        "/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
           "WHERE AccountId = '001g000000XrQcaAAF'"
       )
     )
@@ -42,10 +41,8 @@ class GetSFContactSyncCheckFieldsTest extends AnyFlatSpec with Matchers {
 
 object GetSFContactSyncCheckFieldsTest {
 
-  val salesforceApiVersion = "54.0"
-
   val dummyContact: String =
-    s"""
+    """
       |{
       |    "totalSize": 1,
       |    "done": true,
@@ -53,7 +50,7 @@ object GetSFContactSyncCheckFieldsTest {
       |        {
       |            "attributes": {
       |                "type": "Contact",
-      |                "url": "/services/data/v$salesforceApiVersion/sobjects/Contact/00110000011AABBAAB"
+      |                "url": "/services/data/v43.0/sobjects/Contact/00110000011AABBAAB"
       |            },
       |            "Id": "00110000011AABBAAB",
       |            "RecordTypeId": "STANDARD_TEST_DUMMY",

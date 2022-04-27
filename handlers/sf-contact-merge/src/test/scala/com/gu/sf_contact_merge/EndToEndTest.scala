@@ -2,7 +2,6 @@ package com.gu.sf_contact_merge
 
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.effects.{FakeFetchString, TestingRawEffects}
-import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.config.Stage
@@ -166,8 +165,8 @@ object EndToEndTest {
 
   val mock = new TestingRawEffects(
     responses = Map(
-      s"/services/data/v$salesforceApiVersion/sobjects/Contact/newSFCont" -> HTTPResponse(200, newSFContResponse),
-      s"/services/data/v$salesforceApiVersion/sobjects/Contact/oldSFCont" -> HTTPResponse(200, oldSFContResponse)
+      "/services/data/v43.0/sobjects/Contact/newSFCont" -> HTTPResponse(200, newSFContResponse),
+      "/services/data/v43.0/sobjects/Contact/oldSFCont" -> HTTPResponse(200, oldSFContResponse)
     ),
     postResponses = Map(
       POSTRequest("/services/oauth2/token", sfAuthReq) -> HTTPResponse(200, sfAuthResponse),
@@ -175,8 +174,8 @@ object EndToEndTest {
       POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse),
       POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", updateAccountRequestBody, "PUT") -> updateAccountResponse,
       POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", updateAccountRequestBody, "PUT") -> updateAccountResponse,
-      POSTRequest(s"/services/data/v$salesforceApiVersion/sobjects/Contact/oldSFCont", removeIdentityBody, "PATCH") -> updateAccountResponse,
-      POSTRequest(s"/services/data/v$salesforceApiVersion/sobjects/Contact/newSFCont", addIdentityBody, "PATCH") -> updateAccountResponse
+      POSTRequest("/services/data/v43.0/sobjects/Contact/oldSFCont", removeIdentityBody, "PATCH") -> updateAccountResponse,
+      POSTRequest("/services/data/v43.0/sobjects/Contact/newSFCont", addIdentityBody, "PATCH") -> updateAccountResponse
     )
   )
 
