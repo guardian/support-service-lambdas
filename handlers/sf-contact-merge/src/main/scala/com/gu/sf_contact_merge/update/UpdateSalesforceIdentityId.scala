@@ -1,6 +1,5 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
@@ -60,7 +59,7 @@ object UpdateSalesforceIdentityId {
       contactUpdate.maybeOverwriteEmailAddress.map(_.value)
     )
 
-    val relativePath = RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sFContactId.value}")
+    val relativePath = RelativePath(s"/services/data/v43.0/sobjects/Contact/${sFContactId.value}")
     PatchRequest(wireRequest, relativePath)
   }
 

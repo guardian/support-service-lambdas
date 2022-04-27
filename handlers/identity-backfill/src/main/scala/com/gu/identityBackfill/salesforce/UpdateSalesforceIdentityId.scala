@@ -1,6 +1,5 @@
 package com.gu.identityBackfill.salesforce
 
-import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.resthttp.HttpOp
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
@@ -18,7 +17,7 @@ object UpdateSalesforceIdentityId {
 
   def toRequest(sFContactId: SFContactId, identityId: IdentityId): PatchRequest = {
     val wireRequest = WireRequest(identityId.value)
-    val relativePath = RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sFContactId.value}")
+    val relativePath = RelativePath(s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
     PatchRequest(wireRequest, relativePath)
   }
 

@@ -1,6 +1,5 @@
 package com.gu.contact_us_api.models
 
-import com.gu.contact_us_api.models.ContactUsConfig.salesforceApiVersion
 import io.circe.{Encoder, Json}
 
 trait SFRequestItem
@@ -20,9 +19,8 @@ object SFRequestItem {
 }
 
 object SFCaseRequest {
-
   val method = "POST"
-  val url = s"/services/data/v$salesforceApiVersion/sobjects/Case/"
+  val url = "/services/data/v20.0/sobjects/Case/"
   val referenceId = "newCase"
 
   implicit val encodeSFCaseRequest: Encoder[SFCaseRequest] = new Encoder[SFCaseRequest] {
@@ -53,9 +51,8 @@ object SFCaseRequest {
 }
 
 object SFAttachmentRequest {
-
   val method = "POST"
-  val url = s"/services/data/v$salesforceApiVersion/sobjects/Attachment/"
+  val url = "/services/data/v20.0/sobjects/Attachment/"
   val referenceId = "newAttachment"
 
   implicit val encodeSFAttachmentRequest: Encoder[SFAttachmentRequest] = new Encoder[SFAttachmentRequest] {
