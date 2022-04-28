@@ -71,7 +71,7 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
          |      }
          |    },
          |    {
-         |      "referenceId" : "LinkDeliveryRecord-deliveryRecordIdA",
+         |      "referenceId" : "LinkDeliveryRecord_deliveryRecordIdA",
          |      "method" : "PATCH",
          |      "url" : "/services/data/v$salesforceApiVersion/sobjects/Delivery__c/deliveryRecordIdA",
          |      "body" : {
@@ -82,7 +82,7 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
          |      }
          |    },
          |    {
-         |      "referenceId" : "LinkDeliveryRecord-deliveryRecordIdB",
+         |      "referenceId" : "LinkDeliveryRecord_deliveryRecordIdB",
          |      "method" : "PATCH",
          |      "url" : "/services/data/v$salesforceApiVersion/sobjects/Delivery__c/deliveryRecordIdB",
          |      "body" : {
