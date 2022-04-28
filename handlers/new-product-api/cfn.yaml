@@ -345,7 +345,31 @@ Resources:
         EvaluationPeriods: 1
         MetricName: 5XXError
         Namespace: AWS/ApiGateway
-        Period: 3600
+        Period: 900
         Statistic: Sum
-        Threshold: 5
+        Threshold: 6
+        TreatMissingData: notBreaching
+
+    4xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        AlarmName:
+          !Sub
+            - 4XX rate from ${ApiName}
+            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 4XXError
+        Namespace: AWS/ApiGateway
+        Period: 900
+        Statistic: Sum
+        Threshold: 6
         TreatMissingData: notBreaching
