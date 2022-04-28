@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.{Failure, Success}
 
-object Metrics extends LazyLogging{
+object Metrics extends LazyLogging {
 
   private val stage = sys.env.getOrElse("Stage", "DEV")
 
@@ -20,13 +20,13 @@ object Metrics extends LazyLogging{
         1.0
       )
     ) match {
-      case Failure(exception) => {
-        logger.warn(s"Error logging Metric $event. Error:", exception)
+        case Failure(exception) => {
+          logger.warn(s"Error logging Metric $event. Error:", exception)
+        }
+        case Success(_) => {
+          logger.info(s"Metric $event logged successfully")
+        }
       }
-      case Success(_) => {
-        logger.info(s"Metric $event logged successfully")
-      }
-    }
   }
 
 }
