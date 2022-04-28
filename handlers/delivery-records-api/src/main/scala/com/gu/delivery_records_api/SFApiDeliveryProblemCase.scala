@@ -116,7 +116,7 @@ object SFApiCompositeCreateDeliveryProblem {
         Priority = detail.priority
       )
     )) ++ detail.deliveryRecords.map(deliveryRecord => SFApiCompositePart[SFApiCompositePartBody](
-      referenceId = s"LinkDeliveryRecord-${deliveryRecord.id}",
+      referenceId = s"LinkDeliveryRecord_${deliveryRecord.id}",
       method = "PATCH",
       url = s"${sfObjectsBaseUrl}Delivery__c/${deliveryRecord.id}",
       body = SFApiLinkDeliveryRecord(
