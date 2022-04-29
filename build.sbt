@@ -70,13 +70,13 @@ lazy val zuora = library(project in file("lib/zuora"))
     effects % "test->test"
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest) ++ logging
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest) ++ jacksonDependencies ++ logging
   )
 
 lazy val `salesforce-core` = library(project in file("lib/salesforce/core"))
   .dependsOn(`config-core`)
   .settings(
-    libraryDependencies ++= Seq(playJson) ++ logging
+    libraryDependencies ++= Seq(playJson) ++ jacksonDependencies ++ logging
   )
 
 lazy val `salesforce-client` = library(project in file("lib/salesforce/client"))
@@ -88,7 +88,7 @@ lazy val `salesforce-client` = library(project in file("lib/salesforce/client"))
     `salesforce-core`
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging
+    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ jacksonDependencies ++ logging
   )
 
 lazy val `salesforce-sttp-client` = library(project in file("lib/salesforce/sttp-client"))
@@ -135,7 +135,7 @@ lazy val `holiday-stops` = library(project in file("lib/holiday-stops"))
 lazy val restHttp = library(project in file("lib/restHttp"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging
+    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ jacksonDependencies ++ logging
   )
 
 lazy val s3ConfigValidator = library(project in file("lib/s3ConfigValidator"))
@@ -157,7 +157,7 @@ lazy val s3ConfigValidator = library(project in file("lib/s3ConfigValidator"))
 lazy val handler = library(project in file("lib/handler"))
   .dependsOn(`effects-s3`, `config-core`)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest, awsLambda) ++ logging
+    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest, awsLambda) ++ jacksonDependencies ++ logging
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
@@ -190,7 +190,7 @@ lazy val `config-core` = library(project in file("lib/config-core"))
 
 lazy val `config-cats` = library(project in file("lib/config-cats"))
   .settings(
-    libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig, nettyCodec)
+    libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig, nettyCodec) ++ jacksonDependencies
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
