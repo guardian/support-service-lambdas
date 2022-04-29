@@ -6,7 +6,7 @@ import play.api.libs.json.Json
 case class ZuoraRestConfig(
   baseUrl: String,
   username: String,
-  password: String
+  password: String,
 )
 
 object ZuoraRestConfig {

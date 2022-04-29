@@ -29,7 +29,6 @@ object ToMessage {
               first_name = paymentFailureCallout.firstName,
               last_name = paymentFailureCallout.lastName,
               primaryKey = PaymentId(paymentFailureCallout.paymentId),
-              price = price(paymentFailureInformation.amount, paymentFailureCallout.currency),
               serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
               serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate),
               billing_address1 = paymentFailureCallout.billingDetails.address1,
@@ -63,7 +62,6 @@ object ToMessage {
               first_name = callout.firstName,
               last_name = callout.lastName,
               primaryKey = InvoiceId(callout.invoiceId),
-              price = price(paymentFailureInformation.amount, callout.currency),
               serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
               serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
             )
@@ -78,13 +76,6 @@ object ToMessage {
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")
 
   val decimalFormat = new DecimalFormat("###,###.00")
-
-  def price(amount: Double, currency: String): String = {
-    val formattedAmount: String = decimalFormat.format(decimal(amount))
-    val upperCaseCurrency = currency.toUpperCase
-    val symbol: String = currencySymbol.getOrElse(upperCaseCurrency, upperCaseCurrency)
-    symbol + formattedAmount
-  }
 
   def serviceDateFormat(d: LocalDate) = d.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
 

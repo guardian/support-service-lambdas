@@ -1,16 +1,15 @@
 package com.gu.autoCancel
 
-import java.time.LocalDate
-
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.time.LocalDate
 
 class AutoCancelStepsTest extends AnyFlatSpec with Matchers {
 

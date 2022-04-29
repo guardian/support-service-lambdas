@@ -3,7 +3,8 @@ package com.gu.sf_emails_to_s3_exporter
 import java.nio.charset.StandardCharsets
 
 import com.gu.effects.{AwsS3, Key, UploadToS3}
-import com.gu.sf_emails_to_s3_exporter.Handler.safely
+import com.gu.sf_emails_to_s3_exporter.EmailsFromSfResponse.EmailRecord
+import com.gu.sf_emails_to_s3_exporter.Handler.{safely, safelyWithMetric}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -18,7 +19,7 @@ import scala.util.{Failure, Success, Try}
 
 object S3Connector extends LazyLogging {
 
-  def saveEmailToS3(caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, String] = {
+  def saveEmailToS3(caseEmail: EmailRecord, bucketName: String): Either[CustomFailure, String] = {
 
     fileAlreadyExistsInS3(caseEmail.Parent.CaseNumber, bucketName) match {
 
@@ -29,7 +30,7 @@ object S3Connector extends LazyLogging {
 
         writeEmailsJsonToS3(
           caseEmail.Parent.CaseNumber,
-          Seq[EmailsFromSfResponse.Records](caseEmail).asJson.toString(),
+          Seq[EmailRecord](caseEmail).asJson.toString(),
           caseEmail.Id,
           bucketName
         )
@@ -59,7 +60,7 @@ object S3Connector extends LazyLogging {
   def fileAlreadyExistsInS3(fileName: String, bucketName: String): Either[CustomFailure, Boolean] = {
     logger.info(s"Checking if $fileName exists in S3...")
 
-    safely({
+    safelyWithMetric({
       val filesInS3MatchingFileName = AwsS3.client.listObjects(
         ListObjectsRequest.builder
           .bucket(bucketName)
@@ -71,15 +72,15 @@ object S3Connector extends LazyLogging {
         .map(
           objSummary => Key(objSummary.key)
         ).contains(Key(fileName))
-    })
+    })("failed_s3_check_file_exists")
   }
 
-  def emailsInS3File(caseEmail: EmailsFromSfResponse.Records, bucketName: String): Either[CustomFailure, Seq[EmailsFromSfResponse.Records]] = {
+  def emailsInS3File(caseEmail: EmailRecord, bucketName: String): Either[CustomFailure, Seq[EmailRecord]] = {
     logger.info(s"Retrieving emails from ${caseEmail.Parent.CaseNumber}... ")
 
     for {
       s3FileJsonBody <- getEmailsJsonFromS3File(caseEmail.Parent.CaseNumber, bucketName)
-      decodedEmails <- decode[Seq[EmailsFromSfResponse.Records]](s3FileJsonBody)
+      decodedEmails <- decode[Seq[EmailRecord]](s3FileJsonBody)
         .left
         .map(CustomFailure.fromThrowable)
     } yield decodedEmails
@@ -97,7 +98,12 @@ object S3Connector extends LazyLogging {
       case Left(ex) => { Left(ex) }
       case Right(value) => {
         value match {
-          case Failure(ex) => { Left(CustomFailure.fromThrowable(ex)) }
+          case Failure(ex) => {
+            Left(CustomFailure.fromThrowableToMetric(
+              ex,
+              "failed_s3_write_file"
+            ))
+          }
           case Success(success) => {
             logger.info(s"$fileName successfully saved to S3")
             Right(emailId)
@@ -116,14 +122,14 @@ object S3Connector extends LazyLogging {
   def getS3File(fileName: String, bucketName: String): Either[CustomFailure, ResponseInputStream[GetObjectResponse]] = {
     logger.info(s"Getting $fileName from S3")
 
-    safely(
+    safelyWithMetric({
       AwsS3.client.getObject(
         GetObjectRequest.builder
           .bucket(bucketName)
           .key(fileName)
           .build()
       )
-    )
+    })("failed_s3_get_file")
   }
 
   def generatePutRequestBody(caseEmailsJson: String): Either[CustomFailure, RequestBody] = {
@@ -155,10 +161,11 @@ object S3Connector extends LazyLogging {
   }
 
   def generateJsonForExistingFile(
-    emailsAlreadyInFile: Seq[EmailsFromSfResponse.Records],
-    newEmail: EmailsFromSfResponse.Records,
+    emailsAlreadyInFile: Seq[EmailRecord],
+    newEmail: EmailRecord,
     newEmailAlreadyExistsInFile: Boolean
   ): String = {
+    logger.info(s"${newEmail.Composite_Key__c} already exists in File: $newEmailAlreadyExistsInFile")
     logger.info(s"Generating json for ${newEmail.Composite_Key__c}... ")
 
     if (newEmailAlreadyExistsInFile) {

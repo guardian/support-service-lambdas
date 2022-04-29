@@ -1,10 +1,7 @@
 package com.gu.salesforce.holiday_stops
 
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, ZonedDateTime}
-import java.util.UUID
-
 import ai.x.play.json.Jsonx
+import cats.implicits._
 import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
@@ -19,6 +16,11 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, CustomError}
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import com.gu.zuora.subscription._
 import play.api.libs.json._
+
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZonedDateTime}
+import java.util.UUID
+
 
 object SalesforceHolidayStopRequest extends Logging {
 
@@ -261,9 +263,8 @@ object SalesforceHolidayStopRequest extends Logging {
       startDate: LocalDate,
       endDate: LocalDate,
       issuesData: List[IssueData],
-      existingPublicationsThatWereToBeStopped: List[HolidayStopRequestsDetail],
-      zuoraSubscription: Subscription
-    ): CompositeRequest = {
+      existingPublicationsThatWereToBeStopped: List[HolidayStopRequestsDetail]
+    ): Either[String, CompositeRequest] = {
 
       val masterRecordToBePatched = CompositePart(
         method = "PATCH",
@@ -292,26 +293,29 @@ object SalesforceHolidayStopRequest extends Logging {
             ))(Json.writes[AddHolidayStopRequestDetailBody])
           )}
 
-      val detailRecordsToBeDeleted = existingPublicationsThatWereToBeStopped
-        .filterNot(holidayStopRequestDetail =>
-          issuesData.map(_.issueDate).contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
-        )
-        .map( holidayStopRequestDetail => {
-          if(holidayStopRequestDetail.Is_Actioned__c){
-            throw new RuntimeException("actioned publications cannot be deleted")
-          }
-          CompositePart(
-            method = "DELETE",
-            url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
-            referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
-            body = JsNull
+      for {
+        detailRecordsToBeDeleted <- existingPublicationsThatWereToBeStopped
+          .filterNot(holidayStopRequestDetail =>
+            issuesData.map(_.issueDate).contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
           )
-        })
-
-      CompositeRequest(
-        allOrNone = true,
-        compositeRequest = masterRecordToBePatched :: detailRecordsToBeAdded ++ detailRecordsToBeDeleted
-      )
+          .traverse( holidayStopRequestDetail => {
+            if (holidayStopRequestDetail.Is_Actioned__c)
+              Left("actioned publications cannot be deleted")
+            else
+              Right(
+                CompositePart(
+                  method = "DELETE",
+                  url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
+                  referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
+                  body = JsNull
+                )
+              )
+          })
+      } yield
+        CompositeRequest(
+          allOrNone = true,
+          compositeRequest = masterRecordToBePatched :: detailRecordsToBeAdded ++ detailRecordsToBeDeleted
+        )
     }
 
   }

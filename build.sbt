@@ -265,6 +265,7 @@ def lambdaProject(projectName: String, projectDescription: String, dependencies:
 // FIXME: Why is riff-raff not refering to CF?
 lazy val `zuora-callout-apis` = library(project in file("handlers/zuora-callout-apis"))
   .enablePlugins(RiffRaffArtifact)
+  .settings(libraryDependencies += scalaMock)
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = lambdaProject("identity-backfill", "links subscriptions with identity accounts", Seq(supportInternationalisation)).dependsOn(
@@ -342,7 +343,7 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
 lazy val `sf-emails-to-s3-exporter` = lambdaProject(
   "sf-emails-to-s3-exporter",
   "Runs regularly to retrieve emails from Salesforce and save as json in S3",
-  Seq(circe, circeParser, scalajHttp, awsS3)).dependsOn(`effects-s3`)
+  Seq(circe, circeParser, scalajHttp, awsS3)).dependsOn(`effects-s3`, `effects-cloudwatch`)
 
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",

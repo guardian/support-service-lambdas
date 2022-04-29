@@ -1,6 +1,7 @@
 package com.gu.salesforce.cases
 
 import ai.x.play.json.Jsonx
+import com.gu.cancellation.sf_cases.RaiseCase.SubscriptionName
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
@@ -34,7 +35,7 @@ object SalesforceCase extends Logging {
 
     // NOTE : Case Owner is set by SF Rule based on Origin='Self Service'
     case class WireNewCase(
-      SF_Subscription__c: SubscriptionId,
+      Subscription_Name__c: SubscriptionName,
       ContactId: ContactId,
       Product__c: String,
       Journey__c: String,
@@ -80,16 +81,16 @@ object SalesforceCase extends Logging {
     private case class CaseQueryResponse(records: List[CaseWithCamelcaseId])
     private implicit val readsCases = Json.reads[CaseQueryResponse]
 
-    type TGetMostRecentCaseByContactId = (ContactId, SubscriptionId, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
+    type TGetMostRecentCaseByContactId = (ContactId, SubscriptionName, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
 
     def apply(
       get: HttpOp[RestRequestMaker.GetRequest, JsValue]
-    ): (ContactId, SubscriptionId, CaseSubject) => ClientFailableOp[Option[CaseWithId]] =
+    ): (ContactId, SubscriptionName, CaseSubject) => ClientFailableOp[Option[CaseWithId]] =
       get.setupRequestMultiArg(toRequest _).parse[CaseQueryResponse].map(toResponse).runRequestMultiArg
 
     def toRequest(
       contactId: ContactId,
-      subscriptionId: SubscriptionId,
+      subscriptionName: SubscriptionName,
       caseSubject: CaseSubject
     ): GetRequest = {
       val soqlQuery = s"SELECT Id " +
@@ -97,7 +98,7 @@ object SalesforceCase extends Logging {
         s"WHERE ContactId = '${contactId.value}' " +
         s"AND Origin = '$CASE_ORIGIN' " +
         s"AND CreatedDate = LAST_N_DAYS:3 " +
-        s"AND SF_Subscription__c = '${subscriptionId.value}' " +
+        s"AND Subscription_Name__c = '${subscriptionName.value}' " +
         s"AND Subject = '${caseSubject.value}' " +
         s"ORDER BY CreatedDate DESC " +
         s"LIMIT 1"
