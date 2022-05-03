@@ -412,13 +412,13 @@ lazy val `product-move-api` = lambdaProject(
   "product-move-api",
   "moves a supporter from one product to another.",
   Seq(
-    zio,
+    zio2,
     awsEvents,
     awsLambda,
-    "com.softwaremill.sttp.client3" %% "httpclient-backend-zio1" % "3.5.1"  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
+    "com.softwaremill.sttp.client3" %% "httpclient-backend-zio" % "3.5.2"  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
     awsS3,
-    "com.softwaremill.sttp.client3" %% "zio1-json" % "3.5.1",
-    "dev.zio" %% "zio-logging-slf4j" % "0.5.14"
+    "com.softwaremill.sttp.client3" %% "zio-json" % "3.5.2",
+    "dev.zio" %% "zio-logging-slf4j" % "2.0.0-RC8"
   )
 )
   .settings(scalaVersion := "3.1.1")

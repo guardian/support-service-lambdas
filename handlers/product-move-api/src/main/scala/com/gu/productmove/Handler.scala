@@ -2,7 +2,8 @@ package com.gu.productmove
 
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
-import com.gu.productmove.AwsS3.S3
+import com.gu.productmove
+import com.gu.productmove.AwsS3Live.S3
 import software.amazon.awssdk.auth.credentials.*
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
@@ -14,10 +15,8 @@ import sttp.client3.*
 import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
 import sttp.model.*
 import zio.*
-import zio.blocking.*
+import zio.ZIO.attemptBlocking
 import zio.json.*
-import zio.logging.*
-import zio.stream.ZTransducer
 
 object Handler extends RequestHandler[APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse] {
 
@@ -70,7 +69,7 @@ object Handler extends RequestHandler[APIGatewayV2HTTPEvent, APIGatewayV2HTTPRes
   override def handleRequest(input: APIGatewayV2HTTPEvent, context: Context): APIGatewayV2HTTPResponse =
     Runtime.default.unsafeRun(
       run(input)
-        .provideCustomLayer(AwsS3.live ++ SttpLayer.live ++ LoggingLayer.live)
+        .provide(AwsS3Live.layer, AwsCredentialsLive.layer, HttpClientZioBackend.layer())
     )
 
   case class ExpectedInput(dummy: Boolean)
@@ -99,9 +98,9 @@ object Handler extends RequestHandler[APIGatewayV2HTTPEvent, APIGatewayV2HTTPRes
     s"$basePath/$relativePath"
   }
 
-  def run(input: APIGatewayV2HTTPEvent): ZIO[Logging with S3 with Blocking with SttpClient, Nothing, APIGatewayV2HTTPResponse] = {
+  def run(input: APIGatewayV2HTTPEvent): ZIO[S3 with Any with SttpClient, Nothing, APIGatewayV2HTTPResponse] = {
     (for {
-      stage <- ZIO.effect(sys.env.getOrElse("Stage", "DEV")).mapError(_.toString)
+      stage <- ZIO.attempt(sys.env.getOrElse("Stage", "DEV")).mapError(_.toString)
       postData <- ZIO.fromEither(input.getBody.fromJson[ExpectedInput])
       zuoraConfig <- getConfig(stage)
       subscriptionNumber = "A-S00339056"//DEV - for testing locally
@@ -113,68 +112,74 @@ object Handler extends RequestHandler[APIGatewayV2HTTPEvent, APIGatewayV2HTTPRes
             "apiAccessKeyId" -> zuoraConfig.username
           ))
       ).mapError(_.toString)
-      _ <- log.info("PostData: " + postData.toString)
-      _ <- log.info("ZuoraConfig: " + zuoraConfig.toString)
-      _ <- log.info("Sub: " + sub.toString)
+      _ <- ZIO.log("PostData: " + postData.toString)
+      _ <- ZIO.log("ZuoraConfig: " + zuoraConfig.toString)
+      _ <- ZIO.log("Sub: " + sub.toString)
     } yield APIGatewayV2HTTPResponse.builder().withStatusCode(200).build())
       .catchAll { message =>
         for {
-          _ <- log.info(message)
+          _ <- ZIO.log(message)
         } yield APIGatewayV2HTTPResponse.builder().withStatusCode(500).build()
 
       }
   }
 
-  private def getConfig(stage: String): ZIO[Blocking with S3 with Logging, String, ZuoraRestConfig] =
+  private def getConfig(stage: String): ZIO[Any with S3, String, ZuoraRestConfig] =
   for {
-    fileContent <- AwsS3.getObject(bucket, key(stage)).mapError(_.toString)
+    fileContent <- AwsS3Live.getObject(bucket, key(stage)).mapError(_.toString)
     zuoraRestConfig <- ZIO.fromEither(summon[JsonDecoder[ZuoraRestConfig]].decodeJson(fileContent))
   } yield zuoraRestConfig
 
 }
 
-object AwsS3 {
+object AwsCredentialsLive {
 
   private val ProfileName = "membership"
 
   class InvalidCredentials(message: String) extends Exception
 
-  private val membershipProfile: ZManaged[Blocking, InvalidCredentials, ProfileCredentialsProvider] =
-    ZManaged
-      .fromAutoCloseable(IO.succeed(ProfileCredentialsProvider.create(ProfileName)))
-      .tapM(c =>
-        effectBlocking(c.resolveCredentials())
-          .mapError(err => InvalidCredentials(err.getMessage)))
+  private val membershipProfile: Layer[InvalidCredentials, ProfileCredentialsProvider] =
+    ZLayer.scoped {
+      ZIO.fromAutoCloseable(IO.attempt(ProfileCredentialsProvider.create(ProfileName)))
+        .tap(c => attemptBlocking(c.resolveCredentials()))
+        .mapError(err => InvalidCredentials(err.getMessage))
+    }
 
-  private val instanceProfile: ZManaged[Blocking, InvalidCredentials, InstanceProfileCredentialsProvider] =
-    ZManaged
-      .fromAutoCloseable(IO.succeed(InstanceProfileCredentialsProvider.create()))
-      .tapM(c =>
-        effectBlocking(c.resolveCredentials())
-          .mapError(err => InvalidCredentials(err.getMessage)))
+  private val lambdaCreds: Layer[InvalidCredentials, EnvironmentVariableCredentialsProvider] =
+    ZLayer.fromZIO {
+      IO.attempt(EnvironmentVariableCredentialsProvider.create())
+        .tap(c => attemptBlocking(c.resolveCredentials()))
+        .mapError(err => InvalidCredentials(err.getMessage))
+    }
 
-  private val managedCredentials: RManaged[Blocking, AwsCredentialsProvider] = membershipProfile <> instanceProfile
-  val live: RLayer[Blocking, S3] = ZLayer.fromManaged({
-    managedCredentials.flatMap({creds =>
-      ZManaged.fromAutoCloseable(
-        IO.succeed(
-          S3Client.builder()
-          .region(Region.EU_WEST_1)
-          .credentialsProvider(creds)
-          .build()
+  val layer: Layer[InvalidCredentials, AwsCredentialsProvider] = lambdaCreds <> membershipProfile
+
+}
+
+object AwsS3Live {
+
+  val layer: ZLayer[AwsCredentialsProvider, Throwable, productmove.AwsS3Live.S3] =
+    ZLayer.scoped {
+      ZIO.fromAutoCloseable(
+        ZIO.serviceWithZIO[AwsCredentialsProvider](creds =>
+          IO.attempt(
+            S3Client.builder()
+              .region(Region.EU_WEST_1)
+              .credentialsProvider(creds)
+              .build()
+          )
         )
       ).map(Service(_))
-    })
-  })
+    }
 
-  type S3 = Has[Service]
+  type S3 = Service
 
   class Service(s3Client: S3Client) {
 
 
     def getObject(bucket: String, key: String): Task[String] = {
 
-      ZIO.effect {
+      ZIO.attempt {
         val objectRequest: GetObjectRequest = GetObjectRequest
           .builder()
           .key(key)
@@ -188,20 +193,14 @@ object AwsS3 {
 
   }
 
-  def getObject(bucket: String, key: String): RIO[S3, String] = ZIO.accessM[S3](_.get.getObject(bucket, key))
+  def getObject(bucket: String, key: String): RIO[S3, String] = ZIO.environmentWithZIO[S3](_.get.getObject(bucket, key))
 
 }
 
-object SttpLayer {
-
-  val live: ZLayer[Any, Throwable, SttpClient] = HttpClientZioBackend.managed().toLayer
-
-}
-
-object LoggingLayer {
-  val live =
-    Logging.console(
-      logLevel = LogLevel.Info,
-      format = LogFormat.ColoredLogFormat()
-    ) >>> Logging.withRootLoggerName("my-component")//TODO
-}
+//object LoggingLayer {
+//  val live =
+//    Logging.console(
+//      logLevel = LogLevel.Info,
+//      format = LogFormat.ColoredLogFormat()
+//    ) >>> Logging.withRootLoggerName("my-component")//TODO
+//}
