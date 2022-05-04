@@ -341,10 +341,10 @@ object SalesforceHolidayStopRequest extends Logging {
       val requestDetailParts = holidayStopRequestsDetails
         .map { requestDetail =>
           CompositePart(
-            "PATCH",
-            s"$holidayStopRequestsDetailSfObjectsBaseUrl/${requestDetail.Id.value}",
-            "CANCEL DETAIL : " + idGenerator,
-            Json.toJson(CancelHolidayStopRequestDetailBody(requestDetail.Actual_Price__c, requestDetail.Charge_Code__c))
+            method = "PATCH",
+            url = s"$holidayStopRequestsDetailSfObjectsBaseUrl/${requestDetail.Id.value}",
+            referenceId = "CANCEL_DETAIL : " + idGenerator,
+            body = Json.toJson(CancelHolidayStopRequestDetailBody(requestDetail.Actual_Price__c, requestDetail.Charge_Code__c))
           )
         }
       CompositeRequest(
