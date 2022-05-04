@@ -284,7 +284,7 @@ object SalesforceHolidayStopRequest extends Logging {
           CompositePart(
             method = "POST",
             url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef",
-            referenceId = "CREATE DETAIL : " + UUID.randomUUID().toString,
+            referenceId = "CREATE_DETAIL : " + UUID.randomUUID().toString,
             body = Json.toJson(AddHolidayStopRequestDetailBody(
               Holiday_Stop_Request__c = holidayStopRequestId,
               Stopped_Publication_Date__c = issueData.issueDate,
