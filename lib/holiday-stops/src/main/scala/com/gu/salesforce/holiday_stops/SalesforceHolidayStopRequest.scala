@@ -306,7 +306,7 @@ object SalesforceHolidayStopRequest extends Logging {
                 CompositePart(
                   method = "DELETE",
                   url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
-                  referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
+                  referenceId = "DELETE_DETAIL : " + UUID.randomUUID().toString,
                   body = JsNull
                 )
               )
