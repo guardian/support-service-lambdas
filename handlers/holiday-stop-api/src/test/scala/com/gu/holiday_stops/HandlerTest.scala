@@ -24,7 +24,7 @@ import java.time.temporal.TemporalAdjusters.next
 import java.time.{DayOfWeek, LocalDate}
 
 class HandlerTest extends AnyFlatSpec with Matchers {
-  val testId = "test-generated-id"
+  val testId = "testGeneratedId"
 
   private val runtime = zio.Runtime.default
 
