@@ -284,7 +284,7 @@ object SalesforceHolidayStopRequest extends Logging {
           CompositePart(
             method = "POST",
             url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef",
-            referenceId = s"CREATE_DETAIL_${UUID.randomUUID().toString}",
+            referenceId = s"CREATE_DETAIL_${generateId()}",
             body = Json.toJson(AddHolidayStopRequestDetailBody(
               Holiday_Stop_Request__c = holidayStopRequestId,
               Stopped_Publication_Date__c = issueData.issueDate,
@@ -306,7 +306,7 @@ object SalesforceHolidayStopRequest extends Logging {
                 CompositePart(
                   method = "DELETE",
                   url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
-                  referenceId = s"DELETE_DETAIL_${UUID.randomUUID().toString}",
+                  referenceId = s"DELETE_DETAIL_${generateId()}",
                   body = JsNull
                 )
               )
@@ -343,7 +343,7 @@ object SalesforceHolidayStopRequest extends Logging {
           CompositePart(
             method = "PATCH",
             url = s"$holidayStopRequestsDetailSfObjectsBaseUrl/${requestDetail.Id.value}",
-            referenceId = s"CANCEL_DETAIL_$idGenerator",
+            referenceId = s"CANCEL_DETAIL_${idGenerator.replace("-","")}",
             body = Json.toJson(CancelHolidayStopRequestDetailBody(requestDetail.Actual_Price__c, requestDetail.Charge_Code__c))
           )
         }
@@ -363,4 +363,6 @@ object SalesforceHolidayStopRequest extends Logging {
         PatchRequest(WithdrawnTimePatch(), RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
       }.runRequest
   }
+
+  private def generateId() = UUID.randomUUID().toString.replace("-","")
 }
