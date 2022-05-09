@@ -85,6 +85,21 @@ object Dependencies {
    * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
    */
   val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
+
+  val jacksonVersion         = "2.13.2"
+  val jacksonDatabindVersion = "2.13.2.2"
+
+  val jacksonDependencies = Seq(
+    "com.fasterxml.jackson.core"     % "jackson-core" %  jacksonVersion,
+    "com.fasterxml.jackson.core"     % "jackson-annotations" %  jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" %  jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" %  jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonDatabindVersion,
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
+    "com.fasterxml.jackson.module"     % "jackson-module-parameter-names" % jacksonVersion,
+    "com.fasterxml.jackson.module"     %% "jackson-module-scala" % jacksonVersion,
+  )
+
   /*
    * End of vulnerability fixes
    * ===============================================================================================
