@@ -7,7 +7,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.17.103"
+  val awsSdkVersion = "2.17.180"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.5.0"
   val http4sVersion = "0.21.32"
@@ -69,7 +69,7 @@ object Dependencies {
   val zio2 = "dev.zio" %% "zio" % "2.0.0-RC5"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.0.1"
-  val stripe = "com.stripe" % "stripe-java" % "20.105.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.111.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.7.0" % Test
@@ -86,6 +86,21 @@ object Dependencies {
    * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
    */
   val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
+
+  val jacksonVersion         = "2.13.2"
+  val jacksonDatabindVersion = "2.13.2.2"
+
+  val jacksonDependencies = Seq(
+    "com.fasterxml.jackson.core"     % "jackson-core" %  jacksonVersion,
+    "com.fasterxml.jackson.core"     % "jackson-annotations" %  jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" %  jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" %  jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonDatabindVersion,
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
+    "com.fasterxml.jackson.module"     % "jackson-module-parameter-names" % jacksonVersion,
+    "com.fasterxml.jackson.module"     %% "jackson-module-scala" % jacksonVersion,
+  )
+
   /*
    * End of vulnerability fixes
    * ===============================================================================================
@@ -95,7 +110,7 @@ object Dependencies {
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
   val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
-    case PathList("module-info.class") => MergeStrategy.discard
+    case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
     /*

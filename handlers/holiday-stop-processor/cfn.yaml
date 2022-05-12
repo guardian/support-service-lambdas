@@ -89,7 +89,7 @@ Resources:
           InvoicingApiKey: !Sub '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiKey}}'
       Role:
         !GetAtt HolidayStopProcessorRole.Arn
-      MemorySize: 512
+      MemorySize: 1024
       Runtime: java8.al2
       Timeout: 900
     DependsOn:
@@ -112,12 +112,12 @@ Resources:
       Dimensions:
         - Name: FunctionName
           Value: !Ref HolidayStopProcessor
-      EvaluationPeriods: 1
+      EvaluationPeriods: 6
       MetricName: Errors
       Namespace: AWS/Lambda
-      Period: 4500
+      Period: 900
       Statistic: Sum
-      Threshold: 3
+      Threshold: 1
       TreatMissingData: notBreaching
     DependsOn:
       - HolidayStopProcessor
@@ -146,3 +146,13 @@ Resources:
     DependsOn:
       - HolidayStopProcessor
       - HolidayStopProcessorScheduleRule
+
+  # As processor runs every 20 mins anyway, there's no need to retry
+  HolidayStopProcessorRetryConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref HolidayStopProcessor
+      MaximumRetryAttempts: 0
+      Qualifier: '$LATEST'
+    DependsOn:
+      - HolidayStopProcessor
