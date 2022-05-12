@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Endpoints to handle product movement, initially recurring contribution to digi sub
+
+Parameters:
+  Stack:
+    Description: Stack name
+    Type: String
+    Default: membership
+  Stage:
+    Description: Set by RiffRaff on each deploy
+    Type: String
+    AllowedValues:
+      - CODE
+      - PROD
+  DeployBucket:
+    Description: Bucket to copy files to
+    Type: String
+    Default: membership-dist
+
+Conditions:
+  IsProd: !Equals [ !Ref Stage, "PROD" ]
+
+Resources:
+  ProductMoveApiLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub move-product-${Stage}
+      Description: A lambda for handling product movement API requests
+      Runtime: java8
+      Handler: com.gu.productmove.Handler::handleRequest
+      MemorySize: 1024
+      Timeout: 300
+      Environment:
+        Variables:
+          App: product-move-api
+          Stack: !Ref Stack
+          Stage: !Ref Stage
+      CodeUri:
+        Bucket: !Ref DeployBucket
+        Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      - Statement:
+          Effect: Allow
+          Action: s3:GetObject
+          Resource:
+            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+      - Statement:
+        - Effect: Allow
+          Action: s3:GetObject
+          Resource:
+            - arn:aws:s3::*:membership-dist/*
+      Events:
+        ProductMovement:
+            Type: Api
+            Properties:
+                Path: '/move-product'
+                Method: post
+
+# alarms go here
