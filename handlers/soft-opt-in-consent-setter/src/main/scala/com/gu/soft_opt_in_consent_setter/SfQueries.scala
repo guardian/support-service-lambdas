@@ -18,9 +18,19 @@ object SfQueries {
        |FROM
        |	SF_Subscription__c
        |WHERE
-       |	Soft_Opt_in_Status__c in ('Ready to process acquisition','Ready to process cancellation')
-       |ORDER BY
-       |  SF_Status__c, Acquisition_Date__c
+       |    Soft_Opt_in_Number_of_Attempts__c < 5 AND
+       |    Soft_Opt_in_Eligible__c = true AND
+       |    (
+       |        (
+       |            SF_Status__c = 'Active' AND
+       |            Soft_Opt_in_Last_Stage_Processed__c != 'Acquisition'
+       |        )
+       |        OR
+       |        (
+       |            SF_Status__c = 'Cancelled' AND
+       |            Soft_Opt_in_Last_Stage_Processed__c = 'Acquisition'
+       |        )
+       |    )
        |LIMIT
        |	$limit
     """.stripMargin
