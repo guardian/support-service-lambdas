@@ -1,9 +1,10 @@
-package com.gu.productmove.zuora
+package com.gu.productmove.zuora.rest
 
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.zuora.ZuoraClientLive.ZuoraRestConfig
-import com.gu.productmove.zuora.ZuoraRestBody.ZuoraSuccess
+import com.gu.productmove.zuora.rest.ZuoraClient
+import com.gu.productmove.zuora.rest.ZuoraClientLive.ZuoraRestConfig
+import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccess
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
@@ -11,7 +12,7 @@ import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
-import zio.{RIO, Task, ZIO, ZLayer}
+import zio.{IO, RIO, Task, ZIO, ZLayer}
 
 object ZuoraClientLive {
 
@@ -45,7 +46,7 @@ object ZuoraClientLive {
       _ <- ZIO.log("baseUrl: " + baseUrl.toString)
       sttpClient <- ZIO.service[SttpClient]
     } yield new ZuoraClient:
-      override def send[T](request: Request[T, ZioStreams with Effect[Task] with WebSockets]): ZIO[Any, String, Response[T]] = {
+      override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
         val absoluteUri = baseUrl.resolve(request.uri)
         sttpClient.send(
           request
@@ -54,7 +55,7 @@ object ZuoraClientLive {
               "apiAccessKeyId" -> zuoraRestConfig.username
             ))
             .copy(uri = absoluteUri)
-        ).mapError(_.toString)
+        ).mapError(_.toString).map(_.body).absolve
       }
     ZLayer.fromZIO(zuoraZio)
   }
@@ -63,17 +64,7 @@ object ZuoraClientLive {
 
 trait ZuoraClient {
 
-  def send[T](request: Request[T, ZioStreams with Effect[Task] with WebSockets]): ZIO[Any, String, Response[T]]
-
-}
-object ZuoraClient {
-
-  def get[T: JsonDecoder](relativeUrl: Uri): ZIO[ZuoraClient, String, Response[Either[String, T]]] =
-    ZIO.serviceWithZIO[ZuoraClient](_.send(
-      basicRequest
-        .get(relativeUrl)
-        .mapResponse(ZuoraRestBody.parseIfSuccessful[T])
-    ))
+  def send(request: Request[Either[String, String], Any]): IO[String, String]
 
 }
 
@@ -84,15 +75,14 @@ object ZuoraRestBody {
 
   case class ZuoraSuccess(success: Boolean)
 
-  def parseIfSuccessful[A: JsonDecoder](body: Either[String, String]): Either[String, A] = {
+  def parseIfSuccessful[A: JsonDecoder](body: String): Either[String, A] = {
     val successDecoder: JsonDecoder[ZuoraSuccess] = DeriveJsonDecoder.gen[ZuoraSuccess]
     for {
-      successBody <- body
-      zuoraSuccessFlag <- successDecoder.decodeJson(successBody)
+      zuoraSuccessFlag <- successDecoder.decodeJson(body)
       parsedResponse <-
         if (zuoraSuccessFlag.success)
-          successBody.fromJson[A]
-        else Left(successBody)
+          body.fromJson[A]
+        else Left(body)
     } yield parsedResponse
   }
 

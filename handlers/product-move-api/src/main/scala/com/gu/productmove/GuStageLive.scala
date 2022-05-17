@@ -1,6 +1,6 @@
 package com.gu.productmove
 
-import zio.{ZIO, ZLayer}
+import zio.{ZIO, ZLayer, System}
 
 object GuStageLive {
   enum Stage:
@@ -8,7 +8,7 @@ object GuStageLive {
 
   val layer: ZLayer[Any, String, Stage] = {
     val stageZIO: ZIO[Any, Throwable, Stage] = for {
-      stageString <- ZIO.attempt(sys.env.getOrElse("Stage", "DEV"))
+      stageString <- System.envOrElse("Stage", "DEV")
       stage <- ZIO.attempt(Stage.valueOf(stageString))
     } yield stage
     ZLayer.fromZIO(stageZIO.mapError(_.toString))

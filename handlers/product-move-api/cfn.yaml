@@ -27,7 +27,8 @@ Resources:
     Properties:
       FunctionName: !Sub move-product-${Stage}
       Description: A lambda for handling product movement API requests
-      Runtime: java8
+      Runtime: java11
+      Architectures: [arm64]
       Handler: com.gu.productmove.Handler::handleRequest
       MemorySize: 1024
       Timeout: 300
