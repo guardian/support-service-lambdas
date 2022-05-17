@@ -18,27 +18,18 @@ Mappings:
       IdentityStage: PROD
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: TouchpointUpdate
-      AppSecretsVersion: d338b761-cb81-4adf-aca4-163678e65a59
-      SalesforceUserSecretsVersion: 31220691-ba9c-44b8-9483-d7939e30779e
-      IdentityUserSecretsVersion: fe7df2e2-73a4-4d3f-9513-b8a6e7476aeb
     CODE:
       Schedule: 'rate(365 days)'
       SalesforceStage: CODE
       IdentityStage: CODE
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: AwsConnectorSandbox
-      AppSecretsVersion: 6fc22312-3ddb-4577-8a37-d58222a09db4
-      SalesforceUserSecretsVersion: 9d7777f6-78d7-4ec3-8c93-d4912ce6316e
-      IdentityUserSecretsVersion: ec3fd3ca-f237-4d2d-bbb2-0c9482e636c1
     DEV:
       Schedule: 'rate(365 days)'
       SalesforceStage: DEV
       IdentityStage: CODE
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: AwsConnectorSandbox
-      AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
-      SalesforceUserSecretsVersion: 08036ddd-9fc0-43b1-b478-4023a936751e
-      IdentityUserSecretsVersion: ec3fd3ca-f237-4d2d-bbb2-0c9482e636c1
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
@@ -62,50 +53,42 @@ Resources:
           sfApiVersion: v46.0
           sfAuthUrl:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:authUrl::${AppSecretsVersion}}}'
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:authUrl}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
               AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
-              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
           sfClientId:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId::${AppSecretsVersion}}}'
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
               AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
-              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
           sfClientSecret:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret::${AppSecretsVersion}}}'
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
               AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
-              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
           sfPassword:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfPassword::${SalesforceUserSecretsVersion}}}'
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfPassword}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
           sfToken:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfToken::${SalesforceUserSecretsVersion}}}'
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfToken}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
           sfUsername:
             !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfUsername::${SalesforceUserSecretsVersion}}}'
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfUsername}}'
             - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              SalesforceUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, SalesforceUserSecretsVersion ]
               SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
           identityUrl:
             !Sub
-            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityUrl::${IdentityUserSecretsVersion}}}'
+            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityUrl}}'
             - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
-              IdentityUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, IdentityUserSecretsVersion ]
           identityToken:
             !Sub
-            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken::${IdentityUserSecretsVersion}}}'
+            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken}}'
             - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
-              IdentityUserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, IdentityUserSecretsVersion ]
       Events:
         ScheduledRun:
           Type: Schedule
