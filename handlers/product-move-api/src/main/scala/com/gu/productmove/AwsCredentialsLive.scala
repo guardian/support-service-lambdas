@@ -12,14 +12,14 @@ object AwsCredentialsLive {
 
   private val membershipProfile: Layer[InvalidCredentials, ProfileCredentialsProvider] =
     ZLayer.scoped {
-      ZIO.fromAutoCloseable(IO.attempt(ProfileCredentialsProvider.create(ProfileName)))
+      ZIO.fromAutoCloseable(ZIO.attempt(ProfileCredentialsProvider.create(ProfileName)))
         .tap(c => attemptBlocking(c.resolveCredentials()))
         .mapError(err => InvalidCredentials(err.getMessage))
     }
 
   private val lambdaCreds: Layer[InvalidCredentials, EnvironmentVariableCredentialsProvider] =
     ZLayer.fromZIO {
-      IO.attempt(EnvironmentVariableCredentialsProvider.create())
+      ZIO.attempt(EnvironmentVariableCredentialsProvider.create())
         .tap(c => attemptBlocking(c.resolveCredentials()))
         .mapError(err => InvalidCredentials(err.getMessage))
     }

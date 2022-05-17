@@ -13,7 +13,7 @@ object AwsS3Live {
     ZLayer.scoped {
       ZIO.fromAutoCloseable(
         ZIO.serviceWithZIO[AwsCredentialsProvider](creds =>
-          IO.attempt(
+          ZIO.attempt(
             S3Client.builder()
               .region(Region.EU_WEST_1)
               .credentialsProvider(creds)
