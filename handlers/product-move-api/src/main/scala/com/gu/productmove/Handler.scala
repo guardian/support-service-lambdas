@@ -2,8 +2,8 @@ package com.gu.productmove
 
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
-import com.gu.productmove
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.HandlerTypes.*
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import software.amazon.awssdk.auth.credentials.*
@@ -21,36 +21,29 @@ import zio.*
 import zio.ZIO.attemptBlocking
 import zio.json.*
 
-object Handler extends ZIOApiGatewayRequestHandler {
+import scala.jdk.CollectionConverters.*
+
+object Handler extends ZIOApiGatewayRequestHandler[ExpectedInput, OutputBody] {
 
   override val testInput: String = """{ "dummy": false }"""
 
-  case class ExpectedInput(dummy: Boolean)
+  override def run(input: ExpectedInput): IO[Any, OutputBody] =
+    runWithEnvironment(input).provide(
+      AwsS3Live.layer,
+      AwsCredentialsLive.layer,
+      SttpClientLive.layer,
+      ZuoraClientLive.layer,
+      GetSubscriptionLive.layer,
+      ZuoraGetLive.layer,
+      GuStageLive.layer,
+    )
 
-  given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
-
-  override def run(input: APIGatewayV2HTTPEvent): IO[Any, APIGatewayV2HTTPResponse] = {
-    runWithEnvironment(input)
-      .provide(
-        AwsS3Live.layer,
-        AwsCredentialsLive.layer,
-        SttpClientLive.layer,
-        ZuoraClientLive.layer,
-        GetSubscriptionLive.layer,
-        ZuoraGetLive.layer,
-        GuStageLive.layer,
-      )
-  }
-
-  private def runWithEnvironment(input: APIGatewayV2HTTPEvent): ZIO[GetSubscription, String, APIGatewayV2HTTPResponse] = {
+  private def runWithEnvironment(postData: ExpectedInput): ZIO[GetSubscription, String, OutputBody] =
     for {
-      postData <- ZIO.fromEither(input.getBody.fromJson[ExpectedInput])
-      subscriptionNumber = "A-S00339056" //DEV - for testing locally
-      sub <- GetSubscription.get(subscriptionNumber)
       _ <- ZIO.log("PostData: " + postData.toString)
+      sub <- GetSubscription.get("A-S00339056") //DEV - for testing locally
       _ <- ZIO.log("Sub: " + sub.toString)
-    } yield APIGatewayV2HTTPResponse.builder().withStatusCode(200).build()
-  }
+    } yield OutputBody("hello")
 
 }
 

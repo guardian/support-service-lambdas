@@ -440,7 +440,11 @@ lazy val `product-move-api` = lambdaProject(
     "dev.zio" %% "zio-logging-slf4j" % "2.0.0-RC8"
   )
 )
-  .settings(scalaVersion := "3.1.2")
+  .settings(
+    scalaVersion := "3.1.2",
+    // needed for zio snapshot to get this PR https://github.com/zio/zio/pull/6775
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+  )
   .dependsOn()
 
 lazy val `metric-push-api` = lambdaProject(

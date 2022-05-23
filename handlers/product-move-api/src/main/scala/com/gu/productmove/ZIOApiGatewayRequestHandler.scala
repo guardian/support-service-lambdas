@@ -2,9 +2,28 @@ package com.gu.productmove
 
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
-import zio.{IO, Runtime, ZIO}
+import com.gu.productmove
+import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
+import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
+import software.amazon.awssdk.auth.credentials.*
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.{GetObjectRequest, S3Exception}
+import software.amazon.awssdk.utils.SdkAutoCloseable
+import sttp.capabilities.WebSockets
+import sttp.capabilities.zio.ZioStreams
+import sttp.client3.*
+import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
+import sttp.client3.logging.{Logger, LoggingBackend}
+import sttp.model.*
+import zio.ZIO.attemptBlocking
+import zio.json.*
+import zio.{IO, Runtime, ZIO, *}
 
-trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse] {
+import scala.jdk.CollectionConverters.*
+
+trait ZIOApiGatewayRequestHandler[IN: JsonDecoder, OUT: JsonEncoder] extends RequestHandler[APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse] {
 
   val testInput: String
 
@@ -45,21 +64,65 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2HTTPEvent, 
 
       override def getMemoryLimitInMB: Int = ???
 
-      override def getLogger: LambdaLogger = ???
+      override def getLogger: LambdaLogger = new LambdaLogger:
+        override def log(message: String): Unit = println(s"LOG: $message")
+
+        override def log(message: Array[Byte]): Unit = println(s"LOG BYTES: ${message.toString}")
     }
     val response = handleRequest(input, context)
     println("response: " + response)
   }
 
-  // this is the main lambda entry point.  It is referenced in the cloudformation.
-  override def handleRequest(input: APIGatewayV2HTTPEvent, context: Context): APIGatewayV2HTTPResponse =
-    Runtime.default.unsafeRun(
-      run(input).catchAll { error =>
-        ZIO.log(error.toString)
-          .map(_ => APIGatewayV2HTTPResponse.builder().withStatusCode(500).build())
-      }
-    )
+  class AwsLambdaLogger(lambdaLogger: LambdaLogger) extends ZLogger[String, Unit] {
+    override def apply(
+      trace: Trace,
+      fiberId: FiberId,
+      logLevel: LogLevel,
+      message: () => String,
+      cause: Cause[Any],
+      context: Map[FiberRef[_], Any],
+      spans: List[LogSpan],
+      annotations: Map[String, String]
+    ): Unit = {
 
-  protected def run(input: APIGatewayV2HTTPEvent): IO[Any, APIGatewayV2HTTPResponse]
+      val now = java.time.Instant.now().toString
+      val indentedMessage = message().replaceAll("\n", "\n ")
+
+      lambdaLogger.log(s"$now: $indentedMessage")
+    }
+  }
+
+  // this is the main lambda entry point.  It is referenced in the cloudformation.
+  override def handleRequest(input: APIGatewayV2HTTPEvent, context: Context): APIGatewayV2HTTPResponse = {
+    val runtime = Runtime.default
+    runtime.unsafeRun(
+      runJson(input)
+        .catchAll { error =>
+          ZIO.log(error.toString)
+            .map(_ => APIGatewayV2HTTPResponse.builder().withStatusCode(500).build())
+        }
+        .provideLayer(Runtime.removeDefaultLoggers)
+        .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger)))
+    )
+  }
+
+  private def runJson(input: APIGatewayV2HTTPEvent): IO[Any, APIGatewayV2HTTPResponse] =
+    for {
+      input <- ZIO.fromEither(input.getBody.fromJson[IN])
+      output <- run(input)
+    } yield {
+      APIGatewayV2HTTPResponse
+        .builder()
+        .withStatusCode(200)
+        .withBody(output.toJson)
+        .withHeaders(
+          Map(
+            "Content-type" -> "application/json"
+          ).asJava
+        )
+        .build()
+    }
+
+  protected def run(input: IN): IO[Any, OUT]
 
 }
