@@ -437,13 +437,16 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.client3" %% "zio" % "3.6.1"  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
     awsS3,
     "com.softwaremill.sttp.client3" %% "zio-json" % "3.6.1",
-    "dev.zio" %% "zio-logging-slf4j" % "2.0.0-RC8"
+    "dev.zio" %% "zio-logging-slf4j" % "2.0.0-RC8",
+    "dev.zio" %% "zio-test" % zio2Version % Test,
+    "dev.zio" %% "zio-test-sbt" % zio2Version % Test
   )
 )
   .settings(
     scalaVersion := "3.1.2",
     // needed for zio snapshot to get this PR https://github.com/zio/zio/pull/6775
-    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
   )
   .dependsOn()
 

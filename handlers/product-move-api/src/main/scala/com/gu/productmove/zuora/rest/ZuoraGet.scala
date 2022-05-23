@@ -21,9 +21,3 @@ trait ZuoraGet {
   def get[T: JsonDecoder](relativeUrl: Uri): IO[String, T]
 
 }
-object ZuoraGet {
-
-  def get[T: JsonDecoder](relativeUrl: Uri): ZIO[ZuoraGet, String, T] =
-    ZIO.serviceWithZIO[ZuoraGet](_.get[T](relativeUrl))
-
-}

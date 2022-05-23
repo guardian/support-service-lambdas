@@ -38,7 +38,7 @@ object Handler extends ZIOApiGatewayRequestHandler[ExpectedInput, OutputBody] {
       GuStageLive.layer,
     )
 
-  private def runWithEnvironment(postData: ExpectedInput): ZIO[GetSubscription, String, OutputBody] =
+  private[productmove] def runWithEnvironment(postData: ExpectedInput): ZIO[GetSubscription, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       sub <- GetSubscription.get("A-S00339056") //DEV - for testing locally
