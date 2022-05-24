@@ -90,7 +90,7 @@ Resources:
       Role:
         !GetAtt HolidayStopProcessorRole.Arn
       MemorySize: 1024
-      Runtime: java8.al2
+      Runtime: java11
       Timeout: 900
     DependsOn:
       - HolidayStopProcessorRole
