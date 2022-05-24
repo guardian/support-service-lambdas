@@ -2,8 +2,8 @@ package com.gu.salesforce.holiday_stops
 
 import java.net.URLEncoder
 import java.time.LocalDate
-
 import com.gu.effects.TestingRawEffects.HTTPResponse
+import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceContactId}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, LookupByContactAndOptionalSubscriptionName}
 import com.gu.zuora.subscription.SubscriptionName
@@ -19,7 +19,7 @@ object SalesForceHolidayStopsEffects {
   val listHolidayQuery = LookupByContactAndOptionalSubscriptionName.getSOQL _
 
   def listHolidayRequestUrl(contactId: String, subscriptionName: String, optionalHistoricalCutOff: Option[LocalDate]) = {
-    s"/services/data/v29.0/query/?q=${
+    s"/services/data/v$salesforceApiVersion/query/?q=${
       escapeQueryStringValue(listHolidayQuery(
         SalesforceContactId(contactId),
         Some(SubscriptionName(subscriptionName)),

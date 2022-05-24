@@ -30,10 +30,16 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
   }
 
   def updateSubs(body: String): Either[SoftOptInError, Unit] = {
-    handleCompositeUpdateResp(
+    logger.info(s"Making update request to Salesforce: $body")
+    val result = handleCompositeUpdateResp(
       sendCompositeUpdateReq(body),
       Metrics.put
     )
+    result match {
+      case Left(e) => logger.error(s"Update request failed: $body: cause $e")
+      case Right(_) => logger.info(s"Update request successful: $body")
+    }
+    result
   }
 
   private def sfHttp(url: String): HttpRequest = {

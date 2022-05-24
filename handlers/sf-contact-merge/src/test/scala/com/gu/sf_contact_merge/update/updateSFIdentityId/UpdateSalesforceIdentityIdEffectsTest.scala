@@ -5,6 +5,7 @@ import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
@@ -98,6 +99,6 @@ object GetSalesforceIdentityId {
   def apply(getOp: HttpOp[GetRequest, JsValue])(sFContactId: SFContactId): ClientFailableOp[WireResult] =
     getOp.setupRequest(toRequest).parse[WireResult].runRequest(sFContactId)
 
-  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v43.0/sobjects/Contact/${sfContactId.value}"))
+  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sfContactId.value}"))
 
 }

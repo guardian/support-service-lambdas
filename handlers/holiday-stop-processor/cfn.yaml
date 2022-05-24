@@ -90,7 +90,7 @@ Resources:
       Role:
         !GetAtt HolidayStopProcessorRole.Arn
       MemorySize: 1024
-      Runtime: java8.al2
+      Runtime: java11
       Timeout: 900
     DependsOn:
       - HolidayStopProcessorRole
@@ -146,3 +146,13 @@ Resources:
     DependsOn:
       - HolidayStopProcessor
       - HolidayStopProcessorScheduleRule
+
+  # As processor runs every 20 mins anyway, there's no need to retry
+  HolidayStopProcessorRetryConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref HolidayStopProcessor
+      MaximumRetryAttempts: 0
+      Qualifier: '$LATEST'
+    DependsOn:
+      - HolidayStopProcessor

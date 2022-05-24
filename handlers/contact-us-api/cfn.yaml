@@ -56,7 +56,7 @@ Resources:
     Properties:
       FunctionName: !Sub contact-us-api-${Stage}
       Handler: com.gu.contact_us_api.Handler
-      Runtime: java8.al2
+      Runtime: java11
       CodeUri:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/contact-us-api/contact-us-api.jar
@@ -169,7 +169,7 @@ Resources:
         Or it could mean our users are happy and don't need to contact us. :)
       ComparisonOperator: LessThanThreshold
       Threshold: 1
-      EvaluationPeriods: 6
+      EvaluationPeriods: 12
       Metrics:
         - Id: actualCount
           Expression: "FILL(rawCount, 0)"

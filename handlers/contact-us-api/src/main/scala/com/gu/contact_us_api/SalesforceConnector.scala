@@ -45,6 +45,7 @@ class SalesforceConnector(runRequest: HttpRequest => Either[ContactUsError, Http
   def sendReq(env: ContactUsConfig, token: String, request: SFCompositeRequest): Either[ContactUsError, Unit] = {
     runRequest(
       Http(env.reqEndpoint)
+        .timeout(connTimeoutMs = 30000, readTimeoutMs = 30000)
         .header("Content-Type", "application/json")
         .header("Authorization", s"Bearer $token")
         .postData(request.asJson.toString())
