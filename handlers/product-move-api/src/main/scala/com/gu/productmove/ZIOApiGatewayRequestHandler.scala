@@ -65,31 +65,15 @@ trait ZIOApiGatewayRequestHandler[IN: JsonDecoder, OUT: JsonEncoder] extends Req
       override def getMemoryLimitInMB: Int = ???
 
       override def getLogger: LambdaLogger = new LambdaLogger:
-        override def log(message: String): Unit = println(s"LOG: $message")
+        override def log(message: String): Unit = {
+          val now = java.time.Instant.now().toString
+          println(s"$now: $message")
+        }
 
         override def log(message: Array[Byte]): Unit = println(s"LOG BYTES: ${message.toString}")
     }
     val response = handleRequest(input, context)
     println("response: " + response)
-  }
-
-  class AwsLambdaLogger(lambdaLogger: LambdaLogger) extends ZLogger[String, Unit] {
-    override def apply(
-      trace: Trace,
-      fiberId: FiberId,
-      logLevel: LogLevel,
-      message: () => String,
-      cause: Cause[Any],
-      context: Map[FiberRef[_], Any],
-      spans: List[LogSpan],
-      annotations: Map[String, String]
-    ): Unit = {
-
-      val now = java.time.Instant.now().toString
-      val indentedMessage = message().replaceAll("\n", "\n ")
-
-      lambdaLogger.log(s"$now: $indentedMessage")
-    }
   }
 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
@@ -125,4 +109,17 @@ trait ZIOApiGatewayRequestHandler[IN: JsonDecoder, OUT: JsonEncoder] extends Req
 
   protected def run(input: IN): IO[Any, OUT]
 
+}
+
+class AwsLambdaLogger(lambdaLogger: LambdaLogger) extends ZLogger[String, Unit] {
+  override def apply(
+    trace: Trace,
+    fiberId: FiberId,
+    logLevel: LogLevel,
+    message: () => String,
+    cause: Cause[Any],
+    context: Map[FiberRef[_], Any],
+    spans: List[LogSpan],
+    annotations: Map[String, String]
+  ): Unit = lambdaLogger.log(message())
 }

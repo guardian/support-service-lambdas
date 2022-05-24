@@ -25,7 +25,7 @@ import scala.jdk.CollectionConverters.*
 
 object Handler extends ZIOApiGatewayRequestHandler[ExpectedInput, OutputBody] {
 
-  override val testInput: String = """{ "dummy": false }"""
+  override val testInput: String = ExpectedInput(false).toJson(DeriveJsonEncoder.gen[ExpectedInput])
 
   override def run(input: ExpectedInput): IO[Any, OutputBody] =
     runWithEnvironment(input).provide(
@@ -41,7 +41,7 @@ object Handler extends ZIOApiGatewayRequestHandler[ExpectedInput, OutputBody] {
   private[productmove] def runWithEnvironment(postData: ExpectedInput): ZIO[GetSubscription, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      sub <- GetSubscription.get("A-S00339056") //DEV - for testing locally
+      sub <- GetSubscription.get(if (postData.uat) "A-S00090478" else "A-S00339056") //DEV - for testing locally
       _ <- ZIO.log("Sub: " + sub.toString)
     } yield OutputBody("hello")
 
