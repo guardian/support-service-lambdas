@@ -1,7 +1,6 @@
 package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
-
 import cats.syntax.all._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.creditprocessor.ProcessResult
@@ -15,6 +14,8 @@ import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
 import zio._
 import zio.console.Console
+
+import java.io.IOException
 
 object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayCreditAddResult]] with zio.App {
 
@@ -59,13 +60,13 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
   // This is just for functional testing locally.
   def run(args: List[String]): URIO[ZEnv, ExitCode] = {
 
-    def showResults(processResults: List[ProcessResult[ZuoraHolidayCreditAddResult]]) =
+    def showResults(processResults: List[ProcessResult[ZuoraHolidayCreditAddResult]]): ZIO[Console, IOException, Unit] =
       for {
         _ <- console.putStrLn(processResults.flatMap(_.creditsToApply).size.toString)
-        _ <- URIO.foreach_(processResults.flatMap(_.overallFailure)) { failure =>
+        _ <- ZIO.foreach_(processResults.flatMap(_.overallFailure)) { failure =>
           console.putStrLn(s"Overall failure: ${failure.reason}")
         }
-        _ <- URIO.foreach_(processResults.flatMap(_.creditResults)) {
+        _ <- ZIO.foreach_(processResults.flatMap(_.creditResults)) {
           case Left(failure) => console.putStrLn(s"Failed: ${failure.reason}")
           case Right(response) => console.putStrLn(s"Success: $response")
         }
