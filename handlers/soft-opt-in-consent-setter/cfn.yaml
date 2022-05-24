@@ -54,7 +54,7 @@ Resources:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar
       MemorySize: 512
-      Runtime: java8.al2
+      Runtime: java11
       Timeout: 900
       Environment:
         Variables:
@@ -147,12 +147,12 @@ Resources:
       Dimensions:
         - Name: FunctionName
           Value: !Ref LambdaFunction
-      EvaluationPeriods: 1
+      EvaluationPeriods: 2
       MetricName: Errors
       Namespace: AWS/Lambda
       Period: 3600
       Statistic: Sum
-      Threshold: 2
+      Threshold: 5
       TreatMissingData: notBreaching
 
   failedUpdateAlarm:

@@ -31,7 +31,7 @@ Resources:
     Properties:
       FunctionName: !Sub payment-intent-issues-${Stage}
       Description: A lambda for handling payment intent issues (cancellation, failure, action required)
-      Runtime: java8.al2
+      Runtime: java11
       Handler: com.gu.paymentIntentIssues.Lambda::handler
       MemorySize: 512
       Timeout: 300

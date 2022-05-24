@@ -56,7 +56,7 @@ Resources:
     Properties:
       FunctionName: !Sub contact-us-api-${Stage}
       Handler: com.gu.contact_us_api.Handler
-      Runtime: java8.al2
+      Runtime: java11
       CodeUri:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/contact-us-api/contact-us-api.jar

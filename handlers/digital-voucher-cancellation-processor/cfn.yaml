@@ -106,7 +106,7 @@ Resources:
         Fn::GetAtt:
           - DigitalVoucherCancellationProcessorFnRole9BC677A8
           - Arn
-      Runtime: java8.al2
+      Runtime: java11
       Environment:
         Variables:
           App: digital-voucher-cancellation-processor
