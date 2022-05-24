@@ -1,7 +1,5 @@
 package com.gu.autoCancel
 
-import java.time.LocalDate
-
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
@@ -11,6 +9,8 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
 import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
+
+import java.time.LocalDate
 
 object AutoCancelDataCollectionFilter extends Logging {
 

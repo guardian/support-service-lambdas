@@ -12,6 +12,9 @@ import software.amazon.awssdk.services.secretsmanager.model._
 import scala.util.{Random, Try}
 
 object Main extends App with LazyLogging {
+
+  val salesforceApiVersion = "54.0"
+
   case class SfAuthDetails(access_token: String, instance_url: String)
 
   case class setPasswordResponse(message: String, errorCode: String)
@@ -155,7 +158,7 @@ object Main extends App with LazyLogging {
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
+    Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/query/")
       .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
@@ -219,7 +222,7 @@ object Main extends App with LazyLogging {
       setPasswordRequestBody(NewPassword = newPwd).asJson.spaces2
     Try {
       Http(
-        s"${sfAuthDetails.instance_url}/services/data/v25.0/sobjects/User/$sfUserId/password"
+        s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/sobjects/User/$sfUserId/password"
       ).option(HttpOptions.readTimeout(30000))
         .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")

@@ -1,5 +1,6 @@
 package com.gu.sf_contact_merge.update.updateSFIdentityId
 
+import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
@@ -43,7 +44,7 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
       "Phone" -> JsString("phone1"),
       "Email" -> JsString("emailemail")
     ))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -63,7 +64,7 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
       "IdentityID__c" -> JsString("identityid"),
       "FirstName" -> JsString(".")
     ))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -82,7 +83,7 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
     val expectedJson = JsObject(Seq(
       "IdentityID__c" -> JsString("identityid")
     ))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -101,7 +102,7 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
     val expectedJson = JsObject(Seq(
       "IdentityID__c" -> JsString("")
     ))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }

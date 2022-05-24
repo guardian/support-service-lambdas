@@ -3,14 +3,14 @@ package com.gu.sf_emails_to_s3_exporter
 object EmailsFromSfResponse {
   case class Response(
     done: Boolean,
-    records: Seq[Records],
+    records: Seq[EmailRecord],
     nextRecordsUrl: Option[String] = None
   )
 
-  case class Records(
+  case class EmailRecord(
     Id: String,
     ParentId: String,
-    FromAddress: String,
+    FromAddress: Option[String] = None,
     BccAddress: Option[String] = None,
     CcAddress: Option[String] = None,
     FirstOpenedDate: Option[String] = None,
@@ -21,17 +21,17 @@ object EmailsFromSfResponse {
     IsExternallyVisible: Boolean,
     Incoming: Boolean,
     LastOpenedDate: Option[String] = None,
-    MessageDate: String,
-    Parent: Parent,
+    MessageDate: Option[String] = None,
+    Parent: ParentCase,
     Status: String,
     Subject: Option[String] = None,
     TextBody: Option[String] = None,
-    ToAddress: String,
+    ToAddress: Option[String] = None,
     Composite_Key__c: Option[String] = None,
     Resolve_on_Send__c: Boolean
   )
 
-  case class Parent(
+  case class ParentCase(
     CaseNumber: String,
     Id: String
   )

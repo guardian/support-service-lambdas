@@ -14,6 +14,7 @@ import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, Salesforce
 import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.ApiGatewayResponse.badRequest
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
@@ -477,7 +478,8 @@ object Handler extends Logging {
       issuesData <- SubscriptionData(subscription, account)
         .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesData, existingPublicationsThatWereToBeStopped, subscription)
+      amendBody <- AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesData, existingPublicationsThatWereToBeStopped)
+        .toApiGatewayOp(message => badRequest(s"build body for holiday stop request: $message"))
       _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)", Some(amendBody))
       )

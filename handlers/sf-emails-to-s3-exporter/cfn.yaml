@@ -15,10 +15,12 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
+      Schedule: 'cron(00,30 03 * * ? *)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
       ToLowerCase: prod
     DEV:
+      Schedule: 'cron(00,30 03 * * ? *)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
       ToLowerCase: dev
@@ -46,8 +48,8 @@ Resources:
       ManagedPolicyName: !Sub "s3-emails-from-sf-${Stage}-get-delete"
       Path: "/"
       PolicyDocument: !Sub
-          - "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Action\": [\"s3:GetObject\",\"s3:DeleteObject\"],\"Resource\": \"arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*\"}]}"
-          - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
+        - "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Action\": [\"s3:GetObject\",\"s3:PutObject\",\"s3:DeleteObject\"],\"Resource\": \"arn:aws:s3:::emails-from-sf-${lowerCaseStage}/*\"}]}"
+        - { lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ] }
 
   ApiGatewayRestApi:
     Type: "AWS::ApiGateway::RestApi"
@@ -151,19 +153,20 @@ Resources:
         Type: "AWS"
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
 
-  ApiGatewayMethodDELETE:
+  ApiGatewayMethodPOST:
     Type: "AWS::ApiGateway::Method"
     DependsOn:
       - IAMRoleS3ReadWrite
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResourceS3File
-      HttpMethod: "DELETE"
+      ResourceId: !Ref ApiGatewayResourceS3Bucket
+      HttpMethod: "POST"
       AuthorizationType: "NONE"
       ApiKeyRequired: true
       RequestParameters:
+        "method.request.header.x-amz-checksum-sha1": false
+        "method.request.header.x-amz-sdk-checksum-algorithm": false
         "method.request.path.bucketName": true
-        "method.request.path.caseNumber": true
       MethodResponses:
         - ResponseParameters:
             "method.response.header.Content-Length": false
@@ -183,7 +186,7 @@ Resources:
       Integration:
         CacheNamespace: !Ref ApiGatewayResourceS3File
         Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/emails-to-sf-api-${Stage}-api-gateway-role"
-        IntegrationHttpMethod: "DELETE"
+        IntegrationHttpMethod: "POST"
         IntegrationResponses:
           - ResponseParameters:
               "method.response.header.Content-Length": "integration.response.header.Content-Length"
@@ -198,17 +201,20 @@ Resources:
             StatusCode: "500"
         PassthroughBehavior: "WHEN_NO_MATCH"
         RequestParameters:
-          "integration.request.path.folder": "method.request.path.bucketName"
-          "integration.request.path.item": "method.request.path.caseNumber"
+          "integration.request.header.x-amz-checksum-sha1": "method.request.header.x-amz-checksum-sha1"
+          "integration.request.header.x-amz-sdk-checksum-algorithm": "method.request.header.x-amz-sdk-checksum-algorithm"
         TimeoutInMillis: 29000
         Type: "AWS"
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{folder}/{item}"
+        Uri:
+          !Sub
+            - "arn:aws:apigateway:${AWS::Region}:emails-from-sf-${lowerCaseStage}.s3:path/?delete"
+            - lowerCaseStage: !FindInMap [ StageMap, !Ref Stage, ToLowerCase ]
 
   ApiGatewayDeployment:
     Type: "AWS::ApiGateway::Deployment"
     DependsOn:
       - ApiGatewayMethodGET
-      - ApiGatewayMethodDELETE
+      - ApiGatewayMethodPOST
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
 
@@ -242,7 +248,7 @@ Resources:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/sf-emails-to-s3-exporter/sf-emails-to-s3-exporter.jar
       MemorySize: 512
-      Runtime: java8.al2
+      Runtime: java11
       Timeout: 900
       Environment:
         Variables:
@@ -318,6 +324,13 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+      Events:
+        ScheduledRun:
+          Type: Schedule
+          Properties:
+            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule ]
+            Description: Runs SF Emails to S3 Exporter
+            Enabled: True
 
   failedS3WriteFileAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -341,7 +354,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedS3CheckFileExistsAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -365,7 +378,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedS3GetFileAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -389,7 +402,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedWritebackToSFRequestAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -413,7 +426,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedWritebackToSFRecordAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -437,7 +450,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
 
   failedToRetrieveEmailsFromSalesforceAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -452,13 +465,37 @@ Resources:
         Something went wrong retrieving emails from Salesforce
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: FunctionName
-          Value: !Ref LambdaFunction
+        - Name: "Stage"
+          Value: !Ref Stage
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: Errors
-      Namespace: AWS/Lambda
+      MetricName: failed_to_get_records_from_sf
+      Namespace: s3-emails-from-sf
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: ignore
+      TreatMissingData: notBreaching
+
+  failedToAuthenticateWithSalesforceAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: emails-from-sf failed to authenticate with Salesforce
+      AlarmDescription: >
+        Something went wrong authenticating with Salesforce
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: "Stage"
+          Value: !Ref Stage
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: failed_to_authenticate_with_sf
+      Namespace: s3-emails-from-sf
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
