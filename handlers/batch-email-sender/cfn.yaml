@@ -119,7 +119,7 @@ Resources:
         - "LogAndWriteToEmailQueueRole"
         - Arn
       MemorySize: 1536
-      Runtime: java8.al2
+      Runtime: java11
       Timeout: 300
     DependsOn:
     - "LogAndWriteToEmailQueueRole"

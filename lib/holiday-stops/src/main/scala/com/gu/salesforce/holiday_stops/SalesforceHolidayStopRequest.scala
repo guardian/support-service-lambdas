@@ -284,7 +284,7 @@ object SalesforceHolidayStopRequest extends Logging {
           CompositePart(
             method = "POST",
             url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef",
-            referenceId = "CREATE DETAIL : " + UUID.randomUUID().toString,
+            referenceId = s"CREATE_DETAIL_${generateId()}",
             body = Json.toJson(AddHolidayStopRequestDetailBody(
               Holiday_Stop_Request__c = holidayStopRequestId,
               Stopped_Publication_Date__c = issueData.issueDate,
@@ -306,7 +306,7 @@ object SalesforceHolidayStopRequest extends Logging {
                 CompositePart(
                   method = "DELETE",
                   url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
-                  referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
+                  referenceId = s"DELETE_DETAIL_${generateId()}",
                   body = JsNull
                 )
               )
@@ -341,10 +341,10 @@ object SalesforceHolidayStopRequest extends Logging {
       val requestDetailParts = holidayStopRequestsDetails
         .map { requestDetail =>
           CompositePart(
-            "PATCH",
-            s"$holidayStopRequestsDetailSfObjectsBaseUrl/${requestDetail.Id.value}",
-            "CANCEL DETAIL : " + idGenerator,
-            Json.toJson(CancelHolidayStopRequestDetailBody(requestDetail.Actual_Price__c, requestDetail.Charge_Code__c))
+            method = "PATCH",
+            url = s"$holidayStopRequestsDetailSfObjectsBaseUrl/${requestDetail.Id.value}",
+            referenceId = s"CANCEL_DETAIL_${idGenerator.replace("-","")}",
+            body = Json.toJson(CancelHolidayStopRequestDetailBody(requestDetail.Actual_Price__c, requestDetail.Charge_Code__c))
           )
         }
       CompositeRequest(
@@ -363,4 +363,6 @@ object SalesforceHolidayStopRequest extends Logging {
         PatchRequest(WithdrawnTimePatch(), RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
       }.runRequest
   }
+
+  private def generateId() = UUID.randomUUID().toString.replace("-","")
 }
