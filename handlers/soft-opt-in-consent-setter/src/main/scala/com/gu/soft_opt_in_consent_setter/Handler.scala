@@ -20,7 +20,10 @@ object Handler extends LazyLogging {
     } yield for {
       sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 
+      _ = logger.info(s"About to fetch subs to process from Salesforce")
       allSubs <- sfConnector.getSubsToProcess()
+      _ = logger.info(s"Successfully fetched ${allSubs.records.length} subs from Salesforce")
+
       identityConnector = new IdentityConnector(config.identityConfig)
       consentsCalculator = new ConsentsCalculator(config.consentsMapping)
 
@@ -30,7 +33,10 @@ object Handler extends LazyLogging {
       cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
       cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
+      _ = logger.info(s"About to fetch active subs from Salesforce")
       activeSubs <- sfConnector.getActiveSubs(cancelledSubsIdentityIds)
+      _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
+
       _ <- processCancelledSubs(cancelledSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
       _ = Metrics.put(event = "successful_run")
     } yield ())
