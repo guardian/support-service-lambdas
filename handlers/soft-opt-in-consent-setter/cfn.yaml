@@ -147,12 +147,12 @@ Resources:
       Dimensions:
         - Name: FunctionName
           Value: !Ref LambdaFunction
-      EvaluationPeriods: 1
+      EvaluationPeriods: 2
       MetricName: Errors
       Namespace: AWS/Lambda
       Period: 3600
       Statistic: Sum
-      Threshold: 2
+      Threshold: 5
       TreatMissingData: notBreaching
 
   failedUpdateAlarm:
