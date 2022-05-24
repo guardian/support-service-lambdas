@@ -1,6 +1,6 @@
 package com.gu.productmove
 
-import software.amazon.awssdk.auth.credentials.{AwsCredentialsProvider, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProvider, AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider}
 import zio.ZIO.attemptBlocking
 import zio.{IO, Layer, ZIO, ZLayer}
 
@@ -8,22 +8,16 @@ object AwsCredentialsLive {
 
   private val ProfileName = "membership"
 
-  class InvalidCredentials(message: String) extends Exception
-
-  private val membershipProfile: Layer[InvalidCredentials, ProfileCredentialsProvider] =
+  val layer: Layer[String, AwsCredentialsProvider] =
     ZLayer.scoped {
-      ZIO.fromAutoCloseable(ZIO.attempt(ProfileCredentialsProvider.create(ProfileName)))
-        .tap(c => attemptBlocking(c.resolveCredentials()))
-        .mapError(err => InvalidCredentials(err.getMessage))
+      ZIO.fromAutoCloseable {
+        ZIO.attempt {
+          AwsCredentialsProviderChain.builder().credentialsProviders(
+            ProfileCredentialsProvider.create(ProfileName),
+            EnvironmentVariableCredentialsProvider.create()
+          ).build()
+        }.mapError(_.toString)
+      }
     }
-
-  private val lambdaCreds: Layer[InvalidCredentials, EnvironmentVariableCredentialsProvider] =
-    ZLayer.fromZIO {
-      ZIO.attempt(EnvironmentVariableCredentialsProvider.create())
-        .tap(c => attemptBlocking(c.resolveCredentials()))
-        .mapError(err => InvalidCredentials(err.getMessage))
-    }
-
-  val layer: Layer[InvalidCredentials, AwsCredentialsProvider] = lambdaCreds <> membershipProfile
 
 }
