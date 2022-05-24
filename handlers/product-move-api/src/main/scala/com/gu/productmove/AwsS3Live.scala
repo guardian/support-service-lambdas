@@ -11,21 +11,21 @@ object AwsS3Live {
 
   val layer: ZLayer[AwsCredentialsProvider, Throwable, AwsS3] =
     ZLayer.scoped {
-      ZIO.fromAutoCloseable(
-        ZIO.serviceWithZIO[AwsCredentialsProvider](creds =>
-          ZIO.attempt(
-            S3Client.builder()
-              .region(Region.EU_WEST_1)
-              .credentialsProvider(creds)
-              .build()
-          ))
-      ).map(Service(_))
+      for {
+        creds <- ZIO.service[AwsCredentialsProvider]
+        s3Client <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
+      } yield Service(s3Client)
     }
 
-  private class Service(s3Client: S3Client) extends AwsS3 {
+  private def impl(creds: AwsCredentialsProvider): S3Client = 
+    S3Client.builder()
+      .region(Region.EU_WEST_1)
+      .credentialsProvider(creds)
+      .build()
 
-    override def getObject(bucket: String, key: String): Task[String] = {
+  private class Service(s3Client: S3Client) extends AwsS3:
 
+    override def getObject(bucket: String, key: String): Task[String] =
       ZIO.attempt {
         val objectRequest: GetObjectRequest = GetObjectRequest
           .builder()
@@ -35,10 +35,6 @@ object AwsS3Live {
         val response = s3Client.getObjectAsBytes(objectRequest)
         response.asUtf8String()
       }
-
-    }
-
-  }
 
 }
 

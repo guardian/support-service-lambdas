@@ -36,29 +36,32 @@ object ZuoraClientLive {
     s"$basePath/$relativePath"
   }
 
-  val layer: ZLayer[AwsS3 with Stage with SttpClient, String, ZuoraClient] = {
-    val zuoraZio = for {
-      stage <- ZIO.service[Stage]
-      fileContent <- AwsS3.getObject(bucket, key(stage)).mapError(_.toString)
-      zuoraRestConfig <- ZIO.fromEither(summon[JsonDecoder[ZuoraRestConfig]].decodeJson(fileContent))
-      baseUrl <- ZIO.fromEither(Uri.parse(zuoraRestConfig.baseUrl + "/"))
-      _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
-      _ <- ZIO.log("baseUrl: " + baseUrl.toString)
-      sttpClient <- ZIO.service[SttpClient]
-    } yield new ZuoraClient:
-      override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
-        val absoluteUri = baseUrl.resolve(request.uri)
-        sttpClient.send(
-          request
-            .headers(Map(
-              "apiSecretAccessKey" -> zuoraRestConfig.password,
-              "apiAccessKeyId" -> zuoraRestConfig.username
-            ))
-            .copy(uri = absoluteUri)
-        ).mapError(_.toString).map(_.body).absolve
-      }
-    ZLayer.fromZIO(zuoraZio)
-  }
+  val layer: ZLayer[AwsS3 with Stage with SttpClient, String, ZuoraClient] =
+    ZLayer.fromZIO {
+      for {
+        stage <- ZIO.service[Stage]
+        fileContent <- AwsS3.getObject(bucket, key(stage)).mapError(_.toString)
+        zuoraRestConfig <- ZIO.fromEither(summon[JsonDecoder[ZuoraRestConfig]].decodeJson(fileContent))
+        baseUrl <- ZIO.fromEither(Uri.parse(zuoraRestConfig.baseUrl + "/"))
+        _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
+        _ <- ZIO.log("baseUrl: " + baseUrl.toString)
+        sttpClient <- ZIO.service[SttpClient]
+      } yield Service(baseUrl, sttpClient, zuoraRestConfig)
+    }
+
+  private class Service(baseUrl: Uri, sttpClient: SttpClient, zuoraRestConfig: ZuoraRestConfig) extends ZuoraClient:
+
+    override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
+      val absoluteUri = baseUrl.resolve(request.uri)
+      sttpClient.send(
+        request
+          .headers(Map(
+            "apiSecretAccessKey" -> zuoraRestConfig.password,
+            "apiAccessKeyId" -> zuoraRestConfig.username
+          ))
+          .copy(uri = absoluteUri)
+      ).mapError(_.toString).map(_.body).absolve
+    }
 
 }
 
