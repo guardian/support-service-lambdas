@@ -7,12 +7,11 @@ object GuStageLive {
     case PROD, CODE, DEV
 
   val layer: Layer[String, Stage] =
-    ZLayer.fromZIO(impl).mapError(_.toString)
-
-  private def impl: Task[Stage] =
-    for {
-      stageString <- System.envOrElse("Stage", "DEV")
-      stage <- ZIO.attempt(Stage.valueOf(stageString))
-    } yield stage
+    ZLayer {
+      for {
+        stageString <- System.envOrElse("Stage", "DEV")
+        stage <- ZIO.attempt(Stage.valueOf(stageString))
+      } yield stage
+    }.mapError(_.toString)
 
 }

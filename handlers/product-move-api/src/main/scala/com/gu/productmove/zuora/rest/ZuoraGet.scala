@@ -6,18 +6,18 @@ import zio.json.JsonDecoder
 import zio.{IO, ULayer, URLayer, ZIO, ZLayer}
 
 object ZuoraGetLive {
-  
-  val layer: URLayer[ZuoraClient, ZuoraGet] =
-    ZLayer.fromZIO(ZIO.serviceWith[ZuoraClient](Service(_)))
 
-  private class Service(zuoraClient: ZuoraClient) extends ZuoraGet :
-    override def get[T: JsonDecoder](relativeUrl: Uri): IO[String, T] =
-      for {
-        response <- zuoraClient.send(basicRequest.get(relativeUrl))
-        parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[T](response))
-      } yield parsedBody
-        
+  val layer: URLayer[ZuoraClient, ZuoraGet] =
+    ZLayer(ZIO.serviceWith[ZuoraClient](ZuoraGetLive(_)))
+
 }
+
+private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet :
+  override def get[T: JsonDecoder](relativeUrl: Uri): IO[String, T] =
+    for {
+      response <- zuoraClient.send(basicRequest.get(relativeUrl))
+      parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[T](response))
+    } yield parsedBody
 
 trait ZuoraGet {
 

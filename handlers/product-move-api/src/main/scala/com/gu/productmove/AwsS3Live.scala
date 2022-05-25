@@ -14,29 +14,29 @@ object AwsS3Live {
       for {
         creds <- ZIO.service[AwsCredentialsProvider]
         s3Client <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
-      } yield Service(s3Client)
+      } yield AwsS3Live(s3Client)
     }
 
-  private def impl(creds: AwsCredentialsProvider): S3Client = 
+  private def impl(creds: AwsCredentialsProvider): S3Client =
     S3Client.builder()
       .region(Region.EU_WEST_1)
       .credentialsProvider(creds)
       .build()
 
-  private class Service(s3Client: S3Client) extends AwsS3:
-
-    override def getObject(bucket: String, key: String): Task[String] =
-      ZIO.attempt {
-        val objectRequest: GetObjectRequest = GetObjectRequest
-          .builder()
-          .key(key)
-          .bucket(bucket)
-          .build();
-        val response = s3Client.getObjectAsBytes(objectRequest)
-        response.asUtf8String()
-      }
-
 }
+
+private class AwsS3Live(s3Client: S3Client) extends AwsS3:
+
+  override def getObject(bucket: String, key: String): Task[String] =
+    ZIO.attempt {
+      val objectRequest: GetObjectRequest = GetObjectRequest
+        .builder()
+        .key(key)
+        .bucket(bucket)
+        .build();
+      val response = s3Client.getObjectAsBytes(objectRequest)
+      response.asUtf8String()
+    }
 
 trait AwsS3 {
 

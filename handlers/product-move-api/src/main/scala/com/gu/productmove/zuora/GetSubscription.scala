@@ -16,13 +16,13 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 object GetSubscriptionLive {
 
   val layer: URLayer[ZuoraGet, GetSubscription] =
-    ZLayer.fromZIO(ZIO.serviceWith[ZuoraGet](Service(_)))
-
-  private class Service(zuoraGet: ZuoraGet) extends GetSubscription:
-    override def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse] = 
-      zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/$subscriptionNumber")
+    ZLayer(ZIO.serviceWith[ZuoraGet](GetSubscriptionLive(_)))
 
 }
+
+private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription:
+  override def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse] =
+    zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/$subscriptionNumber")
 
 trait GetSubscription {
 

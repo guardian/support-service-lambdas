@@ -37,7 +37,7 @@ object ZuoraClientLive {
   }
 
   val layer: ZLayer[AwsS3 with Stage with SttpClient, String, ZuoraClient] =
-    ZLayer.fromZIO {
+    ZLayer {
       for {
         stage <- ZIO.service[Stage]
         fileContent <- AwsS3.getObject(bucket, key(stage)).mapError(_.toString)
@@ -46,24 +46,24 @@ object ZuoraClientLive {
         _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
         _ <- ZIO.log("baseUrl: " + baseUrl.toString)
         sttpClient <- ZIO.service[SttpClient]
-      } yield Service(baseUrl, sttpClient, zuoraRestConfig)
-    }
-
-  private class Service(baseUrl: Uri, sttpClient: SttpClient, zuoraRestConfig: ZuoraRestConfig) extends ZuoraClient:
-
-    override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
-      val absoluteUri = baseUrl.resolve(request.uri)
-      sttpClient.send(
-        request
-          .headers(Map(
-            "apiSecretAccessKey" -> zuoraRestConfig.password,
-            "apiAccessKeyId" -> zuoraRestConfig.username
-          ))
-          .copy(uri = absoluteUri)
-      ).mapError(_.toString).map(_.body).absolve
+      } yield ZuoraClientLive(baseUrl, sttpClient, zuoraRestConfig)
     }
 
 }
+
+private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpClient, zuoraRestConfig: ZuoraRestConfig) extends ZuoraClient:
+
+  override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
+    val absoluteUri = baseUrl.resolve(request.uri)
+    sttpClient.send(
+      request
+        .headers(Map(
+          "apiSecretAccessKey" -> zuoraRestConfig.password,
+          "apiAccessKeyId" -> zuoraRestConfig.username
+        ))
+        .copy(uri = absoluteUri)
+    ).mapError(_.toString).map(_.body).absolve
+  }
 
 trait ZuoraClient {
 
