@@ -21,6 +21,10 @@ Parameters:
 Conditions:
   IsProd: !Equals [ !Ref Stage, "PROD" ]
 
+Globals:
+  Api:
+    OpenApiVersion: 3.0.1
+
 Resources:
   ProductMoveApiLambda:
     Type: AWS::Serverless::Function
