@@ -16,7 +16,7 @@ Parameters:
   DeployBucket:
     Description: Bucket to copy files to
     Type: String
-    Default: membership-dist
+    Default: support-service-lambdas-dist
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, "PROD" ]
