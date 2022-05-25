@@ -11,6 +11,8 @@ import scalaj.http.{Http, HttpOptions}
 
 object SFConnector extends LazyLogging {
 
+  val salesforceApiVersion = "54.0"
+
   case class SfAuthDetails(access_token: String, instance_url: String)
 
   def getRecordsFromSF[A: Decoder](sfAuthDetails: SfAuthDetails, sfApiVersion: String, query: String, batchSize: Integer): Either[Error, A] = {
@@ -74,7 +76,7 @@ object SFConnector extends LazyLogging {
   def deleteQueueItemsInSf(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
     logger.info("Deleting async process records from sf...")
 
-    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v52.0/composite/sobjects")
+    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/composite/sobjects")
       .param("ids", recordIds.mkString(","))
       .param("allOrNone", "false")
       .option(HttpOptions.readTimeout(30000))
@@ -92,7 +94,7 @@ object SFConnector extends LazyLogging {
     requestType: String
   ): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
 
-    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects")
+    val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/composite/sobjects")
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .option(HttpOptions.readTimeout(30000))
       .header("Content-Type", "application/json")

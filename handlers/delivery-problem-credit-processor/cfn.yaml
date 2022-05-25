@@ -76,8 +76,8 @@ Resources:
           Stage: !Ref Stage
       Role:
         !GetAtt DeliveryProblemCreditProcessorRole.Arn
-      MemorySize: 512
-      Runtime: java8.al2
+      MemorySize: 1024
+      Runtime: java11
       Timeout: 900
     DependsOn:
       - DeliveryProblemCreditProcessorRole
