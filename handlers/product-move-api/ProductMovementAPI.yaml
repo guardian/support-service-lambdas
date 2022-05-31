@@ -1,0 +1,134 @@
+openapi: 3.0.3
+
+info:
+  title: Product Movement API
+  description:
+    API to facilitate replacing an existing subscription 
+    with another subscription to a different type of product.
+  version: 0.0.1
+
+paths:
+
+  /eligibles/{subName}:
+    get:
+      summary: Gets eligible target products for the given subscription.
+      description:
+        Returns an array of eligible products 
+        or an empty array if there aren't any for the given subscription.
+      parameters:
+        - name: subName
+          in: path
+          description: Name of subscription whose eligibility for movement is to be checked.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/product'
+        404:
+          description: No such subscription.
+        500:
+          description: Unable to respond.
+
+  /move:
+    put:
+      summary: Replaces the existing subscription with a new one.
+      description:
+        Cancels the existing subscription and replaces it with a new subscription
+        to a different type of product.  
+        Also manages all the service comms associated with the movement.
+      requestBody:
+        description: Definition of required movement.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sourceSubName
+                - targetProdId
+              properties:
+                sourceSubName:
+                  description: Name of source subscription that is to be cancelled.
+                  type: string
+                targetProdId:
+                  description: ID of target product that new subscription will be for.
+                  type: string
+                moveDate:
+                  description: Service start date of new subscription.
+                  example: 2022-01-01
+                  default: Next billing date
+                  type: string
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  newSubName:
+                    description: Name of new subscription.
+                    type: string
+                  newProduct:
+                    $ref: '#/components/schemas/product'
+        400:
+          description: Request doesn't make sense.
+        500:
+          description: Unable to respond.
+
+components:
+  schemas:
+
+    timePeriod:
+      type: object
+      properties:
+        name:
+          description: Time units.
+          example: Months
+          type: string
+        count:
+          description: Number of time units in this time period.
+          type: integer
+
+    billing:
+      description: Amount and frequency of billing.
+      type: object
+      properties:
+        billingAmount:
+          type: number
+        billingCurrency:
+          example: GBP
+          type: string
+        billingFrequency:
+          $ref: '#/components/schemas/timePeriod'
+
+    offer:
+      description:
+        A special offer that begins when a subscription begins 
+        and lasts for a given period of time.
+      type: object
+      properties:
+        billing:
+          $ref: '#/components/schemas/billing'
+        duration:
+          $ref: '#/components/schemas/timePeriod'
+
+    product:
+      description: A product that's available for subscription.
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        billing:
+          $ref: '#/components/schemas/billing'
+        introOffer:
+          $ref: '#/components/schemas/offer'
