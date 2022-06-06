@@ -16,7 +16,7 @@ paths:
         Returns an array of eligible products 
         or an empty array if there aren't any for the given subscription.
       parameters:
-        - name: subName
+        - name: subscriptionName
           in: path
           description: Name of subscription whose eligibility for movement is to be checked.
           required: true
