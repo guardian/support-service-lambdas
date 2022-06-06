@@ -3,22 +3,23 @@ openapi: 3.0.3
 info:
   title: Product Movement API
   description:
-    API to facilitate replacing an existing subscription 
-    with another subscription to a different type of product.
+    API to facilitate replacing an existing subscription
+    with another subscription for a different type of product.
   version: 0.0.1
 
 paths:
 
-  /eligibles/{subName}:
+  /availableProductMoves/{subscriptionName}:
     get:
-      summary: Gets eligible target products for the given subscription.
+      summary: Gets available products that can be moved to from the given subscription.
       description:
-        Returns an array of eligible products 
-        or an empty array if there aren't any for the given subscription.
+        Returns an array of eligible products that the given subscription could be moved to,
+        which will be empty if there aren't any for the given subscription.
       parameters:
         - name: subscriptionName
           in: path
           description: Name of subscription whose eligibility for movement is to be checked.
+          example: A-S000001
           required: true
           schema:
             type: string
@@ -36,12 +37,12 @@ paths:
         500:
           description: Unable to respond.
 
-  /move:
-    put:
+  /productMove:
+    post:
       summary: Replaces the existing subscription with a new one.
       description:
         Cancels the existing subscription and replaces it with a new subscription
-        to a different type of product.  
+        to a different type of product.
         Also manages all the service comms associated with the movement.
       requestBody:
         description: Definition of required movement.
@@ -51,19 +52,14 @@ paths:
             schema:
               type: object
               required:
-                - sourceSubName
-                - targetProdId
+                - sourceSubscriptionName
+                - targetProductId
               properties:
-                sourceSubName:
+                sourceSubscriptionName:
                   description: Name of source subscription that is to be cancelled.
                   type: string
-                targetProdId:
+                targetProductId:
                   description: ID of target product that new subscription will be for.
-                  type: string
-                moveDate:
-                  description: Service start date of new subscription.
-                  example: 2022-01-01
-                  default: Next billing date
                   type: string
       responses:
         200:
@@ -73,7 +69,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  newSubName:
+                  newSubscriptionName:
                     description: Name of new subscription.
                     type: string
                   newProduct:
@@ -111,7 +107,7 @@ components:
 
     offer:
       description:
-        A special offer that begins when a subscription begins 
+        A special offer that begins when a subscription begins
         and lasts for a given period of time.
       type: object
       properties:
