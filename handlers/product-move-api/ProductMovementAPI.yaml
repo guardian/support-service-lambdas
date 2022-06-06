@@ -105,12 +105,12 @@ components:
       description: Amount and frequency of billing.
       type: object
       properties:
-        billingAmount:
+        amount:
           type: number
-        billingCurrency:
+        currency:
           example: GBP
           type: string
-        billingFrequency:
+        frequency:
           $ref: '#/components/schemas/timePeriod'
 
     offer:
