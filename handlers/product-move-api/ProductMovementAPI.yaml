@@ -36,6 +36,10 @@ paths:
           description: No such subscription.
         500:
           description: Unable to respond.
+        502:
+          description: Bad response from an upstream system.
+        504:
+          description: Timeout from an upstream system.
 
   /productMove:
     post:
@@ -78,6 +82,10 @@ paths:
           description: Request doesn't make sense.
         500:
           description: Unable to respond.
+        502:
+          description: Bad response from an upstream system.
+        504:
+          description: Timeout from an upstream system.
 
 components:
   schemas:
