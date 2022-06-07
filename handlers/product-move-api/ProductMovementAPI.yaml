@@ -9,7 +9,7 @@ info:
 
 paths:
 
-  /availableProductMoves/{subscriptionName}:
+  /available-product-moves/{subscriptionName}:
     get:
       summary: Gets available products that can be moved to from the given subscription.
       description:
@@ -41,13 +41,21 @@ paths:
         504:
           description: Timeout from an upstream system.
 
-  /productMove:
+  /product-move/{subscriptionName}:
     post:
       summary: Replaces the existing subscription with a new one.
       description:
         Cancels the existing subscription and replaces it with a new subscription
         to a different type of product.
         Also manages all the service comms associated with the movement.
+      parameters:
+        - name: subscriptionName
+          in: path
+          description: Name of subscription to be moved to a different product.
+          example: A-S000001
+          required: true
+          schema:
+            type: string
       requestBody:
         description: Definition of required movement.
         required: true
@@ -56,12 +64,8 @@ paths:
             schema:
               type: object
               required:
-                - sourceSubscriptionName
                 - targetProductId
               properties:
-                sourceSubscriptionName:
-                  description: Name of source subscription that is to be cancelled.
-                  type: string
                 targetProductId:
                   description: ID of target product that new subscription will be for.
                   type: string
