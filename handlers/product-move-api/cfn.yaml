@@ -21,11 +21,21 @@ Parameters:
 Conditions:
   IsProd: !Equals [ !Ref Stage, "PROD" ]
 
-Globals:
-  Api:
-    OpenApiVersion: 3.0.1
-
 Resources:
+
+  ProductMoveApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      OpenApiVersion: 3.0.1
+      Name: !Sub product-move-api-${Stage}-ApiGateway
+      StageName: !Sub ${Stage}
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: !Sub product-move-api-${Stage}-UsagePlan
+          Description: !Sub Usage plan for product-move-api-${Stage}
+
   ProductMoveApiLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -58,9 +68,11 @@ Resources:
             - arn:aws:s3::*:membership-dist/*
       Events:
         ProductMovement:
-            Type: Api
-            Properties:
-                Path: '/move-product'
-                Method: post
+          Type: Api
+          Properties:
+              Path: '/product-move'
+              Method: post
+              RestApiId:
+                Ref: ProductMoveApiGateway
 
 # alarms go here
