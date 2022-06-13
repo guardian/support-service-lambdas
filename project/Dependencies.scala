@@ -49,7 +49,7 @@ object Dependencies {
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
   val sttpOkhttpBackend =
     "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
-  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.3"
+  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.10.0"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
   // HTTP4S
