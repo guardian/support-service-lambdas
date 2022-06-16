@@ -439,7 +439,11 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.client3" %% "zio-json" % "3.6.2",
     "dev.zio" %% "zio-logging-slf4j" % "2.0.0-RC10",
     "dev.zio" %% "zio-test" % zio2Version % Test,
-    "dev.zio" %% "zio-test-sbt" % zio2Version % Test
+    "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.0.0",
   )
 )
   .settings(

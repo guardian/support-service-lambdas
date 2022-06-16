@@ -71,8 +71,8 @@ Resources:
         ProductMovement:
           Type: Api
           Properties:
-              Path: '/product-move'
-              Method: post
+              Path: '/{proxy+}'
+              Method: any
               RestApiId:
                 Ref: ProductMoveApiGateway
 

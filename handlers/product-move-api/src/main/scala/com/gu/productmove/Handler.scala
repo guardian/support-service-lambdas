@@ -3,7 +3,7 @@ package com.gu.productmove
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.HandlerTypes.*
+import com.gu.productmove.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import software.amazon.awssdk.auth.credentials.*
@@ -17,33 +17,41 @@ import sttp.client3.*
 import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
 import sttp.client3.logging.{Logger, LoggingBackend}
 import sttp.model.*
+import sttp.tapir.*
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.zio.*
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.serverless.aws.lambda.*
 import zio.*
 import zio.ZIO.attemptBlocking
 import zio.json.*
 
+import scala.concurrent.Future
 import scala.jdk.CollectionConverters.*
 
-object Handler extends ZIOApiGatewayRequestHandler[ExpectedInput, OutputBody] {
+// this handler contains all the endpoints
+object Handler extends ZIOApiGatewayRequestHandler {
 
-  override val testInput: String = ExpectedInput(false).toJson(DeriveJsonEncoder.gen[ExpectedInput])
+  // run this to test locally via console with some hard coded data
+  def main(args: Array[String]): Unit = super.runTest(
+    "POST",
+    "/product-move/A-S123",
+    Some(ProductMoveEndpointTypes.ExpectedInput(false).toJson)
+  )
 
-  override def run(input: ExpectedInput): IO[Any, OutputBody] =
-    runWithEnvironment(input).provide(
-      AwsS3Live.layer,
-      AwsCredentialsLive.layer,
-      SttpClientLive.layer,
-      ZuoraClientLive.layer,
-      GetSubscriptionLive.layer,
-      ZuoraGetLive.layer,
-      GuStageLive.layer,
-    )
-
-  private[productmove] def runWithEnvironment(postData: ExpectedInput): ZIO[GetSubscription, String, OutputBody] =
-    for {
-      _ <- ZIO.log("PostData: " + postData.toString)
-      sub <- GetSubscription.get(if (postData.uat) "A-S00090478" else "A-S00339056") //DEV - for testing locally
-      _ <- ZIO.log("Sub: " + sub.toString)
-    } yield OutputBody("hello")
+  // this represents all the routes for the server
+  override val server: List[ServerEndpoint[Any, TIO]] = List(
+    ProductMoveEndpoint.server
+  )
 
 }
 
+object TestDocs {
+  def main(args: Array[String]): Unit = {
+    Handler.runTest(
+      "GET",
+      "/docs/",
+      None
+    )
+  }
+}
