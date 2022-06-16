@@ -13,22 +13,16 @@ import sttp.model.Uri
 import zio.json.*
 import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
-object GetSubscriptionLive {
-
-  val layer: URLayer[ZuoraGet, GetSubscription] =
-    ZLayer(ZIO.serviceWith[ZuoraGet](GetSubscriptionLive(_)))
-
-}
+object GetSubscriptionLive :
+  val layer: URLayer[ZuoraGet, GetSubscription] = ZLayer.fromFunction(GetSubscriptionLive(_))
 
 private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription:
   override def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse] =
     zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/$subscriptionNumber")
 
-trait GetSubscription {
-
+trait GetSubscription :
   def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse]
 
-}
 object GetSubscription {
 
   case class GetSubscriptionResponse(id: String)
