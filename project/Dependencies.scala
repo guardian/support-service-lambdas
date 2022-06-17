@@ -11,7 +11,7 @@ object Dependencies {
   val circeVersion = "0.13.0"
   val sttpVersion = "3.6.2"
   val http4sVersion = "0.21.33"
-  val catsVersion = "2.7.0"
+  val catsVersion = "2.8.0"
   val catsEffectVersion = "2.5.5"
 
   val logging = Seq(
