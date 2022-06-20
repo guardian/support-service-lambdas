@@ -10,7 +10,7 @@ Digital vouchers are also known as **Subscription Cards**.
 
 ## Digital voucher lifecycle
 
-Digital vouchers are managed by i-Movo and provisioned by another top-secret third-party supplier.
+Digital vouchers are managed by i-Movo and cards are physically sent out by a third-party supplier.
 
 Customers are provided with a plastic card and a letter.  With the card they can buy a newspaper on
 the days they have subscribed to at any participating newsagent.  Alternatively, they can give the
