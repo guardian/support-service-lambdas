@@ -111,9 +111,18 @@ components:
       properties:
         amount:
           type: number
+          example: 11.99
         currency:
-          example: GBP
-          type: string
+          type: object
+          properties:
+            code:
+              type: string
+              description: ISO 4217 alphabetic currency code.
+              example: GBP
+            symbol:
+              type: string
+              description: ISO 4217 currency symbol.
+              example: '£'
         frequency:
           $ref: '#/components/schemas/timePeriod'
 
@@ -134,8 +143,11 @@ components:
       properties:
         id:
           type: string
+          description: ID of product in Zuora product catalogue.
         name:
           type: string
+          description: Name of product in Zuora product catalogue.
+          example: Digital Pack
         billing:
           $ref: '#/components/schemas/billing'
         introOffer:
