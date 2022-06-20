@@ -76,6 +76,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - newSubscriptionName
+                  - newProduct
                 properties:
                   newSubscriptionName:
                     description: Name of new subscription.
@@ -96,6 +99,9 @@ components:
 
     timePeriod:
       type: object
+      required:
+        - name
+        - count
       properties:
         name:
           description: Time units.
@@ -108,12 +114,18 @@ components:
     billing:
       description: Amount and frequency of billing.
       type: object
+      required:
+        - amount
+        - currency
       properties:
         amount:
           type: number
           example: 11.99
         currency:
           type: object
+          required:
+            - code
+            - symbol
           properties:
             code:
               type: string
@@ -126,11 +138,26 @@ components:
         frequency:
           $ref: '#/components/schemas/timePeriod'
 
-    offer:
+    trial:
       description:
-        A special offer that begins when a subscription begins
+        An optional free trial that begins when a subscription begins
         and lasts for a given period of time.
       type: object
+      required:
+        - duration
+      properties:
+        duration:
+          $ref: '#/components/schemas/timePeriod'
+
+    offer:
+      description:
+        An optional special offer that begins either when a subscription begins
+        or at the end of a free trial
+        and lasts for a given period of time.
+      type: object
+      required:
+        - billing
+        - duration
       properties:
         billing:
           $ref: '#/components/schemas/billing'
@@ -140,6 +167,10 @@ components:
     product:
       description: A product that's available for subscription.
       type: object
+      required:
+        - id
+        - name
+        - billing
       properties:
         id:
           type: string
@@ -150,5 +181,7 @@ components:
           example: Digital Pack
         billing:
           $ref: '#/components/schemas/billing'
+        trial:
+          $ref: '#/components/schemas/trial'
         introOffer:
           $ref: '#/components/schemas/offer'
