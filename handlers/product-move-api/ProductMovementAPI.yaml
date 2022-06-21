@@ -115,12 +115,22 @@ components:
       description: Amount and frequency of billing.
       type: object
       required:
-        - amount
         - currency
+        - startDate
       properties:
         amount:
           type: number
+          description:
+            Absolute amount that will be billed.
+            Either this field or the percentage field will be populated.
           example: 11.99
+        percentage:
+          type: integer
+          description:
+            Percentage of standard amount that will be billed.
+            This field only makes sense if the billing object is attached to an introductory offer.
+            Either this field or the amount field will be populated.
+          example: 50
         currency:
           type: object
           required:
@@ -137,6 +147,10 @@ components:
               example: '£'
         frequency:
           $ref: '#/components/schemas/timePeriod'
+        startDate:
+          type: string
+          description: Date on which first service period for product subscription begins.
+          example: 2022-06-21
 
     trial:
       description:
