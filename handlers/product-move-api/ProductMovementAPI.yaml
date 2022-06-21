@@ -149,7 +149,9 @@ components:
           $ref: '#/components/schemas/timePeriod'
         startDate:
           type: string
-          description: Date on which first service period for product subscription begins.
+          description:
+            Date on which first service period for product subscription begins.
+            In ISO 8601 format.
           example: 2022-06-21
 
     trial:
