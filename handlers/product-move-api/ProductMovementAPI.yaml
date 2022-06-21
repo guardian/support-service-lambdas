@@ -116,7 +116,6 @@ components:
       type: object
       required:
         - currency
-        - startDate
       properties:
         amount:
           type: number
@@ -151,6 +150,8 @@ components:
           type: string
           description:
             Date on which first service period for product subscription begins.
+            This probably won't be known reliably before a subscription has actually been set up,
+            so it's an optional field.
             In ISO 8601 format.
           example: 2022-06-21
 
