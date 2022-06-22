@@ -443,7 +443,7 @@ lazy val `product-move-api` = lambdaProject(
   )
 )
   .settings(
-    scalaVersion := "3.1.2",
+    scalaVersion := "3.1.3",
     // needed for zio snapshot to get this PR https://github.com/zio/zio/pull/6775
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
