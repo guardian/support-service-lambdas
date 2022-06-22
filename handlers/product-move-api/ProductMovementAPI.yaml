@@ -76,6 +76,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - newSubscriptionName
+                  - newProduct
                 properties:
                   newSubscriptionName:
                     description: Name of new subscription.
@@ -96,6 +99,9 @@ components:
 
     timePeriod:
       type: object
+      required:
+        - name
+        - count
       properties:
         name:
           description: Time units.
@@ -108,12 +114,27 @@ components:
     billing:
       description: Amount and frequency of billing.
       type: object
+      required:
+        - currency
       properties:
         amount:
           type: number
+          description:
+            Absolute amount that will be billed.
+            Either this field or the percentage field will be populated.
           example: 11.99
+        percentage:
+          type: integer
+          description:
+            Percentage of standard amount that will be billed.
+            This field only makes sense if the billing object is attached to an introductory offer.
+            Either this field or the amount field will be populated.
+          example: 50
         currency:
           type: object
+          required:
+            - code
+            - symbol
           properties:
             code:
               type: string
@@ -125,12 +146,35 @@ components:
               example: '£'
         frequency:
           $ref: '#/components/schemas/timePeriod'
+        startDate:
+          type: string
+          description:
+            Date on which first service period for product subscription begins.
+            This probably won't be known reliably before a subscription has actually been set up,
+            so it's an optional field.
+            In ISO 8601 format.
+          example: 2022-06-21
+
+    trial:
+      description:
+        An optional free trial that begins when a subscription begins
+        and lasts for a given period of time.
+      type: object
+      required:
+        - duration
+      properties:
+        duration:
+          $ref: '#/components/schemas/timePeriod'
 
     offer:
       description:
-        A special offer that begins when a subscription begins
+        An optional special offer that begins either when a subscription begins
+        or at the end of a free trial
         and lasts for a given period of time.
       type: object
+      required:
+        - billing
+        - duration
       properties:
         billing:
           $ref: '#/components/schemas/billing'
@@ -140,6 +184,10 @@ components:
     product:
       description: A product that's available for subscription.
       type: object
+      required:
+        - id
+        - name
+        - billing
       properties:
         id:
           type: string
@@ -150,5 +198,7 @@ components:
           example: Digital Pack
         billing:
           $ref: '#/components/schemas/billing'
+        trial:
+          $ref: '#/components/schemas/trial'
         introOffer:
           $ref: '#/components/schemas/offer'
