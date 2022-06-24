@@ -158,13 +158,15 @@ components:
     trial:
       description:
         An optional free trial that begins when a subscription begins
-        and lasts for a given period of time.
+        and lasts for a given number of days.
       type: object
       required:
-        - duration
+        - dayCount
       properties:
-        duration:
-          $ref: '#/components/schemas/timePeriod'
+        dayCount:
+          type: integer
+          description: Number of days that free trial lasts.
+          example: 14
 
     offer:
       description:
