@@ -119,7 +119,7 @@ components:
         - currency
       properties:
         amount:
-          type: number
+          type: integer
           description:
             Absolute amount that will be billed in pence.
             Either this field or the percentage field will be populated.
