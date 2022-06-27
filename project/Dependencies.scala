@@ -112,6 +112,8 @@ object Dependencies {
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
   val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
+    case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
+      MergeStrategy.singleOrError
     case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines

@@ -68,11 +68,31 @@ Resources:
           Resource:
             - arn:aws:s3::*:membership-dist/*
       Events:
+        DocsRedirect:
+          Type: Api
+          Properties:
+            Path: '/docs'
+            Method: any
+            Auth:
+              ApiKeyRequired: false
+            RestApiId:
+              Ref: ProductMoveApiGateway
+        Docs:
+          Type: Api
+          Properties:
+            Path: '/docs/{proxy+}'
+            Method: any
+            Auth:
+              ApiKeyRequired: false
+            RestApiId:
+              Ref: ProductMoveApiGateway
         ProductMovement:
           Type: Api
           Properties:
               Path: '/{proxy+}'
               Method: any
+              Auth:
+                ApiKeyRequired: true
               RestApiId:
                 Ref: ProductMoveApiGateway
 

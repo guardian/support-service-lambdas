@@ -4,9 +4,10 @@ import cats.effect.Sync
 import cats.effect.kernel.{CancelScope, Poll}
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent.RequestContext
-import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
+import com.amazonaws.services.lambda.runtime.events.*
 import com.gu.productmove
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.RequestMapper.queryParamsToEncodedString
 import com.gu.productmove.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
@@ -23,15 +24,15 @@ import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
 import sttp.client3.logging.{Logger, LoggingBackend}
 import sttp.model.*
 import sttp.monad.MonadError
-import sttp.tapir.{AttributeKey, AttributeMap, CodecFormat, RawBodyType, WebSocketBodyOutput}
 import sttp.tapir.capabilities.NoStreams
 import sttp.tapir.model.{ConnectionInfo, ServerRequest}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.server.interceptor.{CustomiseInterceptors, RequestResult}
 import sttp.tapir.server.interceptor.reject.RejectInterceptor
-import sttp.tapir.server.interpreter.{BodyListener, FilterServerEndpoints, RawValue, RequestBody, ServerInterpreter, ToResponseBody}
-import sttp.tapir.serverless.aws.lambda.{AwsBodyListener, AwsCatsEffectServerInterpreter, AwsFutureServerInterpreter, AwsHttp, AwsRequest, AwsRequestBody, AwsRequestContext, AwsResponse, AwsServerOptions, AwsServerRequest, AwsToResponseBody, LambdaResponseBody, Route}
+import sttp.tapir.server.interceptor.{CustomiseInterceptors, RequestResult}
+import sttp.tapir.server.interpreter.*
+import sttp.tapir.serverless.aws.lambda.*
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
+import sttp.tapir.{AttributeKey, AttributeMap, CodecFormat, RawBodyType, WebSocketBodyOutput}
 import zio.ZIO.attemptBlocking
 import zio.json.*
 import zio.{IO, Runtime, ZIO, *}
@@ -51,7 +52,7 @@ object ZIOApiGatewayRequestHandler {
 
 }
 
-trait ZIOApiGatewayRequestHandler extends RequestStreamHandler {
+trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEvent, APIGatewayV2WebSocketResponse] {
 
   // for testing
   def runTest(method: String, path: String, testInput: Option[String]): Unit = {
@@ -84,23 +85,24 @@ trait ZIOApiGatewayRequestHandler extends RequestStreamHandler {
   val server: List[ServerEndpoint[Any, TIO]]
 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
-  override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
-    val inputString = new String(input.readAllBytes() /*blocking*/) // utf 8?
-    val outputString: String = handleStringRequest(inputString, context)
-    output.write(outputString.getBytes) // utf 8?
-  }
+  override def handleRequest(javaRequest: APIGatewayV2WebSocketEvent, context: Context): APIGatewayV2WebSocketResponse = {
 
-  private def handleStringRequest(inputString: String, context: Context) = {
-    given JsonDecoder[AwsRequest] = DeriveJsonDecoder.gen[AwsRequest]
-    given JsonDecoder[AwsRequestContext] = DeriveJsonDecoder.gen[AwsRequestContext]
-    given JsonDecoder[AwsHttp] = DeriveJsonDecoder.gen[AwsHttp]
-    given JsonEncoder[AwsResponse] = DeriveJsonEncoder.gen[AwsResponse]
+    context.getLogger.log("Lambda input: " + javaRequest)
 
-    val awsRequest = inputString.fromJson[AwsRequest].getOrElse(null) /*TODO*/
-
+    val awsRequest: AwsRequest = RequestMapper.convertJavaRequestToTapirRequest(javaRequest)
     val response: AwsResponse = handleWithLoggerAndErrorHandling(awsRequest, context)
 
-    response.toJson
+    val javaResponse = new APIGatewayV2WebSocketResponse()
+    javaResponse.setStatusCode(response.statusCode)
+    javaResponse.setHeaders(response.headers.asJava)
+//    javaResponse.setCookies(response.cookies.asJava) if we need cookies in future
+    javaResponse.setBody(response.body)
+    javaResponse.setIsBase64Encoded(response.isBase64Encoded)
+
+    context.getLogger.log("Lambda output: " + javaResponse)
+
+    javaResponse
+
   }
 
   private def handleWithLoggerAndErrorHandling(awsRequest: AwsRequest, context: Context) = {
