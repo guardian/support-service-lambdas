@@ -121,7 +121,7 @@ components:
         amount:
           type: integer
           description:
-            Absolute amount that will be billed in pence.
+            Absolute amount that will be billed in pence or cents etc.
             Either this field or the percentage field will be populated.
           example: 1199
         percentage:
