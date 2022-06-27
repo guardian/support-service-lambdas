@@ -104,7 +104,7 @@ components:
         - count
       properties:
         name:
-          description: Time units.
+          description: Time unit.
           example: month
           type: string
           enum: [month, year]
