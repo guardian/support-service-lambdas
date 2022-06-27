@@ -104,9 +104,10 @@ components:
         - count
       properties:
         name:
-          description: Time units.
-          example: Months
+          description: Time unit.
+          example: month
           type: string
+          enum: [month, year]
         count:
           description: Number of time units in this time period.
           type: integer
@@ -118,11 +119,11 @@ components:
         - currency
       properties:
         amount:
-          type: number
+          type: integer
           description:
-            Absolute amount that will be billed.
+            Absolute amount that will be billed in pence or cents etc.
             Either this field or the percentage field will be populated.
-          example: 11.99
+          example: 1199
         percentage:
           type: integer
           description:
