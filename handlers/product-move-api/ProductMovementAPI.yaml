@@ -1,28 +1,27 @@
 openapi: 3.0.3
-
 info:
   title: Product Movement API
-  description:
+  version: 0.0.1
+  description: |-
     API to facilitate replacing an existing subscription
     with another subscription for a different type of product.
-  version: 0.0.1
-
 paths:
-
   /available-product-moves/{subscriptionName}:
     get:
       summary: Gets available products that can be moved to from the given subscription.
-      description:
+      description: |
         Returns an array of eligible products that the given subscription could be moved to,
         which will be empty if there aren't any for the given subscription.
+      operationId: getAvailable-product-movesSubscriptionname
       parameters:
-        - name: subscriptionName
-          in: path
-          description: Name of subscription whose eligibility for movement is to be checked.
-          example: A-S000001
-          required: true
-          schema:
-            type: string
+      - name: subscriptionName
+        in: path
+        description: Name of subscription whose eligibility for movement is to be
+          checked.
+        required: true
+        schema:
+          type: string
+        example: A-S000001
       responses:
         200:
           description: Success.
@@ -44,18 +43,18 @@ paths:
   /product-move/{subscriptionName}:
     post:
       summary: Replaces the existing subscription with a new one.
-      description:
+      description: |-
         Cancels the existing subscription and replaces it with a new subscription
         to a different type of product.
         Also manages all the service comms associated with the movement.
       parameters:
-        - name: subscriptionName
-          in: path
-          description: Name of subscription to be moved to a different product.
-          example: A-S000001
-          required: true
-          schema:
-            type: string
+      - name: subscriptionName
+        in: path
+        description: Name of subscription to be moved to a different product.
+        required: true
+        schema:
+          type: string
+        example: A-S000001
       requestBody:
         description: Definition of required movement.
         required: true

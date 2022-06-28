@@ -14,6 +14,7 @@ import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.{GetObjectRequest, S3Exception}
 import software.amazon.awssdk.utils.SdkAutoCloseable
+import sttp.apispec.openapi.Info
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3.*
@@ -46,8 +47,8 @@ object Handler extends ZIOApiGatewayRequestHandler {
 
   // this represents all the routes for the server
   override val server: List[ServerEndpoint[Any, TIO]] = List(
-    ProductMoveEndpoint.server,
     AvailableProductMovesEndpoint.server,
+    ProductMoveEndpoint.server,
   )
 
 }
@@ -66,9 +67,13 @@ object TestDocs {
 object MakeDocsYaml {
   import sttp.apispec.openapi.circe.yaml._
 
+  val description =
+    """API to facilitate replacing an existing subscription
+      |with another subscription for a different type of product.""".stripMargin
+
   def main(args: Array[String]): Unit = {
     val endpoints: Iterable[AnyEndpoint] = Handler.server.map(_.endpoint)
-    val docs = OpenAPIDocsInterpreter().toOpenAPI(endpoints, "product-move-api", "0.0.1")
+    val docs = OpenAPIDocsInterpreter().toOpenAPI(endpoints, Info("Product Movement API", "0.0.1", Some(description)))
     val yaml = docs.toYaml
 
     args.headOption match {

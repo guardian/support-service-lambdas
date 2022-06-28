@@ -7,6 +7,7 @@ import com.gu.productmove.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import sttp.tapir.*
+import sttp.tapir.EndpointIO.Example
 import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.jsonBody
 import zio.ZIO
@@ -20,18 +21,30 @@ object ProductMoveEndpoint {
     run(ExpectedInput(false))
   )
 
-  val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (List[String],
-      ProductMoveEndpointTypes.ExpectedInput
+  val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
+    ProductMoveEndpointTypes.ExpectedInput
     ), Unit, ProductMoveEndpointTypes.OutputBody, Any,
     ZIOApiGatewayRequestHandler.TIO
-    ] =
+  ] = {
+    val subscriptionNameCapture: EndpointInput.PathCapture[String] =
+      EndpointInput.PathCapture[String](
+        Some("subscriptionName"),
+        implicitly,
+        EndpointIO.Info.empty.copy(description = Some("Name of subscription to be moved to a different product."), examples = List(Example("A-S000001", None, None))) // A-S000001
+      )
     endpoint
       .post
-      .in("product-move").in(paths)
+      .in("product-move").in(subscriptionNameCapture)
       .in(jsonBody[ExpectedInput])
       .out(jsonBody[OutputBody])
+      .summary("Replaces the existing subscription with a new one.")
+      .description(
+        """Cancels the existing subscription and replaces it with a new subscription
+          |to a different type of product.
+          |Also manages all the service comms associated with the movement.""".stripMargin
+      )
       .serverLogic[TIO] { (_, input) => run(input).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
-
+  }
   private def run(input: ExpectedInput): TIO[OutputBody] =
     runWithEnvironment(input).provide(
       AwsS3Live.layer,

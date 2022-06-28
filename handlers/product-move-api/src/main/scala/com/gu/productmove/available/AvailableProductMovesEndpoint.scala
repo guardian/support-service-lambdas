@@ -7,6 +7,7 @@ import com.gu.productmove.available.AvailableProductMovesEndpointTypes.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import sttp.tapir.*
+import sttp.tapir.EndpointIO.Example
 import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.jsonBody
 import zio.ZIO
@@ -20,24 +21,30 @@ object AvailableProductMovesEndpoint {
     run(ExpectedInput(false))
   )
 
-  val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (List[String],
-      AvailableProductMovesEndpointTypes.ExpectedInput
+  val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
+    AvailableProductMovesEndpointTypes.ExpectedInput
     ), Unit, AvailableProductMovesEndpointTypes.OutputBody, Any,
     ZIOApiGatewayRequestHandler.TIO
-    ] =
+  ] = {
+    val subscriptionNameCapture: EndpointInput.PathCapture[String] =
+      EndpointInput.PathCapture[String](
+        Some("subscriptionName"),
+        implicitly,
+        EndpointIO.Info.empty.copy(description = Some("Name of subscription whose eligibility for movement is to be checked."), examples = List(Example("A-S000001", None, None))) // A-S000001
+      )
     endpoint
       .get
-      .in("available-product-moves").in(paths)
+      .in("available-product-moves").in(subscriptionNameCapture)
       .in(jsonBody[ExpectedInput])
       .out(jsonBody[OutputBody])
       .summary("Gets available products that can be moved to from the given subscription.")
       .description(
-        """
-          |Returns an array of eligible products that the given subscription could be moved to,
+        """Returns an array of eligible products that the given subscription could be moved to,
           |which will be empty if there aren't any for the given subscription.
           |""".stripMargin)
       .serverLogic[TIO] { (_, input) => run(input).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
-
+  }
+  
   private def run(input: ExpectedInput): TIO[OutputBody] =
     runWithEnvironment(input).provide(
       AwsS3Live.layer,
