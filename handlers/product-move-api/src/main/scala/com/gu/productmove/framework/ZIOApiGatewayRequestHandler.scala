@@ -1,14 +1,13 @@
-package com.gu.productmove
+package com.gu.productmove.framework
 
 import cats.effect.Sync
 import cats.effect.kernel.{CancelScope, Poll}
 import com.amazonaws.services.lambda.runtime.*
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent.RequestContext
 import com.amazonaws.services.lambda.runtime.events.*
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent.RequestContext
 import com.gu.productmove
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.RequestMapper.queryParamsToEncodedString
-import com.gu.productmove.ZIOApiGatewayRequestHandler.TIO
+import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import software.amazon.awssdk.auth.credentials.*

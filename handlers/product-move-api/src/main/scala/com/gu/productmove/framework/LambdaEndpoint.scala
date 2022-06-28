@@ -1,4 +1,4 @@
-package com.gu.productmove
+package com.gu.productmove.framework
 
 import zio.{Cause, FiberId, FiberRef, IO, LogLevel, LogSpan, Runtime, Trace, ZIO}
 

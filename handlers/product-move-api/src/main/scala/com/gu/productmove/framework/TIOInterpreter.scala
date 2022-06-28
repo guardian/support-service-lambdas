@@ -1,17 +1,18 @@
-package com.gu.productmove
+package com.gu.productmove.framework
 
-import com.gu.productmove.ZIOApiGatewayRequestHandler.TIO
+import com.gu.productmove.*
+import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import sttp.capabilities
-import sttp.model.{HasHeaders, Header, HeaderNames, Method, QueryParams, StatusCode, Uri}
+import sttp.model.*
 import sttp.monad.MonadError
-import sttp.tapir.{AttributeKey, AttributeMap, CodecFormat, RawBodyType, WebSocketBodyOutput}
 import sttp.tapir.capabilities.NoStreams
 import sttp.tapir.model.{ConnectionInfo, ServerRequest}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.interceptor.reject.RejectInterceptor
 import sttp.tapir.server.interceptor.{CustomiseInterceptors, RequestResult}
-import sttp.tapir.server.interpreter.{BodyListener, FilterServerEndpoints, RawValue, RequestBody, ServerInterpreter, ToResponseBody}
+import sttp.tapir.server.interpreter.*
 import sttp.tapir.serverless.aws.lambda.{AwsRequest, AwsResponse, AwsServerOptions, Route}
+import sttp.tapir.{AttributeKey, AttributeMap, CodecFormat, RawBodyType, WebSocketBodyOutput}
 import zio.ZIO
 
 import java.io.{ByteArrayInputStream, InputStream}
@@ -56,7 +57,7 @@ object TIOInterpreter {
 }
 
 
-import sttp.monad.syntax._
+import sttp.monad.syntax.*
 type LambdaResponseBody = (String, Option[Long])
 abstract class AwsServerInterpreter[F[_]: MonadError] {
 

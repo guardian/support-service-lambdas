@@ -1,14 +1,16 @@
-package com.gu.productmove
+package com.gu.productmove.move
 
-import com.gu.productmove.ZIOApiGatewayRequestHandler.TIO
+import com.gu.productmove.*
+import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
+import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import com.gu.productmove.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
-import sttp.tapir.json.zio.jsonBody
 import sttp.tapir.*
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.zio.jsonBody
 import zio.ZIO
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
-import sttp.tapir.generic.auto._
-import ProductMoveEndpointTypes._
 
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
@@ -19,9 +21,9 @@ object ProductMoveEndpoint {
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (List[String],
-      com.gu.productmove.ProductMoveEndpointTypes.ExpectedInput
-    ), Unit, com.gu.productmove.ProductMoveEndpointTypes.OutputBody, Any,
-    com.gu.productmove.ZIOApiGatewayRequestHandler.TIO
+      ProductMoveEndpointTypes.ExpectedInput
+    ), Unit, ProductMoveEndpointTypes.OutputBody, Any,
+    ZIOApiGatewayRequestHandler.TIO
     ] =
     endpoint
       .post

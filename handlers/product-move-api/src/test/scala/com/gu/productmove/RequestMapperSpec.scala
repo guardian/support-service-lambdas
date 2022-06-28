@@ -1,10 +1,12 @@
 package com.gu.productmove
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2WebSocketEvent
+import com.gu.productmove.framework.RequestMapper
 import sttp.tapir.serverless.aws.lambda.{AwsHttp, AwsRequest, AwsRequestContext}
 import zio.test.Assertion.equalTo
 import zio.test.{ZIOSpecDefault, assert}
 import zio.json.*
+
 import scala.jdk.CollectionConverters.*
 
 object RequestMapperQueryParamsSpec extends ZIOSpecDefault {

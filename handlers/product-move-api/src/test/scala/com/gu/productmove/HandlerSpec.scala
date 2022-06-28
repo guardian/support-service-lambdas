@@ -1,6 +1,7 @@
 package com.gu.productmove
 
-import com.gu.productmove.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
+import com.gu.productmove.move.ProductMoveEndpoint
+import com.gu.productmove.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.zuora.{GetSubscription, TestGetSubscription}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import zio.*

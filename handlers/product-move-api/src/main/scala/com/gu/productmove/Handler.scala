@@ -3,7 +3,10 @@ package com.gu.productmove
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.ZIOApiGatewayRequestHandler.TIO
+import com.gu.productmove.available.AvailableProductMovesEndpoint
+import com.gu.productmove.framework.ZIOApiGatewayRequestHandler
+import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import com.gu.productmove.move.{ProductMoveEndpoint, ProductMoveEndpointTypes}
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import software.amazon.awssdk.auth.credentials.*
@@ -41,7 +44,8 @@ object Handler extends ZIOApiGatewayRequestHandler {
 
   // this represents all the routes for the server
   override val server: List[ServerEndpoint[Any, TIO]] = List(
-    ProductMoveEndpoint.server
+    ProductMoveEndpoint.server,
+    AvailableProductMovesEndpoint.server,
   )
 
 }

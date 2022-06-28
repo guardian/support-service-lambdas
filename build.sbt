@@ -1,6 +1,6 @@
 import Dependencies._
 
-val scalaSettings = Seq(
+val scala2Settings = Seq(
   ThisBuild / scalaVersion := "2.13.8",
   version      := "0.0.1",
   organization := "com.gu",
@@ -31,6 +31,28 @@ val scalaSettings = Seq(
   autoCompilerPlugins := true
 )
 
+val scala3Settings = Seq(
+  scalaVersion := "3.1.3",
+  version      := "0.0.1",
+  organization := "com.gu",
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding", "UTF-8",
+    "-feature",
+    "-unchecked",
+  ),
+  Test / fork := true,
+  {
+    import scalariform.formatter.preferences._
+    scalariformPreferences := scalariformPreferences.value
+      .setPreference(DanglingCloseParenthesis, Force)
+      .setPreference(SpacesAroundMultiImports, false)
+      .setPreference(NewlineAtEndOfFile, true)
+  },
+
+  autoCompilerPlugins := true
+)
+
 // fixme this whole file needs splitting down appropriately
 
 lazy val EffectsTest = config("effectsTest") extend(Test) describedAs("run the edge tests")
@@ -48,7 +70,7 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
   HealthCheckTest / testOptions += Tests.Argument("-n", "com.gu.test.HealthCheck")
 )
 
-def library(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
+def library(theProject: Project) = theProject.settings(scala2Settings, testSettings).configs(EffectsTest, HealthCheckTest)
 
 // ==== START libraries ====
 
@@ -256,7 +278,7 @@ lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-
     libraryDependencies ++= Seq(scalatest)
   )
 
-def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil) = {
+def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil, scalaSettings: SettingsDefinition = scala2Settings) = {
   val cfName = "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
@@ -444,10 +466,10 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.0.0",
-  )
+  ),
+  scala3Settings
 )
   .settings(
-    scalaVersion := "3.1.3",
     // needed for zio snapshot to get this PR https://github.com/zio/zio/pull/6775
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")

@@ -1,8 +1,9 @@
-package com.gu.productmove
+package com.gu.productmove.framework
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2WebSocketEvent
 import sttp.model.Uri
 import sttp.tapir.serverless.aws.lambda.{AwsHttp, AwsRequest, AwsRequestContext}
+
 import scala.jdk.CollectionConverters.*
 
 object RequestMapper {

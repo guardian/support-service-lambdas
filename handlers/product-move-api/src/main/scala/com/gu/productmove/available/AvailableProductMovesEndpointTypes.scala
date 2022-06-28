@@ -1,9 +1,9 @@
-package com.gu.productmove
+package com.gu.productmove.available
 
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 //has to be a separate file due to https://github.com/lampepfl/dotty/issues/12498#issuecomment-973991160
-object ProductMoveEndpointTypes {
+object AvailableProductMovesEndpointTypes {
 
   case class ExpectedInput(uat: Boolean)
 
