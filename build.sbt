@@ -472,7 +472,13 @@ lazy val `product-move-api` = lambdaProject(
   .settings(
     // needed for zio snapshot to get this PR https://github.com/zio/zio/pull/6775
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
+    genDocs := Def.taskDyn {
+      val targetPath = target.value.toString
+      Def.task {
+        (Compile / runMain).toTask(" com.gu.productmove.MakeDocsYaml " + targetPath + "/APIDocs.yaml").value
+      }
+    }.value
   )
   .dependsOn()
 
@@ -588,6 +594,8 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
 
 
 // ==== END handlers ====
+
+lazy val genDocs = taskKey[Unit]("generate yaml open API docs")
 
 initialize := {
   val _ = initialize.value

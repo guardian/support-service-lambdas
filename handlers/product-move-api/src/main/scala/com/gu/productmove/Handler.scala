@@ -21,6 +21,7 @@ import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
 import sttp.client3.logging.{Logger, LoggingBackend}
 import sttp.model.*
 import sttp.tapir.*
+import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
 import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.*
 import sttp.tapir.server.ServerEndpoint
@@ -31,6 +32,7 @@ import zio.json.*
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.*
+import scala.util.Try
 
 // this handler contains all the endpoints
 object Handler extends ZIOApiGatewayRequestHandler {
@@ -57,5 +59,31 @@ object TestDocs {
       "/docs/",
       None
     )
+  }
+}
+
+// called from genDocs command in build.sbt
+object MakeDocsYaml {
+  import sttp.apispec.openapi.circe.yaml._
+
+  def main(args: Array[String]): Unit = {
+    val endpoints: Iterable[AnyEndpoint] = Handler.server.map(_.endpoint)
+    val docs = OpenAPIDocsInterpreter().toOpenAPI(endpoints, "product-move-api", "0.0.1")
+    val yaml = docs.toYaml
+
+    args.headOption match {
+      case None =>
+        println("please pass in a full path/filename ending in .yaml")
+      case Some(yamlFilename) =>
+        import java.io._
+        val writer = new PrintWriter(new File(yamlFilename))
+        val maybeFileOps = Try {
+          writer.write(yaml)
+        }
+        val maybeClose = Try(writer.close)
+        maybeFileOps.get // throws
+        maybeClose.get // throws
+        println("Wrote yaml docs to " + yamlFilename)
+    }
   }
 }
