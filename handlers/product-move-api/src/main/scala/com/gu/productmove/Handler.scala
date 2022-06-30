@@ -38,12 +38,31 @@ import scala.util.Try
 // this handler contains all the endpoints
 object Handler extends ZIOApiGatewayRequestHandler {
 
+  @main
   // run this to test locally via console with some hard coded data
-  def main(args: Array[String]): Unit = super.runTest(
+  def testProductMove(): Unit = super.runTest(
     "POST",
     "/product-move/A-S123",
     Some(ProductMoveEndpointTypes.ExpectedInput("false").toJson)
   )
+
+  @main
+  // run this to test locally via console with some hard coded data
+  def testAvailableMoves(): Unit = super.runTest(
+    "GET",
+    "/available-product-moves/A-S123",
+    None
+  )
+
+  @main
+  // this will output the yaml to the console
+  def testDocs(): Unit = {
+    Handler.runTest(
+      "GET",
+      "/docs/docs.yaml",
+      None
+    )
+  }
 
   // this represents all the routes for the server
   override val server: List[ServerEndpoint[Any, TIO]] = List(
@@ -51,16 +70,6 @@ object Handler extends ZIOApiGatewayRequestHandler {
     ProductMoveEndpoint.server,
   )
 
-}
-
-object TestDocs {
-  def main(args: Array[String]): Unit = {
-    Handler.runTest(
-      "GET",
-      "/docs/",
-      None
-    )
-  }
 }
 
 // called from genDocs command in build.sbt

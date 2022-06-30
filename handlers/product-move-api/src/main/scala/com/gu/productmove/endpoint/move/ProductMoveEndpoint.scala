@@ -1,6 +1,6 @@
 package com.gu.productmove.endpoint.move
 
-import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct}
+import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -67,6 +67,28 @@ object ProductMoveEndpoint {
       _ <- ZIO.log("PostData: " + postData.toString)
       sub <- GetSubscription.get(if (postData.targetProductId == "true") "A-S00090478" else "A-S00339056") //DEV - for testing locally
       _ <- ZIO.log("Sub: " + sub.toString)
-    } yield Success("newsubname", MoveToProduct("idid", "namename", Billing(None, None, Currency("GBP", "£"), None, None), None, None))
+    } yield Success("asdf",
+      MoveToProduct(
+        id = "123",
+        name = "Digital Pack",
+        billing = Billing(
+          amount = Some(1199),
+          percentage = None,
+          currency = Currency.GBP,
+          frequency = Some(TimePeriod("month", 1)),
+          startDate = Some("2022-09-21")
+        ),
+        trial = Some(Trial(14)),
+        introOffer = Some(Offer(
+          Billing(
+            amount = None,
+            percentage = Some(50),
+            currency = Currency.GBP,//FIXME doesn't make sense for a percentage
+            frequency = None,//FIXME doesn't make sense for a percentage
+            startDate = Some("2022-09-21")
+          ),
+          duration = TimePeriod("month", 3)
+        ))
+      ))
 
 }

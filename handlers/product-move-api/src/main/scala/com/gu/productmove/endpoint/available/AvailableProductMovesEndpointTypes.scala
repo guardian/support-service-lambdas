@@ -64,7 +64,6 @@ case class Billing(
   startDate: Option[String], // LocalDate?
 )
 
-// todo enum
 case class Currency(
   @description("ISO 4217 alphabetic currency code.")
   @encodedExample("GBP")
@@ -74,7 +73,7 @@ case class Currency(
   symbol: String
 )
 object Currency {
-
+  val GBP = Currency("GBP", "£")
   given Schema[Currency] = inlineSchema[Currency]
 
 }
