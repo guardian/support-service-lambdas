@@ -1,13 +1,14 @@
-package com.gu.productmove.available
+package com.gu.productmove.endpoint.available
 
-import com.gu.productmove.*
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
-import com.gu.productmove.available.AvailableProductMovesEndpointTypes.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
+import sttp.tapir.EndpointOutput.StatusCode
 import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.jsonBody
 import zio.ZIO
@@ -18,14 +19,10 @@ object AvailableProductMovesEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run(ExpectedInput(false))
+    run("false")
   )
 
-  val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
-    AvailableProductMovesEndpointTypes.ExpectedInput
-    ), Unit, AvailableProductMovesEndpointTypes.OutputBody, Any,
-    ZIOApiGatewayRequestHandler.TIO
-  ] = {
+  val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, String, Unit, OutputBody, Any, ZIOApiGatewayRequestHandler.TIO] = {
     val subscriptionNameCapture: EndpointInput.PathCapture[String] =
       EndpointInput.PathCapture[String](
         Some("subscriptionName"),
@@ -35,18 +32,20 @@ object AvailableProductMovesEndpoint {
     endpoint
       .get
       .in("available-product-moves").in(subscriptionNameCapture)
-      .in(jsonBody[ExpectedInput])
-      .out(jsonBody[OutputBody])
+      .out(oneOf(
+        oneOfVariant(sttp.model.StatusCode.Ok, jsonBody[List[MoveToProduct]].map(Success.apply)(_.body).copy(info = EndpointIO.Info.empty.copy(description = Some("Success.")))),
+        oneOfVariant(sttp.model.StatusCode.NotFound, stringBody.map(NotFound.apply)(_.textResponse).copy(info = EndpointIO.Info.empty.copy(description = Some("No such subscription.")))),
+      ))
       .summary("Gets available products that can be moved to from the given subscription.")
       .description(
         """Returns an array of eligible products that the given subscription could be moved to,
           |which will be empty if there aren't any for the given subscription.
           |""".stripMargin)
-      .serverLogic[TIO] { (_, input) => run(input).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
+      .serverLogic[TIO] { subscriptionName => run(subscriptionName).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
   }
-  
-  private def run(input: ExpectedInput): TIO[OutputBody] =
-    runWithEnvironment(input).provide(
+
+  private def run(subscriptionName: String): TIO[OutputBody] =
+    runWithEnvironment(subscriptionName).provide(
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
@@ -56,11 +55,11 @@ object AvailableProductMovesEndpoint {
       GuStageLive.layer,
     )
 
-  private[productmove] def runWithEnvironment(postData: ExpectedInput): ZIO[GetSubscription, String, OutputBody] =
+  private[productmove] def runWithEnvironment(subscriptionName: String): ZIO[GetSubscription, String, OutputBody] =
     for {
-      _ <- ZIO.log("PostData: " + postData.toString)
-      sub <- GetSubscription.get(if (postData.uat) "A-S00090478" else "A-S00339056") //DEV - for testing locally
+      _ <- ZIO.log("subscription name: " + subscriptionName)
+      sub <- GetSubscription.get(if (subscriptionName == "true") "A-S00090478" else "A-S00339056") //DEV - for testing locally
       _ <- ZIO.log("Sub: " + sub.toString)
-    } yield OutputBody("hello")
+    } yield Success(List(MoveToProduct("idid", "namename", Billing(None, None, Currency("GBP", "£"), None, None), None, None)))
 
 }

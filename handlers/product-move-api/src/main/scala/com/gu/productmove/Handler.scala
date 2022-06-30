@@ -3,10 +3,10 @@ package com.gu.productmove
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.available.AvailableProductMovesEndpoint
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint
+import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, ProductMoveEndpointTypes}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
-import com.gu.productmove.move.{ProductMoveEndpoint, ProductMoveEndpointTypes}
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import software.amazon.awssdk.auth.credentials.*
@@ -42,7 +42,7 @@ object Handler extends ZIOApiGatewayRequestHandler {
   def main(args: Array[String]): Unit = super.runTest(
     "POST",
     "/product-move/A-S123",
-    Some(ProductMoveEndpointTypes.ExpectedInput(false).toJson)
+    Some(ProductMoveEndpointTypes.ExpectedInput("false").toJson)
   )
 
   // this represents all the routes for the server
@@ -78,8 +78,8 @@ object MakeDocsYaml {
 
     args.headOption match {
       case None =>
-        println("please pass in a full path/filename ending in .yaml")
-      case Some(yamlFilename) =>
+        println("Syntax: $0 <pathname.yaml>")
+      case Some(yamlFilename) if yamlFilename.endsWith(".yaml") =>
         import java.io._
         val writer = new PrintWriter(new File(yamlFilename))
         val maybeFileOps = Try {
@@ -89,6 +89,8 @@ object MakeDocsYaml {
         maybeFileOps.get // throws
         maybeClose.get // throws
         println("Wrote yaml docs to " + yamlFilename)
+      case Some(_) =>
+        println("File name passed in must end in .yaml")
     }
   }
 }

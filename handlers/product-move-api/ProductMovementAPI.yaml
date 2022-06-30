@@ -23,7 +23,7 @@ paths:
           type: string
         example: A-S000001
       responses:
-        200:
+        '200':
           description: Success.
           content:
             application/json:
@@ -31,15 +31,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/product'
-        404:
+        '404':
           description: No such subscription.
-        500:
-          description: Unable to respond.
-        502:
-          description: Bad response from an upstream system.
-        504:
-          description: Timeout from an upstream system.
-
+          content:
+            text/plain:
+              schema:
+                type: string
   /product-move/{subscriptionName}:
     post:
       summary: Replaces the existing subscription with a new one.
@@ -47,6 +44,7 @@ paths:
         Cancels the existing subscription and replaces it with a new subscription
         to a different type of product.
         Also manages all the service comms associated with the movement.
+      operationId: postProduct-moveSubscriptionname
       parameters:
       - name: subscriptionName
         in: path
@@ -57,84 +55,90 @@ paths:
         example: A-S000001
       requestBody:
         description: Definition of required movement.
-        required: true
         content:
           application/json:
             schema:
-              type: object
               required:
-                - targetProductId
+              - targetProductId
+              type: object
               properties:
                 targetProductId:
-                  description: ID of target product that new subscription will be for.
                   type: string
+                  description: ID of target product that new subscription will be
+                    for.
+        required: true
       responses:
-        200:
+        '200':
           description: Success.
           content:
             application/json:
               schema:
-                type: object
                 required:
-                  - newSubscriptionName
-                  - newProduct
+                - newSubscriptionName
+                - newProduct
+                type: object
                 properties:
                   newSubscriptionName:
-                    description: Name of new subscription.
                     type: string
+                    description: Name of new subscription.
                   newProduct:
                     $ref: '#/components/schemas/product'
-        400:
-          description: Request doesn't make sense.
-        500:
-          description: Unable to respond.
-        502:
-          description: Bad response from an upstream system.
-        504:
-          description: Timeout from an upstream system.
-
+        '404':
+          description: No such subscription.
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: 'Invalid value for: body'
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
-
     timePeriod:
-      type: object
       required:
-        - name
-        - count
+      - name
+      - count
+      type: object
       properties:
         name:
+          type: string
           description: Time unit.
           example: month
-          type: string
-          enum: [month, year]
+          enum:
+          - month
+          - year
         count:
-          description: Number of time units in this time period.
           type: integer
-
+          description: Number of time units in this time period.
+          format: int32
     billing:
-      description: Amount and frequency of billing.
-      type: object
       required:
-        - currency
+      - currency
+      type: object
       properties:
         amount:
           type: integer
-          description:
+          description: |-
             Absolute amount that will be billed in pence or cents etc.
             Either this field or the percentage field will be populated.
+          format: int32
           example: 1199
         percentage:
           type: integer
-          description:
+          description: |-
             Percentage of standard amount that will be billed.
             This field only makes sense if the billing object is attached to an introductory offer.
             Either this field or the amount field will be populated.
+          format: int32
           example: 50
         currency:
-          type: object
           required:
-            - code
-            - symbol
+          - code
+          - symbol
+          type: object
           properties:
             code:
               type: string
@@ -143,53 +147,51 @@ components:
             symbol:
               type: string
               description: ISO 4217 currency symbol.
-              example: '£'
+              example: £
         frequency:
           $ref: '#/components/schemas/timePeriod'
         startDate:
           type: string
-          description:
+          description: |-
             Date on which first service period for product subscription begins.
             This probably won't be known reliably before a subscription has actually been set up,
             so it's an optional field.
             In ISO 8601 format.
-          example: 2022-06-21
-
+          example: '2022-06-21'
+      description: Amount and frequency of billing.
     trial:
-      description:
-        An optional free trial that begins when a subscription begins
-        and lasts for a given number of days.
-      type: object
       required:
-        - dayCount
+      - dayCount
+      type: object
       properties:
         dayCount:
           type: integer
           description: Number of days that free trial lasts.
+          format: int32
           example: 14
-
+      description: |-
+        An optional free trial that begins when a subscription begins
+        and lasts for a given number of days.
     offer:
-      description:
-        An optional special offer that begins either when a subscription begins
-        or at the end of a free trial
-        and lasts for a given period of time.
-      type: object
       required:
-        - billing
-        - duration
+      - billing
+      - duration
+      type: object
       properties:
         billing:
           $ref: '#/components/schemas/billing'
         duration:
           $ref: '#/components/schemas/timePeriod'
-
+      description: |-
+        An optional special offer that begins either when a subscription begins
+        or at the end of a free trial
+        and lasts for a given period of time.
     product:
-      description: A product that's available for subscription.
-      type: object
       required:
-        - id
-        - name
-        - billing
+      - id
+      - name
+      - billing
+      type: object
       properties:
         id:
           type: string
@@ -204,3 +206,4 @@ components:
           $ref: '#/components/schemas/trial'
         introOffer:
           $ref: '#/components/schemas/offer'
+      description: A product that's available for subscription.

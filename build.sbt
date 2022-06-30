@@ -40,6 +40,7 @@ val scala3Settings = Seq(
     "-encoding", "UTF-8",
     "-feature",
     "-unchecked",
+    "-Xmax-inlines", "256"
   ),
   Test / fork := true,
   {
@@ -465,7 +466,7 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
-    "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.0.0",
+    "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
   ),
   scala3Settings
 )
