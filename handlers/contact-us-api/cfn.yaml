@@ -60,8 +60,8 @@ Resources:
       CodeUri:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/contact-us-api/contact-us-api.jar
-      Timeout: 120
-      MemorySize: 256
+      Timeout: 60
+      MemorySize: 1024
       Environment:
         Variables:
           clientID:
