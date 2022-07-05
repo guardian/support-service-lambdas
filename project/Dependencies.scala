@@ -68,6 +68,7 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.15"
   val zio2Version = "2.0.0-RC6+28-22f0d8c2-SNAPSHOT" // snapshot until https://github.com/zio/zio/pull/6775 is out
   val zio2 = "dev.zio" %% "zio" % zio2Version
+  val tapirVersion = "1.0.1"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
   val stripe = "com.stripe" % "stripe-java" % "20.128.0"
@@ -111,6 +112,8 @@ object Dependencies {
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
   val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
+    case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
+      MergeStrategy.singleOrError
     case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
