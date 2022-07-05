@@ -5,7 +5,7 @@ import sttp.tapir.generic.Derived
 
 object InlineSchema {
 
-  def inlineSchema[T](using d: Derived[Schema[T]]): Schema[T] =
-    d.value.name(None)
+  def inlineSchema[T](d: Schema[T]): Schema[T] =
+    d.name(None)
 
 }

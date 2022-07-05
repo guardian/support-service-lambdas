@@ -1,6 +1,6 @@
 package com.gu.productmove.endpoint.move
 
-import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, Trial}
+import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -9,7 +9,7 @@ import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
-import sttp.tapir.generic.auto.*
+import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
 import zio.ZIO
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
@@ -75,7 +75,7 @@ object ProductMoveEndpoint {
           amount = Some(1199),
           percentage = None,
           currency = Currency.GBP,
-          frequency = Some(TimePeriod("month", 1)),
+          frequency = Some(TimePeriod(TimeUnit.month, 1)),
           startDate = Some("2022-09-21")
         ),
         trial = Some(Trial(14)),
@@ -87,7 +87,7 @@ object ProductMoveEndpoint {
             frequency = None,//FIXME doesn't make sense for a percentage
             startDate = Some("2022-09-21")
           ),
-          duration = TimePeriod("month", 3)
+          duration = TimePeriod(TimeUnit.month, 3)
         ))
       ))
 

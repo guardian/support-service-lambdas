@@ -23,7 +23,6 @@ import sttp.client3.logging.{Logger, LoggingBackend}
 import sttp.model.*
 import sttp.tapir.*
 import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
-import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.*
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.serverless.aws.lambda.*

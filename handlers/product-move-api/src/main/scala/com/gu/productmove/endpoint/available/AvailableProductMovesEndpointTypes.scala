@@ -1,12 +1,16 @@
 package com.gu.productmove.endpoint.available
 
+import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
-import sttp.tapir.{Schema, Validator}
+import sttp.tapir.Schema.*
 import sttp.tapir.Schema.annotations.*
+import sttp.tapir.SchemaType.{SProductField, SString}
 import sttp.tapir.Validator.Enumeration
 import sttp.tapir.generic.Derived
-import sttp.tapir.generic.auto.*
+import sttp.tapir.{FieldName, Schema, SchemaType, Validator}
 import zio.json.{DeriveJsonCodec, JsonCodec}
+
+import scala.util.Try
 
 //has to be a separate file due to https://github.com/lampepfl/dotty/issues/12498#issuecomment-973991160
 object AvailableProductMovesEndpointTypes {
@@ -24,14 +28,19 @@ object AvailableProductMovesEndpointTypes {
 object MoveToProduct {
 
   given JsonCodec[MoveToProduct] = DeriveJsonCodec.gen[MoveToProduct]
+  given Schema[MoveToProduct] = Schema.derived
 
   given JsonCodec[Billing] = DeriveJsonCodec.gen[Billing]
-  given JsonCodec[Currency] = DeriveJsonCodec.gen[Currency]
-  given JsonCodec[TimePeriod] = DeriveJsonCodec.gen[TimePeriod]
+  given Schema[Billing] = Schema.derived
 
   given JsonCodec[Trial] = DeriveJsonCodec.gen[Trial]
+  given Schema[Trial] = Schema.derived
 
   given JsonCodec[Offer] = DeriveJsonCodec.gen[Offer]
+  given Schema[Offer] = Schema.derived
+
+  given JsonCodec[TimePeriod] = DeriveJsonCodec.gen[TimePeriod]
+  given Schema[TimePeriod] = Schema.derived
 
 }
 
@@ -57,6 +66,7 @@ case class Billing(
   @description("Percentage of standard amount that will be billed.\nThis field only makes sense if the billing object is attached to an introductory offer.\nEither this field or the amount field will be populated.")
   @encodedExample(50)
   percentage: Option[Int], // Either - amount or percentage?
+  @validate[Currency](Validator.enumeration(List(Currency.GBP)))
   currency: Currency,
   frequency: Option[TimePeriod],
   @description("Date on which first service period for product subscription begins.\nThis probably won't be known reliably before a subscription has actually been set up,\nso it's an optional field.\nIn ISO 8601 format.")
@@ -64,19 +74,42 @@ case class Billing(
   startDate: Option[String], // LocalDate?
 )
 
-case class Currency(
-  @description("ISO 4217 alphabetic currency code.")
-  @encodedExample("GBP")
-  code: String,
-  @description("ISO 4217 currency symbol.")
-  @encodedExample("£")
-  symbol: String
-)
+// tapir doesn't support scala 3 enums (yet), hence the need for custom codec https://github.com/softwaremill/tapir/pull/1824#discussion_r913111720
+enum Currency(
+  val code: String,
+  val symbol: String
+):
+  case GBP extends Currency("GBP", "£")
 object Currency {
-  val GBP = Currency("GBP", "£")
-  given Schema[Currency] = inlineSchema[Currency]
-
+  given JsonCodec[Currency] = JsonCodec[Map[String, String]].transformOrFail[Currency](
+    _.get("code").toRight("no code in currency object").flatMap(code => Try(Currency.valueOf(code)).toEither.left.map(_.toString)),
+    c => Map("code" -> c.code, "symbol" -> c.symbol)
+  )
+  given Schema[Currency] =
+    Schema[Currency](
+      SchemaType.SProduct[Currency](
+        List(
+          SProductField(FieldName("code"), Schema(SString(), encodedExample = Some("GBP"), description = Some("ISO 4217 alphabetic currency code.")), (c: Currency) => None),
+          SProductField(FieldName("symbol"), Schema(SString(), encodedExample = Some("£"), description = Some("ISO 4217 currency symbol.")), (c: Currency) => None),
+        )
+      )
+    )
 }
+
+// tapir doesn't support scala 3 enums (yet), hence the need for custom codec https://github.com/softwaremill/tapir/pull/1824#discussion_r913111720
+enum TimeUnit:
+  case month, year
+
+object TimeUnit:
+
+  given JsonCodec[TimeUnit] = summon[JsonCodec[String]].transform[TimeUnit]({
+    case "month" => TimeUnit.month
+    case "year" => TimeUnit.year
+  }, _.toString)
+
+  given Schema[TimeUnit] =
+    inlineSchema(Schema.derivedEnumeration())
+
 
 @encodedName("trial")
 @description("An optional free trial that begins when a subscription begins\nand lasts for a given number of days.")
@@ -97,10 +130,12 @@ case class Offer(
 case class TimePeriod(
   @description("Time unit.")
   @encodedExample("month")
-  @validate[String](Validator.enumeration(List("month", "year")))
-  name: String, // todo make actual enum
+  @validate(
+    Validator.enumeration(
+      List[com.gu.productmove.endpoint.available.TimeUnit](TimeUnit.month, TimeUnit.year),
+      tu => Some(tu.toString)
+    ))
+  name: TimeUnit,
   @description("Number of time units in this time period.")
   count: Int
 )
-
-

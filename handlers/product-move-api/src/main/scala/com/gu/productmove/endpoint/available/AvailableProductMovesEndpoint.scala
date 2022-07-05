@@ -9,7 +9,7 @@ import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClien
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.EndpointOutput.StatusCode
-import sttp.tapir.generic.auto.*
+import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
 import zio.ZIO
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
@@ -68,7 +68,7 @@ object AvailableProductMovesEndpoint {
           amount = Some(1199),
           percentage = None,
           currency = Currency.GBP,
-          frequency = Some(TimePeriod("month", 1)),
+          frequency = Some(TimePeriod(TimeUnit.month, 1)),
           startDate = Some("2022-09-21")
         ),
         trial = Some(Trial(14)),
@@ -80,7 +80,7 @@ object AvailableProductMovesEndpoint {
             frequency = None,//FIXME doesn't make sense for a percentage
             startDate = Some("2022-09-21")
           ),
-          duration = TimePeriod("month", 3)
+          duration = TimePeriod(TimeUnit.month, 3)
         ))
       )
     ))
