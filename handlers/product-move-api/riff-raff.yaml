@@ -1,0 +1,25 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+allowedStages:
+- DEV
+- CODE
+- PROD
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: product-move-api
+    parameters:
+      templatePath: cfn.yaml
+
+  product-move-api:
+    type: aws-lambda
+    parameters:
+      fileName: product-move-api.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+      - move-product-
+    dependencies: [cfn]

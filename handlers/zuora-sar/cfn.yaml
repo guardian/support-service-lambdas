@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Performs a Subject Access Requests against Zuora
+Description: Performs Subject Access Requests against Zuora
 
 Parameters:
     Stage:
@@ -175,7 +175,7 @@ Resources:
             Environment:
                 Variables:
                   Stage: !Ref Stage
-            MemorySize: 384
+            MemorySize: 1024
             Runtime: java11
             Timeout: 120
             VpcConfig:

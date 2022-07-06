@@ -7,10 +7,10 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.17.194"
-  val circeVersion = "0.14.2"
-  val sttpVersion = "3.5.2"
-  val http4sVersion = "0.21.32"
+  val awsSdkVersion = "2.17.210"
+  val circeVersion = "0.13.0"
+  val sttpVersion = "3.6.2"
+  val http4sVersion = "0.21.33"
   val catsVersion = "2.7.0"
   val catsEffectVersion = "2.5.5"
 
@@ -49,7 +49,7 @@ object Dependencies {
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
   val sttpOkhttpBackend =
     "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
-  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.9.3"
+  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.10.0"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
   // HTTP4S
@@ -65,10 +65,13 @@ object Dependencies {
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.7"
+  val zio = "dev.zio" %% "zio" % "1.0.15"
+  val zio2Version = "2.0.0-RC6+28-22f0d8c2-SNAPSHOT" // snapshot until https://github.com/zio/zio/pull/6775 is out
+  val zio2 = "dev.zio" %% "zio" % zio2Version
+  val tapirVersion = "1.0.1"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
-  val stripe = "com.stripe" % "stripe-java" % "20.123.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.128.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.7.1" % Test
@@ -109,6 +112,8 @@ object Dependencies {
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
   val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
+    case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
+      MergeStrategy.singleOrError
     case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
