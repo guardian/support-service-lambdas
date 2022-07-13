@@ -25,7 +25,7 @@ trait GetSubscription :
 
 object GetSubscription {
 
-  case class GetSubscriptionResponse(id: String)
+  case class GetSubscriptionResponse(id: String, accountId: String)
 
   given JsonDecoder[GetSubscriptionResponse] = DeriveJsonDecoder.gen[GetSubscriptionResponse]
 

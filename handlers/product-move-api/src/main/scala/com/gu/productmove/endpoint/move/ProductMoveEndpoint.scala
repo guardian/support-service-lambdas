@@ -4,8 +4,8 @@ import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
+import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
+import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
@@ -51,44 +51,50 @@ object ProductMoveEndpoint {
     endpointDescription
       .serverLogic[TIO] { (_, input) => run(input).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
   }
-  private def run(input: ExpectedInput): TIO[OutputBody] =
-    runWithEnvironment(input).provide(
+
+
+
+  private def run(input: ExpectedInput): TIO[OutputBody] = {
+    val value: ZIO[ZuoraGet & Subscribe, String, OutputBody] = productMove(input).provideSomeLayer(GetSubscriptionLive.layer)
+    val value1: ZIO[ZuoraGet, String, OutputBody] = value.provideSomeLayer(SubscribeLive.layer)
+
+    value1.provide(
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
       ZuoraClientLive.layer,
-      GetSubscriptionLive.layer,
       ZuoraGetLive.layer,
       GuStageLive.layer,
     )
+  }
 
-  private[productmove] def runWithEnvironment(postData: ExpectedInput): ZIO[GetSubscription, String, OutputBody] =
+  private[productmove] def productMove(postData: ExpectedInput): ZIO[GetSubscription & Subscribe, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      sub <- GetSubscription.get(if (postData.targetProductId == "true") "A-S00090478" else "A-S00339056") //DEV - for testing locally
-      _ <- ZIO.log("Sub: " + sub.toString)
-    } yield Success("asdf",
-      MoveToProduct(
-        id = "123",
-        name = "Digital Pack",
-        billing = Billing(
-          amount = Some(1199),
-          percentage = None,
-          currency = Currency.GBP,
-          frequency = Some(TimePeriod(TimeUnit.month, 1)),
+      subscription <- GetSubscription.get("8ad0950c81b4f9990181cb0515e52670")
+      createRequestBody <- Subscribe.createRequestBody(subscription.accountId, postData.targetProductId)
+      newSubscriptionId <- Subscribe.create(createRequestBody)
+      _ <- ZIO.log("Sub: " + newSubscriptionId.toString)
+    } yield Success("asdf", MoveToProduct(
+      id = "123",
+      name = "Digital Pack",
+      billing = Billing(
+        amount = Some(1199),
+        percentage = None,
+        currency = Currency.GBP,
+        frequency = Some(TimePeriod(TimeUnit.month, 1)),
+        startDate = Some("2022-09-21")
+      ),
+      trial = Some(Trial(14)),
+      introOffer = Some(Offer(
+        Billing(
+          amount = None,
+          percentage = Some(50),
+          currency = Currency.GBP,//FIXME doesn't make sense for a percentage
+          frequency = None,//FIXME doesn't make sense for a percentage
           startDate = Some("2022-09-21")
         ),
-        trial = Some(Trial(14)),
-        introOffer = Some(Offer(
-          Billing(
-            amount = None,
-            percentage = Some(50),
-            currency = Currency.GBP,//FIXME doesn't make sense for a percentage
-            frequency = None,//FIXME doesn't make sense for a percentage
-            startDate = Some("2022-09-21")
-          ),
-          duration = TimePeriod(TimeUnit.month, 3)
-        ))
+        duration = TimePeriod(TimeUnit.month, 3)
       ))
-
+    ))
 }
