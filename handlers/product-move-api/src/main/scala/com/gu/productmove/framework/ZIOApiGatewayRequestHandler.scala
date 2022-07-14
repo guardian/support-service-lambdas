@@ -104,21 +104,27 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
 
   }
 
-  private def handleWithLoggerAndErrorHandling(awsRequest: AwsRequest, context: Context) = {
+  private def handleWithLoggerAndErrorHandling(awsRequest: AwsRequest, context: Context): AwsResponse = {
     val swaggerEndpoints = SwaggerInterpreter().fromServerEndpoints[TIO](server, "My App", "1.0")
 
     val route: Route[TIO] = TIOInterpreter().toRoute(server ++ swaggerEndpoints)
     val routedTask: TIO[AwsResponse] = route(awsRequest)
     val runtime = Runtime.default
-    runtime.unsafeRun(
-      routedTask
-        .catchAll { error =>
-          ZIO.log(error.toString)
-            .map(_ => AwsResponse(Nil, false, 500, Map.empty, ""))
-        }
-        .provideLayer(Runtime.removeDefaultLoggers)
-        .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger)))
-    )
+    Unsafe.unsafe {
+      runtime.unsafe.run(
+        routedTask
+          .catchAll { error =>
+            ZIO.log(error.toString)
+              .map(_ => AwsResponse(Nil, false, 500, Map.empty, ""))
+          }
+          .provideLayer(Runtime.removeDefaultLoggers)
+          .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger)))
+      ) match
+        case Exit.Success(value) => value
+        case Exit.Failure(cause) =>
+          context.getLogger.log("Failed with: " + cause.toString)
+          AwsResponse(Nil, false, 500, Map.empty, "")
+    }
   }
 
 }
@@ -130,7 +136,7 @@ class AwsLambdaLogger(lambdaLogger: LambdaLogger) extends ZLogger[String, Unit] 
     logLevel: LogLevel,
     message: () => String,
     cause: Cause[Any],
-    context: Map[FiberRef[_], Any],
+    context: FiberRefs,
     spans: List[LogSpan],
     annotations: Map[String, String]
   ): Unit = lambdaLogger.log(message())
