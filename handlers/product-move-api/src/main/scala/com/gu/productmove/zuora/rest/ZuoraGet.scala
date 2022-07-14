@@ -2,7 +2,7 @@ package com.gu.productmove.zuora.rest
 
 import sttp.client3.basicRequest
 import sttp.model.Uri
-import zio.json.JsonDecoder
+import zio.json.*
 import zio.{IO, ULayer, URLayer, ZIO, ZLayer}
 
 object ZuoraGetLive:
@@ -15,13 +15,13 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet :
       parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[T](response))
     } yield parsedBody
 
-  override def post[T: JsonDecoder](relativeUrl: Uri, body: String): IO[String, T] =
+  override def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response] =
     for {
-      response <- zuoraClient.send(basicRequest.body(body).post(relativeUrl))
-      parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[T](response))
+      response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).post(relativeUrl))
+      parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response))
     } yield parsedBody
 
 trait ZuoraGet:
   def get[T: JsonDecoder](relativeUrl: Uri): IO[String, T]
-  def post[T: JsonDecoder](relativeUrl: Uri, body: String): IO[String, T]
+  def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response]
 

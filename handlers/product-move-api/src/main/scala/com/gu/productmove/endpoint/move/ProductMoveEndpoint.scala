@@ -11,7 +11,7 @@ import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio.ZIO
+import zio.{Clock, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 // this is the description for just the one endpoint
@@ -19,7 +19,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run(ExpectedInput("false"))
+    run("8ad0855181f72d2d0181f7c5f0116ce2", ExpectedInput("2c92c0f84bbfec8b014bc655f4852d9d"))
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
@@ -49,16 +49,13 @@ object ProductMoveEndpoint {
             |Also manages all the service comms associated with the movement.""".stripMargin
         )
     endpointDescription
-      .serverLogic[TIO] { (_, input) => run(input).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
+      .serverLogic[TIO] { (subscriptionName, postData) => run(subscriptionName, postData).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
   }
 
-
-
-  private def run(input: ExpectedInput): TIO[OutputBody] = {
-    val value: ZIO[ZuoraGet & Subscribe, String, OutputBody] = productMove(input).provideSomeLayer(GetSubscriptionLive.layer)
-    val value1: ZIO[ZuoraGet, String, OutputBody] = value.provideSomeLayer(SubscribeLive.layer)
-
-    value1.provide(
+  private def run(subscriptionName: String, postData: ExpectedInput): TIO[OutputBody] =
+    productMove(subscriptionName, postData).provide(
+      SubscribeLive.layer,
+      GetSubscriptionLive.layer,
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
@@ -66,16 +63,14 @@ object ProductMoveEndpoint {
       ZuoraGetLive.layer,
       GuStageLive.layer,
     )
-  }
 
-  private[productmove] def productMove(postData: ExpectedInput): ZIO[GetSubscription & Subscribe, String, OutputBody] =
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with Subscribe, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get("8ad0950c81b4f9990181cb0515e52670")
-      createRequestBody <- Subscribe.createRequestBody(subscription.accountId, postData.targetProductId)
-      newSubscriptionId <- Subscribe.create(createRequestBody)
+      subscription <- GetSubscription.get(subscriptionName)
+      newSubscriptionId <- Subscribe.create(subscription.accountId, postData.targetProductId)
       _ <- ZIO.log("Sub: " + newSubscriptionId.toString)
-    } yield Success("asdf", MoveToProduct(
+    } yield Success(newSubscriptionId.subscriptionId, MoveToProduct(
       id = "123",
       name = "Digital Pack",
       billing = Billing(

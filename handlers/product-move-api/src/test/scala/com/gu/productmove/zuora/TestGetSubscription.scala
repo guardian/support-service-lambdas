@@ -4,7 +4,7 @@ import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import zio.{IO, ZIO}
 
-class TestGetSubscription(responses: Map[String, String]) extends GetSubscription {
+class TestGetSubscription(responses: Map[String, GetSubscription.GetSubscriptionResponse]) extends GetSubscription {
 
   private var mutableStore: List[String] = Nil // we need to remember the side effects
 
@@ -12,11 +12,11 @@ class TestGetSubscription(responses: Map[String, String]) extends GetSubscriptio
 
   override def get(subscriptionNumber: String): IO[String, GetSubscription.GetSubscriptionResponse] = {
     mutableStore = subscriptionNumber :: mutableStore
+
     responses.get(subscriptionNumber) match
-      case Some(value) => ZIO.succeed(GetSubscriptionResponse(value, "accountId"))
+      case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(s"success = false, subscription not found: $subscriptionNumber")
   }
-
 }
 
 object TestGetSubscription {
