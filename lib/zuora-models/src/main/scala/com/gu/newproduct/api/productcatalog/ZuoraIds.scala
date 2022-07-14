@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
-import com.gu.newproduct.api.productcatalog.PlanId._
+import com.gu.newproduct.api.productcatalog.PlanId.*
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.config.Stage
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}

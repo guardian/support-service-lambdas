@@ -71,7 +71,7 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
   HealthCheckTest / testOptions += Tests.Argument("-n", "com.gu.test.HealthCheck")
 )
 
-def library(theProject: Project) = theProject.settings(scala2Settings, testSettings).configs(EffectsTest, HealthCheckTest)
+def library(theProject: Project, scalaSettings: SettingsDefinition = scala2Settings) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
 
 // ==== START libraries ====
 
@@ -258,6 +258,10 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
     dependencyOverrides ++= jacksonDependencies
   )
 
+// this lib is shared between ZIO and non zio projects so can't depend on json libs, http clients, effects etc.
+lazy val `zuora-models` = library(project in  file("lib/zuora-models"), scala3Settings)
+  .dependsOn(`config-core`)
+
 lazy val `credit-processor` = library(project in file("lib/credit-processor"))
   .dependsOn(
     `zuora-core`,
@@ -337,7 +341,7 @@ lazy val `new-product-api` = lambdaProject(
   "new-product-api",
   "Add subscription to account",
   Seq(supportInternationalisation)
-).dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
+).dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
@@ -481,7 +485,7 @@ lazy val `product-move-api` = lambdaProject(
       }
     }.value
   )
-  .dependsOn()
+  .dependsOn(`zuora-models`)
 
 lazy val `metric-push-api` = lambdaProject(
   "metric-push-api",

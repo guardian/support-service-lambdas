@@ -2,8 +2,6 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.i18n.Currency
-
 case class Catalog(
   voucherWeekend: Plan,
   voucherSaturday: Plan,

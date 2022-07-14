@@ -3,8 +3,9 @@ package com.gu.productmove.endpoint.available
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
+import com.gu.productmove.zuora.GetAccount.GetAccountResponse
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
+import com.gu.productmove.zuora.{GetAccount, GetSubscription, GetSubscriptionLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
@@ -13,6 +14,8 @@ import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
 import zio.ZIO
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
+
+import java.time.LocalDate
 
 // this is the description for just the one endpoint
 object AvailableProductMovesEndpoint {
@@ -54,35 +57,74 @@ object AvailableProductMovesEndpoint {
       ZuoraGetLive.layer,
       GuStageLive.layer,
     )
+/*
+Only show the switch if
+credit card is not expired (according to zuora)
+User is not in payment failure or has unpaid invoices
+Currency is GBP (initially on day 1 only?)
+Monthly contribution
+Only have one sub in the account
+API return values
+Note, These are all wrapped in a switches structure which has a collection of switches available.  There will only be one initially as we only support RC->DS
+trial = X days (1-31 days) (may not need this, may be hard coded to 14 days)
+Payment method = xxxxxxxxx4242 + expiry from zuora or similar for DD.
+Next payment date
+Next payment amount (hard code the 3 months half price discount in the MVP for simplicity)
+Email address to send to (may be already known on client side)
+If it fails: we just return a generic error, the call centre can help the user if necessary.
 
+*/
   private[productmove] def runWithEnvironment(subscriptionName: String): ZIO[GetSubscription, String, OutputBody] =
     for {
       _ <- ZIO.log("subscription name: " + subscriptionName)
-      sub <- GetSubscription.get(if (subscriptionName == "true") "A-S00090478" else "A-S00339056") //DEV - for testing locally
+      accountNumber <- GetSubscription.get(subscriptionName)
+      account <- GetAccount.get(accountNumber)
+      switches = AvailableSwitches.getAvailable(account)
       _ <- ZIO.log("Sub: " + sub.toString)
-    } yield Success(List(
-      MoveToProduct(
-        id = "123",
-        name = "Digital Pack",
-        billing = Billing(
-          amount = Some(1199),
-          percentage = None,
-          currency = Currency.GBP,
-          frequency = Some(TimePeriod(TimeUnit.month, 1)),
-          startDate = Some("2022-09-21")
-        ),
-        trial = Some(Trial(14)),
-        introOffer = Some(Offer(
-          Billing(
-            amount = None,
-            percentage = Some(50),
-            currency = Currency.GBP,//FIXME doesn't make sense for a percentage
-            frequency = None,//FIXME doesn't make sense for a percentage
-            startDate = Some("2022-09-21")
-          ),
-          duration = TimePeriod(TimeUnit.month, 3)
-        ))
-      )
-    ))
+    } yield Success(switches)
 
 }
+
+object AvailableSwitches:
+
+  private val moveToDigitalSub = MoveToProduct(
+    id = "123",
+    name = "Digital Pack",
+    billing = Billing(
+      amount = Some(1199),
+      percentage = None,
+      currency = Currency.GBP,
+      frequency = Some(TimePeriod(TimeUnit.month, 1)),
+      startDate = Some("2022-09-21")
+    ),
+    trial = Some(Trial(14)),
+    introOffer = Some(Offer(
+      Billing(
+        amount = None,
+        percentage = Some(50),
+        currency = Currency.GBP, //FIXME doesn't make sense for a percentage
+        frequency = None, //FIXME doesn't make sense for a percentage
+        startDate = Some("2022-09-21")
+      ),
+      duration = TimePeriod(TimeUnit.month, 3)
+    ))
+  )
+
+  def getAvailable(account: GetAccountResponse, today: LocalDate) = {
+    for {
+      a <- account.basicInfo
+      /*
+
+credit card is not expired (according to zuora)
+User is not in payment failure or has unpaid invoices
+Currency is GBP (initially on day 1 only?)
+Monthly contribution
+Only have one sub in the account
+
+      */
+    }
+    List(
+      moveToDigitalSub
+    )
+  }
+
