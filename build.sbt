@@ -18,7 +18,6 @@ val scala2Settings = Seq(
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard",
-    "-Yretain-trees"
   ),
   Test / fork := true,
   {
