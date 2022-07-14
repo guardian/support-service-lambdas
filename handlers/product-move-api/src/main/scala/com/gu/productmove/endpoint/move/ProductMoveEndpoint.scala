@@ -19,7 +19,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("8ad0855181f72d2d0181f7c5f0116ce2", ExpectedInput("2c92c0f84bbfec8b014bc655f4852d9d"))
+    run("zuoraAccountId", ExpectedInput("targetProductId"))
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
