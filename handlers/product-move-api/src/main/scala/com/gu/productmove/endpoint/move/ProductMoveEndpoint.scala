@@ -5,7 +5,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive}
+import com.gu.productmove.zuora.{Cancellation, GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
@@ -68,6 +68,7 @@ object ProductMoveEndpoint {
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName)
+      _ <- Cancellation.cancel(subscriptionName, subscription.chargedThroughDate)
       newSubscriptionId <- Subscribe.create(subscription.accountId, postData.targetProductId)
       _ <- ZIO.log("Sub: " + newSubscriptionId.toString)
     } yield Success(newSubscriptionId.subscriptionId, MoveToProduct(
