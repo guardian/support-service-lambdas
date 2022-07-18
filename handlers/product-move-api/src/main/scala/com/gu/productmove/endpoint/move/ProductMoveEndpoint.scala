@@ -70,13 +70,9 @@ object ProductMoveEndpoint {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName)
 
-      billing = subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate
-      _ = billing match {
-        case Some(value) => value
-        case None => ZIO.fail(s"chargedThroughDate is null for subscription $subscription.")
-      }
+      chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElseFail(s"chargedThroughDate is null for subscription $subscriptionName.")
 
-      _ <- Cancellation.cancel(subscriptionName, billing.get)
+      _ <- Cancellation.cancel(subscriptionName, chargedThroughDate)
       newSubscriptionId <- Subscribe.create(subscription.accountId, postData.targetProductId)
       _ <- ZIO.log("Sub: " + newSubscriptionId.toString)
     } yield Success(newSubscriptionId.subscriptionId, MoveToProduct(
