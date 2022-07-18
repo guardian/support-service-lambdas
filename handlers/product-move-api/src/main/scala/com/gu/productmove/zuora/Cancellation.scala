@@ -17,20 +17,20 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 import java.time.LocalDate
 
 trait Cancellation:
-  def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CreateSubscriptionResponse]
+  def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CancellationResponse]
 
 object CancellationLive :
   val layer: URLayer[ZuoraGet, Cancellation] = ZLayer.fromFunction(CancellationLive(_))
 
 private class CancellationLive(zuoraGet: ZuoraGet) extends Cancellation:
-  override def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CreateSubscriptionResponse] = {
+  override def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CancellationResponse] = {
     val cancellationRequest = CancellationRequest(chargedThroughDate)
 
-    zuoraGet.put[CancellationRequest, CreateSubscriptionResponse] (uri"subscriptions/$subscriptionNumber/cancel", cancellationRequest)
+    zuoraGet.put[CancellationRequest, CancellationResponse] (uri"subscriptions/$subscriptionNumber/cancel", cancellationRequest)
   }
 
 object Cancellation {
-  def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Cancellation, String, CreateSubscriptionResponse] =
+  def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Cancellation, String, CancellationResponse] =
     ZIO.serviceWithZIO[Cancellation](_.cancel(subscriptionNumber, chargedThroughDate))
 }
 
@@ -39,3 +39,9 @@ case class CancellationRequest(
                              cancellationPolicy: String = "SpecificDate"
                            )
 given JsonEncoder[CancellationRequest] = DeriveJsonEncoder.gen[CancellationRequest]
+
+case class CancellationResponse(
+                                subscriptionId: String,
+                                cancellationDate: LocalDate
+                              )
+given JsonDecoder[CancellationResponse] = DeriveJsonDecoder.gen[CancellationResponse]
