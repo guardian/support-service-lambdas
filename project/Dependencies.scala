@@ -71,7 +71,7 @@ object Dependencies {
   val tapirVersion = "1.0.1"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
-  val stripe = "com.stripe" % "stripe-java" % "20.128.0"
+  val stripe = "com.stripe" % "stripe-java" % "20.136.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.7.1" % Test
