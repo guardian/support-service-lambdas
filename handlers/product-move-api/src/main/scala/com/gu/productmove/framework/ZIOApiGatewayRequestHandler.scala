@@ -19,7 +19,7 @@ import sttp.capabilities
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3.*
-import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.logging.{Logger, LoggingBackend}
 import sttp.model.*
 import sttp.monad.MonadError
