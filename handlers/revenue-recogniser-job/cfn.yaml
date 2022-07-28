@@ -15,7 +15,7 @@ Mappings:
   Stages:
     Schedule:
       CODE: 'rate(365 days)'
-      PROD: 'rate(12 hours)'
+      PROD: 'cron(0 3,15 2-31 * ? *)'
   Constants:
     Alarm:
       Process: See the docs at https://github.com/guardian/support-service-lambdas/tree/main/handlers/revenue-recogniser-job
