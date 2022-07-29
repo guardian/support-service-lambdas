@@ -1,9 +1,9 @@
 package com.gu.productmove.endpoint.move
 
 import com.gu.productmove.framework.InlineSchema.inlineSchema
-import com.gu.productmove.endpoint.available.{Currency, MoveToProduct, TimePeriod}
+import com.gu.productmove.endpoint.available.{Currency, MoveToProduct}
 import sttp.tapir.Schema
-import sttp.tapir.Schema.annotations.{description, encodedExample, encodedName}
+import sttp.tapir.Schema.annotations.{description, encodedName}
 import sttp.tapir.generic.{Configuration, Derived}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 import sttp.tapir.Schema
