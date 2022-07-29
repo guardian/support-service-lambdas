@@ -19,8 +19,8 @@ object HandlerSpec extends ZIOSpecDefault {
         val getSubscriptionResponse = GetSubscriptionResponse("subscriptionName", "zuoraAccountId")
         val createSubscriptionResponse = CreateSubscriptionResponse("newSubscriptionName")
 
-        val GetSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
-        val SubscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
+        val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
+        val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
 
         val expectedOutput = Success(
           newSubscriptionName = "newSubscriptionName",
