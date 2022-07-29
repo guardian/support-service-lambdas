@@ -67,8 +67,8 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(testRequests)(equalTo(List(expectedSubNameInput))) &&
           assert(subscribeRequests)(equalTo(List(("zuoraAccountId", "targetProductId"))))
         }).provide(
-          ZLayer.succeed(new TestGetSubscription(GetSubscriptionStubs)),
-          ZLayer.succeed(new MockSubscribe(SubscribeStubs))
+          ZLayer.succeed(new TestGetSubscription(getSubscriptionStubs)),
+          ZLayer.succeed(new MockSubscribe(subscribeStubs))
         )
       }
     )
