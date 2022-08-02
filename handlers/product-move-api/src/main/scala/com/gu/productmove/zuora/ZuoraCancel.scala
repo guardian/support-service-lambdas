@@ -16,22 +16,22 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-trait Cancellation:
+trait ZuoraCancel:
   def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CancellationResponse]
 
-object CancellationLive :
-  val layer: URLayer[ZuoraGet, Cancellation] = ZLayer.fromFunction(CancellationLive(_))
+object ZuoraCancelLive :
+  val layer: URLayer[ZuoraGet, ZuoraCancel] = ZLayer.fromFunction(ZuoraCancelLive(_))
 
-private class CancellationLive(zuoraGet: ZuoraGet) extends Cancellation:
+private class ZuoraCancelLive(zuoraGet: ZuoraGet) extends ZuoraCancel:
   override def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CancellationResponse] = {
     val cancellationRequest = CancellationRequest(chargedThroughDate)
 
     zuoraGet.put[CancellationRequest, CancellationResponse] (uri"subscriptions/$subscriptionNumber/cancel", cancellationRequest)
   }
 
-object Cancellation {
-  def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Cancellation, String, CancellationResponse] =
-    ZIO.serviceWithZIO[Cancellation](_.cancel(subscriptionNumber, chargedThroughDate))
+object ZuoraCancel {
+  def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[ZuoraCancel, String, CancellationResponse] =
+    ZIO.serviceWithZIO[ZuoraCancel](_.cancel(subscriptionNumber, chargedThroughDate))
 }
 
 case class CancellationRequest(

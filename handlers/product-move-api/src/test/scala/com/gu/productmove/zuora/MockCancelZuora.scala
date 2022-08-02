@@ -4,7 +4,7 @@ import zio.{IO, ZIO}
 
 import java.time.LocalDate
 
-class MockCancellation(responses: Map[(String, LocalDate), CancellationResponse]) extends Cancellation {
+class MockCancelZuora(responses: Map[(String, LocalDate), CancellationResponse]) extends ZuoraCancel {
 
   private var mutableStore: List[(String, LocalDate)] = Nil // we need to remember the side effects
 
@@ -19,6 +19,6 @@ class MockCancellation(responses: Map[(String, LocalDate), CancellationResponse]
   }
 }
 
-object MockCancellation {
-  def requests: ZIO[MockCancellation, Nothing, List[(String, LocalDate)]] = ZIO.serviceWith[MockCancellation](_.requests)
+object MockCancelZuora {
+  def requests: ZIO[MockCancelZuora, Nothing, List[(String, LocalDate)]] = ZIO.serviceWith[MockCancelZuora](_.requests)
 }

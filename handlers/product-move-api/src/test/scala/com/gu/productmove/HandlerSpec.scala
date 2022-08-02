@@ -3,7 +3,7 @@ package com.gu.productmove
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody, Success}
-import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, GetSubscription, MockCancellation, MockSubscribe, TestGetSubscription}
+import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, GetSubscription, MockCancelZuora, MockSubscribe, TestGetSubscription}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
 import zio.test.*
@@ -86,7 +86,7 @@ object HandlerSpec extends ZIOSpecDefault {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData)
           testRequests <- TestGetSubscription.requests
           subscribeRequests <- MockSubscribe.requests
-          cancellationRequests <- MockCancellation.requests
+          cancellationRequests <- MockCancelZuora.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
           assert(testRequests)(equalTo(List(expectedSubNameInput))) &&
@@ -95,7 +95,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new TestGetSubscription(GetSubscriptionStubs)),
           ZLayer.succeed(new MockSubscribe(SubscribeStubs)),
-          ZLayer.succeed(new MockCancellation(CancellationStubs))
+          ZLayer.succeed(new MockCancelZuora(CancellationStubs))
         )
       },
 
@@ -171,7 +171,7 @@ object HandlerSpec extends ZIOSpecDefault {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData).exit
           testRequests <- TestGetSubscription.requests
           subscribeRequests <- MockSubscribe.requests
-          cancellationRequests <- MockCancellation.requests
+          cancellationRequests <- MockCancelZuora.requests
         } yield {
           assert(output)(fails(equalTo("chargedThroughDate is null for subscription A-S00339056."))) &&
             assert(testRequests)(equalTo(List(expectedSubNameInput))) &&
@@ -180,7 +180,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new TestGetSubscription(GetSubscriptionStubs)),
           ZLayer.succeed(new MockSubscribe(SubscribeStubs)),
-          ZLayer.succeed(new MockCancellation(CancellationStubs))
+          ZLayer.succeed(new MockCancelZuora(CancellationStubs))
         )
       }
     )
