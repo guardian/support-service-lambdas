@@ -17,31 +17,33 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 import java.time.LocalDate
 
 trait ZuoraCancel:
-  def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CancellationResponse]
+  def cancel(subscriptionNumber: String, cancellationEffectiveDate: LocalDate): ZIO[Any, String, CancellationResponse]
 
-object ZuoraCancelLive :
+object ZuoraCancelLive:
   val layer: URLayer[ZuoraGet, ZuoraCancel] = ZLayer.fromFunction(ZuoraCancelLive(_))
 
-private class ZuoraCancelLive(zuoraGet: ZuoraGet) extends ZuoraCancel:
-  override def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CancellationResponse] = {
-    val cancellationRequest = CancellationRequest(chargedThroughDate)
+private class ZuoraCancelLive(zuoraGet: ZuoraGet) extends ZuoraCancel :
+  override def cancel(subscriptionNumber: String, cancellationEffectiveDate: LocalDate): ZIO[Any, String, CancellationResponse] = {
+    val cancellationRequest = CancellationRequest(cancellationEffectiveDate)
 
-    zuoraGet.put[CancellationRequest, CancellationResponse] (uri"subscriptions/$subscriptionNumber/cancel", cancellationRequest)
+    zuoraGet.put[CancellationRequest, CancellationResponse](uri"subscriptions/$subscriptionNumber/cancel", cancellationRequest)
   }
 
 object ZuoraCancel {
-  def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[ZuoraCancel, String, CancellationResponse] =
-    ZIO.serviceWithZIO[ZuoraCancel](_.cancel(subscriptionNumber, chargedThroughDate))
+  def cancel(subscriptionNumber: String, cancellationEffectiveDate: LocalDate): ZIO[ZuoraCancel, String, CancellationResponse] =
+    ZIO.serviceWithZIO[ZuoraCancel](_.cancel(subscriptionNumber, cancellationEffectiveDate))
 }
 
 case class CancellationRequest(
-                             cancellationEffectiveDate: LocalDate,
-                             cancellationPolicy: String = "SpecificDate"
-                           )
+  cancellationEffectiveDate: LocalDate,
+  cancellationPolicy: String = "SpecificDate"
+)
+
 given JsonEncoder[CancellationRequest] = DeriveJsonEncoder.gen[CancellationRequest]
 
 case class CancellationResponse(
-                                subscriptionId: String,
-                                cancellationDate: LocalDate
-                              )
+  subscriptionId: String,
+  cancellationDate: LocalDate
+)
+
 given JsonDecoder[CancellationResponse] = DeriveJsonDecoder.gen[CancellationResponse]

@@ -15,14 +15,14 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-object GetSubscriptionLive :
+object GetSubscriptionLive:
   val layer: URLayer[ZuoraGet, GetSubscription] = ZLayer.fromFunction(GetSubscriptionLive(_))
 
-private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription:
+private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription :
   override def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse] =
     zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/$subscriptionNumber")
 
-trait GetSubscription :
+trait GetSubscription:
   def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse]
 
 object GetSubscription {
@@ -30,23 +30,23 @@ object GetSubscription {
   case class GetSubscriptionResponse(id: String, accountId: String, ratePlans: List[RatePlan])
 
   case class RatePlan(
-                       productName: String,
-                       ratePlanName: String,
-                       ratePlanCharges: List[RatePlanCharge],
-                       productRatePlanId: String,
-                       id: String,
-                     )
+    productName: String,
+    ratePlanName: String,
+    ratePlanCharges: List[RatePlanCharge],
+    productRatePlanId: String,
+    id: String,
+  )
 
   case class RatePlanCharge(
-                             name: String,
-                             number: String,
-                             price: Double,
-                             billingPeriod: Option[String],
-                             effectiveStartDate: LocalDate,
-                             chargedThroughDate: Option[LocalDate],
-                             productRatePlanChargeId: String,
-                             effectiveEndDate: LocalDate,
-                           )
+    name: String,
+    number: String,
+    price: Double,
+    billingPeriod: Option[String],
+    effectiveStartDate: LocalDate,
+    chargedThroughDate: Option[LocalDate],
+    productRatePlanChargeId: String,
+    effectiveEndDate: LocalDate,
+  )
 
   given JsonDecoder[GetSubscriptionResponse] = DeriveJsonDecoder.gen[GetSubscriptionResponse]
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
