@@ -31,7 +31,7 @@ object SubscribeSpec extends ZIOSpecDefault {
 
       for {
         _ <- TestClock.setDateTime(time)
-        createRequestBody <- SubscribeRequest("zuoraAccountId", "targetProductId")
+        createRequestBody <- SubscribeRequest.withTodaysDate("zuoraAccountId", "targetProductId")
       } yield assert(createRequestBody)(equalTo(expectedSubscribeRequest))
     })
 }
