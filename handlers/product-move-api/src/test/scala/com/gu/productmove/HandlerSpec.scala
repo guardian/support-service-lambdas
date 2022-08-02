@@ -3,7 +3,7 @@ package com.gu.productmove
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody, Success}
-import com.gu.productmove.zuora.{CreateSubscriptionResponse, GetSubscription, MockSubscribe, TestGetSubscription}
+import com.gu.productmove.zuora.{CreateSubscriptionResponse, GetSubscription, MockSubscribe, MockGetSubscription}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import zio.*
 import zio.test.*
@@ -60,14 +60,14 @@ object HandlerSpec extends ZIOSpecDefault {
 
         (for {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData)
-          testRequests <- TestGetSubscription.requests
+          testRequests <- MockGetSubscription.requests
           subscribeRequests <- MockSubscribe.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
           assert(testRequests)(equalTo(List(expectedSubNameInput))) &&
           assert(subscribeRequests)(equalTo(List(("zuoraAccountId", "targetProductId"))))
         }).provide(
-          ZLayer.succeed(new TestGetSubscription(getSubscriptionStubs)),
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscribe(subscribeStubs))
         )
       }
