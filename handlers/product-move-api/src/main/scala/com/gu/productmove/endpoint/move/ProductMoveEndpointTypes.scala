@@ -39,5 +39,4 @@ object ProductMoveEndpointTypes {
   given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
   given JsonDecoder[NotFound] = DeriveJsonDecoder.gen[NotFound] // needed to keep tapir happy
   given JsonDecoder[OutputBody] = DeriveJsonDecoder.gen[OutputBody] // needed to keep tapir happy
-
 }

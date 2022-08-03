@@ -17,7 +17,7 @@ val scala2Settings = Seq(
     "-Xlint:-byname-implicit",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard"
+    "-Ywarn-value-discard",
   ),
   Test / fork := true,
   {
