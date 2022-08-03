@@ -21,7 +21,14 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet :
       parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response))
     } yield parsedBody
 
+  override def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response] =
+    for {
+      response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).put(relativeUrl))
+      parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response))
+    } yield parsedBody
+
 trait ZuoraGet:
   def get[T: JsonDecoder](relativeUrl: Uri): IO[String, T]
   def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response]
+  def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response]
 

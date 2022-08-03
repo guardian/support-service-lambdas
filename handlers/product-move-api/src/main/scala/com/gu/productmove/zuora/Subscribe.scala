@@ -19,10 +19,10 @@ import java.time.LocalDate
 trait Subscribe:
   def create(zuoraAccountId: String, targetProductId: String): ZIO[Any, String, CreateSubscriptionResponse]
 
-object SubscribeLive :
+object SubscribeLive:
   val layer: URLayer[ZuoraGet, Subscribe] = ZLayer.fromFunction(SubscribeLive(_))
 
-private class SubscribeLive(zuoraGet: ZuoraGet) extends Subscribe:
+private class SubscribeLive(zuoraGet: ZuoraGet) extends Subscribe :
   override def create(zuoraAccountId: String, targetProductId: String): ZIO[Any, String, CreateSubscriptionResponse] = {
     for {
       subscribeRequest <- SubscribeRequest.withTodaysDate(zuoraAccountId, targetProductId)
@@ -37,16 +37,17 @@ object Subscribe {
 
 case class ProductRatePlanId(value: String) extends AnyVal
 case class ProductRatePlanChargeId(value: String) extends AnyVal
-
 case class CreateSubscriptionResponse(subscriptionId: String)
+
 given JsonDecoder[CreateSubscriptionResponse] = DeriveJsonDecoder.gen[CreateSubscriptionResponse]
 
 case class ChargeOverrides(
-                            price: Option[Double],
-                            productRatePlanChargeId: String,
-                            triggerDate: Option[LocalDate],
-                            triggerEvent: Option[String]
-                          )
+  price: Option[Double],
+  productRatePlanChargeId: String,
+  triggerDate: Option[LocalDate],
+  triggerEvent: Option[String]
+)
+
 given JsonEncoder[ChargeOverrides] = DeriveJsonEncoder.gen[ChargeOverrides]
 
 case class ZuoraAccountId(value: String) extends AnyVal
@@ -54,21 +55,23 @@ case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
 
 case class SubscribeToRatePlans(productRatePlanId: String, chargeOverrides: List[ChargeOverrides] = List())
+
 given JsonEncoder[SubscribeToRatePlans] = DeriveJsonEncoder.gen[SubscribeToRatePlans]
 
 case class SubscribeRequest(
-                             accountKey: String,
-                             autoRenew: Boolean = true,
-                             contractEffectiveDate: LocalDate,
-                             customerAcceptanceDate: LocalDate,
-                             termType: String = "TERMED",
-                             renewalTerm: Int = 12,
-                             initialTerm: Int = 12,
-                             subscribeToRatePlans: List[SubscribeToRatePlans],
-                             AcquisitionCase__c: String,
-                             AcquisitionSource__c: String,
-                             CreatedByCSR__c: String
-                           )
+  accountKey: String,
+  autoRenew: Boolean = true,
+  contractEffectiveDate: LocalDate,
+  customerAcceptanceDate: LocalDate,
+  termType: String = "TERMED",
+  renewalTerm: Int = 12,
+  initialTerm: Int = 12,
+  subscribeToRatePlans: List[SubscribeToRatePlans],
+  AcquisitionCase__c: String,
+  AcquisitionSource__c: String,
+  CreatedByCSR__c: String
+)
+
 object SubscribeRequest {
   given JsonEncoder[SubscribeRequest] = DeriveJsonEncoder.gen[SubscribeRequest]
 
