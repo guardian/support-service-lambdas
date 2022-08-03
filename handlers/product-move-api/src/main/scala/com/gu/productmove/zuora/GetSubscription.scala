@@ -13,23 +13,61 @@ import sttp.model.Uri
 import zio.json.*
 import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
-object GetSubscriptionLive :
+import java.time.LocalDate
+
+object GetSubscriptionLive:
   val layer: URLayer[ZuoraGet, GetSubscription] = ZLayer.fromFunction(GetSubscriptionLive(_))
 
-private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription:
+private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription :
   override def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse] =
     zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/$subscriptionNumber")
 
-trait GetSubscription :
+trait GetSubscription:
   def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse]
 
 object GetSubscription {
 
-  case class GetSubscriptionResponse(id: String)
+  case class GetSubscriptionResponse(id: String, accountNumber: String, ratePlans: List[RatePlan])
+
+  case class RatePlan(
+    productName: String,
+    ratePlanName: String,
+    ratePlanCharges: List[RatePlanCharge],
+    productRatePlanId: String,
+    id: String,
+    lastChangeType: Option[String]
+  )
+  object RatePlan {
+    given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
+  }
+
+  case class RatePlanCharge(
+    name: String,
+    number: String,
+    price: Double,
+    billingPeriod: Option[String],
+    effectiveStartDate: LocalDate,
+    chargedThroughDate: Option[LocalDate],
+    HolidayStart__c: Option[LocalDate],
+    HolidayEnd__c: Option[LocalDate],
+    processedThroughDate: Option[LocalDate],
+    productRatePlanChargeId: String,
+    specificBillingPeriod: Option[Int],
+    endDateCondition: Option[String],
+    upToPeriodsType: Option[String],
+    upToPeriods: Option[Int],
+    billingDay: Option[String],
+    triggerEvent: Option[String],
+    triggerDate: Option[LocalDate],
+    discountPercentage: Option[Double],
+    effectiveEndDate: LocalDate,
+  )
+  object RatePlanCharge {
+    given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen
+  }
 
   given JsonDecoder[GetSubscriptionResponse] = DeriveJsonDecoder.gen[GetSubscriptionResponse]
 
   def get(subscriptionNumber: String): ZIO[GetSubscription, String, GetSubscriptionResponse] =
     ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionNumber))
-
 }

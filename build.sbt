@@ -17,7 +17,7 @@ val scala2Settings = Seq(
     "-Xlint:-byname-implicit",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard"
+    "-Ywarn-value-discard",
   ),
   Test / fork := true,
   {
@@ -40,7 +40,7 @@ val scala3Settings = Seq(
     "-encoding", "UTF-8",
     "-feature",
     "-unchecked",
-    "-Xmax-inlines", "256"
+    "-Xmax-inlines", "256", "-Yretain-trees"
   ),
   Test / fork := true,
   {
