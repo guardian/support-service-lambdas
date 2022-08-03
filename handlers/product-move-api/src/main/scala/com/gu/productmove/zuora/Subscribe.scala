@@ -25,7 +25,7 @@ object SubscribeLive:
 private class SubscribeLive(zuoraGet: ZuoraGet) extends Subscribe :
   override def create(zuoraAccountId: String, targetProductId: String): ZIO[Any, String, CreateSubscriptionResponse] = {
     for {
-      subscribeRequest <- SubscribeRequest(zuoraAccountId, targetProductId)
+      subscribeRequest <- SubscribeRequest.withTodaysDate(zuoraAccountId, targetProductId)
       response <- zuoraGet.post[SubscribeRequest, CreateSubscriptionResponse](uri"subscriptions", subscribeRequest)
     } yield response
   }
@@ -75,7 +75,7 @@ case class SubscribeRequest(
 object SubscribeRequest {
   given JsonEncoder[SubscribeRequest] = DeriveJsonEncoder.gen[SubscribeRequest]
 
-  def apply(zuoraAccountId: String, targetProductId: String): ZIO[Any, Nothing, SubscribeRequest] =
+  def withTodaysDate(zuoraAccountId: String, targetProductId: String): ZIO[Any, Nothing, SubscribeRequest] =
     for {
       date <- Clock.currentDateTime.map(_.toLocalDate)
     } yield SubscribeRequest(

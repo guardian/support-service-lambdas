@@ -4,7 +4,7 @@ import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import zio.{IO, ZIO}
 
-class TestGetSubscription(responses: Map[String, GetSubscription.GetSubscriptionResponse]) extends GetSubscription {
+class MockGetSubscription(responses: Map[String, GetSubscription.GetSubscriptionResponse]) extends GetSubscription {
 
   private var mutableStore: List[String] = Nil // we need to remember the side effects
 
@@ -19,6 +19,6 @@ class TestGetSubscription(responses: Map[String, GetSubscription.GetSubscription
   }
 }
 
-object TestGetSubscription {
-  def requests: ZIO[TestGetSubscription, Nothing, List[String]] = ZIO.serviceWith[TestGetSubscription](_.requests)
+object MockGetSubscription {
+  def requests: ZIO[MockGetSubscription, Nothing, List[String]] = ZIO.serviceWith[MockGetSubscription](_.requests)
 }
