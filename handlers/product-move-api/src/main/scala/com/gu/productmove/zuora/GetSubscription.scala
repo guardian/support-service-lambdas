@@ -27,7 +27,7 @@ trait GetSubscription:
 
 object GetSubscription {
 
-  case class GetSubscriptionResponse(id: String, accountNumber: String, ratePlans: List[RatePlan])
+  case class GetSubscriptionResponse(id: String, accountId: String, accountNumber: String, ratePlans: List[RatePlan])
 
   case class RatePlan(
     productName: String,
@@ -35,38 +35,28 @@ object GetSubscription {
     ratePlanCharges: List[RatePlanCharge],
     productRatePlanId: String,
     id: String,
-    lastChangeType: Option[String]
   )
   object RatePlan {
     given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
   }
 
   case class RatePlanCharge(
+    productRatePlanChargeId: String,
+    effectiveEndDate: LocalDate,
     name: String,
     number: String,
     price: Double,
     billingPeriod: Option[String],
     effectiveStartDate: LocalDate,
     chargedThroughDate: Option[LocalDate],
-    HolidayStart__c: Option[LocalDate],
-    HolidayEnd__c: Option[LocalDate],
-    processedThroughDate: Option[LocalDate],
-    productRatePlanChargeId: String,
-    specificBillingPeriod: Option[Int],
-    endDateCondition: Option[String],
-    upToPeriodsType: Option[String],
-    upToPeriods: Option[Int],
-    billingDay: Option[String],
-    triggerEvent: Option[String],
-    triggerDate: Option[LocalDate],
-    discountPercentage: Option[Double],
-    effectiveEndDate: LocalDate,
   )
   object RatePlanCharge {
     given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen
   }
 
   given JsonDecoder[GetSubscriptionResponse] = DeriveJsonDecoder.gen[GetSubscriptionResponse]
+  given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
+  given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen[RatePlanCharge]
 
   def get(subscriptionNumber: String): ZIO[GetSubscription, String, GetSubscriptionResponse] =
     ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionNumber))
