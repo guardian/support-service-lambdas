@@ -132,7 +132,9 @@ object AvailableProductMovesEndpoint {
           zuoraProductCatalogue <- zuoraProductCatalogueFetch.join
 
           productRatePlans = getAvailableSwitchRatePlans(zuoraProductCatalogue, List("Digital Pack"))
-          moveToProduct <- ZIO.collectAll { productRatePlans.map(x => MoveToProduct.buildResponseFromRatePlan(subscriptionName, x, chargedThroughDate)) }
+          moveToProduct <- ZIO.foreach(productRatePlans) { productRatePlan =>
+            MoveToProduct.buildResponseFromRatePlan(subscriptionName, productRatePlan, chargedThroughDate)
+          }
         } yield moveToProduct
       } else {
         ZIO.succeed(List())
