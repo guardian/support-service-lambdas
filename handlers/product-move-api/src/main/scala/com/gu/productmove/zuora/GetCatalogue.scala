@@ -45,16 +45,6 @@ enum ZuoraBillingPeriod:
 
 object ZuoraBillingPeriod {
   given JsonDecoder[ZuoraBillingPeriod] = DeriveJsonDecoder.gen[ZuoraBillingPeriod]
-
-  /* Doesn't work
-  val toTimeUnit: TimeUnit = {
-    this match {
-      case ZuoraBillingPeriod.Month => TimeUnit.month
-      case ZuoraBillingPeriod.Annual => TimeUnit.year
-      case _ => throw new Error("not a name")
-    }
-  }
-  */
 }
 
 
