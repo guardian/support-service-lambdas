@@ -24,12 +24,12 @@ private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue 
   private def key(stage: Stage) = {
     val stagePath = if (stage == Stage.DEV) "CODE/Zuora-DEV" else if (stage == Stage.CODE) "CODE/Zuora-UAT" else "PROD/Zuora-PROD"
     val relativePath = "catalog.json"
-    "CODE/Zuora-DEV/catalog.json"
+    s"$stagePath/$relativePath"
   }
 
   def get: ZIO[Any, String, ZuoraProductCatalogue] =
     for {
-      fileContent <- awsS3.getObject(zuoraCatalogueBucket, "CODE/Zuora-DEV/catalog.json").mapError(_.toString)
+      fileContent <- awsS3.getObject(zuoraCatalogueBucket, key(stage)).mapError(_.toString)
       zuoraCatalogue <- ZIO.fromEither(summon[JsonDecoder[ZuoraProductCatalogue]].decodeJson(fileContent))
     } yield zuoraCatalogue
 
