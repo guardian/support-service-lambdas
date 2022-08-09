@@ -80,7 +80,7 @@ object GetAccount {
 
 case class DefaultPaymentMethod(
   id: String,
-  creditCardExpirationMonth: LocalDate,
+  creditCardExpirationDate: LocalDate,
 )
 
 object DefaultPaymentMethod {
