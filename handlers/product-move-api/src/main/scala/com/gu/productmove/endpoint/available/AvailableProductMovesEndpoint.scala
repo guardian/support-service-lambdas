@@ -122,7 +122,7 @@ object AvailableProductMovesEndpoint {
         (for {
           _ <- eligibilityCheck(account.subscriptions.length > 1, s"More than one subscription for account for subscription: $subscriptionName")
           _ <- eligibilityCheck(subscription.ratePlans.head.productRatePlanId != monthlyContributionRatePlanId,s"Subscription: $subscriptionName is not a monthly contribution")
-          _ <- eligibilityCheck(subscription.ratePlans.head.ratePlanCharges.head.currency != "GBP", s"Subscription: $subscriptionName not in GBP")
+          _ <- eligibilityCheck(account.billingAndPayment.currency != "GBP", s"Subscription: $subscriptionName not in GBP")
           _ <- eligibilityCheck(paymentMethod.NumConsecutiveFailures > 0, s"User is in payment failure with subscription: $subscriptionName")
           _ <- eligibilityCheck(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate.isBefore(today), s"card expired for subscription: $subscriptionName")
         } yield ()).isSuccess

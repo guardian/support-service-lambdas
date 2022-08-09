@@ -42,8 +42,11 @@ object GetAccount {
 
   case class GetAccountResponse(
     basicInfo: BasicInfo,
+    billingAndPayment: BillingAndPayment,
     subscriptions: List[GetSubscriptionResponse],
   )
+
+  case class BillingAndPayment(currency: String)
 
   case class BasicInfo(
     defaultPaymentMethod: DefaultPaymentMethod
@@ -71,6 +74,7 @@ object GetAccount {
   given JsonDecoder[ZuoraSubscription] = DeriveJsonDecoder.gen
   given JsonDecoder[ZuoraRatePlan] = DeriveJsonDecoder.gen
   given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen
+  given JsonDecoder[BillingAndPayment] = DeriveJsonDecoder.gen[BillingAndPayment]
 
   def get(accountNumber: String): ZIO[GetAccount, String, GetAccountResponse] =
     ZIO.serviceWithZIO[GetAccount](_.get(accountNumber))

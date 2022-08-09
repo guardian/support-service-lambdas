@@ -6,7 +6,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.zuora.GetAccount.{BasicInfo, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
+import com.gu.productmove.zuora.GetAccount.{BasicInfo, BillingAndPayment, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
 import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
@@ -20,7 +20,7 @@ object HandlerSpec extends ZIOSpecDefault {
     RatePlan(
       id = "R1",
       productName = "P1",
-      productRatePlanId = "PRP1",
+      productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
       ratePlanName = "RP1",
       ratePlanCharges = List(
         RatePlanCharge(
@@ -37,6 +37,17 @@ object HandlerSpec extends ZIOSpecDefault {
       )
     )
   ))
+
+  private val getAccountResponse = GetAccountResponse(
+    BasicInfo(
+      DefaultPaymentMethod(
+        id = "paymentMethodId",
+        creditCardExpirationDate = LocalDate.of(2099,02,02)
+      )
+    ),
+    BillingAndPayment("GBP"),
+    List(getSubscriptionResponse)
+  )
 
   def spec = {
     suite("HandlerSpec")(
@@ -194,16 +205,6 @@ object HandlerSpec extends ZIOSpecDefault {
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0))
         val expectedSubNameInput = "A-S00339056"
 
-        val getAccountResponse = GetAccountResponse(
-          BasicInfo(
-            DefaultPaymentMethod(
-              id = "paymentMethodId",
-              creditCardExpirationMonth = LocalDate.of(2099,02,02)
-            )
-          ),
-          List(getSubscriptionResponse)
-        )
-
         val getPaymentMethodResponse = PaymentMethodResponse(
           NumConsecutiveFailures = 0
         )
@@ -257,16 +258,6 @@ object HandlerSpec extends ZIOSpecDefault {
       test("available-product-moves endpoint returns empty response when user is in payment failure") {
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0))
         val expectedSubNameInput = "A-S00339056"
-
-        val getAccountResponse = GetAccountResponse(
-          BasicInfo(
-            DefaultPaymentMethod(
-              "paymentMethodId",
-              LocalDate.of(2099,02,02)
-            )
-          ),
-          List()
-        )
 
         val getPaymentMethodResponse = PaymentMethodResponse(
           NumConsecutiveFailures = 3
