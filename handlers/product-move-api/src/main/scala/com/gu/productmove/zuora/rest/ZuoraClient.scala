@@ -76,17 +76,19 @@ trait ZuoraClient {
 // This detects that and stops straight away.
 object ZuoraRestBody {
 
-  case class ZuoraSuccess(success: Boolean)
+  case class ZuoraSuccess(success: Option[Boolean])
 
   def parseIfSuccessful[A: JsonDecoder](body: String): Either[String, A] = {
     val successDecoder: JsonDecoder[ZuoraSuccess] = DeriveJsonDecoder.gen[ZuoraSuccess]
-    for {
-      zuoraSuccessFlag <- successDecoder.decodeJson(body)
-      parsedResponse <-
-        if (zuoraSuccessFlag.success)
-          body.fromJson[A]
-        else Left(body)
-    } yield parsedResponse
-  }
+    val zuoraSuccessResponse = successDecoder.decodeJson(body)
 
+    zuoraSuccessResponse match {
+      case Right(res) =>
+        res.success match {
+          case Some(successFlag) => if (successFlag) body.fromJson[A] else Left(body)
+          case None => body.fromJson[A]
+        }
+      case Left(errorMessage) => Left(s"Error decoding json from zuora response: $errorMessage")
+    }
+  }
 }

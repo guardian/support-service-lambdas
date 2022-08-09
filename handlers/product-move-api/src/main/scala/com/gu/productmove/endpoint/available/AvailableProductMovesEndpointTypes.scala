@@ -4,7 +4,7 @@ import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.local
 import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
-import com.gu.productmove.zuora.{Price, ZuoraProductRatePlan}
+import com.gu.productmove.zuora.{ZuoraBillingPeriod, ZuoraProductRatePlan}
 import sttp.tapir.Schema.*
 import sttp.tapir.Schema.annotations.*
 import sttp.tapir.SchemaType.{SProductField, SString}
@@ -50,12 +50,12 @@ object MoveToProduct {
   def buildResponseFromRatePlan(subscriptionName: String, productRatePlan: ZuoraProductRatePlan, chargedThroughDate: LocalDate): IO[String, MoveToProduct] =
     for {
       billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).orElseFail(s"billingPeriod is null for subscription: $subscriptionName")
+      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).orElseFail(s"currency not found on ratePlanCharge")
+      price  = pricing.price.toFloat * 100
 
-      price = productRatePlan.productRatePlanCharges.head.pricing.head.price.toFloat
-
-      introOffer = Offer(Billing(amount = Some(Price(price, GBP).prettyAmount.toInt), percentage = Some(50), currency = GBP, frequency = Some(TimePeriod(billingPeriod, 1)), startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))
-      newPlan = Billing(amount = Some(Price(price, GBP).prettyAmount.toInt), percentage = Some(50), currency = GBP, frequency = Some(TimePeriod(billingPeriod, 1)), startDate = Some(localDateToString.format(chargedThroughDate.plusDays(90))))
-    } yield MoveToProduct(id = "id", name = "name", trial = Some(Trial(dayCount = 14)), introOffer = Some(introOffer), billing = newPlan)
+      introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))
+      newPlan = Billing(amount = Some(price.toInt), percentage = None, currency = Some(GBP), frequency = Some(TimePeriod(TimeUnit.fromString(billingPeriod), 1)), startDate = Some(localDateToString.format(chargedThroughDate.plusDays(90))))
+    } yield MoveToProduct(id = subscriptionName, name = "Digital Pack", trial = Some(Trial(dayCount = 14)), introOffer = Some(introOffer), billing = newPlan)
 }
 
 @encodedName("product")
@@ -81,7 +81,7 @@ case class Billing(
   @encodedExample(50)
   percentage: Option[Int], // Either - amount or percentage?
   @validate[Currency](Validator.enumeration(List(Currency.GBP)))
-  currency: Currency,
+  currency: Option[Currency],    // optional if the ratePlan is a percentage discount
   frequency: Option[TimePeriod],
   @description("Date on which first service period for product subscription begins.\nThis probably won't be known reliably before a subscription has actually been set up,\nso it's an optional field.\nIn ISO 8601 format.")
   @encodedExample("2022-06-21")
@@ -109,7 +109,6 @@ object Currency {
       )
     )
 }
-// add new type for bbillingPeriod in the Zuora API response case class, map to the TimeUnit type further along in the code
 
 // tapir doesn't support scala 3 enums (yet), hence the need for custom codec https://github.com/softwaremill/tapir/pull/1824#discussion_r913111720
 enum TimeUnit:
@@ -124,6 +123,13 @@ object TimeUnit:
 
   given Schema[TimeUnit] =
     inlineSchema(Schema.derivedEnumeration())
+
+  def fromString(billingPeriod: String): TimeUnit = {
+    billingPeriod match {
+      case "Month" => TimeUnit.month
+      case "Annual" => TimeUnit.year
+    }
+  }
 
 
 @encodedName("trial")

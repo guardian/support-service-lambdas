@@ -46,6 +46,7 @@ object GetSubscription {
     name: String,
     number: String,
     price: Double,
+    currency: String,
     billingPeriod: Option[String],
     effectiveStartDate: LocalDate,
     chargedThroughDate: Option[LocalDate],

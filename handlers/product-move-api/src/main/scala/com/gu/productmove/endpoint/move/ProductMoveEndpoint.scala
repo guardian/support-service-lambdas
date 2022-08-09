@@ -81,7 +81,7 @@ object ProductMoveEndpoint {
       billing = Billing(
         amount = Some(1199),
         percentage = None,
-        currency = Currency.GBP,
+        currency = Some(Currency.GBP),
         frequency = Some(TimePeriod(TimeUnit.month, 1)),
         startDate = Some("2022-09-21")
       ),
@@ -90,7 +90,7 @@ object ProductMoveEndpoint {
         Billing(
           amount = None,
           percentage = Some(50),
-          currency = Currency.GBP,//FIXME doesn't make sense for a percentage
+          currency = Some(Currency.GBP),//FIXME doesn't make sense for a percentage
           frequency = None,//FIXME doesn't make sense for a percentage
           startDate = Some("2022-09-21")
         ),

@@ -53,6 +53,7 @@ object AvailableProductMovesEndpoint {
       .serverLogic[TIO] { subscriptionName => run(subscriptionName).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
   }
 
+  // sub to test on: "A-S00334930"
   private def run(subscriptionName: String): TIO[OutputBody] =
     runWithEnvironment(subscriptionName).provide(
       AwsS3Live.layer,
@@ -68,33 +69,16 @@ object AvailableProductMovesEndpoint {
 
   private val freeTrialDays = 14
 
-  /*
-  Only show the switch if
-  § credit card is not expired (according to zuora)
-  § User is not in payment failure or has unpaid invoices
-  ? Currency is GBP (initially on day 1 only?)
-  § Monthly contribution
-  § Only have one sub in the account
 
-  API return values
-  Note, These are all wrapped in a switches structure which has a collection of switches available.  There will only be one initially as we only support RC->DS
-  trial = X days (1-31 days) (may not need this, may be hard coded to 14 days)
-  Payment method = xxxxxxxxx4242 + expiry from zuora or similar for DD.
-  § Next payment date
-  Next payment amount (hard code the 3 months half price discount in the MVP for simplicity)
-  Email address to send to (may be already known on client side)
-  If it fails: we just return a generic error, the call centre can help the user if necessary.
-
-  */
   def getAvailableSwitchRatePlans(zuoraProductCatalogue: ZuoraProductCatalogue, ratePlanNames: List[String]): List[ZuoraProductRatePlan] =
     val productRatePlans = for {
       product <- zuoraProductCatalogue.products.filter(ratePlanNames contains _.name)
       productRatePlan <- product.productRatePlans.toList
     } yield productRatePlan
 
-    productRatePlans.toList
+    productRatePlans.find(_.name == "Digital Pack Monthly").toList
 
-  val localDateToString = DateTimeFormatter.BASIC_ISO_DATE
+  val localDateToString = DateTimeFormatter.ISO_LOCAL_DATE
 
   def eligibilityCheck(accountNotEligible: Boolean, message: String): ZIO[Any, Unit, Unit] = {
     if (accountNotEligible) {
@@ -107,15 +91,18 @@ object AvailableProductMovesEndpoint {
     }
   }
 
-  private[productmove] def runWithEnvironment(subscriptionName: String): ZIO[GetSubscription with GetCatalogue with GetAccount, String, OutputBody] = {
+  private[productmove] def runWithEnvironment(subscriptionName: String): ZIO[GetSubscription with GetCatalogue with GetAccount with Stage, String, OutputBody] = {
     for {
+      stage <- ZIO.service[Stage]
+      monthlyContributionRatePlanId = if (stage == Stage.DEV) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
+
       _ <- ZIO.log("subscription name: " + subscriptionName)
 
-      // kick off catalogue fetch in parallel
-      zuoraProductCatalogueFuture <- GetCatalogue.get.fork
+      // Kick off catalogue fetch in parallel
+      zuoraProductCatalogueFetch <- GetCatalogue.get.fork
       subscription <- GetSubscription.get(subscriptionName)
 
-      // next payment date
+      // Next payment date
       chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElseFail(s"chargedThroughDate is null for subscription $subscriptionName.")
 
       account <- GetAccount.get(subscription.accountNumber)
@@ -123,24 +110,28 @@ object AvailableProductMovesEndpoint {
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
+      /*
+      Only show the switch if:
+        credit card is not expired (according to zuora)
+        User is not in payment failure or has unpaid invoices
+        Currency is GBP (initially on day 1 only?)
+        Monthly contribution
+        Only have one sub in the account
+      */
       isEligible <-
         (for {
-          // more than one sub in account
-          _ <- eligibilityCheck(account.subscriptions.length > 1, "more than one subscription for account")
-          // sub is a monthly contribution
-          _ <- eligibilityCheck(account.subscriptions.head.ratePlans.head.productRatePlanId != "monthlyContributionRatePlanId","Not a monthly contribution")
-          // not in payment failure
-          _ <- eligibilityCheck(paymentMethod.NumConsecutiveFailures > 0, s"In payment failure for subscription: $subscriptionName")
-          // card not expired
-          _ <- eligibilityCheck(account.basicInfo.defaultPaymentMethod.creditCardExpirationMonth.isBefore(today), "card expired so no product to move to")
+          _ <- eligibilityCheck(account.subscriptions.length > 1, s"More than one subscription for account for subscription: $subscriptionName")
+          _ <- eligibilityCheck(subscription.ratePlans.head.productRatePlanId != monthlyContributionRatePlanId,s"Subscription: $subscriptionName is not a monthly contribution")
+          _ <- eligibilityCheck(subscription.ratePlans.head.ratePlanCharges.head.currency != "GBP", s"Subscription: $subscriptionName not in GBP")
+          _ <- eligibilityCheck(paymentMethod.NumConsecutiveFailures > 0, s"User is in payment failure with subscription: $subscriptionName")
+          _ <- eligibilityCheck(account.basicInfo.defaultPaymentMethod.creditCardExpirationMonth.isBefore(today), s"card expired for subscription: $subscriptionName")
         } yield ()).isSuccess
 
       availableProductMoves <- if (isEligible) {
         for {
-          zuoraProductCatalogue <- zuoraProductCatalogueFuture.join
+          zuoraProductCatalogue <- zuoraProductCatalogueFetch.join
 
-          // get rate plans to switch to and build the response objects, hardcoded for now
-          productRatePlans = getAvailableSwitchRatePlans(zuoraProductCatalogue, List("Digital Pack Monthly"))
+          productRatePlans = getAvailableSwitchRatePlans(zuoraProductCatalogue, List("Digital Pack"))
           moveToProduct <- ZIO.collectAll { productRatePlans.map(x => MoveToProduct.buildResponseFromRatePlan(subscriptionName, x, chargedThroughDate)) }
         } yield moveToProduct
       } else {

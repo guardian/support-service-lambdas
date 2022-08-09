@@ -19,19 +19,17 @@ object GetCatalogueLive:
   val layer: URLayer[AwsS3 with Stage, GetCatalogue] = ZLayer.fromFunction(GetCatalogueLive(_, _))
 
 private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue :
-  private val zuoraCatalogueBucket = "gu-zuora-catalogue"
+  private val zuoraCatalogueBucket = "gu-zuora-catalog"
 
-  private def key(stage: Stage, version: Int = 1) = {
-    val basePath = s"membership/support-service-lambdas/$stage"
-
-    val versionString = if (stage == Stage.DEV) "" else s".v${version}"
-    val relativePath = s"zuoraRest-$stage$versionString.json"
-    s"$basePath/$relativePath"
+  private def key(stage: Stage) = {
+    val stagePath = if (stage == Stage.DEV) "CODE/Zuora-DEV" else if (stage == Stage.CODE) "CODE/Zuora-UAT" else "PROD/Zuora-PROD"
+    val relativePath = "catalog.json"
+    "CODE/Zuora-DEV/catalog.json"
   }
 
   def get: ZIO[Any, String, ZuoraProductCatalogue] =
     for {
-      fileContent <- awsS3.getObject(zuoraCatalogueBucket, key(stage)).mapError(_.toString)
+      fileContent <- awsS3.getObject(zuoraCatalogueBucket, "CODE/Zuora-DEV/catalog.json").mapError(_.toString)
       zuoraCatalogue <- ZIO.fromEither(summon[JsonDecoder[ZuoraProductCatalogue]].decodeJson(fileContent))
     } yield zuoraCatalogue
 
@@ -41,6 +39,24 @@ trait GetCatalogue:
 object GetCatalogue {
   def get: ZIO[GetCatalogue, String, ZuoraProductCatalogue] = ZIO.serviceWithZIO[GetCatalogue](_.get)
 }
+
+enum ZuoraBillingPeriod:
+  case Month, Annual, Quarter
+
+object ZuoraBillingPeriod {
+  given JsonDecoder[ZuoraBillingPeriod] = DeriveJsonDecoder.gen[ZuoraBillingPeriod]
+
+  /* Doesn't work
+  val toTimeUnit: TimeUnit = {
+    this match {
+      case ZuoraBillingPeriod.Month => TimeUnit.month
+      case ZuoraBillingPeriod.Annual => TimeUnit.year
+      case _ => throw new Error("not a name")
+    }
+  }
+  */
+}
+
 
 case class ZuoraProductCatalogue(products: Set[ZuoraProduct], nextPage: Option[String] = None)
 
@@ -68,7 +84,8 @@ object ZuoraProductRatePlan {
   given JsonDecoder[ZuoraProductRatePlan] = DeriveJsonDecoder.gen[ZuoraProductRatePlan]
 }
 
-case class ZuoraProductRatePlanCharge(id: String, billingPeriod: Option[TimeUnit], pricing: Set[ZuoraPricing])
+case class ZuoraProductRatePlanCharge(id: String, billingPeriod: Option[String], pricing: Set[ZuoraPricing])
+
 object ZuoraProductRatePlanCharge {
   given JsonDecoder[ZuoraProductRatePlanCharge] = DeriveJsonDecoder.gen[ZuoraProductRatePlanCharge]
 }
