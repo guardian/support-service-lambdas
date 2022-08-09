@@ -74,6 +74,7 @@ trait ZuoraClient {
 // zuora commonly returns status = 200 and success = false.
 // this usually causes a deserialisation error and often makes it hard to understand what went wrong
 // This detects that and stops straight away.
+// the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success flag, therefore if the success property does not exist, we decode the JSON as normal.
 object ZuoraRestBody {
 
   case class ZuoraSuccess(success: Option[Boolean])
