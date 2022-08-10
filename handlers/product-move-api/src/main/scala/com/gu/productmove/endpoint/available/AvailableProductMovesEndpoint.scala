@@ -20,7 +20,6 @@ import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import scala.runtime.Nothing$
 import scala.util.Left
 
 // this is the description for just the one endpoint
@@ -80,16 +79,14 @@ object AvailableProductMovesEndpoint {
 
   val localDateToString = DateTimeFormatter.ISO_LOCAL_DATE
 
-  def eligibilityCheck(accountNotEligible: Boolean, message: String): ZIO[Any, Unit, Unit] = {
-    if (accountNotEligible) {
+  def succeedIfEligible(accountEligible: Boolean, message: String): ZIO[Any, Unit, Unit] =
+    if (accountEligible)
+      ZIO.succeed(())
+    else
       for {
         _ <- ZIO.log(message)
         _ <- ZIO.fail(())
       } yield ()
-    } else {
-      ZIO.succeed(())
-    }
-  }
 
   private[productmove] def runWithEnvironment(subscriptionName: String): ZIO[GetSubscription with GetCatalogue with GetAccount with Stage, String, OutputBody] = {
     for {
@@ -120,11 +117,11 @@ object AvailableProductMovesEndpoint {
       */
       isEligible <-
         (for {
-          _ <- eligibilityCheck(account.subscriptions.length > 1, s"More than one subscription for account for subscription: $subscriptionName")
-          _ <- eligibilityCheck(subscription.ratePlans.head.productRatePlanId != monthlyContributionRatePlanId,s"Subscription: $subscriptionName is not a monthly contribution")
-          _ <- eligibilityCheck(account.billingAndPayment.currency != "GBP", s"Subscription: $subscriptionName not in GBP")
-          _ <- eligibilityCheck(paymentMethod.NumConsecutiveFailures > 0, s"User is in payment failure with subscription: $subscriptionName")
-          _ <- eligibilityCheck(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate.isBefore(today), s"card expired for subscription: $subscriptionName")
+          _ <- succeedIfEligible(account.subscriptions.length == 1, s"More than one subscription for account for subscription: $subscriptionName")
+          _ <- succeedIfEligible(subscription.ratePlans.head.productRatePlanId == monthlyContributionRatePlanId,s"Subscription: $subscriptionName is not a monthly contribution")
+          _ <- succeedIfEligible(account.basicInfo.currency == "GBP", s"Subscription: $subscriptionName not in GBP")
+          _ <- succeedIfEligible(paymentMethod.NumConsecutiveFailures == 0, s"User is in payment failure with subscription: $subscriptionName")
+          _ <- succeedIfEligible(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate.isAfter(today), s"card expired for subscription: $subscriptionName")
         } yield ()).isSuccess
 
       availableProductMoves <- if (isEligible) {

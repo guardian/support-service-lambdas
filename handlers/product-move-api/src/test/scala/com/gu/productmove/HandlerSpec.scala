@@ -6,7 +6,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.zuora.GetAccount.{BasicInfo, BillingAndPayment, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
+import com.gu.productmove.zuora.GetAccount.{BasicInfo, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
 import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
@@ -43,9 +43,9 @@ object HandlerSpec extends ZIOSpecDefault {
       DefaultPaymentMethod(
         id = "paymentMethodId",
         creditCardExpirationDate = LocalDate.of(2099,02,02)
-      )
+      ),
+      currency = "GBP"
     ),
-    BillingAndPayment("GBP"),
     List(getSubscriptionResponse)
   )
 
