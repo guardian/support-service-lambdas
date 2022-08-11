@@ -61,7 +61,7 @@ object Dependencies {
   // Guardian
   val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.6"
   val supportInternationalisation =
-    "com.gu" %% "support-internationalisation" % "0.13"
+    "com.gu" %% "support-internationalisation" % "0.14"
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
