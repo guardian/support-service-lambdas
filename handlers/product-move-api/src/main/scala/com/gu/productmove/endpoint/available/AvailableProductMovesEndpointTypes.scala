@@ -1,6 +1,7 @@
 package com.gu.productmove.endpoint.available
 
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.localDateToString
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{handleError, localDateToString}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.OutputBody
 import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
@@ -23,6 +24,7 @@ object AvailableProductMovesEndpointTypes {
   sealed trait OutputBody
   case class Success(body: List[MoveToProduct]) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
+  case object InternalServerError extends OutputBody
 
   given JsonCodec[Success] = DeriveJsonCodec.gen[Success]
   given JsonCodec[NotFound] = DeriveJsonCodec.gen[NotFound]
@@ -47,10 +49,10 @@ object MoveToProduct {
   given JsonCodec[TimePeriod] = DeriveJsonCodec.gen[TimePeriod]
   given Schema[TimePeriod] = Schema.derived
 
-  def buildResponseFromRatePlan(subscriptionName: String, productRatePlan: ZuoraProductRatePlan, chargedThroughDate: LocalDate): IO[String, MoveToProduct] =
+  def buildResponseFromRatePlan(subscriptionName: String, productRatePlan: ZuoraProductRatePlan, chargedThroughDate: LocalDate): IO[OutputBody, MoveToProduct] =
     for {
-      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).orElseFail(s"billingPeriod is null for subscription: $subscriptionName")
-      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).orElseFail(s"currency not found on ratePlanCharge")
+      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).handleError(s"billingPeriod is null for subscription: $subscriptionName")
+      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).handleError(s"currency not found on ratePlanCharge")
       price  = pricing.price.toFloat * 100
 
       introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))

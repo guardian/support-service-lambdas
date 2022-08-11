@@ -15,7 +15,7 @@ import sttp.tapir.EndpointIO.Example
 import sttp.tapir.EndpointOutput.StatusCode
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio.{IO, Clock, ZIO}
+import zio.{URIO, IO, Clock, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 import java.time.LocalDate
@@ -88,8 +88,14 @@ object AvailableProductMovesEndpoint {
         _ <- ZIO.fail(())
       } yield ()
 
-  private[productmove] def runWithEnvironment(subscriptionName: String): ZIO[GetSubscription with GetCatalogue with GetAccount with Stage, String, OutputBody] = {
-    for {
+  extension [R, E, A](zio: ZIO[R, E, A])
+    def handleError(message: String) = zio.catchAll {
+      error =>
+        ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
+    }
+
+  private[productmove] def runWithEnvironment(subscriptionName: String): URIO[GetSubscription with GetCatalogue with GetAccount with Stage, OutputBody] = {
+    val asdf: ZIO[GetAccount with GetSubscription with GetCatalogue with Stage, OutputBody, OutputBody] = for {
       stage <- ZIO.service[Stage]
       monthlyContributionRatePlanId = if (stage == Stage.DEV) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
 
@@ -97,13 +103,15 @@ object AvailableProductMovesEndpoint {
 
       // Kick off catalogue fetch in parallel
       zuoraProductCatalogueFetch <- GetCatalogue.get.fork
-      subscription <- GetSubscription.get(subscriptionName)
+      subscription <- GetSubscription.get(subscriptionName).handleError("GetSubscription")
 
       // Next payment date
-      chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElseFail(s"chargedThroughDate is null for subscription $subscriptionName.")
+      chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse {
+        ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(Success(List())))
+      }
 
-      account <- GetAccount.get(subscription.accountNumber)
-      paymentMethod <- GetAccount.getPaymentMethod(account.basicInfo.defaultPaymentMethod.id)
+      account <- GetAccount.get(subscription.accountNumber).handleError("GetAccount")
+      paymentMethod <- GetAccount.getPaymentMethod(account.basicInfo.defaultPaymentMethod.id).handleError("GetAccount.getPaymentMethod")
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
@@ -124,21 +132,21 @@ object AvailableProductMovesEndpoint {
           _ <- succeedIfEligible(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate.isAfter(today), s"card expired for subscription: $subscriptionName")
         } yield ()).isSuccess
 
-      availableProductMoves <- if (isEligible) {
-        for {
-          zuoraProductCatalogue <- zuoraProductCatalogueFetch.join
+      availableProductMoves <- if (isEligible) ZIO.succeed(()) else ZIO.fail(Success(List()))
 
-          productRatePlans = getAvailableSwitchRatePlans(zuoraProductCatalogue, List("Digital Pack"))
-          moveToProduct <- ZIO.foreach(productRatePlans) { productRatePlan =>
-            MoveToProduct.buildResponseFromRatePlan(subscriptionName, productRatePlan, chargedThroughDate)
-          }
-        } yield moveToProduct
-      } else {
-        ZIO.succeed(List())
+      zuoraProductCatalogue <- zuoraProductCatalogueFetch.join.handleError("GetCatalogue")
+
+      productRatePlans = getAvailableSwitchRatePlans(zuoraProductCatalogue, List("Digital Pack"))
+      moveToProduct <- ZIO.foreach(productRatePlans) { productRatePlan =>
+        MoveToProduct.buildResponseFromRatePlan(subscriptionName, productRatePlan, chargedThroughDate)
       }
 
       _ <- ZIO.log("done")
-    } yield Success(availableProductMoves)
+    } yield Success(moveToProduct)
+
+    asdf.catchAll {
+      failure => ZIO.succeed(failure)
+    }
   }
 }
 
