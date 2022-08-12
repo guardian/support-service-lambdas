@@ -203,7 +203,7 @@ object HandlerSpec extends ZIOSpecDefault {
       },
 
       test("available-product-moves endpoint") {
-        val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0))
+        val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0)).toInstant
         val expectedSubNameInput = "A-S00339056"
 
         val getPaymentMethodResponse = PaymentMethodResponse(
@@ -239,7 +239,7 @@ object HandlerSpec extends ZIOSpecDefault {
         ))
 
         (for {
-          _ <- TestClock.setDateTime(time)
+          _ <- TestClock.setTime(time)
 
           output <- AvailableProductMovesEndpoint.runWithEnvironment(expectedSubNameInput)
           getSubRequests <- MockGetSubscription.requests
@@ -257,7 +257,7 @@ object HandlerSpec extends ZIOSpecDefault {
       },
 
       test("available-product-moves endpoint returns empty response when user is in payment failure") {
-        val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0))
+        val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0)).toInstant
         val expectedSubNameInput = "A-S00339056"
 
         val getPaymentMethodResponse = PaymentMethodResponse(
@@ -273,7 +273,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val expectedOutput = AvailableProductMovesEndpointTypes.Success(body = List())
 
         (for {
-          _ <- TestClock.setDateTime(time)
+          _ <- TestClock.setTime(time)
 
           output <- AvailableProductMovesEndpoint.runWithEnvironment(expectedSubNameInput)
           getSubRequests <- MockGetSubscription.requests

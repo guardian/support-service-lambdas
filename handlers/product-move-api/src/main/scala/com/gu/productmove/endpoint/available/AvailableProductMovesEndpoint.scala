@@ -54,7 +54,7 @@ object AvailableProductMovesEndpoint {
 
   // sub to test on: "A-S00334930"
   private def run(subscriptionName: String): TIO[OutputBody] =
-    runWithEnvironment(subscriptionName).provide(
+    runWithEnvironment("A-S00334930").provide(
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
@@ -95,7 +95,7 @@ object AvailableProductMovesEndpoint {
     }
 
   private[productmove] def runWithEnvironment(subscriptionName: String): URIO[GetSubscription with GetCatalogue with GetAccount with Stage, OutputBody] = {
-    val asdf: ZIO[GetAccount with GetSubscription with GetCatalogue with Stage, OutputBody, OutputBody] = for {
+    val output = for {
       stage <- ZIO.service[Stage]
       monthlyContributionRatePlanId = if (stage == Stage.DEV) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
 
@@ -104,6 +104,15 @@ object AvailableProductMovesEndpoint {
       // Kick off catalogue fetch in parallel
       zuoraProductCatalogueFetch <- GetCatalogue.get.fork
       subscription <- GetSubscription.get(subscriptionName).handleError("GetSubscription")
+
+      firstEligibilityChecks <-
+        (for {
+          _ <- succeedIfEligible(subscription.ratePlans.length == 1,s"Subscription: $subscriptionName has more than one ratePlan")
+          _ <- succeedIfEligible(subscription.ratePlans.head.productRatePlanId == monthlyContributionRatePlanId,s"Subscription: $subscriptionName is not a monthly contribution")
+          _ <- succeedIfEligible(subscription.ratePlans.head.ratePlanCharges.length == 1,s"Subscription: $subscriptionName has more than one ratePlan charge for ratePlan ${subscription.ratePlans.head}")
+        } yield ()).isSuccess
+
+      _ <- if (firstEligibilityChecks) ZIO.succeed(()) else ZIO.fail(Success(List()))
 
       // Next payment date
       chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse {
@@ -124,17 +133,16 @@ object AvailableProductMovesEndpoint {
         Only have one sub in the account
         Account balance is 0
       */
-      isEligible <-
+      secondEligibilityChecks <-
         (for {
           _ <- succeedIfEligible(account.subscriptions.length == 1, s"More than one subscription for account for subscription: $subscriptionName")
-          _ <- succeedIfEligible(subscription.ratePlans.head.productRatePlanId == monthlyContributionRatePlanId,s"Subscription: $subscriptionName is not a monthly contribution")
           _ <- succeedIfEligible(account.basicInfo.currency == "GBP", s"Subscription: $subscriptionName not in GBP")
           _ <- succeedIfEligible(paymentMethod.NumConsecutiveFailures == 0, s"User is in payment failure with subscription: $subscriptionName")
           _ <- succeedIfEligible(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate.isAfter(today), s"card expired for subscription: $subscriptionName")
           _ <- succeedIfEligible(account.basicInfo.balance == 0, s"Account balance is not zero for subscription: $subscriptionName")
         } yield ()).isSuccess
 
-      availableProductMoves <- if (isEligible) ZIO.succeed(()) else ZIO.fail(Success(List()))
+      _ <- if (secondEligibilityChecks) ZIO.succeed(()) else ZIO.fail(Success(List()))
 
       zuoraProductCatalogue <- zuoraProductCatalogueFetch.join.handleError("GetCatalogue")
 
@@ -146,7 +154,7 @@ object AvailableProductMovesEndpoint {
       _ <- ZIO.log("done")
     } yield Success(moveToProduct)
 
-    asdf.catchAll {
+    output.catchAll {
       failure => ZIO.succeed(failure)
     }
   }

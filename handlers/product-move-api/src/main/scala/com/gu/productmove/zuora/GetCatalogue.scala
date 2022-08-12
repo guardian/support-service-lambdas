@@ -7,7 +7,7 @@ import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
-import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
+import sttp.client3.httpclient.zio.{HttpClientZioBackend}
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
