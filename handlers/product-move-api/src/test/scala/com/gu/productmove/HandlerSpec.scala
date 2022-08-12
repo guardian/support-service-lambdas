@@ -44,6 +44,7 @@ object HandlerSpec extends ZIOSpecDefault {
         id = "paymentMethodId",
         creditCardExpirationDate = LocalDate.of(2099,02,02)
       ),
+      balance = 0.000000000,
       currency = "GBP"
     ),
     List(getSubscriptionResponse)

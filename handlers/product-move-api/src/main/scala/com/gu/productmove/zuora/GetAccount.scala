@@ -47,6 +47,7 @@ object GetAccount {
 
   case class BasicInfo(
     defaultPaymentMethod: DefaultPaymentMethod,
+    balance: BigDecimal,
     currency: String
   )
 

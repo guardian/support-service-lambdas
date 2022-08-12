@@ -122,6 +122,7 @@ object AvailableProductMovesEndpoint {
         Currency is GBP (initially on day 1 only?)
         Monthly contribution
         Only have one sub in the account
+        Account balance is 0
       */
       isEligible <-
         (for {
@@ -130,6 +131,7 @@ object AvailableProductMovesEndpoint {
           _ <- succeedIfEligible(account.basicInfo.currency == "GBP", s"Subscription: $subscriptionName not in GBP")
           _ <- succeedIfEligible(paymentMethod.NumConsecutiveFailures == 0, s"User is in payment failure with subscription: $subscriptionName")
           _ <- succeedIfEligible(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate.isAfter(today), s"card expired for subscription: $subscriptionName")
+          _ <- succeedIfEligible(account.basicInfo.balance == 0, s"Account balance is not zero for subscription: $subscriptionName")
         } yield ()).isSuccess
 
       availableProductMoves <- if (isEligible) ZIO.succeed(()) else ZIO.fail(Success(List()))
