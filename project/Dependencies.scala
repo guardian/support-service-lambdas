@@ -68,7 +68,7 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.15"
   val zio2Version = "2.0.0-RC6+28-22f0d8c2-SNAPSHOT" // snapshot until https://github.com/zio/zio/pull/6775 is out
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.0.1"
+  val tapirVersion = "1.0.5"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
   val stripe = "com.stripe" % "stripe-java" % "20.128.0"
