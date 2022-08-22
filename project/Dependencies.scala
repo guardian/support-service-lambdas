@@ -115,6 +115,7 @@ object Dependencies {
     case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
       MergeStrategy.singleOrError
     case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
+    case PathList(ps @ _*) if ps.last == "deriving.conf" => MergeStrategy.discard
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
     /*
