@@ -3,14 +3,16 @@ package com.gu.productmove.zuora
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.{Currency, TimeUnit}
-import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
+import com.gu.productmove.zuora.DefaultPaymentMethod
+import com.gu.productmove.zuora.WireDefaultPaymentMethod
+import com.gu.productmove.zuora.GetAccount.{ GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.rest.ZuoraClientLive.{ZuoraRestConfig, bucket, key}
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
-import sttp.client3.httpclient.zio.{HttpClientZioBackend}
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
@@ -42,11 +44,15 @@ object GetAccount {
 
   case class GetAccountResponse(
     basicInfo: BasicInfo,
-    subscriptions: List[GetSubscriptionResponse],
+    subscriptions: List[AccountSubscription],
+  )
+
+  case class AccountSubscription(
+    id: String
   )
 
   case class BasicInfo(
-    defaultPaymentMethod: DefaultPaymentMethod,
+    defaultPaymentMethod: WireDefaultPaymentMethod,
     balance: BigDecimal,
     currency: String
   )
@@ -70,6 +76,7 @@ object GetAccount {
   )
 
   given JsonDecoder[GetAccountResponse] = DeriveJsonDecoder.gen
+  given JsonDecoder[AccountSubscription] = DeriveJsonDecoder.gen
   given JsonDecoder[ZuoraSubscription] = DeriveJsonDecoder.gen
   given JsonDecoder[ZuoraRatePlan] = DeriveJsonDecoder.gen
   given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen
@@ -85,23 +92,13 @@ case class DefaultPaymentMethod(
   creditCardExpirationDate: LocalDate,
 )
 
-object DefaultPaymentMethod {
+case class WireDefaultPaymentMethod(
+  id: String,
+  creditCardExpirationMonth: Option[Int],
+  creditCardExpirationYear: Option[Int],
+)
 
-  private case class WireDefaultPaymentMethod(
-    id: String,
-    creditCardExpirationMonth: Int,
-    creditCardExpirationYear: Int,
-  )
-
-  given JsonDecoder[DefaultPaymentMethod] =
-    DeriveJsonDecoder.gen[WireDefaultPaymentMethod].mapOrFail {
-      case WireDefaultPaymentMethod(id, creditCardExpirationMonth, creditCardExpirationYear) =>
-        for {
-          expiry <- Try(LocalDate.of(creditCardExpirationYear, creditCardExpirationMonth, 1)).toEither.left.map(_.toString)
-        } yield DefaultPaymentMethod(id, expiry.plusMonths(1)) // valid until the end of the month
-    }
-
-}
+given JsonDecoder[WireDefaultPaymentMethod] = DeriveJsonDecoder.gen[WireDefaultPaymentMethod]
 
 /*
 * Don't use discount percentage from product catalogue,
@@ -109,6 +106,7 @@ object DefaultPaymentMethod {
 */
 // price can be null, this is only for percentage discounts, so default to 0 rather than option handling
 case class ZuoraPricing(currency: String, price: BigDecimal = 0.000000000)
+
 object ZuoraPricing {
   given JsonDecoder[ZuoraPricing] = DeriveJsonDecoder.gen[ZuoraPricing]
 }

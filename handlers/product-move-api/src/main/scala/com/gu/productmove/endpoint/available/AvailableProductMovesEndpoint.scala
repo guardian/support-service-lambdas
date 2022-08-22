@@ -8,6 +8,7 @@ import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.*
+import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import sttp.tapir.*
@@ -15,12 +16,12 @@ import sttp.tapir.EndpointIO.Example
 import sttp.tapir.EndpointOutput.StatusCode
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio.{URIO, IO, Clock, ZIO}
+import zio.{Clock, IO, URIO, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import scala.util.Left
+import scala.util.{Left, Try}
 
 // this is the description for just the one endpoint
 object AvailableProductMovesEndpoint {
@@ -88,7 +89,13 @@ object AvailableProductMovesEndpoint {
         _ <- ZIO.fail(())
       } yield ()
 
-  extension [R, E, A](zio: ZIO[R, E, A])
+  def getCreditCardExpirationDate(wireDefaultPaymentMethod: WireDefaultPaymentMethod): Either[Unit, LocalDate] =
+    for {
+      creditCardExpirationMonth <- wireDefaultPaymentMethod.creditCardExpirationMonth.toRight(())
+      creditCardExpirationYear <- wireDefaultPaymentMethod.creditCardExpirationYear.toRight(())
+    } yield LocalDate.of(creditCardExpirationYear, creditCardExpirationMonth, 1)
+
+  extension[R, E, A] (zio: ZIO[R, E, A])
     def handleError(message: String) = zio.catchAll {
       error =>
         ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
@@ -107,9 +114,9 @@ object AvailableProductMovesEndpoint {
 
       firstEligibilityChecks <-
         (for {
-          _ <- succeedIfEligible(subscription.ratePlans.length == 1,s"Subscription: $subscriptionName has more than one ratePlan")
-          _ <- succeedIfEligible(subscription.ratePlans.head.productRatePlanId == monthlyContributionRatePlanId,s"Subscription: $subscriptionName is not a monthly contribution")
-          _ <- succeedIfEligible(subscription.ratePlans.head.ratePlanCharges.length == 1,s"Subscription: $subscriptionName has more than one ratePlan charge for ratePlan ${subscription.ratePlans.head}")
+          _ <- succeedIfEligible(subscription.ratePlans.length == 1, s"Subscription: $subscriptionName has more than one ratePlan")
+          _ <- succeedIfEligible(subscription.ratePlans.head.productRatePlanId == monthlyContributionRatePlanId, s"Subscription: $subscriptionName is not a monthly contribution")
+          _ <- succeedIfEligible(subscription.ratePlans.head.ratePlanCharges.length == 1, s"Subscription: $subscriptionName has more than one ratePlan charge for ratePlan ${subscription.ratePlans.head}")
         } yield ()).isSuccess
 
       _ <- if (firstEligibilityChecks) ZIO.succeed(()) else ZIO.fail(Success(List()))
@@ -120,6 +127,11 @@ object AvailableProductMovesEndpoint {
       }
 
       account <- GetAccount.get(subscription.accountNumber).handleError("GetAccount")
+
+      creditCardExpirationDate <- ZIO.fromEither(getCreditCardExpirationDate(account.basicInfo.defaultPaymentMethod)).orElse {
+        ZIO.log(s"Payment method is not a card for subscription $subscriptionName.").flatMap(_ => ZIO.fail(Success(List())))
+      }
+
       paymentMethod <- GetAccount.getPaymentMethod(account.basicInfo.defaultPaymentMethod.id).handleError("GetAccount.getPaymentMethod")
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
@@ -130,7 +142,6 @@ object AvailableProductMovesEndpoint {
         User is not in payment failure or has unpaid invoices
         Currency is GBP (initially on day 1 only?)
         Monthly contribution
-        Only have one sub in the account
         Account balance is 0
       */
       secondEligibilityChecks <-
@@ -138,7 +149,7 @@ object AvailableProductMovesEndpoint {
           _ <- succeedIfEligible(account.subscriptions.length == 1, s"More than one subscription for account for subscription: $subscriptionName")
           _ <- succeedIfEligible(account.basicInfo.currency == "GBP", s"Subscription: $subscriptionName not in GBP")
           _ <- succeedIfEligible(paymentMethod.NumConsecutiveFailures == 0, s"User is in payment failure with subscription: $subscriptionName")
-          _ <- succeedIfEligible(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate.isAfter(today), s"card expired for subscription: $subscriptionName")
+          _ <- succeedIfEligible(creditCardExpirationDate.isAfter(today), s"card expired for subscription: $subscriptionName")
           _ <- succeedIfEligible(account.basicInfo.balance == 0, s"Account balance is not zero for subscription: $subscriptionName")
         } yield ()).isSuccess
 

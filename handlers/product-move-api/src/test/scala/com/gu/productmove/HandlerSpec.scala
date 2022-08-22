@@ -6,8 +6,8 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.zuora.GetAccount.{BasicInfo, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
-import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe}
+import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
+import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe, WireDefaultPaymentMethod}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
 import zio.test.*
@@ -40,14 +40,20 @@ object HandlerSpec extends ZIOSpecDefault {
 
   private val getAccountResponse = GetAccountResponse(
     BasicInfo(
-      DefaultPaymentMethod(
-        id = "paymentMethodId",
-        creditCardExpirationDate = LocalDate.of(2099,02,02)
-      ),
+      WireDefaultPaymentMethod("paymentMethodId", Some(12), Some(2030)),
       balance = 0.000000000,
       currency = "GBP"
     ),
-    List(getSubscriptionResponse)
+    List(AccountSubscription("subscriptionId"))
+  )
+
+  private val directDebitGetAccountResponse = GetAccountResponse(
+    BasicInfo(
+      WireDefaultPaymentMethod("paymentMethodId", None, None),
+      balance = 0.000000000,
+      currency = "GBP"
+    ),
+    List(AccountSubscription("subscriptionId"))
   )
 
   def spec = {
@@ -288,7 +294,41 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))
         )
-        }
+        },
+
+      test("available-product-moves endpoint returns empty response when user does not have a card payment method") {
+        val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0)).toInstant
+        val expectedSubNameInput = "A-S00339056"
+
+        val createSubscriptionResponse = CreateSubscriptionResponse("newSubscriptionName")
+
+        val getPaymentMethodResponse = PaymentMethodResponse(
+          NumConsecutiveFailures = 0
+        )
+
+        val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
+        val getAccountStubs = Map("accountNumber" -> directDebitGetAccountResponse)
+        val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+
+        val expectedOutput = AvailableProductMovesEndpointTypes.Success(body = List())
+
+        (for {
+          _ <- TestClock.setTime(time)
+
+          output <- AvailableProductMovesEndpoint.runWithEnvironment(expectedSubNameInput)
+          getSubRequests <- MockGetSubscription.requests
+          accountRequests <- MockGetAccount.requests
+        } yield {
+          assert(output)(equalTo(expectedOutput)) &&
+            assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+            assert(accountRequests)(equalTo(List("accountNumber")))
+        }).provide(
+          ZLayer.succeed(new MockCatalogue),
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD"))
+        )
+      }
     )
   }
 }
