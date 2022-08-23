@@ -459,6 +459,7 @@ lazy val `product-move-api` = lambdaProject(
     awsLambda,
     "com.softwaremill.sttp.client3" %% "zio" % "3.6.2"  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
     awsS3,
+    awsSQS,
     "com.softwaremill.sttp.client3" %% "zio-json" % "3.6.2",
     "dev.zio" %% "zio-logging-slf4j" % "2.0.0-RC10",
     "dev.zio" %% "zio-test" % zio2Version % Test,

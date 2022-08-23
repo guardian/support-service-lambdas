@@ -5,8 +5,8 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{ZuoraCancel, GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
+import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, ZuoraCancel, ZuoraCancelLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailSender, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -74,6 +74,41 @@ object ProductMoveEndpoint {
 
       _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate)
       newSubscriptionId <- Subscribe.create(subscription.accountId, postData.targetProductId)
+
+      /*
+      _ <- EmailSender.sendEmail(
+        message = EmailMessage(
+          EmailPayload(
+            Address = contact.Email,
+            ContactAttributes = EmailPayloadContactAttributes(
+              SubscriberAttributes = EmailPayloadSubscriberAttributes(
+                title =
+                  contact.FirstName flatMap (_ =>
+                    contact.Salutation
+                    ), // if no first name, we use salutation as first name and leave this field empty
+                first_name = firstName,
+                last_name = lastName,
+                billing_address_1 = street,
+                billing_address_2 = None, // See 'Billing Address Format' section in the readme
+                billing_city = address.city,
+                billing_postal_code = postalCode,
+                billing_state = address.state,
+                billing_country = country,
+                payment_amount = estimatedNewPrice,
+                next_payment_date = startDate,
+                payment_frequency = paymentFrequency,
+                subscription_id = cohortItem.subscriptionName,
+                product_type = sfSubscription.Product_Type__c.getOrElse("")
+              )
+            )
+          ),
+          brazeCampaignName,
+          contact.Id,
+          contact.IdentityID__c
+        )
+      )
+      */
+
       _ <- ZIO.log("Sub: " + newSubscriptionId.toString)
     } yield Success(newSubscriptionId.subscriptionId, MoveToProduct(
       id = "123",
