@@ -20,6 +20,7 @@ import sttp.client3.testing.SttpBackendStub
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
+import org.http4s.syntax.literals._
 
 class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with EitherValues {
 
@@ -178,7 +179,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val response = app.run(
       Request[IO](
         method = Method.POST,
-        Uri(path = "/digital-voucher/replace")
+        Uri(path = path"/digital-voucher/replace")
       ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
@@ -209,7 +210,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val response = app.run(
       Request[IO](
         method = Method.POST,
-        Uri(path = "/digital-voucher/replace")
+        Uri(path = path"/digital-voucher/replace")
       ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(false), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
@@ -240,7 +241,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val response = app.run(
       Request[IO](
         method = Method.POST,
-        Uri(path = "/digital-voucher/replace")
+        Uri(path = path"/digital-voucher/replace")
       ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(false)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
@@ -264,7 +265,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val response = app.run(
       Request[IO](
         method = Method.POST,
-        Uri(path = "/digital-voucher/replace")
+        Uri(path = path"/digital-voucher/replace")
       ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
@@ -316,7 +317,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val response = app.run(
       Request[IO](
         method = Method.POST,
-        Uri(path = "/digital-voucher/cancel")
+        Uri(path = path"/digital-voucher/cancel")
       ).withEntity[String](CancelSubscriptionVoucherRequestBody(subscriptionId.value, cancellationDate).asJson.spaces2)
     ).value.unsafeRunSync().get
 
