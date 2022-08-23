@@ -8,7 +8,7 @@ import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccess
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
-import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
@@ -36,7 +36,7 @@ object ZuoraClientLive {
     s"$basePath/$relativePath"
   }
 
-  val layer: ZLayer[AwsS3 with Stage with SttpClient, String, ZuoraClient] =
+  val layer: ZLayer[AwsS3 with Stage with SttpBackend[Task, Any], String, ZuoraClient] =
     ZLayer {
       for {
         stage <- ZIO.service[Stage]
@@ -45,13 +45,13 @@ object ZuoraClientLive {
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraRestConfig.baseUrl + "/"))
         _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
         _ <- ZIO.log("baseUrl: " + baseUrl.toString)
-        sttpClient <- ZIO.service[SttpClient]
+        sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield ZuoraClientLive(baseUrl, sttpClient, zuoraRestConfig)
     }
 
 }
 
-private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpClient, zuoraRestConfig: ZuoraRestConfig) extends ZuoraClient:
+private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], zuoraRestConfig: ZuoraRestConfig) extends ZuoraClient:
 
   override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
     val absoluteUri = baseUrl.resolve(request.uri)
@@ -74,19 +74,22 @@ trait ZuoraClient {
 // zuora commonly returns status = 200 and success = false.
 // this usually causes a deserialisation error and often makes it hard to understand what went wrong
 // This detects that and stops straight away.
+// the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success flag, therefore if the success property does not exist, we decode the JSON as normal.
 object ZuoraRestBody {
 
-  case class ZuoraSuccess(success: Boolean)
+  case class ZuoraSuccess(success: Option[Boolean])
 
   def parseIfSuccessful[A: JsonDecoder](body: String): Either[String, A] = {
     val successDecoder: JsonDecoder[ZuoraSuccess] = DeriveJsonDecoder.gen[ZuoraSuccess]
-    for {
-      zuoraSuccessFlag <- successDecoder.decodeJson(body)
-      parsedResponse <-
-        if (zuoraSuccessFlag.success)
-          body.fromJson[A]
-        else Left(body)
-    } yield parsedResponse
-  }
+    val zuoraSuccessResponse = successDecoder.decodeJson(body)
 
+    zuoraSuccessResponse match {
+      case Right(res) =>
+        res.success match {
+          case Some(successFlag) => if (successFlag) body.fromJson[A] else Left(body)
+          case None => body.fromJson[A]
+        }
+      case Left(errorMessage) => Left(s"Error decoding json from zuora response: $errorMessage")
+    }
+  }
 }

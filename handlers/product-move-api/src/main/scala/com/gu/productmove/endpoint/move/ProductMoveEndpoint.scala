@@ -5,7 +5,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, ZuoraCancel, ZuoraCancelLive}
+import com.gu.productmove.zuora.{GetAccount, GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, ZuoraCancel, ZuoraCancelLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailSender, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
@@ -75,7 +75,8 @@ object ProductMoveEndpoint {
       _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate)
       newSubscriptionId <- Subscribe.create(subscription.accountId, postData.targetProductId)
 
-      /*
+      account <- GetAccount.get(subscription.accountNumber).handleError("GetAccount")
+
       _ <- EmailSender.sendEmail(
         message = EmailMessage(
           EmailPayload(
@@ -86,7 +87,7 @@ object ProductMoveEndpoint {
                   contact.FirstName flatMap (_ =>
                     contact.Salutation
                     ), // if no first name, we use salutation as first name and leave this field empty
-                first_name = firstName,
+                first_name = account.basicInfo.FirstName,
                 last_name = lastName,
                 billing_address_1 = street,
                 billing_address_2 = None, // See 'Billing Address Format' section in the readme
@@ -107,7 +108,6 @@ object ProductMoveEndpoint {
           contact.IdentityID__c
         )
       )
-      */
 
       _ <- ZIO.log("Sub: " + newSubscriptionId.toString)
     } yield Success(newSubscriptionId.subscriptionId, MoveToProduct(
@@ -116,7 +116,7 @@ object ProductMoveEndpoint {
       billing = Billing(
         amount = Some(1199),
         percentage = None,
-        currency = Currency.GBP,
+        currency = Some(Currency.GBP),
         frequency = Some(TimePeriod(TimeUnit.month, 1)),
         startDate = Some("2022-09-21")
       ),
@@ -125,7 +125,7 @@ object ProductMoveEndpoint {
         Billing(
           amount = None,
           percentage = Some(50),
-          currency = Currency.GBP,//FIXME doesn't make sense for a percentage
+          currency = Some(Currency.GBP),//FIXME doesn't make sense for a percentage
           frequency = None,//FIXME doesn't make sense for a percentage
           startDate = Some("2022-09-21")
         ),

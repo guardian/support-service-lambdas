@@ -1,15 +1,21 @@
 package com.gu.productmove.endpoint.available
 
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{handleError, localDateToString}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.OutputBody
+import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
+import com.gu.productmove.zuora.{ZuoraBillingPeriod, ZuoraProductRatePlan}
 import sttp.tapir.Schema.*
 import sttp.tapir.Schema.annotations.*
 import sttp.tapir.SchemaType.{SProductField, SString}
 import sttp.tapir.Validator.Enumeration
 import sttp.tapir.generic.Derived
 import sttp.tapir.{FieldName, Schema, SchemaType, Validator}
+import zio.{IO, ZIO}
 import zio.json.{DeriveJsonCodec, JsonCodec}
 
+import java.time.LocalDate
 import scala.util.Try
 
 //has to be a separate file due to https://github.com/lampepfl/dotty/issues/12498#issuecomment-973991160
@@ -18,6 +24,7 @@ object AvailableProductMovesEndpointTypes {
   sealed trait OutputBody
   case class Success(body: List[MoveToProduct]) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
+  case object InternalServerError extends OutputBody
 
   given JsonCodec[Success] = DeriveJsonCodec.gen[Success]
   given JsonCodec[NotFound] = DeriveJsonCodec.gen[NotFound]
@@ -42,6 +49,15 @@ object MoveToProduct {
   given JsonCodec[TimePeriod] = DeriveJsonCodec.gen[TimePeriod]
   given Schema[TimePeriod] = Schema.derived
 
+  def buildResponseFromRatePlan(subscriptionName: String, productRatePlan: ZuoraProductRatePlan, chargedThroughDate: LocalDate): IO[OutputBody, MoveToProduct] =
+    for {
+      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).handleError(s"billingPeriod is null for subscription: $subscriptionName")
+      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).handleError(s"currency not found on ratePlanCharge")
+      price  = pricing.price.toFloat * 100
+
+      introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))
+      newPlan = Billing(amount = Some(price.toInt), percentage = None, currency = Some(GBP), frequency = Some(TimePeriod(TimeUnit.fromString(billingPeriod), 1)), startDate = Some(localDateToString.format(chargedThroughDate.plusDays(90))))
+    } yield MoveToProduct(id = subscriptionName, name = "Digital Pack", trial = Some(Trial(dayCount = 14)), introOffer = Some(introOffer), billing = newPlan)
 }
 
 @encodedName("product")
@@ -67,7 +83,7 @@ case class Billing(
   @encodedExample(50)
   percentage: Option[Int], // Either - amount or percentage?
   @validate[Currency](Validator.enumeration(List(Currency.GBP)))
-  currency: Currency,
+  currency: Option[Currency],    // optional if the ratePlan is a percentage discount
   frequency: Option[TimePeriod],
   @description("Date on which first service period for product subscription begins.\nThis probably won't be known reliably before a subscription has actually been set up,\nso it's an optional field.\nIn ISO 8601 format.")
   @encodedExample("2022-06-21")
@@ -103,12 +119,19 @@ enum TimeUnit:
 object TimeUnit:
 
   given JsonCodec[TimeUnit] = summon[JsonCodec[String]].transform[TimeUnit]({
-    case "month" => TimeUnit.month
-    case "year" => TimeUnit.year
+    case "Month" => TimeUnit.month
+    case "Annual" => TimeUnit.year
   }, _.toString)
 
   given Schema[TimeUnit] =
     inlineSchema(Schema.derivedEnumeration())
+
+  def fromString(billingPeriod: String): TimeUnit = {
+    billingPeriod match {
+      case "Month" => TimeUnit.month
+      case "Annual" => TimeUnit.year
+    }
+  }
 
 
 @encodedName("trial")
