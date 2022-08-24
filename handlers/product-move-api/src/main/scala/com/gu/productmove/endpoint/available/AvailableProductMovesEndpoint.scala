@@ -144,7 +144,7 @@ object AvailableProductMovesEndpoint {
         Monthly contribution
         Account balance is 0
       */
-      secondEligibilityChecks <-
+      accountIsEligible <-
         (for {
           _ <- succeedIfEligible(account.subscriptions.length == 1, s"More than one subscription for account for subscription: $subscriptionName")
           _ <- succeedIfEligible(account.basicInfo.currency == "GBP", s"Subscription: $subscriptionName not in GBP")
