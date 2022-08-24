@@ -8,7 +8,7 @@ import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccess
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
-import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
@@ -36,7 +36,7 @@ object ZuoraClientLive {
     s"$basePath/$relativePath"
   }
 
-  val layer: ZLayer[AwsS3 with Stage with SttpClient, String, ZuoraClient] =
+  val layer: ZLayer[AwsS3 with Stage with SttpBackend[Task, Any], String, ZuoraClient] =
     ZLayer {
       for {
         stage <- ZIO.service[Stage]
@@ -45,13 +45,13 @@ object ZuoraClientLive {
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraRestConfig.baseUrl + "/"))
         _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
         _ <- ZIO.log("baseUrl: " + baseUrl.toString)
-        sttpClient <- ZIO.service[SttpClient]
+        sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield ZuoraClientLive(baseUrl, sttpClient, zuoraRestConfig)
     }
 
 }
 
-private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpClient, zuoraRestConfig: ZuoraRestConfig) extends ZuoraClient:
+private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], zuoraRestConfig: ZuoraRestConfig) extends ZuoraClient:
 
   override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
     val absoluteUri = baseUrl.resolve(request.uri)
