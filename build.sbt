@@ -457,10 +457,10 @@ lazy val `product-move-api` = lambdaProject(
     zio2,
     awsEvents,
     awsLambda,
-    "com.softwaremill.sttp.client3" %% "zio" % "3.6.2"  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
+    "com.softwaremill.sttp.client3" %% "zio" % sttpVersion  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
     awsS3,
-    "com.softwaremill.sttp.client3" %% "zio-json" % "3.6.2",
-    "dev.zio" %% "zio-logging-slf4j" % "2.0.0-RC10",
+    "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
+    "dev.zio" %% "zio-logging-slf4j" % "2.0.1",
     "dev.zio" %% "zio-test" % zio2Version % Test,
     "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
@@ -471,15 +471,8 @@ lazy val `product-move-api` = lambdaProject(
   scala3Settings
 )
   .settings(
-    // needed for zio snapshot to get this PR https://github.com/zio/zio/pull/6775
-    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
-    genDocs := Def.taskDyn {
-      val targetPath = target.value.toString
-      Def.task {
-        (Compile / runMain).toTask(" com.gu.productmove.MakeDocsYaml " + targetPath + "/APIDocs.yaml").value
-      }
-    }.value
+    genDocs := genDocsImpl("com.gu.productmove.MakeDocsYaml").value
   )
   .dependsOn()
 
@@ -597,6 +590,15 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
 // ==== END handlers ====
 
 lazy val genDocs = taskKey[Unit]("generate yaml open API docs")
+
+def genDocsImpl(makeDocsClassName: String): Def.Initialize[Task[Unit]] = {
+  Def.taskDyn {
+    val targetPath = target.value.toString
+    Def.task {
+      (Compile / runMain).toTask(" "+makeDocsClassName+" " + targetPath + "/APIDocs.yaml").value
+    }
+  }
+}
 
 initialize := {
   val _ = initialize.value
