@@ -112,7 +112,7 @@ object AvailableProductMovesEndpoint {
       zuoraProductCatalogueFetch <- GetCatalogue.get.fork
       subscription <- GetSubscription.get(subscriptionName).handleError("GetSubscription")
 
-      firstEligibilityChecks <-
+      subscriptionIsEligible <-
         (for {
           _ <- succeedIfEligible(subscription.ratePlans.length == 1, s"Subscription: $subscriptionName has more than one ratePlan")
           _ <- succeedIfEligible(subscription.ratePlans.head.productRatePlanId == monthlyContributionRatePlanId, s"Subscription: $subscriptionName is not a monthly contribution")
