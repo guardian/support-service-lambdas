@@ -18,7 +18,7 @@ import sttp.apispec.openapi.Info
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3.*
-import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient, send}
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.logging.{Logger, LoggingBackend}
 import sttp.model.*
 import sttp.tapir.*
@@ -73,7 +73,7 @@ object Handler extends ZIOApiGatewayRequestHandler {
 
 // called from genDocs command in build.sbt
 object MakeDocsYaml {
-  import sttp.apispec.openapi.circe.yaml._
+  import sttp.apispec.openapi.circe.yaml.*
 
   val description =
     """API to facilitate replacing an existing subscription
@@ -88,7 +88,7 @@ object MakeDocsYaml {
       case None =>
         println("Syntax: $0 <pathname.yaml>")
       case Some(yamlFilename) if yamlFilename.endsWith(".yaml") =>
-        import java.io._
+        import java.io.*
         val writer = new PrintWriter(new File(yamlFilename))
         val maybeFileOps = Try {
           writer.write(yaml)
