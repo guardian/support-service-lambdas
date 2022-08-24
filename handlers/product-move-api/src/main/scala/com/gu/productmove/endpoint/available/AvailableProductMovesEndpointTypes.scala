@@ -1,7 +1,7 @@
 package com.gu.productmove.endpoint.available
 
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{handleError, localDateToString}
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.OutputBody
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{localDateToString}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{OutputBody, Success}
 import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
@@ -51,8 +51,8 @@ object MoveToProduct {
 
   def buildResponseFromRatePlan(subscriptionName: String, productRatePlan: ZuoraProductRatePlan, chargedThroughDate: LocalDate): IO[OutputBody, MoveToProduct] =
     for {
-      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).handleError(s"billingPeriod is null for subscription: $subscriptionName")
-      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).handleError(s"currency not found on ratePlanCharge")
+      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).orElse(ZIO.log(s"billingPeriod is null for subscription: $subscriptionName").flatMap(_ => ZIO.fail(Success(List()))))
+      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).orElse(ZIO.log(s"currency not found on ratePlanCharge").flatMap(_ => ZIO.fail(Success(List()))))
       price  = pricing.price.toFloat * 100
 
       introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))

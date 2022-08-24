@@ -90,7 +90,7 @@ object ProductMoveEndpoint {
         Billing(
           amount = None,
           percentage = Some(50),
-          currency = None
+          currency = None,
           frequency = None,//FIXME doesn't make sense for a percentage
           startDate = Some("2022-09-21")
         ),

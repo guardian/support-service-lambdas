@@ -110,7 +110,7 @@ object AvailableProductMovesEndpoint {
 
       // Kick off catalogue fetch in parallel
       zuoraProductCatalogueFetch <- GetCatalogue.get.fork
-      subscription <- GetSubscription.get(subscriptionName).handleError("GetSubscription")
+      subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription")
 
       subscriptionIsEligible <-
         (for {
@@ -119,20 +119,20 @@ object AvailableProductMovesEndpoint {
           _ <- succeedIfEligible(subscription.ratePlans.head.ratePlanCharges.length == 1, s"Subscription: $subscriptionName has more than one ratePlan charge for ratePlan ${subscription.ratePlans.head}")
         } yield ()).isSuccess
 
-      _ <- if (firstEligibilityChecks) ZIO.succeed(()) else ZIO.fail(Success(List()))
+      _ <- if (subscriptionIsEligible) ZIO.succeed(()) else ZIO.fail(Success(List()))
 
       // Next payment date
       chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse {
         ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(Success(List())))
       }
 
-      account <- GetAccount.get(subscription.accountNumber).handleError("GetAccount")
+      account <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount")
 
       creditCardExpirationDate <- ZIO.fromEither(getCreditCardExpirationDate(account.basicInfo.defaultPaymentMethod)).orElse {
         ZIO.log(s"Payment method is not a card for subscription $subscriptionName.").flatMap(_ => ZIO.fail(Success(List())))
       }
 
-      paymentMethod <- GetAccount.getPaymentMethod(account.basicInfo.defaultPaymentMethod.id).handleError("GetAccount.getPaymentMethod")
+      paymentMethod <- GetAccount.getPaymentMethod(account.basicInfo.defaultPaymentMethod.id).mapErrorTo500("GetAccount.getPaymentMethod")
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
@@ -153,9 +153,9 @@ object AvailableProductMovesEndpoint {
           _ <- succeedIfEligible(account.basicInfo.balance == 0, s"Account balance is not zero for subscription: $subscriptionName")
         } yield ()).isSuccess
 
-      _ <- if (secondEligibilityChecks) ZIO.succeed(()) else ZIO.fail(Success(List()))
+      _ <- if (accountIsEligible) ZIO.succeed(()) else ZIO.fail(Success(List()))
 
-      zuoraProductCatalogue <- zuoraProductCatalogueFetch.join.handleError("GetCatalogue")
+      zuoraProductCatalogue <- zuoraProductCatalogueFetch.join.mapErrorTo500("GetCatalogue")
 
       productRatePlans = getAvailableSwitchRatePlans(zuoraProductCatalogue, List("Digital Pack"))
       moveToProduct <- ZIO.foreach(productRatePlans) { productRatePlan =>
