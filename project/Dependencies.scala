@@ -65,7 +65,7 @@ object Dependencies {
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.15"
+  val zio = "dev.zio" %% "zio" % "1.0.16"
   val zio2Version = "2.0.0"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion = "1.0.3"
