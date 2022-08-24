@@ -18,7 +18,7 @@ object SubscribeSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("subscribe layer")(test("createRequest function: JSON request body is created and encoded correctly") {
-      val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0))
+      val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
       val expectedSubscribeRequest = SubscribeRequest(
         accountKey = "zuoraAccountId",
         contractEffectiveDate = LocalDate.of(2022, 5, 10),
@@ -30,7 +30,7 @@ object SubscribeSpec extends ZIOSpecDefault {
       )
 
       for {
-        _ <- TestClock.setDateTime(time)
+        _ <- TestClock.setTime(time)
         createRequestBody <- SubscribeRequest.withTodaysDate("zuoraAccountId", "targetProductId")
       } yield assert(createRequestBody)(equalTo(expectedSubscribeRequest))
     })
