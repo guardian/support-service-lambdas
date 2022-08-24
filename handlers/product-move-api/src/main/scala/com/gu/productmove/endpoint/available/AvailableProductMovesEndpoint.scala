@@ -96,7 +96,7 @@ object AvailableProductMovesEndpoint {
     } yield LocalDate.of(creditCardExpirationYear, creditCardExpirationMonth, 1)
 
   extension[R, E, A] (zio: ZIO[R, E, A])
-    def handleError(message: String) = zio.catchAll {
+    def mapErrorTo500(message: String) = zio.catchAll {
       error =>
         ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
