@@ -1,5 +1,6 @@
 package com.gu.productmove.endpoint.move
 
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.InternalServerError
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
@@ -65,6 +66,12 @@ object ProductMoveEndpoint {
       GuStageLive.layer,
     )
 
+  extension[R, E, A] (zio: ZIO[R, E, A])
+    def handleError(message: String) = zio.catchAll {
+      error =>
+        ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
+    }
+
   private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with Subscribe with ZuoraCancel, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
@@ -87,18 +94,12 @@ object ProductMoveEndpoint {
                   contact.FirstName flatMap (_ =>
                     contact.Salutation
                     ), // if no first name, we use salutation as first name and leave this field empty
-                first_name = account.basicInfo.FirstName,
-                last_name = lastName,
-                billing_address_1 = street,
-                billing_address_2 = None, // See 'Billing Address Format' section in the readme
-                billing_city = address.city,
-                billing_postal_code = postalCode,
-                billing_state = address.state,
-                billing_country = country,
+                first_name = account.basicInfo.firstName,
+                last_name = account.basicInfo.lastName,
                 payment_amount = estimatedNewPrice,
                 next_payment_date = startDate,
                 payment_frequency = paymentFrequency,
-                subscription_id = cohortItem.subscriptionName,
+                subscription_id = subscription.id,
                 product_type = sfSubscription.Product_Type__c.getOrElse("")
               )
             )

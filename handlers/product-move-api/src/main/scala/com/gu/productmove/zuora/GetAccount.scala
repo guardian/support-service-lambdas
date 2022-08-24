@@ -53,6 +53,8 @@ object GetAccount {
 
   case class BasicInfo(
     defaultPaymentMethod: WireDefaultPaymentMethod,
+    firstName: String,
+    lastName: String,
     balance: BigDecimal,
     currency: String
   )

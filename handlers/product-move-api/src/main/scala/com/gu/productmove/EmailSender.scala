@@ -30,7 +30,7 @@ object EmailSenderLive {
           )
           .mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
       } yield new EmailSender {
-        override def sendEmail(message: EmailMessage): Task[String] =
+        override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
           sendMessage(sqsClient, queueUrlResponse.queueUrl, message)
       }
     )
