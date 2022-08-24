@@ -40,14 +40,6 @@ object GetCatalogue {
   def get: ZIO[GetCatalogue, String, ZuoraProductCatalogue] = ZIO.serviceWithZIO[GetCatalogue](_.get)
 }
 
-enum ZuoraBillingPeriod:
-  case Month, Annual, Quarter
-
-object ZuoraBillingPeriod {
-  given JsonDecoder[ZuoraBillingPeriod] = DeriveJsonDecoder.gen[ZuoraBillingPeriod]
-}
-
-
 case class ZuoraProductCatalogue(products: Set[ZuoraProduct], nextPage: Option[String] = None)
 
 object ZuoraProductCatalogue {
@@ -66,7 +58,6 @@ object ZuoraProduct {
 case class ZuoraProductRatePlan(
   id: String,
   name: String,
-  status: String,
   productRatePlanCharges: Set[ZuoraProductRatePlanCharge]
 )
 

@@ -92,7 +92,7 @@ object HandlerSpec extends ZIOSpecDefault {
                 billing = Billing(
                   amount = None,
                   percentage = Some(50),
-                  currency = Some(Currency.GBP),
+                  currency = None,
                   frequency = None,
                   startDate = Some("2022-09-21")
                 ),

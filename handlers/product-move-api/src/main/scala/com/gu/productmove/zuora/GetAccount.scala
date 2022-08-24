@@ -108,5 +108,9 @@ given JsonDecoder[WireDefaultPaymentMethod] = DeriveJsonDecoder.gen[WireDefaultP
 case class ZuoraPricing(currency: String, price: BigDecimal = 0.000000000)
 
 object ZuoraPricing {
-  given JsonDecoder[ZuoraPricing] = DeriveJsonDecoder.gen[ZuoraPricing]
+  private case class ZuoraPricingWire(currency: String, price: BigDecimal = 0.000000000)
+
+  given JsonDecoder[ZuoraPricing] = DeriveJsonDecoder.gen[ZuoraPricingWire].map {
+    case ZuoraPricingWire(currency, price) => ZuoraPricing(currency, (price.toDouble * 100).toInt)
+  }
 }
