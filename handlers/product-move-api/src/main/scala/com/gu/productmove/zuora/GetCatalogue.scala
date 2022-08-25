@@ -65,7 +65,7 @@ object ZuoraProductRatePlan {
   given JsonDecoder[ZuoraProductRatePlan] = DeriveJsonDecoder.gen[ZuoraProductRatePlan]
 }
 
-case class ZuoraProductRatePlanCharge(id: String, billingPeriod: Option[String], pricing: Set[ZuoraPricing])
+case class ZuoraProductRatePlanCharge(id: String, billingPeriod: Option[String], pricing: List[ZuoraPricing])
 
 object ZuoraProductRatePlanCharge {
   given JsonDecoder[ZuoraProductRatePlanCharge] = DeriveJsonDecoder.gen[ZuoraProductRatePlanCharge]
