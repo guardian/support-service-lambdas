@@ -42,7 +42,7 @@ object AvailableProductMovesEndpoint {
       .get
       .in("available-product-moves").in(subscriptionNameCapture)
       .out(oneOf(
-        oneOfVariant(sttp.model.StatusCode.Ok, jsonBody[List[MoveToProduct]].map(Success.apply)(_.body).copy(info = EndpointIO.Info.empty.copy(description = Some("Success.")))),
+        oneOfVariant(sttp.model.StatusCode.Ok, jsonBody[List[MoveToProduct]].map(AvailableMoves.apply)(_.body).copy(info = EndpointIO.Info.empty.copy(description = Some("Success.")))),
         oneOfVariant(sttp.model.StatusCode.NotFound, stringBody.map(NotFound.apply)(_.textResponse).copy(info = EndpointIO.Info.empty.copy(description = Some("No such subscription.")))),
       ))
       .summary("Gets available products that can be moved to from the given subscription.")
@@ -89,12 +89,6 @@ object AvailableProductMovesEndpoint {
         _ <- ZIO.fail(())
       } yield ()
 
-  def getCreditCardExpirationDate(wireDefaultPaymentMethod: WireDefaultPaymentMethod): Either[Unit, LocalDate] =
-    for {
-      creditCardExpirationMonth <- wireDefaultPaymentMethod.creditCardExpirationMonth.toRight(())
-      creditCardExpirationYear <- wireDefaultPaymentMethod.creditCardExpirationYear.toRight(())
-    } yield LocalDate.of(creditCardExpirationYear, creditCardExpirationMonth, 1)
-
   extension[R, E, A] (zio: ZIO[R, E, A])
     def mapErrorTo500(message: String) = zio.catchAll {
       error =>
@@ -119,17 +113,17 @@ object AvailableProductMovesEndpoint {
           _ <- succeedIfEligible(subscription.ratePlans.head.ratePlanCharges.length == 1, s"Subscription: $subscriptionName has more than one ratePlan charge for ratePlan ${subscription.ratePlans.head}")
         } yield ()).isSuccess
 
-      _ <- if (subscriptionIsEligible) ZIO.succeed(()) else ZIO.fail(Success(List()))
+      _ <- if (subscriptionIsEligible) ZIO.succeed(()) else ZIO.fail(AvailableMoves(List()))
 
       // Next payment date
       chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse {
-        ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(Success(List())))
+        ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(AvailableMoves(List())))
       }
 
       account <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount")
 
-      creditCardExpirationDate <- ZIO.fromEither(getCreditCardExpirationDate(account.basicInfo.defaultPaymentMethod)).orElse {
-        ZIO.log(s"Payment method is not a card for subscription $subscriptionName.").flatMap(_ => ZIO.fail(Success(List())))
+      creditCardExpirationDate <- ZIO.fromOption(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate).orElse {
+        ZIO.log(s"Payment method is not a card for subscription $subscriptionName.").flatMap(_ => ZIO.fail(AvailableMoves(List())))
       }
 
       paymentMethod <- GetAccount.getPaymentMethod(account.basicInfo.defaultPaymentMethod.id).mapErrorTo500("GetAccount.getPaymentMethod")
@@ -153,7 +147,7 @@ object AvailableProductMovesEndpoint {
           _ <- succeedIfEligible(account.basicInfo.balance == 0, s"Account balance is not zero for subscription: $subscriptionName")
         } yield ()).isSuccess
 
-      _ <- if (accountIsEligible) ZIO.succeed(()) else ZIO.fail(Success(List()))
+      _ <- if (accountIsEligible) ZIO.succeed(()) else ZIO.fail(AvailableMoves(List()))
 
       zuoraProductCatalogue <- zuoraProductCatalogueFetch.join.mapErrorTo500("GetCatalogue")
 
@@ -163,7 +157,7 @@ object AvailableProductMovesEndpoint {
       }
 
       _ <- ZIO.log("done")
-    } yield Success(moveToProduct)
+    } yield AvailableMoves(moveToProduct)
 
     output.catchAll {
       failure => ZIO.succeed(failure)

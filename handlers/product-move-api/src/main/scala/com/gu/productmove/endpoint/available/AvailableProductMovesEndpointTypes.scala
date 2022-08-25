@@ -1,7 +1,7 @@
 package com.gu.productmove.endpoint.available
 
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.localDateToString
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{OutputBody, Success}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{OutputBody, AvailableMoves}
 import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
@@ -22,11 +22,11 @@ import scala.util.Try
 object AvailableProductMovesEndpointTypes {
 
   sealed trait OutputBody
-  case class Success(body: List[MoveToProduct]) extends OutputBody
+  case class AvailableMoves(body: List[MoveToProduct]) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
   case object InternalServerError extends OutputBody
 
-  given JsonCodec[Success] = DeriveJsonCodec.gen[Success]
+  given JsonCodec[AvailableMoves] = DeriveJsonCodec.gen[AvailableMoves]
   given JsonCodec[NotFound] = DeriveJsonCodec.gen[NotFound]
   given JsonCodec[OutputBody] = DeriveJsonCodec.gen[OutputBody]
 
@@ -51,8 +51,8 @@ object MoveToProduct {
 
   def buildResponseFromRatePlan(subscriptionName: String, productRatePlan: ZuoraProductRatePlan, chargedThroughDate: LocalDate): IO[OutputBody, MoveToProduct] =
     for {
-      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).orElse(ZIO.log(s"billingPeriod is null for subscription: $subscriptionName").flatMap(_ => ZIO.fail(Success(List()))))
-      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).orElse(ZIO.log(s"currency not found on ratePlanCharge").flatMap(_ => ZIO.fail(Success(List()))))
+      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).orElse(ZIO.log(s"billingPeriod is null for subscription: $subscriptionName").flatMap(_ => ZIO.fail(AvailableMoves(List()))))
+      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).orElse(ZIO.log(s"currency not found on ratePlanCharge").flatMap(_ => ZIO.fail(AvailableMoves(List()))))
       price  = pricing.price
 
       introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))

@@ -7,7 +7,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput,
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
-import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe, WireDefaultPaymentMethod}
+import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
 import zio.test.*
@@ -40,7 +40,7 @@ object HandlerSpec extends ZIOSpecDefault {
 
   private val getAccountResponse = GetAccountResponse(
     BasicInfo(
-      WireDefaultPaymentMethod("paymentMethodId", Some(12), Some(2030)),
+      DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
       balance = 0.000000000,
       currency = "GBP"
     ),
@@ -49,7 +49,7 @@ object HandlerSpec extends ZIOSpecDefault {
 
   private val directDebitGetAccountResponse = GetAccountResponse(
     BasicInfo(
-      WireDefaultPaymentMethod("paymentMethodId", None, None),
+      DefaultPaymentMethod("paymentMethodId", None),
       balance = 0.000000000,
       currency = "GBP"
     ),
@@ -220,7 +220,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
         val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
 
-        val expectedOutput = AvailableProductMovesEndpointTypes.Success(
+        val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(
           body = List(MoveToProduct(
             id = "A-S00339056",
             name = "Digital Pack",
@@ -276,7 +276,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
         val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
 
-        val expectedOutput = AvailableProductMovesEndpointTypes.Success(body = List())
+        val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(body = List())
 
         (for {
           _ <- TestClock.setTime(time)
@@ -310,7 +310,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val getAccountStubs = Map("accountNumber" -> directDebitGetAccountResponse)
         val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
 
-        val expectedOutput = AvailableProductMovesEndpointTypes.Success(body = List())
+        val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(body = List())
 
         (for {
           _ <- TestClock.setTime(time)

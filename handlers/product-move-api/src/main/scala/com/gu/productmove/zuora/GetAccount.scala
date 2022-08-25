@@ -4,11 +4,11 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.{Currency, TimeUnit}
 import com.gu.productmove.zuora.DefaultPaymentMethod
-import com.gu.productmove.zuora.WireDefaultPaymentMethod
 import com.gu.productmove.zuora.GetAccount.{ GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.rest.ZuoraClientLive.{ZuoraRestConfig, bucket, key}
 import com.gu.productmove.zuora.rest.ZuoraGet
+import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
@@ -22,15 +22,16 @@ import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode.HALF_UP
 import scala.util.Try
 
+
 object GetAccountLive:
   val layer: URLayer[ZuoraGet, GetAccount] = ZLayer.fromFunction(GetAccountLive(_))
 
 private class GetAccountLive(zuoraGet: ZuoraGet) extends GetAccount :
   override def get(accountNumber: String): IO[String, GetAccountResponse] =
-    zuoraGet.get[GetAccountResponse](uri"accounts/$accountNumber/summary")
+    zuoraGet.get[GetAccountResponse](uri"accounts/$accountNumber/summary", ZuoraSuccessCheck.SuccessCheckLowercase)
 
   override def getPaymentMethod(paymentMethodId: String): IO[String, PaymentMethodResponse] =
-    zuoraGet.get[PaymentMethodResponse](uri"object/payment-method/$paymentMethodId")
+    zuoraGet.get[PaymentMethodResponse](uri"object/payment-method/$paymentMethodId", ZuoraSuccessCheck.SuccessCheckSize)
 
 trait GetAccount:
   def get(subscriptionNumber: String): ZIO[GetAccount, String, GetAccountResponse]
@@ -52,7 +53,7 @@ object GetAccount {
   )
 
   case class BasicInfo(
-    defaultPaymentMethod: WireDefaultPaymentMethod,
+    defaultPaymentMethod: DefaultPaymentMethod,
     balance: BigDecimal,
     currency: String
   )
@@ -89,16 +90,26 @@ object GetAccount {
 
 case class DefaultPaymentMethod(
   id: String,
-  creditCardExpirationDate: LocalDate,
+  creditCardExpirationDate: Option[LocalDate],
 )
 
-case class WireDefaultPaymentMethod(
-  id: String,
-  creditCardExpirationMonth: Option[Int],
-  creditCardExpirationYear: Option[Int],
-)
+object DefaultPaymentMethod {
+  private case class WireDefaultPaymentMethod(
+    id: String,
+    creditCardExpirationMonth: Option[Int],
+    creditCardExpirationYear: Option[Int],
+  )
 
-given JsonDecoder[WireDefaultPaymentMethod] = DeriveJsonDecoder.gen[WireDefaultPaymentMethod]
+  given JsonDecoder[DefaultPaymentMethod] = DeriveJsonDecoder.gen[WireDefaultPaymentMethod].map {
+    case WireDefaultPaymentMethod(id, month, year) =>
+      val creditCardExpirationDate = for {
+        creditCardExpirationMonth <- month
+        creditCardExpirationYear <- year
+      } yield LocalDate.of(creditCardExpirationYear, creditCardExpirationMonth, 1)
+
+      DefaultPaymentMethod(id, creditCardExpirationDate)
+  }
+}
 
 /*
 * Don't use discount percentage from product catalogue,
