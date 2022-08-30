@@ -72,7 +72,7 @@ object AvailableProductMovesEndpoint {
 
   def getAvailableSwitchRatePlans(zuoraProductCatalogue: ZuoraProductCatalogue, ratePlanNames: List[String]): List[ZuoraProductRatePlan] =
     val productRatePlans = for {
-      product <- zuoraProductCatalogue.products.filter(ratePlanNames contains _.name)
+      product <- zuoraProductCatalogue.products.filter(product => ratePlanNames.contains(product.name))
       productRatePlan <- product.productRatePlans.toList
     } yield productRatePlan
 
