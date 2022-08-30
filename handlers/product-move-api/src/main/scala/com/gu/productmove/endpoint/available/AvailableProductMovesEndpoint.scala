@@ -104,7 +104,7 @@ object AvailableProductMovesEndpoint {
 
       // Kick off catalogue fetch in parallel
       zuoraProductCatalogueFetch <- GetCatalogue.get.fork
-      subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription")
+      subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription") // TODO add code to return 404 rather than 500 if it's not found
 
       subscriptionIsEligible <-
         (for {
