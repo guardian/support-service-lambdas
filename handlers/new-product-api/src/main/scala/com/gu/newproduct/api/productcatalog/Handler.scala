@@ -39,5 +39,16 @@ object Handler extends Logging {
   } yield Operation.noHealthcheck {
     Req: ApiGatewayRequest => ApiGatewayResponse(body = wireCatalog, statusCode = "200")
   }
+
+  def main(args: Array[String]): Unit = {
+    val result = runWithEffects(
+      null,
+      Stage("DEV"),
+      GetFromS3.fetchString,
+      LocalDate.now()
+    )
+
+    println("result:" + result);
+  }
 }
 
