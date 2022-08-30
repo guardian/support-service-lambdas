@@ -7,7 +7,7 @@ import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetAccount, GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailSender, GuStageLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailSender, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -97,8 +97,8 @@ object ProductMoveEndpoint {
                 first_name = account.basicInfo.firstName,
                 last_name = account.basicInfo.lastName,
                 payment_amount = estimatedNewPrice,
-                next_payment_date = startDate,
-                payment_frequency = paymentFrequency,
+                next_payment_date = chargedThroughDate,
+                payment_frequency = TimePeriod(TimeUnit.fromString(billingPeriod), 1),
                 subscription_id = subscription.id,
                 product_type = sfSubscription.Product_Type__c.getOrElse("")
               )
