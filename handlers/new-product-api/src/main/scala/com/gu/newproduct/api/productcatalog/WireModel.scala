@@ -135,6 +135,12 @@ object WireModel {
         enabledForDeliveryCountries = None
       )
 
+      val supporterPlusProduct = WireProduct(
+        label = "Supporter Plus",
+        plans = PlanId.enabledSupporterPlusPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
+      )
+
       val contributionProduct = WireProduct(
         label = "Contribution",
         plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId),
@@ -172,7 +178,7 @@ object WireModel {
       )
 
       val availableProductsAndPlans = List(
-        contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct, guardianWeeklyDomestic,
+        supporterPlusProduct, contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct, guardianWeeklyDomestic,
         guardianWeeklyROW, digitalVoucher
       ).filterNot(_.plans.isEmpty)
 
