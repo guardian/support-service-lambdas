@@ -87,7 +87,8 @@ object ZuoraRestBody {
       case ZuoraSuccessCheck.SuccessCheckSize =>
         for {
           zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessSize].decodeJson(body)
-          isSuccessful <- if (zuoraResponse.size.isEmpty) Right(()) else Left(s"size = 0, body: $body")
+          succeeded = zuoraResponse.size.isEmpty // size field only exists if it's not found.
+          isSuccessful <- if (succeeded) Right(()) else Left(s"size = 0, body: $body")
         } yield ()
 
       case ZuoraSuccessCheck.SuccessCheckLowercase =>
