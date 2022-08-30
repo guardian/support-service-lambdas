@@ -53,7 +53,7 @@ object MoveToProduct {
     for {
       billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).orElse(ZIO.log(s"billingPeriod is null for subscription: $subscriptionName").flatMap(_ => ZIO.fail(AvailableMoves(List()))))
       pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).orElse(ZIO.log(s"currency not found on ratePlanCharge").flatMap(_ => ZIO.fail(AvailableMoves(List()))))
-      price  = pricing.price
+      price  = pricing.priceMinorUnits
 
       introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))
       newPlan = Billing(amount = Some(price.toInt), percentage = None, currency = Some(GBP), frequency = Some(TimePeriod(TimeUnit.fromString(billingPeriod), 1)), startDate = Some(localDateToString.format(chargedThroughDate.plusDays(90))))

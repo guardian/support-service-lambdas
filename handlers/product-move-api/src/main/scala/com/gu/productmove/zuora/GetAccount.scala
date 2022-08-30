@@ -4,7 +4,7 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.{Currency, TimeUnit}
 import com.gu.productmove.zuora.DefaultPaymentMethod
-import com.gu.productmove.zuora.GetAccount.{ GetAccountResponse, PaymentMethodResponse}
+import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.rest.ZuoraClientLive.{ZuoraRestConfig, bucket, key}
 import com.gu.productmove.zuora.rest.ZuoraGet
@@ -54,9 +54,21 @@ object GetAccount {
 
   case class BasicInfo(
     defaultPaymentMethod: DefaultPaymentMethod,
-    balance: BigDecimal,
+    balance: Int,
     currency: String
   )
+
+  object BasicInfo {
+    private case class BasicInfoWire(
+      defaultPaymentMethod: DefaultPaymentMethod,
+      balance: BigDecimal,
+      currency: String
+    )
+
+    given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen[BasicInfoWire].map {
+      case BasicInfoWire(defaultPaymentMethod, balance, currency) => BasicInfo(defaultPaymentMethod, (balance.toDouble * 100).toInt, currency)
+    }
+  }
 
   /* The zuora API has slightly different responses for ratePlans in the catalogue and when querying a subscription, e.g.: productRatePlanId in the subscription response and id in the catalogue response */
 
@@ -77,10 +89,12 @@ object GetAccount {
   )
 
   given JsonDecoder[GetAccountResponse] = DeriveJsonDecoder.gen
+
   given JsonDecoder[AccountSubscription] = DeriveJsonDecoder.gen
+
   given JsonDecoder[ZuoraSubscription] = DeriveJsonDecoder.gen
+
   given JsonDecoder[ZuoraRatePlan] = DeriveJsonDecoder.gen
-  given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen
 
   def get(accountNumber: String): ZIO[GetAccount, String, GetAccountResponse] =
     ZIO.serviceWithZIO[GetAccount](_.get(accountNumber))
@@ -116,7 +130,7 @@ object DefaultPaymentMethod {
 * because it can be overridden so the default value is unreliable.
 */
 // price can be null, this is only for percentage discounts, so default to 0 rather than option handling
-case class ZuoraPricing(currency: String, price: BigDecimal = 0.000000000)
+case class ZuoraPricing(currency: String, priceMinorUnits: Int)
 
 object ZuoraPricing {
   private case class ZuoraPricingWire(currency: String, price: BigDecimal = 0.000000000)

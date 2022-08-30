@@ -41,7 +41,7 @@ object HandlerSpec extends ZIOSpecDefault {
   private val getAccountResponse = GetAccountResponse(
     BasicInfo(
       DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
-      balance = 0.000000000,
+      balance = 0,
       currency = "GBP"
     ),
     List(AccountSubscription("subscriptionId"))
@@ -50,7 +50,7 @@ object HandlerSpec extends ZIOSpecDefault {
   private val directDebitGetAccountResponse = GetAccountResponse(
     BasicInfo(
       DefaultPaymentMethod("paymentMethodId", None),
-      balance = 0.000000000,
+      balance = 0,
       currency = "GBP"
     ),
     List(AccountSubscription("subscriptionId"))
