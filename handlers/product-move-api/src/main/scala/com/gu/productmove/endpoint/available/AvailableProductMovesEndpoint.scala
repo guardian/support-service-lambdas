@@ -80,14 +80,24 @@ object AvailableProductMovesEndpoint {
 
   val localDateToString = DateTimeFormatter.ISO_LOCAL_DATE
 
-  def succeedIfEligible(accountEligible: Boolean, message: String): ZIO[Any, Unit, Unit] =
+  def succeedIfEligible(accountEligible: Boolean, message: String): ZIO[Any, AvailableMoves, Unit] =
     if (accountEligible)
       ZIO.succeed(())
     else
       for {
         _ <- ZIO.log(message)
-        _ <- ZIO.fail(())
-      } yield ()
+        resp <- ZIO.fail(AvailableMoves(List()))
+      } yield resp
+
+  def getSingleOrNotEligible[A](list: List[A], message: String): IO[AvailableMoves, A] =
+    list match {
+      case single :: Nil => ZIO.succeed(single)
+      case wrongNumber =>
+        for {
+          _ <- ZIO.log(s"subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber")
+          resp <- ZIO.fail(AvailableMoves(List()))
+        } yield resp
+    }
 
   extension[R, E, A] (zio: ZIO[R, E, A])
     def mapErrorTo500(message: String) = zio.catchAll {
@@ -106,18 +116,16 @@ object AvailableProductMovesEndpoint {
       zuoraProductCatalogueFetch <- GetCatalogue.get.fork
       subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription") // TODO add code to return 404 rather than 500 if it's not found
 
-      subscriptionIsEligible <-
-        (for {
-          _ <- succeedIfEligible(subscription.ratePlans.length == 1, s"Subscription: $subscriptionName has more than one ratePlan")
-          _ <- succeedIfEligible(subscription.ratePlans.head.productRatePlanId == monthlyContributionRatePlanId, s"Subscription: $subscriptionName is not a monthly contribution")
-          _ <- succeedIfEligible(subscription.ratePlans.head.ratePlanCharges.length == 1, s"Subscription: $subscriptionName has more than one ratePlan charge for ratePlan ${subscription.ratePlans.head}")
-        } yield ()).isSuccess
-
-      _ <- if (subscriptionIsEligible) ZIO.succeed(()) else ZIO.fail(AvailableMoves(List()))
+      ratePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName , ratePlan")
+      _ <- succeedIfEligible(ratePlan.productRatePlanId == monthlyContributionRatePlanId, s"Subscription: $subscriptionName is not a monthly contribution")
+      charge <- getSingleOrNotEligible(ratePlan.ratePlanCharges, s"Subscription: $subscriptionName , ratePlan charge for ratePlan $ratePlan")
 
       // Next payment date
-      chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse {
-        ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(AvailableMoves(List())))
+      chargedThroughDate <- ZIO.fromOption(charge.chargedThroughDate).orElse {
+        for {
+          _ <- ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.")
+          resp <- ZIO.fail(AvailableMoves(List()))
+        } yield resp
       }
 
       account <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount")

@@ -1,7 +1,7 @@
 package com.gu.productmove.endpoint.available
 
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.localDateToString
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{OutputBody, AvailableMoves}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{localDateToString}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{AvailableMoves, OutputBody}
 import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
