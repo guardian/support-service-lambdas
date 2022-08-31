@@ -205,12 +205,12 @@ object ZuoraIds {
       Stage("PROD") -> ZuoraIds(
         SupporterPlusZuoraIds(
           monthly = PlanAndCharge(
-            productRatePlanId = ProductRatePlanId("mno"),
-            productRatePlanChargeId = ProductRatePlanChargeId("pqr")
+            productRatePlanId = ProductRatePlanId("8a12865b8219d9b401822106192b64dc"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b401822106194e64e3")
           ),
           annual = PlanAndCharge(
-            productRatePlanId = ProductRatePlanId("stu"),
-            productRatePlanChargeId = ProductRatePlanChargeId("vwx")
+            productRatePlanId = ProductRatePlanId("8a12865b8219d9b40182210618a464ba"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b40182210618c664c1")
           )
         ),
         ContributionsZuoraIds(
@@ -283,12 +283,12 @@ object ZuoraIds {
       Stage("CODE") -> ZuoraIds(
         SupporterPlusZuoraIds(
           monthly = PlanAndCharge(
-            productRatePlanId = ProductRatePlanId("abc"),
-            productRatePlanChargeId = ProductRatePlanChargeId("def")
+            productRatePlanId = ProductRatePlanId("8ad088718219a6b601822036a6c91f5c"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad088718219a6b601822036a6e21f5e")
           ),
           annual = PlanAndCharge(
-            productRatePlanId = ProductRatePlanId("ghi"),
-            productRatePlanChargeId = ProductRatePlanChargeId("jkl")
+            productRatePlanId = ProductRatePlanId("8ad088718219a6b601822036a5801f34"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad088718219a6b601822036a5c21f39")
           )
         ),
         ContributionsZuoraIds(
@@ -361,7 +361,7 @@ object ZuoraIds {
       Stage("DEV") -> ZuoraIds(
         SupporterPlusZuoraIds(
           monthly = PlanAndCharge(
-            productRatePlanId = ProductRatePlanId("8ad09fc281de1ce70181de3b251736a4"),
+            productRatePlanId = ProductRatePlanId("111"),
             productRatePlanChargeId = ProductRatePlanChargeId("8ad09fc281de1ce70181de3b253e36a6")
           ),
           annual = PlanAndCharge(
