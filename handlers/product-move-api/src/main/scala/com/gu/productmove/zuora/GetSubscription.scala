@@ -27,7 +27,7 @@ trait GetSubscription:
 
 object GetSubscription {
 
-  case class GetSubscriptionResponse(id: String, accountId: String, ratePlans: List[RatePlan])
+  case class GetSubscriptionResponse(id: String, accountId: String, accountNumber: String, ratePlans: List[RatePlan])
 
   case class RatePlan(
     productName: String,
@@ -36,17 +36,24 @@ object GetSubscription {
     productRatePlanId: String,
     id: String,
   )
+  object RatePlan {
+    given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
+  }
 
   case class RatePlanCharge(
+    productRatePlanChargeId: String,
+    effectiveEndDate: LocalDate,
     name: String,
     number: String,
     price: Double,
+    currency: String,
     billingPeriod: Option[String],
     effectiveStartDate: LocalDate,
     chargedThroughDate: Option[LocalDate],
-    productRatePlanChargeId: String,
-    effectiveEndDate: LocalDate,
   )
+  object RatePlanCharge {
+    given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen
+  }
 
   given JsonDecoder[GetSubscriptionResponse] = DeriveJsonDecoder.gen[GetSubscriptionResponse]
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
@@ -54,5 +61,4 @@ object GetSubscription {
 
   def get(subscriptionNumber: String): ZIO[GetSubscription, String, GetSubscriptionResponse] =
     ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionNumber))
-
 }
