@@ -38,10 +38,23 @@ object Handler extends Logging {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, SqsAsync.send(SqsAsync.buildClient), RawEffects.now)
     }
+
+  def main(args: Array[String]): Unit = {
+    val result = Steps.operationForEffects(
+      RawEffects.response,
+      Stage("DEV"),
+      GetFromS3.fetchString,
+      SqsAsync.send(SqsAsync.buildClient),
+      RawEffects.now
+    )
+
+    println("result:" + result)
+  }
 }
 
 object Steps {
   def handleRequest(
+    addSupporterPlus: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
@@ -52,6 +65,7 @@ object Steps {
   ): Future[ApiResponse] = (for {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
     subscriptionName <- request.planId match {
+      case _: SupporterPlusPlanId => addSupporterPlus(request)
       case _: ContributionPlanId => addContribution(request)
       case _: VoucherPlanId => addPaperSub(request)
       case _: HomeDeliveryPlanId => addPaperSub(request)
@@ -94,6 +108,17 @@ object Steps {
         }
       )
       createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription], currentDate) _
+
+      supporterPlusSteps = AddContribution.wireSteps(
+        catalog,
+        zuoraIds,
+        zuoraClient,
+        isValidStartDateForPlan,
+        createSubscription,
+        awsSQSSend,
+        queueNames,
+        currentDate
+      )
 
       contributionSteps = AddContribution.wireSteps(
         catalog,
@@ -156,6 +181,7 @@ object Steps {
       )
 
       addSubSteps = handleRequest(
+        addSupporterPlus = supporterPlusSteps,
         addContribution = contributionSteps,
         addPaperSub = paperSteps,
         addDigipackSub = digipackSteps,
