@@ -47,8 +47,6 @@ object Handler extends Logging {
       GetFromS3.fetchString,
       LocalDate.now()
     )
-
-    println("result:" + result);
   }
 }
 
