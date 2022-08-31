@@ -20,14 +20,13 @@ object Handler extends Logging {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       runWithEffects(
-        LambdaIO(inputStream, outputStream, context),
         RawEffects.stage,
         GetFromS3.fetchString,
         LocalDate.now()
       )
     }
 
-  def runWithEffects(lambdaIO: LambdaIO, stage: Stage, fetchString: StringFromS3, today: LocalDate): ApiGatewayOp[Operation] = for {
+  def runWithEffects(stage: Stage, fetchString: StringFromS3, today: LocalDate): ApiGatewayOp[Operation] = for {
     zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
     zuoraToPlanId = zuoraIds.rateplanIdToApiId.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
@@ -42,7 +41,6 @@ object Handler extends Logging {
 
   def main(args: Array[String]): Unit = {
     val result = runWithEffects(
-      null,
       Stage("DEV"),
       GetFromS3.fetchString,
       LocalDate.now()
