@@ -1,14 +1,14 @@
 package com.gu.newproduct.api.productcatalog
 
+import java.time.DayOfWeek._
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
-import play.api.libs.json.Json
-import java.time.DayOfWeek._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.Json
 
 class CatalogWireTest extends AnyFlatSpec with Matchers {
   it should "serialise catalog" in {
@@ -16,6 +16,32 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
       """
         |{
         |  "products": [
+        |  {
+        |    "label" : "Supporter Plus",
+        |    "plans" : [ {
+        |      "id" : "monthly_supporter_plus",
+        |      "label" : "Monthly",
+        |      "startDateRules" : {
+        |        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        |        "selectableWindow" : {
+        |          "startDate" : "2019-12-01",
+        |          "sizeInDays" : 1
+        |        }
+        |      },
+        |      "paymentPlans": []
+        |    }, {
+        |      "id" : "annual_supporter_plus",
+        |      "label" : "Annual",
+        |      "startDateRules" : {
+        |        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        |        "selectableWindow" : {
+        |          "startDate" : "2019-12-01",
+        |          "sizeInDays" : 1
+        |        }
+        |      },
+        |      "paymentPlans": []
+        |    } ]
+        |  },
         |    {
         |      "label": "Contribution",
         |      "plans": [
@@ -1006,6 +1032,8 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
       case VoucherEveryDayPlus => gbpPrice(5196)
       case VoucherSixDay => gbpPrice(4112)
       case VoucherSixDayPlus => gbpPrice(4762)
+      case MonthlySupporterPlus => Map.empty
+      case AnnualSupporterPlus => Map.empty
       case MonthlyContribution => Map.empty
       case AnnualContribution => Map.empty
       case HomeDeliveryEveryDay => gbpPrice(123)
