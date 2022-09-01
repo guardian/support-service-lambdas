@@ -40,15 +40,7 @@ object GetCatalogue {
   def get: ZIO[GetCatalogue, String, ZuoraProductCatalogue] = ZIO.serviceWithZIO[GetCatalogue](_.get)
 }
 
-enum ZuoraBillingPeriod:
-  case Month, Annual, Quarter
-
-object ZuoraBillingPeriod {
-  given JsonDecoder[ZuoraBillingPeriod] = DeriveJsonDecoder.gen[ZuoraBillingPeriod]
-}
-
-
-case class ZuoraProductCatalogue(products: Set[ZuoraProduct], nextPage: Option[String] = None)
+case class ZuoraProductCatalogue(products: List[ZuoraProduct], nextPage: Option[String] = None)
 
 object ZuoraProductCatalogue {
   given JsonDecoder[ZuoraProductCatalogue] = DeriveJsonDecoder.gen[ZuoraProductCatalogue]
@@ -56,7 +48,7 @@ object ZuoraProductCatalogue {
 
 case class ZuoraProduct(
   name: String,
-  productRatePlans: Set[ZuoraProductRatePlan]
+  productRatePlans: List[ZuoraProductRatePlan]
 )
 
 object ZuoraProduct {
@@ -66,15 +58,14 @@ object ZuoraProduct {
 case class ZuoraProductRatePlan(
   id: String,
   name: String,
-  status: String,
-  productRatePlanCharges: Set[ZuoraProductRatePlanCharge]
+  productRatePlanCharges: List[ZuoraProductRatePlanCharge]
 )
 
 object ZuoraProductRatePlan {
   given JsonDecoder[ZuoraProductRatePlan] = DeriveJsonDecoder.gen[ZuoraProductRatePlan]
 }
 
-case class ZuoraProductRatePlanCharge(id: String, billingPeriod: Option[String], pricing: Set[ZuoraPricing])
+case class ZuoraProductRatePlanCharge(id: String, billingPeriod: Option[String], pricing: List[ZuoraPricing])
 
 object ZuoraProductRatePlanCharge {
   given JsonDecoder[ZuoraProductRatePlanCharge] = DeriveJsonDecoder.gen[ZuoraProductRatePlanCharge]

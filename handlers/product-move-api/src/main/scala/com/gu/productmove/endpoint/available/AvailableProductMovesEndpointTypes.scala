@@ -1,11 +1,11 @@
 package com.gu.productmove.endpoint.available
 
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{handleError, localDateToString}
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.OutputBody
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{localDateToString}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{AvailableMoves, OutputBody}
 import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
-import com.gu.productmove.zuora.{ZuoraBillingPeriod, ZuoraProductRatePlan}
+import com.gu.productmove.zuora.ZuoraProductRatePlan
 import sttp.tapir.Schema.*
 import sttp.tapir.Schema.annotations.*
 import sttp.tapir.SchemaType.{SProductField, SString}
@@ -22,11 +22,11 @@ import scala.util.Try
 object AvailableProductMovesEndpointTypes {
 
   sealed trait OutputBody
-  case class Success(body: List[MoveToProduct]) extends OutputBody
+  case class AvailableMoves(body: List[MoveToProduct]) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
   case object InternalServerError extends OutputBody
 
-  given JsonCodec[Success] = DeriveJsonCodec.gen[Success]
+  given JsonCodec[AvailableMoves] = DeriveJsonCodec.gen[AvailableMoves]
   given JsonCodec[NotFound] = DeriveJsonCodec.gen[NotFound]
   given JsonCodec[OutputBody] = DeriveJsonCodec.gen[OutputBody]
 
@@ -51,9 +51,9 @@ object MoveToProduct {
 
   def buildResponseFromRatePlan(subscriptionName: String, productRatePlan: ZuoraProductRatePlan, chargedThroughDate: LocalDate): IO[OutputBody, MoveToProduct] =
     for {
-      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).handleError(s"billingPeriod is null for subscription: $subscriptionName")
-      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).handleError(s"currency not found on ratePlanCharge")
-      price  = pricing.price.toFloat * 100
+      billingPeriod <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod).orElse(ZIO.log(s"billingPeriod is null for subscription: $subscriptionName").flatMap(_ => ZIO.fail(AvailableMoves(List()))))
+      pricing <- ZIO.fromOption(productRatePlan.productRatePlanCharges.head.pricing.find(_.currency == "GBP")).orElse(ZIO.log(s"currency not found on ratePlanCharge").flatMap(_ => ZIO.fail(AvailableMoves(List()))))
+      price  = pricing.priceMinorUnits
 
       introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))
       newPlan = Billing(amount = Some(price.toInt), percentage = None, currency = Some(GBP), frequency = Some(TimePeriod(TimeUnit.fromString(billingPeriod), 1)), startDate = Some(localDateToString.format(chargedThroughDate.plusDays(90))))
@@ -117,11 +117,7 @@ enum TimeUnit:
   case month, year
 
 object TimeUnit:
-
-  given JsonCodec[TimeUnit] = summon[JsonCodec[String]].transform[TimeUnit]({
-    case "Month" => TimeUnit.month
-    case "Annual" => TimeUnit.year
-  }, _.toString)
+  given JsonCodec[TimeUnit] = DeriveJsonCodec.gen[TimeUnit]
 
   given Schema[TimeUnit] =
     inlineSchema(Schema.derivedEnumeration())

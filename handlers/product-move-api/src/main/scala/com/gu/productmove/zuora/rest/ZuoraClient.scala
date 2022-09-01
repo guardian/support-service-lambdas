@@ -4,7 +4,6 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.zuora.rest.ZuoraClient
 import com.gu.productmove.zuora.rest.ZuoraClientLive.ZuoraRestConfig
-import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccess
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
@@ -74,22 +73,31 @@ trait ZuoraClient {
 // zuora commonly returns status = 200 and success = false.
 // this usually causes a deserialisation error and often makes it hard to understand what went wrong
 // This detects that and stops straight away.
-// the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success flag, therefore if the success property does not exist, we decode the JSON as normal.
 object ZuoraRestBody {
 
-  case class ZuoraSuccess(success: Option[Boolean])
+  // the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success property, and instead returns `size: "0"` if nothing was found
+  enum ZuoraSuccessCheck:
+    case SuccessCheckSize, SuccessCheckLowercase
 
-  def parseIfSuccessful[A: JsonDecoder](body: String): Either[String, A] = {
-    val successDecoder: JsonDecoder[ZuoraSuccess] = DeriveJsonDecoder.gen[ZuoraSuccess]
-    val zuoraSuccessResponse = successDecoder.decodeJson(body)
+  case class ZuoraSuccessLowercase(success: Boolean)
+  case class ZuoraSuccessSize(size: Option[Int])
 
-    zuoraSuccessResponse match {
-      case Right(res) =>
-        res.success match {
-          case Some(successFlag) => if (successFlag) body.fromJson[A] else Left(body)
-          case None => body.fromJson[A]
-        }
-      case Left(errorMessage) => Left(s"Error decoding json from zuora response: $errorMessage")
+  def parseIfSuccessful[A: JsonDecoder](body: String, zuoraSuccessCheck: ZuoraSuccessCheck): Either[String, A] = {
+    val isSuccessful: Either[String, Unit] = zuoraSuccessCheck match {
+      case ZuoraSuccessCheck.SuccessCheckSize =>
+        for {
+          zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessSize].decodeJson(body)
+          succeeded = zuoraResponse.size.isEmpty // size field only exists if it's not found.
+          isSuccessful <- if (succeeded) Right(()) else Left(s"size = 0, body: $body")
+        } yield ()
+
+      case ZuoraSuccessCheck.SuccessCheckLowercase =>
+        for {
+          zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessLowercase].decodeJson(body)
+          isSuccessful <- if (zuoraResponse.success) Right(()) else Left(s"success = false, body: $body")
+        } yield ()
     }
+
+    isSuccessful.flatMap(_ => body.fromJson[A])
   }
 }
