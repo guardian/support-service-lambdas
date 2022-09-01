@@ -107,6 +107,7 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
       fail("unexpected execution of voucher steps while processing contribution request!")
     }
     val futureActual = Steps.handleRequest(
+      addSupporterPlus = dummySteps,
       addContribution = fakeAddContributionSteps,
       addPaperSub = dummySteps,
       addDigipackSub = dummySteps,
