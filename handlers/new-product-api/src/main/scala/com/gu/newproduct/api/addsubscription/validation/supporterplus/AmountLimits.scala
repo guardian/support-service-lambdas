@@ -12,33 +12,33 @@ case class AmountLimits(min: Int, max: Int)
 object AmountLimits {
 
   val gbp = SupporterPlusLimits(
-    monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000)
+    monthly = AmountLimits(min = 1200, max = 16600),
+    annual = AmountLimits(min = 11900, max = 200000)
   )
 
   val aud = SupporterPlusLimits(
-    monthly = AmountLimits(min = 1000, max = 20000),
-    annual = AmountLimits(min = 1000, max = 200000)
+    monthly = AmountLimits(min = 2200, max = 20000),
+    annual = AmountLimits(min = 21500, max = 240000)
   )
 
   val usd = SupporterPlusLimits(
-    monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000)
+    monthly = AmountLimits(min = 2000, max = 80000),
+    annual = AmountLimits(min = 11900, max = 1000000)
   )
 
   val nzd = SupporterPlusLimits(
-    monthly = AmountLimits(min = 1000, max = 20000),
-    annual = AmountLimits(min = 1000, max = 200000)
+    monthly = AmountLimits(min = 2400, max = 20000),
+    annual = AmountLimits(min = 23500, max = 240000)
   )
 
   val cad = SupporterPlusLimits(
-    monthly = AmountLimits(min = 500, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000)
+    monthly = AmountLimits(min = 2200, max = 16600),
+    annual = AmountLimits(min = 21900, max = 200000)
   )
 
   val eur = SupporterPlusLimits(
-    monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000)
+    monthly = AmountLimits(min = 1500, max = 16600),
+    annual = AmountLimits(min = 14900, max = 200000)
   )
 
   def limitsFor(planId: PlanId, currency: Currency): AmountLimits = {
