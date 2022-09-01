@@ -44,6 +44,7 @@ object GetAccount {
 
   case class GetAccountResponse(
     basicInfo: BasicInfo,
+    billToContact: BillToContact,
     subscriptions: List[AccountSubscription],
   )
 
@@ -57,6 +58,10 @@ object GetAccount {
     lastName: String,
     balance: BigDecimal,
     currency: String
+  )
+
+  case class BillToContact(
+    workEmail: String
   )
 
   /* The zuora API has slightly different responses for ratePlans in the catalogue and when querying a subscription, e.g.: productRatePlanId in the subscription response and id in the catalogue response */
@@ -82,6 +87,7 @@ object GetAccount {
   given JsonDecoder[ZuoraSubscription] = DeriveJsonDecoder.gen
   given JsonDecoder[ZuoraRatePlan] = DeriveJsonDecoder.gen
   given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen
+  given JsonDecoder[BillToContact] = DeriveJsonDecoder.gen
 
   def get(accountNumber: String): ZIO[GetAccount, String, GetAccountResponse] =
     ZIO.serviceWithZIO[GetAccount](_.get(accountNumber))

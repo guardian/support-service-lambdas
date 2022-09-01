@@ -6,7 +6,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
+import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
 import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe, WireDefaultPaymentMethod}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
@@ -41,18 +41,24 @@ object HandlerSpec extends ZIOSpecDefault {
   private val getAccountResponse = GetAccountResponse(
     BasicInfo(
       WireDefaultPaymentMethod("paymentMethodId", Some(12), Some(2030)),
+      "John",
+      "Hee",
       balance = 0.000000000,
       currency = "GBP"
     ),
+    BillToContact("example@gmail.com"),
     List(AccountSubscription("subscriptionId"))
   )
 
   private val directDebitGetAccountResponse = GetAccountResponse(
     BasicInfo(
       WireDefaultPaymentMethod("paymentMethodId", None, None),
+      "John",
+      "Hee",
       balance = 0.000000000,
       currency = "GBP"
     ),
+    BillToContact("example@gmail.com"),
     List(AccountSubscription("subscriptionId"))
   )
 

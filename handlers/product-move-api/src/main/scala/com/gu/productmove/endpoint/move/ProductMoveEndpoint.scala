@@ -6,8 +6,8 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetAccount, GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailSender, GuStageLive, SttpClientLive}
+import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, Subscribe, SubscribeLive, ZuoraCancel, ZuoraCancelLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, EmailSender, EmailSenderLive, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -63,6 +63,9 @@ object ProductMoveEndpoint {
       SttpClientLive.layer,
       ZuoraClientLive.layer,
       ZuoraGetLive.layer,
+      EmailSenderLive.layer,
+      InvoicePreviewLive.layer,
+      GetAccountLive.layer,
       GuStageLive.layer,
     )
 
@@ -72,7 +75,7 @@ object ProductMoveEndpoint {
         ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
 
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with Subscribe with ZuoraCancel, String, OutputBody] =
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with Subscribe with ZuoraCancel with GetAccount with InvoicePreview with EmailSender, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName)
@@ -82,31 +85,28 @@ object ProductMoveEndpoint {
       _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate)
       newSubscriptionId <- Subscribe.create(subscription.accountId, postData.targetProductId)
 
-      account <- GetAccount.get(subscription.accountNumber).handleError("GetAccount")
+      getAccountFuture <- GetAccount.get(subscription.accountNumber).fork
+      nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).fork
+
+      account <- getAccountFuture.join
+      nextInvoice <- nextInvoiceFuture.join
 
       _ <- EmailSender.sendEmail(
         message = EmailMessage(
           EmailPayload(
-            Address = contact.Email,
+            Address = Some(account.billToContact.workEmail),
             ContactAttributes = EmailPayloadContactAttributes(
               SubscriberAttributes = EmailPayloadSubscriberAttributes(
-                title =
-                  contact.FirstName flatMap (_ =>
-                    contact.Salutation
-                    ), // if no first name, we use salutation as first name and leave this field empty
                 first_name = account.basicInfo.firstName,
                 last_name = account.basicInfo.lastName,
-                payment_amount = estimatedNewPrice,
-                next_payment_date = chargedThroughDate,
-                payment_frequency = TimePeriod(TimeUnit.fromString(billingPeriod), 1),
-                subscription_id = subscription.id,
-                product_type = sfSubscription.Product_Type__c.getOrElse("")
+                first_payment_amount = "123123123",
+                date_of_first_payment = "2022-12-12-12",
+                payment_frequency = "Month",
+                subscription_id = subscription.id
               )
             )
           ),
-          brazeCampaignName,
-          contact.Id,
-          contact.IdentityID__c
+          "SV_RCtoDP_Switch"
         )
       )
 

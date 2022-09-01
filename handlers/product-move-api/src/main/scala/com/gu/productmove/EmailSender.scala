@@ -3,9 +3,9 @@ package com.gu.productmove
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
-import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, SendMessageRequest}
+import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, GetQueueUrlResponse, SendMessageRequest}
 import zio.*
-import zio.json.{DeriveJsonDecoder, JsonDecoder}
+import zio.json.*
 
 trait EmailSender {
   def sendEmail(message: EmailMessage): ZIO[Any, String, Unit]
@@ -19,21 +19,29 @@ object EmailSender {
 
 object EmailSenderLive {
 
-  val layer: ZLayer[AwsCredentialsProvider, Throwable, EmailSender] =
-    ZLayer.scoped(
-      for {
-        creds <- ZIO.service[AwsCredentialsProvider]
-        sqsClient <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
-        queueUrlResponse <- ZIO
-          .fromCompletableFuture(
-            sqsClient.getQueueUrl(GetQueueUrlRequest.builder.queueName(config.sqsEmailQueueName).build())
-          )
-          .mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
+  val layer: ZLayer[AwsCredentialsProvider, String, EmailSender] =
+    ZLayer.fromZIO(for {
+        sqsClient <- initializeSQSClient().mapError(ex => s"")
+        queueUrlResponse <- getQueue(sqsClient)
       } yield new EmailSender {
         override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
           sendMessage(sqsClient, queueUrlResponse.queueUrl, message)
       }
     )
+
+  private def initializeSQSClient(): ZIO[AwsCredentialsProvider, Throwable, SqsAsyncClient] =
+    ZIO.scoped(
+      for {
+        creds <- ZIO.service[AwsCredentialsProvider]
+        sqsClient <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
+      } yield sqsClient
+    )
+
+  private def getQueue(sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
+    ZIO
+      .fromCompletableFuture(
+        sqsAsyncClient.getQueueUrl(GetQueueUrlRequest.builder.queueName("direct-mail-CODE").build())
+      ).mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
 
   private def impl(creds: AwsCredentialsProvider): SqsAsyncClient =
     SqsAsyncClient.builder()
@@ -53,29 +61,21 @@ object EmailSenderLive {
           )
         }
         .mapError { ex =>
-          s"Failed to send sqs email message for sfContactId ${message.SfContactId}: ${ex.getMessage}"
+          s"Failed to send sqs email message for sfContactId"
         }
       _ <- ZIO.log(
-        s"Successfully sent email for sfContactId ${message.SfContactId} message id: ${result.messageId}"
+        s"Successfully sent email for sfContactId"
       )
     } yield ()
 }
 
 case class EmailPayloadSubscriberAttributes(
-  title: Option[String],
   first_name: String,
   last_name: String,
-  billing_address_1: String,
-  billing_address_2: Option[String],
-  billing_city: Option[String],
-  billing_postal_code: String,
-  billing_state: Option[String],
-  billing_country: String,
-  payment_amount: String,
-  next_payment_date: String,
+  first_payment_amount: String,
+  date_of_first_payment: String,
   payment_frequency: String,
   subscription_id: String,
-  product_type: String
 )
 
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
@@ -85,12 +85,10 @@ case class EmailPayload(Address: Option[String], ContactAttributes: EmailPayload
 case class EmailMessage(
   To: EmailPayload,
   DataExtensionName: String,
-  SfContactId: String,
-  IdentityUserId: Option[String]
 )
 
-given JsonDecoder[EmailPayloadSubscriberAttributes] = DeriveJsonDecoder.gen[EmailPayloadSubscriberAttributes]
-given JsonDecoder[EmailPayloadContactAttributes] = DeriveJsonDecoder.gen[EmailPayloadContactAttributes]
-given JsonDecoder[EmailPayload] = DeriveJsonDecoder.gen[EmailPayload]
-given JsonDecoder[EmailMessage] = DeriveJsonDecoder.gen[EmailMessage]
+given JsonEncoder[EmailPayloadSubscriberAttributes] = DeriveJsonEncoder.gen[EmailPayloadSubscriberAttributes]
+given JsonEncoder[EmailPayloadContactAttributes] = DeriveJsonEncoder.gen[EmailPayloadContactAttributes]
+given JsonEncoder[EmailPayload] = DeriveJsonEncoder.gen[EmailPayload]
+given JsonEncoder[EmailMessage] = DeriveJsonEncoder.gen[EmailMessage]
 
