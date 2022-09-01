@@ -42,8 +42,8 @@ object AmountLimits {
   )
 
   def limitsFor(planId: PlanId, currency: Currency): AmountLimits = {
-    val supporterPluscontributionLimits = supporterPlusLimitsfor(currency)
-    if (planId == AnnualSupporterPlus) supporterPluscontributionLimits.annual else supporterPluscontributionLimits.monthly
+    val supporterPlusLimits = supporterPlusLimitsfor(currency)
+    if (planId == AnnualSupporterPlus) supporterPlusLimits.annual else supporterPlusLimits.monthly
   }
 
   def supporterPlusLimitsfor(currency: Currency): SupporterPlusLimits = currency match {
