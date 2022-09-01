@@ -1,18 +1,14 @@
 package com.gu.newproduct.api.addsubscription
 
-import com.gu.effects.sqs.AwsSQSSend
-import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.EmailQueueNames
 import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
 import com.gu.newproduct.api.addsubscription.email.supporterplus.SupporterPlusEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, SendConfirmationEmail, SupporterPlusEmailData}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
-import com.gu.newproduct.api.addsubscription.validation.supporterplus.{GetSupporterPlusCustomerData, SupporterPlusAccountValidation, SupporterPlusCustomerData, SupporterPlusValidations, AmountLimits}
+import com.gu.newproduct.api.addsubscription.validation.supporterplus._
+import com.gu.newproduct.api.addsubscription.validation.{AmountLimits, _}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
@@ -29,7 +25,6 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 
 import java.time.LocalDate
-import scala.concurrent.Future
 
 object AddSupporterPlus {
   def steps(
@@ -39,7 +34,7 @@ object AddSupporterPlus {
    getCustomerData: ZuoraAccountId => ApiGatewayOp[SupporterPlusCustomerData],
    supporterPlusValidations: (SupporterPlusValidations.ValidatableFields, PlanId, Currency) => ValidationResult[AmountMinorUnits],
    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-   sendConfirmationEmail: (Option[SfContactId], SupporterPlusEmailData) => AsyncApiGatewayOp[Unit]
+   //sendConfirmationEmail: (Option[SfContactId], SupporterPlusEmailData) => AsyncApiGatewayOp[Unit]
  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = {
     for {
       customerData <- getCustomerData(request.zuoraAccountId).toAsync
@@ -60,17 +55,17 @@ object AddSupporterPlus {
         )
       )
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly supporter plus")
-      supporterPlusEmailData = toSupporterPlusEmailData(
-        request = request,
-        currency = account.currency,
-        paymentMethod = paymentMethod,
-        firstPaymentDate = acceptanceDate,
-        contacts = contacts,
-        amountMinorUnits = amountMinorUnits,
-        plan = getPlan(request.planId),
-        currentDate = getCurrentDate()
-      )
-      _ <- sendConfirmationEmail(account.sfContactId, supporterPlusEmailData).recoverAndLog("send supporter plus confirmation email")
+//      supporterPlusEmailData = toSupporterPlusEmailData(
+//        request = request,
+//        currency = account.currency,
+//        paymentMethod = paymentMethod,
+//        firstPaymentDate = acceptanceDate,
+//        contacts = contacts,
+//        amountMinorUnits = amountMinorUnits,
+//        plan = getPlan(request.planId),
+//        currentDate = getCurrentDate()
+//      )
+      //_ <- sendConfirmationEmail(account.sfContactId, supporterPlusEmailData).recoverAndLog("send supporter plus confirmation email")
     } yield subscriptionName
   }
 
@@ -80,8 +75,8 @@ object AddSupporterPlus {
     zuoraClient: Requests,
     isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-    emailQueueNames: EmailQueueNames,
+//    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
+//    emailQueueNames: EmailQueueNames,
     currentDate: () => LocalDate
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
@@ -89,11 +84,13 @@ object AddSupporterPlus {
     val supporterPlusIds = List(zuoraIds.supporterPlusZuoraIds.monthly.productRatePlanId, zuoraIds.supporterPlusZuoraIds.annual.productRatePlanId)
     val getCustomerData = getValidatedSupporterPlusCustomerData(zuoraClient, supporterPlusIds)
     val isValidSupporterPlusStartDate = isValidStartDateForPlan(MonthlySupporterPlus, _: LocalDate)
-    val validateRequest = SupporterPlusValidations(isValidSupporterPlusStartDate, AmountLimits.limitsFor()) _ //todo make sure amountLimits is using supporter plus
-    val supporterPlusSqsSend = awsSQSSend(emailQueueNames.supporterPlus)
+    val validateRequest = SupporterPlusValidations(isValidSupporterPlusStartDate, AmountLimits.limitsFor) _
 
-    val supporterPlusBrazeConfirmationSqsSend = EtSqsSend[SupporterPlusEmailData](supporterPlusSqsSend) _
-    val sendConfirmationEmail = SendConfirmationEmail(supporterPlusBrazeConfirmationSqsSend) _
+    //val validateRequest = SupporterPlusValidations(isValidSupporterPlusStartDate, AmountLimits.limitsFor) _ //todo make sure amountLimits is using supporter plus
+//    val supporterPlusSqsSend = awsSQSSend(emailQueueNames.supporterPlus)
+//
+//    val supporterPlusBrazeConfirmationSqsSend = EtSqsSend[SupporterPlusEmailData](supporterPlusSqsSend) _
+//    val sendConfirmationEmail = SendConfirmationEmail(supporterPlusBrazeConfirmationSqsSend) _
 
     AddSupporterPlus.steps(
       getPlan = catalog.planForId,
@@ -102,7 +99,7 @@ object AddSupporterPlus {
       getCustomerData = getCustomerData,
       supporterPlusValidations = validateRequest,
       createSubscription = createSubscription,
-      sendConfirmationEmail = sendConfirmationEmail
+      //sendConfirmationEmail = sendConfirmationEmail
     ) _
 
   }

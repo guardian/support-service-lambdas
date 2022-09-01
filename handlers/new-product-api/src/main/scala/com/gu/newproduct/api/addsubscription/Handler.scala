@@ -109,14 +109,14 @@ object Steps {
       )
       createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription], currentDate) _
 
-      supporterPlusSteps = AddContribution.wireSteps(
+      supporterPlusSteps = AddSupporterPlus.wireSteps(
         catalog,
         zuoraIds,
         zuoraClient,
         isValidStartDateForPlan,
         createSubscription,
-        awsSQSSend,
-        queueNames,
+        //        awsSQSSend,
+        //        queueNames,
         currentDate
       )
 
