@@ -70,7 +70,7 @@ object Steps {
     currentDatetime: () => LocalDateTime
   ): ApiGatewayOp[Operation] =
     for {
-      zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
+      zuoraIds <- ZuoraIds.zuoraIdsForStage(stage).toApiGatewayOp(ApiGatewayResponse.internalServerError _)
       zuoraConfig <- {
         val loadConfig = LoadConfigModule(stage, fetchString)
         loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")

@@ -1,9 +1,7 @@
 package com.gu.newproduct.api.productcatalog
 
 import com.gu.newproduct.api.productcatalog.PlanId._
-import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.config.Stage
-import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 
 object ZuoraIds {
 
@@ -199,7 +197,7 @@ object ZuoraIds {
 
   }
 
-  def zuoraIdsForStage(stage: Stage): ApiGatewayOp[ZuoraIds] = {
+  def zuoraIdsForStage(stage: Stage): Either[String, ZuoraIds] = {
     val mappings = Map(
       // todo ideally we should add an id to the fields in zuora so we don't have to hard code
       Stage("PROD") -> ZuoraIds(
@@ -437,9 +435,7 @@ object ZuoraIds {
         )
       )
     )
-
-    mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing zuora ids for stage $stage"))
-
+    mappings.get(stage).toRight(s"missing zuora ids for stage $stage")
   }
 
 }

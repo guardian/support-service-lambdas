@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint
+import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
 import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, ProductMoveEndpointTypes}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
@@ -67,6 +68,7 @@ object Handler extends ZIOApiGatewayRequestHandler {
   override val server: List[ServerEndpoint[Any, TIO]] = List(
     AvailableProductMovesEndpoint.server,
     ProductMoveEndpoint.server,
+    SubscriptionCancelEndpoint.server,
   )
 
 }

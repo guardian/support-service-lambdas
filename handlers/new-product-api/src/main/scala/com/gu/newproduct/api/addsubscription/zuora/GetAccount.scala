@@ -33,7 +33,7 @@ object GetAccount {
         )
       )
 
-      case None => GenericError(s"unknown currency ${zuoraAccount.Currency} supported : ${Currency.all.map(_.iso)}")
+      case None => GenericError(s"unknown currency ${zuoraAccount.Currency} supported : ${Currency.websiteSupportedCurrencies.map(_.iso) ++ Currency.otherCurrencies.keys}")
     }
 
   }

@@ -41,7 +41,7 @@ object AddSubscriptionRequest {
         startDate = parsedDate,
         acquisitionSource = AcquisitionSource(this.acquisitionSource),
         createdByCSR = CreatedByCSR(this.createdByCSR),
-        amountMinorUnits = amountMinorUnits.map(AmountMinorUnits),
+        amountMinorUnits = amountMinorUnits.map(AmountMinorUnits.apply),
         CaseId(acquisitionCase),
         parsedPlanId
       )
