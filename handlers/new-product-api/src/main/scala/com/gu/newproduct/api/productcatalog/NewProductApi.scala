@@ -153,7 +153,7 @@ object NewProductApi {
       voucherSunday = planWithPayment(VoucherSunday, PlanDescription("Sunday"), voucherSundayDateRules, Monthly),
       voucherSundayPlus = planWithPayment(VoucherSundayPlus, PlanDescription("Sunday+"), voucherSundayDateRules, Monthly),
       monthlySupporterPlus = planWithPayment(MonthlySupporterPlus, PlanDescription("Monthly"), supporterPlusRule, Monthly),
-      annualSupporterPlus = planWithPayment(AnnualSupporterPlus, PlanDescription("Annual"), supporterPlusRule, Monthly),
+      annualSupporterPlus = planWithPayment(AnnualSupporterPlus, PlanDescription("Annual"), supporterPlusRule, Annual),
       monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), contributionsRule, Monthly),
       annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), contributionsRule, Monthly),
       homeDeliveryEveryDay = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules, Monthly),
