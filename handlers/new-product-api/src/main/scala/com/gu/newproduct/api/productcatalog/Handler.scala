@@ -20,14 +20,13 @@ object Handler extends Logging {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       runWithEffects(
-        LambdaIO(inputStream, outputStream, context),
         RawEffects.stage,
         GetFromS3.fetchString,
         LocalDate.now()
       )
     }
 
-  def runWithEffects(lambdaIO: LambdaIO, stage: Stage, fetchString: StringFromS3, today: LocalDate): ApiGatewayOp[Operation] = for {
+  def runWithEffects(stage: Stage, fetchString: StringFromS3, today: LocalDate): ApiGatewayOp[Operation] = for {
     zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
     zuoraToPlanId = zuoraIds.rateplanIdToApiId.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
@@ -38,6 +37,15 @@ object Handler extends Logging {
     wireCatalog = WireCatalog.fromCatalog(catalog)
   } yield Operation.noHealthcheck {
     Req: ApiGatewayRequest => ApiGatewayResponse(body = wireCatalog, statusCode = "200")
+  }
+
+  // run this method with membership janus credentials, to check that the lambda is working and log the output to the console
+  def main(args: Array[String]): Unit = {
+    val result = runWithEffects(
+      Stage("DEV"),
+      GetFromS3.fetchString,
+      LocalDate.now()
+    )
   }
 }
 
