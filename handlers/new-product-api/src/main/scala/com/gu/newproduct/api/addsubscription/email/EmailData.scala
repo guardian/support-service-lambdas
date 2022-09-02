@@ -50,17 +50,6 @@ case class ContributionsEmailData(
   created: LocalDate
 ) extends EmailData
 
-case class SupporterPlusEmailData(
-  accountId: ZuoraAccountId,
-  currency: Currency,
-  paymentMethod: PaymentMethod,
-  amountMinorUnits: AmountMinorUnits,
-  firstPaymentDate: LocalDate,
-  plan: Plan,
-  contacts: Contacts,
-  created: LocalDate
-) extends EmailData
-
 case class GuardianWeeklyEmailData(
   currency: Currency,
   paymentMethod: PaymentMethod,

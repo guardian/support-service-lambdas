@@ -15,7 +15,7 @@ object EmailQueueNames {
   val subsWelcomeProdQueue = QueueName("subs-welcome-email")
   val contributionThanksProdQueue = QueueName("contributions-thanks")
   val contributionThanksDevQueue = QueueName("contributions-thanks-dev")
-  
+
   def emailQueuesFor(stage: Stage) = stage match {
 
     case Stage("PROD") =>
