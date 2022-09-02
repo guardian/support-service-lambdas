@@ -6,6 +6,7 @@ import com.gu.newproduct.api.addsubscription.validation.ValidatedAccount
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionCustomerData
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyCustomerData
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperCustomerData
+import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusCustomerData
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId, SfContactId}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
@@ -69,6 +70,13 @@ object TestData {
   )
 
   val contributionCustomerData = ContributionCustomerData(
+    account = validatedAccount,
+    paymentMethod = directDebitPaymentMethod,
+    accountSubscriptions = subscriptionList,
+    contacts = contacts
+  )
+
+  val supporterPlusCustomerData = SupporterPlusCustomerData(
     account = validatedAccount,
     paymentMethod = directDebitPaymentMethod,
     accountSubscriptions = subscriptionList,
