@@ -7,7 +7,7 @@ import com.gu.newproduct.api.addsubscription.validation.{ValidationResult}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 
-object SupporterPlusValidations{
+object SupporterPlusValidations {
 
   case class ValidatableFields(amountMinorUnits: Option[AmountMinorUnits], startDate: LocalDate)
 
@@ -15,13 +15,13 @@ object SupporterPlusValidations{
   //TODO format amount in response
 
   def apply(
-     isValidStartDate: LocalDate => ValidationResult[Unit],
-     limitsFor: (PlanId, Currency) => AmountLimits
-   )(
-     validatableFields: ValidatableFields,
-     planId: PlanId,
-     currency: Currency
-   ): ValidationResult[AmountMinorUnits] =
+    isValidStartDate: LocalDate => ValidationResult[Unit],
+    limitsFor: (PlanId, Currency) => AmountLimits
+  )(
+    validatableFields: ValidatableFields,
+    planId: PlanId,
+    currency: Currency
+  ): ValidationResult[AmountMinorUnits] =
     for {
       amount <- validatableFields.amountMinorUnits getOrFailWith s"amountMinorUnits is missing"
       _ <- isValidStartDate(validatableFields.startDate)
