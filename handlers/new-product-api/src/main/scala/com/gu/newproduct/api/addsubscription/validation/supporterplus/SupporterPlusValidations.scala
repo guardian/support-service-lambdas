@@ -11,6 +11,9 @@ object SupporterPlusValidations{
 
   case class ValidatableFields(amountMinorUnits: Option[AmountMinorUnits], startDate: LocalDate)
 
+  //TODO ensure upper threshold is being applied
+  //TODO format amount in response
+
   def apply(
      isValidStartDate: LocalDate => ValidationResult[Unit],
      limitsFor: (PlanId, Currency) => AmountLimits
