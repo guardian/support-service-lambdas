@@ -17,7 +17,7 @@ class GetContactsEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      res <- GetContacts(zuoraDeps.get[GetContactsResponse])(ZuoraAccountId("8ad095b882f7aaa60182f9c2a69a043a")).toDisjunction
+      res <- GetContacts(zuoraDeps.get[GetContactsResponse])(ZuoraAccountId("8ad095dd830721b201830e51862b425b")).toDisjunction
     } yield res
 
     val expectedBillTo = BillToContact(
