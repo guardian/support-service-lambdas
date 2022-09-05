@@ -8,7 +8,7 @@ jobs:
   test:
     name: Test of Scala Steward PR
         
-    if: github.actor == 'gu-scala-steward-public-repos'
+    if: github.actor == 'gu-scala-steward-public-repos[bot]'
 
     runs-on: ubuntu-latest
 
