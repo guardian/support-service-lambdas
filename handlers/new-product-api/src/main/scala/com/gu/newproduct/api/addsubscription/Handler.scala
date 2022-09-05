@@ -115,8 +115,6 @@ object Steps {
         zuoraClient,
         isValidStartDateForPlan,
         createSubscription,
-        //        awsSQSSend,
-        //        queueNames,
         currentDate
       )
 
