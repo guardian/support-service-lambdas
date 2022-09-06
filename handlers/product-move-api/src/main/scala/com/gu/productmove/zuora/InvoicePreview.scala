@@ -41,13 +41,23 @@ object InvoicePreview {
   }
 
   case class ZuoraInvoiceItem(
-    subscriptionNumber: String,
+    subscriptionName: String,
     serviceStartDate: LocalDate,
-    chargeNumber: String,
-    productName: String
+    chargeAmount: Double,
+    taxAmount: Double,
   )
+
   object ZuoraInvoiceItem {
-    given JsonDecoder[ZuoraInvoiceItem] = DeriveJsonDecoder.gen[ZuoraInvoiceItem]
+    private case class ZuoraInvoiceItemWire(
+      subscriptionName: String,
+      serviceStartDate: LocalDate,
+      chargeAmount: BigDecimal,
+      taxAmount: BigDecimal,
+    )
+
+    given JsonDecoder[ZuoraInvoiceItem] = DeriveJsonDecoder.gen[ZuoraInvoiceItemWire].map {
+      case ZuoraInvoiceItemWire(subscriptionName, serviceStartDate, chargeAmount, taxAmount) => ZuoraInvoiceItem(subscriptionName, serviceStartDate, (chargeAmount.toDouble * 100).toInt, (taxAmount.toDouble * 100).toInt)
+    }
   }
 
   def get(zuoraAccountId: String, targetDate: LocalDate): ZIO[InvoicePreview, String, ZuoraInvoiceList] = ZIO.serviceWithZIO[InvoicePreview](_.get(zuoraAccountId, targetDate))

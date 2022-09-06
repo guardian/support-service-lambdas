@@ -1,68 +1,23 @@
 package com.gu.productmove
 
+import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.{AvailableProductMovesEndpoint, Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
-import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe, WireDefaultPaymentMethod}
+import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockEmailSender, MockGetAccount, MockGetSubscription, MockInvoicePreview, MockSubscribe}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
 
 import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
+import scala.language.postfixOps
 
 object HandlerSpec extends ZIOSpecDefault {
-  private val getSubscriptionResponse = GetSubscriptionResponse("subscriptionName", "zuoraAccountId", "accountNumber", ratePlans = List(
-    RatePlan(
-      id = "R1",
-      productName = "P1",
-      productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
-      ratePlanName = "RP1",
-      ratePlanCharges = List(
-        RatePlanCharge(
-          productRatePlanChargeId = "PRPC1",
-          name = "Digital Pack Monthly",
-          price = 11.11,
-          currency = "GBP",
-          number = "number",
-          effectiveStartDate = LocalDate.of(2017, 12, 15),
-          effectiveEndDate = LocalDate.of(2020, 11, 29),
-          chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
-          billingPeriod = Some("billingPeriod"),
-        )
-      )
-    )
-  ))
-
-  private val getAccountResponse = GetAccountResponse(
-    BasicInfo(
-      "John",
-      "Hee",
-      DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
-      balance = 0,
-      currency = "GBP"
-    ),
-    BillToContact("example@gmail.com"),
-    List(AccountSubscription("subscriptionId"))
-  )
-
-  private val directDebitGetAccountResponse = GetAccountResponse(
-    BasicInfo(
-      "John",
-      "Hee",
-      DefaultPaymentMethod("paymentMethodId", None),
-      balance = 0,
-      currency = "GBP"
-    ),
-    BillToContact("example@gmail.com"),
-    List(AccountSubscription("subscriptionId"))
-  )
-
   def spec = {
     suite("HandlerSpec")(
       test("productMove endpoint") {
@@ -76,41 +31,15 @@ object HandlerSpec extends ZIOSpecDefault {
         val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
         val cancellationStubs = Map(("A-S00339056", LocalDate.of(2022, 9, 29)) -> cancellationResponse)
 
-        val expectedOutput = ProductMoveEndpointTypes.Success(
-          newSubscriptionName = "newSubscriptionName",
-          newProduct = MoveToProduct(
-            id = "123",
-            name = "Digital Pack",
-            billing = Billing(
-              amount = Some(1199),
-              percentage = None,
-              currency = Some(Currency.GBP),
-              frequency = Some(
-                TimePeriod(
-                  name = TimeUnit.month,
-                  count = 1
-                )
-              ),
-              startDate = Some("2022-09-21")
-            ),
-            trial = Some(Trial(dayCount = 14)),
-            introOffer = Some(
-              Offer(
-                billing = Billing(
-                  amount = None,
-                  percentage = Some(50),
-                  currency = None,
-                  frequency = None,
-                  startDate = Some("2022-09-21")
-                ),
-                duration = TimePeriod(
-                  name = TimeUnit.month,
-                  count = 3
-                )
-              )
-            )
-          )
+        val emailSenderStubs = Map(emailMessageBody -> ())
+        val getAccountStubs = Map("accountNumber" -> getAccountResponse)
+        val getPaymentMethodResponse = PaymentMethodResponse(
+          NumConsecutiveFailures = 0
         )
+        val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+        val invoicePreviewStubs = Map(("zuoraAccountId", LocalDate.of(2022, 9, 29)) -> DigiSubWithOfferInvoicePreview)
+
+        val expectedOutput = ProductMoveEndpointTypes.Success("newSubscriptionName")
 
         (for {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData)
@@ -125,7 +54,10 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscribe(subscribeStubs)),
-          ZLayer.succeed(new MockCancelZuora(cancellationStubs))
+          ZLayer.succeed(new MockCancelZuora(cancellationStubs)),
+          ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
+          ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs))
         )
       },
 
@@ -162,41 +94,15 @@ object HandlerSpec extends ZIOSpecDefault {
         val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
         val cancellationStubs = Map(("A-S00339056", LocalDate.of(2022, 9, 29)) -> cancellationResponse)
 
-        val expectedOutput = ProductMoveEndpointTypes.Success(
-          newSubscriptionName = "newSubscriptionName",
-          newProduct = MoveToProduct(
-            id = "123",
-            name = "Digital Pack",
-            billing = Billing(
-              amount = Some(1199),
-              percentage = None,
-              currency = Some(Currency.GBP),
-              frequency = Some(
-                TimePeriod(
-                  name = TimeUnit.month,
-                  count = 1
-                )
-              ),
-              startDate = Some("2022-09-21")
-            ),
-            trial = Some(Trial(dayCount = 14)),
-            introOffer = Some(
-              Offer(
-                billing = Billing(
-                  amount = None,
-                  percentage = Some(50),
-                  currency = Some(Currency.GBP),
-                  frequency = None,
-                  startDate = Some("2022-09-21")
-                ),
-                duration = TimePeriod(
-                  name = TimeUnit.month,
-                  count = 3
-                )
-              )
-            )
-          )
+        val emailSenderStubs = Map(emailMessageBody -> ())
+        val getAccountStubs = Map("accountNumber" -> getAccountResponse)
+        val getPaymentMethodResponse = PaymentMethodResponse(
+          NumConsecutiveFailures = 0
         )
+        val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+        val invoicePreviewStubs = Map(("zuoraAccountId", LocalDate.of(2022, 9, 29)) -> DigiSubWithOfferInvoicePreview)
+
+        val expectedOutput = ProductMoveEndpointTypes.Success("newSubscriptionName")
 
         (for {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData).exit
@@ -211,7 +117,10 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscribe(subscribeStubs)),
-          ZLayer.succeed(new MockCancelZuora(cancellationStubs))
+          ZLayer.succeed(new MockCancelZuora(cancellationStubs)),
+          ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
+          ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs))
         )
       },
 

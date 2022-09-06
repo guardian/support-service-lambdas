@@ -54,7 +54,7 @@ object GetAccount {
   )
 
   case class BasicInfo(
-    defaultPaymentMethod: WireDefaultPaymentMethod,
+    defaultPaymentMethod: DefaultPaymentMethod,
     firstName: String,
     lastName: String,
     balance: BigDecimal,
@@ -68,12 +68,14 @@ object GetAccount {
   object BasicInfo {
     private case class BasicInfoWire(
       defaultPaymentMethod: DefaultPaymentMethod,
+      firstName: String,
+      lastName: String,
       balance: BigDecimal,
       currency: String
     )
 
     given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen[BasicInfoWire].map {
-      case BasicInfoWire(defaultPaymentMethod, balance, currency) => BasicInfo(defaultPaymentMethod, (balance.toDouble * 100).toInt, currency)
+      case BasicInfoWire(defaultPaymentMethod, firstName, lastName, balance, currency) => BasicInfo(defaultPaymentMethod, firstName, lastName, (balance.toDouble * 100).toInt, currency)
     }
   }
 
