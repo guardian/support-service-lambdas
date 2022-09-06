@@ -22,11 +22,17 @@ object GetSupporterPlusCustomerData {
     getContacts: ZuoraAccountId => ApiGatewayOp[Contacts],
     getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]],
     accountId: ZuoraAccountId
-  ) = for {
-    account <- getAccount(accountId)
-    paymentMethod <- getPaymentMethod(account.paymentMethodId)
-    accountSubscriptions <- getAccountSubscriptions(accountId)
-    contacts <- getContacts(accountId)
-  } yield SupporterPlusCustomerData(account, paymentMethod, accountSubscriptions, contacts)
+  ) = {
+    // put futures into vals so they all kick off in advance of the for comprehension
+    val eventualAccount = getAccount(accountId)
+    val eventualSubscriptions = getAccountSubscriptions(accountId)
+    val eventualContacts = getContacts(accountId)
+    for {
+      account <- eventualAccount
+      paymentMethod <- getPaymentMethod(account.paymentMethodId)
+      accountSubscriptions <- eventualSubscriptions
+      contacts <- eventualContacts
+    } yield SupporterPlusCustomerData(account, paymentMethod, accountSubscriptions, contacts)
+  }
 
 }
