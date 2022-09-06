@@ -18,7 +18,7 @@ class MockEmailSender(responses: Map[EmailMessage, Unit]) extends EmailSender {
 
     responses.get(message) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"success = false")
+      case None => ZIO.fail(s"wrong input, message was $message")
   }
 }
 

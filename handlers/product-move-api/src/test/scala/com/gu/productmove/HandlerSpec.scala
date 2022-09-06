@@ -61,36 +61,14 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       },
 
-      test("productMove endpoint fails if chargedThroughDate is None") {
+      test("productMove endpoint returns 500 error if chargedThroughDate is None") {
         val expectedSubNameInput = "A-S00339056"
         val testPostData = ExpectedInput("targetProductId")
-
-        val getSubscriptionResponse = GetSubscriptionResponse("subscriptionName", "zuoraAccountId", "accountNumber", ratePlans = List(
-          RatePlan(
-            id = "R1",
-            productName = "P1",
-            productRatePlanId = "PRP1",
-            ratePlanName = "RP1",
-            ratePlanCharges = List(
-              RatePlanCharge(
-                productRatePlanChargeId = "PRPC1",
-                name = "Digital Pack Monthly",
-                price = 11.11,
-                currency = "GBP",
-                number = "number",
-                effectiveStartDate = LocalDate.of(2017, 12, 15),
-                effectiveEndDate = LocalDate.of(2020, 11, 29),
-                chargedThroughDate = None,
-                billingPeriod = Some("billingPeriod"),
-              )
-            )
-          )
-        ))
 
         val createSubscriptionResponse = CreateSubscriptionResponse("newSubscriptionName")
         val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022,02,02))
 
-        val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
+        val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponseNoChargedThroughDate)
         val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
         val cancellationStubs = Map(("A-S00339056", LocalDate.of(2022, 9, 29)) -> cancellationResponse)
 
@@ -102,15 +80,13 @@ object HandlerSpec extends ZIOSpecDefault {
         val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
         val invoicePreviewStubs = Map(("zuoraAccountId", LocalDate.of(2022, 9, 29)) -> DigiSubWithOfferInvoicePreview)
 
-        val expectedOutput = ProductMoveEndpointTypes.Success("newSubscriptionName")
-
         (for {
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData).exit
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData)
           getSubRequests <- MockGetSubscription.requests
           subscribeRequests <- MockSubscribe.requests
           cancellationRequests <- MockCancelZuora.requests
         } yield {
-          assert(output)(fails(equalTo("chargedThroughDate is null for subscription A-S00339056."))) &&
+          assert(output)(equalTo(ProductMoveEndpointTypes.InternalServerError)) &&
             assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
             assert(subscribeRequests)(equalTo(List())) &&
             assert(cancellationRequests)(equalTo(List()))

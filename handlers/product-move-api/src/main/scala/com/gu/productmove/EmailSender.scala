@@ -21,7 +21,7 @@ object EmailSenderLive {
 
   val layer: ZLayer[AwsCredentialsProvider, String, EmailSender] =
     ZLayer.fromZIO(for {
-        sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $e")
+        sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
         queueUrlResponse <- getQueue(sqsClient)
       } yield new EmailSender {
         override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =

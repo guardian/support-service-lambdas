@@ -56,7 +56,7 @@ object InvoicePreview {
     )
 
     given JsonDecoder[ZuoraInvoiceItem] = DeriveJsonDecoder.gen[ZuoraInvoiceItemWire].map {
-      case ZuoraInvoiceItemWire(subscriptionName, serviceStartDate, chargeAmount, taxAmount) => ZuoraInvoiceItem(subscriptionName, serviceStartDate, (chargeAmount.toDouble * 100).toInt, (taxAmount.toDouble * 100).toInt)
+      case ZuoraInvoiceItemWire(subscriptionName, serviceStartDate, chargeAmount, taxAmount) => ZuoraInvoiceItem(subscriptionName, serviceStartDate, chargeAmount.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble, taxAmount.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
     }
   }
 

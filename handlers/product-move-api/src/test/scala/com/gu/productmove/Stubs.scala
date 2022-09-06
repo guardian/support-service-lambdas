@@ -37,6 +37,28 @@ val getSubscriptionResponse = GetSubscriptionResponse("subscriptionName", "zuora
   )
 ))
 
+val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse("subscriptionName", "zuoraAccountId", "accountNumber", ratePlans = List(
+  RatePlan(
+    id = "R1",
+    productName = "P1",
+    productRatePlanId = "PRP1",
+    ratePlanName = "RP1",
+    ratePlanCharges = List(
+      RatePlanCharge(
+        productRatePlanChargeId = "PRPC1",
+        name = "Digital Pack Monthly",
+        price = 11.11,
+        currency = "GBP",
+        number = "number",
+        effectiveStartDate = LocalDate.of(2017, 12, 15),
+        effectiveEndDate = LocalDate.of(2020, 11, 29),
+        chargedThroughDate = None,
+        billingPeriod = Some("billingPeriod"),
+      )
+    )
+  )
+))
+
 //-----------------------------------------------------
 // Stubs for GetAccount service
 //-----------------------------------------------------
@@ -69,22 +91,22 @@ val directDebitGetAccountResponse = GetAccountResponse(
 //-----------------------------------------------------
 val emailMessageBody = EmailMessage(
   To = EmailPayload(
-    Address = Some("john.hee@gmail.com"),
+    Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
       EmailPayloadSubscriberAttributes(
-        subscription_id = "A-S234234",
+        subscription_id = "newSubscriptionName",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "4",
+        first_payment_amount = "5.99",
         payment_frequency = "Month",
-        date_of_first_payment = "234-34-234",
+        date_of_first_payment = "2022-09-29",
         currency = "GBP",
         promotion = "50% off for 3 months",
-        contribution_cancellation_date = "123123-1231-123"
+        contribution_cancellation_date = "2022-09-29"
       )
     )
   ),
-  "BrazeCampaignName"
+  "SV_RCtoDP_Switch"
 )
 
 //-----------------------------------------------------
@@ -93,16 +115,16 @@ val emailMessageBody = EmailMessage(
 val DigiSubWithOfferInvoicePreview = ZuoraInvoiceList(
   List(
     ZuoraInvoiceItem(
-      subscriptionName = "A-S00391001",
+      subscriptionName = "newSubscriptionName",
       serviceStartDate = LocalDate.of(2022, 7, 31),
-      chargeAmount = 9.9,
-      taxAmount = 2
+      chargeAmount = 9.99,
+      taxAmount = 2.00
    ),
     ZuoraInvoiceItem(
-      subscriptionName = "A-S00391001",
+      subscriptionName = "newSubscriptionName",
       serviceStartDate = LocalDate.of(2022, 7, 31),
-      chargeAmount = -5,
-      taxAmount = -1
+      chargeAmount = -5.00,
+      taxAmount = -1.00
     )
   )
 )

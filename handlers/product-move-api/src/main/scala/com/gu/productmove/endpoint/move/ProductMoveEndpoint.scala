@@ -83,8 +83,8 @@ object ProductMoveEndpoint {
       // no exception handling for .head here. I assume this is fine for the MVP? Given the subscription first has to pass this check in the first endpoint.
       chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse(ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(InternalServerError)))
 
-      _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate).mapErrorTo500("ZuoraCancel")
       newSubscription <- Subscribe.create(subscription.accountId, postData.targetProductId).mapErrorTo500("GetSubscription")
+      _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate).mapErrorTo500("ZuoraCancel")
 
       getAccountFuture <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount").fork
       nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).mapErrorTo500(s"InvoicePreview").fork
@@ -95,7 +95,7 @@ object ProductMoveEndpoint {
       account = responses._1
       nextInvoice = responses._2
 
-      first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == subscription.id).map(x => x.chargeAmount + x.taxAmount).sum
+      first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionId).map(x => x.chargeAmount + x.taxAmount).sum
 
       _ <- EmailSender.sendEmail(
         message = EmailMessage(
@@ -111,7 +111,7 @@ object ProductMoveEndpoint {
                 payment_frequency = "Month",
                 promotion = "50% off for 3 months",
                 contribution_cancellation_date = chargedThroughDate.toString,
-                subscription_id = subscription.id
+                subscription_id = newSubscription.subscriptionId
               )
             )
           ),
