@@ -16,7 +16,7 @@ object PaperAddressValidator {
 
   def postCodeValidationFor(planId: PlanId): Option[Postcode] => ValidationResult[Any] = planId match {
     case _: HomeDeliveryPlanId => validatePostCodeForHomeDelivery _
-    case _ => postCode: Option[Postcode] => Passed(())
+    case _ => (postCode: Option[Postcode]) => Passed(())
   }
 
   def validatePostCodeForHomeDelivery(postcode: Option[Postcode]): ValidationResult[Postcode] = for {

@@ -13,6 +13,7 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{Stage, ZuoraEnvironment}
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.util.reader.Types._
 
 object Handler extends Logging {
 
@@ -27,12 +28,12 @@ object Handler extends Logging {
     }
 
   def runWithEffects(stage: Stage, fetchString: StringFromS3, today: LocalDate): ApiGatewayOp[Operation] = for {
-    zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
+    zuoraIds <- ZuoraIds.zuoraIdsForStage(stage).toApiGatewayOp(ApiGatewayResponse.internalServerError _)
     zuoraToPlanId = zuoraIds.rateplanIdToApiId.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
     plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
     getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
-    startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOp
+    startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOpOr422
     catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, today)
     wireCatalog = WireCatalog.fromCatalog(catalog)
   } yield Operation.noHealthcheck {
