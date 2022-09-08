@@ -75,26 +75,5 @@ object ProductMoveEndpoint {
       _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate)
       newSubscriptionId <- Subscribe.create(subscription.accountId, postData.targetProductId)
       _ <- ZIO.log("Sub: " + newSubscriptionId.toString)
-    } yield Success(newSubscriptionId.subscriptionId, MoveToProduct(
-      id = "123",
-      name = "Digital Pack",
-      billing = Billing(
-        amount = Some(1199),
-        percentage = None,
-        currency = Some(Currency.GBP),
-        frequency = Some(TimePeriod(TimeUnit.month, 1)),
-        startDate = Some("2022-09-21")
-      ),
-      trial = Some(Trial(14)),
-      introOffer = Some(Offer(
-        Billing(
-          amount = None,
-          percentage = Some(50),
-          currency = None,
-          frequency = None,//FIXME doesn't make sense for a percentage
-          startDate = Some("2022-09-21")
-        ),
-        duration = TimePeriod(TimeUnit.month, 3)
-      ))
-    ))
+    } yield Success(newSubscriptionId.subscriptionId)
 }

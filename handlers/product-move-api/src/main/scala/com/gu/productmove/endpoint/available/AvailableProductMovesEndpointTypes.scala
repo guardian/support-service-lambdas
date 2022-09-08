@@ -57,7 +57,7 @@ object MoveToProduct {
 
       introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))
       newPlan = Billing(amount = Some(price.toInt), percentage = None, currency = Some(GBP), frequency = Some(TimePeriod(TimeUnit.fromString(billingPeriod), 1)), startDate = Some(localDateToString.format(chargedThroughDate.plusDays(90))))
-    } yield MoveToProduct(id = subscriptionName, name = "Digital Pack", trial = Some(Trial(dayCount = 14)), introOffer = Some(introOffer), billing = newPlan)
+    } yield MoveToProduct(id = productRatePlan.id, name = "Digital Pack", trial = Some(Trial(dayCount = 14)), introOffer = Some(introOffer), billing = newPlan)
 }
 
 @encodedName("product")
