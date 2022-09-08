@@ -53,7 +53,7 @@ object ProductMoveEndpoint {
   }
 
   private def run(subscriptionName: String, postData: ExpectedInput): TIO[OutputBody] =
-    productMove(subscriptionName, postData).provide(
+    productMove("A-S00314561", postData).provide(
       SubscribeLive.layer,
       GetSubscriptionLive.layer,
       ZuoraCancelLive.layer,
@@ -74,7 +74,11 @@ object ProductMoveEndpoint {
         ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
 
-  // test monthly contribution subscription number: A-S01725972
+  /*
+    * DEV percentage discount productrateplanID: 2c92c0f85721ff7c01572942235b6d7a
+    * DEV DIGISUB productrateplanID ID: 2c92c0f84bbfec8b014bc655f4852d9d
+  */
+  // test monthly contribution subscription number: A-S00314561
   private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): URIO[GetSubscription with Subscribe with ZuoraCancel with GetAccount with InvoicePreview with EmailSender, OutputBody] =
     val output = for {
       _ <- ZIO.log("PostData: " + postData.toString)

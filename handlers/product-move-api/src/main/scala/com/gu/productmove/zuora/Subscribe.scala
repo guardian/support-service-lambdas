@@ -81,9 +81,8 @@ object SubscribeRequest {
     } yield SubscribeRequest(
       accountKey = zuoraAccountId,
       contractEffectiveDate = date,
-      // customerAcceptanceDate = date.plusDays(14),    if there is a free trial, we simply add the 14 days onto the customerAcceptanceDate, no extra rateplans needed. To implement later on.
-      customerAcceptanceDate = date,
-      subscribeToRatePlans = List(SubscribeToRatePlans(productRatePlanId = targetProductId)),
+      customerAcceptanceDate = date.plusDays(14),   // if there is a free trial, we simply add the 14 days onto the customerAcceptanceDate, no extra rateplans needed. To implement later on.
+      subscribeToRatePlans = List(SubscribeToRatePlans(productRatePlanId = targetProductId)),   // hardcode 50% offer for 3 months
       AcquisitionCase__c = "case",
       AcquisitionSource__c = "product-movement",
       CreatedByCSR__c = "na"

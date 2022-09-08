@@ -1,6 +1,8 @@
 package com.gu.productmove
 
+import com.gu.productmove.GuStageLive.Stage
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, GetQueueUrlResponse, SendMessageRequest}
@@ -19,32 +21,35 @@ object EmailSender {
 
 object EmailSenderLive {
 
-  val layer: ZLayer[AwsCredentialsProvider, String, EmailSender] =
-    ZLayer.fromZIO(for {
-        sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
-        queueUrlResponse <- getQueue(sqsClient)
-      } yield new EmailSender {
-        override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
-          sendMessage(sqsClient, queueUrlResponse.queueUrl, message)
-      }
-    )
+  val layer: ZLayer[AwsCredentialsProvider with Stage, String, EmailSender] =
+    ZLayer.scoped(for {
+    stage <- ZIO.service[Stage]
+    sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
+    queueUrlResponse <- getQueue(stage, sqsClient)
+  } yield new EmailSender {
+    override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
+      sendMessage(sqsClient, queueUrlResponse.queueUrl, message)
+  })
 
-  private def initializeSQSClient(): ZIO[AwsCredentialsProvider, Throwable, SqsAsyncClient] =
-    ZIO.scoped(
+  private def initializeSQSClient(): ZIO[AwsCredentialsProvider with Scope, Throwable, SqsAsyncClient] =
       for {
         creds <- ZIO.service[AwsCredentialsProvider]
         sqsClient <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
       } yield sqsClient
-    )
 
-  private def getQueue(sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
+  private def getQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
+    val queueName = if (stage == Stage.PROD) "direct-mail-PROD" else "direct-mail-CODE"
+    val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
+
+    println(sqsAsyncClient.listQueues())
+
     ZIO
       .fromCompletableFuture(
-        sqsAsyncClient.getQueueUrl(GetQueueUrlRequest.builder.queueName("direct-mail-CODE").build())
+        sqsAsyncClient.getQueueUrl(queueUrl)
       ).mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
 
   private def impl(creds: AwsCredentialsProvider): SqsAsyncClient =
-    SqsAsyncClient.builder()
+    SqsAsyncClient.builder
       .region(Region.EU_WEST_1)
       .credentialsProvider(creds)
       .build()
