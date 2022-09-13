@@ -2,6 +2,7 @@ package com.gu.productmove.endpoint.move
 
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
+import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
@@ -13,6 +14,9 @@ import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
 import zio.{Clock, URIO, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
@@ -53,7 +57,7 @@ object ProductMoveEndpoint {
   }
 
   private def run(subscriptionName: String, postData: ExpectedInput): TIO[OutputBody] =
-    productMove("A-S00314561", postData).provide(
+    productMove(subscriptionName, postData).provide(
       SubscribeLive.layer,
       GetSubscriptionLive.layer,
       ZuoraCancelLive.layer,
@@ -74,12 +78,7 @@ object ProductMoveEndpoint {
         ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
 
-  /*
-    * DEV percentage discount productrateplanID: 2c92c0f85721ff7c01572942235b6d7a
-    * DEV DIGISUB productrateplanID ID: 2c92c0f84bbfec8b014bc655f4852d9d
-  */
-  // test monthly contribution subscription number: A-S00314561
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): URIO[GetSubscription with Subscribe with ZuoraCancel with GetAccount with InvoicePreview with EmailSender, OutputBody] =
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): URIO[GetSubscription with Subscribe with ZuoraCancel with GetAccount with InvoicePreview with EmailSender with Stage, OutputBody] =
     val output = for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription")
@@ -87,7 +86,7 @@ object ProductMoveEndpoint {
       // no exception handling for .head here. I assume this is fine for the MVP? Given the subscription first has to pass this check in the first endpoint.
       chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse(ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(InternalServerError)))
 
-      newSubscription <- Subscribe.create(subscription.accountId, postData.targetProductId).mapErrorTo500("GetSubscription")
+      newSubscription <- Subscribe.create(subscription.accountId, postData.targetProductId).mapErrorTo500("Subscribe")
       _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate).mapErrorTo500("ZuoraCancel")
 
       getAccountFuture <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount").fork
@@ -99,7 +98,7 @@ object ProductMoveEndpoint {
       account = responses._1
       nextInvoice = responses._2
 
-      first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionId).map(x => x.chargeAmount + x.taxAmount).sum
+      first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionNumber).map(x => x.chargeAmount + x.taxAmount).sum
 
       _ <- EmailSender.sendEmail(
         message = EmailMessage(
@@ -107,24 +106,27 @@ object ProductMoveEndpoint {
             Address = Some(account.billToContact.workEmail),
             ContactAttributes = EmailPayloadContactAttributes(
               SubscriberAttributes = EmailPayloadSubscriberAttributes(
-                first_name = account.basicInfo.firstName,
-                last_name = account.basicInfo.lastName,
-                currency = account.basicInfo.currency,
+                first_name = account.billToContact.firstName,
+                last_name = account.billToContact.lastName,
+                currency = account.basicInfo.currency.symbol,
+                price = "11.99",
                 first_payment_amount = first_payment_amount.toString,
-                date_of_first_payment = chargedThroughDate.toString,
-                payment_frequency = "Month",
+                date_of_first_payment = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                payment_frequency = "Monthly",
                 promotion = "50% off for 3 months",
-                contribution_cancellation_date = chargedThroughDate.toString,
-                subscription_id = newSubscription.subscriptionId
+                contribution_cancellation_date = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                subscription_id = newSubscription.subscriptionNumber
               )
             )
           ),
-          "SV_RCtoDP_Switch"
+          "SV_RCtoDP_Switch",
+          account.basicInfo.sfContactId__c,
+          account.basicInfo.IdentityId__c
         )
       ).mapErrorTo500("EmailSender")
 
-      _ <- ZIO.log("Sub: " + newSubscription.subscriptionId)
-    } yield Success(newSubscription.subscriptionId)
+      _ <- ZIO.log("Sub: " + newSubscription.subscriptionNumber)
+    } yield Success(newSubscription.subscriptionNumber)
 
     output.catchAll {
       failure => ZIO.succeed(failure)

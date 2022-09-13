@@ -57,7 +57,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockCancelZuora(cancellationStubs)),
           ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
           ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs))
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD"))
         )
       },
 
@@ -96,7 +97,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockCancelZuora(cancellationStubs)),
           ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
           ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs))
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD"))
         )
       },
 

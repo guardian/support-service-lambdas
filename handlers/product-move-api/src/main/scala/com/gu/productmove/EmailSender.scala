@@ -38,10 +38,9 @@ object EmailSenderLive {
       } yield sqsClient
 
   private def getQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
-    val queueName = if (stage == Stage.PROD) "direct-mail-PROD" else "direct-mail-CODE"
+    // choose existing SQS queue to test for now, create another queue for this.
+    val queueName = if (stage == Stage.PROD) "contributions-thanks" else "contributions-thanks-dev"
     val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
-
-    println(sqsAsyncClient.listQueues())
 
     ZIO
       .fromCompletableFuture(
@@ -66,10 +65,10 @@ object EmailSenderLive {
           )
         }
         .mapError { ex =>
-          s"Failed to send sqs email message for sfContactId"
+          s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
         }
       _ <- ZIO.log(
-        s"Successfully sent email for sfContactId"
+        s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
       )
     } yield ()
 }
@@ -79,6 +78,7 @@ case class EmailPayloadSubscriberAttributes(
   last_name: String,
   first_payment_amount: String,
   date_of_first_payment: String,
+  price: String,
   payment_frequency: String,
   contribution_cancellation_date: String,
   currency: String,
@@ -93,6 +93,8 @@ case class EmailPayload(Address: Option[String], ContactAttributes: EmailPayload
 case class EmailMessage(
   To: EmailPayload,
   DataExtensionName: String,
+  SfContactId: String,
+  IdentityUserId: Option[String]
 )
 
 given JsonEncoder[EmailPayloadSubscriberAttributes] = DeriveJsonEncoder.gen[EmailPayloadSubscriberAttributes]

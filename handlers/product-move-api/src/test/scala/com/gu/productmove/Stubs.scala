@@ -1,5 +1,6 @@
 package com.gu.productmove
 
+import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
 import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview}
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
@@ -65,24 +66,24 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse("subsc
 val getAccountResponse = GetAccountResponse(
   BasicInfo(
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
-    "John",
-    "Hee",
+    None,
+    "sfContactId",
     balance = 0,
-    currency = "GBP"
+    currency = Currency.GBP
   ),
-  BillToContact("example@gmail.com"),
+  BillToContact("John", "Hee", "example@gmail.com"),
   List(AccountSubscription("subscriptionId"))
 )
 
 val directDebitGetAccountResponse = GetAccountResponse(
   BasicInfo(
     DefaultPaymentMethod("paymentMethodId", None),
-    "John",
-    "Hee",
+    None,
+    "sfContactId",
     balance = 0,
-    currency = "GBP"
+    currency = Currency.GBP
   ),
-  BillToContact("example@gmail.com"),
+  BillToContact("John", "Hee", "example@gmail.com"),
   List(AccountSubscription("subscriptionId"))
 )
 
@@ -98,6 +99,7 @@ val emailMessageBody = EmailMessage(
         first_name = "John",
         last_name = "Hee",
         first_payment_amount = "5.99",
+        price = "11.99",
         payment_frequency = "Month",
         date_of_first_payment = "2022-09-29",
         currency = "GBP",
@@ -106,7 +108,9 @@ val emailMessageBody = EmailMessage(
       )
     )
   ),
-  "SV_RCtoDP_Switch"
+  "SV_RCtoDP_Switch",
+  "sfContactId",
+  None
 )
 
 //-----------------------------------------------------

@@ -1,6 +1,6 @@
 package com.gu.productmove.endpoint.available
 
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{localDateToString}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.localDateToString
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{AvailableMoves, OutputBody}
 import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
@@ -13,7 +13,7 @@ import sttp.tapir.Validator.Enumeration
 import sttp.tapir.generic.Derived
 import sttp.tapir.{FieldName, Schema, SchemaType, Validator}
 import zio.{IO, ZIO}
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.json.*
 
 import java.time.LocalDate
 import scala.util.Try
@@ -95,12 +95,35 @@ enum Currency(
   val code: String,
   val symbol: String
 ):
+  // The MVP only accepts GBP
   case GBP extends Currency("GBP", "£")
+  case USD extends Currency("USD", "$")
+  case AUD extends Currency("AUD", "$")
+  case NZD extends Currency("NZD", "$")
+  case CAD extends Currency("CAD", "$")
+  case EUR extends Currency("EUR", "€")
+  case UnrecognizedCurrency extends Currency("", "")
+
 object Currency {
+  val websiteSupportedCurrencies = List(
+    GBP,
+    USD,
+    AUD,
+    CAD,
+    EUR,
+    NZD,
+  )
+
+  def currencyCodetoObject(code: String): Currency = {
+    // add some logging here, do we need to log via the ZIO library??
+    websiteSupportedCurrencies.find(_.code == code).getOrElse(Currency.UnrecognizedCurrency)
+  }
+
   given JsonCodec[Currency] = JsonCodec[Map[String, String]].transformOrFail[Currency](
     _.get("code").toRight("no code in currency object").flatMap(code => Try(Currency.valueOf(code)).toEither.left.map(_.toString)),
     c => Map("code" -> c.code, "symbol" -> c.symbol)
   )
+
   given Schema[Currency] =
     Schema[Currency](
       SchemaType.SProduct[Currency](
