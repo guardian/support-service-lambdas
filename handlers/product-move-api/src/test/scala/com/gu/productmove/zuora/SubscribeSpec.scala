@@ -27,8 +27,10 @@ object SubscribeSpec extends ZIOSpecDefault {
         AcquisitionCase__c = "case",
         AcquisitionSource__c = "product-movement",
         CreatedByCSR__c = "na",
-        subscribeToRatePlans = List(SubscribeToRatePlans(productRatePlanId = "targetProductId"),
-          SubscribeToRatePlans(productRatePlanId = "2c92a0ff5345f9220153559d915d5c26", chargeOverrides = List(ChargeOverrides(productRatePlanChargeId = "2c92a0fd5345efa10153559e97bb76c6", discountPercentage = Some(50), upToPeriods = Some(3), endDateCondition = Some("Fixed_Period")))))
+        subscribeToRatePlans = List(
+          SubscribeToRatePlans(productRatePlanId = "targetProductId"),
+          SubscribeToRatePlans(productRatePlanId = "2c92a0ff5345f9220153559d915d5c26", chargeOverrides = List(ChargeOverrides(productRatePlanChargeId = "2c92a0fd5345efa10153559e97bb76c6", discountPercentage = Some(50), upToPeriods = Some(3), endDateCondition = Some("Fixed_Period"))))
+        )
       )
 
       for {

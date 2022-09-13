@@ -25,7 +25,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val testPostData = ExpectedInput("targetProductId")
 
         val createSubscriptionResponse = CreateSubscriptionResponse("newSubscriptionName")
-        val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022,02,02))
+        val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022, 02, 02))
 
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
         val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
@@ -48,8 +48,8 @@ object HandlerSpec extends ZIOSpecDefault {
           cancellationRequests <- MockCancelZuora.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
-          assert(subscribeRequests)(equalTo(List(("zuoraAccountId", "targetProductId")))) &&
+            assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+            assert(subscribeRequests)(equalTo(List(("zuoraAccountId", "targetProductId")))) &&
             assert(cancellationRequests)(equalTo(List(("A-S00339056", LocalDate.of(2022, 9, 29)))))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
@@ -67,7 +67,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val testPostData = ExpectedInput("targetProductId")
 
         val createSubscriptionResponse = CreateSubscriptionResponse("newSubscriptionName")
-        val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022,02,02))
+        val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022, 02, 02))
 
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponseNoChargedThroughDate)
         val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
@@ -116,7 +116,7 @@ object HandlerSpec extends ZIOSpecDefault {
 
         val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(
           body = List(MoveToProduct(
-            id = "A-S00339056",
+            id = "2c92a0fb4edd70c8014edeaa4eae220a",
             name = "Digital Pack",
             billing = Billing(
               amount = Some(1199),
@@ -135,8 +135,9 @@ object HandlerSpec extends ZIOSpecDefault {
                 startDate = Some("2022-09-29")
               ),
               duration = TimePeriod(TimeUnit.month, 3)
-            )))
-        ))
+            ))
+          ))
+        )
 
         (for {
           _ <- TestClock.setTime(time)
@@ -188,7 +189,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))
         )
-        },
+      },
 
       test("available-product-moves endpoint returns empty response when user does not have a card payment method") {
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0)).toInstant

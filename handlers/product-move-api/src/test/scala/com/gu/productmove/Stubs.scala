@@ -100,11 +100,11 @@ val emailMessageBody = EmailMessage(
         last_name = "Hee",
         first_payment_amount = "5.99",
         price = "11.99",
-        payment_frequency = "Month",
-        date_of_first_payment = "2022-09-29",
-        currency = "GBP",
+        payment_frequency = "Monthly",
+        date_of_first_payment = "29 September 2022",
+        currency = "£",
         promotion = "50% off for 3 months",
-        contribution_cancellation_date = "2022-09-29"
+        contribution_cancellation_date = "29 September 2022"
       )
     )
   ),
