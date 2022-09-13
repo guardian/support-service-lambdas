@@ -14,10 +14,7 @@ object SupporterPlusValidations {
   //TODO ensure upper threshold is being applied
   //TODO format amount in response
 
-  def apply(
-    isValidStartDate: LocalDate => ValidationResult[Unit],
-    limitsFor: (PlanId, Currency) => AmountLimits
-  )(
+  def apply(isValidStartDate: LocalDate => ValidationResult[Unit], limitsFor: (PlanId, Currency) => AmountLimits)(
     validatableFields: ValidatableFields,
     planId: PlanId,
     currency: Currency
@@ -26,7 +23,7 @@ object SupporterPlusValidations {
       amount <- validatableFields.amountMinorUnits getOrFailWith s"amountMinorUnits is missing"
       _ <- isValidStartDate(validatableFields.startDate)
       limits = limitsFor(planId, currency)
-      _ <- (amount.value <= limits.max) orFailWith s"amount must not be more than ${limits.max}"
-      _ <- (amount.value >= limits.min) orFailWith s"amount must be at least ${limits.min}"
+      _ <- (amount.value <= limits.max) orFailWith s"amount must not be more than $currency ${limits.max}"
+      _ <- (amount.value >= limits.min) orFailWith s"amount must be at least $currency ${limits.min}"
     } yield (amount)
 }
