@@ -50,7 +50,7 @@ object StartDateValidator {
   }
 
   implicit class OptionalRuleOps(maybeRule: Option[LocalDate => ValidationResult[Unit]]) {
-    def orPass: LocalDate => ValidationResult[Unit] = maybeRule.getOrElse { anyDate: LocalDate => Passed(()) }
+    def orPass: LocalDate => ValidationResult[Unit] = maybeRule.getOrElse { (anyDate: LocalDate) => Passed(()) }
   }
 
 }

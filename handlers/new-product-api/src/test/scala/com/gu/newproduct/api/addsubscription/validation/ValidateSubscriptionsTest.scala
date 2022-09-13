@@ -10,10 +10,10 @@ class ValidateSubscriptionsTest extends AnyFlatSpec with Matchers {
 
   def sub(active: Boolean, rateplans: Set[String]) = Subscription(
     status = if (active) GetAccountSubscriptions.Active else GetAccountSubscriptions.NotActive,
-    productRateplanIds = rateplans.map(ProductRatePlanId)
+    productRateplanIds = rateplans.map(ProductRatePlanId.apply)
   )
 
-  private val contributionRateplans = List("monthyContributionRateplanId", "annualContributionRateplanId").map(ProductRatePlanId)
+  private val contributionRateplans = List("monthyContributionRateplanId", "annualContributionRateplanId").map(ProductRatePlanId.apply)
   private val validationFailedMsg = "validation Failed!"
 
   it should "fail if account already has an active recurring contribution subscription" in {

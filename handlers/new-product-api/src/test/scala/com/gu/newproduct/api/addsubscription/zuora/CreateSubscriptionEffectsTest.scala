@@ -23,7 +23,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
   it should "create subscription in account" taggedAs EffectsTest in {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val request = CreateSubscription.ZuoraCreateSubRequest(
-      ZuoraAccountId("2c92c0f864a214c30164a8b5accb650b"),
+      ZuoraAccountId("8ad095dd82f7aaa50182f96de24d3ddb"), // dev https://apisandbox.zuora.com/apps/CustomerAccount.do?method=view&id=8ad095dd82f7aaa50182f96de24d3ddb
       currentDate().plusDays(2),
       validCaseIdToAvoidCausingSFErrors,
       AcquisitionSource("sourcesource"),

@@ -15,6 +15,8 @@ case class Catalog(
   voucherSundayPlus: Plan,
   voucherEveryDayPlus: Plan,
   voucherSixDayPlus: Plan,
+  monthlySupporterPlus: Plan,
+  annualSupporterPlus: Plan,
   monthlyContribution: Plan,
   annualContribution: Plan,
   homeDeliveryEveryDay: Plan,
@@ -59,6 +61,8 @@ case class Catalog(
     voucherSixDayPlus,
     monthlyContribution,
     annualContribution,
+    monthlySupporterPlus,
+    annualSupporterPlus,
     homeDeliveryEveryDay,
     homeDeliverySixDay,
     homeDeliverySunday,
@@ -92,6 +96,7 @@ case class Catalog(
   val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
 }
 sealed trait VoucherPlanId
+sealed trait SupporterPlusPlanId
 sealed trait ContributionPlanId
 sealed trait HomeDeliveryPlanId
 sealed trait DigipackPlanId
@@ -101,6 +106,10 @@ sealed trait DigitalVoucherPlanId
 sealed abstract class PlanId(val name: String)
 
 object PlanId {
+  case object AnnualSupporterPlus extends PlanId("annual_supporter_plus") with SupporterPlusPlanId
+
+  case object MonthlySupporterPlus extends PlanId("monthly_supporter_plus") with SupporterPlusPlanId
+
   case object AnnualContribution extends PlanId("annual_contribution") with ContributionPlanId
 
   case object MonthlyContribution extends PlanId("monthly_contribution") with ContributionPlanId
@@ -193,10 +202,17 @@ object PlanId {
     VoucherWeekend,
     VoucherWeekendPlus
   )
+
   val enabledContributionPlans = List(
     MonthlyContribution,
     AnnualContribution
   )
+
+  val enabledSupporterPlusPlans = List(
+    MonthlySupporterPlus,
+    AnnualSupporterPlus
+  )
+
   val enabledHomeDeliveryPlans = List(
     HomeDeliveryEveryDay,
     HomeDeliveryEveryDayPlus,
@@ -241,7 +257,7 @@ object PlanId {
   )
 
   val supportedPlans: List[PlanId] =
-    enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
+    enabledVoucherPlans ++ enabledSupporterPlusPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
       enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++ enabledDigitalVoucherPlans
 
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
@@ -285,5 +301,6 @@ object ProductType {
   val NewspaperHomeDelivery = ProductType("Newspaper - Home Delivery")
   val DigitalPack = ProductType("Digital Pack")
   val Contribution = ProductType("Contribution")
+  val SupporterPlus = ProductType("Supporter Plus")
   val Membership = ProductType("Membership")
 }

@@ -14,6 +14,7 @@ object NewProductApi {
   val HomeDeliverySubscriptionStartDateWindowSize = WindowSizeDays(28)
   val GuardianWeeklySubscriptionStartDateWindowSize = WindowSizeDays(28)
   val VoucherSubscriptionStartDateWindowSize = WindowSizeDays(35)
+  val SupporterPlusStartDateWindowSize = WindowSizeDays(1)
   val ContributionStartDateWindowSize = WindowSizeDays(1)
   val DigiPackStartDateWindowSize = WindowSizeDays(90)
   val DigitalVoucherStartDateWindowSize = WindowSizeDays(1)
@@ -25,6 +26,7 @@ object NewProductApi {
   ): Catalog = {
 
     def paymentPlansFor(planId: PlanId, billingPeriod: BillingPeriod): Map[Currency, PaymentPlan] = {
+
       val pricesByCurrency: Map[Currency, AmountMinorUnits] = pricingFor(planId)
 
       val billingPeriodDescription = billingPeriod match {
@@ -90,6 +92,13 @@ object NewProductApi {
     val homeDeliverySaturdayDateRules = homeDeliveryDateRules(saturdayDays)
     val homeDeliveryWeekendRules = homeDeliveryDateRules(weekendDays)
 
+    val supporterPlusRule = StartDateRules(
+      windowRule = WindowRule(
+        startDate = today,
+        maybeSize = Some(SupporterPlusStartDateWindowSize),
+      )
+    )
+
     val contributionsRule = StartDateRules(
       windowRule = WindowRule(
         startDate = today,
@@ -143,6 +152,8 @@ object NewProductApi {
       voucherSaturdayPlus = planWithPayment(VoucherSaturdayPlus, PlanDescription("Saturday+"), voucherSaturdayDateRules, Monthly),
       voucherSunday = planWithPayment(VoucherSunday, PlanDescription("Sunday"), voucherSundayDateRules, Monthly),
       voucherSundayPlus = planWithPayment(VoucherSundayPlus, PlanDescription("Sunday+"), voucherSundayDateRules, Monthly),
+      monthlySupporterPlus = planWithPayment(MonthlySupporterPlus, PlanDescription("Monthly"), supporterPlusRule, Monthly),
+      annualSupporterPlus = planWithPayment(AnnualSupporterPlus, PlanDescription("Annual"), supporterPlusRule, Annual),
       monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), contributionsRule, Monthly),
       annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), contributionsRule, Monthly),
       homeDeliveryEveryDay = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules, Monthly),

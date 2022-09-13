@@ -32,7 +32,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.1.3",
+  scalaVersion := "3.1.2",
   version      := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -72,7 +72,8 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
   HealthCheckTest / testOptions += Tests.Argument("-n", "com.gu.test.HealthCheck")
 )
 
-def library(theProject: Project) = theProject.settings(scala2Settings, testSettings).configs(EffectsTest, HealthCheckTest)
+def library(theProject: Project, scalaSettings: SettingsDefinition = scala2Settings) =
+  theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
 
 // ==== START libraries ====
 
@@ -259,6 +260,13 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
     dependencyOverrides ++= jacksonDependencies
   )
 
+// this lib is shared between ZIO and non zio projects so can't depend on json libs, http clients, effects etc.
+lazy val `zuora-models` = library(project in file("lib/zuora-models"), scala3Settings)
+  .dependsOn(`config-core`)
+  .settings(
+    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.15" exclude("com.typesafe.scala-logging", "scala-logging_2.13")
+  )
+
 lazy val `credit-processor` = library(project in file("lib/credit-processor"))
   .dependsOn(
     `zuora-core`,
@@ -337,8 +345,12 @@ lazy val `identity-retention` = lambdaProject(
 lazy val `new-product-api` = lambdaProject(
   "new-product-api",
   "Add subscription to account",
-  Seq(supportInternationalisation)
-).dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
+  Seq(),
+)
+  .settings(
+    scalacOptions += "-Ytasty-reader",
+  )
+  .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
@@ -476,7 +488,7 @@ lazy val `product-move-api` = lambdaProject(
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     genDocs := genDocsImpl("com.gu.productmove.MakeDocsYaml").value
   )
-  .dependsOn()
+  .dependsOn(`zuora-models`)
 
 lazy val `metric-push-api` = lambdaProject(
   "metric-push-api",

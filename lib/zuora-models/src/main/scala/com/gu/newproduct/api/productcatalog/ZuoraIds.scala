@@ -1,9 +1,7 @@
 package com.gu.newproduct.api.productcatalog
 
 import com.gu.newproduct.api.productcatalog.PlanId._
-import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.config.Stage
-import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 
 object ZuoraIds {
 
@@ -12,6 +10,14 @@ object ZuoraIds {
   case class ProductRatePlanChargeId(value: String) extends AnyVal
 
   case class PlanAndCharge(productRatePlanId: ProductRatePlanId, productRatePlanChargeId: ProductRatePlanChargeId)
+
+
+  case class SupporterPlusZuoraIds(monthly: PlanAndCharge, annual: PlanAndCharge) {
+    val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharge] = Map(
+      MonthlySupporterPlus -> monthly,
+      AnnualSupporterPlus -> annual
+    )
+  }
 
   case class ContributionsZuoraIds(monthly: PlanAndCharge, annual: PlanAndCharge) {
     val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharge] = Map(
@@ -162,6 +168,7 @@ object ZuoraIds {
 
 
   case class ZuoraIds(
+    supporterPlusZuoraIds: SupporterPlusZuoraIds,
     contributionsZuoraIds: ContributionsZuoraIds,
     voucherZuoraIds: VoucherZuoraIds,
     homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
@@ -171,7 +178,8 @@ object ZuoraIds {
     digitalVoucher: DigitalVoucherZuoraIds
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
-      (contributionsZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
+      (supporterPlusZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
+      contributionsZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
       voucherZuoraIds.byApiPlanId ++
       homeDeliveryZuoraIds.byApiPlanId ++
       digitalPackIds.byApiPlanId ++
@@ -182,16 +190,27 @@ object ZuoraIds {
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 
     def apiIdToPlanAndCharge: Map[PlanId, PlanAndCharge] =
-      contributionsZuoraIds.planAndChargeByApiPlanId ++
+      supporterPlusZuoraIds.planAndChargeByApiPlanId ++
+        contributionsZuoraIds.planAndChargeByApiPlanId ++
         guardianWeeklyDomestic.planAndChargeByApiPlanId ++
         guardianWeeklyROW.planAndChargeByApiPlanId
 
   }
 
-  def zuoraIdsForStage(stage: Stage): ApiGatewayOp[ZuoraIds] = {
+  def zuoraIdsForStage(stage: Stage): Either[String, ZuoraIds] = {
     val mappings = Map(
       // todo ideally we should add an id to the fields in zuora so we don't have to hard code
       Stage("PROD") -> ZuoraIds(
+        SupporterPlusZuoraIds(
+          monthly = PlanAndCharge(
+            productRatePlanId = ProductRatePlanId("8a12865b8219d9b401822106192b64dc"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b401822106194e64e3")
+          ),
+          annual = PlanAndCharge(
+            productRatePlanId = ProductRatePlanId("8a12865b8219d9b40182210618a464ba"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b40182210618c664c1")
+          )
+        ),
         ContributionsZuoraIds(
           monthly = PlanAndCharge(
             ProductRatePlanId("2c92a0fc5aacfadd015ad24db4ff5e97"),
@@ -260,6 +279,16 @@ object ZuoraIds {
         )
       ),
       Stage("CODE") -> ZuoraIds(
+        SupporterPlusZuoraIds(
+          monthly = PlanAndCharge(
+            productRatePlanId = ProductRatePlanId("8ad088718219a6b601822036a6c91f5c"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad088718219a6b601822036a6e21f5e")
+          ),
+          annual = PlanAndCharge(
+            productRatePlanId = ProductRatePlanId("8ad088718219a6b601822036a5801f34"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad088718219a6b601822036a5c21f39")
+          )
+        ),
         ContributionsZuoraIds(
           monthly = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("2c92c0f85ab269be015acd9d014549b7"),
@@ -328,6 +357,16 @@ object ZuoraIds {
         )
       ),
       Stage("DEV") -> ZuoraIds(
+        SupporterPlusZuoraIds(
+          monthly = PlanAndCharge(
+            productRatePlanId = ProductRatePlanId("8ad09fc281de1ce70181de3b251736a4"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad09fc281de1ce70181de3b253e36a6")
+          ),
+          annual = PlanAndCharge(
+            productRatePlanId = ProductRatePlanId("8ad09fc281de1ce70181de3b28ee3783"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad09fc281de1ce70181de3b29223787")
+          )
+        ),
         ContributionsZuoraIds(
           monthly = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("2c92c0f85a6b134e015a7fcd9f0c7855"),
@@ -396,7 +435,7 @@ object ZuoraIds {
         )
       )
     )
-    mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing zuora ids for stage $stage"))
+    mappings.get(stage).toRight(s"missing zuora ids for stage $stage")
   }
 
 }
