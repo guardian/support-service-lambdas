@@ -36,11 +36,11 @@ class SupporterPlusValidationsTest extends AnyFlatSpec with Matchers {
     wiredValidator(oldRequest, MonthlySupporterPlus, GBP) shouldBe Failed("Date validation failed!")
   }
   it should "return error if amount is too small" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))), MonthlySupporterPlus, GBP) shouldBe Failed("amount must be at least 100")
+    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))), MonthlySupporterPlus, GBP) shouldBe Failed("amount must be at least GBP 100")
   }
 
   it should "return error if amount is too large" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))), MonthlySupporterPlus, GBP) shouldBe Failed("amount must not be more than 200")
+    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))), MonthlySupporterPlus, GBP) shouldBe Failed("amount must not be more than GBP 200")
   }
   it should "return success if amount is within valid range" in {
     wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(150))), MonthlySupporterPlus, GBP) shouldBe Passed((AmountMinorUnits(150)))
