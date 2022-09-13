@@ -4,7 +4,7 @@ import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidationResult}
-import com.gu.newproduct.api.productcatalog.PlanId.{MonthlySupporterPlus}
+import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -23,7 +23,7 @@ class SupporterPlusValidationsTest extends AnyFlatSpec with Matchers {
   def amountLimitsFor(planId: PlanId, currency: Currency) = {
     planId shouldBe MonthlySupporterPlus
     currency shouldBe GBP
-    AmountLimits(min = 100, max = 200)
+    AmountLimits.limitsFromMajorToMinorUnits(min = 12, max = 166)
   }
 
   def isValidStartDate(d: LocalDate): ValidationResult[Unit] =
@@ -36,14 +36,15 @@ class SupporterPlusValidationsTest extends AnyFlatSpec with Matchers {
     wiredValidator(oldRequest, MonthlySupporterPlus, GBP) shouldBe Failed("Date validation failed!")
   }
   it should "return error if amount is too small" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))), MonthlySupporterPlus, GBP) shouldBe Failed("amount must be at least GBP 100")
+    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(1100))), MonthlySupporterPlus, GBP) shouldBe Failed("amount must be at least GBP 12")
   }
 
   it should "return error if amount is too large" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))), MonthlySupporterPlus, GBP) shouldBe Failed("amount must not be more than GBP 200")
+    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(16700))), MonthlySupporterPlus, GBP) shouldBe Failed("amount must not be more than GBP 166")
   }
+
   it should "return success if amount is within valid range" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(150))), MonthlySupporterPlus, GBP) shouldBe Passed((AmountMinorUnits(150)))
+    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(15000))), MonthlySupporterPlus, GBP) shouldBe Passed((AmountMinorUnits(15000)))
   }
 
   it should "return error if amount is missing" in {

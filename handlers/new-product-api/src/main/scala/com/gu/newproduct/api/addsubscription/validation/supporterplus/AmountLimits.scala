@@ -11,36 +11,37 @@ case class AmountLimits(min: Int, max: Int)
 
 object AmountLimits {
 
-  def fromMajorUnits(min: Int, max: Int) = AmountLimits(min * 100, max * 100)
+  def limitsFromMajorToMinorUnits(min: Int, max: Int) = AmountLimits(min * 100, max * 100)
+  def fromMinorToMajor(value: Int) = value / 100
 
   val gbp = SupporterPlusLimits(
-    monthly = AmountLimits.fromMajorUnits(min = 12, max = 166),
-    annual = AmountLimits.fromMajorUnits(min = 119, max = 2000)
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 12, max = 166),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 119, max = 2000)
   )
 
   val aud = SupporterPlusLimits(
-    monthly = AmountLimits.fromMajorUnits(min = 22, max = 200),
-    annual = AmountLimits.fromMajorUnits(min = 215, max = 2400)
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 22, max = 200),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 215, max = 2400)
   )
 
   val usd = SupporterPlusLimits(
-    monthly = AmountLimits.fromMajorUnits(min = 20, max = 800),
-    annual = AmountLimits.fromMajorUnits(min = 119, max = 10000)
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 20, max = 800),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 119, max = 10000)
   )
 
   val nzd = SupporterPlusLimits(
-    monthly = AmountLimits.fromMajorUnits(min = 24, max = 200),
-    annual = AmountLimits.fromMajorUnits(min = 235, max = 2400)
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 24, max = 200),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 235, max = 2400)
   )
 
   val cad = SupporterPlusLimits(
-    monthly = AmountLimits.fromMajorUnits(min = 22, max = 166),
-    annual = AmountLimits.fromMajorUnits(min = 219, max = 2000)
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 22, max = 166),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 219, max = 2000)
   )
 
   val eur = SupporterPlusLimits(
-    monthly = AmountLimits.fromMajorUnits(min = 15, max = 166),
-    annual = AmountLimits.fromMajorUnits(min = 149, max = 2000)
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 15, max = 166),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 149, max = 2000)
   )
 
   def limitsFor(planId: PlanId, currency: Currency): AmountLimits = {
