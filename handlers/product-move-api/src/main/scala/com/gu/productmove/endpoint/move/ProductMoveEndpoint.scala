@@ -83,7 +83,6 @@ object ProductMoveEndpoint {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription")
 
-      // no exception handling for .head here. I assume this is fine for the MVP? Given the subscription first has to pass this check in the first endpoint.
       chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse(ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(InternalServerError)))
 
       newSubscription <- Subscribe.create(subscription.accountId, postData.targetProductId).mapErrorTo500("Subscribe")
