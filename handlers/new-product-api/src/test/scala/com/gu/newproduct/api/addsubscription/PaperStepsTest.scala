@@ -1,7 +1,5 @@
 package com.gu.newproduct.api.addsubscription
 
-import java.time.LocalDate
-
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.validation._
@@ -11,21 +9,22 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
-import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId, RuleFixtures}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json._
-import com.gu.util.reader.AsyncTypes._
 
+import java.time.LocalDate
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 
 class PaperStepsTest extends AnyFlatSpec with Matchers {
 
@@ -97,6 +96,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
     ) _
 
     val futureActual = Steps.handleRequest(
+      addSupporterPlus = dummySteps,
       addContribution = dummySteps,
       addPaperSub = fakeAddVoucherSteps,
       addDigipackSub = dummySteps,

@@ -3,7 +3,12 @@ package com.gu.newproduct.api
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.util.config.Stage
 
-case class EmailQueueNames(contributions: QueueName, paper: QueueName, digipack: QueueName, guardianWeekly: QueueName)
+case class EmailQueueNames(
+  contributions: QueueName,
+  paper: QueueName,
+  digipack: QueueName,
+  guardianWeekly: QueueName
+)
 
 object EmailQueueNames {
   val subsWelcomeDevQueue = QueueName("subs-welcome-email-dev")
