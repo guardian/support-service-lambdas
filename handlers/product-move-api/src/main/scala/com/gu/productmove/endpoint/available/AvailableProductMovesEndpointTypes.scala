@@ -32,6 +32,13 @@ object AvailableProductMovesEndpointTypes {
 
 }
 
+given JsonCodec[Option[String]] = JsonCodec.string.transform( s =>
+  s match {
+    case null | "" => None
+    case s         => Some(s)
+  },
+  _.getOrElse(""))
+
 object MoveToProduct {
 
   given JsonCodec[MoveToProduct] = DeriveJsonCodec.gen[MoveToProduct]
