@@ -14,7 +14,7 @@ import scala.io.Source
 
 class JsonCodecSpec extends AnyFlatSpec {
   it should "JSON Decoding: null fields should convert to type None" in {
-    val json = Source.fromResource("AccountBasicInfo.json").mkString
+    val json = Source.fromResource("AccountBasicInfo2.json").mkString
     val expectedBasicInfo = BasicInfo(DefaultPaymentMethod("2c92a0fd590128e4015902ad34001c1f", None), None, "0030J00001tCDhGAMKL", 0.0, Currency.GBP)
 
     val basicInfo = json.fromJson[BasicInfo].getOrElse("")

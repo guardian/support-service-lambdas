@@ -71,7 +71,7 @@ object GetAccount {
   object BasicInfo {
     private case class BasicInfoWire(
       defaultPaymentMethod: DefaultPaymentMethod,
-      IdentityId__c: String,
+      IdentityId__c: Option[String],
       sfContactId__c: String,
       balance: BigDecimal,
       currency: String
@@ -80,8 +80,12 @@ object GetAccount {
     given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen[BasicInfoWire].map {
       case BasicInfoWire(defaultPaymentMethod, identityId, sfContactId__c, balance, currency) =>
         identityId match {
-          case "" => BasicInfo(defaultPaymentMethod, None, sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
-          case id => BasicInfo(defaultPaymentMethod, Some(id), sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+          case None => BasicInfo(defaultPaymentMethod, None, sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+          case Some(id) =>
+            id match {
+              case "" => BasicInfo(defaultPaymentMethod, None, sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+              case _ => BasicInfo(defaultPaymentMethod, Some(id), sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+            }
         }
     }
   }

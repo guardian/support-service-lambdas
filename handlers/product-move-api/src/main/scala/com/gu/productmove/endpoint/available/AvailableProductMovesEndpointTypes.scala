@@ -34,7 +34,7 @@ object AvailableProductMovesEndpointTypes {
 
 given JsonCodec[Option[String]] = JsonCodec.string.transform( s =>
   s match {
-    case null | "" => None
+    case "" => None
     case s         => Some(s)
   },
   _.getOrElse(""))
