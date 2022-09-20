@@ -2,6 +2,7 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.available.Currency.currencyCodetoObject
 import com.gu.productmove.endpoint.available.{Currency, TimeUnit}
 import com.gu.productmove.zuora.DefaultPaymentMethod
 import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
@@ -45,6 +46,7 @@ object GetAccount {
 
   case class GetAccountResponse(
     basicInfo: BasicInfo,
+    billToContact: BillToContact,
     subscriptions: List[AccountSubscription],
   )
 
@@ -54,19 +56,37 @@ object GetAccount {
 
   case class BasicInfo(
     defaultPaymentMethod: DefaultPaymentMethod,
-    balance: Int,
-    currency: String
+    IdentityId__c: Option[String],
+    sfContactId__c: String,
+    balance: BigDecimal,
+    currency: Currency,
+  )
+
+  case class BillToContact(
+    firstName: String,
+    lastName: String,
+    workEmail: String
   )
 
   object BasicInfo {
     private case class BasicInfoWire(
       defaultPaymentMethod: DefaultPaymentMethod,
+      IdentityId__c: Option[String],
+      sfContactId__c: String,
       balance: BigDecimal,
       currency: String
     )
 
     given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen[BasicInfoWire].map {
-      case BasicInfoWire(defaultPaymentMethod, balance, currency) => BasicInfo(defaultPaymentMethod, (balance.toDouble * 100).toInt, currency)
+      case BasicInfoWire(defaultPaymentMethod, identityId, sfContactId__c, balance, currency) =>
+        identityId match {
+          case None => BasicInfo(defaultPaymentMethod, None, sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+          case Some(id) =>
+            id match {
+              case "" => BasicInfo(defaultPaymentMethod, None, sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+              case _ => BasicInfo(defaultPaymentMethod, Some(id), sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+            }
+        }
     }
   }
 
@@ -95,6 +115,8 @@ object GetAccount {
   given JsonDecoder[ZuoraSubscription] = DeriveJsonDecoder.gen
 
   given JsonDecoder[ZuoraRatePlan] = DeriveJsonDecoder.gen
+
+  given JsonDecoder[BillToContact] = DeriveJsonDecoder.gen
 
   def get(accountNumber: String): ZIO[GetAccount, String, GetAccountResponse] =
     ZIO.serviceWithZIO[GetAccount](_.get(accountNumber))

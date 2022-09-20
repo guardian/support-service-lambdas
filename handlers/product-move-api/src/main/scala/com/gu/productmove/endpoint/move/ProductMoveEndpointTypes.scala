@@ -1,5 +1,6 @@
 package com.gu.productmove.endpoint.move
 
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.OutputBody
 import com.gu.productmove.framework.InlineSchema.inlineSchema
 import com.gu.productmove.endpoint.available.{Currency, MoveToProduct}
 import sttp.tapir.Schema
@@ -22,13 +23,12 @@ object ProductMoveEndpointTypes {
 
   given Schema[ExpectedInput] = inlineSchema(Schema.derived)
 
-
   sealed trait OutputBody
   case class Success(
     @description("Name of new subscription.") newSubscriptionName: String,
-    newProduct: MoveToProduct,
   ) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
+  case object InternalServerError extends OutputBody
 
   given Schema[Success] = inlineSchema(Schema.derived)
 
