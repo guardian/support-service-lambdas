@@ -122,7 +122,7 @@ object Currency {
   )
 
   def currencyCodetoObject(code: String): Currency = {
-    // add some logging here, do we need to log via the ZIO library??
+    // add logging here
     websiteSupportedCurrencies.find(_.code == code).getOrElse(Currency.UnrecognizedCurrency)
   }
 
