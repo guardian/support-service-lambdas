@@ -43,7 +43,7 @@ given JsonEncoder[CancellationRequest] = DeriveJsonEncoder.gen[CancellationReque
 
 case class CancellationResponse(
   subscriptionId: String,
-  cancellationDate: LocalDate
+  cancelledDate: LocalDate
 )
 
 given JsonDecoder[CancellationResponse] = DeriveJsonDecoder.gen[CancellationResponse]
