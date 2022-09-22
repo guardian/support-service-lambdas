@@ -1,12 +1,17 @@
 package com.gu.newproduct.api.addsubscription
 
+import com.gu.effects.sqs.AwsSQSSend
+import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.validation.Validation._
+import com.gu.newproduct.api.EmailQueueNames
+import com.gu.newproduct.api.addsubscription.TypeConvert.*
+import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
+import com.gu.newproduct.api.addsubscription.validation.Validation.*
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
-import com.gu.newproduct.api.addsubscription.validation.supporterplus._
+import com.gu.newproduct.api.addsubscription.validation.supporterplus.*
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidateSubscriptions, ValidationResult}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
@@ -16,12 +21,13 @@ import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Catalog, Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
-import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
+import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, *}
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 
 import java.time.LocalDate
+import scala.concurrent.Future
 
 object AddSupporterPlus {
   def steps(
@@ -30,7 +36,8 @@ object AddSupporterPlus {
    getPlanAndCharge: PlanId => Option[PlanAndCharge],
    getCustomerData: ZuoraAccountId => ApiGatewayOp[SupporterPlusCustomerData],
    supporterPlusValidations: (SupporterPlusValidations.ValidatableFields, PlanId, Currency) => ValidationResult[AmountMinorUnits],
-   createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName]
+   createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+   sendConfirmationEmail: (Option[SfContactId], SupporterPlusEmailData) => AsyncApiGatewayOp[Unit]
  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = {
     for {
       customerData <- getCustomerData(request.zuoraAccountId).toAsync
@@ -51,7 +58,17 @@ object AddSupporterPlus {
         )
       )
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly supporter plus")
-
+      supporterPlusEmailData = toSupporterPlusEmailData(
+        request = request,
+        currency = account.currency,
+        paymentMethod = paymentMethod,
+        firstPaymentDate = acceptanceDate,
+        contacts = contacts,
+        amountMinorUnits = amountMinorUnits,
+        plan = getPlan(request.planId),
+        currentDate = getCurrentDate()
+      )
+      _ <- sendConfirmationEmail(account.sfContactId, supporterPlusEmailData).recoverAndLog("send supporter plus confirmation email")
     } yield subscriptionName
   }
 
@@ -61,6 +78,8 @@ object AddSupporterPlus {
     zuoraClient: Requests,
     isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
+    emailQueueNames: EmailQueueNames,
     currentDate: () => LocalDate
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
@@ -70,6 +89,10 @@ object AddSupporterPlus {
     val isValidSupporterPlusStartDate = isValidStartDateForPlan(MonthlySupporterPlus, _: LocalDate)
     val validateRequest = SupporterPlusValidations(isValidSupporterPlusStartDate, AmountLimits.limitsFor) _
 
+    val supporterPlusSqsSend = awsSQSSend(emailQueueNames.supporterPlus)
+    val contributionsBrazeConfirmationSqsSend = EtSqsSend[SupporterPlusEmailData](supporterPlusSqsSend) _
+    val sendConfirmationEmail = SendConfirmationEmail(contributionsBrazeConfirmationSqsSend) _
+
     AddSupporterPlus.steps(
       getPlan = catalog.planForId,
       getCurrentDate = currentDate,
@@ -77,6 +100,7 @@ object AddSupporterPlus {
       getCustomerData = getCustomerData,
       supporterPlusValidations = validateRequest,
       createSubscription = createSubscription,
+      sendConfirmationEmail = sendConfirmationEmail
     ) _
 
   }
@@ -85,6 +109,27 @@ object AddSupporterPlus {
     case d: DirectDebit => 10l
     case _ => 0l
   }
+
+  def toSupporterPlusEmailData(
+    request: AddSubscriptionRequest,
+    plan: Plan,
+    currency: Currency,
+    paymentMethod: PaymentMethod,
+    firstPaymentDate: LocalDate,
+    contacts: Contacts,
+    amountMinorUnits: AmountMinorUnits,
+    currentDate: LocalDate
+  ) =
+    SupporterPlusEmailData(
+      accountId = request.zuoraAccountId,
+      currency = currency,
+      plan = plan,
+      paymentMethod = paymentMethod,
+      amountMinorUnits = amountMinorUnits,
+      firstPaymentDate = firstPaymentDate,
+      contacts = contacts,
+      created = currentDate
+    )
 
   def getValidatedSupporterPlusCustomerData(
    zuoraClient: Requests,

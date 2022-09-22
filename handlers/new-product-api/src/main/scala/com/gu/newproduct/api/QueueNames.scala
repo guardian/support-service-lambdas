@@ -4,6 +4,7 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.util.config.Stage
 
 case class EmailQueueNames(
+  supporterPlus: QueueName,
   contributions: QueueName,
   paper: QueueName,
   digipack: QueueName,
