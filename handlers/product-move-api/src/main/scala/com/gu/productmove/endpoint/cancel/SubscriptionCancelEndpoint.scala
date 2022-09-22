@@ -2,7 +2,9 @@ package com.gu.productmove.endpoint.cancel
 
 import SubscriptionCancelEndpointTypes.{ExpectedInput, *}
 import com.gu.newproduct.api.productcatalog.ZuoraIds
+import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.cancel.zuora.GetSubscription.{GetSubscriptionResponse, RatePlanCharge}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import com.gu.productmove.endpoint.cancel.zuora.{GetSubscription, GetSubscriptionLive}
 import com.gu.productmove.zuora.rest.*
@@ -14,13 +16,16 @@ import sttp.tapir.EndpointIO.Example
 import sttp.tapir.*
 import sttp.tapir.json.zio.jsonBody
 import zio.{Clock, ZIO}
+import com.gu.util.config
+
+import java.time.LocalDate
 
 // this is the description for just the one endpoint
 object SubscriptionCancelEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("zuoraAccountId", ExpectedInput("targetProductId"))
+    run("A-S00424052", ExpectedInput("targetProductId"))
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String, ExpectedInput), Unit, OutputBody, Any, ZIOApiGatewayRequestHandler.TIO] = {
@@ -33,7 +38,7 @@ object SubscriptionCancelEndpoint {
     val endpointDescription: PublicEndpoint[(String, ExpectedInput), Unit, OutputBody, Any] =
       endpoint
         .post
-        .in("subscription-cancel").in(subscriptionNameCapture)
+        .in("supporter-plus-cancel").in(subscriptionNameCapture)
         .in(jsonBody[ExpectedInput].copy(info = EndpointIO.Info.empty[ExpectedInput].copy(description = Some("Information to describe the nature of the cancellation"))))
         .out(oneOf(
           oneOfVariant(sttp.model.StatusCode.Ok, jsonBody[Success].copy(info = EndpointIO.Info.empty.copy(description = Some("Successfully cancelled the subscription.")))),
@@ -69,25 +74,40 @@ object SubscriptionCancelEndpoint {
       case wrongNumber => ZIO.fail(s"subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber")
     }
 
+  private def checkProductRatePlanIds(charge: RatePlanCharge, ids: SupporterPlusZuoraIds) = {
+    if (charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
+      charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value)
+      ZIO.succeed(())
+    else
+      ZIO.fail("Subscription cannot be cancelled as it was not a Supporter Plus subscription")
+  }
+
+  // Check are we in the first 14 days, if so backdate the cancellation (and do the invoice dance)
+  private def subIsWithinFirst14Days(contractEffectiveDate: LocalDate) =
+    LocalDate.now().isBefore(contractEffectiveDate.plusDays(15)) //TODO: Check this
+
+  private def getEffectiveCancellationDate(contractEffectiveDate: LocalDate, charge: RatePlanCharge ) =
+    if (subIsWithinFirst14Days(contractEffectiveDate))
+      Some(contractEffectiveDate)
+    else
+      charge.chargedThroughDate
+
+
   private[productmove] def subscriptionCancel(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with ZuoraCancel with Stage, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName)
-
-      // check sub info to make sure it's a supporter plus
       stage <- ZIO.service[Stage]
-      zuoraIds <- ZIO.fromEither(ZuoraIds.zuoraIdsForStage(com.gu.util.config.Stage(stage.toString)))
-//      _ <- zuoraIds.supporterPlusIds TODO get the supporter plus ids and fail the lambda if the one in `subscription` doesn't match
-
-  //TODO check are we in the first 14 days, if so backdate the cancellation (and do the invoice dance)
-
+      subscription <- GetSubscription.get(subscriptionName)
+      // check sub info to make sure it's a supporter plus
       // should look at the relevant charge, members data api looks for the Paid Plan.
       // initially this will only apply to new prop which won't have multiple plans or charges.
+      zuoraIds <- ZIO.fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)))
       ratePlan <- asSingle(subscription.ratePlans, "ratePlan")
       charge <- asSingle(ratePlan.ratePlanCharges, "ratePlanCharge")
-      chargedThroughDate <- ZIO.fromOption(charge.chargedThroughDate).orElseFail(s"chargedThroughDate is null")
-
-      _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate) // TODO only if postData.actuallyDoCancellation is true (rather than just a preview)
-      _ <- ZIO.log("Sub cancelled as of: " + chargedThroughDate)
-    } yield Success()
+      _ <- checkProductRatePlanIds(charge, zuoraIds.supporterPlusZuoraIds)
+      cancellationDate <- ZIO.fromOption(getEffectiveCancellationDate(subscription.contractEffectiveDate, charge)).orElseFail(s"Cancellation date is null")
+      _ <- ZuoraCancel.cancel(subscriptionName, cancellationDate) // TODO only if postData.actuallyDoCancellation is true (rather than just a preview)
+      //_ <- refund()
+      _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
+    } yield Success("Hooray!")
 }

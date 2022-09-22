@@ -27,7 +27,7 @@ trait GetSubscription:
 
 object GetSubscription {
 
-  case class GetSubscriptionResponse(id: String, accountId: String, ratePlans: List[RatePlan])
+  case class GetSubscriptionResponse(id: String, contractEffectiveDate: LocalDate, accountId: String, ratePlans: List[RatePlan])
 
   case class RatePlan(
     productName: String,

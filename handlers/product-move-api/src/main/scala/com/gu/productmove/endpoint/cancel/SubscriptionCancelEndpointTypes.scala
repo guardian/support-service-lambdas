@@ -22,7 +22,7 @@ object SubscriptionCancelEndpointTypes {
 
   sealed trait OutputBody
   case class Success(
-    // TBC what should the body be?
+    message: String
   ) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
 
