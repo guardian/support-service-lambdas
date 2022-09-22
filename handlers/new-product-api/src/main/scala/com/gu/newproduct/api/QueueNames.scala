@@ -20,6 +20,7 @@ object EmailQueueNames {
 
     case Stage("PROD") =>
       EmailQueueNames(
+        supporterPlus = subsWelcomeProdQueue,
         contributions = contributionThanksProdQueue,
         paper = subsWelcomeProdQueue,
         digipack = subsWelcomeProdQueue,
@@ -28,6 +29,7 @@ object EmailQueueNames {
 
     case _ =>
       EmailQueueNames(
+        supporterPlus = subsWelcomeDevQueue,
         contributions = contributionThanksDevQueue,
         paper = subsWelcomeDevQueue,
         digipack = subsWelcomeDevQueue,
