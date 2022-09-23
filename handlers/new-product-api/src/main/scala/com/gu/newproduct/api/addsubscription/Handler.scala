@@ -38,18 +38,6 @@ object Handler extends Logging {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, SqsAsync.send(SqsAsync.buildClient), RawEffects.now)
     }
-
-  def main(args: Array[String]): Unit = {
-    val result = Steps.operationForEffects(
-      RawEffects.response,
-      Stage("DEV"),
-      GetFromS3.fetchString,
-      SqsAsync.send(SqsAsync.buildClient),
-      RawEffects.now
-    )
-
-    println("result:" + result)
-  }
 }
 
 object Steps {
