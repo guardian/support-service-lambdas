@@ -2,16 +2,19 @@ package com.gu.newproduct.api.addsubscription
 
 import com.gu.i18n.Currency
 import com.gu.newproduct.TestData
+import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription, PlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
@@ -60,6 +63,10 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
       ClientSuccess(SubscriptionName("well done"))
     }
 
+    def fakeSendEmails(sfContactId: Option[SfContactId], supporterPlusEmailData: SupporterPlusEmailData) = {
+      ContinueProcessing(()).toAsync
+    }
+
     def fakeValidateRequest(fields: ValidatableFields, planId: PlanId, currency: Currency) = {
       fields.amountMinorUnits.map(Passed(_)).getOrElse(Failed("missing amount"))
     }
@@ -90,7 +97,8 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
       getPlanAndCharge,
       fakeGetCustomerData,
       fakeValidateRequest,
-      fakeCreate
+      fakeCreate,
+      fakeSendEmails
     ) _
 
     val dummySteps = (req: AddSubscriptionRequest) => {
