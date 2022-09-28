@@ -42,7 +42,7 @@ object SubscriptionCancelEndpoint {
         .in(jsonBody[ExpectedInput].copy(info = EndpointIO.Info.empty[ExpectedInput].copy(description = Some("Information to describe the nature of the cancellation"))))
         .out(oneOf(
           oneOfVariant(sttp.model.StatusCode.Ok, jsonBody[Success].copy(info = EndpointIO.Info.empty.copy(description = Some("Successfully cancelled the subscription.")))),
-          oneOfVariant(sttp.model.StatusCode.NotFound, stringBody.map(NotFound.apply)(_.textResponse).copy(info = EndpointIO.Info.empty.copy(description = Some("No such subscription.")))),
+          oneOfVariant(sttp.model.StatusCode.InternalServerError, stringBody.map(InternalServerError.apply)(_.message).copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError.")))),
         ))
         .summary("Cancels the subscription at the soonest possible date based on the subscription type.")
         .description(
