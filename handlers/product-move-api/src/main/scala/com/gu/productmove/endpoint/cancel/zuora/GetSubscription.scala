@@ -40,7 +40,7 @@ object GetSubscription {
   case class RatePlanCharge(
     name: String,
     number: String,
-    price: Double,
+    price: BigDecimal,
     billingPeriod: Option[String],
     effectiveStartDate: LocalDate,
     chargedThroughDate: Option[LocalDate],
