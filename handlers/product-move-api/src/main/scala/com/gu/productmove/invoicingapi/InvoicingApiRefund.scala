@@ -35,8 +35,8 @@ private class InvoicingApiRefundLive(apiKey: String, url: String, sttpClient: St
       .send(sttpClient)
       .map{ response =>
         response.body match {
-          case Left(err) => ZIO.logInfo(s"Recieved an error from Invoicing refund endpoint: $err")
-          case Right(body) => ZIO.logInfo(s"Recieved a successful response from Invoicing refund endpoint: $body")
+          case Left(err) => println(s"Recieved an error from Invoicing refund endpoint: $err")
+          case Right(body) => println(s"Recieved a successful response from Invoicing refund endpoint: $body")
         }
         response.body
       }.absolve
@@ -48,7 +48,7 @@ trait InvoicingApiRefund {
 }
 
 object InvoicingApiRefund {
-  case class RefundRequest(subscriptionName: String, amount: BigDecimal)
+  case class RefundRequest(subscriptionName: String, refund: BigDecimal)
   /*
   {
     "subscriptionName": "A-S00427546",
