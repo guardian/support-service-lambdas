@@ -350,7 +350,7 @@ lazy val `new-product-api` = lambdaProject(
   .settings(
     scalacOptions += "-Ytasty-reader",
   )
-  .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`)
+  .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",

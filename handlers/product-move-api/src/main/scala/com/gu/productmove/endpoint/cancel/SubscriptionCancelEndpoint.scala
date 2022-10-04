@@ -13,6 +13,7 @@ import zio.IO
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
+import InvoicingApiRefund.RefundResponse
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.*
 import sttp.tapir.json.zio.jsonBody
@@ -20,6 +21,7 @@ import zio.{Clock, ZIO}
 import com.gu.util.config
 
 import java.time.LocalDate
+import scala.concurrent.Future
 
 // this is the description for just the one endpoint
 object SubscriptionCancelEndpoint {
@@ -76,7 +78,7 @@ object SubscriptionCancelEndpoint {
       case wrongNumber => ZIO.fail(s"subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber")
     }
 
-  private def checkProductRatePlanIds(charge: RatePlanCharge, ids: SupporterPlusZuoraIds) = {
+  private def checkProductIsSupporterPlus(charge: RatePlanCharge, ids: SupporterPlusZuoraIds) = {
     if (charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
       charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value)
       ZIO.succeed(())
@@ -84,9 +86,8 @@ object SubscriptionCancelEndpoint {
       ZIO.fail("Subscription cannot be cancelled as it was not a Supporter Plus subscription")
   }
 
-  // Check are we in the first 14 days, if so backdate the cancellation (and do the invoice dance)
   private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
-    now.isBefore(contractEffectiveDate.plusDays(15)) //TODO: Check this
+    now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 
   private def getEffectiveCancellationDate(shouldBeRefunded: Boolean, contractEffectiveDate: LocalDate, charge: RatePlanCharge ) =
     if (shouldBeRefunded)
@@ -101,21 +102,32 @@ object SubscriptionCancelEndpoint {
       _ <- ZIO.log(s"Stage is $stage")
       subscription <- GetSubscription.get(subscriptionName)
       _ <- ZIO.log(s"Subscription is ${subscription}")
-      shouldBeRefunded = subIsWithinFirst14Days(LocalDate.now(), subscription.contractEffectiveDate)
-      _ <- ZIO.log(s"Should be refunded is $shouldBeRefunded")
+
       // check sub info to make sure it's a supporter plus
       // should look at the relevant charge, members data api looks for the Paid Plan.
       // initially this will only apply to new prop which won't have multiple plans or charges.
       zuoraIds <- ZIO.fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)))
       ratePlan <- asSingle(subscription.ratePlans, "ratePlan")
       charge <- asSingle(ratePlan.ratePlanCharges, "ratePlanCharge")
-      _ <- checkProductRatePlanIds(charge, zuoraIds.supporterPlusZuoraIds)
-      cancellationDate <- ZIO.fromOption(getEffectiveCancellationDate(shouldBeRefunded, subscription.contractEffectiveDate, charge)).orElseFail(s"Cancellation date is null")
+      _ <- checkProductIsSupporterPlus(charge, zuoraIds.supporterPlusZuoraIds)
+
+      // check whether the sub is within the first 14 days of purchase - if it is then the subscriber is entitled to a refund
+      shouldBeRefunded = subIsWithinFirst14Days(LocalDate.now(), subscription.contractEffectiveDate)
+      _ <- ZIO.log(s"Should be refunded is $shouldBeRefunded")
+      cancellationDate <- ZIO.fromOption(
+        if (shouldBeRefunded)
+          Some(subscription.contractEffectiveDate)
+        else
+          charge.chargedThroughDate
+      ).orElseFail(s"Cancellation date is null")
       _ <- ZIO.log(s"Cancellation date is $cancellationDate")
-      //_ <- ZIO.log(s"Attempting to cancel sub")
-      //_ <- ZuoraCancel.cancel(subscriptionName, cancellationDate) // TODO only if postData.actuallyDoCancellation is true (rather than just a preview)
+
+      _ <- ZIO.log(s"Attempting to cancel sub")
+      _ <- ZuoraCancel.cancel(subscriptionName, cancellationDate)
+
       _ <- ZIO.log(s"Attempting to refund sub")
-      _ <- ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, charge.price)) // TODO only if shouldBeRefunded = true
+      _ <- if(shouldBeRefunded) ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, charge.price)) else ZIO.succeed(RefundResponse("Success"))
+
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
-    } yield Success("Whoopee!")
+    } yield Success(s"Subscription was successfully cancelled${(if (shouldBeRefunded) " and refunded" else "")}")
 }

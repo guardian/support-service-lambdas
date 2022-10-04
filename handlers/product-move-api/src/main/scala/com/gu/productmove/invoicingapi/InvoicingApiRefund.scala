@@ -22,7 +22,7 @@ object InvoicingApiRefundLive {
     }
 }
 
-private class InvoicingApiRefundLive(apiKey: String, url: String, sttpClient: SttpBackend[Task, Any]) extends InvoicingApiRefund :
+private class InvoicingApiRefundLive(apiKey: String, url: String, sttpClient: SttpBackend[Task, Any]) extends InvoicingApiRefund {
   override def refund(subscriptionName: String, amount: BigDecimal): ZIO[Any, String, RefundResponse] = {
 
     val requestBody = RefundRequest(subscriptionName, amount)
@@ -33,7 +33,7 @@ private class InvoicingApiRefundLive(apiKey: String, url: String, sttpClient: St
       .post(uri"$url")
       .response(asJson[RefundResponse])
       .send(sttpClient)
-      .map{ response =>
+      .map { response =>
         response.body match {
           case Left(err) => println(s"Recieved an error from Invoicing refund endpoint: $err")
           case Right(body) => println(s"Recieved a successful response from Invoicing refund endpoint: $body")
@@ -42,6 +42,7 @@ private class InvoicingApiRefundLive(apiKey: String, url: String, sttpClient: St
       }.absolve
       .mapError(_.toString)
   }
+}
 
 trait InvoicingApiRefund {
   def refund(subscriptionName: String, amount: BigDecimal): ZIO[Any, String, RefundResponse]

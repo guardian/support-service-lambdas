@@ -11,7 +11,7 @@ object SubscriptionCancelEndpointTypes {
   case class ExpectedInput(
     @description("User cancellation reason - from a picklist.")
     @encodedExample("mma_other")// also "mma_value_for_money" , "mma_support_another_way" , "mma_financial_circumstances", etc
-    reason: String // TODO consider an enumeration
+    reason: String
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
