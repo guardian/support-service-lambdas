@@ -75,7 +75,7 @@ object SubscriptionCancelEndpoint {
   def asSingle[A](list: List[A], message: String): IO[String, A] =
     list match {
       case singlePlan :: Nil => ZIO.succeed(singlePlan)
-      case wrongNumber => ZIO.fail(s"subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber")
+      case wrongNumber => ZIO.fail(s"Subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber")
     }
 
   private def checkProductIsSupporterPlus(charge: RatePlanCharge, ids: SupporterPlusZuoraIds) = {
@@ -119,7 +119,10 @@ object SubscriptionCancelEndpoint {
           Some(subscription.contractEffectiveDate)
         else
           charge.chargedThroughDate
-      ).orElseFail(s"Cancellation date is null")
+      ).orElseFail(
+        s"Subscription charged through date is null is for supporter plus subscription $subscriptionName.\n" +
+        s"This is an error because we expect to be able to use the charged through date to work out the effective cancellation date"
+      )
       _ <- ZIO.log(s"Cancellation date is $cancellationDate")
 
       _ <- ZIO.log(s"Attempting to cancel sub")
