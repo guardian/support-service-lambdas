@@ -8,7 +8,7 @@ import com.gu.productmove.endpoint.cancel.zuora.GetSubscription.{GetSubscription
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import com.gu.productmove.endpoint.cancel.zuora.{GetSubscription, GetSubscriptionLive}
 import com.gu.productmove.zuora.rest.*
-import com.gu.productmove.zuora.{ZuoraCancel, ZuoraCancelLive}
+import com.gu.productmove.zuora.{ZuoraCancel, ZuoraCancelLive, ZuoraSetCancellationReasons, ZuoraSetCancellationReasonsLive}
 import zio.IO
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -68,6 +68,7 @@ object SubscriptionCancelEndpoint {
         ZuoraGetLive.layer,
         GuStageLive.layer,
         InvoicingApiRefundLive.layer,
+        ZuoraSetCancellationReasonsLive.layer,
       )
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res)
@@ -95,7 +96,8 @@ object SubscriptionCancelEndpoint {
     else
       charge.chargedThroughDate
 
-  private[productmove] def subscriptionCancel(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with ZuoraCancel with InvoicingApiRefund with Stage, String, OutputBody] =
+  private[productmove] def subscriptionCancel(subscriptionName: String, postData: ExpectedInput):
+  ZIO[GetSubscription with ZuoraCancel with InvoicingApiRefund with Stage with ZuoraSetCancellationReasons, String, OutputBody] =
     for {
       _ <- ZIO.log(s"PostData: ${postData.toString}")
       stage <- ZIO.service[Stage]
@@ -132,5 +134,9 @@ object SubscriptionCancelEndpoint {
       _ <- if(shouldBeRefunded) ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, charge.price)) else ZIO.succeed(RefundResponse("Success"))
 
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
+
+      _ <- ZIO.log(s"Attempting to update cancellation reasons on Zuora subscription")
+      _ <- ZuoraSetCancellationReasons.update(subscriptionName, subscription.version + 1, postData.reason) // Version +1 because the cancellation will have incremented the version
+
     } yield Success(s"Subscription was successfully cancelled${(if (shouldBeRefunded) " and refunded" else "")}")
 }
