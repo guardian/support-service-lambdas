@@ -1,7 +1,10 @@
 package com.gu.productmove.invoicingapi
 
+import com.gu.productmove.AwsS3
+import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.{RefundRequest, RefundResponse}
+import com.gu.productmove.invoicingapi.InvoicingApiRefundLive.InvoicingApiConfig
 import sttp.client3.Response.ExampleGet.uri
 import sttp.client3.quick.basicRequest
 import sttp.client3.ziojson.*
@@ -10,27 +13,34 @@ import zio.json.*
 import zio.{Task, ZIO, ZLayer}
 
 object InvoicingApiRefundLive {
-  val layer: ZLayer[Stage with SttpBackend[Task, Any], String, InvoicingApiRefundLive] =
+
+  case class InvoicingApiConfig(url: String, apiKey: String)
+
+  object InvoicingApiConfig {
+    given JsonDecoder[InvoicingApiConfig] = DeriveJsonDecoder.gen[InvoicingApiConfig]
+  }
+
+  val layer: ZLayer[Stage with SttpBackend[Task, Any] with AwsS3, String, InvoicingApiRefundLive] =
     ZLayer {
       for {
         stage <- ZIO.service[Stage]
-        apiKey = sys.env.getOrElse("InvoicingApiKey", throw new RuntimeException("Missing x-api-key for invoicing-api"))
-        invoicingApiUrl = s"${sys.env.getOrElse("InvoicingApiUrl", throw new RuntimeException("Missing invoicing-api url"))}/$stage/refund"
-        _ <- ZIO.logInfo(s"Invoice API url is $invoicingApiUrl")
+        fileContent <- AwsS3.getObject(bucket, key("invoicingApi", stage)).mapError(_.toString)
+        invoicingApiConfig <- ZIO.fromEither(summon[JsonDecoder[InvoicingApiConfig]].decodeJson(fileContent))
+        _ <- ZIO.logInfo(s"Invoice API url is ${invoicingApiConfig.url}")
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
-      } yield InvoicingApiRefundLive(apiKey, invoicingApiUrl, sttpClient)
+      } yield InvoicingApiRefundLive(invoicingApiConfig, sttpClient)
     }
 }
 
-private class InvoicingApiRefundLive(apiKey: String, url: String, sttpClient: SttpBackend[Task, Any]) extends InvoicingApiRefund {
+private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: SttpBackend[Task, Any]) extends InvoicingApiRefund {
   override def refund(subscriptionName: String, amount: BigDecimal): ZIO[Any, String, RefundResponse] = {
 
     val requestBody = RefundRequest(subscriptionName, amount)
     basicRequest
       .contentType("application/json")
-      .header("x-api-key", apiKey)
+      .header("x-api-key", config.apiKey)
       .body(requestBody.toJson)
-      .post(uri"$url")
+      .post(uri"$config.url")
       .response(asJson[RefundResponse])
       .send(sttpClient)
       .map { response =>

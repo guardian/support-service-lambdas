@@ -1,6 +1,7 @@
 package com.gu.productmove.zuora.rest
 
 import com.gu.productmove.AwsS3
+import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.zuora.rest.ZuoraClient
 import com.gu.productmove.zuora.rest.ZuoraClientLive.ZuoraRestConfig
@@ -25,21 +26,11 @@ object ZuoraClientLive {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
 
-  val bucket = "gu-reader-revenue-private"
-
-  private def key(stage: Stage, version: Int = 1) = {
-    val basePath = s"membership/support-service-lambdas/$stage"
-
-    val versionString = if (stage == Stage.DEV) "" else s".v${version}"
-    val relativePath = s"zuoraRest-$stage$versionString.json"
-    s"$basePath/$relativePath"
-  }
-
   val layer: ZLayer[AwsS3 with Stage with SttpBackend[Task, Any], String, ZuoraClient] =
     ZLayer {
       for {
         stage <- ZIO.service[Stage]
-        fileContent <- AwsS3.getObject(bucket, key(stage)).mapError(_.toString)
+        fileContent <- AwsS3.getObject(bucket, key("zuoraRest", stage)).mapError(_.toString)
         zuoraRestConfig <- ZIO.fromEither(summon[JsonDecoder[ZuoraRestConfig]].decodeJson(fileContent))
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraRestConfig.baseUrl + "/"))
         _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
