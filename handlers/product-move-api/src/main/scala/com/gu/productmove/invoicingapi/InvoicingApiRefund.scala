@@ -49,6 +49,9 @@ trait InvoicingApiRefund {
 }
 
 object InvoicingApiRefund {
+  def refund(subscriptionName: String, amount: BigDecimal): ZIO[InvoicingApiRefund, String, RefundResponse] =
+    ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount))
+
   case class RefundRequest(subscriptionName: String, refund: BigDecimal)
   /* Full response from Invoicing api is as follows:
   {
