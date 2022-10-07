@@ -485,10 +485,29 @@ lazy val `product-move-api` = lambdaProject(
   ),
   scala3Settings
 )
-  .settings(
-    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
+  .settings {
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
     genDocs := genDocsImpl("com.gu.productmove.MakeDocsYaml").value
-  )
+
+    lazy val deployTo =
+      inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+
+    // run from product-move-api project eg. deployTo CODE
+    // product-move-api needs its own deploy task currently because firstly it's Scala 3 so the jar path is different to
+    // other projects and secondly the jar is too large to deploy with the aws cli --zip-file parameter so we need to use S3
+    deployTo := {
+      import scala.sys.process._
+      import complete.DefaultParsers._
+      val jarFile = assembly.value
+
+      val Seq(stage) = spaceDelimited("<arg>").parsed
+      val s3Bucket = "support-service-lambdas-dist"
+      val s3Path = s"membership/$stage/product-move-api/product-move-api.jar"
+
+      s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name move-product-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+    }
+  }
   .dependsOn(`zuora-models`)
 
 lazy val `metric-push-api` = lambdaProject(
@@ -633,17 +652,4 @@ deployAwsLambda := {
 commands += Command.args("deploy", "<name stage>") { (state, args) =>
   val Seq(name, stage) = args
   s"""$name/assembly""":: s"deployAwsLambda $name $stage" :: state
-}
-
-lazy val deployProductMove =
-  inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
-
-deployProductMove := {
-  import scala.sys.process._
-  val _ = (`product-move-api`/assembly).value
-  val s3Bucket = "support-service-lambdas-dist"
-  val s3Path = "membership/DEV/product-move-api/product-move-api.jar"
-
-  s"aws s3 cp handlers/product-move-api/target/scala-3.1.2/product-move-api.jar s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
-  s"aws lambda update-function-code --function-name move-product-DEV --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
 }
