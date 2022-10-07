@@ -40,7 +40,7 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
       .contentType("application/json")
       .header("x-api-key", config.apiKey)
       .body(requestBody.toJson)
-      .post(uri"$config.url")
+      .post(uri"${config.url}")
       .response(asJson[RefundResponse])
       .send(sttpClient)
       .map { response =>
