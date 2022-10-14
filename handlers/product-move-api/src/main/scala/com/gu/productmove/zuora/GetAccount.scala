@@ -7,7 +7,7 @@ import com.gu.productmove.endpoint.available.{Currency, TimeUnit}
 import com.gu.productmove.zuora.DefaultPaymentMethod
 import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import com.gu.productmove.zuora.rest.ZuoraClientLive.{ZuoraRestConfig, bucket, key}
+import com.gu.productmove.zuora.rest.ZuoraClientLive.ZuoraRestConfig
 import com.gu.productmove.zuora.rest.ZuoraGet
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck
 import sttp.capabilities.zio.ZioStreams

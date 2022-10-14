@@ -11,7 +11,7 @@ object SubscriptionCancelEndpointTypes {
   case class ExpectedInput(
     @description("User cancellation reason - from a picklist.")
     @encodedExample("mma_other")// also "mma_value_for_money" , "mma_support_another_way" , "mma_financial_circumstances", etc
-    reason: String // TODO consider an enumeration
+    reason: String
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
@@ -21,15 +21,14 @@ object SubscriptionCancelEndpointTypes {
 
 
   sealed trait OutputBody
-  case class Success(
-    // TBC what should the body be?
-  ) extends OutputBody
+  case class Success(message: String) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
+  case class InternalServerError(message: String) extends OutputBody
 
   given Schema[Success] = inlineSchema(Schema.derived)
 
   given JsonCodec[Success] = DeriveJsonCodec.gen[Success]
-  given JsonCodec[NotFound] = DeriveJsonCodec.gen[NotFound]
+  given JsonCodec[InternalServerError] = DeriveJsonCodec.gen[InternalServerError]
   given JsonCodec[OutputBody] = DeriveJsonCodec.gen[OutputBody]
 
 }

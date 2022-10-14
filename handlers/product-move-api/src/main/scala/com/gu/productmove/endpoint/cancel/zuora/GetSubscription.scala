@@ -27,7 +27,13 @@ trait GetSubscription:
 
 object GetSubscription {
 
-  case class GetSubscriptionResponse(id: String, accountId: String, ratePlans: List[RatePlan])
+  case class GetSubscriptionResponse(
+    id: String,
+    version: Int,
+    contractEffectiveDate: LocalDate,
+    accountId: String,
+    ratePlans: List[RatePlan]
+  )
 
   case class RatePlan(
     productName: String,
@@ -40,7 +46,7 @@ object GetSubscription {
   case class RatePlanCharge(
     name: String,
     number: String,
-    price: Double,
+    price: BigDecimal,
     billingPeriod: Option[String],
     effectiveStartDate: LocalDate,
     chargedThroughDate: Option[LocalDate],

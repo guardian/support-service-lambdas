@@ -62,6 +62,7 @@ Resources:
           Action: s3:GetObject
           Resource:
             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/invoicingApi-${Stage}*.json
       - Statement:
         - Effect: Allow
           Action: s3:GetObject
@@ -96,4 +97,22 @@ Resources:
               RestApiId:
                 Ref: ProductMoveApiGateway
 
-# alarms go here
+# alarms
+  ProductMovementFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+      AlarmName: An error in the Product Move lambda. Please check the logs to diagnose
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ProductMoveApiLambda
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
