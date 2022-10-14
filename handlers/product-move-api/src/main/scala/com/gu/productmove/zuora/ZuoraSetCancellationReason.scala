@@ -16,22 +16,22 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-trait ZuoraSetCancellationReasons:
+trait ZuoraSetCancellationReason:
   def update(subscriptionNumber: String, subscriptionVersion: Int, userCancellationReason: String): ZIO[Any, String, UpdateResponse]
 
-object ZuoraSetCancellationReasonsLive:
-  val layer: URLayer[ZuoraGet, ZuoraSetCancellationReasons] = ZLayer.fromFunction(ZuoraSetCancellationReasonsLive(_))
+object ZuoraSetCancellationReasonLive:
+  val layer: URLayer[ZuoraGet, ZuoraSetCancellationReason] = ZLayer.fromFunction(ZuoraSetCancellationReasonLive(_))
 
-private class ZuoraSetCancellationReasonsLive(zuoraGet: ZuoraGet) extends ZuoraSetCancellationReasons :
+private class ZuoraSetCancellationReasonLive(zuoraGet: ZuoraGet) extends ZuoraSetCancellationReason :
   override def update(subscriptionNumber: String, subscriptionVersion: Int, userCancellationReason: String): ZIO[Any, String, UpdateResponse] = {
     val updateRequest = UpdateRequest(CustomFields(userCancellationReason))
 
     zuoraGet.put[UpdateRequest, UpdateResponse](uri"subscriptions/$subscriptionNumber/versions/$subscriptionVersion/customFields", updateRequest)
   }
 
-object ZuoraSetCancellationReasons {
-  def update(subscriptionNumber: String, subscriptionVersion: Int, userCancellationReason: String): ZIO[ZuoraSetCancellationReasons, String, UpdateResponse] =
-    ZIO.serviceWithZIO[ZuoraSetCancellationReasons](_.update(subscriptionNumber, subscriptionVersion, userCancellationReason))
+object ZuoraSetCancellationReason {
+  def update(subscriptionNumber: String, subscriptionVersion: Int, userCancellationReason: String): ZIO[ZuoraSetCancellationReason, String, UpdateResponse] =
+    ZIO.serviceWithZIO[ZuoraSetCancellationReason](_.update(subscriptionNumber, subscriptionVersion, userCancellationReason))
 }
 
 case class UpdateRequest(
