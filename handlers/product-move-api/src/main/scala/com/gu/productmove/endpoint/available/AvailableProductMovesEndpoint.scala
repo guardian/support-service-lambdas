@@ -149,7 +149,7 @@ object AvailableProductMovesEndpoint {
       accountIsEligible <-
         (for {
           _ <- succeedIfEligible(account.subscriptions.length == 1, s"More than one subscription for account for subscription: $subscriptionName")
-          _ <- succeedIfEligible(account.basicInfo.currency == "GBP", s"Subscription: $subscriptionName not in GBP")
+          _ <- succeedIfEligible(account.basicInfo.currency == Currency.GBP, s"Subscription: $subscriptionName not in GBP")
           _ <- succeedIfEligible(paymentMethod.NumConsecutiveFailures == 0, s"User is in payment failure with subscription: $subscriptionName")
           _ <- succeedIfEligible(creditCardExpirationDate.isAfter(today), s"card expired for subscription: $subscriptionName")
           _ <- succeedIfEligible(account.basicInfo.balance == 0, s"Account balance is not zero for subscription: $subscriptionName")

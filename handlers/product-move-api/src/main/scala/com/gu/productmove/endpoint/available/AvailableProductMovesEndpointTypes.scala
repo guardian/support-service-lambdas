@@ -1,6 +1,6 @@
 package com.gu.productmove.endpoint.available
 
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.{localDateToString}
+import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.localDateToString
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{AvailableMoves, OutputBody}
 import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
@@ -13,7 +13,7 @@ import sttp.tapir.Validator.Enumeration
 import sttp.tapir.generic.Derived
 import sttp.tapir.{FieldName, Schema, SchemaType, Validator}
 import zio.{IO, ZIO}
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.json.*
 
 import java.time.LocalDate
 import scala.util.Try
@@ -31,6 +31,13 @@ object AvailableProductMovesEndpointTypes {
   given JsonCodec[OutputBody] = DeriveJsonCodec.gen[OutputBody]
 
 }
+
+given JsonCodec[Option[String]] = JsonCodec.string.transform( s =>
+  s match {
+    case "" => None
+    case s         => Some(s)
+  },
+  _.getOrElse(""))
 
 object MoveToProduct {
 
@@ -57,7 +64,7 @@ object MoveToProduct {
 
       introOffer = Offer(Billing(amount = None, percentage = Some(50), currency = None, frequency = None, startDate = Some(localDateToString.format(chargedThroughDate))), TimePeriod(TimeUnit.month, 3))
       newPlan = Billing(amount = Some(price.toInt), percentage = None, currency = Some(GBP), frequency = Some(TimePeriod(TimeUnit.fromString(billingPeriod), 1)), startDate = Some(localDateToString.format(chargedThroughDate.plusDays(90))))
-    } yield MoveToProduct(id = subscriptionName, name = "Digital Pack", trial = Some(Trial(dayCount = 14)), introOffer = Some(introOffer), billing = newPlan)
+    } yield MoveToProduct(id = productRatePlan.id, name = "Digital Pack", trial = Some(Trial(dayCount = 14)), introOffer = Some(introOffer), billing = newPlan)
 }
 
 @encodedName("product")
@@ -95,12 +102,35 @@ enum Currency(
   val code: String,
   val symbol: String
 ):
+  // The MVP only accepts GBP
   case GBP extends Currency("GBP", "£")
+  case USD extends Currency("USD", "$")
+  case AUD extends Currency("AUD", "$")
+  case NZD extends Currency("NZD", "$")
+  case CAD extends Currency("CAD", "$")
+  case EUR extends Currency("EUR", "€")
+  case UnrecognizedCurrency extends Currency("", "")
+
 object Currency {
+  val websiteSupportedCurrencies = List(
+    GBP,
+    USD,
+    AUD,
+    CAD,
+    EUR,
+    NZD,
+  )
+
+  def currencyCodetoObject(code: String): Currency = {
+    // add logging here
+    websiteSupportedCurrencies.find(_.code == code).getOrElse(Currency.UnrecognizedCurrency)
+  }
+
   given JsonCodec[Currency] = JsonCodec[Map[String, String]].transformOrFail[Currency](
     _.get("code").toRight("no code in currency object").flatMap(code => Try(Currency.valueOf(code)).toEither.left.map(_.toString)),
     c => Map("code" -> c.code, "symbol" -> c.symbol)
   )
+
   given Schema[Currency] =
     Schema[Currency](
       SchemaType.SProduct[Currency](
