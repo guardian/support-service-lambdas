@@ -43,7 +43,7 @@ class CreditCardExpiryTest extends AnyFlatSpec with Matchers with TripleEquals {
       |        "first_name" : "Bar",
       |        "last_name" : "Foo",
       |        "subscriber_id" : "A-S00111111",
-      |        "next_charge_date" : "6 April 2020",
+      |        "next_charge_date" : "6 April 20201",
       |        "product" : "Contributor"
       |      }
       |    }
