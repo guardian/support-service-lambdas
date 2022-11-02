@@ -23,7 +23,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("zuoraAccountId", ExpectedInput("targetProductId"))
+    run("A-S00442849", ExpectedInput("50"))
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
@@ -83,7 +83,7 @@ object ProductMoveEndpoint {
       case _ => ZIO.log(s"subscription has more or less than one rateplan $message: ${list.length}").flatMap(_ => ZIO.fail(InternalServerError("")))
     }
 
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with EmailSender, OutputBody, Success] =
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with EmailSender with Stage, OutputBody, Success] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription")
@@ -93,7 +93,7 @@ object ProductMoveEndpoint {
 
       chargedThroughDate <- ZIO.fromOption(ratePlanCharge.chargedThroughDate).orElse(ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(InternalServerError(""))))
 
-      newSubscription <- SubscriptionUpdate.update(subscription.id, postData.targetProductId, currentRatePlan.id).mapErrorTo500("SubscriptionUpdate")
+      newSubscription <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).mapErrorTo500("SubscriptionUpdate")
 
       getAccountFuture <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount").fork
       nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).mapErrorTo500(s"InvoicePreview").fork

@@ -1,5 +1,6 @@
 package com.gu.productmove
 
+import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
 import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview}
@@ -16,9 +17,9 @@ import java.time.LocalDate
 //-----------------------------------------------------
 // Stubs for GetSubscription service
 //-----------------------------------------------------
-val getSubscriptionResponse = GetSubscriptionResponse("subscriptionName", "zuoraAccountId", "accountNumber", ratePlans = List(
+val getSubscriptionResponse = GetSubscriptionResponse("A-S00339056", "zuoraAccountId", "accountNumber", ratePlans = List(
   RatePlan(
-    id = "R1",
+    id = "89ad8casd9c0asdcaj89sdc98as",
     productName = "P1",
     productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
     ratePlanName = "RP1",
@@ -32,7 +33,7 @@ val getSubscriptionResponse = GetSubscriptionResponse("subscriptionName", "zuora
         effectiveStartDate = LocalDate.of(2017, 12, 15),
         effectiveEndDate = LocalDate.of(2020, 11, 29),
         chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
-        billingPeriod = Some("billingPeriod"),
+        billingPeriod = Monthly,
       )
     )
   )
@@ -54,7 +55,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse("subsc
         effectiveStartDate = LocalDate.of(2017, 12, 15),
         effectiveEndDate = LocalDate.of(2020, 11, 29),
         chargedThroughDate = None,
-        billingPeriod = Some("billingPeriod"),
+        billingPeriod = Monthly,
       )
     )
   )
