@@ -31,11 +31,6 @@ object HandlerSpec extends ZIOSpecDefault {
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> SubscriptionUpdateResponse("subscriptionId"))
 
-
-
-
-
-
         val emailSenderStubs = Map(emailMessageBody -> ())
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
         val getPaymentMethodResponse = PaymentMethodResponse(
@@ -45,12 +40,6 @@ object HandlerSpec extends ZIOSpecDefault {
         val invoicePreviewStubs = Map(("zuoraAccountId", LocalDate.of(2022, 9, 29)) -> DigiSubWithOfferInvoicePreview)
 
         val expectedOutput = ProductMoveEndpointTypes.Success("A-S9999999")
-
-
-
-
-
-
 
         (for {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
