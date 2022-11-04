@@ -28,7 +28,7 @@ object ProductMoveEndpointTypes {
     @description("Name of new subscription.") newSubscriptionName: String,
   ) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
-  case class InternalServerError(s: String) extends OutputBody
+  case class InternalServerError(message: String) extends OutputBody
 
   given Schema[Success] = inlineSchema(Schema.derived)
 

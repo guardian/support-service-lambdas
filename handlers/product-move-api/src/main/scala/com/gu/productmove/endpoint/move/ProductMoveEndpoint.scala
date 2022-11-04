@@ -44,7 +44,7 @@ object ProductMoveEndpoint {
         .in(jsonBody[ExpectedInput].copy(info = EndpointIO.Info.empty[ExpectedInput].copy(description = Some("Definition of required movement."))))
         .out(oneOf(
           oneOfVariant(sttp.model.StatusCode.Ok, jsonBody[Success].copy(info = EndpointIO.Info.empty.copy(description = Some("Success.")))),
-          oneOfVariant(sttp.model.StatusCode.InternalServerError, stringBody.map(InternalServerError.apply)(_.s).copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError.")))),
+          oneOfVariant(sttp.model.StatusCode.InternalServerError, stringBody.map(InternalServerError.apply)(_.message).copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError.")))),
         ))
         .summary("Replaces the existing subscription with a new one.")
         .description(
@@ -72,31 +72,30 @@ object ProductMoveEndpoint {
     )
 
   extension[R, E, A] (zio: ZIO[R, E, A])
-    def mapErrorTo500(message: String) = zio.catchAll {
-      error =>
-        ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError("")))
+    def addLogMessage(message: String) = zio.catchAll {
+      error => ZIO.fail(s"$message failed with: $error")
     }
 
-  def getSingleOrNotEligible[A](list: List[A], message: String): IO[InternalServerError, A] =
+  def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
     list.length match {
       case 1 => ZIO.succeed(list.head)
-      case _ => ZIO.log(s"subscription has more or less than one rateplan $message: ${list.length}").flatMap(_ => ZIO.fail(InternalServerError("")))
+      case _ => ZIO.fail(message)
     }
 
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with EmailSender with Stage, OutputBody, Success] =
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with EmailSender with Stage, String, Success] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription")
+      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
 
-      currentRatePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName , ratePlan")
-      ratePlanCharge <- getSingleOrNotEligible(currentRatePlan.ratePlanCharges, s"Subscription: $subscriptionName , ratePlanCharge")
+      currentRatePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName has more than one ratePlan")
+      ratePlanCharge <- getSingleOrNotEligible(currentRatePlan.ratePlanCharges, s"Subscription: $subscriptionName has more than one ratePlanCharge")
 
-      chargedThroughDate <- ZIO.fromOption(ratePlanCharge.chargedThroughDate).orElse(ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(InternalServerError(""))))
+      chargedThroughDate <- ZIO.fromOption(ratePlanCharge.chargedThroughDate).orElseFail(s"chargedThroughDate is null for subscription $subscriptionName.")
 
-      newSubscription <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).mapErrorTo500("SubscriptionUpdate")
+      newSubscription <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
 
-      getAccountFuture <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount").fork
-      nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).mapErrorTo500(s"InvoicePreview").fork
+      getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
+      nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).addLogMessage(s"InvoicePreview").fork
 
       requests = getAccountFuture.zip(nextInvoiceFuture)
       responses <- requests.join
@@ -130,7 +129,7 @@ object ProductMoveEndpoint {
           account.basicInfo.sfContactId__c,
           account.basicInfo.IdentityId__c
         )
-      ).mapErrorTo500("EmailSender")
+      ).addLogMessage("EmailSender")
 
       _ <- ZIO.log("Sub: " + "A-S9999999")
     } yield Success("A-S9999999")
