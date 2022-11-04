@@ -15,7 +15,7 @@ import scala.deriving.Mirror
 object ProductMoveEndpointTypes {
 
   case class ExpectedInput(
-    @description("price of new Supporter Plus subscription") price: String
+    @description("price of new Supporter Plus subscription") price: Double
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]

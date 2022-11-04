@@ -19,7 +19,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("subscription update service")(
-      test("JSON request body is created and encoded correctly (DEV)") {
+      test("SubscriptionUpdateRequest is correct for input (DEV)") {
         val timeLocalDate = LocalDate.of(2022, 5, 10)
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
 
@@ -40,11 +40,11 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
         for {
           _ <- TestClock.setTime(time)
-          createRequestBody <- SubscriptionUpdateRequest(Monthly, "8ad03sdfa1312f3123", "50").provideLayer(ZLayer.succeed(Stage.valueOf("DEV")))
+          createRequestBody <- SubscriptionUpdateRequest(Monthly, "8ad03sdfa1312f3123",50.00).provideLayer(ZLayer.succeed(Stage.valueOf("DEV")))
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       },
 
-      test("JSON request body is created and encoded correctly (PROD)") {
+      test("SubscriptionUpdateRequest is correct for input (PROD)") {
         val timeLocalDate = LocalDate.of(2022, 5, 10)
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
 
@@ -65,7 +65,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
         for {
           _ <- TestClock.setTime(time)
-          createRequestBody <- SubscriptionUpdateRequest(Monthly, "8ad03sdfa1312f3123", "50").provideLayer(ZLayer.succeed(Stage.valueOf("PROD")))
+          createRequestBody <- SubscriptionUpdateRequest(Monthly, "8ad03sdfa1312f3123", 50.00).provideLayer(ZLayer.succeed(Stage.valueOf("PROD")))
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       },
 

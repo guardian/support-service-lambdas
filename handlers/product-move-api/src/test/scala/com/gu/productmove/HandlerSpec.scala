@@ -23,9 +23,9 @@ object HandlerSpec extends ZIOSpecDefault {
     suite("HandlerSpec")(
       test("productMove endpoint is successful") {
         val expectedSubNameInput = "A-S00339056"
-        val endpointJsonInputBody = ExpectedInput("50")
+        val endpointJsonInputBody = ExpectedInput(50.00)
 
-        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, String, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "89ad8casd9c0asdcaj89sdc98as")
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "89ad8casd9c0asdcaj89sdc98as")
 
         val subscriptionUpdateResponse = CreateSubscriptionResponse("newSubscriptionName")
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
@@ -61,9 +61,9 @@ object HandlerSpec extends ZIOSpecDefault {
 
       test("productMove endpoint returns 500 error if chargedThroughDate is None") {
         val expectedSubNameInput = "A-S00339056"
-        val endpointJsonInputBody = ExpectedInput("50")
+        val endpointJsonInputBody = ExpectedInput(50.00)
 
-        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, String, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
 
         val subscriptionUpdateResponse = CreateSubscriptionResponse("newSubscriptionName")
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponseNoChargedThroughDate)
@@ -99,9 +99,9 @@ object HandlerSpec extends ZIOSpecDefault {
 
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
         val expectedSubNameInput = "A-S00339056"
-        val endpointJsonInputBody = ExpectedInput("50")
+        val endpointJsonInputBody = ExpectedInput(50.00)
 
-        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, String, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
 
         val subscriptionUpdateResponse = CreateSubscriptionResponse("newSubscriptionName")
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse2)

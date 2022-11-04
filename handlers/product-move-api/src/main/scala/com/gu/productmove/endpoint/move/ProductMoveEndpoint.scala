@@ -23,7 +23,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00442849", ExpectedInput("50"))
+    run("A-S00442849", ExpectedInput(49.9999999))
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,

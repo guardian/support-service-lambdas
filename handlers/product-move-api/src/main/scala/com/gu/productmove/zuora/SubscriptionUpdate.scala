@@ -19,13 +19,13 @@ import com.gu.util.config
 import java.time.LocalDate
 
 trait SubscriptionUpdate:
-  def update(subscriptionId: String, billingPeriod: BillingPeriod, price: String, ratePlanIdToRemove: String): ZIO[Stage, String, SubscriptionUpdateResponse]
+  def update(subscriptionId: String, billingPeriod: BillingPeriod, price: Double, ratePlanIdToRemove: String): ZIO[Stage, String, SubscriptionUpdateResponse]
 
 object SubscriptionUpdateLive:
   val layer: URLayer[ZuoraGet, SubscriptionUpdate] = ZLayer.fromFunction(SubscriptionUpdateLive(_))
 
 private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpdate :
-  override def update(subscriptionId: String, billingPeriod: BillingPeriod, price: String, ratePlanIdToRemove: String): ZIO[Stage, String, SubscriptionUpdateResponse] = {
+  override def update(subscriptionId: String, billingPeriod: BillingPeriod, price: Double, ratePlanIdToRemove: String): ZIO[Stage, String, SubscriptionUpdateResponse] = {
     for {
       requestBody <- SubscriptionUpdateRequest(billingPeriod, ratePlanIdToRemove, price)
       response <- zuoraGet.put[SubscriptionUpdateRequest, SubscriptionUpdateResponse](uri"subscriptions/$subscriptionId", requestBody)
@@ -33,7 +33,7 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
   }
 
 object SubscriptionUpdate {
-  def update(subscriptionId: String, billingPeriod: BillingPeriod, price: String, ratePlanIdToRemove: String): ZIO[SubscriptionUpdate with Stage, String, SubscriptionUpdateResponse] =
+  def update(subscriptionId: String, billingPeriod: BillingPeriod, price: Double, ratePlanIdToRemove: String): ZIO[SubscriptionUpdate with Stage, String, SubscriptionUpdateResponse] =
     ZIO.serviceWithZIO[SubscriptionUpdate](_.update(subscriptionId, billingPeriod, price, ratePlanIdToRemove))
 }
 
@@ -64,14 +64,14 @@ object SubscriptionUpdateRequest {
       case Annual => (ids.supporterPlusZuoraIds.annual.productRatePlanId.value, ids.supporterPlusZuoraIds.annual.productRatePlanChargeId.value)
     }
 
-  def apply(billingPeriod: BillingPeriod, ratePlanIdToRemove: String, price: String): ZIO[Stage, String, SubscriptionUpdateRequest] =
+  def apply(billingPeriod: BillingPeriod, ratePlanIdToRemove: String, price: Double): ZIO[Stage, String, SubscriptionUpdateRequest] =
     for {
       date <- Clock.currentDateTime.map(_.toLocalDate)
       stage <- ZIO.service[Stage]
 
       zuoraIds <- ZIO.fromEither(zuoraIdsForStage(config.Stage(stage.toString)))
       (supporterPlusRatePlanId, supporterPlusRatePlanChargeId) = returnZuoraId(zuoraIds, billingPeriod)
-      chargeOverride = ChargeOverrides(price = Some(price.toDouble), productRatePlanChargeId = supporterPlusRatePlanChargeId)
+      chargeOverride = ChargeOverrides(price = Some(price), productRatePlanChargeId = supporterPlusRatePlanChargeId)
 
       addRatePlan = AddRatePlan(date, supporterPlusRatePlanId, chargeOverrides = List(chargeOverride))
       removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
