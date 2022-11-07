@@ -121,7 +121,7 @@ object ProductMoveEndpoint {
                 payment_frequency = "Monthly",
                 promotion = "50% off for 3 months",
                 contribution_cancellation_date = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                subscription_id = "A-S9999999"
+                subscription_id = newSubscription.subscriptionId
               )
             )
           ),
@@ -131,6 +131,5 @@ object ProductMoveEndpoint {
         )
       ).addLogMessage("EmailSender")
 
-      _ <- ZIO.log("Sub: " + "A-S9999999")
-    } yield Success("A-S9999999")
+    } yield Success("Product move completed successfully")
 }
