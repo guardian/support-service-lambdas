@@ -1,7 +1,7 @@
 package com.gu.deliveryproblemcreditprocessor
 
 import cats.data.EitherT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import cats.syntax.all._
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
@@ -10,7 +10,6 @@ import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher}
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
-import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.gu.zuora.subscription._
@@ -19,13 +18,10 @@ import io.circe.generic.auto._
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.HttpURLConnectionBackend
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
-import zio.Schedule.{exponential, recurs}
-import zio.clock.Clock
-import zio.duration._
-import zio.{RIO, Task, ZIO}
 
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.{Duration, DurationInt}
 
 object DeliveryCreditProcessor extends Logging {
 
@@ -35,80 +31,80 @@ object DeliveryCreditProcessor extends Logging {
 
   private lazy val stage = Stage()
 
-  private lazy val sfConfig: Task[SFAuthConfig] =
-    config(
-      LoadConfigModule(stage, GetFromS3.fetchString)
-        .apply[SFAuthConfig](ConfigLocation("sfAuth", 1), SFAuthConfig.reads)
-    )
+  private lazy val sfConfig = LoadConfigModule(stage, GetFromS3.fetchString)
+    .apply[SFAuthConfig](ConfigLocation("sfAuth", 1), SFAuthConfig.reads)
 
-  private lazy val zuoraConfig: Task[HolidayStopProcessorZuoraConfig] =
-    config(
-      LoadConfigModule(stage, GetFromS3.fetchString)
-        .apply[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads)
-    )
+  private lazy val zuoraConfig = LoadConfigModule(stage, GetFromS3.fetchString)
+    .apply[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads)
 
-  private def config[A](a: Either[ConfigFailure, A]): Task[A] = {
-    ZIO.absolve(Task.effect(a)).mapError {
-      case e: ConfigFailure => new RuntimeException(e.error)
-      case e: Throwable => e
-    }
-  }
-
-  private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): RIO[Clock, AccessToken] =
-    ZIO.absolve(ZIO.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend)))
-      .retry(exponential(1.second) && recurs(5))
-      .mapError {
+  private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): Either[Throwable, AccessToken] = {
+    retry(5, 1.second) {
+      Zuora.accessTokenGetResponse(config, zuoraSttpBackend).left.map {
         case e: ZuoraApiFailure => new RuntimeException(e.reason)
         case e: Throwable => e
       }
+    }
+  }
 
-  val processAllProducts: RIO[Clock, List[DeliveryCreditResult]] = {
-    val productTypes = List(NewspaperHomeDelivery, GuardianWeekly)
+  def retry[T](times: Int, delay: Duration)(action : => T): T = {
+      try {
+        action
+      } catch {
+        case e if (times <= 1) => throw e
+        case _ => {
+          Thread.sleep(delay.toMillis)
+          retry(times - 1, delay * 2)(action)
+        }
+      }
+  }
+
+  def processAllProducts(): Either[Throwable, List[DeliveryCreditResult]] = {
+    val results = List(NewspaperHomeDelivery, GuardianWeekly)
+      .map(processProduct)
+    liftEithers(results)(identity).map(_.flatten)
+  }
+
+  def processProduct(productType: ZuoraProductType): Either[Throwable, List[DeliveryCreditResult]] =
     for {
       sfAuthConfig <- sfConfig
       zConfig <- zuoraConfig
       zAccessToken <- zuoraAccessToken(zConfig)
-      processResults <- Task.foreach(productTypes)(processProduct(sfAuthConfig, zConfig, zAccessToken))
-      creditResults <- Task.foreach(processResults)(gatherCreditResults)
-    } yield creditResults.flatten
+      processResult = processProduct(sfAuthConfig, zConfig, zAccessToken)(productType)
+      result <- gatherCreditResults(processResult)
+    } yield result
+
+  def liftEithers[L, R](eithers: List[Either[L, R]])(toThrowable: L => Throwable): Either[Throwable, List[R]] = {
+    val (lefts, rights) = eithers.partitionMap(identity)
+    lefts.headOption.map(toThrowable).toLeft(rights)
   }
 
-  def gatherCreditResults(processResult: ProcessResult[DeliveryCreditResult]): Task[List[DeliveryCreditResult]] =
-    for {
-      _ <- Task.effect(ProcessResult.log(processResult))
-      _ <- Task.effect(processResult.overallFailure).flatMap {
-        case None => Task.succeed(())
-        case Some(e) => Task.fail(new RuntimeException(e.reason))
-      }
-      results <- Task.foreach(processResult.creditResults) { result =>
-        ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason))
-      }
-    } yield results
+  def gatherCreditResults(processResult: ProcessResult[DeliveryCreditResult]): Either[Throwable, List[DeliveryCreditResult]] = {
+    ProcessResult.log(processResult)
+    (processResult.overallFailure match {
+      case None => Right(processResult)
+      case Some(e) => Left(new RuntimeException(e.reason))
+    }).flatMap(result =>
+      liftEithers(result.creditResults)(failure => new RuntimeException(failure.reason))
+    )
+  }
 
-  def processProduct(
-    sfAuthConfig: SFAuthConfig,
-    zuoraConfig: HolidayStopProcessorZuoraConfig,
-    zuoraAccessToken: AccessToken
-  )(productType: ZuoraProductType): Task[ProcessResult[DeliveryCreditResult]] =
-    for {
-      processResult <- Task.effect(
-        Processor
-          .processLiveProduct[DeliveryCreditRequest, DeliveryCreditResult](
-            zuoraConfig,
-            zuoraAccessToken,
-            zuoraSttpBackend,
-            DeliveryCreditProduct.forStage(Stage()),
-            getCreditRequestsFromSalesforce(sfAuthConfig),
-            fulfilmentDatesFetcher,
-            processOverrideDate = None,
-            productType,
-            updateToApply,
-            resultOfZuoraCreditAdd,
-            writeCreditResultsToSalesforce(sfAuthConfig),
-            Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend)
-          )
+  private def processProduct(sfAuthConfig: SFAuthConfig, zuoraConfig: HolidayStopProcessorZuoraConfig, zuoraAccessToken: AccessToken)(productType: ZuoraProductType): ProcessResult[DeliveryCreditResult] = {
+    Processor
+      .processLiveProduct[DeliveryCreditRequest, DeliveryCreditResult](
+        zuoraConfig,
+        zuoraAccessToken,
+        zuoraSttpBackend,
+        DeliveryCreditProduct.forStage(Stage()),
+        getCreditRequestsFromSalesforce(sfAuthConfig),
+        fulfilmentDatesFetcher,
+        processOverrideDate = None,
+        productType,
+        updateToApply,
+        resultOfZuoraCreditAdd,
+        writeCreditResultsToSalesforce(sfAuthConfig),
+        Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend)
       )
-    } yield processResult
+  }
 
   // TODO: this isn't actually used so could be optional in the credit processor
   val fulfilmentDatesFetcher: FulfilmentDatesFetcher = (_, _) => {
@@ -124,17 +120,19 @@ object DeliveryCreditProcessor extends Logging {
     Right(
       DayOfWeek
         .values()
-        .map { _ -> fulfilmentDates }
+        .map {
+          _ -> fulfilmentDates
+        }
         .toMap
     )
   }
 
   def updateToApply(
-    creditProduct: CreditProductForSubscription,
-    subscription: Subscription,
-    account: ZuoraAccount,
-    request: DeliveryCreditRequest
-  ): ZuoraApiResponse[SubscriptionUpdate] =
+                     creditProduct: CreditProductForSubscription,
+                     subscription: Subscription,
+                     account: ZuoraAccount,
+                     request: DeliveryCreditRequest
+                   ): ZuoraApiResponse[SubscriptionUpdate] =
     SubscriptionUpdate(
       creditProduct(subscription),
       subscription,
@@ -144,9 +142,9 @@ object DeliveryCreditProcessor extends Logging {
     )
 
   def resultOfZuoraCreditAdd(
-    request: DeliveryCreditRequest,
-    addedCharge: RatePlanCharge
-  ): DeliveryCreditResult = DeliveryCreditResult(
+                              request: DeliveryCreditRequest,
+                              addedCharge: RatePlanCharge
+                            ): DeliveryCreditResult = DeliveryCreditResult(
     deliveryId = request.Id,
     chargeCode = RatePlanChargeCode(addedCharge.number),
     amountCredited = Price(addedCharge.price),
@@ -159,9 +157,9 @@ object DeliveryCreditProcessor extends Logging {
   ): SalesforceApiResponse[List[DeliveryCreditRequest]] = {
 
     def queryForDeliveryRecords(
-      salesforceClient: SalesforceClient[IO],
-      productType: ZuoraProductType
-    ): EitherT[IO, SalesforceApiFailure, RecordsWrapperCaseClass[DeliveryCreditRequest]] = {
+                                 salesforceClient: SalesforceClient[IO],
+                                 productType: ZuoraProductType
+                               ): EitherT[IO, SalesforceApiFailure, RecordsWrapperCaseClass[DeliveryCreditRequest]] = {
       val qry = deliveryRecordsQuery(productType)
       logger.info(s"Running SF query:\n$qry")
       salesforceClient
@@ -200,11 +198,11 @@ object DeliveryCreditProcessor extends Logging {
   }
 
   case class DeliveryCreditActioned(
-    Charge_Code__c: String,
-    Credit_Amount__c: Double,
-    Actioned_On__c: LocalDateTime,
-    Invoice_Date__c: LocalDate
-  )
+                                     Charge_Code__c: String,
+                                     Credit_Amount__c: Double,
+                                     Actioned_On__c: LocalDateTime,
+                                     Invoice_Date__c: LocalDate
+                                   )
 
   def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
     results: List[DeliveryCreditResult]
