@@ -1,0 +1,38 @@
+package com.gu.productmove.zuora
+
+import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.refund.*
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailSenderLive, GuStageLive, SttpClientLive}
+import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
+import com.gu.productmove.endpoint.move.ProductMoveEndpoint
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
+import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
+import com.gu.productmove.zuora.GetSubscription
+import com.gu.productmove.zuora.Subscribe.*
+import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import zio.{IO, ZIO}
+import zio.*
+import zio.test.Assertion.*
+import zio.test.*
+
+import java.time.*
+
+object RefundSpec extends ZIOSpecDefault {
+  override def spec: Spec[TestEnvironment with Scope, Any] =
+    suite("Refund")(test("sdfsdf") {
+
+      for {
+        _ <- Refund.applyRefund(RefundInput("A-S00446886", "8ad09c4b8455ccff018462254418702f", 4)).provide(
+          AwsS3Live.layer,
+          AwsCredentialsLive.layer,
+          SttpClientLive.layer,
+          ZuoraClientLive.layer,
+          ZuoraGetLive.layer,
+          GuStageLive.layer,
+          InvoicingApiRefundLive.layer,
+          CreditBalanceAdjustmentLive.layer
+        )
+      } yield assert(true)(equalTo(true))
+    })
+}

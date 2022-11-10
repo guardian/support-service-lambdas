@@ -6,14 +6,14 @@ import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 import sttp.model.Uri.UriContext
 
-case class RequestBody(amount: BigDecimal, comment: String, sourceTransactionId: String, Type: String)
+case class RequestBody(Amount: BigDecimal, Comment: String, SourceTransactionId: String, Type: String)
 given JsonEncoder[RequestBody] = DeriveJsonEncoder.gen[RequestBody]
 
 case class Res(Id: String)
 given JsonDecoder[Res] = DeriveJsonDecoder.gen[Res]
 
 object CreditBalanceAdjustmentLive:
-  val layer: URLayer[ZuoraGet, Res] = ZLayer.fromFunction(CreditBalanceAdjustmentLive(_))
+  val layer: URLayer[ZuoraGet, CreditBalanceAdjustment] = ZLayer.fromFunction(CreditBalanceAdjustmentLive(_))
 
 private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBalanceAdjustment :
   override def adjust(amount: BigDecimal, comment: String, invoiceId: String, `type`: String): IO[String, Res] = {

@@ -133,10 +133,10 @@ object SubscriptionCancelEndpoint {
 
       _ <- ZIO.log(s"Attempting to refund sub")
       refundFuture <- (
-        if(shouldBeRefunded) 
-          InvoicingApiRefund.refund(subscriptionName, charge.price) 
-        else 
-          ZIO.succeed(RefundResponse("Success"))
+        if(shouldBeRefunded)
+          InvoicingApiRefund.refund(subscriptionName, charge.price)
+        else
+          ZIO.succeed(RefundResponse("Success", ""))
         ).fork
 
       _ <- ZIO.log(s"Attempting to update cancellation reason on Zuora subscription")
