@@ -20,7 +20,9 @@ import scala.language.postfixOps
 object HandlerSpec extends ZIOSpecDefault {
   def spec = {
     suite("HandlerSpec")(
-      test("productMove endpoint") {
+      test("productMove endpoint is successful") {
+        val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
+
         val expectedSubNameInput = "A-S00339056"
         val testPostData = ExpectedInput("targetProductId")
 
@@ -28,8 +30,12 @@ object HandlerSpec extends ZIOSpecDefault {
         val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022, 02, 02))
 
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
+<<<<<<< Updated upstream
         val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
         val cancellationStubs = Map(("A-S00339056", LocalDate.of(2022, 9, 29)) -> cancellationResponse)
+=======
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> SubscriptionUpdateResponse(25.00))
+>>>>>>> Stashed changes
 
         val emailSenderStubs = Map(emailMessageBody -> ())
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
@@ -42,7 +48,12 @@ object HandlerSpec extends ZIOSpecDefault {
         val expectedOutput = ProductMoveEndpointTypes.Success("newSubscriptionName")
 
         (for {
+<<<<<<< Updated upstream
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData)
+=======
+          _ <- TestClock.setTime(time)
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
+>>>>>>> Stashed changes
           getSubRequests <- MockGetSubscription.requests
           subscribeRequests <- MockSubscribe.requests
           cancellationRequests <- MockCancelZuora.requests
@@ -70,8 +81,12 @@ object HandlerSpec extends ZIOSpecDefault {
         val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022, 02, 02))
 
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponseNoChargedThroughDate)
+<<<<<<< Updated upstream
         val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
         val cancellationStubs = Map(("A-S00339056", LocalDate.of(2022, 9, 29)) -> cancellationResponse)
+=======
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> SubscriptionUpdateResponse(1.99))
+>>>>>>> Stashed changes
 
         val emailSenderStubs = Map(emailMessageBody -> ())
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
@@ -81,6 +96,49 @@ object HandlerSpec extends ZIOSpecDefault {
         val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
         val invoicePreviewStubs = Map(("zuoraAccountId", LocalDate.of(2022, 9, 29)) -> DigiSubWithOfferInvoicePreview)
 
+<<<<<<< Updated upstream
+=======
+        val expectedOutput = "chargedThroughDate is null for subscription A-S00339056."
+
+        (for {
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody).exit
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+        } yield {
+          assert(output)(fails(equalTo(expectedOutput))) &&
+            assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+            assert(subUpdateRequests)(equalTo(Nil))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
+          ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD"))
+        )
+      },
+
+      test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
+        val expectedSubNameInput = "A-S00339056"
+        val endpointJsonInputBody = ExpectedInput(50.00)
+
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
+
+        val subscriptionUpdateResponse = CreateSubscriptionResponse("newSubscriptionName")
+        val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse2)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> SubscriptionUpdateResponse(-5.99))
+
+        val emailSenderStubs = Map(emailMessageBody -> ())
+        val getAccountStubs = Map("accountNumber" -> getAccountResponse)
+        val getPaymentMethodResponse = PaymentMethodResponse(
+          NumConsecutiveFailures = 0
+        )
+        val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+        val invoicePreviewStubs = Map(("zuoraAccountId", LocalDate.of(2022, 9, 29)) -> DigiSubWithOfferInvoicePreview)
+
+        val expectedOutput = "Subscription: A-S00339056 has more than one ratePlan"
+
+>>>>>>> Stashed changes
         (for {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData)
           getSubRequests <- MockGetSubscription.requests

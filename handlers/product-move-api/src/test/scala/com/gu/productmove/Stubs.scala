@@ -95,16 +95,15 @@ val emailMessageBody = EmailMessage(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
       EmailPayloadSubscriberAttributes(
-        subscription_id = "newSubscriptionName",
+        subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "5.99",
-        price = "11.99",
-        payment_frequency = "Monthly",
-        date_of_first_payment = "29 September 2022",
+        first_payment_amount = "25.0",
+        price = "50.0",
+        payment_frequency = "month",
+        date_of_first_payment = "10 May 2022",
         currency = "£",
-        promotion = "50% off for 3 months",
-        contribution_cancellation_date = "29 September 2022"
+        contribution_cancellation_date = "10 May 2022"
       )
     )
   ),

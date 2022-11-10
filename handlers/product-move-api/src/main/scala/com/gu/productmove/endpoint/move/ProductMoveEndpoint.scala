@@ -1,7 +1,7 @@
 package com.gu.productmove.endpoint.move
 
-import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
+import com.gu.newproduct.api.productcatalog.{BillingPeriod, Annual, Monthly}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, InternalServerError, OutputBody, Success}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -78,26 +78,29 @@ object ProductMoveEndpoint {
         ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
 
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): URIO[GetSubscription with Subscribe with ZuoraCancel with GetAccount with InvoicePreview with EmailSender with Stage, OutputBody] =
-    val output = for {
+  def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
+    list.length match {
+      case 1 => ZIO.succeed(list.head)
+      case _ => ZIO.fail(message)
+    }
+
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with EmailSender with Stage, String, Success] =
+    for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription")
+      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+      getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
 
       chargedThroughDate <- ZIO.fromOption(subscription.ratePlans.head.ratePlanCharges.head.chargedThroughDate).orElse(ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.").flatMap(_ => ZIO.fail(InternalServerError)))
 
       newSubscription <- Subscribe.create(subscription.accountId, postData.targetProductId).mapErrorTo500("Subscribe")
       _ <- ZuoraCancel.cancel(subscriptionName, chargedThroughDate).mapErrorTo500("ZuoraCancel")
 
-      getAccountFuture <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount").fork
-      nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).mapErrorTo500(s"InvoicePreview").fork
+      updateResponse <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
+      totalDeltaMrr = updateResponse.totalDeltaMrr
 
-      requests = getAccountFuture.zip(nextInvoiceFuture)
-      responses <- requests.join
+      account <- getAccountFuture.join
 
-      account = responses._1
-      nextInvoice = responses._2
-
-      first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionNumber).map(x => x.chargeAmount + x.taxAmount).sum
+      date <- Clock.currentDateTime.map(_.toLocalDate)
 
       _ <- EmailSender.sendEmail(
         message = EmailMessage(
@@ -108,13 +111,12 @@ object ProductMoveEndpoint {
                 first_name = account.billToContact.firstName,
                 last_name = account.billToContact.lastName,
                 currency = account.basicInfo.currency.symbol,
-                price = "11.99",
-                first_payment_amount = first_payment_amount.toString,
-                date_of_first_payment = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = "Monthly",
-                promotion = "50% off for 3 months",
-                contribution_cancellation_date = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                subscription_id = newSubscription.subscriptionNumber
+                price = postData.price.toString,
+                first_payment_amount = totalDeltaMrr.toString,
+                date_of_first_payment = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                payment_frequency = ratePlanCharge.billingPeriod.value(),
+                contribution_cancellation_date = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                subscription_id = subscriptionName
               )
             )
           ),
@@ -122,12 +124,8 @@ object ProductMoveEndpoint {
           account.basicInfo.sfContactId__c,
           account.basicInfo.IdentityId__c
         )
-      ).mapErrorTo500("EmailSender")
+      ).addLogMessage("EmailSender")
 
-      _ <- ZIO.log("Sub: " + newSubscription.subscriptionNumber)
-    } yield Success(newSubscription.subscriptionNumber)
-
-    output.catchAll {
-      failure => ZIO.succeed(failure)
-    }
+      _ <- ZIO.log("Sub: " + "A-S9999999")
+    } yield Success("A-S9999999")
 }
