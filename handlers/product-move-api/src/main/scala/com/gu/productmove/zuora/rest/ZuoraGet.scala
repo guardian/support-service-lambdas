@@ -31,6 +31,6 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet :
 
 trait ZuoraGet:
   def get[T: JsonDecoder](relativeUrl: Uri, zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase): IO[String, T]
-  def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response]
+  def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request, zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase): IO[String, Response]
   def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response]
 

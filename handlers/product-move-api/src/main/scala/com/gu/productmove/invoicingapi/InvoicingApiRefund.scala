@@ -33,9 +33,9 @@ object InvoicingApiRefundLive {
 }
 
 private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: SttpBackend[Task, Any]) extends InvoicingApiRefund {
-  override def refund(subscriptionName: String, amount: BigDecimal): ZIO[Any, String, RefundResponse] = {
+  override def refund(subscriptionName: String, amount: BigDecimal, adjustInvoices: Boolean): ZIO[Any, String, RefundResponse] = {
 
-    val requestBody = RefundRequest(subscriptionName, amount)
+    val requestBody = RefundRequest(subscriptionName, amount, adjustInvoices)
     basicRequest
       .contentType("application/json")
       .header("x-api-key", config.apiKey)
@@ -55,14 +55,14 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
 }
 
 trait InvoicingApiRefund {
-  def refund(subscriptionName: String, amount: BigDecimal): ZIO[Any, String, RefundResponse]
+  def refund(subscriptionName: String, amount: BigDecimal, adjustInvoices: Boolean): ZIO[Any, String, RefundResponse]
 }
 
 object InvoicingApiRefund {
-  def refund(subscriptionName: String, amount: BigDecimal): ZIO[InvoicingApiRefund, String, RefundResponse] =
-    ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount))
+  def refund(subscriptionName: String, amount: BigDecimal, adjustInvoices: Boolean = true): ZIO[InvoicingApiRefund, String, RefundResponse] =
+    ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount, adjustInvoices))
 
-  case class RefundRequest(subscriptionName: String, refund: BigDecimal)
+  case class RefundRequest(subscriptionName: String, refund: BigDecimal, adjustInvoices: Boolean)
   /* Full response from Invoicing api is as follows:
   {
     "subscriptionName": "A-S00427546",
@@ -83,7 +83,7 @@ object InvoicingApiRefund {
     "guid": "e6282ccd-d06a-49bd-ad2e-9c362e912232"
 }
   */
-  case class RefundResponse(subscriptionName: String)
+  case class RefundResponse(subscriptionName: String, invoiceId: String)
 
   given JsonEncoder[RefundRequest] = DeriveJsonEncoder.gen[RefundRequest]
   given JsonDecoder[RefundResponse] = DeriveJsonDecoder.gen[RefundResponse]
