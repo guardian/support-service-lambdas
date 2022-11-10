@@ -14,8 +14,15 @@ import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{CreditBalanceAdjustment, GetAccountLive, GetSubscriptionLive, InvoicePreviewLive, SubscribeLive, ZuoraCancel, ZuoraCancelLive, ZuoraSetCancellationReason}
 import sttp.client3.SttpBackend
 import zio.{Task, ZIO}
+import zio.json.{JsonDecoder, DeriveJsonDecoder, JsonEncoder, DeriveJsonEncoder}
 
 case class RefundInput(subscriptionName: String, invoiceId: String, refundAmount: BigDecimal)
+
+object RefundInput {
+  given JsonDecoder[RefundInput] = DeriveJsonDecoder.gen[RefundInput]
+
+  given JsonEncoder[RefundInput] = DeriveJsonEncoder.gen[RefundInput]
+}
 
 object Refund {
   def applyRefund(refundInput: RefundInput): ZIO[InvoicingApiRefund with CreditBalanceAdjustment with Stage with SttpBackend[Task, Any] with AwsS3, String, Unit] = {
