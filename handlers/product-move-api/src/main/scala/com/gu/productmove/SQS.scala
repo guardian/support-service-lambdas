@@ -26,8 +26,7 @@ object SQS {
   }
 }
 
-object EmailSenderLive {
-
+object SQSLive {
   val layer: ZLayer[AwsCredentialsProvider with Stage, String, SQS] =
     ZLayer.scoped(for {
       stage <- ZIO.service[Stage]
@@ -36,10 +35,42 @@ object EmailSenderLive {
       refundQueueUrlResponse <- getRefundQueue(stage, sqsClient)
     } yield new SQS {
       override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
-        sendMessage(sqsClient, emailQueueUrlResponse.queueUrl, message)
+        for {
+          result <- ZIO
+            .fromCompletableFuture {
+              sqsClient.sendMessage(
+                SendMessageRequest.builder
+                  .queueUrl(emailQueueUrlResponse.queueUrl)
+                  .messageBody(message.toJson)
+                  .build()
+              )
+            }
+            .mapError { ex =>
+              s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
+            }
+          _ <- ZIO.log(
+            s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
+          )
+        } yield ()
 
-        override def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit] =
-          sendMessage(sqsClient, refundQueueUrlResponse.queueUrl, refundInput)
+      override def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit] =
+        for {
+          result <- ZIO
+            .fromCompletableFuture {
+              sqsClient.sendMessage(
+                SendMessageRequest.builder
+                  .queueUrl(refundQueueUrlResponse.queueUrl)
+                  .messageBody(refundInput.toJson)
+                  .build()
+              )
+            }
+            .mapError { ex =>
+              s"Failed to send sqs refund message with subscription Number: ${refundInput.subscriptionName}"
+            }
+          _ <- ZIO.log(
+            s"Successfully sent refund message for subscription number: ${refundInput.subscriptionName}"
+          )
+        } yield ()
     })
 
   private def initializeSQSClient(): ZIO[AwsCredentialsProvider with Scope, Throwable, SqsAsyncClient] =
@@ -73,25 +104,6 @@ object EmailSenderLive {
       .region(Region.EU_WEST_1)
       .credentialsProvider(creds)
       .build()
-
-  private def sendMessage(sqsClient: SqsAsyncClient, queueUrl: String, message: EmailMessage) =
-    for {
-      result <- ZIO
-        .fromCompletableFuture {
-          sqsClient.sendMessage(
-            SendMessageRequest.builder
-              .queueUrl(queueUrl)
-              .messageBody(message.toJson)
-              .build()
-          )
-        }
-        .mapError { ex =>
-          s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
-        }
-      _ <- ZIO.log(
-        s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
-      )
-    } yield ()
 }
 
 case class EmailPayloadSubscriberAttributes(

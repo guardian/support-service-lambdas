@@ -3,7 +3,7 @@ package com.gu.productmove
 import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
-import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview}
+import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview, SubscriptionUpdateResponse}
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoicePreview.*
@@ -171,3 +171,8 @@ val DigiSubWithOfferInvoicePreview = ZuoraInvoiceList(
     )
   )
 )
+
+//-----------------------------------------------------
+// Stubs for SubscriptionUpdate service
+//-----------------------------------------------------
+val subscriptionUpdateResponse = SubscriptionUpdateResponse("", 5, "")

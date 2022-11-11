@@ -2,7 +2,7 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.refund.*
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailSenderLive, GuStageLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, SQSLive, GuStageLive, SttpClientLive}
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput

@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.{EmailMessage, SQS}
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
@@ -21,6 +22,10 @@ class MockSQS(responses: Map[EmailMessage, Unit]) extends SQS {
       // case None => ZIO.fail(s"wrong input, message was $message")
       // temporarily make all tests pass
       case None => ZIO.succeed(())
+  }
+
+  override def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit] = {
+    ZIO.succeed(())
   }
 }
 

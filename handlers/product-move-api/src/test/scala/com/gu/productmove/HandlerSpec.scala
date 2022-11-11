@@ -1,5 +1,6 @@
 package com.gu.productmove
 
+import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
 import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.{AvailableProductMovesEndpoint, Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
@@ -8,7 +9,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput,
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
-import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockEmailSender, MockGetAccount, MockGetSubscription, MockInvoicePreview, MockSubscribe}
+import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockInvoicePreview, MockSQS, MockSubscribe, MockSubscriptionUpdate, SubscriptionUpdateResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
 import zio.test.*
@@ -26,9 +27,8 @@ object HandlerSpec extends ZIOSpecDefault {
 
         val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "89ad8casd9c0asdcaj89sdc98as")
 
-        val subscriptionUpdateResponse = CreateSubscriptionResponse("newSubscriptionName")
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
-        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> SubscriptionUpdateResponse("subscriptionId"))
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
 
         val emailSenderStubs = Map(emailMessageBody -> ())
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
@@ -51,7 +51,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
+          ZLayer.succeed(new MockSQS(emailSenderStubs)),
           ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))
@@ -64,9 +64,8 @@ object HandlerSpec extends ZIOSpecDefault {
 
         val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
 
-        val subscriptionUpdateResponse = CreateSubscriptionResponse("newSubscriptionName")
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponseNoChargedThroughDate)
-        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> SubscriptionUpdateResponse("subscriptionId"))
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
 
         val emailSenderStubs = Map(emailMessageBody -> ())
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
@@ -89,7 +88,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
+          ZLayer.succeed(new MockSQS(emailSenderStubs)),
           ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))
@@ -102,9 +101,8 @@ object HandlerSpec extends ZIOSpecDefault {
 
         val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
 
-        val subscriptionUpdateResponse = CreateSubscriptionResponse("newSubscriptionName")
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse2)
-        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> SubscriptionUpdateResponse("subscriptionId"))
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
 
         val emailSenderStubs = Map(emailMessageBody -> ())
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
@@ -127,7 +125,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
+          ZLayer.succeed(new MockSQS(emailSenderStubs)),
           ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))

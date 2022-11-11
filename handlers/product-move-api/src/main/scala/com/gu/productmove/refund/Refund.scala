@@ -2,7 +2,7 @@ package com.gu.productmove.refund
 
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, EmailSenderLive, GuStageLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, SQSLive, GuStageLive, SttpClientLive}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.{ExpectedInput, OutputBody, Success}
 import com.gu.productmove.endpoint.cancel.zuora.GetSubscription

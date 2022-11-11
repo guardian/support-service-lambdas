@@ -37,7 +37,7 @@ object SubscriptionUpdate {
     ZIO.serviceWithZIO[SubscriptionUpdate](_.update(subscriptionId, billingPeriod, price, ratePlanIdToRemove))
 }
 
-case class SubscriptionUpdateResponse(subscriptionId: String)
+case class SubscriptionUpdateResponse(subscriptionId: String, totalDeltaMrr: BigDecimal, invoiceId: String)
 
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 

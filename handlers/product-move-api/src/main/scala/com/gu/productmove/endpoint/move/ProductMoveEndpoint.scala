@@ -5,9 +5,10 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
+import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, Subscribe, SubscribeLive, SubscriptionUpdate, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, EmailSender, EmailSenderLive, GuStageLive, SttpClientLive}
+import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -58,15 +59,14 @@ object ProductMoveEndpoint {
 
   private def run(subscriptionName: String, postData: ExpectedInput): TIO[OutputBody] =
     productMove(subscriptionName, postData).provide(
-      SubscribeLive.layer,
       GetSubscriptionLive.layer,
-      ZuoraCancelLive.layer,
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
       ZuoraClientLive.layer,
       ZuoraGetLive.layer,
-      EmailSenderLive.layer,
+      SubscriptionUpdateLive.layer,
+      SQSLive.layer,
       InvoicePreviewLive.layer,
       GetAccountLive.layer,
       GuStageLive.layer,
@@ -83,8 +83,8 @@ object ProductMoveEndpoint {
       case _ => ZIO.fail(message)
     }
 
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): URIO[GetSubscription with Subscribe with ZuoraCancel with GetAccount with InvoicePreview with EmailSender with Stage, OutputBody] =
-    val output = for {
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with SQS with Stage, String, OutputBody] =
+    for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
 
@@ -93,7 +93,7 @@ object ProductMoveEndpoint {
 
       chargedThroughDate <- ZIO.fromOption(ratePlanCharge.chargedThroughDate).orElseFail(s"chargedThroughDate is null for subscription $subscriptionName.")
 
-      newSubscription <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
+      subUpdate <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
 
       getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
       nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).addLogMessage(s"InvoicePreview").fork
@@ -107,7 +107,7 @@ object ProductMoveEndpoint {
       // first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionNumber).map(x => x.chargeAmount + x.taxAmount).sum
       first_payment_amount = 1
 
-      _ <- EmailSender.sendEmail(
+      _ <- SQS.sendEmail(
         message = EmailMessage(
           EmailPayload(
             Address = Some(account.billToContact.workEmail),
@@ -122,7 +122,7 @@ object ProductMoveEndpoint {
                 payment_frequency = "Monthly",
                 promotion = "50% off for 3 months",
                 contribution_cancellation_date = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                subscription_id = newSubscription.subscriptionId
+                subscription_id = subscriptionName
               )
             )
           ),
@@ -130,7 +130,9 @@ object ProductMoveEndpoint {
           account.basicInfo.sfContactId__c,
           account.basicInfo.IdentityId__c
         )
-      ).addLogMessage("EmailSender")
+      ).addLogMessage("EmailSender").fork
+
+      _ <- if (subUpdate.totalDeltaMrr < 0) SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).fork else ZIO.succeed(())
 
     } yield Success("Product move completed successfully")
 }
