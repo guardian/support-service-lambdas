@@ -55,13 +55,18 @@ case class SubscriptionUpdateRequest(
   runBilling: Boolean = true
 )
 
+case class SupporterPlusRatePlanIds(ratePlanId: String, ratePlanChargeId: String)
+
 object SubscriptionUpdateRequest {
   given JsonEncoder[SubscriptionUpdateRequest] = DeriveJsonEncoder.gen[SubscriptionUpdateRequest]
 
-  private def returnZuoraId(ids: ZuoraIds, billingPeriod: BillingPeriod): (String, String) =
+  private def getSupporterPlusRatePlanIds(ids: ZuoraIds, billingPeriod: BillingPeriod): Either[String, SupporterPlusRatePlanIds] =
+    import ids.supporterPlusZuoraIds.{monthly, annual}
+
     billingPeriod match {
-      case Monthly => (ids.supporterPlusZuoraIds.monthly.productRatePlanId.value, ids.supporterPlusZuoraIds.monthly.productRatePlanChargeId.value)
-      case Annual => (ids.supporterPlusZuoraIds.annual.productRatePlanId.value, ids.supporterPlusZuoraIds.annual.productRatePlanChargeId.value)
+      case Monthly => Right(SupporterPlusRatePlanIds(monthly.productRatePlanId.value, monthly.productRatePlanChargeId.value))
+      case Annual => Right(SupporterPlusRatePlanIds(annual.productRatePlanId.value, annual.productRatePlanChargeId.value))
+      case _ => Left(s"error when matching on billingPeriod ${billingPeriod}")
     }
 
   def apply(billingPeriod: BillingPeriod, ratePlanIdToRemove: String, price: Double): ZIO[Stage, String, SubscriptionUpdateRequest] =
@@ -70,10 +75,10 @@ object SubscriptionUpdateRequest {
       stage <- ZIO.service[Stage]
 
       zuoraIds <- ZIO.fromEither(zuoraIdsForStage(config.Stage(stage.toString)))
-      (supporterPlusRatePlanId, supporterPlusRatePlanChargeId) = returnZuoraId(zuoraIds, billingPeriod)
-      chargeOverride = ChargeOverrides(price = Some(price), productRatePlanChargeId = supporterPlusRatePlanChargeId)
+      supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(zuoraIds, billingPeriod))
+      chargeOverride = ChargeOverrides(price = Some(price), productRatePlanChargeId = supporterPlusRatePlanIds.ratePlanChargeId)
 
-      addRatePlan = AddRatePlan(date, supporterPlusRatePlanId, chargeOverrides = List(chargeOverride))
+      addRatePlan = AddRatePlan(date, supporterPlusRatePlanIds.ratePlanId, chargeOverrides = List(chargeOverride))
       removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
     } yield SubscriptionUpdateRequest(List(addRatePlan), List(removeRatePlan))
 }

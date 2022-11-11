@@ -39,7 +39,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
         val invoicePreviewStubs = Map(("zuoraAccountId", LocalDate.of(2022, 9, 29)) -> DigiSubWithOfferInvoicePreview)
 
-        val expectedOutput = ProductMoveEndpointTypes.Success("A-S9999999")
+        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
 
         (for {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
