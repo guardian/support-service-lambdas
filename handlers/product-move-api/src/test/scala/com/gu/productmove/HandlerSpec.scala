@@ -8,7 +8,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput,
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
-import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockEmailSender, MockGetAccount, MockGetSubscription, MockInvoicePreview, MockSubscribe}
+import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockSQS, MockGetAccount, MockGetSubscription, MockInvoicePreview, MockSubscribe}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
 import zio.test.*
@@ -55,7 +55,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscribe(subscribeStubs)),
           ZLayer.succeed(new MockCancelZuora(cancellationStubs)),
-          ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
+          ZLayer.succeed(new MockSQS(emailSenderStubs)),
           ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))
@@ -95,7 +95,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscribe(subscribeStubs)),
           ZLayer.succeed(new MockCancelZuora(cancellationStubs)),
-          ZLayer.succeed(new MockEmailSender(emailSenderStubs)),
+          ZLayer.succeed(new MockSQS(emailSenderStubs)),
           ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))

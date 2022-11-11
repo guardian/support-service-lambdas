@@ -7,7 +7,7 @@ import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, Subscribe, SubscribeLive, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, EmailSender, EmailSenderLive, GuStageLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, SQS, EmailSenderLive, GuStageLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -78,7 +78,7 @@ object ProductMoveEndpoint {
         ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
 
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): URIO[GetSubscription with Subscribe with ZuoraCancel with GetAccount with InvoicePreview with EmailSender with Stage, OutputBody] =
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): URIO[GetSubscription with Subscribe with ZuoraCancel with GetAccount with InvoicePreview with SQS with Stage, OutputBody] =
     val output = for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription")
@@ -99,7 +99,7 @@ object ProductMoveEndpoint {
 
       first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionNumber).map(x => x.chargeAmount + x.taxAmount).sum
 
-      _ <- EmailSender.sendEmail(
+      _ <- SQS.sendEmail(
         message = EmailMessage(
           EmailPayload(
             Address = Some(account.billToContact.workEmail),
@@ -122,7 +122,13 @@ object ProductMoveEndpoint {
           account.basicInfo.sfContactId__c,
           account.basicInfo.IdentityId__c
         )
-      ).mapErrorTo500("EmailSender")
+      ).mapErrorTo500("EmailSender").fork
+
+      if (res.totalDeltaMRR < 0) {
+        <- SQS.queueRefund(RefundInput(res.totalDeltaMRR.abs, res.invoiceId)).fork
+      } else {
+        ZIO.succeed (())
+      }
 
       _ <- ZIO.log("Sub: " + newSubscription.subscriptionNumber)
     } yield Success(newSubscription.subscriptionNumber)

@@ -1,6 +1,7 @@
 package com.gu.productmove
 
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.refund.RefundInput
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 import software.amazon.awssdk.regions.Region
@@ -9,37 +10,57 @@ import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, GetQueueUr
 import zio.*
 import zio.json.*
 
-trait EmailSender {
+trait SQS {
   def sendEmail(message: EmailMessage): ZIO[Any, String, Unit]
+
+  def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit]
 }
 
-object EmailSender {
-  def sendEmail(message: EmailMessage): ZIO[EmailSender, String, Unit] = {
+object SQS {
+  def sendEmail(message: EmailMessage): ZIO[SQS, String, Unit] = {
     ZIO.environmentWithZIO(_.get.sendEmail(message))
+  }
+
+  def queueRefund(refundInput: RefundInput): ZIO[SQS, String, Unit] = {
+    ZIO.environmentWithZIO(_.get.queueRefund(refundInput))
   }
 }
 
 object EmailSenderLive {
 
-  val layer: ZLayer[AwsCredentialsProvider with Stage, String, EmailSender] =
+  val layer: ZLayer[AwsCredentialsProvider with Stage, String, SQS] =
     ZLayer.scoped(for {
-    stage <- ZIO.service[Stage]
-    sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
-    queueUrlResponse <- getQueue(stage, sqsClient)
-  } yield new EmailSender {
-    override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
-      sendMessage(sqsClient, queueUrlResponse.queueUrl, message)
-  })
+      stage <- ZIO.service[Stage]
+      sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
+      emailQueueUrlResponse <- getEmailQueue(stage, sqsClient)
+      refundQueueUrlResponse <- getRefundQueue(stage, sqsClient)
+    } yield new SQS {
+      override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
+        sendMessage(sqsClient, emailQueueUrlResponse.queueUrl, message)
+
+        override def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit] =
+          sendMessage(sqsClient, refundQueueUrlResponse.queueUrl, refundInput)
+    })
 
   private def initializeSQSClient(): ZIO[AwsCredentialsProvider with Scope, Throwable, SqsAsyncClient] =
-      for {
-        creds <- ZIO.service[AwsCredentialsProvider]
-        sqsClient <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
-      } yield sqsClient
+    for {
+      creds <- ZIO.service[AwsCredentialsProvider]
+      sqsClient <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
+    } yield sqsClient
 
-  private def getQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
+  private def getEmailQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
     // choose existing SQS queue to test for now, create another queue for this.
     val queueName = if (stage == Stage.PROD) "contributions-thanks" else "contributions-thanks-dev"
+    val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
+
+    ZIO
+      .fromCompletableFuture(
+        sqsAsyncClient.getQueueUrl(queueUrl)
+      ).mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
+
+  private def getRefundQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
+    // choose existing SQS queue to test for now, create another queue for this.
+    val queueName = if (stage == Stage.PROD) "refund-with-switching" else "refunds-for-switching-DEV"
     val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
 
     ZIO
