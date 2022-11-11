@@ -56,10 +56,11 @@ object GetSubscription {
     given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen
   }
 
-  given JsonDecoder[BillingPeriod] = JsonDecoder[String].map(x =>
+  given JsonDecoder[BillingPeriod] = JsonDecoder[String].mapOrFail(x =>
     x match {
-      case "Month" => Monthly
-      case "Annual" => Annual
+      case "Month" => Right(Monthly)
+      case "Annual" => Right(Annual)
+      case _ => Left(s"No such billing period ${x.toString}")
     }
   )
 
