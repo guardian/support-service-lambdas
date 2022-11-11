@@ -1,23 +1,23 @@
-package com.gu.productmove.framework
+package com.gu.productmove.refund
 
-import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
+import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
 import com.gu.productmove.zuora.CreditBalanceAdjustmentLive
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
+import zio.json.*
+import zio.{Exit, Runtime, Unsafe, ZIO}
 
 import scala.jdk.CollectionConverters.*
-import zio.{Exit, Runtime, Unsafe, ZIO}
-import zio.json.*
 
-object ZIOLambdaSQSRequestHandler {
+object RefundHandler {
   type TIO[+A] = ZIO[Any, Any, A] // Succeed with an `A`, may fail with anything`, no requirements.
 }
 
-class ZIOLambdaSQSRequestHandler extends RequestHandler[SQSEvent, Unit] {
+class RefundHandler extends RequestHandler[SQSEvent, Unit] {
 
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
     val records: List[SQSEvent.SQSMessage] = input.getRecords.asScala.toList
