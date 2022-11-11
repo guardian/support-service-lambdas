@@ -15,7 +15,7 @@ import scala.deriving.Mirror
 object ProductMoveEndpointTypes {
 
   case class ExpectedInput(
-    @description("ID of target product that new subscription will be for.") targetProductId: String
+    @description("price of new Supporter Plus subscription") price: Double
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
@@ -25,18 +25,12 @@ object ProductMoveEndpointTypes {
 
   sealed trait OutputBody
   case class Success(
-    @description("Name of new subscription.") newSubscriptionName: String,
+    @description("Success message.") message: String,
   ) extends OutputBody
-  case class NotFound(textResponse: String) extends OutputBody
-  case object InternalServerError extends OutputBody
-
+  case class InternalServerError(message: String) extends OutputBody
   given Schema[Success] = inlineSchema(Schema.derived)
-
   given JsonEncoder[Success] = DeriveJsonEncoder.gen[Success]
-  given JsonEncoder[NotFound] = DeriveJsonEncoder.gen[NotFound]
-  given JsonEncoder[OutputBody] = DeriveJsonEncoder.gen[OutputBody]
-
   given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
-  given JsonDecoder[NotFound] = DeriveJsonDecoder.gen[NotFound] // needed to keep tapir happy
+  given JsonEncoder[OutputBody] = DeriveJsonEncoder.gen[OutputBody]
   given JsonDecoder[OutputBody] = DeriveJsonDecoder.gen[OutputBody] // needed to keep tapir happy
 }
