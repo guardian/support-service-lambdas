@@ -123,28 +123,26 @@ Resources:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
       Policies:
-        - AWSLambdaBasicExecutionRole
-        - Statement:
-            Effect: Allow
-            Action: s3:GetObject
-            Resource:
-              - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
-              - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/invoicingApi-${Stage}*.json
-              - arn:aws:s3::*:membership-dist/*
-        - PolicyName: AllowSQS
-          PolicyDocument:
-            Statement:
-              Action:
-                - sqs:DeleteMessage
-                - sqs:GetQueueAttributes
-                - sqs:ReceiveMessage
-              Resource: "*"
-              Effect: Allow
+      - AWSLambdaBasicExecutionRole
+      - Statement:
+          Effect: Allow
+          Action: s3:GetObject
+          Resource:
+            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/invoicingApi-${Stage}*.json
+            - arn:aws:s3::*:membership-dist/*
+      - Statement:
+          Effect: Allow
+          Action:
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+            - sqs:ReceiveMessage
+          Resource: "*"
 
   RefundQueue:
     Type: AWS::SQS::Queue
     Properties:
-      DelaySeconds: 5
+      VisibilityTimeout: 3000
       QueueName: !Sub refunds-for-switching-${Stage}
 
   SQSTrigger:

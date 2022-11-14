@@ -24,7 +24,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00442849", ExpectedInput(49.9999999))
+    run("A-S00448751", ExpectedInput(1))
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
@@ -130,9 +130,9 @@ object ProductMoveEndpoint {
           account.basicInfo.sfContactId__c,
           account.basicInfo.IdentityId__c
         )
-      ).addLogMessage("SQS sendEmail()").fork
+      ).addLogMessage("SQS sendEmail()")
 
-      _ <- if (subUpdate.totalDeltaMrr < 0) SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).addLogMessage("SQS queueRefund()").fork else ZIO.succeed(())
+      _ <- if (subUpdate.totalDeltaMrr < 0) SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).addLogMessage("SQS queueRefund()") else ZIO.succeed(())
 
     } yield Success("Product move completed successfully")
 }
