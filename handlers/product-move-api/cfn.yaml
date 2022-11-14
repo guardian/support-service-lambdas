@@ -106,7 +106,7 @@ Resources:
                 Ref: ProductMoveApiGateway
 
   RefundLambda:
-    Type: AWS::Lambda::Function
+    Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub refund-switch-${Stage}
       Description: An SQS-triggered lambda that refunds customer's going through product-switching
@@ -140,6 +140,7 @@ Resources:
                 - sqs:ReceiveMessage
               Resource: "*"
               Effect: Allow
+
   RefundQueue:
     Type: AWS::SQS::Queue
     Properties:
