@@ -24,7 +24,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00448751", ExpectedInput(1))
+    run("A-S00448731", ExpectedInput(1))
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
@@ -87,6 +87,7 @@ object ProductMoveEndpoint {
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+      getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
 
       currentRatePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName has more than one ratePlan")
       ratePlanCharge <- getSingleOrNotEligible(currentRatePlan.ratePlanCharges, s"Subscription: $subscriptionName has more than one ratePlanCharge")
@@ -95,7 +96,6 @@ object ProductMoveEndpoint {
 
       subUpdate <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
 
-      getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
       nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).addLogMessage(s"InvoicePreview").fork
 
       requests = getAccountFuture.zip(nextInvoiceFuture)
@@ -107,7 +107,7 @@ object ProductMoveEndpoint {
       // first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionNumber).map(x => x.chargeAmount + x.taxAmount).sum
       first_payment_amount = 1
 
-      _ <- SQS.sendEmail(
+      emailFuture <- SQS.sendEmail(
         message = EmailMessage(
           EmailPayload(
             Address = Some(account.billToContact.workEmail),
@@ -130,9 +130,16 @@ object ProductMoveEndpoint {
           account.basicInfo.sfContactId__c,
           account.basicInfo.IdentityId__c
         )
-      ).addLogMessage("SQS sendEmail()")
+      ).addLogMessage("SQS sendEmail()").fork
 
-      _ <- if (subUpdate.totalDeltaMrr < 0) SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).addLogMessage("SQS queueRefund()") else ZIO.succeed(())
+      refundFuture <-
+        if (subUpdate.totalDeltaMrr < 0)
+          SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).addLogMessage("SQS queueRefund()").fork
+        else
+          ZIO.succeed(()).fork
+
+      sqsRequests = emailFuture.zip(refundFuture)
+      _ <- sqsRequests.join
 
     } yield Success("Product move completed successfully")
 }
