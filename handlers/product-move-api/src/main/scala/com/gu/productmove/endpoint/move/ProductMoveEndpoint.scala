@@ -130,9 +130,9 @@ object ProductMoveEndpoint {
           account.basicInfo.sfContactId__c,
           account.basicInfo.IdentityId__c
         )
-      ).addLogMessage("EmailSender").fork
+      ).addLogMessage("SQS sendEmail()").fork
 
-      _ <- if (subUpdate.totalDeltaMrr < 0) SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).fork else ZIO.succeed(())
+      _ <- if (subUpdate.totalDeltaMrr < 0) SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).addLogMessage("SQS queueRefund()").fork else ZIO.succeed(())
 
     } yield Success("Product move completed successfully")
 }
