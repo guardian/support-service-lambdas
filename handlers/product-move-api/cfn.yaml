@@ -140,19 +140,19 @@ Resources:
                 - sqs:ReceiveMessage
               Resource: "*"
               Effect: Allow
-    RefundQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        DelaySeconds: 5
-        QueueName: !Sub refunds-for-switching-${Stage}
+  RefundQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      DelaySeconds: 5
+      QueueName: !Sub refunds-for-switching-${Stage}
 
-    SQSTrigger:
-      Type: AWS::Lambda::EventSourceMapping
-      Properties:
-        BatchSize: 1
-        Enabled: true
-        EventSourceArn: !GetAtt RefundQueue.Arn
-        FunctionName: !Ref RefundLambda
+  SQSTrigger:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn: !GetAtt RefundQueue.Arn
+      FunctionName: !Ref RefundLambda
 
   # alarms
   ProductMovementFailureAlarm:
