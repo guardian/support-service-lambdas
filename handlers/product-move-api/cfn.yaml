@@ -132,14 +132,14 @@ Resources:
               - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/invoicingApi-${Stage}*.json
               - arn:aws:s3::*:membership-dist/*
         - PolicyName: AllowSQS
-            PolicyDocument:
-              Statement:
-                Action:
-                  - sqs:DeleteMessage
-                  - sqs:GetQueueAttributes
-                  - sqs:ReceiveMessage
-                Resource: "*"
-                Effect: Allow
+          PolicyDocument:
+            Statement:
+              Action:
+                - sqs:DeleteMessage
+                - sqs:GetQueueAttributes
+                - sqs:ReceiveMessage
+              Resource: "*"
+              Effect: Allow
     RefundQueue:
       Type: AWS::SQS::Queue
       Properties:
