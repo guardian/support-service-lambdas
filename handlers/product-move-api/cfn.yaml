@@ -108,7 +108,7 @@ Resources:
   RefundLambda:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub refund-switch-${Stage}
+      FunctionName: !Sub product-switch-refund-${Stage}
       Description: An SQS-triggered lambda that refunds customer's going through product-switching
       Runtime: java11
       Handler: com.gu.productmove.refund.RefundHandler::handleRequest
@@ -143,7 +143,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       VisibilityTimeout: 3000
-      QueueName: !Sub refunds-for-switching-${Stage}
+      QueueName: !Sub product-switch-refund-${Stage}
 
   SQSTrigger:
     Type: AWS::Lambda::EventSourceMapping
