@@ -67,7 +67,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponseNoChargedThroughDate)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
 
-        val emailSenderStubs = Map(emailMessageBody -> ())
+        val sqsStubs = Map(emailMessageBody -> (), )
         val getAccountStubs = Map("accountNumber" -> getAccountResponse)
         val getPaymentMethodResponse = PaymentMethodResponse(
           NumConsecutiveFailures = 0
@@ -88,7 +88,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockSQS(emailSenderStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockInvoicePreview(invoicePreviewStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))

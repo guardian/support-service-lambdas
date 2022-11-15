@@ -13,11 +13,11 @@ import zio.{Exit, Runtime, Unsafe, ZIO}
 
 import scala.jdk.CollectionConverters.*
 
-object RefundHandler {
+object RefundHandler extends RefundHandler {
   type TIO[+A] = ZIO[Any, Any, A] // Succeed with an `A`, may fail with anything`, no requirements.
 }
 
-class RefundHandler extends RequestHandler[SQSEvent, Unit] {
+trait RefundHandler extends RequestHandler[SQSEvent, Unit] {
 
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
     val records: List[SQSEvent.SQSMessage] = input.getRecords.asScala.toList
