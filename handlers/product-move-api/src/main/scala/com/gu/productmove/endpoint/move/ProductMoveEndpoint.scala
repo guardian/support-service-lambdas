@@ -79,7 +79,7 @@ object ProductMoveEndpoint {
     }
 
   extension(billingPeriod: BillingPeriod)
-    def toStringg() =
+    def value =
       billingPeriod match {
         case Monthly => "month"
         case Annual => "annual"
@@ -100,8 +100,6 @@ object ProductMoveEndpoint {
       currentRatePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName has more than one ratePlan")
       ratePlanCharge <- getSingleOrNotEligible(currentRatePlan.ratePlanCharges, s"Subscription: $subscriptionName has more than one ratePlanCharge")
 
-      chargedThroughDate <- ZIO.fromOption(ratePlanCharge.chargedThroughDate).orElseFail(s"chargedThroughDate is null for subscription $subscriptionName.")
-
       updateResponse <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
       totalDeltaMrr = updateResponse.totalDeltaMrr
 
@@ -121,7 +119,7 @@ object ProductMoveEndpoint {
                 price = postData.price.toString,
                 first_payment_amount = totalDeltaMrr.toString,
                 date_of_first_payment = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = ratePlanCharge.billingPeriod.toStringg(),
+                payment_frequency = ratePlanCharge.billingPeriod.value,
                 contribution_cancellation_date = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                 subscription_id = subscriptionName
               )

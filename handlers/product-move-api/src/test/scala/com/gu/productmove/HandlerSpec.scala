@@ -109,41 +109,6 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       },
 
-      test("productMove endpoint returns 500 error if chargedThroughDate is None") {
-        val expectedSubNameInput = "A-S00339056"
-        val endpointJsonInputBody = ExpectedInput(50.00)
-
-        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
-
-        val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponseNoChargedThroughDate)
-        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
-
-        val sqsStubs: Map[EmailMessage | RefundInput, Unit] = Map(emailMessageBody -> (), refundInput1 -> ())
-        val getAccountStubs = Map("accountNumber" -> getAccountResponse)
-        val getPaymentMethodResponse = PaymentMethodResponse(
-          NumConsecutiveFailures = 0
-        )
-        val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
-
-        val expectedOutput = "chargedThroughDate is null for subscription A-S00339056."
-
-        (for {
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody).exit
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-        } yield {
-          assert(output)(fails(equalTo(expectedOutput))) &&
-            assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
-            assert(subUpdateRequests)(equalTo(Nil))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(Stage.valueOf("PROD"))
-        )
-      },
-
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
         val expectedSubNameInput = "A-S00339056"
         val endpointJsonInputBody = ExpectedInput(50.00)
