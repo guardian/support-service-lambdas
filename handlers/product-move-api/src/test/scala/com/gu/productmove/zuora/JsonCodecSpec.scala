@@ -1,7 +1,9 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.available.Currency
+import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.GetAccount.BasicInfo
+import com.gu.productmove.*
 
 import collection.mutable.Stack
 import org.scalatest.*
@@ -29,5 +31,11 @@ class JsonCodecSpec extends AnyFlatSpec {
     val basicInfo = json.fromJson[BasicInfo].getOrElse("")
 
     assert(basicInfo == expectedBasicInfo)
+  }
+
+  it should "Convert billingPeriod to enum when decoding GET (/v1/subscriptions/$subscriptionId) response" in {
+    val json = Source.fromResource("zuoraResponses/GetSubscriptionResponse.json").mkString
+
+    assert(json.fromJson[GetSubscriptionResponse].getOrElse("") == getSubscriptionResponse2)
   }
 }

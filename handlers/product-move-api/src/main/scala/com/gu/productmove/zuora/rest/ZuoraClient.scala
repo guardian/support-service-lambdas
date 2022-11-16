@@ -48,6 +48,7 @@ private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], 
     sttpClient.send(
       request
         .headers(Map(
+          "zuora-version" -> "211.0",
           "apiSecretAccessKey" -> zuoraRestConfig.password,
           "apiAccessKeyId" -> zuoraRestConfig.username
         ))
