@@ -8,9 +8,9 @@ import com.gu.productmove.zuora.CreateSubscriptionResponse
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import zio.{IO, ZIO}
 
-class MockSQS(responses: Map[Any, Unit]) extends SQS {
+class MockSQS(responses: Map[EmailMessage | RefundInput, Unit]) extends SQS {
 
-  private var mutableStore: List[Any] = Nil // we need to remember the side effects
+  private var mutableStore: List[EmailMessage | RefundInput] = Nil // we need to remember the side effects
 
   def requests = mutableStore.reverse
 
@@ -19,9 +19,7 @@ class MockSQS(responses: Map[Any, Unit]) extends SQS {
 
     responses.get(message) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      // case None => ZIO.fail(s"wrong input, message was $message")
-      // temporarily make all tests pass
-      case None => ZIO.succeed(())
+      case None => ZIO.fail(s"wrong input, message was $message")
   }
 
   override def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit] = {
@@ -34,5 +32,5 @@ class MockSQS(responses: Map[Any, Unit]) extends SQS {
 }
 
 object MockSQS {
-  def requests: ZIO[MockSQS, Nothing, List[Any]] = ZIO.serviceWith[MockSQS](_.requests)
+  def requests: ZIO[MockSQS, Nothing, List[EmailMessage | RefundInput]] = ZIO.serviceWith[MockSQS](_.requests)
 }
