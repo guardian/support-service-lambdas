@@ -90,7 +90,6 @@ object SQSLive {
       ).mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
 
   private def getRefundQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
-    // choose existing SQS queue to test for now, create another queue for this.
     val queueName = s"product-switch-refund-${stage.toString}"
     val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
 
