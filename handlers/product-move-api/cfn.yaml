@@ -105,7 +105,55 @@ Resources:
               RestApiId:
                 Ref: ProductMoveApiGateway
 
-# alarms
+  RefundLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub product-switch-refund-${Stage}
+      Description: An SQS-triggered lambda that refunds customer's going through product-switching
+      Runtime: java11
+      Handler: com.gu.productmove.refund.RefundHandler::handleRequest
+      MemorySize: 1024
+      Timeout: 300
+      Environment:
+        Variables:
+          App: product-move-api
+          Stack: !Ref Stack
+          Stage: !Ref Stage
+      CodeUri:
+        Bucket: !Ref DeployBucket
+        Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      - Statement:
+          Effect: Allow
+          Action: s3:GetObject
+          Resource:
+            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/invoicingApi-${Stage}*.json
+            - arn:aws:s3::*:membership-dist/*
+      - Statement:
+          Effect: Allow
+          Action:
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+            - sqs:ReceiveMessage
+          Resource: "*"
+
+  RefundQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 3000
+      QueueName: !Sub product-switch-refund-${Stage}
+
+  SQSTrigger:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn: !GetAtt RefundQueue.Arn
+      FunctionName: !Ref RefundLambda
+
+  # alarms
   ProductMovementFailureAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
@@ -117,6 +165,25 @@ Resources:
       Dimensions:
         - Name: FunctionName
           Value: !Ref ProductMoveApiLambda
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+
+  RefundLambdaFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+      AlarmName: An error in the Refund lambda. Please check the logs to diagnose
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref RefundLambda
       EvaluationPeriods: 1
       MetricName: Errors
       Namespace: AWS/Lambda

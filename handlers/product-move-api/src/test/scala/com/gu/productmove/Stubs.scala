@@ -2,8 +2,9 @@ package com.gu.productmove
 
 import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.productmove.endpoint.available.Currency
+import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
-import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview}
+import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview, SubscriptionUpdateResponse}
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoicePreview.*
@@ -127,7 +128,7 @@ val directDebitGetAccountResponse = GetAccountResponse(
 )
 
 //-----------------------------------------------------
-// Stubs for EmailSender service
+// Stubs for SQS service
 //-----------------------------------------------------
 val emailMessageBody = EmailMessage(
   To = EmailPayload(
@@ -137,7 +138,7 @@ val emailMessageBody = EmailMessage(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "25.0",
+        first_payment_amount = "28",
         price = "50.0",
         payment_frequency = "month",
         date_of_first_payment = "10 May 2022",
@@ -149,6 +150,34 @@ val emailMessageBody = EmailMessage(
   "SV_RCtoDP_Switch",
   "sfContactId",
   None
+)
+
+val emailMessageBodyRefund = EmailMessage(
+  To = EmailPayload(
+    Address = Some("example@gmail.com"),
+    EmailPayloadContactAttributes(
+      EmailPayloadSubscriberAttributes(
+        subscription_id = "A-S00339056",
+        first_name = "John",
+        last_name = "Hee",
+        first_payment_amount = "-4",
+        price = "50.0",
+        payment_frequency = "month",
+        date_of_first_payment = "10 May 2022",
+        currency = "£",
+        contribution_cancellation_date = "10 May 2022"
+      )
+    )
+  ),
+  "SV_RCtoDP_Switch",
+  "sfContactId",
+  None
+)
+
+val refundInput1 = RefundInput(
+  subscriptionName = "A-S00339056",
+  invoiceId = "80a23d9sdf9a89fs8cjjk2",
+  refundAmount = 4
 )
 
 //-----------------------------------------------------
@@ -170,3 +199,10 @@ val DigiSubWithOfferInvoicePreview = ZuoraInvoiceList(
     )
   )
 )
+
+//-----------------------------------------------------
+// Stubs for SubscriptionUpdate service
+//-----------------------------------------------------
+val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as")
+val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2")
+

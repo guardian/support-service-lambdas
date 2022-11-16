@@ -36,16 +36,7 @@ object SubscriptionUpdate {
   def update(subscriptionId: String, billingPeriod: BillingPeriod, price: Double, ratePlanIdToRemove: String): ZIO[SubscriptionUpdate with Stage, String, SubscriptionUpdateResponse] =
     ZIO.serviceWithZIO[SubscriptionUpdate](_.update(subscriptionId, billingPeriod, price, ratePlanIdToRemove))
 }
-
-case class SubscriptionUpdateResponse(totalDeltaMrr: Double)
-
-object SubscriptionUpdateResponse {
-  private case class SubscriptionUpdateResponseWire(totalDeltaMrr: BigDecimal)
-
-  given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponseWire].map {
-    case SubscriptionUpdateResponseWire(totalDeltaMrr) => SubscriptionUpdateResponse(totalDeltaMrr.toDouble * 100)
-  }
-}
+case class SubscriptionUpdateResponse(subscriptionId: String, totalDeltaMrr: BigDecimal, invoiceId: String)
 
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 

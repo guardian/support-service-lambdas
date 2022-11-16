@@ -17,10 +17,10 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet :
       parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[T](response, zuoraSuccessCheck))
     } yield parsedBody
 
-  override def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response] =
+  override def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request, zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase): IO[String, Response] =
     for {
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).post(relativeUrl))
-      parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response, ZuoraSuccessCheck.SuccessCheckLowercase))
+      parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck))
     } yield parsedBody
 
   override def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response] =
@@ -31,6 +31,6 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet :
 
 trait ZuoraGet:
   def get[T: JsonDecoder](relativeUrl: Uri, zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase): IO[String, T]
-  def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response]
+  def post[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request, zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase): IO[String, Response]
   def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response]
 
