@@ -22,4 +22,5 @@ deployments:
       prefixStack: false
       functionNames:
       - move-product-
+      - product-switch-refund-
     dependencies: [cfn]

@@ -27,8 +27,7 @@ trait RefundHandler extends RequestHandler[SQSEvent, Unit] {
 
       maybeRefundInput match {
         case Right(refundInput) => runZio(refundInput, context)
-        case _ => ()
-          // SafeLogger.warn(s"Couldn't decode JSON to RefundInput with body: ${maybeRefundInput.getBody}")
+        case Left(ex) => context.getLogger.log(s"Error '${ex}' when decoding JSON to RefundInput with body: ${record.getBody}")
       }
     }
   }
@@ -39,7 +38,6 @@ trait RefundHandler extends RequestHandler[SQSEvent, Unit] {
       runtime.unsafe.run(
         Refund.applyRefund(refundInput)
           .provide(
-            // Runtime.addLogger(new AwsLambdaLogger(context.getLogger)),
             AwsS3Live.layer,
             AwsCredentialsLive.layer,
             SttpClientLive.layer,

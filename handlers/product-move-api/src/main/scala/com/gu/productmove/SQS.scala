@@ -36,7 +36,7 @@ object SQSLive {
     } yield new SQS {
       override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
         for {
-          result <- ZIO
+          _ <- ZIO
             .fromCompletableFuture {
               sqsClient.sendMessage(
                 SendMessageRequest.builder
@@ -46,7 +46,7 @@ object SQSLive {
               )
             }
             .mapError { ex =>
-              s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
+              s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id} with error: ${ex.toString}"
             }
           _ <- ZIO.log(
             s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
@@ -55,7 +55,7 @@ object SQSLive {
 
       override def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit] =
         for {
-          result <- ZIO
+          _ <- ZIO
             .fromCompletableFuture {
               sqsClient.sendMessage(
                 SendMessageRequest.builder
@@ -65,7 +65,7 @@ object SQSLive {
               )
             }
             .mapError { ex =>
-              s"Failed to send sqs refund message with subscription Number: ${refundInput.subscriptionName}"
+              s"Failed to send sqs refund message with subscription Number: ${refundInput.subscriptionName} with error: ${ex.toString}"
             }
           _ <- ZIO.log(
             s"Successfully sent refund message for subscription number: ${refundInput.subscriptionName}"
