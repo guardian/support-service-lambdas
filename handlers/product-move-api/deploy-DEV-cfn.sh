@@ -5,9 +5,9 @@ set -ex
 
 aws cloudformation update-stack \
   --capabilities '["CAPABILITY_AUTO_EXPAND", "CAPABILITY_NAMED_IAM", "CAPABILITY_IAM"]'  \
-  --stack-name membership-CODE-product-move-api \
+  --stack-name membership-DEV-product-move-api \
   --template-body file://cfn.yaml \
-  --parameters  ParameterKey=Stage,ParameterValue=CODE \
+  --parameters  ParameterKey=Stage,ParameterValue=DEV \
   --profile membership
 
 echo -e "\nStack update has been started, check progress in the AWS console.";

@@ -1,13 +1,14 @@
 package com.gu.productmove.endpoint.move
 
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, InternalServerError, OutputBody, Success}
+import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.getSingleOrNotEligible
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
+import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, EmailSender, EmailSenderLive, GuStageLive, SttpClientLive}
+import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -23,7 +24,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00442849", ExpectedInput(49.9999999))
+    run("A-S00448793", ExpectedInput(1))
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, (String,
@@ -58,14 +59,14 @@ object ProductMoveEndpoint {
 
   private def run(subscriptionName: String, postData: ExpectedInput): TIO[OutputBody] =
     productMove(subscriptionName, postData).provide(
-      SubscriptionUpdateLive.layer,
       GetSubscriptionLive.layer,
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
       ZuoraClientLive.layer,
       ZuoraGetLive.layer,
-      EmailSenderLive.layer,
+      SubscriptionUpdateLive.layer,
+      SQSLive.layer,
       InvoicePreviewLive.layer,
       GetAccountLive.layer,
       GuStageLive.layer,
@@ -82,19 +83,19 @@ object ProductMoveEndpoint {
       case _ => ZIO.fail(message)
     }
 
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with EmailSender with Stage, String, Success] =
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with SQS with Stage, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+      getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
 
       currentRatePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName has more than one ratePlan")
       ratePlanCharge <- getSingleOrNotEligible(currentRatePlan.ratePlanCharges, s"Subscription: $subscriptionName has more than one ratePlanCharge")
 
       chargedThroughDate <- ZIO.fromOption(ratePlanCharge.chargedThroughDate).orElseFail(s"chargedThroughDate is null for subscription $subscriptionName.")
 
-      newSubscription <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
+      subUpdate <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
 
-      getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
       nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).addLogMessage(s"InvoicePreview").fork
 
       requests = getAccountFuture.zip(nextInvoiceFuture)
@@ -106,7 +107,7 @@ object ProductMoveEndpoint {
       // first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionNumber).map(x => x.chargeAmount + x.taxAmount).sum
       first_payment_amount = 1
 
-      _ <- EmailSender.sendEmail(
+      emailFuture <- SQS.sendEmail(
         message = EmailMessage(
           EmailPayload(
             Address = Some(account.billToContact.workEmail),
@@ -121,7 +122,7 @@ object ProductMoveEndpoint {
                 payment_frequency = "Monthly",
                 promotion = "50% off for 3 months",
                 contribution_cancellation_date = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                subscription_id = newSubscription.subscriptionId
+                subscription_id = subscriptionName
               )
             )
           ),
@@ -129,7 +130,16 @@ object ProductMoveEndpoint {
           account.basicInfo.sfContactId__c,
           account.basicInfo.IdentityId__c
         )
-      ).addLogMessage("EmailSender")
+      ).addLogMessage("SQS sendEmail()").fork
+
+      refundFuture <-
+        if (subUpdate.totalDeltaMrr < 0)
+          SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).addLogMessage("SQS queueRefund()").fork
+        else
+          ZIO.succeed(()).fork
+
+      sqsRequests = emailFuture.zip(refundFuture)
+      _ <- sqsRequests.join
 
     } yield Success("Product move completed successfully")
 }
