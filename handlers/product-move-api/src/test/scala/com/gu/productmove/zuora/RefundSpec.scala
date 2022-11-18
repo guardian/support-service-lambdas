@@ -20,7 +20,11 @@ import java.time.*
 
 object RefundSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("Refund")(test("sdfsdf") {
+    suite("Refund")
+    /*
+      Test suite used to run the refund lambda locally
+    */
+      (test("Run refund lambda locally") {
 
       for {
         _ <- Refund.applyRefund(RefundInput("A-S00446886", "8ad09c4b8455ccff018462254418702f", 4)).provide(
@@ -34,5 +38,5 @@ object RefundSpec extends ZIOSpecDefault {
           CreditBalanceAdjustmentLive.layer
         )
       } yield assert(true)(equalTo(true))
-    })
+    } @@ TestAspect.ignore )
 }
