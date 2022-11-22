@@ -138,13 +138,34 @@ val emailMessageBody = EmailMessage(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "1",
-        price = "11.99",
-        payment_frequency = "Monthly",
-        date_of_first_payment = "29 September 2022",
+        first_payment_amount = "28",
+        price = "50.0",
+        payment_frequency = "month",
+        date_of_first_payment = "10 May 2022",
         currency = "£",
-        promotion = "50% off for 3 months",
-        contribution_cancellation_date = "29 September 2022"
+        contribution_cancellation_date = "10 May 2022"
+      )
+    )
+  ),
+  "SV_RCtoDP_Switch",
+  "sfContactId",
+  None
+)
+
+val emailMessageBodyRefund = EmailMessage(
+  To = EmailPayload(
+    Address = Some("example@gmail.com"),
+    EmailPayloadContactAttributes(
+      EmailPayloadSubscriberAttributes(
+        subscription_id = "A-S00339056",
+        first_name = "John",
+        last_name = "Hee",
+        first_payment_amount = "-4",
+        price = "50.0",
+        payment_frequency = "month",
+        date_of_first_payment = "10 May 2022",
+        currency = "£",
+        contribution_cancellation_date = "10 May 2022"
       )
     )
   ),
@@ -182,6 +203,6 @@ val DigiSubWithOfferInvoicePreview = ZuoraInvoiceList(
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
-val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 5, "89ad8casd9c0asdcaj89sdc98as")
+val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as")
 val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2")
 
