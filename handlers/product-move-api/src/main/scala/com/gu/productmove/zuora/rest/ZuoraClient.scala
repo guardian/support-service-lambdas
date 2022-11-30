@@ -1,6 +1,7 @@
 package com.gu.productmove.zuora.rest
 
 import com.gu.productmove.AwsS3
+import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.zuora.rest.ZuoraClient
 import com.gu.productmove.zuora.rest.ZuoraClientLive.ZuoraRestConfig
@@ -25,21 +26,11 @@ object ZuoraClientLive {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
 
-  val bucket = "gu-reader-revenue-private"
-
-  private def key(stage: Stage, version: Int = 1) = {
-    val basePath = s"membership/support-service-lambdas/$stage"
-
-    val versionString = if (stage == Stage.DEV) "" else s".v${version}"
-    val relativePath = s"zuoraRest-$stage$versionString.json"
-    s"$basePath/$relativePath"
-  }
-
   val layer: ZLayer[AwsS3 with Stage with SttpBackend[Task, Any], String, ZuoraClient] =
     ZLayer {
       for {
         stage <- ZIO.service[Stage]
-        fileContent <- AwsS3.getObject(bucket, key(stage)).mapError(_.toString)
+        fileContent <- AwsS3.getObject(bucket, key("zuoraRest", stage)).mapError(_.toString)
         zuoraRestConfig <- ZIO.fromEither(summon[JsonDecoder[ZuoraRestConfig]].decodeJson(fileContent))
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraRestConfig.baseUrl + "/"))
         _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
@@ -57,6 +48,7 @@ private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], 
     sttpClient.send(
       request
         .headers(Map(
+          "zuora-version" -> "211.0",
           "apiSecretAccessKey" -> zuoraRestConfig.password,
           "apiAccessKeyId" -> zuoraRestConfig.username
         ))
@@ -76,9 +68,11 @@ trait ZuoraClient {
 object ZuoraRestBody {
 
   // the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success property, and instead returns `size: "0"` if nothing was found
+  // Zuora either returns a "success" property with a lower or upper case starting letter, hence the need for SuccessCheckLowercase and SuccessCheckCapitalised enums
   enum ZuoraSuccessCheck:
-    case SuccessCheckSize, SuccessCheckLowercase
+    case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised
 
+  case class ZuoraSuccessCapitalised(Success: Boolean)
   case class ZuoraSuccessLowercase(success: Boolean)
   case class ZuoraSuccessSize(size: Option[Int])
 
@@ -95,6 +89,12 @@ object ZuoraRestBody {
         for {
           zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessLowercase].decodeJson(body)
           isSuccessful <- if (zuoraResponse.success) Right(()) else Left(s"success = false, body: $body")
+        } yield ()
+
+      case ZuoraSuccessCheck.SuccessCheckCapitalised =>
+        for {
+          zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessCapitalised].decodeJson(body)
+          isSuccessful <- if (zuoraResponse.Success) Right(()) else Left(s"Success = false, body: $body")
         } yield ()
     }
 

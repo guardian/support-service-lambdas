@@ -7,11 +7,11 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.17.210"
+  val awsSdkVersion = "2.18.27"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.7.2"
   val http4sVersion = "0.21.33"
-  val catsVersion = "2.7.0"
+  val catsVersion = "2.9.0"
   val catsEffectVersion = "2.5.5"
 
   val logging = Seq(
@@ -39,7 +39,7 @@ object Dependencies {
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
-  val playJson = "com.typesafe.play" %% "play-json" % "2.9.2"
+  val playJson = "com.typesafe.play" %% "play-json" % "2.9.3"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
   // HTTP clients
@@ -65,7 +65,7 @@ object Dependencies {
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.15"
+  val zio = "dev.zio" %% "zio" % "1.0.17"
   val zio2Version = "2.0.0"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion = "1.0.3"
@@ -75,7 +75,7 @@ object Dependencies {
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.7.1" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.12" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.14" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.16.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
 

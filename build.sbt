@@ -350,7 +350,7 @@ lazy val `new-product-api` = lambdaProject(
   .settings(
     scalacOptions += "-Ytasty-reader",
   )
-  .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`)
+  .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
@@ -472,6 +472,8 @@ lazy val `product-move-api` = lambdaProject(
     awsLambda,
     "com.softwaremill.sttp.client3" %% "zio" % sttpVersion  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
     awsS3,
+    awsSQS,
+    scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
     "dev.zio" %% "zio-logging-slf4j" % "2.0.1",
     "dev.zio" %% "zio-test" % zio2Version % Test,
@@ -483,10 +485,30 @@ lazy val `product-move-api` = lambdaProject(
   ),
   scala3Settings
 )
-  .settings(
-    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
+  .settings {
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
     genDocs := genDocsImpl("com.gu.productmove.MakeDocsYaml").value
-  )
+
+    lazy val deployTo =
+      inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+
+    // run from product-move-api project eg. deployTo CODE
+    // product-move-api needs its own deploy task currently because firstly it's Scala 3 so the jar path is different to
+    // other projects and secondly the jar is too large to deploy with the aws cli --zip-file parameter so we need to use S3
+    deployTo := {
+      import scala.sys.process._
+      import complete.DefaultParsers._
+      val jarFile = assembly.value
+
+      val Seq(stage) = spaceDelimited("<arg>").parsed
+      val s3Bucket = "support-service-lambdas-dist"
+      val s3Path = s"membership/$stage/product-move-api/product-move-api.jar"
+
+      s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name move-product-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name product-switch-refund-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+    }
+  }
   .dependsOn(`zuora-models`)
 
 lazy val `metric-push-api` = lambdaProject(

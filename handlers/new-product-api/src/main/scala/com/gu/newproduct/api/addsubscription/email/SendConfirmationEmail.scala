@@ -44,6 +44,7 @@ object SendConfirmationEmail extends Logging {
       case _: DigitalVoucherPlanId => "paper-subscription-card" // SV_SC_WelcomeDay0
       case _: VoucherPlanId => "paper-voucher"
       case _: DigipackPlanId => "digipack"
+      case _: SupporterPlusPlanId => "supporter-plus"
       case _: ContributionPlanId => "regular-contribution-thank-you"
       case _: HomeDeliveryPlanId => "paper-delivery"
       case _: GuardianWeeklyDomestic => "guardian-weekly"
