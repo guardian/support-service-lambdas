@@ -36,7 +36,6 @@ object SubscriptionUpdate {
   def update(subscriptionId: String, billingPeriod: BillingPeriod, price: Double, ratePlanIdToRemove: String): ZIO[SubscriptionUpdate with Stage, String, SubscriptionUpdateResponse] =
     ZIO.serviceWithZIO[SubscriptionUpdate](_.update(subscriptionId, billingPeriod, price, ratePlanIdToRemove))
 }
-
 case class SubscriptionUpdateResponse(subscriptionId: String, totalDeltaMrr: BigDecimal, invoiceId: String)
 
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
@@ -54,7 +53,6 @@ case class SubscriptionUpdateRequest(
   collect: Boolean = true,
   runBilling: Boolean = true
 )
-
 case class SupporterPlusRatePlanIds(ratePlanId: String, ratePlanChargeId: String)
 
 object SubscriptionUpdateRequest {
@@ -75,10 +73,12 @@ object SubscriptionUpdateRequest {
       stage <- ZIO.service[Stage]
 
       zuoraIds <- ZIO.fromEither(zuoraIdsForStage(config.Stage(stage.toString)))
+
       supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(zuoraIds, billingPeriod))
       chargeOverride = ChargeOverrides(price = Some(price), productRatePlanChargeId = supporterPlusRatePlanIds.ratePlanChargeId)
 
       addRatePlan = AddRatePlan(date, supporterPlusRatePlanIds.ratePlanId, chargeOverrides = List(chargeOverride))
+
       removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
     } yield SubscriptionUpdateRequest(List(addRatePlan), List(removeRatePlan))
 }

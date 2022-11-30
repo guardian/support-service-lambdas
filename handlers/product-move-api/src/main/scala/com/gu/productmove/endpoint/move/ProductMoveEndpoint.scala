@@ -1,5 +1,6 @@
 package com.gu.productmove.endpoint.move
 
+import com.gu.newproduct.api.productcatalog.{BillingPeriod, Annual, Monthly}
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
@@ -77,13 +78,20 @@ object ProductMoveEndpoint {
       error => ZIO.fail(s"$message failed with: $error")
     }
 
+  extension(billingPeriod: BillingPeriod)
+    def value =
+      billingPeriod match {
+        case Monthly => "month"
+        case Annual => "annual"
+      }
+
   def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
     list.length match {
       case 1 => ZIO.succeed(list.head)
       case _ => ZIO.fail(message)
     }
 
-  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with InvoicePreview with SQS with Stage, String, OutputBody] =
+  private[productmove] def productMove(subscriptionName: String, postData: ExpectedInput): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Stage, String, OutputBody] =
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
@@ -92,20 +100,12 @@ object ProductMoveEndpoint {
       currentRatePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName has more than one ratePlan")
       ratePlanCharge <- getSingleOrNotEligible(currentRatePlan.ratePlanCharges, s"Subscription: $subscriptionName has more than one ratePlanCharge")
 
-      chargedThroughDate <- ZIO.fromOption(ratePlanCharge.chargedThroughDate).orElseFail(s"chargedThroughDate is null for subscription $subscriptionName.")
+      updateResponse <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
+      totalDeltaMrr = updateResponse.totalDeltaMrr
 
-      subUpdate <- SubscriptionUpdate.update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id).addLogMessage("SubscriptionUpdate")
+      account <- getAccountFuture.join
 
-      nextInvoiceFuture <- InvoicePreview.get(subscription.accountId, chargedThroughDate).addLogMessage(s"InvoicePreview").fork
-
-      requests = getAccountFuture.zip(nextInvoiceFuture)
-      responses <- requests.join
-
-      account = responses._1
-      nextInvoice = responses._2
-
-      // first_payment_amount = nextInvoice.invoiceItems.filter(x => x.subscriptionName == newSubscription.subscriptionNumber).map(x => x.chargeAmount + x.taxAmount).sum
-      first_payment_amount = 1
+      date <- Clock.currentDateTime.map(_.toLocalDate)
 
       emailFuture <- SQS.sendEmail(
         message = EmailMessage(
@@ -116,12 +116,11 @@ object ProductMoveEndpoint {
                 first_name = account.billToContact.firstName,
                 last_name = account.billToContact.lastName,
                 currency = account.basicInfo.currency.symbol,
-                price = "11.99",
-                first_payment_amount = first_payment_amount.toString,
-                date_of_first_payment = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = "Monthly",
-                promotion = "50% off for 3 months",
-                contribution_cancellation_date = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                price = postData.price.toString,
+                first_payment_amount = totalDeltaMrr.toString,
+                date_of_first_payment = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                payment_frequency = ratePlanCharge.billingPeriod.value,
+                contribution_cancellation_date = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                 subscription_id = subscriptionName
               )
             )
@@ -133,8 +132,8 @@ object ProductMoveEndpoint {
       ).addLogMessage("SQS sendEmail()").fork
 
       refundFuture <-
-        if (subUpdate.totalDeltaMrr < 0)
-          SQS.queueRefund(RefundInput(subscriptionName, subUpdate.invoiceId, subUpdate.totalDeltaMrr.abs)).addLogMessage("SQS queueRefund()").fork
+        if (updateResponse.totalDeltaMrr < 0)
+          SQS.queueRefund(RefundInput(subscriptionName, updateResponse.invoiceId, updateResponse.totalDeltaMrr.abs)).addLogMessage("SQS queueRefund()").fork
         else
           ZIO.succeed(()).fork
 
