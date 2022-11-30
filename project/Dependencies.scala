@@ -7,7 +7,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.17.295"
+  val awsSdkVersion = "2.18.27"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.7.2"
   val http4sVersion = "0.21.33"
@@ -65,7 +65,7 @@ object Dependencies {
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.15"
+  val zio = "dev.zio" %% "zio" % "1.0.17"
   val zio2Version = "2.0.0"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion = "1.0.3"
