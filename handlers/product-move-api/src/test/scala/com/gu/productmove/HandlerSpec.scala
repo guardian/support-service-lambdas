@@ -1,210 +1,146 @@
 package com.gu.productmove
 
+import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
+import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.{AvailableProductMovesEndpoint, Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
-import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSubscribe}
+import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
+import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSQS, MockSubscribe, MockSubscriptionUpdate, SubscriptionUpdateResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
 
 import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
+import scala.language.postfixOps
 
 object HandlerSpec extends ZIOSpecDefault {
-  private val getSubscriptionResponse = GetSubscriptionResponse("subscriptionName", "zuoraAccountId", "accountNumber", ratePlans = List(
-    RatePlan(
-      id = "R1",
-      productName = "P1",
-      productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
-      ratePlanName = "RP1",
-      ratePlanCharges = List(
-        RatePlanCharge(
-          productRatePlanChargeId = "PRPC1",
-          name = "Digital Pack Monthly",
-          price = 11.11,
-          currency = "GBP",
-          number = "number",
-          effectiveStartDate = LocalDate.of(2017, 12, 15),
-          effectiveEndDate = LocalDate.of(2020, 11, 29),
-          chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
-          billingPeriod = Some("billingPeriod"),
-        )
-      )
-    )
-  ))
-
-  private val getAccountResponse = GetAccountResponse(
-    BasicInfo(
-      DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
-      balance = 0,
-      currency = "GBP"
-    ),
-    List(AccountSubscription("subscriptionId"))
-  )
-
-  private val directDebitGetAccountResponse = GetAccountResponse(
-    BasicInfo(
-      DefaultPaymentMethod("paymentMethodId", None),
-      balance = 0,
-      currency = "GBP"
-    ),
-    List(AccountSubscription("subscriptionId"))
-  )
-
   def spec = {
-    suite("HandlerSpec")(
-      test("productMove endpoint") {
-        val expectedSubNameInput = "A-S00339056"
-        val testPostData = ExpectedInput("targetProductId")
+    val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
 
-        val createSubscriptionResponse = CreateSubscriptionResponse("newSubscriptionName")
-        val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022,02,02))
+    suite("HandlerSpec")(
+      test("productMove endpoint is successful") {
+
+        val expectedSubNameInput = "A-S00339056"
+        val endpointJsonInputBody = ExpectedInput(50.00)
+
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "89ad8casd9c0asdcaj89sdc98as")
 
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
-        val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
-        val cancellationStubs = Map(("A-S00339056", LocalDate.of(2022, 9, 29)) -> cancellationResponse)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
 
-        val expectedOutput = ProductMoveEndpointTypes.Success(
-          newSubscriptionName = "newSubscriptionName",
-          newProduct = MoveToProduct(
-            id = "123",
-            name = "Digital Pack",
-            billing = Billing(
-              amount = Some(1199),
-              percentage = None,
-              currency = Some(Currency.GBP),
-              frequency = Some(
-                TimePeriod(
-                  name = TimeUnit.month,
-                  count = 1
-                )
-              ),
-              startDate = Some("2022-09-21")
-            ),
-            trial = Some(Trial(dayCount = 14)),
-            introOffer = Some(
-              Offer(
-                billing = Billing(
-                  amount = None,
-                  percentage = Some(50),
-                  currency = None,
-                  frequency = None,
-                  startDate = Some("2022-09-21")
-                ),
-                duration = TimePeriod(
-                  name = TimeUnit.month,
-                  count = 3
-                )
-              )
-            )
-          )
+        val sqsStubs: Map[EmailMessage | RefundInput, Unit] = Map(emailMessageBody -> ())
+        val getAccountStubs = Map("accountNumber" -> getAccountResponse)
+        val getPaymentMethodResponse = PaymentMethodResponse(
+          NumConsecutiveFailures = 0
         )
+        val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+
+        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
 
         (for {
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData)
+          _ <- TestClock.setTime(time)
+
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
+
           getSubRequests <- MockGetSubscription.requests
-          subscribeRequests <- MockSubscribe.requests
-          cancellationRequests <- MockCancelZuora.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          sqsRequests <- MockSQS.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
-          assert(subscribeRequests)(equalTo(List(("zuoraAccountId", "targetProductId")))) &&
-            assert(cancellationRequests)(equalTo(List(("A-S00339056", LocalDate.of(2022, 9, 29)))))
+            assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+            assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+            assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
+            assert(sqsRequests)(equalTo(List(emailMessageBody)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
-          ZLayer.succeed(new MockSubscribe(subscribeStubs)),
-          ZLayer.succeed(new MockCancelZuora(cancellationStubs))
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD"))
         )
       },
 
-      test("productMove endpoint fails if chargedThroughDate is None") {
+      test("productMove endpoint is successful for a refunded customer") {
         val expectedSubNameInput = "A-S00339056"
-        val testPostData = ExpectedInput("targetProductId")
+        val endpointJsonInputBody = ExpectedInput(50.00)
 
-        val getSubscriptionResponse = GetSubscriptionResponse("subscriptionName", "zuoraAccountId", "accountNumber", ratePlans = List(
-          RatePlan(
-            id = "R1",
-            productName = "P1",
-            productRatePlanId = "PRP1",
-            ratePlanName = "RP1",
-            ratePlanCharges = List(
-              RatePlanCharge(
-                productRatePlanChargeId = "PRPC1",
-                name = "Digital Pack Monthly",
-                price = 11.11,
-                currency = "GBP",
-                number = "number",
-                effectiveStartDate = LocalDate.of(2017, 12, 15),
-                effectiveEndDate = LocalDate.of(2020, 11, 29),
-                chargedThroughDate = None,
-                billingPeriod = Some("billingPeriod"),
-              )
-            )
-          )
-        ))
-
-        val createSubscriptionResponse = CreateSubscriptionResponse("newSubscriptionName")
-        val cancellationResponse = CancellationResponse("newSubscriptionName", LocalDate.of(2022,02,02))
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "89ad8casd9c0asdcaj89sdc98as")
 
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
-        val subscribeStubs = Map(("zuoraAccountId", "targetProductId") -> createSubscriptionResponse)
-        val cancellationStubs = Map(("A-S00339056", LocalDate.of(2022, 9, 29)) -> cancellationResponse)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse2)
 
-        val expectedOutput = ProductMoveEndpointTypes.Success(
-          newSubscriptionName = "newSubscriptionName",
-          newProduct = MoveToProduct(
-            id = "123",
-            name = "Digital Pack",
-            billing = Billing(
-              amount = Some(1199),
-              percentage = None,
-              currency = Some(Currency.GBP),
-              frequency = Some(
-                TimePeriod(
-                  name = TimeUnit.month,
-                  count = 1
-                )
-              ),
-              startDate = Some("2022-09-21")
-            ),
-            trial = Some(Trial(dayCount = 14)),
-            introOffer = Some(
-              Offer(
-                billing = Billing(
-                  amount = None,
-                  percentage = Some(50),
-                  currency = Some(Currency.GBP),
-                  frequency = None,
-                  startDate = Some("2022-09-21")
-                ),
-                duration = TimePeriod(
-                  name = TimeUnit.month,
-                  count = 3
-                )
-              )
-            )
-          )
+        val sqsStubs: Map[EmailMessage | RefundInput, Unit] = Map(emailMessageBodyRefund -> (), refundInput1 -> ())
+        val getAccountStubs = Map("accountNumber" -> getAccountResponse)
+        val getPaymentMethodResponse = PaymentMethodResponse(
+          NumConsecutiveFailures = 0
         )
+        val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+
+        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
 
         (for {
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, testPostData).exit
+          _ <- TestClock.setTime(time)
+
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
+
           getSubRequests <- MockGetSubscription.requests
-          subscribeRequests <- MockSubscribe.requests
-          cancellationRequests <- MockCancelZuora.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          sqsRequests <- MockSQS.requests
         } yield {
-          assert(output)(fails(equalTo("chargedThroughDate is null for subscription A-S00339056."))) &&
+          assert(output)(equalTo(expectedOutput)) &&
             assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
-            assert(subscribeRequests)(equalTo(List())) &&
-            assert(cancellationRequests)(equalTo(List()))
+            assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+            assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
+            assert(sqsRequests)(equalTo(List(emailMessageBodyRefund, refundInput1)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
-          ZLayer.succeed(new MockSubscribe(subscribeStubs)),
-          ZLayer.succeed(new MockCancelZuora(cancellationStubs))
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD"))
+        )
+      },
+
+      test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
+        val expectedSubNameInput = "A-S00339056"
+        val endpointJsonInputBody = ExpectedInput(50.00)
+
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) = (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
+
+        val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse2)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
+
+        val emailSenderStubs: Map[EmailMessage | RefundInput, Unit] = Map(emailMessageBody -> ())
+        val getAccountStubs = Map("accountNumber" -> getAccountResponse)
+        val getPaymentMethodResponse = PaymentMethodResponse(
+          NumConsecutiveFailures = 0
+        )
+        val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+
+        val expectedOutput = "Subscription: A-S00339056 has more than one ratePlan"
+
+        (for {
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody).exit
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+        } yield {
+          assert(output)(fails(equalTo(expectedOutput))) &&
+            assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+            assert(subUpdateRequests)(equalTo(Nil))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSQS(emailSenderStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD"))
         )
       },
 
@@ -222,7 +158,7 @@ object HandlerSpec extends ZIOSpecDefault {
 
         val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(
           body = List(MoveToProduct(
-            id = "A-S00339056",
+            id = "2c92a0fb4edd70c8014edeaa4eae220a",
             name = "Digital Pack",
             billing = Billing(
               amount = Some(1199),
@@ -241,8 +177,9 @@ object HandlerSpec extends ZIOSpecDefault {
                 startDate = Some("2022-09-29")
               ),
               duration = TimePeriod(TimeUnit.month, 3)
-            )))
-        ))
+            ))
+          ))
+        )
 
         (for {
           _ <- TestClock.setTime(time)
@@ -294,7 +231,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD"))
         )
-        },
+      },
 
       test("available-product-moves endpoint returns empty response when user does not have a card payment method") {
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 9, 16, 10, 2), ZoneOffset.ofHours(0)).toInstant
