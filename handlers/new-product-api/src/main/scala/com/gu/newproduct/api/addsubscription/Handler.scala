@@ -42,6 +42,7 @@ object Handler extends Logging {
 
 object Steps {
   def handleRequest(
+    addSupporterPlus: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
@@ -52,6 +53,7 @@ object Steps {
   ): Future[ApiResponse] = (for {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
     subscriptionName <- request.planId match {
+      case _: SupporterPlusPlanId => addSupporterPlus(request)
       case _: ContributionPlanId => addContribution(request)
       case _: VoucherPlanId => addPaperSub(request)
       case _: HomeDeliveryPlanId => addPaperSub(request)
@@ -70,7 +72,7 @@ object Steps {
     currentDatetime: () => LocalDateTime
   ): ApiGatewayOp[Operation] =
     for {
-      zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
+      zuoraIds <- ZuoraIds.zuoraIdsForStage(stage).toApiGatewayOp(ApiGatewayResponse.internalServerError _)
       zuoraConfig <- {
         val loadConfig = LoadConfigModule(stage, fetchString)
         loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
@@ -94,6 +96,17 @@ object Steps {
         }
       )
       createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription], currentDate) _
+
+      supporterPlusSteps = AddSupporterPlus.wireSteps(
+        catalog,
+        zuoraIds,
+        zuoraClient,
+        isValidStartDateForPlan,
+        createSubscription,
+        awsSQSSend,
+        queueNames,
+        currentDate
+      )
 
       contributionSteps = AddContribution.wireSteps(
         catalog,
@@ -156,6 +169,7 @@ object Steps {
       )
 
       addSubSteps = handleRequest(
+        addSupporterPlus = supporterPlusSteps,
         addContribution = contributionSteps,
         addPaperSub = paperSteps,
         addDigipackSub = digipackSteps,

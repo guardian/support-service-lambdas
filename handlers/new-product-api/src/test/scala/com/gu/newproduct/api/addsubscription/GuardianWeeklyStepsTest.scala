@@ -128,6 +128,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
     ) _
 
     val futureActual = Steps.handleRequest(
+      addSupporterPlus = dummySteps,
       addContribution = dummySteps,
       addPaperSub = dummySteps,
       addDigipackSub = dummySteps,
@@ -194,6 +195,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
     ) _
 
     val futureActual = Steps.handleRequest(
+      addSupporterPlus = dummySteps,
       addContribution = dummySteps,
       addPaperSub = dummySteps,
       addDigipackSub = dummySteps,

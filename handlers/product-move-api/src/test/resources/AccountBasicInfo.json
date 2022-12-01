@@ -1,0 +1,32 @@
+{
+    "id": "2c92a0ff58bjkleb0158ff0351370sdf",
+    "name": "385sdf",
+    "accountNumber": "385sdf",
+    "balance": 0.000000000,
+    "lastInvoiceDate": "2022-08-24",
+    "lastPaymentDate": "2022-08-24",
+    "lastPaymentAmount": 55.990000000,
+    "currency": "GBP",
+    "status": "Active",
+    "batch": "Batch1",
+    "billCycleDay": 24,
+    "invoiceDeliveryPrefsPrint": false,
+    "invoiceDeliveryPrefsEmail": true,
+    "additionalEmailAddresses": [],
+    "IdentityId__c": "",
+    "sfContactId__c": "0030J00001tCDhGAMKL",
+    "CCURN__c": null,
+    "SpecialDeliveryInstructions__c": null,
+    "NonStandardDataReason__c": null,
+    "ProcessingAdvice__c": null,
+    "CreatedRequestId__c": null,
+    "RetryStatus__c": null,
+    "defaultPaymentMethod": {
+      "id": "2c92a0fd590128e4015902ad34001c1f",
+      "paymentMethodType": "BankTransfer",
+      "creditCardNumber": null,
+      "creditCardExpirationMonth": null,
+      "creditCardExpirationYear": null,
+      "creditCardType": null
+    }
+}

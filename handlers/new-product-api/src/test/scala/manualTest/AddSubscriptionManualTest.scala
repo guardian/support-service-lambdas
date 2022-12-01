@@ -9,12 +9,14 @@ import play.api.libs.json.{JsString, Json}
 object AddSubscriptionManualTest extends App {
   val requestBody =
     """{
-      |   "zuoraAccountId":"2c92c0f869330b7a01694982970a2b34",
-      |   "startDate":"2019-03-25",
-      |   "acquisitionSource":"CSR",
-      |   "createdByCSR":"someone testingsadasd",
-      |   "acquisitionCase": "caseID",
-      |   "planId": "digipack_monthly"
+      |	"zuoraAccountId":"8ad09b7d83634b880183698ea4ff27cc",
+      |	"startDate":"2022-09-23",
+      |	"productRatePlanChargeId":"monthly_supporter_plus",
+      |	"planId":"monthly_supporter_plus",
+      |	"createdByCSR":"David Pepper",
+      |	"amountMinorUnits":2000,
+      |	"acquisitionSource":"CSR",
+      |	"acquisitionCase":"5009E00000Lyy3T"
       |}
     """.stripMargin
 

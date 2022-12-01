@@ -33,7 +33,7 @@ object AccountIdentitys {
     stage match {
       case Stage("PROD") => HealthCheckTestAccountData(ZuoraAccountId("2c92a0fb4a38064e014a3f48f1663ad8"), IdentityId("13552794"))
       case Stage("CODE") => HealthCheckTestAccountData(ZuoraAccountId("2c92c0f86140da81016142811d0c6cf7"), IdentityId("30002133"))
-      case Stage(_ /*DEV*/ ) => HealthCheckTestAccountData(ZuoraAccountId("2c92c0f8646e0a6601646ff9b98e7b5f"), IdentityId("1234567890"))
+      case Stage(_ /*DEV*/ ) => HealthCheckTestAccountData(ZuoraAccountId("8ad095dd82f7aaa50182f96de24d3ddb"), IdentityId("200045767"))
     }
 
 }

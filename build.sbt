@@ -1,7 +1,7 @@
 import Dependencies._
 
-val scalaSettings = Seq(
-  ThisBuild / scalaVersion := "2.13.8",
+val scala2Settings = Seq(
+  ThisBuild / scalaVersion := "2.13.10",
   version      := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -17,7 +17,31 @@ val scalaSettings = Seq(
     "-Xlint:-byname-implicit",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard"
+    "-Ywarn-value-discard",
+  ),
+  Test / fork := true,
+  {
+    import scalariform.formatter.preferences._
+    scalariformPreferences := scalariformPreferences.value
+      .setPreference(DanglingCloseParenthesis, Force)
+      .setPreference(SpacesAroundMultiImports, false)
+      .setPreference(NewlineAtEndOfFile, true)
+  },
+
+  autoCompilerPlugins := true
+)
+
+val scala3Settings = Seq(
+  scalaVersion := "3.1.2",
+  version      := "0.0.1",
+  organization := "com.gu",
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding", "UTF-8",
+    "-feature",
+    "-unchecked",
+    "-Xmax-inlines", "256",
+    "-Yretain-trees",
   ),
   Test / fork := true,
   {
@@ -48,7 +72,8 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
   HealthCheckTest / testOptions += Tests.Argument("-n", "com.gu.test.HealthCheck")
 )
 
-def library(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
+def library(theProject: Project, scalaSettings: SettingsDefinition = scala2Settings) =
+  theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
 
 // ==== START libraries ====
 
@@ -235,6 +260,13 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
     dependencyOverrides ++= jacksonDependencies
   )
 
+// this lib is shared between ZIO and non zio projects so can't depend on json libs, http clients, effects etc.
+lazy val `zuora-models` = library(project in file("lib/zuora-models"), scala3Settings)
+  .dependsOn(`config-core`)
+  .settings(
+    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.15" exclude("com.typesafe.scala-logging", "scala-logging_2.13")
+  )
+
 lazy val `credit-processor` = library(project in file("lib/credit-processor"))
   .dependsOn(
     `zuora-core`,
@@ -256,7 +288,7 @@ lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-
     libraryDependencies ++= Seq(scalatest)
   )
 
-def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil) = {
+def lambdaProject(projectName: String, projectDescription: String, dependencies: Seq[sbt.ModuleID] = Nil, scalaSettings: SettingsDefinition = scala2Settings) = {
   val cfName = "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
@@ -313,8 +345,12 @@ lazy val `identity-retention` = lambdaProject(
 lazy val `new-product-api` = lambdaProject(
   "new-product-api",
   "Add subscription to account",
-  Seq(supportInternationalisation)
-).dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
+  Seq(),
+)
+  .settings(
+    scalacOptions += "-Ytasty-reader",
+  )
+  .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
@@ -337,8 +373,8 @@ lazy val `revenue-recogniser-job` = lambdaProject(
   "revenue-recogniser-job",
   "Finds unrecognised revenue in zuora and recognises it appropariately",
   Seq(
-    "com.nrinaudo" %% "kantan.csv-generic" % "0.6.2",
-    "com.nrinaudo" %% "kantan.csv-java8" % "0.6.2",
+    "com.nrinaudo" %% "kantan.csv-generic" % "0.7.0",
+    "com.nrinaudo" %% "kantan.csv-java8" % "0.7.0",
   )
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
 
@@ -434,21 +470,46 @@ lazy val `product-move-api` = lambdaProject(
     zio2,
     awsEvents,
     awsLambda,
-    "com.softwaremill.sttp.client3" %% "zio" % "3.6.1"  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
+    "com.softwaremill.sttp.client3" %% "zio" % sttpVersion  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
     awsS3,
-    "com.softwaremill.sttp.client3" %% "zio-json" % "3.6.1",
-    "dev.zio" %% "zio-logging-slf4j" % "2.0.0-RC8",
+    awsSQS,
+    scalatest,
+    "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
+    "dev.zio" %% "zio-logging-slf4j" % "2.0.1",
     "dev.zio" %% "zio-test" % zio2Version % Test,
-    "dev.zio" %% "zio-test-sbt" % zio2Version % Test
-  )
+    "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
+  ),
+  scala3Settings
 )
-  .settings(
-    scalaVersion := "3.1.2",
-    // needed for zio snapshot to get this PR https://github.com/zio/zio/pull/6775
-    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+  .settings {
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
-  )
-  .dependsOn()
+    genDocs := genDocsImpl("com.gu.productmove.MakeDocsYaml").value
+
+    lazy val deployTo =
+      inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+
+    // run from product-move-api project eg. deployTo CODE
+    // product-move-api needs its own deploy task currently because firstly it's Scala 3 so the jar path is different to
+    // other projects and secondly the jar is too large to deploy with the aws cli --zip-file parameter so we need to use S3
+    deployTo := {
+      import scala.sys.process._
+      import complete.DefaultParsers._
+      val jarFile = assembly.value
+
+      val Seq(stage) = spaceDelimited("<arg>").parsed
+      val s3Bucket = "support-service-lambdas-dist"
+      val s3Path = s"membership/$stage/product-move-api/product-move-api.jar"
+
+      s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name move-product-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name product-switch-refund-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+    }
+  }
+  .dependsOn(`zuora-models`)
 
 lazy val `metric-push-api` = lambdaProject(
   "metric-push-api",
@@ -562,6 +623,17 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
 
 
 // ==== END handlers ====
+
+lazy val genDocs = taskKey[Unit]("generate yaml open API docs")
+
+def genDocsImpl(makeDocsClassName: String): Def.Initialize[Task[Unit]] = {
+  Def.taskDyn {
+    val targetPath = target.value.toString
+    Def.task {
+      (Compile / runMain).toTask(" "+makeDocsClassName+" " + targetPath + "/APIDocs.yaml").value
+    }
+  }
+}
 
 initialize := {
   val _ = initialize.value
