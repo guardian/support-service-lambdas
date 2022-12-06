@@ -619,7 +619,7 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     sttp,
     sttpCirce
   )
-).dependsOn(`config-cats`, `zuora-core`)
+).dependsOn(handler, `config-cats`, zuora, `zuora-core`, effectsDepIncludingTestFolder, testDep)
 
 
 // ==== END handlers ====

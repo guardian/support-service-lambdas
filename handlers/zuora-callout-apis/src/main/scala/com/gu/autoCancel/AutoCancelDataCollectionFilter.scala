@@ -1,7 +1,7 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.stripeCustomerSourceUpdated.TypeConvert._
+import com.gu.util.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.ApiGatewayOp._

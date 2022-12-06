@@ -6,7 +6,7 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.SafeQueryBuilder.Implicits._
+import com.gu.util.zuora.SafeQueryBuilder.Implicits.{makeSafeAlreadySafe, _}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json._

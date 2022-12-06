@@ -1,10 +1,9 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import com.gu.TestData
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse}
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.SourceUpdatedUrlParams
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedStepsTestData._
+import com.gu.stripeCustomerSourceUpdated.SourceUpdatedStepsTestData.{accountSummaryJson, defaultAccountSummaryJson}
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
