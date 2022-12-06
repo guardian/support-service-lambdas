@@ -1,0 +1,42 @@
+package com.gu.productmove.salesforce
+
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
+import com.gu.productmove.AwsS3
+import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
+import com.gu.productmove.zuora.rest.ZuoraGet
+import sttp.capabilities.zio.ZioStreams
+import sttp.capabilities.{Effect, WebSockets}
+import sttp.client3.*
+import sttp.client3.httpclient.zio.HttpClientZioBackend
+import sttp.client3.ziojson.*
+import sttp.model.Uri
+import zio.json.*
+import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
+
+import java.time.LocalDate
+
+object GetSfSubscriptionLive:
+  val layer: URLayer[SalesforceClient, GetSfSubscription] = ZLayer.fromFunction(GetSfSubscriptionLive(_))
+
+private class GetSfSubscriptionLive(salesforceClient: SalesforceClient) extends GetSfSubscription :
+  override def get(subscriptionNumber: String): IO[String, GetSfSubscriptionResponse] =
+    salesforceClient.get[GetSfSubscriptionResponse](uri"/services/data/v43.0/sobjects/SF_Subscription__c/Name/$subscriptionNumber")
+
+trait GetSfSubscription:
+  def get(subscriptionNumber: String): IO[String, GetSfSubscriptionResponse]
+
+object GetSfSubscription {
+
+  case class GetSfSubscriptionResponse(
+                                     Id: String,
+                                     Name: String,
+                                     Buyer__c: String,
+                                     Status__c: String,
+                                     Product_Type__c: Option[String] // This ought to always have a value but there appear to be some nulls in the data.
+                                   )
+  given JsonDecoder[GetSfSubscriptionResponse] = DeriveJsonDecoder.gen[GetSfSubscriptionResponse]
+
+  def get(subscriptionNumber: String): ZIO[GetSfSubscription, String, GetSfSubscriptionResponse] =
+    ZIO.serviceWithZIO[GetSfSubscription](_.get(subscriptionNumber))
+}
