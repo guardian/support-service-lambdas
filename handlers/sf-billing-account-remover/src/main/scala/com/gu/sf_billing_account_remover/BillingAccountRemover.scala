@@ -159,6 +159,8 @@ object BillingAccountRemover extends App with LazyLogging {
       "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = \'Max Billing Acc GDPR Removal Attempts\'"
     println("custom setting query:"+query)
     val customSettingQueryResponse = doSfGetWithQuery(sfAuthentication, query)
+    println("customSettingQueryResponse:"+customSettingQueryResponse)
+
     decode[SfGetCustomSettingResponse](customSettingQueryResponse)
   }
 
