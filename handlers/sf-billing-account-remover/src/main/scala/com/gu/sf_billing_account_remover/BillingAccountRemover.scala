@@ -186,7 +186,7 @@ object BillingAccountRemover extends App with LazyLogging {
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
 
-    val url = s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/query/"
+    val url = s"${sfAuthDetails.instance_url}/services/data/v54.0/query/"
 
     println("url:" + url)
     val abc = Http(url)
@@ -209,7 +209,7 @@ object BillingAccountRemover extends App with LazyLogging {
 
     Try {
       Http(
-        s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/composite/sobjects"
+        s"${sfAuthDetails.instance_url}/services/data/v54.0/composite/sobjects"
       ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
         .put(jsonBody)
