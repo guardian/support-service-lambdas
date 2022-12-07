@@ -2,7 +2,7 @@ package com.gu.stripeCustomerSourceUpdated
 
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
-import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{CreateStripePaymentMethod, CreditCardType}
+import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{CreatePaymentMethodResult, CreateStripePaymentMethod, CreditCardType}
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.stripeCustomerSourceUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
 import com.gu.util.Logging
@@ -82,7 +82,7 @@ object SourceUpdatedSteps extends Logging {
   def createPaymentMethod(requests: Requests)(
     eventDataObject: EventDataObject,
     paymentMethodFields: PaymentMethodFields
-  ): ApiGatewayOp[CreatePaymentMethod.CreatePaymentMethodResult] = {
+  ): ApiGatewayOp[CreatePaymentMethodResult] = {
     for {
       creditCardType <- Some(eventDataObject.brand).collect {
         case StripeBrand.Visa => CreditCardType.Visa

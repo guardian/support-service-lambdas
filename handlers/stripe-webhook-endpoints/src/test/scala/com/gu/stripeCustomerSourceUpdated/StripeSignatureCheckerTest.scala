@@ -1,11 +1,9 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import org.scalatest.matchers.should.Matchers._
-import com.gu.TestData
-import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
+import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
 import com.gu.util.config.{StripeConfig, StripeSecretKey}
-import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers._
 
 class StripeRequestSignatureCheckerTest extends AnyFlatSpec {
 
