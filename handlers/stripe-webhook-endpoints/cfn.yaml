@@ -93,8 +93,6 @@ Resources:
               Resource:
                 - arn:aws:s3::*:membership-dist/*
                 - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
-                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
-                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/exactTarget-${Stage}.*.json
                 - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/stripe-${Stage}.*.json
       Events:
         AcquisitionEvent:
