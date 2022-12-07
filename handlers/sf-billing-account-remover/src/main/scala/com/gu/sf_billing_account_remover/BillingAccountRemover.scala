@@ -128,7 +128,8 @@ object BillingAccountRemover extends App with LazyLogging {
 
   def auth(salesforceConfig: SalesforceConfig): String = {
     logger.info("Authenticating with Salesforce...")
-    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
+    logger.info("Auth URL:"+s"${System.getenv("authUrl")}")
+    val authResponse = Http(s"${System.getenv("authUrl")}/services/oauth2/token")
       .postForm(
         Seq(
           "grant_type" -> "password",
@@ -141,6 +142,8 @@ object BillingAccountRemover extends App with LazyLogging {
       .asString
       .body
 
+    println("authResponse:"+authResponse)
+    authResponse
   }
 
   def getSfCustomSetting(
