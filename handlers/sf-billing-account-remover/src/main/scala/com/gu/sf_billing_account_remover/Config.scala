@@ -12,7 +12,7 @@ case class SalesforceConfig(
   authUrl: String,
   clientId: String,
   clientSecret: String,
-  userName: String,
+  username: String,
   password: String,
   token: String
 )

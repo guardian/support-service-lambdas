@@ -78,7 +78,7 @@ object BillingAccountRemover extends App with LazyLogging {
 
   } yield Config(
     SalesforceConfig(
-      userName = sfUserName,
+      username = sfUserName,
       clientId = sfClientId,
       clientSecret = sfClientSecret,
       password = sfPassword,
@@ -134,7 +134,7 @@ object BillingAccountRemover extends App with LazyLogging {
           "grant_type" -> "password",
           "client_id" -> salesforceConfig.clientId,
           "client_secret" -> salesforceConfig.clientSecret,
-          "username" -> salesforceConfig.userName,
+          "username" -> salesforceConfig.username,
           "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
         )
       )
