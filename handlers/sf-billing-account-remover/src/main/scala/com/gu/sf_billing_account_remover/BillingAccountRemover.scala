@@ -106,32 +106,29 @@ object BillingAccountRemover extends App with LazyLogging {
           )
         )
         .Property_Value__c
-      //      getBillingAccountsResponse <- getSfBillingAccounts(
-      //        maxAttempts,
-      //        sfAuthDetails
-      //      )
+      getBillingAccountsResponse <- getSfBillingAccounts(
+        maxAttempts,
+        sfAuthDetails
+      )
     } yield {
-      println("maxAttempts:" + maxAttempts)
-      //
-      //      val sfRecords = getBillingAccountsResponse.records
-      //      println("sfRecords:" + sfRecords)
-      //      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
-      //      println("allUpdates:" + allUpdates)
-      //
-      //      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
-      //      println("failedUpdates:" + failedUpdates)
-      //
-      //      if (failedUpdates.nonEmpty) {
-      //        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
-      //      }
+      val sfRecords = getBillingAccountsResponse.records
+      println("sfRecords:" + sfRecords)
+      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
+      println("allUpdates:" + allUpdates)
+
+      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
+      println("failedUpdates:" + failedUpdates)
+
+      if (failedUpdates.nonEmpty) {
+        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
+      }
     }).left
       .foreach(e => throw new RuntimeException("An error occurred: ", e))
   }
 
   def auth(salesforceConfig: SalesforceConfig): String = {
     logger.info("Authenticating with Salesforce...")
-    logger.info("Auth URL:" + s"${System.getenv("authUrl")}")
-    val authResponse = Http(s"${System.getenv("authUrl")}/services/oauth2/token")
+    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
       .postForm(
         Seq(
           "grant_type" -> "password",
@@ -144,8 +141,6 @@ object BillingAccountRemover extends App with LazyLogging {
       .asString
       .body
 
-    println("authResponse:" + authResponse)
-    authResponse
   }
 
   def getSfCustomSetting(
@@ -156,13 +151,11 @@ object BillingAccountRemover extends App with LazyLogging {
     )
 
     val query =
-      "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = \'Max Billing Acc GDPR Removal Attempts\'"
-    println("custom setting query:" + query)
-    println("sfAuthentication:" + sfAuthentication)
-    val customSettingQueryResponse = doSfGetWithQuery(sfAuthentication, query)
-    println("customSettingQueryResponse:" + customSettingQueryResponse)
+      "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
 
-    decode[SfGetCustomSettingResponse](customSettingQueryResponse)
+    decode[SfGetCustomSettingResponse](
+      doSfGetWithQuery(sfAuthentication, query)
+    )
   }
 
   def getSfBillingAccounts(
@@ -176,29 +169,19 @@ object BillingAccountRemover extends App with LazyLogging {
 
     val query =
       s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts and Id=\'a029E00000OuybhQAB\' limit $limit"
-    println("query:" + query)
 
-    val queryResponse = doSfGetWithQuery(sfAuthentication, query)
-    println("queryResponse:" + queryResponse)
-
-    decode[SfGetBillingAccsResponse](queryResponse)
+    decode[SfGetBillingAccsResponse](doSfGetWithQuery(sfAuthentication, query))
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-
-    val url = s"${sfAuthDetails.instance_url}/services/data/v54.0/query/"
-
-    println("url:" + url)
-    val abc = Http(url)
+//    Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/query/")
+    Http(s"${sfAuthDetails.instance_url}/services/data/v54.0/query/")
       .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .method("GET")
       .asString
       .body
-
-    println("abc:" + abc)
-    abc
   }
 
   def doSfCompositeRequest(
