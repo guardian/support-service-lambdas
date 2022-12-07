@@ -106,22 +106,24 @@ object BillingAccountRemover extends App with LazyLogging {
           )
         )
         .Property_Value__c
-      getBillingAccountsResponse <- getSfBillingAccounts(
-        maxAttempts,
-        sfAuthDetails
-      )
+//      getBillingAccountsResponse <- getSfBillingAccounts(
+//        maxAttempts,
+//        sfAuthDetails
+//      )
     } yield {
-      val sfRecords = getBillingAccountsResponse.records
-      println("sfRecords:" + sfRecords)
-      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
-      println("allUpdates:" + allUpdates)
-
-      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
-      println("failedUpdates:" + failedUpdates)
-
-      if (failedUpdates.nonEmpty) {
-        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
-      }
+      println("maxAttempts:" + maxAttempts)
+//
+//      val sfRecords = getBillingAccountsResponse.records
+//      println("sfRecords:" + sfRecords)
+//      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
+//      println("allUpdates:" + allUpdates)
+//
+//      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
+//      println("failedUpdates:" + failedUpdates)
+//
+//      if (failedUpdates.nonEmpty) {
+//        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
+//      }
     }).left
       .foreach(e => throw new RuntimeException("An error occurred: ", e))
   }
@@ -172,8 +174,12 @@ object BillingAccountRemover extends App with LazyLogging {
 
     val query =
       s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts and Id=\'a029E00000OuybhQAB\' limit $limit"
+    println("query:"+query)
 
-    decode[SfGetBillingAccsResponse](doSfGetWithQuery(sfAuthentication, query))
+    val queryResponse = doSfGetWithQuery(sfAuthentication, query)
+    println("queryResponse:"+queryResponse)
+
+    decode[SfGetBillingAccsResponse](queryResponse)
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
