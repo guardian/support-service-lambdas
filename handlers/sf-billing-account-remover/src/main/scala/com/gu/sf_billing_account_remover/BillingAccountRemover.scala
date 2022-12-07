@@ -164,7 +164,7 @@ object BillingAccountRemover extends App with LazyLogging {
     val limit = 200;
 
     val query =
-      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts and Id=\'a029E00000OuybhQAB\' limit $limit"
+      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
 
     decode[SfGetBillingAccsResponse](doSfGetWithQuery(sfAuthentication, query))
   }
