@@ -11,9 +11,7 @@ import scalaj.http._
 import scala.util.Try
 
 object BillingAccountRemover extends App with LazyLogging {
-
-  val salesforceApiVersion = "54.0"
-
+  
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
 
@@ -114,13 +112,13 @@ object BillingAccountRemover extends App with LazyLogging {
       val sfRecords = getBillingAccountsResponse.records
       logger.info(s"Retrieved ${sfRecords.length} records from Salesforce.")
 
-      //      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
-      //
-      //      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
-      //
-      //      if (failedUpdates.nonEmpty) {
-      //        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
-      //      }
+      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
+
+      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
+
+      if (failedUpdates.nonEmpty) {
+        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
+      }
     }).left
       .foreach(e => throw new RuntimeException("An error occurred: ", e))
   }
@@ -170,9 +168,7 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    val url = s"${sfAuthDetails.instance_url}/services/data/v${salesforceApiVersion}/query/"
-    println("url:" + url)
-    Http(url)
+    Http(s"${sfAuthDetails.instance_url}/services/data/v54.0/query/")
       .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
@@ -189,7 +185,7 @@ object BillingAccountRemover extends App with LazyLogging {
 
     Try {
       Http(
-        s"${sfAuthDetails.instance_url}/services/data/v${salesforceApiVersion}/composite/sobjects"
+        s"${sfAuthDetails.instance_url}/services/data/v54.0/composite/sobjects"
       ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
         .put(jsonBody)
