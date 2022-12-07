@@ -11,9 +11,7 @@ import scalaj.http._
 import scala.util.Try
 
 object BillingAccountRemover extends App with LazyLogging {
-
-  val salesforceApiVersion = "54.0"
-
+  
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
 
