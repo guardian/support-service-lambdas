@@ -157,9 +157,10 @@ object BillingAccountRemover extends App with LazyLogging {
 
     val query =
       "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = \'Max Billing Acc GDPR Removal Attempts\'"
-    println("custom setting query:"+query)
+    println("custom setting query:" + query)
+    println("sfAuthentication:" + sfAuthentication)
     val customSettingQueryResponse = doSfGetWithQuery(sfAuthentication, query)
-    println("customSettingQueryResponse:"+customSettingQueryResponse)
+    println("customSettingQueryResponse:" + customSettingQueryResponse)
 
     decode[SfGetCustomSettingResponse](customSettingQueryResponse)
   }
@@ -184,13 +185,20 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/query/")
+
+    val url = s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/query/"
+
+    println("url:" + url)
+    val abc = Http(url)
       .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .method("GET")
       .asString
       .body
+
+    println("abc:" + abc)
+    abc
   }
 
   def doSfCompositeRequest(
