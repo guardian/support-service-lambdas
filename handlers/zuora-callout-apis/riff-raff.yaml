@@ -20,6 +20,5 @@ deployments:
       functionNames:
       - zuora-auto-cancel-
       - payment-failure-
-      - stripe-customer-source-updated-
     dependencies: [cfn]
     
