@@ -3,6 +3,7 @@ package com.gu
 import java.time.LocalDate
 
 import com.gu.effects.TestingRawEffects
+import com.gu.stripeCustomerSourceUpdated.{StripeDeps, StripeSignatureChecker}
 import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
@@ -52,5 +53,6 @@ object TestData extends Matchers {
   }
 
   def zuoraDeps(effects: TestingRawEffects) = ZuoraRestRequestMaker(effects.response, TestData.fakeZuoraConfig)
+  val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
 
 }

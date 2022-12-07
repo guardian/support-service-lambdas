@@ -29,7 +29,7 @@ Resources:
   PaymentIntentIssuesLambda:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub stripe-payment-intent-issues-${Stage}
+      FunctionName: !Sub payment-intent-issues-${Stage}
       Description: A lambda for handling payment intent issues (cancellation, failure, action required)
       Runtime: java11
       Handler: com.gu.paymentIntentIssues.Lambda::handler
@@ -62,44 +62,3 @@ Resources:
             Properties:
                 Path: '/payment-intent-issue'
                 Method: post
-  CustomerUpdatedLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub stripe-customer-updated-${Stage}
-      Description: A lambda for handling customer updates
-      Runtime: java11
-      Handler: com.gu.stripeCustomerSourceUpdated.Lambda::apply
-      MemorySize: 512
-      Timeout: 900
-      Environment:
-        Variables:
-          App: stripe-customer-updated
-          Stack: !Ref Stack
-          Stage: !Ref Stage
-      CodeUri:
-        Bucket: !Ref DeployBucket
-        Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
-      Policies:
-        - AWSLambdaBasicExecutionRole
-        - Statement:
-            Effect: Allow
-            Action:
-              - ssm:GetParametersByPath
-            Resource:
-              - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership/payment-intent-issues
-        - Statement:
-            - Effect: Allow
-              Action: s3:GetObject
-              Resource:
-                - arn:aws:s3::*:membership-dist/*
-                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
-                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
-                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/stripe-${Stage}.*.json
-      Events:
-        AcquisitionEvent:
-          Type: Api
-          Properties:
-            Path: '/customer-updated'
-            Method: post
-            RequestParameters:
-              - method.request.querystring.apiToken

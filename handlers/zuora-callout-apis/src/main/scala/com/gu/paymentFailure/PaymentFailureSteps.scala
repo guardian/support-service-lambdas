@@ -1,7 +1,7 @@
 package com.gu.paymentFailure
 
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
-import com.gu.util.TypeConvert.TypeConvertClientOp
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized

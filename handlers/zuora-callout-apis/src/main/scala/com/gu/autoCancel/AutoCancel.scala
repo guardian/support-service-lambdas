@@ -1,7 +1,7 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
-import com.gu.util.TypeConvert._
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
