@@ -68,7 +68,7 @@ Resources:
       FunctionName: !Sub stripe-customer-updated-${Stage}
       Description: A lambda for handling customer updates
       Runtime: java11
-      Handler: com.gu.stripeCustomerSourceUpdated.Lambda::apply
+      Handler: com.gu.stripeCardUpdated.Lambda::apply
       MemorySize: 512
       Timeout: 900
       Environment:
