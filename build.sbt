@@ -619,7 +619,25 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     sttp,
     sttpCirce
   )
-).dependsOn(handler, `config-cats`, zuora, `zuora-core`, effectsDepIncludingTestFolder, testDep)
+).settings {
+  lazy val deployTo =
+    inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+
+  // run from stripe-webhook-endpoints project eg. deployTo CODE
+  deployTo := {
+    import scala.sys.process._
+    import complete.DefaultParsers._
+    val jarFile = assembly.value
+
+    val Seq(stage) = spaceDelimited("<arg>").parsed
+    val s3Bucket = "support-service-lambdas-dist"
+    val s3Path = s"membership/$stage/product-move-api/product-move-api.jar"
+
+    s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
+    s"aws lambda update-function-code --function-name move-product-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+    s"aws lambda update-function-code --function-name product-switch-refund-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+  }
+}.dependsOn(handler, `config-cats`, zuora, `zuora-core`, effectsDepIncludingTestFolder, testDep)
 
 
 // ==== END handlers ====
