@@ -28,13 +28,7 @@ trait GetSfSubscription:
 
 object GetSfSubscription {
 
-  case class GetSfSubscriptionResponse(
-                                     Id: String,
-                                     Name: String,
-                                     Buyer__c: String,
-                                     Status__c: String,
-                                     Product_Type__c: Option[String] // This ought to always have a value but there appear to be some nulls in the data.
-                                   )
+  case class GetSfSubscriptionResponse(Id: String)
   given JsonDecoder[GetSfSubscriptionResponse] = DeriveJsonDecoder.gen[GetSfSubscriptionResponse]
 
   def get(subscriptionNumber: String): ZIO[GetSfSubscription, String, GetSfSubscriptionResponse] =

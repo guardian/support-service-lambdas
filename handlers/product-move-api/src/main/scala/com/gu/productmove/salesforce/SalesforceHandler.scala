@@ -23,7 +23,7 @@ object SalesforceHandler {
                                    effectiveDate: LocalDate,
                                    refundAmount: BigDecimal)
 
-  def createSfRecord(salesforceRecordInput: SalesforceRecordInput): ZIO[CreateRecord with GetSfSubscription with Stage with SttpBackend[Task, Any] with AwsS3, String, Unit] =
+  def createSfRecord(salesforceRecordInput: SalesforceRecordInput): ZIO[CreateRecord with GetSfSubscription, String, Unit] =
     import salesforceRecordInput.*
 
     for {
