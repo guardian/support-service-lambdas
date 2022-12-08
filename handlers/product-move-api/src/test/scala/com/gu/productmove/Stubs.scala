@@ -206,3 +206,13 @@ val DigiSubWithOfferInvoicePreview = ZuoraInvoiceList(
 val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as")
 val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2")
 
+//-----------------------------------------------------
+// Stubs for GetSfSubscription service
+//-----------------------------------------------------
+val sfSubscription1 = GetSfSubscriptionResponse(
+  Id = "123456",
+  Name = "My Subscription",
+  Buyer__c = "X89adsc9adspcp",
+  Status__c = "Active",
+  Product_Type__c = Some("Software")
+)

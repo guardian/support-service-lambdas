@@ -7,7 +7,7 @@ import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, 
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
-import com.gu.productmove.salesforce.{CreateRecordLive, GetSfSubscription, GetSfSubscriptionLive, SalesforceClientLive, SalesforceHandler}
+import com.gu.productmove.salesforce.{CreateRecordLive, GetSfSubscription, GetSfSubscriptionLive, MockCreateRecord, SalesforceClientLive, SalesforceHandler}
 import com.gu.productmove.salesforce.SalesforceHandler.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.Subscribe.*
@@ -39,5 +39,37 @@ object CreateRecordSpec extends ZIOSpecDefault {
           SalesforceClientLive.layer
         )
       } yield assert(true)(equalTo(true))
-    })
+    } @@ TestAspect.ignore,
+
+      test("Creates Salesforce record successfully") {
+        val sfSubscription =
+          for {
+            _ <- SalesforceHandler.createSfRecord(SalesforceRecordInput("A-S00102815", BigDecimal(100),
+              "prev rate plan", "new rate plan", LocalDate.parse("2022-12-08"), LocalDate.parse("2022-12-09"), BigDecimal(50))).provide(
+              AwsS3Live.layer,
+              AwsCredentialsLive.layer,
+              SttpClientLive.layer,
+              ZLayer.succeed(Stage.valueOf("DEV")),
+              MockCreateRecord,
+              GetSfSubscriptionLive.layer,
+              SalesforceClientLive.layer
+            )
+          } yield assert(true)(equalTo(true))
+      },
+
+      test("Fails if...") {
+        for {
+          _ <- SalesforceHandler.createSfRecord(SalesforceRecordInput("A-S00102815", 10.0000000,
+            "prev rate plan", "new rate plan", LocalDate.now(), LocalDate.now(), 12.000000)).provide(
+            AwsS3Live.layer,
+            AwsCredentialsLive.layer,
+            SttpClientLive.layer,
+            ZLayer.succeed(Stage.valueOf("DEV")),
+            CreateRecordLive.layer,
+            GetSfSubscriptionLive.layer,
+            SalesforceClientLive.layer
+          )
+        } yield assert(true)(equalTo(true))
+      }
+    )
 }
