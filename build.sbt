@@ -357,6 +357,12 @@ lazy val `zuora-retention` = lambdaProject(
   "find and mark accounts that are out of the retention period"
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
 
+lazy val `zuora-rer` = lambdaProject(
+  "zuora-rer",
+  "Performs Right to Erasure Requests against Zuora",
+  Seq(catsEffect, circeParser, circe)
+).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+
 lazy val `zuora-sar` = lambdaProject(
   "zuora-sar",
   "Performs a Subject Access Requests against Zuora",
