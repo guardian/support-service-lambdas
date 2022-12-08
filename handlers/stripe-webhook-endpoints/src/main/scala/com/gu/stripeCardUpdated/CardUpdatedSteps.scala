@@ -6,7 +6,7 @@ import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.{CreatePaymentMethodRe
 import com.gu.stripeCardUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
-import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
+import com.gu.util.apigateway.ApiGatewayResponse.messageResponse
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
@@ -65,7 +65,11 @@ object CardUpdatedSteps extends Logging {
     res <- if (signatureVerified) {
       apiGatewayRequest.bodyAsCaseClass[CardUpdatedMessageBody]()
     } else
-      ReturnWithResponse(unauthorized)
+      ReturnWithResponse(messageResponse(
+        "401",
+        "Couldn't verify the signature of the webhook payload, do you have the correct signing secret key in config? " +
+          "See https://stripe.com/docs/webhooks/signatures for more information"
+      ))
   } yield res
 
   def getPaymentMethodsToUpdate(

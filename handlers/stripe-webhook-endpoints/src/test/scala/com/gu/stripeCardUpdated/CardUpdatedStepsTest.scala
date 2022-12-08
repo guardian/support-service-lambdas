@@ -50,7 +50,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
     actual.toDisjunction should be(Right(List()))
   }
 
-  "CardUpdatedSteps" should "getAccountToUpdate default pm" in {
+  it should "getAccountToUpdate default pm" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -86,7 +86,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
     actual.toDisjunction should be(Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accid"), NumConsecutiveFailures(3)))))
   }
 
-  "CardUpdatedSteps" should "getAccountToUpdate default pm with multiple on the same account" in {
+  it should "getAccountToUpdate default pm with multiple on the same account" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -127,7 +127,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
     actual.toDisjunction should be(Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)))))
   }
 
-  "CardUpdatedSteps" should "getAccountToUpdate multiple on different account three only" in {
+  it should "getAccountToUpdate multiple on different account three only" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -188,7 +188,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
     )))
   }
 
-  "CardUpdatedSteps" should "getAccountToUpdate multiple on different account two of them but only one is default PM" in {
+  it should "getAccountToUpdate multiple on different account two of them but only one is default PM" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -236,7 +236,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
     )))
   }
 
-  "CardUpdatedSteps" should "getAccountToUpdate multiple on different account more than three" in {
+  it should "getAccountToUpdate multiple on different account more than three" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -281,7 +281,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
     actual.toDisjunction should be(Left(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
   }
 
-  "CardUpdatedSteps" should "getAccountToUpdate no payment methods at all" in {
+  it should "getAccountToUpdate no payment methods at all" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
