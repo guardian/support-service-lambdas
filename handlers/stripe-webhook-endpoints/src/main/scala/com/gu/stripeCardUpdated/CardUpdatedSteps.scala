@@ -1,10 +1,9 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
-import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
-import com.gu.stripeCustomerSourceUpdated.TypeConvert._
-import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{CreatePaymentMethodResult, CreateStripePaymentMethod, CreditCardType}
-import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
-import com.gu.stripeCustomerSourceUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
+import StripeRequestSignatureChecker.verifyRequest
+import TypeConvert._
+import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.{CreatePaymentMethodResult, CreateStripePaymentMethod, CreditCardType}
+import com.gu.stripeCardUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
@@ -17,26 +16,34 @@ import com.gu.util.zuora._
 import play.api.libs.json.JsPath
 import cats.syntax.all._
 import cats.data.NonEmptyList
+import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.CreatePaymentMethodResult
+import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.CreditCardType.{AmericanExpress, Discover, MasterCard, Visa}
+import com.gu.stripeCardUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
+import com.gu.stripeCardUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 
-object SourceUpdatedSteps extends Logging {
+object CardUpdatedSteps extends Logging {
 
-  case class SourceUpdatedUrlParams(stripeAccount: Option[StripeAccount] = None)
-  object SourceUpdatedUrlParams {
+  case class CardUpdatedUrlParams(stripeAccount: Option[StripeAccount] = None)
+  object CardUpdatedUrlParams {
     implicit val reads = (JsPath \ "stripeAccount").readNullable[String].map { accountName =>
       val maybeStripeAccount = accountName.flatMap(StripeAccount.fromString)
-      SourceUpdatedUrlParams(maybeStripeAccount)
+      CardUpdatedUrlParams(maybeStripeAccount)
     }
   }
 
-  // cats does not have ListT so after removing scalaz it became flatMap + traverse
   def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck { apiGatewayRequest =>
-    (if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]())
-      .flatMap { sourceUpdatedCallout =>
-        getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
-          .flatMap {
-            _.traverse(defaultPaymentMethod => createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`))
-          }
-      }
+    val apiGatewayBody = if (stripeDeps.config.signatureChecking)
+      bodyIfSignatureVerified(stripeDeps, apiGatewayRequest)
+    else
+      apiGatewayRequest.bodyAsCaseClass[CardUpdatedMessageBody]()
+
+    val updatePaymentMethodsResult = for {
+      cardUpdatedMessageBody <- apiGatewayBody
+      paymentMethods <- getPaymentMethodsToUpdate(zuoraRequests)(cardUpdatedMessageBody.data.`object`.customer, cardUpdatedMessageBody.data.`object`.id)
+    } yield paymentMethods.traverse(defaultPaymentMethod =>
+      createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, cardUpdatedMessageBody.data.`object`))
+
+    updatePaymentMethodsResult
       .map(_ => ApiGatewayResponse.successfulExecution)
       .apiResponse
   }
@@ -50,31 +57,30 @@ object SourceUpdatedSteps extends Logging {
     } yield ()
   }
 
-  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[SourceUpdatedCallout] = for {
-    queryParams <- apiGatewayRequest.queryParamsAsCaseClass[SourceUpdatedUrlParams]()
+  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[CardUpdatedMessageBody] = for {
+    queryParams <- apiGatewayRequest.queryParamsAsCaseClass[CardUpdatedUrlParams]()
     _ = logger.info(s"from: ${queryParams.stripeAccount}")
     maybeStripeAccount = queryParams.stripeAccount
     signatureVerified = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
     res <- if (signatureVerified) {
-      apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
+      apiGatewayRequest.bodyAsCaseClass[CardUpdatedMessageBody]()
     } else
       ReturnWithResponse(unauthorized)
   } yield res
 
-  // cats does not have ListT so after removing scalaz it became flatMap + traverse
   def getPaymentMethodsToUpdate(
     requests: Requests
   )(customer: StripeCustomerId, source: StripeSourceId): ApiGatewayOp[List[PaymentMethodFields]] = {
     val zuoraQuerier = ZuoraQuery(requests)
-    ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source)
-      .flatMap {
-        _.flatTraverse { paymentMethods =>
-          ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed")
-            .flatMap { account =>
-              findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toList.pure[ApiGatewayOp].withLogging("findDefaultOrSkip")
-            }
-        }
+    for {
+      zuoraPaymentMethodIds <- ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source)
+      paymentMethodFields <- zuoraPaymentMethodIds.flatTraverse { paymentMethodIds =>
+        ZuoraGetAccountSummary(requests)(paymentMethodIds.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed")
+          .flatMap { account =>
+            findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethodIds.paymentMethods).toList.pure[ApiGatewayOp].withLogging("findDefaultOrSkip")
+          }
       }
+    } yield paymentMethodFields
   }
 
   import com.gu.util.reader.Types._
@@ -85,10 +91,10 @@ object SourceUpdatedSteps extends Logging {
   ): ApiGatewayOp[CreatePaymentMethodResult] = {
     for {
       creditCardType <- Some(eventDataObject.brand).collect {
-        case StripeBrand.Visa => CreditCardType.Visa
-        case StripeBrand.Discover => CreditCardType.Discover
-        case StripeBrand.MasterCard => CreditCardType.MasterCard
-        case StripeBrand.AmericanExpress => CreditCardType.AmericanExpress
+        case StripeBrand.Visa => Visa
+        case StripeBrand.Discover => Discover
+        case StripeBrand.MasterCard => MasterCard
+        case StripeBrand.AmericanExpress => AmericanExpress
       }.toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"not valid card type for zuora: ${eventDataObject.brand}"))
       result <- CreatePaymentMethod.createPaymentMethod(requests)(CreateStripePaymentMethod(
         paymentMethodFields.AccountId,

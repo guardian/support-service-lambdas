@@ -1,4 +1,4 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -12,7 +12,7 @@ case class EventDataObject(
   expiry: StripeExpiry,
   last4: StripeLast4
 )
-case class SourceUpdatedCallout(id: StripeEventId, data: EventData)
+case class CardUpdatedMessageBody(id: StripeEventId, data: EventData)
 
 case class StripeEventId(value: String) extends AnyVal
 case class StripeCustomerId(value: String) extends AnyVal
@@ -45,7 +45,7 @@ object StripeBrand {
 
 case class StripeCountry(value: String) extends AnyVal
 
-object SourceUpdatedCallout {
+object CardUpdatedMessageBody {
 
   implicit val stripeEventIdReads = Json.reads[StripeEventId]
   implicit val stripeCustomerIdReads = Json.reads[StripeCustomerId]
@@ -86,9 +86,9 @@ object SourceUpdatedCallout {
 
   implicit val eventDataReads: Reads[EventData] = (JsPath \ "object").read[EventDataObject].map(EventData.apply _)
 
-  implicit val jf: Reads[SourceUpdatedCallout] = (
+  implicit val jf: Reads[CardUpdatedMessageBody] = (
     (JsPath \ "id").read[String].map(StripeEventId.apply) and
     (JsPath \ "data").read[EventData]
-  )(SourceUpdatedCallout.apply _)
+  )(CardUpdatedMessageBody.apply _)
 
 }

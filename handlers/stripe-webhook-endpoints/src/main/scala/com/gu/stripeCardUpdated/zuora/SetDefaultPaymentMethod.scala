@@ -1,4 +1,4 @@
-package com.gu.stripeCustomerSourceUpdated.zuora
+package com.gu.stripeCardUpdated.zuora
 
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp

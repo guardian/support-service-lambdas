@@ -1,6 +1,6 @@
-package com.gu.stripeCustomerSourceUpdated.zuora
+package com.gu.stripeCardUpdated.zuora
 
-import com.gu.stripeCustomerSourceUpdated._
+import com.gu.stripeCardUpdated.{StripeCountry, StripeCustomerId, StripeExpiry, StripeLast4, StripeSourceId}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}

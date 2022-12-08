@@ -1,7 +1,6 @@
-package com.gu.stripeCustomerSourceUpdated.zuora
+package com.gu.stripeCardUpdated.zuora
 
-import com.gu.stripeCustomerSourceUpdated.TypeConvert._
-import com.gu.stripeCustomerSourceUpdated.{StripeCustomerId, StripeSourceId}
+import com.gu.stripeCardUpdated.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
@@ -11,6 +10,7 @@ import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json._
 import cats.data.NonEmptyList
+import com.gu.stripeCardUpdated.{StripeCustomerId, StripeSourceId}
 
 object ZuoraQueryPaymentMethod extends Logging {
 

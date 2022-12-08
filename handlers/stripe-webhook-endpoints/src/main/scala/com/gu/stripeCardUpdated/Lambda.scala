@@ -1,4 +1,4 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import java.io.{InputStream, OutputStream}
 
@@ -29,7 +29,7 @@ object Lambda {
         stripeConfig <- loadConfigModule[StripeConfig].toApiGatewayOp("load stripe config")
         zuoraClient = ZuoraRestRequestMaker(response, zuoraRestConfig)
         stripeChecker = StripeDeps(stripeConfig, new StripeSignatureChecker)
-        configuredOp = SourceUpdatedSteps(
+        configuredOp = CardUpdatedSteps(
           zuoraClient,
           stripeChecker
         )

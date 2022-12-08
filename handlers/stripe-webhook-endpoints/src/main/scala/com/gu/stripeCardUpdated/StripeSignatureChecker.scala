@@ -1,4 +1,4 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import com.gu.util.config.{StripeConfig, StripeSecretKey}
 import com.gu.util.Logging

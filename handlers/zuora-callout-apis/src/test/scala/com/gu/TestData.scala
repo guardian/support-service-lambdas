@@ -25,11 +25,6 @@ object TestData extends Matchers {
 
   val fakeApiConfig = TrustedApiConfig("validApiToken", "testEnvTenantId")
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
-  val fakeStripeConfig = StripeConfig(
-    customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")),
-    customerUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")),
-    signatureChecking = true
-  )
 
   val missingCredentialsResponse =
     """{

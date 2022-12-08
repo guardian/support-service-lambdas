@@ -1,6 +1,7 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import com.gu.effects.TestingRawEffects
+import com.gu.stripeCardUpdated.{StripeDeps, StripeSignatureChecker}
 import com.gu.util.config._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.matchers.should.Matchers
