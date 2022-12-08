@@ -11,7 +11,7 @@ Mappings:
     DEV:
       SalesforceUrl: https://test.salesforce.com
       SalesforceConnectedApp: AwsConnectorSandbox
-      SalesforceUser: MembersDataAPI
+      SalesforceUser: BillingAccountRemoverAPIUser
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SfSaves
     CODE:
@@ -22,8 +22,8 @@ Mappings:
       ZuoraAccount: SubscriptionsZuoraApi
     PROD:
       SalesforceUrl: https://gnmtouchpoint.my.salesforce.com
-      SalesforceConnectedApp: TouchpointUpdate
-      SalesforceUser: MembersDataAPI
+      SalesforceConnectedApp: BillingAccountRemover
+      SalesforceUser: BillingAccountRemoverAPIUser
       ZuoraUrl: https://rest.zuora.com
       ZuoraAccount: SupportServiceLambdas
 

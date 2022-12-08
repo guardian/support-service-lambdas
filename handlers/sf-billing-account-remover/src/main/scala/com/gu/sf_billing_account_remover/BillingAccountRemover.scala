@@ -12,8 +12,6 @@ import scala.util.Try
 
 object BillingAccountRemover extends App with LazyLogging {
 
-  val salesforceApiVersion = "54.0"
-
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
 
@@ -78,7 +76,7 @@ object BillingAccountRemover extends App with LazyLogging {
 
   } yield Config(
     SalesforceConfig(
-      userName = sfUserName,
+      username = sfUserName,
       clientId = sfClientId,
       clientSecret = sfClientSecret,
       password = sfPassword,
@@ -112,6 +110,7 @@ object BillingAccountRemover extends App with LazyLogging {
       )
     } yield {
       val sfRecords = getBillingAccountsResponse.records
+      logger.info(s"Retrieved ${sfRecords.length} records from Salesforce.")
 
       val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
 
@@ -132,7 +131,7 @@ object BillingAccountRemover extends App with LazyLogging {
           "grant_type" -> "password",
           "client_id" -> salesforceConfig.clientId,
           "client_secret" -> salesforceConfig.clientSecret,
-          "username" -> salesforceConfig.userName,
+          "username" -> salesforceConfig.username,
           "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
         )
       )
@@ -144,9 +143,7 @@ object BillingAccountRemover extends App with LazyLogging {
   def getSfCustomSetting(
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetCustomSettingResponse] = {
-    logger.info(
-      "Getting GDPR Max Number of Removal Attempts Custom Setting value from Salesforce..."
-    )
+    logger.info("Getting GDPR Max Number of Removal Attempts Custom Setting value from Salesforce...")
 
     val query =
       "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
@@ -160,8 +157,7 @@ object BillingAccountRemover extends App with LazyLogging {
     maxAttempts: Int,
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetBillingAccsResponse] = {
-    logger
-      .info("Getting Billing Accounts from Salesforce...")
+    logger.info("Getting Billing Accounts from Salesforce...")
 
     val limit = 200;
 
@@ -172,7 +168,7 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/query/")
+    Http(s"${sfAuthDetails.instance_url}/services/data/v54.0/query/")
       .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
@@ -189,7 +185,7 @@ object BillingAccountRemover extends App with LazyLogging {
 
     Try {
       Http(
-        s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/composite/sobjects"
+        s"${sfAuthDetails.instance_url}/services/data/v54.0/composite/sobjects"
       ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
         .put(jsonBody)
@@ -211,6 +207,9 @@ object BillingAccountRemover extends App with LazyLogging {
     zuoraConfig: ZuoraConfig,
     recordsForUpdate: Seq[BillingAccountsRecords.Records]
   ): Seq[BillingAccountsRecords.Records] = {
+
+    logger.info(s"Removing crm Id from ${recordsForUpdate.length} records in Zuora...")
+    logger.info(s"recordsForUpdate in Zuora: ${recordsForUpdate}")
 
     for {
       billingAccount <- recordsForUpdate
@@ -277,6 +276,8 @@ object BillingAccountRemover extends App with LazyLogging {
     sfAuthDetails: SfAuthDetails,
     failedUpdates: Seq[BillingAccountsRecords.Records]
   ): Unit = {
+    logger.info(s"Writing ${failedUpdates.length} errors back to Salesforce...")
+    logger.info(s"failedUpdates: ${failedUpdates}")
 
     (for {
       _ <- updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
@@ -294,7 +295,6 @@ object BillingAccountRemover extends App with LazyLogging {
     )
 
     val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
-
     doSfCompositeRequest(sfAuthDetails, sfBillingAccUpdateJson, "PATCH")
 
   }
