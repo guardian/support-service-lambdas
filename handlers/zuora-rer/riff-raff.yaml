@@ -10,7 +10,7 @@ deployments:
     parameters:
       templatePath: cfn.yaml
 
-  zuora-sar:
+  zuora-rer:
     type: aws-lambda
     parameters:
       fileName: zuora-rer.jar
