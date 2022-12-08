@@ -12,8 +12,6 @@ import scala.util.Try
 
 object BillingAccountRemover extends App with LazyLogging {
 
-  val salesforceApiVersion = "54.0"
-
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
 
@@ -99,28 +97,28 @@ object BillingAccountRemover extends App with LazyLogging {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
       sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
       getCustomSettingResponse <- getSfCustomSetting(sfAuthDetails)
-//      maxAttempts = getCustomSettingResponse.records.headOption
-//        .getOrElse(
-//          throw new RuntimeException(
-//            "There should be at least one record returned for MaxAttempts"
-//          )
-//        )
-//        .Property_Value__c
-//      getBillingAccountsResponse <- getSfBillingAccounts(
-//        maxAttempts,
-//        sfAuthDetails
-//      )
+      maxAttempts = getCustomSettingResponse.records.headOption
+        .getOrElse(
+          throw new RuntimeException(
+            "There should be at least one record returned for MaxAttempts"
+          )
+        )
+        .Property_Value__c
+      getBillingAccountsResponse <- getSfBillingAccounts(
+        maxAttempts,
+        sfAuthDetails
+      )
     } yield {
-//      val sfRecords = getBillingAccountsResponse.records
-//      logger.info(s"Retrieved ${sfRecords.length} records from Salesforce.")
-//
-//      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
-//
-//      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
-//
-//      if (failedUpdates.nonEmpty) {
-//        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
-//      }
+      val sfRecords = getBillingAccountsResponse.records
+      logger.info(s"Retrieved ${sfRecords.length} records from Salesforce.")
+
+      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
+
+      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
+
+      if (failedUpdates.nonEmpty) {
+        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
+      }
     }).left
       .foreach(e => throw new RuntimeException("An error occurred: ", e))
   }
@@ -150,13 +148,9 @@ object BillingAccountRemover extends App with LazyLogging {
     val query =
       "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
 
-    val customSettingResponse = decode[SfGetCustomSettingResponse](
+    decode[SfGetCustomSettingResponse](
       doSfGetWithQuery(sfAuthentication, query)
     )
-
-    println("customSettingResponse:"+customSettingResponse)
-
-    customSettingResponse
   }
 
   def getSfBillingAccounts(
@@ -174,20 +168,13 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    val endpoint = s"${sfAuthDetails.instance_url}/services/data/v${salesforceApiVersion}/query/"
-
-    println("endpoint:"+endpoint)
-
-    val httpResponse = Http(endpoint)
+    Http(s"${sfAuthDetails.instance_url}/services/data/v54.0/query/")
       .param("q", query)
       .option(HttpOptions.readTimeout(30000))
       .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .method("GET")
       .asString
       .body
-
-    println("doSfGetWithQuery httpResponse:"+httpResponse)
-    httpResponse
   }
 
   def doSfCompositeRequest(
