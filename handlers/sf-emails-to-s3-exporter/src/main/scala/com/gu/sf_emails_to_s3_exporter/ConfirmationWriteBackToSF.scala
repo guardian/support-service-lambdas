@@ -5,14 +5,14 @@ import java.time.format.DateTimeFormatter
 
 object ConfirmationWriteBackToSF {
   case class EmailMessageToUpdate(
-    id: String,
-    Most_Recent_Export__c: String = getCurrentDateTimeForWriteback(),
-    attributes: Attributes = Attributes(`type` = "EmailMessage")
+      id: String,
+      Most_Recent_Export__c: String = getCurrentDateTimeForWriteback(),
+      attributes: Attributes = Attributes(`type` = "EmailMessage"),
   )
 
   case class EmailMessagesToUpdate(
-    allOrNone: Boolean,
-    records: Seq[EmailMessageToUpdate]
+      allOrNone: Boolean,
+      records: Seq[EmailMessageToUpdate],
   )
 
   case class Attributes(`type`: String)

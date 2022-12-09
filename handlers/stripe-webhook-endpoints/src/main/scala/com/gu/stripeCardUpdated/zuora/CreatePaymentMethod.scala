@@ -9,14 +9,14 @@ import play.api.libs.json.{JsPath, Json, Reads, Writes}
 object CreatePaymentMethod {
 
   case class CreateStripePaymentMethod(
-    accountId: AccountId,
-    cardId: StripeCardId,
-    customerId: StripeCustomerId,
-    cardCountry: StripeCountry,
-    last4: StripeLast4,
-    expiration: StripeExpiry,
-    creditCardType: CreditCardType,
-    numConsecutiveFailures: NumConsecutiveFailures
+      accountId: AccountId,
+      cardId: StripeCardId,
+      customerId: StripeCustomerId,
+      cardCountry: StripeCountry,
+      last4: StripeLast4,
+      expiration: StripeExpiry,
+      creditCardType: CreditCardType,
+      numConsecutiveFailures: NumConsecutiveFailures,
   )
 
   sealed abstract class CreditCardType(val value: String)
@@ -41,7 +41,7 @@ object CreatePaymentMethod {
       "CreditCardExpirationYear" -> command.expiration.exp_year,
       "CreditCardType" -> command.creditCardType.value,
       "Type" -> "CreditCardReferenceTransaction",
-      "NumConsecutiveFailures" -> command.numConsecutiveFailures
+      "NumConsecutiveFailures" -> command.numConsecutiveFailures,
     )
   }
 
@@ -50,7 +50,9 @@ object CreatePaymentMethod {
 
   case class CreatePaymentMethodResult(id: PaymentMethodId)
 
-  def createPaymentMethod(requests: Requests)(request: CreateStripePaymentMethod): ClientFailableOp[CreatePaymentMethodResult] =
+  def createPaymentMethod(requests: Requests)(
+      request: CreateStripePaymentMethod,
+  ): ClientFailableOp[CreatePaymentMethodResult] =
     requests.post[CreateStripePaymentMethod, CreatePaymentMethodResult](request, s"object/payment-method")
 
 }

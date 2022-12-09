@@ -19,9 +19,11 @@ import java.time.LocalDate
 object GetSfSubscriptionLive:
   val layer: URLayer[SalesforceClient, GetSfSubscription] = ZLayer.fromFunction(GetSfSubscriptionLive(_))
 
-private class GetSfSubscriptionLive(salesforceClient: SalesforceClient) extends GetSfSubscription :
+private class GetSfSubscriptionLive(salesforceClient: SalesforceClient) extends GetSfSubscription:
   override def get(subscriptionNumber: String): IO[String, GetSfSubscriptionResponse] =
-    salesforceClient.get[GetSfSubscriptionResponse](uri"/services/data/v55.0/sobjects/SF_Subscription__c/Name/$subscriptionNumber")
+    salesforceClient.get[GetSfSubscriptionResponse](
+      uri"/services/data/v55.0/sobjects/SF_Subscription__c/Name/$subscriptionNumber",
+    )
 
 trait GetSfSubscription:
   def get(subscriptionNumber: String): IO[String, GetSfSubscriptionResponse]

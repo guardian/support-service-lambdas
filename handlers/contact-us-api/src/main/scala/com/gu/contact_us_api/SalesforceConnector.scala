@@ -1,11 +1,18 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.models.{ContactUsConfig, ContactUsError, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
+import com.gu.contact_us_api.models.{
+  ContactUsConfig,
+  ContactUsError,
+  SFAuthFailure,
+  SFAuthSuccess,
+  SFCompositeRequest,
+  SFCompositeResponse,
+  SFErrorDetails,
+}
 import com.gu.contact_us_api.ParserUtils._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import scalaj.http.{Http, HttpRequest, HttpResponse}
-
 
 class SalesforceConnector(runRequest: HttpRequest => Either[ContactUsError, HttpResponse[String]]) {
 
@@ -27,8 +34,8 @@ class SalesforceConnector(runRequest: HttpRequest => Either[ContactUsError, Http
             ("client_secret", env.clientSecret),
             ("username", env.username),
             ("password", env.password + env.token),
-          )
-        )
+          ),
+        ),
     )
       .flatMap(response => {
         if (response.isSuccess)
@@ -37,7 +44,12 @@ class SalesforceConnector(runRequest: HttpRequest => Either[ContactUsError, Http
         else
           decode[SFAuthFailure](response.body, Some("SFAuthFailure"))
             .flatMap(value =>
-              Left(ContactUsError("Salesforce", s"Could not authenticate: Status code: ${response.code}. ${value.error} - ${value.error_description}"))
+              Left(
+                ContactUsError(
+                  "Salesforce",
+                  s"Could not authenticate: Status code: ${response.code}. ${value.error} - ${value.error_description}",
+                ),
+              ),
             )
       })
   }
@@ -48,19 +60,31 @@ class SalesforceConnector(runRequest: HttpRequest => Either[ContactUsError, Http
         .timeout(connTimeoutMs = 30000, readTimeoutMs = 30000)
         .header("Content-Type", "application/json")
         .header("Authorization", s"Bearer $token")
-        .postData(request.asJson.toString())
+        .postData(request.asJson.toString()),
     )
       .flatMap(response => {
         if (response.isSuccess)
           decode[SFCompositeResponse](response.body, Some("SFCompositeResponse"))
             .flatMap(compositeResponse => {
               if (compositeResponse.isSuccess) Right(())
-              else Left(ContactUsError("Salesforce", s"Could not complete composite request. Status code: ${response.code}. ${compositeResponse.errorsAsString.getOrElse("")}"))
+              else
+                Left(
+                  ContactUsError(
+                    "Salesforce",
+                    s"Could not complete composite request. Status code: ${response.code}. ${compositeResponse.errorsAsString
+                        .getOrElse("")}",
+                  ),
+                )
             })
         else
           decode[List[SFErrorDetails]](response.body, Some("List[SFErrorDetails]"))
             .flatMap(errors =>
-              Left(ContactUsError("Salesforce", s"Could not complete request. Status code: ${response.code}. ${errors.map(_.asString).mkString(", ")}"))
+              Left(
+                ContactUsError(
+                  "Salesforce",
+                  s"Could not complete request. Status code: ${response.code}. ${errors.map(_.asString).mkString(", ")}",
+                ),
+              ),
             )
       })
   }

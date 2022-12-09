@@ -14,11 +14,13 @@ class GetSubscriptionReaderTest extends AnyFlatSpec {
   "GetSubscription" should "deserialise correctly a valid response from Zuora" in {
     val subscriptionStream = getClass.getResourceAsStream("/digitalSubscriptionExpiry/validSubscription.json")
 
-    val charges = List(RatePlanCharge(
-      name = "Digital Pack Monthly",
-      effectiveStartDate = LocalDate.of(2018, 3, 20),
-      effectiveEndDate = LocalDate.of(2018, 4, 20)
-    ))
+    val charges = List(
+      RatePlanCharge(
+        name = "Digital Pack Monthly",
+        effectiveStartDate = LocalDate.of(2018, 3, 20),
+        effectiveEndDate = LocalDate.of(2018, 4, 20),
+      ),
+    )
     val expected = JsSuccess(
       SubscriptionResult(
         id = SubscriptionId("A-S00044860"),
@@ -28,12 +30,11 @@ class GetSubscriptionReaderTest extends AnyFlatSpec {
         startDate = LocalDate.of(2018, 3, 20),
         endDate = LocalDate.of(2018, 4, 20),
         customerAcceptanceDate = LocalDate.of(2018, 3, 20),
-        ratePlans = List(RatePlan("Digital Pack", charges))
-      )
+        ratePlans = List(RatePlan("Digital Pack", charges)),
+      ),
     )
     val subscription = Json.parse(subscriptionStream).validate[SubscriptionResult]
     subscription should be(expected)
   }
 
 }
-

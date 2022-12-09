@@ -40,7 +40,11 @@ object SalesforceStub {
       }
     }
 
-    def stubNextRecordLink(auth: SalesforceAuth, nextRecordLink: String, responseString: String): SttpBackendStub[F, S] = {
+    def stubNextRecordLink(
+        auth: SalesforceAuth,
+        nextRecordLink: String,
+        responseString: String,
+    ): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesNextRecordsRequest(auth, nextRecordLink, request) =>
           Response.ok(responseString)
@@ -55,9 +59,9 @@ object SalesforceStub {
     }
 
     def stubComposite[A: Decoder, B: Encoder](
-      auth: SalesforceAuth,
-      expectedRequest: Option[A],
-      response: B
+        auth: SalesforceAuth,
+        expectedRequest: Option[A],
+        response: B,
     ): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesCompositeRequest(auth, expectedRequest, request) =>
@@ -74,7 +78,7 @@ object SalesforceStub {
         s"username=${URLEncoder.encode(config.username, "UTF-8")}&" +
         s"password=${URLEncoder.encode(config.password + config.token, "UTF-8")}&" +
         s"grant_type=password",
-      "utf-8"
+      "utf-8",
     )
     urlMatches && bodyMatches
   }
@@ -87,13 +91,19 @@ object SalesforceStub {
   }
 
   private def matchesPatchRequest[S, F[_]](auth: SalesforceAuth, request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request).exists(_.startsWith(auth.instance_url + SalesforceConstants.sfObjectsBaseUrl))
+    val urlMatches =
+      urlNoQueryString(request).exists(_.startsWith(auth.instance_url + SalesforceConstants.sfObjectsBaseUrl))
     val methodMatches = request.method == Method.PATCH
     urlMatches && methodMatches
   }
 
-  private def matchesCompositeRequest[S, F[_], A: Decoder](auth: SalesforceAuth, optionalExpectedRequestBody: Option[A], request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request).exists(_.startsWith(auth.instance_url + SalesforceConstants.compositeBaseUrl))
+  private def matchesCompositeRequest[S, F[_], A: Decoder](
+      auth: SalesforceAuth,
+      optionalExpectedRequestBody: Option[A],
+      request: Request[_, _],
+  ) = {
+    val urlMatches =
+      urlNoQueryString(request).exists(_.startsWith(auth.instance_url + SalesforceConstants.compositeBaseUrl))
     val methodMatches = request.method == Method.POST
     val bodyMatches = optionalExpectedRequestBody
       .map { expectedRequestBody => getBodyAs[A](request) == Right(expectedRequestBody) }
@@ -102,7 +112,11 @@ object SalesforceStub {
     urlMatches && methodMatches && bodyMatches
   }
 
-  private def matchesNextRecordsRequest[S, F[_]](auth: SalesforceAuth, nextRecordsLink: String, request: Request[_, _]) = {
+  private def matchesNextRecordsRequest[S, F[_]](
+      auth: SalesforceAuth,
+      nextRecordsLink: String,
+      request: Request[_, _],
+  ) = {
     val urlMatches = urlNoQueryString(request).contains(auth.instance_url + nextRecordsLink)
     val methodMatches = request.method == Method.GET
     urlMatches && methodMatches

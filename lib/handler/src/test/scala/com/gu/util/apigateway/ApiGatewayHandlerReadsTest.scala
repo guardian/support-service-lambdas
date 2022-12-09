@@ -10,12 +10,13 @@ class ApiGatewayHandlerReadsTest extends AnyFlatSpec {
 
   "ApiGatewayHandler" should "deserialise the headers too when receiving a request from Stripe" in {
 
-    val eventBodySimple: String = "{\'hello\': \'it is some stripe event info but what exactly, I do not mind right now\'}"
+    val eventBodySimple: String =
+      "{\'hello\': \'it is some stripe event info but what exactly, I do not mind right now\'}"
 
     val eventHeaders = Map(
       "SomeHeader1" -> "testvalue",
       "Content-Type" -> "application/json",
-      "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString"
+      "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString",
     )
     val validApiGatewayEventJson =
       s"""
@@ -67,7 +68,7 @@ class ApiGatewayHandlerReadsTest extends AnyFlatSpec {
 
     val queryStringParameters = Map(
       "apiToken" -> "someToken",
-      "isHealthcheck" -> "true"
+      "isHealthcheck" -> "true",
     )
 
     val expected: JsResult[ApiGatewayRequest] = JsSuccess(
@@ -76,8 +77,8 @@ class ApiGatewayHandlerReadsTest extends AnyFlatSpec {
         queryStringParameters = Some(queryStringParameters),
         body = Some(eventBodySimple),
         headers = Some(eventHeaders),
-        path = Some("/stripe-customer-source-updated")
-      )
+        path = Some("/stripe-customer-source-updated"),
+      ),
     )
 
     val event: JsResult[ApiGatewayRequest] = Json.parse(validApiGatewayEventJson).validate[ApiGatewayRequest]
@@ -93,19 +94,29 @@ class ApiGatewayHandlerReadsTest extends AnyFlatSpec {
   it should "deserialise empty query string to case class" in {
 
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = None, body = None, headers = None, path = None
+      httpMethod = None,
+      queryStringParameters = None,
+      body = None,
+      headers = None,
+      path = None,
     )
 
     noQueryParamsRequest.queryParamsAsCaseClass[TestParams]() shouldBe ContinueProcessing(TestParams(None))
   }
 
   it should "deserialise query string to case class" in {
-    val queryParams = Some(Map(
-      "ignoredParam" -> "ignoredValue",
-      "testQueryParam" -> "testValue"
-    ))
+    val queryParams = Some(
+      Map(
+        "ignoredParam" -> "ignoredValue",
+        "testQueryParam" -> "testValue",
+      ),
+    )
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
+      httpMethod = None,
+      queryStringParameters = queryParams,
+      body = None,
+      headers = None,
+      path = None,
     )
     noQueryParamsRequest.queryParamsAsCaseClass[TestParams]() shouldBe ContinueProcessing(TestParams(Some("testValue")))
   }
@@ -116,11 +127,17 @@ class ApiGatewayHandlerReadsTest extends AnyFlatSpec {
   }
 
   it should "return provided error if query params cannot be deserialised to provided case class" in {
-    val queryParams = Some(Map(
-      "wrongParamName" -> "someValue"
-    ))
+    val queryParams = Some(
+      Map(
+        "wrongParamName" -> "someValue",
+      ),
+    )
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
+      httpMethod = None,
+      queryStringParameters = queryParams,
+      body = None,
+      headers = None,
+      path = None,
     )
     val actual = noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams]()
     val expected = Left("400")
@@ -128,11 +145,17 @@ class ApiGatewayHandlerReadsTest extends AnyFlatSpec {
   }
 
   it should "deserialise correctly if all params are there" in {
-    val queryParams = Some(Map(
-      "testQueryParam" -> "someValue"
-    ))
+    val queryParams = Some(
+      Map(
+        "testQueryParam" -> "someValue",
+      ),
+    )
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
+      httpMethod = None,
+      queryStringParameters = queryParams,
+      body = None,
+      headers = None,
+      path = None,
     )
     val actual = noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams]()
     val expected = ContinueProcessing(NonOptionalParams("someValue"))
@@ -140,12 +163,18 @@ class ApiGatewayHandlerReadsTest extends AnyFlatSpec {
   }
 
   it should "deserialise correctly even if extra stuff" in {
-    val queryParams = Some(Map(
-      "testQueryParam" -> "someValue",
-      "another" -> "someOtherValue"
-    ))
+    val queryParams = Some(
+      Map(
+        "testQueryParam" -> "someValue",
+        "another" -> "someOtherValue",
+      ),
+    )
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
+      httpMethod = None,
+      queryStringParameters = queryParams,
+      body = None,
+      headers = None,
+      path = None,
     )
     val actual = noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams]()
     val expected = ContinueProcessing(NonOptionalParams("someValue"))

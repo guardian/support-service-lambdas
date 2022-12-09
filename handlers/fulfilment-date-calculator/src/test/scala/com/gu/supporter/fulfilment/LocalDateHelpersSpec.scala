@@ -9,16 +9,18 @@ import org.scalatest.matchers.should.Matchers
 
 class LocalDateHelpersSpec extends AnyFlatSpec with Matchers with DateSupport {
 
-  implicit val sampleBankHolidays: BankHolidays = BankHolidays(List(
-    LocalDate.parse( /* New Year’s Day */ "2021-01-01"),
-    LocalDate.parse( /* Good Friday */ "2021-04-02"),
-    LocalDate.parse( /* Easter Monday */ "2021-04-05"),
-    LocalDate.parse( /* Early May bank holiday */ "2021-05-03"),
-    LocalDate.parse( /* Spring bank holiday */ "2021-05-31"),
-    LocalDate.parse( /* Summer bank holiday */ "2021-08-30"),
-    LocalDate.parse( /* Christmas Day */ "2021-12-27"),
-    LocalDate.parse( /* Boxing Day */ "2021-12-28")
-  ).map(Event))
+  implicit val sampleBankHolidays: BankHolidays = BankHolidays(
+    List(
+      LocalDate.parse( /* New Year’s Day */ "2021-01-01"),
+      LocalDate.parse( /* Good Friday */ "2021-04-02"),
+      LocalDate.parse( /* Easter Monday */ "2021-04-05"),
+      LocalDate.parse( /* Early May bank holiday */ "2021-05-03"),
+      LocalDate.parse( /* Spring bank holiday */ "2021-05-31"),
+      LocalDate.parse( /* Summer bank holiday */ "2021-08-30"),
+      LocalDate.parse( /* Christmas Day */ "2021-12-27"),
+      LocalDate.parse( /* Boxing Day */ "2021-12-28"),
+    ).map(Event),
+  )
 
   "isWorkingDay" should "correctly identify normal working days" in {
     (LocalDate.parse( /* Monday    */ "2019-12-02") isWorkingDay) shouldBe true
@@ -52,13 +54,19 @@ class LocalDateHelpersSpec extends AnyFlatSpec with Matchers with DateSupport {
 
     // example Spring bank holiday - "2021-05-31"
     (LocalDate.parse( /* Monday    */ "2021-05-31") findPreviousWorkingDay) should equalDate("2021-05-28")
-    (LocalDate.parse( /* Tuesday   */ "2021-06-01") findPreviousWorkingDay) should equalDate("2021-05-28") // note this is still the Friday from the week before, due to the bank holiday
+    (LocalDate.parse( /* Tuesday   */ "2021-06-01") findPreviousWorkingDay) should equalDate(
+      "2021-05-28",
+    ) // note this is still the Friday from the week before, due to the bank holiday
     (LocalDate.parse( /* Wednesday */ "2021-06-02") findPreviousWorkingDay) should equalDate("2021-06-01")
     (LocalDate.parse( /* Thursday  */ "2021-06-03") findPreviousWorkingDay) should equalDate("2021-06-02")
 
     // example Easter weekend (Good Friday - "2021-04-02" AND Easter Monday -"2021-04-05")
-    (LocalDate.parse( /* Monday    */ "2021-04-05") findPreviousWorkingDay) should equalDate("2021-04-01") // not this is the thursday before good friday
-    (LocalDate.parse( /* Tuesday   */ "2021-04-06") findPreviousWorkingDay) should equalDate("2021-04-01") // note this is still the thursday before good friday, due to the bank holidays
+    (LocalDate.parse( /* Monday    */ "2021-04-05") findPreviousWorkingDay) should equalDate(
+      "2021-04-01",
+    ) // not this is the thursday before good friday
+    (LocalDate.parse( /* Tuesday   */ "2021-04-06") findPreviousWorkingDay) should equalDate(
+      "2021-04-01",
+    ) // note this is still the thursday before good friday, due to the bank holidays
     (LocalDate.parse( /* Wednesday */ "2021-04-07") findPreviousWorkingDay) should equalDate("2021-04-06")
     (LocalDate.parse( /* Thursday  */ "2021-04-08") findPreviousWorkingDay) should equalDate("2021-04-07")
   }

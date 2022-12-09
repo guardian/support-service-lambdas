@@ -4,11 +4,11 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.util.config.Stage
 
 case class EmailQueueNames(
-  supporterPlus: QueueName,
-  contributions: QueueName,
-  paper: QueueName,
-  digipack: QueueName,
-  guardianWeekly: QueueName
+    supporterPlus: QueueName,
+    contributions: QueueName,
+    paper: QueueName,
+    digipack: QueueName,
+    guardianWeekly: QueueName,
 )
 
 object EmailQueueNames {
@@ -25,7 +25,7 @@ object EmailQueueNames {
         contributions = contributionThanksProdQueue,
         paper = subsWelcomeProdQueue,
         digipack = subsWelcomeProdQueue,
-        guardianWeekly = contributionThanksProdQueue
+        guardianWeekly = contributionThanksProdQueue,
       )
 
     case _ =>
@@ -34,7 +34,7 @@ object EmailQueueNames {
         contributions = contributionThanksDevQueue,
         paper = subsWelcomeDevQueue,
         digipack = subsWelcomeDevQueue,
-        guardianWeekly = contributionThanksDevQueue
+        guardianWeekly = contributionThanksDevQueue,
       )
   }
 }

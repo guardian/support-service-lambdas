@@ -50,12 +50,12 @@ object TIOInterpreter {
 
   def apply(): AwsServerInterpreter[TIO] = new AwsServerInterpreter[TIO]() {
     override def awsServerOptions: AwsServerOptions[TIO] = CustomiseInterceptors(
-      createOptions = (ci: CustomiseInterceptors[TIO, AwsServerOptions[TIO]]) => AwsServerOptions(encodeResponseBody = false, ci.interceptors)
+      createOptions = (ci: CustomiseInterceptors[TIO, AwsServerOptions[TIO]]) =>
+        AwsServerOptions(encodeResponseBody = false, ci.interceptors),
     ).options
   }
 
 }
-
 
 import sttp.monad.syntax.*
 type LambdaResponseBody = (String, Option[Long])
@@ -74,7 +74,7 @@ abstract class AwsServerInterpreter[F[_]: MonadError] {
       new AwsRequestBody[F](),
       new AwsToResponseBody(awsServerOptions),
       RejectInterceptor.disableWhenSingleEndpoint(awsServerOptions.interceptors, ses),
-      deleteFile = _ => ().unit // no file support
+      deleteFile = _ => ().unit, // no file support
     )
 
     { (request: AwsRequest) =>
@@ -82,7 +82,13 @@ abstract class AwsServerInterpreter[F[_]: MonadError] {
 
       interpreter.apply(serverRequest).map {
         case RequestResult.Failure(_) =>
-          AwsResponse(Nil, isBase64Encoded = awsServerOptions.encodeResponseBody, StatusCode.NotFound.code, Map.empty, "")
+          AwsResponse(
+            Nil,
+            isBase64Encoded = awsServerOptions.encodeResponseBody,
+            StatusCode.NotFound.code,
+            Map.empty,
+            "",
+          )
         case RequestResult.Response(res) =>
           val cookies = res.cookies.collect { case Right(cookie) => cookie.value }.toList
           val baseHeaders = res.headers.groupBy(_.name).map { case (n, v) => n -> v.map(_.value).mkString(",") }
@@ -96,7 +102,7 @@ abstract class AwsServerInterpreter[F[_]: MonadError] {
             isBase64Encoded = awsServerOptions.encodeResponseBody,
             res.code.code,
             allHeaders,
-            res.body.map(_._1).getOrElse("")
+            res.body.map(_._1).getOrElse(""),
           )
       }
     }
@@ -104,7 +110,8 @@ abstract class AwsServerInterpreter[F[_]: MonadError] {
 }
 
 class AwsBodyListener[F[_]: MonadError] extends BodyListener[F, LambdaResponseBody] {
-  override def onComplete(body: LambdaResponseBody)(cb: Try[Unit] => F[Unit]): F[LambdaResponseBody] = cb(Success(())).map(_ => body)
+  override def onComplete(body: LambdaResponseBody)(cb: Try[Unit] => F[Unit]): F[LambdaResponseBody] =
+    cb(Success(())).map(_ => body)
 }
 
 case class AwsServerRequest(request: AwsRequest, attributes: AttributeMap = AttributeMap.Empty) extends ServerRequest {
@@ -137,17 +144,18 @@ class AwsRequestBody[F[_]: MonadError]() extends RequestBody[F, NoStreams] {
   override def toRaw[R](serverRequest: ServerRequest, bodyType: RawBodyType[R]): F[RawValue[R]] = {
     val request = awsRequest(serverRequest)
     val decoded =
-      if (request.isBase64Encoded) Left(Base64.getDecoder.decode(request.body.getOrElse(""))) else Right(request.body.getOrElse(""))
+      if (request.isBase64Encoded) Left(Base64.getDecoder.decode(request.body.getOrElse("")))
+      else Right(request.body.getOrElse(""))
 
     def asByteArray: Array[Byte] = decoded.fold(identity[Array[Byte]], _.getBytes())
 
     RawValue(bodyType match {
       case RawBodyType.StringBody(charset) => decoded.fold(new String(_, charset), identity[String])
-      case RawBodyType.ByteArrayBody       => asByteArray
-      case RawBodyType.ByteBufferBody      => ByteBuffer.wrap(asByteArray)
-      case RawBodyType.InputStreamBody     => new ByteArrayInputStream(asByteArray)
-      case RawBodyType.FileBody            => throw new UnsupportedOperationException
-      case _: RawBodyType.MultipartBody    => throw new UnsupportedOperationException
+      case RawBodyType.ByteArrayBody => asByteArray
+      case RawBodyType.ByteBufferBody => ByteBuffer.wrap(asByteArray)
+      case RawBodyType.InputStreamBody => new ByteArrayInputStream(asByteArray)
+      case RawBodyType.FileBody => throw new UnsupportedOperationException
+      case _: RawBodyType.MultipartBody => throw new UnsupportedOperationException
     }).asInstanceOf[RawValue[R]].unit
   }
 
@@ -158,7 +166,12 @@ class AwsRequestBody[F[_]: MonadError]() extends RequestBody[F, NoStreams] {
 class AwsToResponseBody[F[_]](options: AwsServerOptions[F]) extends ToResponseBody[LambdaResponseBody, NoStreams] {
   override val streams: capabilities.Streams[NoStreams] = NoStreams
 
-  override def fromRawValue[R](v: R, headers: HasHeaders, format: CodecFormat, bodyType: RawBodyType[R]): LambdaResponseBody =
+  override def fromRawValue[R](
+      v: R,
+      headers: HasHeaders,
+      format: CodecFormat,
+      bodyType: RawBodyType[R],
+  ): LambdaResponseBody =
     bodyType match {
       case RawBodyType.StringBody(charset) =>
         val str = v.asInstanceOf[String]
@@ -172,16 +185,19 @@ class AwsToResponseBody[F[_]](options: AwsServerOptions[F]) extends ToResponseBo
 
       case RawBodyType.ByteBufferBody =>
         val byteBuffer = v.asInstanceOf[ByteBuffer]
-        val r = if (options.encodeResponseBody) Base64.getEncoder.encodeToString(safeRead(byteBuffer)) else new String(safeRead(byteBuffer))
+        val r =
+          if (options.encodeResponseBody) Base64.getEncoder.encodeToString(safeRead(byteBuffer))
+          else new String(safeRead(byteBuffer))
         (r, None)
 
       case RawBodyType.InputStreamBody =>
         val stream = v.asInstanceOf[InputStream]
         val r =
-          if (options.encodeResponseBody) Base64.getEncoder.encodeToString(stream.readAllBytes()) else new String(stream.readAllBytes())
+          if (options.encodeResponseBody) Base64.getEncoder.encodeToString(stream.readAllBytes())
+          else new String(stream.readAllBytes())
         (r, None)
 
-      case RawBodyType.FileBody         => throw new UnsupportedOperationException
+      case RawBodyType.FileBody => throw new UnsupportedOperationException
       case _: RawBodyType.MultipartBody => throw new UnsupportedOperationException
     }
 
@@ -200,15 +216,15 @@ class AwsToResponseBody[F[_]](options: AwsServerOptions[F]) extends ToResponseBo
   }
 
   override def fromStreamValue(
-    v: streams.BinaryStream,
-    headers: HasHeaders,
-    format: CodecFormat,
-    charset: Option[Charset]
+      v: streams.BinaryStream,
+      headers: HasHeaders,
+      format: CodecFormat,
+      charset: Option[Charset],
   ): LambdaResponseBody =
     throw new UnsupportedOperationException
 
   override def fromWebSocketPipe[REQ, RESP](
-    pipe: streams.Pipe[REQ, RESP],
-    o: WebSocketBodyOutput[streams.Pipe[REQ, RESP], REQ, RESP, _, NoStreams]
+      pipe: streams.Pipe[REQ, RESP],
+      o: WebSocketBodyOutput[streams.Pipe[REQ, RESP], REQ, RESP, _, NoStreams],
   ): LambdaResponseBody = throw new UnsupportedOperationException
 }

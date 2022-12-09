@@ -22,28 +22,33 @@ import scala.util.Try
 object Lambda {
 
   def runForLegacyTestsSeeTestingMd(
-    stage: Stage,
-    fetchString: StringFromS3,
-    response: Request => Response,
-    lambdaIO: LambdaIO,
-    sqsSend: QueueName => Payload => Try[Unit]
+      stage: Stage,
+      fetchString: StringFromS3,
+      response: Request => Response,
+      lambdaIO: LambdaIO,
+      sqsSend: QueueName => Payload => Try[Unit],
   ): Unit = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
-    ApiGatewayHandler(lambdaIO)(operationForEffects(loadConfigModule[TrustedApiConfig], wiredOperation(stage, response, loadConfigModule, sqsSend)))
+    ApiGatewayHandler(lambdaIO)(
+      operationForEffects(
+        loadConfigModule[TrustedApiConfig],
+        wiredOperation(stage, response, loadConfigModule, sqsSend),
+      ),
+    )
   }
 
   def operationForEffects(
-    loadConfigModule: Either[ConfigFailure, TrustedApiConfig],
-    wiredOperation: ApiGatewayOp[ApiGatewayHandler.Operation]
+      loadConfigModule: Either[ConfigFailure, TrustedApiConfig],
+      wiredOperation: ApiGatewayOp[ApiGatewayHandler.Operation],
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     wiredOperation.map(_.prependRequestValidationToSteps(Auth(loadConfigModule)))
   }
 
   def wiredOperation(
-    stage: Stage,
-    response: Request => Response,
-    loadConfigModule: LoadConfigModule.PartialApply,
-    sqsSend: QueueName => Payload => Try[Unit]
+      stage: Stage,
+      response: Request => Response,
+      loadConfigModule: LoadConfigModule.PartialApply,
+      sqsSend: QueueName => Payload => Try[Unit],
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     for {
       zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
@@ -53,9 +58,9 @@ object Lambda {
     } yield PaymentFailureSteps(
       ZuoraEmailSteps.sendEmailRegardingAccount(
         EmailSendSteps(sqsSend(emailQueueFor(stage))),
-        ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))
+        ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig)),
       ),
-      trustedApiConfig
+      trustedApiConfig,
     )
   }
 
@@ -73,7 +78,7 @@ object Lambda {
       GetFromS3.fetchString,
       RawEffects.response,
       LambdaIO(inputStream, outputStream, context),
-      SqsSync.send(SqsSync.buildClient)
+      SqsSync.send(SqsSync.buildClient),
     )
   }
 

@@ -4,29 +4,31 @@ import com.stripe.net.Webhook
 import scala.jdk.CollectionConverters._
 
 object Local {
-  /**
-   * NB: It will probably be quite tricky to run this locally going forward.
-   * It was useful during development and is mainly being kept for reference.
-   *
-   * For testing locally against zuora sandbox we require the following environment variables:
-   *
-   * - endpointSecret
-   * - zuoraClientId
-   * - zuoraSecret
-   *
-   * endpointSecret can be found in the stripe webhook dashboard (https://dashboard.stripe.com/test/webhooks).
-   * zuoraClientId and zuoraSecret can be found in parameter store (e.g /CODE/membership/payment-intent-issues/zuoraClientId)
-   *
-   * To run every step of the zuora update, we need to generate a new failed payment event from stripe.
-   * To do this in CODE, we need to:
-   *
-   * 1. Disable the webhook in AWS to prevent it from processing the event
-   * 2. Visit the CODE LP and make a contribution with a test IBAN (https://stripe.com/docs/connect/testing)
-   * 3. Visit the stripe webhook dashboard to copy the event it generated for the failed payment
-   * 4. Paste the event json in the `getJson` function (maintaining the custom timestamp)
-   *
-   * NB: this does not test the Stripe signature verification logic. This needs to be done in aws with a real Stripe event.
-   */
+
+  /** NB: It will probably be quite tricky to run this locally going forward. It was useful during development and is
+    * mainly being kept for reference.
+    *
+    * For testing locally against zuora sandbox we require the following environment variables:
+    *
+    *   - endpointSecret
+    *   - zuoraClientId
+    *   - zuoraSecret
+    *
+    * endpointSecret can be found in the stripe webhook dashboard (https://dashboard.stripe.com/test/webhooks).
+    * zuoraClientId and zuoraSecret can be found in parameter store (e.g
+    * /CODE/membership/payment-intent-issues/zuoraClientId)
+    *
+    * To run every step of the zuora update, we need to generate a new failed payment event from stripe. To do this in
+    * CODE, we need to:
+    *
+    *   1. Disable the webhook in AWS to prevent it from processing the event 2. Visit the CODE LP and make a
+    *      contribution with a test IBAN (https://stripe.com/docs/connect/testing) 3. Visit the stripe webhook dashboard
+    *      to copy the event it generated for the failed payment 4. Paste the event json in the `getJson` function
+    *      (maintaining the custom timestamp)
+    *
+    * NB: this does not test the Stripe signature verification logic. This needs to be done in aws with a real Stripe
+    * event.
+    */
   def main(args: Array[String]): Unit = {
     println(s"Processing test SEPA payment failure event...")
     val timestamp = getTimestamp

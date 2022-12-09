@@ -35,22 +35,25 @@ object SalesforceCase extends Logging {
 
     // NOTE : Case Owner is set by SF Rule based on Origin='Self Service'
     case class WireNewCase(
-      Subscription_Name__c: SubscriptionName,
-      ContactId: ContactId,
-      Product__c: String,
-      Journey__c: String,
-      Enquiry_Type__c: String,
-      Case_Closure_Reason__c: String,
-      Status: String,
-      Subject: CaseSubject,
-      Origin: String = CASE_ORIGIN
+        Subscription_Name__c: SubscriptionName,
+        ContactId: ContactId,
+        Product__c: String,
+        Journey__c: String,
+        Enquiry_Type__c: String,
+        Case_Closure_Reason__c: String,
+        Status: String,
+        Subject: CaseSubject,
+        Origin: String = CASE_ORIGIN,
     )
     implicit val writesWireNewCase = Json.writes[WireNewCase]
 
     def apply(post: HttpOp[RestRequestMaker.PostRequest, JsValue]): WireNewCase => ClientFailableOp[CaseWithId] =
-      post.setupRequest[WireNewCase] { newCase =>
-        PostRequest(newCase, RelativePath(caseSObjectsBaseUrl))
-      }.parse[CaseWithId].runRequest
+      post
+        .setupRequest[WireNewCase] { newCase =>
+          PostRequest(newCase, RelativePath(caseSObjectsBaseUrl))
+        }
+        .parse[CaseWithId]
+        .runRequest
 
   }
 
@@ -66,10 +69,13 @@ object SalesforceCase extends Logging {
 
   object GetById {
 
-    def apply[ResponseType: Reads](get: HttpOp[RestRequestMaker.GetRequest, JsValue]): CaseId => ClientFailableOp[ResponseType] =
+    def apply[ResponseType: Reads](
+        get: HttpOp[RestRequestMaker.GetRequest, JsValue],
+    ): CaseId => ClientFailableOp[ResponseType] =
       get.setupRequest(toRequest).parse[ResponseType].runRequest
 
-    def toRequest(caseId: CaseId): GetRequest = RestRequestMaker.GetRequest(RelativePath(s"$caseSObjectsBaseUrl/${caseId.value}"))
+    def toRequest(caseId: CaseId): GetRequest =
+      RestRequestMaker.GetRequest(RelativePath(s"$caseSObjectsBaseUrl/${caseId.value}"))
 
   }
 
@@ -81,17 +87,18 @@ object SalesforceCase extends Logging {
     private case class CaseQueryResponse(records: List[CaseWithCamelcaseId])
     private implicit val readsCases = Json.reads[CaseQueryResponse]
 
-    type TGetMostRecentCaseByContactId = (ContactId, SubscriptionName, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
+    type TGetMostRecentCaseByContactId =
+      (ContactId, SubscriptionName, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
 
     def apply(
-      get: HttpOp[RestRequestMaker.GetRequest, JsValue]
+        get: HttpOp[RestRequestMaker.GetRequest, JsValue],
     ): (ContactId, SubscriptionName, CaseSubject) => ClientFailableOp[Option[CaseWithId]] =
       get.setupRequestMultiArg(toRequest _).parse[CaseQueryResponse].map(toResponse).runRequestMultiArg
 
     def toRequest(
-      contactId: ContactId,
-      subscriptionName: SubscriptionName,
-      caseSubject: CaseSubject
+        contactId: ContactId,
+        subscriptionName: SubscriptionName,
+        caseSubject: CaseSubject,
     ): GetRequest = {
       val soqlQuery = s"SELECT Id " +
         s"FROM Case " +

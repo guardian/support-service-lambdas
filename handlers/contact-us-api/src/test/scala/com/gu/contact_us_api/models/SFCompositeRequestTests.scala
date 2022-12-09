@@ -7,20 +7,21 @@ import org.scalatest.matchers.should
 import com.gu.contact_us_api.models.ContactUsTestVars._
 
 class SFCompositeRequestTests extends AnyFlatSpec with should.Matchers {
-  private val singleReq = List[SFRequestItem](SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage))
+  private val singleReq =
+    List[SFRequestItem](SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage))
   private val multipleReq = List[SFRequestItem](
     SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage),
-    SFAttachmentRequest(testFileName, testFileContents)
+    SFAttachmentRequest(testFileName, testFileContents),
   )
 
   private val singleReqJson = Json.obj(
     ("allOrNone", Json.fromBoolean(true)),
-    ("compositeRequest", Json.arr(singleReq.map(i => i.asJson): _*))
+    ("compositeRequest", Json.arr(singleReq.map(i => i.asJson): _*)),
   )
 
   private val multipleReqJson = Json.obj(
     ("allOrNone", Json.fromBoolean(true)),
-    ("compositeRequest", Json.arr(multipleReq.map(i => i.asJson): _*))
+    ("compositeRequest", Json.arr(multipleReq.map(i => i.asJson): _*)),
   )
 
   "SFCompositeRequest" should "encode into expected json object when only one item is supplied" in {

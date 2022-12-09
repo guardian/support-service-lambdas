@@ -9,8 +9,11 @@ import org.scalatest.matchers.should.Matchers
 object TestData extends Matchers {
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
   val fakeStripeConfig = StripeConfig(
-    customerUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")),
-    signatureChecking = true
+    customerUpdatedWebhook = StripeWebhook(
+      StripeSecretKey("ukCustomerSourceUpdatedSecretKey"),
+      StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey"),
+    ),
+    signatureChecking = true,
   )
 
   val missingCredentialsResponse =

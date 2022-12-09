@@ -6,10 +6,12 @@ import zio.{Task, TaskLayer, UIO}
 object ConfigurationTest {
 
   val impl: TaskLayer[Configuration] =
-    Task.fromEither(Config.fromS3(FakeFetchString.fetchString)
-      .left.map(e => new RuntimeException(e.reason)))
+    Task
+      .fromEither(Config.fromS3(FakeFetchString.fetchString).left.map(e => new RuntimeException(e.reason)))
       .map(cnfg =>
         new Configuration.Service {
           val config: UIO[Config] = UIO(cnfg)
-        }).toLayer
+        },
+      )
+      .toLayer
 }

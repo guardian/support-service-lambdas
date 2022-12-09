@@ -20,87 +20,105 @@ import java.time.LocalDate
 //-----------------------------------------------------
 // Stubs for GetSubscription service
 //-----------------------------------------------------
-val getSubscriptionResponse = GetSubscriptionResponse("A-S00339056", "zuoraAccountId", "accountNumber", ratePlans = List(
-  RatePlan(
-    id = "89ad8casd9c0asdcaj89sdc98as",
-    productName = "P1",
-    productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
-    ratePlanName = "RP1",
-    ratePlanCharges = List(
-      RatePlanCharge(
-        productRatePlanChargeId = "PRPC1",
-        name = "Digital Pack Monthly",
-        price = 11.11,
-        currency = "GBP",
-        number = "number",
-        effectiveStartDate = LocalDate.of(2017, 12, 15),
-        effectiveEndDate = LocalDate.of(2020, 11, 29),
-        chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
-        billingPeriod = Monthly,
-      )
-    )
-  )
-))
+val getSubscriptionResponse = GetSubscriptionResponse(
+  "A-S00339056",
+  "zuoraAccountId",
+  "accountNumber",
+  ratePlans = List(
+    RatePlan(
+      id = "89ad8casd9c0asdcaj89sdc98as",
+      productName = "P1",
+      productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
+      ratePlanName = "RP1",
+      ratePlanCharges = List(
+        RatePlanCharge(
+          productRatePlanChargeId = "PRPC1",
+          name = "Digital Pack Monthly",
+          price = 11.11,
+          currency = "GBP",
+          number = "number",
+          effectiveStartDate = LocalDate.of(2017, 12, 15),
+          effectiveEndDate = LocalDate.of(2020, 11, 29),
+          chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
+          billingPeriod = Monthly,
+        ),
+      ),
+    ),
+  ),
+)
 
 val getSubscriptionResponse2 = GetSubscriptionResponse(
-  id = "8ad0823f841cf4e601841e61f6aa8923", accountNumber = "A00433231", accountId = "8ad0823f841cf4e601841e61f6aads87",
+  id = "8ad0823f841cf4e601841e61f6aa8923",
+  accountNumber = "A00433231",
+  accountId = "8ad0823f841cf4e601841e61f6aads87",
   ratePlans = List(
     RatePlan(
       productName = "Contributor",
       ratePlanName = "Monthly Contribution",
-      ratePlanCharges = List(RatePlanCharge(
-        productRatePlanChargeId = "2c92c0f85a6b1352015a7fcf35ab397c",
-        name = "Contribution",
-        number = "C-00732721",
-        price = 5.000000000,
-        currency = "GBP",
-        billingPeriod = Monthly,
-        effectiveStartDate = LocalDate.of(2022, 10, 28),
-        effectiveEndDate = LocalDate.of(2022, 10, 28),
-        chargedThroughDate = Some(LocalDate.of(2022, 10, 28))
-      )
+      ratePlanCharges = List(
+        RatePlanCharge(
+          productRatePlanChargeId = "2c92c0f85a6b1352015a7fcf35ab397c",
+          name = "Contribution",
+          number = "C-00732721",
+          price = 5.000000000,
+          currency = "GBP",
+          billingPeriod = Monthly,
+          effectiveStartDate = LocalDate.of(2022, 10, 28),
+          effectiveEndDate = LocalDate.of(2022, 10, 28),
+          chargedThroughDate = Some(LocalDate.of(2022, 10, 28)),
+        ),
       ),
       "2c92c0f85a6b134e015a7fcd9f0c7855",
-      "8ad0823f841cf4e601841e61f6d47234"),
+      "8ad0823f841cf4e601841e61f6d47234",
+    ),
     RatePlan(
       "Supporter Plus",
       "Supporter Plus Monthly",
       List(
         RatePlanCharge(
           productRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6",
-          name = "Supporter Plus Monthly", number = "C-00732747",
-          price = 30.000000000, currency = "GBP",
+          name = "Supporter Plus Monthly",
+          number = "C-00732747",
+          price = 30.000000000,
+          currency = "GBP",
           billingPeriod = Monthly,
           chargedThroughDate = Some(LocalDate.of(2022, 11, 28)),
           effectiveStartDate = LocalDate.of(2022, 10, 28),
-          effectiveEndDate = LocalDate.of(2023, 10, 28))),
+          effectiveEndDate = LocalDate.of(2023, 10, 28),
+        ),
+      ),
       "8ad09fc281de1ce70181de3b251736a4",
-      "8ad0823f841cf4e601841e61f6d470bb"
-    )
-  )
+      "8ad0823f841cf4e601841e61f6d470bb",
+    ),
+  ),
 )
 
-val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse("subscriptionName", "zuoraAccountId", "accountNumber", ratePlans = List(
-  RatePlan(
-    id = "R1",
-    productName = "P1",
-    productRatePlanId = "PRP1",
-    ratePlanName = "RP1",
-    ratePlanCharges = List(
-      RatePlanCharge(
-        productRatePlanChargeId = "PRPC1",
-        name = "Digital Pack Monthly",
-        price = 11.11,
-        currency = "GBP",
-        number = "number",
-        effectiveStartDate = LocalDate.of(2017, 12, 15),
-        effectiveEndDate = LocalDate.of(2020, 11, 29),
-        chargedThroughDate = None,
-        billingPeriod = Monthly,
-      )
-    )
-  )
-))
+val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
+  "subscriptionName",
+  "zuoraAccountId",
+  "accountNumber",
+  ratePlans = List(
+    RatePlan(
+      id = "R1",
+      productName = "P1",
+      productRatePlanId = "PRP1",
+      ratePlanName = "RP1",
+      ratePlanCharges = List(
+        RatePlanCharge(
+          productRatePlanChargeId = "PRPC1",
+          name = "Digital Pack Monthly",
+          price = 11.11,
+          currency = "GBP",
+          number = "number",
+          effectiveStartDate = LocalDate.of(2017, 12, 15),
+          effectiveEndDate = LocalDate.of(2020, 11, 29),
+          chargedThroughDate = None,
+          billingPeriod = Monthly,
+        ),
+      ),
+    ),
+  ),
+)
 
 //-----------------------------------------------------
 // Stubs for GetAccount service
@@ -111,10 +129,10 @@ val getAccountResponse = GetAccountResponse(
     None,
     "sfContactId",
     balance = 0,
-    currency = Currency.GBP
+    currency = Currency.GBP,
   ),
   BillToContact("John", "Hee", "example@gmail.com"),
-  List(AccountSubscription("subscriptionId"))
+  List(AccountSubscription("subscriptionId")),
 )
 
 val directDebitGetAccountResponse = GetAccountResponse(
@@ -123,10 +141,10 @@ val directDebitGetAccountResponse = GetAccountResponse(
     None,
     "sfContactId",
     balance = 0,
-    currency = Currency.GBP
+    currency = Currency.GBP,
   ),
   BillToContact("John", "Hee", "example@gmail.com"),
-  List(AccountSubscription("subscriptionId"))
+  List(AccountSubscription("subscriptionId")),
 )
 
 //-----------------------------------------------------
@@ -145,13 +163,13 @@ val emailMessageBody = EmailMessage(
         payment_frequency = "month",
         date_of_first_payment = "10 May 2022",
         currency = "£",
-        contribution_cancellation_date = "10 May 2022"
-      )
-    )
+        contribution_cancellation_date = "10 May 2022",
+      ),
+    ),
   ),
   "SV_RCtoDP_Switch",
   "sfContactId",
-  None
+  None,
 )
 
 val emailMessageBodyRefund = EmailMessage(
@@ -167,19 +185,19 @@ val emailMessageBodyRefund = EmailMessage(
         payment_frequency = "month",
         date_of_first_payment = "10 May 2022",
         currency = "£",
-        contribution_cancellation_date = "10 May 2022"
-      )
-    )
+        contribution_cancellation_date = "10 May 2022",
+      ),
+    ),
   ),
   "SV_RCtoDP_Switch",
   "sfContactId",
-  None
+  None,
 )
 
 val refundInput1 = RefundInput(
   subscriptionName = "A-S00339056",
   invoiceId = "80a23d9sdf9a89fs8cjjk2",
-  refundAmount = 4
+  refundAmount = 4,
 )
 
 //-----------------------------------------------------
@@ -191,15 +209,15 @@ val DigiSubWithOfferInvoicePreview = ZuoraInvoiceList(
       subscriptionName = "newSubscriptionName",
       serviceStartDate = LocalDate.of(2022, 7, 31),
       chargeAmount = 9.99,
-      taxAmount = 2.00
+      taxAmount = 2.00,
     ),
     ZuoraInvoiceItem(
       subscriptionName = "newSubscriptionName",
       serviceStartDate = LocalDate.of(2022, 7, 31),
       chargeAmount = -5.00,
-      taxAmount = -1.00
-    )
-  )
+      taxAmount = -1.00,
+    ),
+  ),
 )
 
 //-----------------------------------------------------
@@ -212,7 +230,7 @@ val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, 
 // Stubs for GetSfSubscription service
 //-----------------------------------------------------
 val sfSubscription1 = GetSfSubscriptionResponse(
-  Id = "123456"
+  Id = "123456",
 )
 
 //-----------------------------------------------------
@@ -225,5 +243,5 @@ val createRecordRequest1 = CreateRecordRequest(
   New_Rate_Plan_Name__c = "new rate plan",
   Requested_Date__c = LocalDate.parse("2022-12-08"),
   Effective_Date__c = LocalDate.parse("2022-12-09"),
-  Refund_Amount__c = BigDecimal(50)
+  Refund_Amount__c = BigDecimal(50),
 )

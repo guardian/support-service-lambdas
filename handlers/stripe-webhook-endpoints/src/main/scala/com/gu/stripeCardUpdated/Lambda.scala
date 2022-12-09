@@ -16,10 +16,10 @@ import okhttp3.{Request, Response}
 object Lambda {
 
   def runWithEffects(
-    stage: Stage,
-    fetchString: StringFromS3,
-    response: Request => Response,
-    lambdaIO: LambdaIO
+      stage: Stage,
+      fetchString: StringFromS3,
+      response: Request => Response,
+      lambdaIO: LambdaIO,
   ): Unit = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
 
@@ -31,7 +31,7 @@ object Lambda {
         stripeChecker = StripeDeps(stripeConfig, new StripeSignatureChecker)
         configuredOp = CardUpdatedSteps(
           zuoraClient,
-          stripeChecker
+          stripeChecker,
         )
       } yield configuredOp.prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
     }
@@ -42,6 +42,11 @@ object Lambda {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      RawEffects.response,
+      LambdaIO(inputStream, outputStream, context),
+    )
 
 }

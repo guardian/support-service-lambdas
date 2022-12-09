@@ -23,7 +23,7 @@ object Handler extends Logging {
       runWithEffects(
         RawEffects.stage,
         GetFromS3.fetchString,
-        LocalDate.now()
+        LocalDate.now(),
       )
     }
 
@@ -31,13 +31,15 @@ object Handler extends Logging {
     zuoraIds <- ZuoraIds.zuoraIdsForStage(stage).toApiGatewayOp(ApiGatewayResponse.internalServerError _)
     zuoraToPlanId = zuoraIds.rateplanIdToApiId.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
-    plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
+    plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp(
+      "get prices from zuora catalog",
+    )
     getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
     startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOpOr422
     catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, today)
     wireCatalog = WireCatalog.fromCatalog(catalog)
-  } yield Operation.noHealthcheck {
-    Req: ApiGatewayRequest => ApiGatewayResponse(body = wireCatalog, statusCode = "200")
+  } yield Operation.noHealthcheck { Req: ApiGatewayRequest =>
+    ApiGatewayResponse(body = wireCatalog, statusCode = "200")
   }
 
   // run this method with membership janus credentials, to check that the lambda is working and log the output to the console
@@ -45,8 +47,7 @@ object Handler extends Logging {
     val result = runWithEffects(
       Stage("DEV"),
       GetFromS3.fetchString,
-      LocalDate.now()
+      LocalDate.now(),
     )
   }
 }
-

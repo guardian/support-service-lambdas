@@ -14,8 +14,8 @@ object DedupSfContacts {
   }
 
   case class SFContactsForMerge[CONTACT](
-    winner: CONTACT,
-    others: List[CONTACT]
+      winner: CONTACT,
+      others: List[CONTACT],
   ) {
     def map[OUT](f: CONTACT => OUT): SFContactsForMerge[OUT] = {
       SFContactsForMerge(f(winner), others.map(f))
@@ -26,7 +26,7 @@ object DedupSfContacts {
 trait DedupSfContacts {
 
   def apply(
-    sfContactIds: SFContactsForMerge[SFContactId]
+      sfContactIds: SFContactsForMerge[SFContactId],
   ): SFContactsForMerge[SFContactId]
 
 }

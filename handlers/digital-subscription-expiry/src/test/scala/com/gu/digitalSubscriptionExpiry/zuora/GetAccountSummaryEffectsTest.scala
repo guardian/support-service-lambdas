@@ -16,7 +16,8 @@ class GetAccountSummaryEffectsTest extends AnyFlatSpec with Matchers {
     val testAccountId = AccountId("2c92c0f86078c4d4016079e1402d6536")
 
     val actual: ApiGatewayOp[AccountSummaryResult] = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")
+      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+        .toApiGatewayOp("parse config")
 
       zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       subscription <- GetAccountSummary(zuoraRequests)(testAccountId).toApiGatewayOp("get summary")
@@ -30,7 +31,7 @@ class GetAccountSummaryEffectsTest extends AnyFlatSpec with Matchers {
       billToPostcode = Some("SW13 8EB"),
       soldToLastName = "Brown",
       soldToPostcode = Some("SW13 8EB"),
-      identityId = Some("30001864")
+      identityId = Some("30001864"),
     )
 
     actual should be(ContinueProcessing(expected))

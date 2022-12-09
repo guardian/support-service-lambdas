@@ -10,14 +10,14 @@ case class SubscriptionVouchers(cardCode: String, letterCode: String)
 case class ReplacementSubscriptionVouchers(cardCode: Option[String], letterCode: Option[String])
 
 case class RedemptionAttempt(
-  voucherCode: String,
-  voucherType: String,
-  actionDate: String,
-  activityType: String,
-  address: Option[String],
-  postCode: Option[String],
-  message: String,
-  amount: Double
+    voucherCode: String,
+    voucherType: String,
+    actionDate: String,
+    activityType: String,
+    address: Option[String],
+    postCode: Option[String],
+    message: String,
+    amount: Double,
 )
 
 object RedemptionAttempt {
@@ -30,7 +30,7 @@ object RedemptionAttempt {
       historyItem.address,
       historyItem.postCode,
       historyItem.reason,
-      historyItem.value
+      historyItem.value,
     )
   }
 }
@@ -42,7 +42,7 @@ object ReplacementSubscriptionVouchers {
     (replacementVoucher: ReplacementSubscriptionVouchers) => {
       val tupledCardAndLetter = (
         replacementVoucher.cardCode.map(card => ("cardCode", Json.fromString(card))),
-        replacementVoucher.letterCode.map(letter => ("letterCode", Json.fromString(letter)))
+        replacementVoucher.letterCode.map(letter => ("letterCode", Json.fromString(letter))),
       )
 
       tupledCardAndLetter match {
@@ -53,4 +53,3 @@ object ReplacementSubscriptionVouchers {
       }
     }
 }
-

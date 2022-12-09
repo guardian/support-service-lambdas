@@ -4,7 +4,17 @@ import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse}
 import com.gu.stripeCardUpdated.CardUpdatedSteps.CardUpdatedUrlParams
 import com.gu.stripeCardUpdated.CardUpdatedStepsTestData.{accountSummaryJson, defaultAccountSummaryJson}
-import com.gu.stripeCardUpdated.{EventDataObject, CardUpdatedSteps, StripeAccount, StripeBrand, StripeCountry, StripeCustomerId, StripeExpiry, StripeLast4, StripeCardId}
+import com.gu.stripeCardUpdated.{
+  EventDataObject,
+  CardUpdatedSteps,
+  StripeAccount,
+  StripeBrand,
+  StripeCountry,
+  StripeCustomerId,
+  StripeExpiry,
+  StripeLast4,
+  StripeCardId,
+}
 import com.gu.stripeCardUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
@@ -15,10 +25,14 @@ import org.scalatest.matchers.should.Matchers
 class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Matchers {
 
   "CardUpdatedSteps" should "getAccountToUpdate non default pm" in {
-    val effects = new TestingRawEffects(500, Map(
-      ("/action/query", HTTPResponse(
-        200,
-        """{
+    val effects = new TestingRawEffects(
+      500,
+      Map(
+        (
+          "/action/query",
+          HTTPResponse(
+            200,
+            """{
           |  "records": [
           |    {
           |      "Id": "nondefaultPMID",
@@ -28,22 +42,27 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
           |  ],
           |  "size": 1,
           |  "done": true
-          |}""".stripMargin
-      )), //defaultPMID
-      ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
-    ))
+          |}""".stripMargin,
+          ),
+        ), // defaultPMID
+        ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+      ),
+    )
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(
+      StripeCustomerId("fakecustid"),
+      StripeCardId("fakecardid"),
+    )
 
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}",
     )
     val expectedGET = BasicRequest(
       "GET",
       "/accounts/accid/summary",
-      ""
+      "",
     )
 
     effects.requestsAttempted should be(List(expectedGET, expectedPOST))
@@ -51,10 +70,14 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
   }
 
   it should "getAccountToUpdate default pm" in {
-    val effects = new TestingRawEffects(500, Map(
-      ("/action/query", HTTPResponse(
-        200,
-        """{
+    val effects = new TestingRawEffects(
+      500,
+      Map(
+        (
+          "/action/query",
+          HTTPResponse(
+            200,
+            """{
           |  "records": [
           |    {
           |      "Id": "defaultPMID",
@@ -64,33 +87,44 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
           |  ],
           |  "size": 1,
           |  "done": true
-          |}""".stripMargin
-      )), //defaultPMID
-      ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
-    ))
+          |}""".stripMargin,
+          ),
+        ), // defaultPMID
+        ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+      ),
+    )
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(
+      StripeCustomerId("fakecustid"),
+      StripeCardId("fakecardid"),
+    )
 
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}",
     )
     val expectedGET = BasicRequest(
       "GET",
       "/accounts/accid/summary",
-      ""
+      "",
     )
 
     effects.requestsAttempted should be(List(expectedGET, expectedPOST))
-    actual.toDisjunction should be(Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accid"), NumConsecutiveFailures(3)))))
+    actual.toDisjunction should be(
+      Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accid"), NumConsecutiveFailures(3)))),
+    )
   }
 
   it should "getAccountToUpdate default pm with multiple on the same account" in {
-    val effects = new TestingRawEffects(500, Map(
-      ("/action/query", HTTPResponse(
-        200,
-        """{
+    val effects = new TestingRawEffects(
+      500,
+      Map(
+        (
+          "/action/query",
+          HTTPResponse(
+            200,
+            """{
           |  "records": [
           |    {
           |      "Id": "defaultPMID",
@@ -105,33 +139,46 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
           |  ],
           |  "size": 2,
           |  "done": true
-          |}""".stripMargin
-      )), //defaultPMID
-      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
-    ))
+          |}""".stripMargin,
+          ),
+        ), // defaultPMID
+        ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+      ),
+    )
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(
+      StripeCustomerId("fakecustid"),
+      StripeCardId("fakecardid"),
+    )
 
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}",
     )
     val expectedGET = BasicRequest(
       "GET",
       "/accounts/accountidfake/summary",
-      ""
+      "",
     )
 
     effects.requestsAttempted should be(List(expectedGET, expectedPOST))
-    actual.toDisjunction should be(Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)))))
+    actual.toDisjunction should be(
+      Right(
+        List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2))),
+      ),
+    )
   }
 
   it should "getAccountToUpdate multiple on different account three only" in {
-    val effects = new TestingRawEffects(500, Map(
-      ("/action/query", HTTPResponse(
-        200,
-        """{
+    val effects = new TestingRawEffects(
+      500,
+      Map(
+        (
+          "/action/query",
+          HTTPResponse(
+            200,
+            """{
           |  "records": [
           |    {
           |      "Id": "defaultPMID",
@@ -151,48 +198,65 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
           |  ],
           |  "size": 3,
           |  "done": true
-          |}""".stripMargin
-      )),
-      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
-      ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM"))),
-      ("/accounts/accountidANOTHERONE/summary", HTTPResponse(200, accountSummaryJson("anotherPMAGAIN")))
-    ))
+          |}""".stripMargin,
+          ),
+        ),
+        ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+        ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM"))),
+        ("/accounts/accountidANOTHERONE/summary", HTTPResponse(200, accountSummaryJson("anotherPMAGAIN"))),
+      ),
+    )
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(
+      StripeCustomerId("fakecustid"),
+      StripeCardId("fakecardid"),
+    )
 
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}",
     )
     val expectedGET1 = BasicRequest(
       "GET",
       "/accounts/accountidfake/summary",
-      ""
+      "",
     )
     val expectedGET2 = BasicRequest(
       "GET",
       "/accounts/accountidANOTHER/summary",
-      ""
+      "",
     )
     val expectedGET3 = BasicRequest(
       "GET",
       "/accounts/accountidANOTHERONE/summary",
-      ""
+      "",
     )
     effects.requestsAttempted.toSet should be(Set(expectedGET1, expectedGET2, expectedGET3, expectedPOST))
-    actual.toDisjunction.map(_.toSet) should be(Right(Set(
-      PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)),
-      PaymentMethodFields(PaymentMethodId("anotherPM"), AccountId("accountidANOTHER"), NumConsecutiveFailures(4)),
-      PaymentMethodFields(PaymentMethodId("anotherPMAGAIN"), AccountId("accountidANOTHERONE"), NumConsecutiveFailures(4))
-    )))
+    actual.toDisjunction.map(_.toSet) should be(
+      Right(
+        Set(
+          PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)),
+          PaymentMethodFields(PaymentMethodId("anotherPM"), AccountId("accountidANOTHER"), NumConsecutiveFailures(4)),
+          PaymentMethodFields(
+            PaymentMethodId("anotherPMAGAIN"),
+            AccountId("accountidANOTHERONE"),
+            NumConsecutiveFailures(4),
+          ),
+        ),
+      ),
+    )
   }
 
   it should "getAccountToUpdate multiple on different account two of them but only one is default PM" in {
-    val effects = new TestingRawEffects(500, Map(
-      ("/action/query", HTTPResponse(
-        200,
-        """{
+    val effects = new TestingRawEffects(
+      500,
+      Map(
+        (
+          "/action/query",
+          HTTPResponse(
+            200,
+            """{
           |  "records": [
           |    {
           |      "Id": "defaultPMID",
@@ -207,40 +271,53 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
           |  ],
           |  "size": 2,
           |  "done": true
-          |}""".stripMargin
-      )),
-      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
-      ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM")))
-    ))
+          |}""".stripMargin,
+          ),
+        ),
+        ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+        ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM"))),
+      ),
+    )
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(
+      StripeCustomerId("fakecustid"),
+      StripeCardId("fakecardid"),
+    )
 
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}",
     )
     val expectedGET1 = BasicRequest(
       "GET",
       "/accounts/accountidfake/summary",
-      ""
+      "",
     )
     val expectedGET2 = BasicRequest(
       "GET",
       "/accounts/accountidANOTHER/summary",
-      ""
+      "",
     )
     effects.requestsAttempted.toSet should be(Set(expectedGET1, expectedGET2, expectedPOST))
-    actual.toDisjunction.map(_.toSet) should be(Right(Set(
-      PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2))
-    )))
+    actual.toDisjunction.map(_.toSet) should be(
+      Right(
+        Set(
+          PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)),
+        ),
+      ),
+    )
   }
 
   it should "getAccountToUpdate multiple on different account more than three" in {
-    val effects = new TestingRawEffects(500, Map(
-      ("/action/query", HTTPResponse(
-        200,
-        """{
+    val effects = new TestingRawEffects(
+      500,
+      Map(
+        (
+          "/action/query",
+          HTTPResponse(
+            200,
+            """{
           |  "records": [
           |    {
           |      "Id": "defaultPMID",
@@ -265,42 +342,58 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
           |  ],
           |  "size": 4,
           |  "done": true
-          |}""".stripMargin
-      )), //defaultPMID
-      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
-    ))
+          |}""".stripMargin,
+          ),
+        ), // defaultPMID
+        ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+      ),
+    )
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(
+      StripeCustomerId("fakecustid"),
+      StripeCardId("fakecardid"),
+    )
 
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}",
     )
     effects.requestsAttempted should be(List(expectedPOST))
-    actual.toDisjunction should be(Left(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
+    actual.toDisjunction should be(
+      Left(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")),
+    )
   }
 
   it should "getAccountToUpdate no payment methods at all" in {
-    val effects = new TestingRawEffects(500, Map(
-      ("/action/query", HTTPResponse(
-        200,
-        """{
+    val effects = new TestingRawEffects(
+      500,
+      Map(
+        (
+          "/action/query",
+          HTTPResponse(
+            200,
+            """{
           |  "records": [
           |  ],
           |  "size": 0,
           |  "done": true
-          |}""".stripMargin
-      )), //defaultPMID
-      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
-    ))
+          |}""".stripMargin,
+          ),
+        ), // defaultPMID
+        ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+      ),
+    )
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(
+      StripeCustomerId("fakecustid"),
+      StripeCardId("fakecardid"),
+    )
 
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}",
     )
     effects.requestsAttempted should be(List(expectedPOST))
     actual.toDisjunction should be(Right(List()))
@@ -312,10 +405,13 @@ class CardUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matchers 
 
   "CardUpdatedSteps" should "updatePaymentMethod" in {
 
-    val effects = new TestingRawEffects(500, Map(
-      ("/object/payment-method", HTTPResponse(200, """{"Success": true,"Id": "newPMID"}""")),
-      ("/object/account/fake", HTTPResponse(200, """{"Success": true,"Id": "fakeaccountid"}"""))
-    ))
+    val effects = new TestingRawEffects(
+      500,
+      Map(
+        ("/object/payment-method", HTTPResponse(200, """{"Success": true,"Id": "newPMID"}""")),
+        ("/object/account/fake", HTTPResponse(200, """{"Success": true,"Id": "fakeaccountid"}""")),
+      ),
+    )
 
     val eventData = EventDataObject(
       id = StripeCardId("card_def456"),
@@ -323,25 +419,25 @@ class CardUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matchers 
       country = StripeCountry("US"),
       customer = StripeCustomerId("cus_ghi789"),
       expiry = StripeExpiry(exp_month = 7, exp_year = 2020),
-      last4 = StripeLast4("1234")
+      last4 = StripeLast4("1234"),
     )
 
     val actual = CardUpdatedSteps.createUpdatedDefaultPaymentMethod(
-      TestData.zuoraDeps(effects)
+      TestData.zuoraDeps(effects),
     )(
-        PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)),
-        eventData
-      )
+      PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)),
+      eventData,
+    )
 
     val expectedPOST = BasicRequest(
       "POST",
       "/object/payment-method",
-      """{"AccountId":"fake","TokenId":"card_def456","SecondTokenId":"cus_ghi789","CreditCardCountry":"US","CreditCardNumber":"1234","CreditCardExpirationMonth":7,"CreditCardExpirationYear":2020,"CreditCardType":"Visa","Type":"CreditCardReferenceTransaction","NumConsecutiveFailures":1}"""
+      """{"AccountId":"fake","TokenId":"card_def456","SecondTokenId":"cus_ghi789","CreditCardCountry":"US","CreditCardNumber":"1234","CreditCardExpirationMonth":7,"CreditCardExpirationYear":2020,"CreditCardType":"Visa","Type":"CreditCardReferenceTransaction","NumConsecutiveFailures":1}""",
     )
     val expectedPUT = BasicRequest(
       "PUT",
       "/object/account/fake",
-      """{"DefaultPaymentMethodId":"newPMID"}"""
+      """{"DefaultPaymentMethodId":"newPMID"}""",
     )
 
     effects.requestsAttempted should be(List(expectedPUT, expectedPOST))
@@ -359,7 +455,7 @@ class CardUpdatedStepsApplyTest extends AnyFlatSpec with Matchers {
     val badHeaders = Map(
       "SomeHeader1" -> "testvalue",
       "Content-Type" -> "application/json",
-      "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString"
+      "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString",
     )
 
     val body =
@@ -415,12 +511,16 @@ class CardUpdatedStepsApplyTest extends AnyFlatSpec with Matchers {
 
   it should "manage with the GMN AUS stripe param set" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership_AUS"}"""
-    Json.parse(queryStringJson).as[CardUpdatedUrlParams] should be(CardUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)))
+    Json.parse(queryStringJson).as[CardUpdatedUrlParams] should be(
+      CardUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)),
+    )
   }
 
   it should "manage with the GMN stripe param set" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership"}"""
-    Json.parse(queryStringJson).as[CardUpdatedUrlParams] should be(CardUpdatedUrlParams(Some(StripeAccount.GNM_Membership)))
+    Json.parse(queryStringJson).as[CardUpdatedUrlParams] should be(
+      CardUpdatedUrlParams(Some(StripeAccount.GNM_Membership)),
+    )
   }
 
 }

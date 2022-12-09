@@ -25,16 +25,18 @@ object SalesforceGenericIdLookup {
   case class ResponseWithId(Id: String)
   implicit val reads = Json.reads[ResponseWithId]
 
-  def apply(get: HttpOp[RestRequestMaker.GetRequest, JsValue]): (SfObjectType, FieldName, LookupValue) => ClientFailableOp[ResponseWithId] =
+  def apply(
+      get: HttpOp[RestRequestMaker.GetRequest, JsValue],
+  ): (SfObjectType, FieldName, LookupValue) => ClientFailableOp[ResponseWithId] =
     get.setupRequestMultiArg(toRequest _).parse[ResponseWithId].runRequestMultiArg
 
   def toRequest(
-    sfObjectType: SfObjectType,
-    fieldName: FieldName,
-    lookupValue: LookupValue
+      sfObjectType: SfObjectType,
+      fieldName: FieldName,
+      lookupValue: LookupValue,
   ): GetRequest =
     RestRequestMaker.GetRequest(
-      RelativePath(s"${sfObjectsBaseUrl}${sfObjectType.value}/${fieldName.value}/${lookupValue.value}")
+      RelativePath(s"${sfObjectsBaseUrl}${sfObjectType.value}/${fieldName.value}/${lookupValue.value}"),
     )
 
 }

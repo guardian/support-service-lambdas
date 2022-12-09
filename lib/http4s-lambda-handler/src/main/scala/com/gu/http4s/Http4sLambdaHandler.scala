@@ -15,17 +15,17 @@ import scala.collection.immutable
 import scala.io.Source
 
 case class LambdaRequest(
-  httpMethod: String,
-  path: String,
-  multiValueQueryStringParameters: Option[Map[String, List[String]]],
-  body: Option[String],
-  multiValueHeaders: Option[Map[String, List[String]]]
+    httpMethod: String,
+    path: String,
+    multiValueQueryStringParameters: Option[Map[String, List[String]]],
+    body: Option[String],
+    multiValueHeaders: Option[Map[String, List[String]]],
 )
 
 case class LambdaResponse(
-  statusCode: Int,
-  body: String,
-  headers: Map[String, String]
+    statusCode: Int,
+    body: String,
+    headers: Map[String, String],
 )
 
 class Http4sLambdaHandler(service: HttpRoutes[IO]) {
@@ -42,12 +42,12 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
       .flatMap(identity)
       .fold(
         error => LambdaResponse(500, error, Map.empty),
-        identity
+        identity,
       )
 
     try {
       outputStream.write(
-        response.asJson.spaces2.getBytes("UTF-8")
+        response.asJson.spaces2.getBytes("UTF-8"),
       )
     } finally {
       outputStream.close();
@@ -67,13 +67,14 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
 
   private def runRequest(http4sRequest: Request[IO], http4sService: HttpRoutes[IO]) = {
     EitherT(
-      Either.catchNonFatal {
-        http4sService
-          .run(http4sRequest)
-          .getOrElse(Response.notFound)
-      }
+      Either
+        .catchNonFatal {
+          http4sService
+            .run(http4sRequest)
+            .getOrElse(Response.notFound)
+        }
         .leftMap(ex => s"Unexpected exception: $ex")
-        .traverse(identity)
+        .traverse(identity),
     )
   }
 
@@ -96,34 +97,33 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
       method = method,
       uri = uri,
       headers = headers,
-      body = body
+      body = body,
     )
   }
 
   private def extractUri(apiGateWayRequest: LambdaRequest): Uri = {
     val queryStringValues: immutable.Seq[(String, Option[String])] =
-      apiGateWayRequest
-        .multiValueQueryStringParameters.getOrElse(Nil)
-        .flatMap {
-          case (key, valueList) => valueList.map(value => key -> Some(value).filter(!_.isEmpty))
-        }.toList
+      apiGateWayRequest.multiValueQueryStringParameters
+        .getOrElse(Nil)
+        .flatMap { case (key, valueList) =>
+          valueList.map(value => key -> Some(value).filter(!_.isEmpty))
+        }
+        .toList
 
     Uri(path = apiGateWayRequest.path, query = Query(queryStringValues: _*))
   }
 
   private def extractHeaders(apiGateWayRequest: LambdaRequest): Headers = {
     Headers.of(
-      apiGateWayRequest
-        .multiValueHeaders
+      apiGateWayRequest.multiValueHeaders
         .getOrElse(Nil)
         .flatMap { case (key, multiValue) => multiValue.map(value => Header(key, value)) }
-        .toList: _*
+        .toList: _*,
     )
   }
 
   private def extractBody(apiGateWayRequest: LambdaRequest) = {
-    apiGateWayRequest
-      .body
+    apiGateWayRequest.body
       .map(body => Stream(body).through(text.utf8Encode))
       .getOrElse(EmptyBody)
   }

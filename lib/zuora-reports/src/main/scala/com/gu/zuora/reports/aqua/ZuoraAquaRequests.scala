@@ -5,13 +5,13 @@ import play.api.libs.json.Json
 case class AquaQuery(name: String, query: String, `type`: String = "zoqlexport")
 
 case class AquaQueryRequest(
-  format: String = "csv",
-  version: String = "1.0",
-  name: String,
-  encrypted: String = "none",
-  useQueryLabels: String = "true",
-  dateTimeUtc: String = "true",
-  queries: Seq[AquaQuery]
+    format: String = "csv",
+    version: String = "1.0",
+    name: String,
+    encrypted: String = "none",
+    useQueryLabels: String = "true",
+    dateTimeUtc: String = "true",
+    queries: Seq[AquaQuery],
 )
 
 object AquaQuery {

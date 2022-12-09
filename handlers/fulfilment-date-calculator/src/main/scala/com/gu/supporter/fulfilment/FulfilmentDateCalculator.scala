@@ -24,7 +24,6 @@ class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyL
     val datesForYesterdayThroughToAFortnight = (-1 to 14).map(_.toLong).map(today.plusDays)
 
     datesForYesterdayThroughToAFortnight.foreach { date =>
-
       writeToBucket(GuardianWeekly, date, GuardianWeeklyFulfilmentDates(date).asJson.spaces2)
 
       writeToBucket(NewspaperHomeDelivery, date, HomeDeliveryFulfilmentDates(date).asJson.spaces2)
@@ -49,4 +48,3 @@ class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyL
   }
 
 }
-

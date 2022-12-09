@@ -7,20 +7,25 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.SfQueryInfo
 import play.api.libs.json._
 
-/**
- * Run a query as a salesforce job, wait for it to complete and copy the results to s3.
- *
- * See a log entry like
- * "Copying file to S3. Bucket: gu-salesforce-export-dev | Key: ImovoContract_2019-07-01_7503E0000063xJmQAI_7523E0000029Hyi.csv"
- * at the end of the execution.
- */
+/** Run a query as a salesforce job, wait for it to complete and copy the results to s3.
+  *
+  * See a log entry like "Copying file to S3. Bucket: gu-salesforce-export-dev | Key:
+  * ImovoContract_2019-07-01_7503E0000063xJmQAI_7523E0000029Hyi.csv" at the end of the execution.
+  */
 object EndToEndManualTest extends App {
 
   case class Job(jobId: String, jobName: String, objectName: String, uploadToDataLake: Boolean)
 
   case class Batch(batchId: String, state: String)
 
-  case class Batches(jobId: String, jobName: String, objectName: String, jobStatus: String, batches: Seq[Batch], uploadToDataLake: Boolean) {
+  case class Batches(
+      jobId: String,
+      jobName: String,
+      objectName: String,
+      jobStatus: String,
+      batches: Seq[Batch],
+      uploadToDataLake: Boolean,
+  ) {
     def isCompleted = jobStatus == "Completed"
 
     def isFailed = jobStatus == "Failed"
@@ -91,7 +96,7 @@ object EndToEndManualTest extends App {
          |----------------------------------------------------------------------
          |$s
          |----------------------------------------------------------------------
-      """.stripMargin
+      """.stripMargin,
     )
   }
 }

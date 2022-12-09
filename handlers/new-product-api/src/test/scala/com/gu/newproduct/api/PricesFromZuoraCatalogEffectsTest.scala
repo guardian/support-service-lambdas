@@ -17,9 +17,13 @@ class PricesFromZuoraCatalogEffectsTest extends AnyFlatSpec with Matchers {
 
     val actual = for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(Stage("DEV"))
-      response <- PricesFromZuoraCatalog(ZuoraEnvironment("DEV"), GetFromS3.fetchString, zuoraIds.rateplanIdToApiId.get).toDisjunction.left.map(_.toString)
+      response <- PricesFromZuoraCatalog(
+        ZuoraEnvironment("DEV"),
+        GetFromS3.fetchString,
+        zuoraIds.rateplanIdToApiId.get,
+      ).toDisjunction.left.map(_.toString)
     } yield response
-    //the prices might change but at least we can assert that we got some price for each product
+    // the prices might change but at least we can assert that we got some price for each product
     actual.map(_.keySet) shouldBe Right(expectedProducts)
   }
 }

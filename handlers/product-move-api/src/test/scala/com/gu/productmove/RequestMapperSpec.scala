@@ -12,25 +12,21 @@ import scala.jdk.CollectionConverters.*
 object RequestMapperQueryParamsSpec extends ZIOSpecDefault {
 
   def spec: zio.test.Spec[zio.test.TestEnvironment & zio.Scope, Any] = suite("RequestMapperQueryParamsSpec")(
-
     test("queryParamsToEncodedString can manage a normal key/value pair") {
       val testData = Map("aaa" -> "bbb")
       val result = RequestMapper.queryParamsToEncodedString(testData)
       assert(result)(equalTo("aaa=bbb"))
     },
-
     test("queryParamsToEncodedString can manage a query param with no separate value") {
       val testData = Map("aaa" -> "")
       val result = RequestMapper.queryParamsToEncodedString(testData)
       assert(result)(equalTo("aaa"))
     },
-
     test("queryParamsToEncodedString can manage a query string with strange characters") {
-      val testData = Map("aaaa&aa?aa=aaaa"->"bbbb&bb?bb=bbbb")
+      val testData = Map("aaaa&aa?aa=aaaa" -> "bbbb&bb?bb=bbbb")
       val result = RequestMapper.queryParamsToEncodedString(testData)
       assert(result)(equalTo("aaaa%26aa?aa%3Daaaa=bbbb%26bb?bb%3Dbbbb"))
     },
-
   )
 
 }
@@ -38,7 +34,6 @@ object RequestMapperQueryParamsSpec extends ZIOSpecDefault {
 object RequestMapperConvertSpec extends ZIOSpecDefault {
 
   def spec: zio.test.Spec[zio.test.TestEnvironment & zio.Scope, Any] = suite("RequestMapperConvertSpec")(
-
     test("convertJavaRequestToTapirRequest can manage a normal key/value pair") {
       val testData = {
         val identity = new APIGatewayV2WebSocketEvent.RequestIdentity()
@@ -66,18 +61,17 @@ object RequestMapperConvertSpec extends ZIOSpecDefault {
           AwsHttp(
             "GET",
             "/path",
-            "$.requestContext.protocol",// dummy value
+            "$.requestContext.protocol", // dummy value
             "1.2.3.4",
-            "browser"
-          )
+            "browser",
+          ),
         ),
         Some("body"),
-        false
+        false,
       )
       val result = RequestMapper.convertJavaRequestToTapirRequest(testData)
       assert(result)(equalTo(expected))
     },
-
   )
 
 }

@@ -15,7 +15,7 @@ class WindowValidatorTest extends AnyFlatSpec with Matchers {
 
     WindowValidator(
       selectableWindow = august6To26Window,
-      dateToValidate = outOfWindowDate
+      dateToValidate = outOfWindowDate,
     ) shouldBe Failed("2018-08-05 is out of the selectable range: [2018-08-06 - 2018-08-26)")
   }
 
@@ -24,7 +24,7 @@ class WindowValidatorTest extends AnyFlatSpec with Matchers {
 
     WindowValidator(
       selectableWindow = august6To26Window,
-      dateToValidate = dateInWindow
+      dateToValidate = dateInWindow,
     ) shouldBe Passed(())
   }
 }

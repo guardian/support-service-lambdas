@@ -24,6 +24,9 @@ object SalesforceToBrazeCampaignMapping {
       case ("Digital_Voucher__c", "replace") => "SV_SC_LostItem"
       case ("Case", "Delivery issues") => "SV_DeliveryProblemConfirmation"
       case ("Contact", "Delivery address change") => "SV_DeliveryAddressChangeConfirmation"
-      case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
+      case (objectName, emailStage) =>
+        throw new RuntimeException(
+          s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.",
+        )
     }
 }

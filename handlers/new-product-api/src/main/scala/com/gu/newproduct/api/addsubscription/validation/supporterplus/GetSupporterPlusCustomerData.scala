@@ -9,19 +9,19 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMetho
 import com.gu.util.reader.Types.ApiGatewayOp
 
 case class SupporterPlusCustomerData(
-  account: ValidatedAccount,
-  paymentMethod: PaymentMethod,
-  accountSubscriptions: List[Subscription],
-  contacts: Contacts
+    account: ValidatedAccount,
+    paymentMethod: PaymentMethod,
+    accountSubscriptions: List[Subscription],
+    contacts: Contacts,
 )
 
 object GetSupporterPlusCustomerData {
   def apply(
-    getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
-    getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
-    getContacts: ZuoraAccountId => ApiGatewayOp[Contacts],
-    getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]],
-    accountId: ZuoraAccountId
+      getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
+      getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
+      getContacts: ZuoraAccountId => ApiGatewayOp[Contacts],
+      getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]],
+      accountId: ZuoraAccountId,
   ) = {
     // put futures into vals so they all kick off in advance of the for comprehension
     val eventualAccount = getAccount(accountId)

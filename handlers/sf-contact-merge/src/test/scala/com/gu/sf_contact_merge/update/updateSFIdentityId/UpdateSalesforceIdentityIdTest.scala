@@ -22,29 +22,34 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
       SFContactUpdate(
         Some(IdentityId("identityid")),
         SetFirstName(FirstName("firstname")),
-        OverrideAddressWith(SFAddress(
-          SFStreet("street1"),
-          Some(SFCity("city1")),
-          Some(SFState("state2")),
-          Some(SFPostalCode("post1")),
-          SFCountry("country1"),
-          Some(SFPhone("phone1"))
-        )),
-        Some(EmailAddress("emailemail"))
-      )
+        OverrideAddressWith(
+          SFAddress(
+            SFStreet("street1"),
+            Some(SFCity("city1")),
+            Some(SFState("state2")),
+            Some(SFPostalCode("post1")),
+            SFCountry("country1"),
+            Some(SFPhone("phone1")),
+          ),
+        ),
+        Some(EmailAddress("emailemail")),
+      ),
     )
-    val expectedJson = JsObject(Seq(
-      "IdentityID__c" -> JsString("identityid"),
-      "FirstName" -> JsString("firstname"),
-      "OtherStreet" -> JsString("street1"),
-      "OtherCity" -> JsString("city1"),
-      "OtherState" -> JsString("state2"),
-      "OtherPostalCode" -> JsString("post1"),
-      "OtherCountry" -> JsString("country1"),
-      "Phone" -> JsString("phone1"),
-      "Email" -> JsString("emailemail")
-    ))
-    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
+    val expectedJson = JsObject(
+      Seq(
+        "IdentityID__c" -> JsString("identityid"),
+        "FirstName" -> JsString("firstname"),
+        "OtherStreet" -> JsString("street1"),
+        "OtherCity" -> JsString("city1"),
+        "OtherState" -> JsString("state2"),
+        "OtherPostalCode" -> JsString("post1"),
+        "OtherCountry" -> JsString("country1"),
+        "Phone" -> JsString("phone1"),
+        "Email" -> JsString("emailemail"),
+      ),
+    )
+    val expected =
+      new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -57,14 +62,17 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
         Some(IdentityId("identityid")),
         DummyFirstName,
         DontOverrideAddress,
-        None
-      )
+        None,
+      ),
     )
-    val expectedJson = JsObject(Seq(
-      "IdentityID__c" -> JsString("identityid"),
-      "FirstName" -> JsString(".")
-    ))
-    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
+    val expectedJson = JsObject(
+      Seq(
+        "IdentityID__c" -> JsString("identityid"),
+        "FirstName" -> JsString("."),
+      ),
+    )
+    val expected =
+      new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -77,13 +85,16 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
         Some(IdentityId("identityid")),
         DontChangeFirstName,
         DontOverrideAddress,
-        None
-      )
+        None,
+      ),
     )
-    val expectedJson = JsObject(Seq(
-      "IdentityID__c" -> JsString("identityid")
-    ))
-    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
+    val expectedJson = JsObject(
+      Seq(
+        "IdentityID__c" -> JsString("identityid"),
+      ),
+    )
+    val expected =
+      new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -96,13 +107,16 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
         None,
         DontChangeFirstName,
         DontOverrideAddress,
-        None
-      )
+        None,
+      ),
     )
-    val expectedJson = JsObject(Seq(
-      "IdentityID__c" -> JsString("")
-    ))
-    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
+    val expectedJson = JsObject(
+      Seq(
+        "IdentityID__c" -> JsString(""),
+      ),
+    )
+    val expected =
+      new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }

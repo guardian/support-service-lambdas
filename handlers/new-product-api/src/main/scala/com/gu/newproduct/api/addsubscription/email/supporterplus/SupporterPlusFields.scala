@@ -28,14 +28,15 @@ object SupporterPlusFields {
   }
 
   def paymentMethodFields(paymentMethod: PaymentMethod, firstPaymentDate: LocalDate) = paymentMethod match {
-    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) => Map(
-      "account number" -> accountNumberMask.value,
-      "sort code" -> sortCode.hyphenated,
-      "account name" -> accountName.value,
-      "Mandate ID" -> mandateId.value,
-      "payment method" -> "Direct Debit",
-      "first payment date" -> firstPaymentDate.format(firstPaymentDateFormat)
-    )
+    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) =>
+      Map(
+        "account number" -> accountNumberMask.value,
+        "sort code" -> sortCode.hyphenated,
+        "account name" -> accountName.value,
+        "Mandate ID" -> mandateId.value,
+        "payment method" -> "Direct Debit",
+        "first payment date" -> firstPaymentDate.format(firstPaymentDateFormat),
+      )
     case _ => Map.empty
 
   }
@@ -47,7 +48,7 @@ object SupporterPlusFields {
     "currency" -> data.currency.glyph,
     "edition" -> data.contacts.billTo.address.country.map(_.alpha2).getOrElse(""),
     "name" -> data.contacts.billTo.firstName.value,
-    "product" -> productId(data.plan)
+    "product" -> productId(data.plan),
   ) ++ paymentMethodFields(data.paymentMethod, data.firstPaymentDate)
 
 }

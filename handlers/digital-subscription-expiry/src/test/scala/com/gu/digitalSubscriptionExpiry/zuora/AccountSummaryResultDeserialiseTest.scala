@@ -17,9 +17,8 @@ class AccountSummaryResultDeserialiseTest extends AnyFlatSpec {
         billToPostcode = None,
         soldToLastName = "soldToLastName",
         soldToPostcode = None,
-        identityId = Some("12344")
-      )
-
+        identityId = Some("12344"),
+      ),
     )
 
     val testAccount = getTestAccount(None, None, Some("12344"))
@@ -37,9 +36,8 @@ class AccountSummaryResultDeserialiseTest extends AnyFlatSpec {
         billToPostcode = Some(""),
         soldToLastName = "soldToLastName",
         soldToPostcode = Some(""),
-        identityId = Some("12344")
-      )
-
+        identityId = Some("12344"),
+      ),
     )
 
     val testAccount = getTestAccount(Some(""), Some(""), Some("12344"))
@@ -57,15 +55,14 @@ class AccountSummaryResultDeserialiseTest extends AnyFlatSpec {
         billToPostcode = Some("billtoPostcodeValue"),
         soldToLastName = "soldToLastName",
         soldToPostcode = Some("SoldToPostcodeValue"),
-        identityId = Some("12344")
-      )
-
+        identityId = Some("12344"),
+      ),
     )
 
     val testAccount = getTestAccount(
       billToPostcode = Some("billtoPostcodeValue"),
       soldToPostcode = Some("SoldToPostcodeValue"),
-      identityId = Some("12344")
+      identityId = Some("12344"),
     )
     val event: JsResult[AccountSummaryResult] = Json.parse(testAccount).validate[AccountSummaryResult]
 
@@ -81,15 +78,14 @@ class AccountSummaryResultDeserialiseTest extends AnyFlatSpec {
         billToPostcode = Some("billtoPostcodeValue"),
         soldToLastName = "soldToLastName",
         soldToPostcode = Some("SoldToPostcodeValue"),
-        identityId = None
-      )
-
+        identityId = None,
+      ),
     )
 
     val testAccount = getTestAccount(
       billToPostcode = Some("billtoPostcodeValue"),
       soldToPostcode = Some("SoldToPostcodeValue"),
-      identityId = None
+      identityId = None,
     )
     val event: JsResult[AccountSummaryResult] = Json.parse(testAccount).validate[AccountSummaryResult]
 
@@ -105,15 +101,14 @@ class AccountSummaryResultDeserialiseTest extends AnyFlatSpec {
         billToPostcode = Some("billtoPostcodeValue"),
         soldToLastName = "soldToLastName",
         soldToPostcode = Some("SoldToPostcodeValue"),
-        identityId = Some("12344")
-      )
-
+        identityId = Some("12344"),
+      ),
     )
 
     val testAccount = getTestAccount(
       billToPostcode = Some("billtoPostcodeValue"),
       soldToPostcode = Some("SoldToPostcodeValue"),
-      identityId = Some("12344")
+      identityId = Some("12344"),
     )
     val event: JsResult[AccountSummaryResult] = Json.parse(testAccount).validate[AccountSummaryResult]
 
@@ -121,9 +116,9 @@ class AccountSummaryResultDeserialiseTest extends AnyFlatSpec {
   }
 
   def getTestAccount(
-    billToPostcode: Option[String] = None,
-    soldToPostcode: Option[String],
-    identityId: Option[String]
+      billToPostcode: Option[String] = None,
+      soldToPostcode: Option[String],
+      identityId: Option[String],
   ) = {
     def toFieldValue(o: Option[String]) = o.map(s => '"' + s + '"').getOrElse("null")
 

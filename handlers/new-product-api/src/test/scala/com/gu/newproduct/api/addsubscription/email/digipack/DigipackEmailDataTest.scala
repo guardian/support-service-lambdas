@@ -7,7 +7,14 @@ import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, TrialPeriod}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  NonDirectDebitMethod,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.PlanId._
@@ -30,8 +37,8 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
       Some(City("billToCity")),
       Some(State("billToState")),
       Some(Country.UK),
-      Some(Postcode("billToPostcode"))
-    )
+      Some(Postcode("billToPostcode")),
+    ),
   )
 
   val soldto = SoldToContact(
@@ -45,8 +52,8 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
       Some(City("soldToCity")),
       Some(State("soldToState")),
       Country.US,
-      Some(Postcode("soldToPostcode"))
-    )
+      Some(Postcode("soldToPostcode")),
+    ),
   )
   val contacts = Contacts(billto, soldto)
 
@@ -55,7 +62,7 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
       id = VoucherEveryDayPlus,
       description = PlanDescription("Everyday+"),
       startDateRules = testStartDateRules,
-      paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month"))
+      paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month")),
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
@@ -65,10 +72,10 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
       BankAccountName("someAccountName"),
       BankAccountNumberMask("*****mask"),
       SortCode("123456"),
-      MandateId("MandateId")
+      MandateId("MandateId"),
     ),
     currency = GBP,
-    trialPeriod = TrialPeriod(18)
+    trialPeriod = TrialPeriod(18),
   )
   it should "generate json payload for digipack data with direct debit fields" in {
 
@@ -114,9 +121,8 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
   }
 
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
-    val allPlansVoucherData = ids.map(
-      planId => directDebitData.copy(plan = Plan(planId, PlanDescription("test plan"), testStartDateRules))
-    )
+    val allPlansVoucherData =
+      ids.map(planId => directDebitData.copy(plan = Plan(planId, PlanDescription("test plan"), testStartDateRules)))
     allPlansVoucherData.map(DigipackEmailFields(_))
   }
 

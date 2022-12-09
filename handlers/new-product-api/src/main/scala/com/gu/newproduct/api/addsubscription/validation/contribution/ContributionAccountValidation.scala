@@ -4,7 +4,7 @@ import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, Validat
 
 object ContributionAccountValidation {
   def apply(
-    account: ValidatedAccount
+      account: ValidatedAccount,
   ): ValidationResult[ValidatedAccount] = {
     account.identityId match {
       case Some(_) => Passed(account)

@@ -11,7 +11,7 @@ object RequestMapper {
   /*
   API gateway parses the query parameters to k/v pairs, but tapir needs the raw query string, so we
   need to re-encode it again.
-  */
+   */
   def queryParamsToEncodedString(queryStringParams: Map[String, String]): String = {
     val querySegments = queryStringParams.toSeq.map {
       case (key, "") => Uri.QuerySegment.Value(key)
@@ -40,10 +40,10 @@ object RequestMapper {
           "$.requestContext.protocol", // this is unused and not parsed from the API gateway JSON by the java SDK
           getRequestContext.getIdentity.getSourceIp, // nullable?
           getRequestContext.getIdentity.getUserAgent, // nullable?
-        )
+        ),
       ),
       Option(getBody),
-      isIsBase64Encoded
+      isIsBase64Encoded,
     )
 
   }

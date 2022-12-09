@@ -17,10 +17,11 @@ class HealthCheckTest extends AnyFlatSpec with Matchers {
         Account(
           Some(IdentityId("1313")),
           Some(SfContactId("1414")),
-          None, AutoPay(false),
+          None,
+          AutoPay(false),
           AccountBalanceMinorUnits(0),
-          Currency.GBP
-        )
+          Currency.GBP,
+        ),
       )
     }
 
@@ -37,8 +38,8 @@ class HealthCheckTest extends AnyFlatSpec with Matchers {
           None,
           AutoPay(false),
           AccountBalanceMinorUnits(0),
-          Currency.GBP
-        )
+          Currency.GBP,
+        ),
       )
     }
 

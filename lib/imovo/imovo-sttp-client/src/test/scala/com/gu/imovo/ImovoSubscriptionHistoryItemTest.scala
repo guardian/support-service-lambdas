@@ -29,8 +29,8 @@ class ImovoSubscriptionHistoryItemTest extends AnyFlatSpec with Matchers {
           address = Some("1 High Street, London"),
           postCode = Some("N1 9GU "),
           reason = "Success",
-          value = 2.2
-        )
+          value = 2.2,
+        ),
       )
   }
 
@@ -56,8 +56,8 @@ class ImovoSubscriptionHistoryItemTest extends AnyFlatSpec with Matchers {
           address = None,
           postCode = None,
           reason = "Redemption rejected - the voucher cannot be used today",
-          value = 0
-        )
+          value = 0,
+        ),
       )
   }
 }

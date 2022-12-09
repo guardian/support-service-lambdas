@@ -57,16 +57,16 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
         query = Query(
           "Query1" -> Some("Query Value1"),
           "Query2" -> Some("Query Value2.1"),
-          "Query2" -> Some("Query Value2.2")
-        )
-      )
+          "Query2" -> Some("Query Value2.2"),
+        ),
+      ),
     )
     decodedRequest.headers should equal(
       Headers.of(
         Header("Header1", "Header Value1"),
         Header("Header2", "Header Value2.1"),
-        Header("Header2", "Header Value2.2")
-      )
+        Header("Header2", "Header Value2.2"),
+      ),
     )
     decodedRequest.httpVersion should equal(HttpVersion.`HTTP/1.1`)
     decodedRequest.body should equal(EmptyBody)
@@ -80,7 +80,7 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
         |    "Content-Length" : "13",
         |    "ResponseHeader" : "Response Header Value1"
         |  }
-        |}""".stripMargin
+        |}""".stripMargin,
     )
   }
   it should "handle POST request with body" in {
@@ -129,20 +129,20 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
         query = Query(
           "Query1" -> Some("Query Value1"),
           "Query2" -> Some("Query Value2.1"),
-          "Query2" -> Some("Query Value2.2")
-        )
-      )
+          "Query2" -> Some("Query Value2.2"),
+        ),
+      ),
     )
     decodedRequest.headers should equal(
       Headers.of(
         Header("Header1", "Header Value1"),
         Header("Header2", "Header Value2.1"),
-        Header("Header2", "Header Value2.2")
-      )
+        Header("Header2", "Header Value2.2"),
+      ),
     )
     decodedRequest.httpVersion should equal(HttpVersion.`HTTP/1.1`)
     new String(decodedRequest.body.compile.toVector.unsafeRunSync().toArray, "UTF-8") should equal(
-      "{\"bodyKey\":\"bodyValue\"}"
+      "{\"bodyKey\":\"bodyValue\"}",
     )
 
     apiGatewayResponse should equal(
@@ -154,7 +154,7 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
         |    "Content-Length" : "13",
         |    "ResponseHeader" : "Response Header Value1"
         |  }
-        |}""".stripMargin
+        |}""".stripMargin,
     )
   }
 
@@ -162,22 +162,21 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
     var requestReceived: Option[Request[IO]] = None
 
     val handler = new Http4sLambdaHandler(
-      HttpRoutes.of[IO] {
-        case request =>
-          requestReceived = Some(request)
-          response
-      }
+      HttpRoutes.of[IO] { case request =>
+        requestReceived = Some(request)
+        response
+      },
     )
 
     val stream = new ByteArrayOutputStream()
 
     handler.handle(
       new ByteArrayInputStream(apiGatewayRequest.getBytes("UTF-8")),
-      stream
+      stream,
     )
 
-    val request = Inside.inside(requestReceived) {
-      case Some(request) => request
+    val request = Inside.inside(requestReceived) { case Some(request) =>
+      request
     }
 
     val responseBody = new String(stream.toByteArray, "UTF-8")

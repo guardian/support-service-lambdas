@@ -2,7 +2,15 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.zuora.{CaseId, ChargeOverrides, CreateSubscriptionResponse, ProductRatePlanChargeId, ProductRatePlanId, SubscribeToRatePlans, ZuoraAccountId}
+import com.gu.productmove.zuora.{
+  CaseId,
+  ChargeOverrides,
+  CreateSubscriptionResponse,
+  ProductRatePlanChargeId,
+  ProductRatePlanId,
+  SubscribeToRatePlans,
+  ZuoraAccountId,
+}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
@@ -22,28 +30,37 @@ trait ZuoraCancel:
 object ZuoraCancelLive:
   val layer: URLayer[ZuoraGet, ZuoraCancel] = ZLayer.fromFunction(ZuoraCancelLive(_))
 
-private class ZuoraCancelLive(zuoraGet: ZuoraGet) extends ZuoraCancel :
-  override def cancel(subscriptionNumber: String, cancellationEffectiveDate: LocalDate): ZIO[Any, String, CancellationResponse] = {
+private class ZuoraCancelLive(zuoraGet: ZuoraGet) extends ZuoraCancel:
+  override def cancel(
+      subscriptionNumber: String,
+      cancellationEffectiveDate: LocalDate,
+  ): ZIO[Any, String, CancellationResponse] = {
     val cancellationRequest = CancellationRequest(cancellationEffectiveDate)
 
-    zuoraGet.put[CancellationRequest, CancellationResponse](uri"subscriptions/$subscriptionNumber/cancel", cancellationRequest)
+    zuoraGet.put[CancellationRequest, CancellationResponse](
+      uri"subscriptions/$subscriptionNumber/cancel",
+      cancellationRequest,
+    )
   }
 
 object ZuoraCancel {
-  def cancel(subscriptionNumber: String, cancellationEffectiveDate: LocalDate): ZIO[ZuoraCancel, String, CancellationResponse] =
+  def cancel(
+      subscriptionNumber: String,
+      cancellationEffectiveDate: LocalDate,
+  ): ZIO[ZuoraCancel, String, CancellationResponse] =
     ZIO.serviceWithZIO[ZuoraCancel](_.cancel(subscriptionNumber, cancellationEffectiveDate))
 }
 
 case class CancellationRequest(
-  cancellationEffectiveDate: LocalDate,
-  cancellationPolicy: String = "SpecificDate"
+    cancellationEffectiveDate: LocalDate,
+    cancellationPolicy: String = "SpecificDate",
 )
 
 given JsonEncoder[CancellationRequest] = DeriveJsonEncoder.gen[CancellationRequest]
 
 case class CancellationResponse(
-  subscriptionId: String,
-  cancelledDate: LocalDate
+    subscriptionId: String,
+    cancelledDate: LocalDate,
 )
 
 given JsonDecoder[CancellationResponse] = DeriveJsonDecoder.gen[CancellationResponse]

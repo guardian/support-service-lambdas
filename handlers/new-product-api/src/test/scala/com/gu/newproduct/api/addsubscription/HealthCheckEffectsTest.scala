@@ -18,7 +18,7 @@ class HealthCheckEffectsTest extends AnyFlatSpec with Matchers {
     val actual = (for {
       zuoraConfig <- LoadConfigModule(stage, GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       zuoraClient = ZuoraRestRequestMaker(Http.response, zuoraConfig)
-      getAccount = GetAccount(zuoraClient.get[ZuoraAccount])_
+      getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
     } yield HealthCheck(getAccount, AccountIdentitys.accountIdentitys(stage))).apiResponse
 
     actual.statusCode should be("200")

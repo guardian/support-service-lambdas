@@ -41,27 +41,37 @@ object SQSRead extends LazyLogging {
 
   def apply(queueName: QueueName): List[String] = {
 
-    val sqsClient = SqsAsyncClient
-      .builder
+    val sqsClient = SqsAsyncClient.builder
       .region(EU_WEST_1)
       .credentialsProvider(AwsSQSSend.CredentialsProvider)
       .build()
 
-    val futureQueueUrl = sqsClient.getQueueUrl(
-      GetQueueUrlRequest.builder.queueName(queueName.value).build()
-    ).asScala.map(_.queueUrl)
+    val futureQueueUrl = sqsClient
+      .getQueueUrl(
+        GetQueueUrlRequest.builder.queueName(queueName.value).build(),
+      )
+      .asScala
+      .map(_.queueUrl)
 
     val futureReceived = for {
       queueUrl <- futureQueueUrl
       _ <- Future.successful(logger.info(s"reading message from SQS queue $queueUrl"))
-      request = ReceiveMessageRequest.builder.queueUrl(queueUrl).attributeNamesWithStrings("ApproximateReceiveCount").maxNumberOfMessages(10).waitTimeSeconds(0).build()
-      received <- sqsClient.receiveMessage(request).asScala.map {
-        results => results.messages.asScala.toList.map(_.body)
-      }.recover {
-        e =>
+      request = ReceiveMessageRequest.builder
+        .queueUrl(queueUrl)
+        .attributeNamesWithStrings("ApproximateReceiveCount")
+        .maxNumberOfMessages(10)
+        .waitTimeSeconds(0)
+        .build()
+      received <- sqsClient
+        .receiveMessage(request)
+        .asScala
+        .map { results =>
+          results.messages.asScala.toList.map(_.body)
+        }
+        .recover { e =>
           logger.warn("Error encountered while receiving messages from Amazon: " + e.getMessage)
           Nil
-      }
+        }
     } yield received
 
     Await.result(futureReceived, 10.seconds)

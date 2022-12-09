@@ -18,7 +18,7 @@ object GetSubscriptionExpiry {
       accountSummary.billToPostcode,
       Some(accountSummary.billToLastName),
       Some(accountSummary.soldToLastName),
-      accountSummary.soldToPostcode
+      accountSummary.soldToPostcode,
     ).flatten.map(format)
 
     val formattedPassword = format(password)
@@ -35,9 +35,16 @@ object GetSubscriptionExpiry {
     digipackChargeNamePrefixes.exists(upperCaseName.contains(_))
   }
 
-  private def getExpiryDateForValidSubscription(subscription: SubscriptionResult, accountSummary: AccountSummaryResult, date: LocalDate): Option[LocalDate] = {
+  private def getExpiryDateForValidSubscription(
+      subscription: SubscriptionResult,
+      accountSummary: AccountSummaryResult,
+      date: LocalDate,
+  ): Option[LocalDate] = {
 
-    val dateToCheck = if (!subscription.startDate.isAfter(date) && subscription.customerAcceptanceDate.isAfter(date)) subscription.customerAcceptanceDate else date
+    val dateToCheck =
+      if (!subscription.startDate.isAfter(date) && subscription.customerAcceptanceDate.isAfter(date))
+        subscription.customerAcceptanceDate
+      else date
 
     def chargeSpansDate(charge: RatePlanCharge) =
       !charge.effectiveEndDate.isBefore(dateToCheck) &&
@@ -46,29 +53,37 @@ object GetSubscriptionExpiry {
     def isActiveDigipack(charge: RatePlanCharge) = isDigipackName(charge.name) && chargeSpansDate(charge)
     val hasActiveDigipackCharges = subscription.ratePlans.flatMap(_.ratePlanCharges).exists(isActiveDigipack)
 
-    @deprecated("should only exist during Coronavirus measures (where digipack access is expanded to cover paper customers)") //FIXME remove after Coronavirus
+    @deprecated(
+      "should only exist during Coronavirus measures (where digipack access is expanded to cover paper customers)",
+    ) // FIXME remove after Coronavirus
     def isNewspaper(ratePlan: RatePlan) = ratePlan.productName.toUpperCase.startsWith("NEWSPAPER")
-    val isValidNewspaperSub = subscription.ratePlans.filter(isNewspaper).flatMap(_.ratePlanCharges).exists(chargeSpansDate)
+    val isValidNewspaperSub =
+      subscription.ratePlans.filter(isNewspaper).flatMap(_.ratePlanCharges).exists(chargeSpansDate)
 
     if (hasActiveDigipackCharges || isValidNewspaperSub) {
       Some(subscription.endDate.plusDays(1))
     } else None
   }
 
-  def apply(today: () => LocalDate)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): ApiResponse =
+  def apply(
+      today: () => LocalDate,
+  )(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): ApiResponse =
     if (!validPassword(accountSummary, providedPassword)) {
       notFoundResponse
     } else {
       val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, today())
-      maybeSubscriptionEndDate.map {
-        subscriptionEndDate =>
-          val res = SuccessResponse(Expiry(
-            expiryDate = subscriptionEndDate,
-            expiryType = ExpiryType.SUB,
-            subscriptionCode = None,
-            provider = None
-          ))
+      maybeSubscriptionEndDate
+        .map { subscriptionEndDate =>
+          val res = SuccessResponse(
+            Expiry(
+              expiryDate = subscriptionEndDate,
+              expiryType = ExpiryType.SUB,
+              subscriptionCode = None,
+              provider = None,
+            ),
+          )
           ApiGatewayResponse("200", res)
-      }.getOrElse(notFoundResponse)
+        }
+        .getOrElse(notFoundResponse)
     }
 }

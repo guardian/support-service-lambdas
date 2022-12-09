@@ -30,56 +30,84 @@ object CardUpdatedSteps extends Logging {
   }
 
   def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck { apiGatewayRequest =>
-    val apiGatewayBody = if (stripeDeps.config.signatureChecking)
-      bodyIfSignatureVerified(stripeDeps, apiGatewayRequest)
-    else
-      apiGatewayRequest.bodyAsCaseClass[CardUpdatedMessageBody]()
+    val apiGatewayBody =
+      if (stripeDeps.config.signatureChecking)
+        bodyIfSignatureVerified(stripeDeps, apiGatewayRequest)
+      else
+        apiGatewayRequest.bodyAsCaseClass[CardUpdatedMessageBody]()
 
     val updatePaymentMethodsResult = for {
       cardUpdatedMessageBody <- apiGatewayBody
-      paymentMethods <- getPaymentMethodsToUpdate(zuoraRequests)(cardUpdatedMessageBody.data.`object`.customer, cardUpdatedMessageBody.data.`object`.id)
+      paymentMethods <- getPaymentMethodsToUpdate(zuoraRequests)(
+        cardUpdatedMessageBody.data.`object`.customer,
+        cardUpdatedMessageBody.data.`object`.id,
+      )
     } yield paymentMethods.traverse(defaultPaymentMethod =>
-      createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, cardUpdatedMessageBody.data.`object`))
+      createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, cardUpdatedMessageBody.data.`object`),
+    )
 
     updatePaymentMethodsResult
       .map(_ => ApiGatewayResponse.successfulExecution)
       .apiResponse
   }
 
-  def createUpdatedDefaultPaymentMethod(requests: Requests)(paymentMethodFields: PaymentMethodFields, eventDataObject: EventDataObject): ApiGatewayOp[Unit] = {
+  def createUpdatedDefaultPaymentMethod(
+      requests: Requests,
+  )(paymentMethodFields: PaymentMethodFields, eventDataObject: EventDataObject): ApiGatewayOp[Unit] = {
     for {
       // similar to ZuoraService.createPaymentMethod only in REST api
-      paymentMethod <- createPaymentMethod(requests)(eventDataObject, paymentMethodFields).withLogging("createPaymentMethod")
-      _ <- SetDefaultPaymentMethod.setDefaultPaymentMethod(requests)(paymentMethodFields.AccountId, paymentMethod.id)
-        .toApiGatewayOp("SetDefaultPaymentMethod failed").withLogging("setDefaultPaymentMethod")
+      paymentMethod <- createPaymentMethod(requests)(eventDataObject, paymentMethodFields).withLogging(
+        "createPaymentMethod",
+      )
+      _ <- SetDefaultPaymentMethod
+        .setDefaultPaymentMethod(requests)(paymentMethodFields.AccountId, paymentMethod.id)
+        .toApiGatewayOp("SetDefaultPaymentMethod failed")
+        .withLogging("setDefaultPaymentMethod")
     } yield ()
   }
 
-  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[CardUpdatedMessageBody] = for {
+  def bodyIfSignatureVerified(
+      stripeDeps: StripeDeps,
+      apiGatewayRequest: ApiGatewayRequest,
+  ): ApiGatewayOp[CardUpdatedMessageBody] = for {
     queryParams <- apiGatewayRequest.queryParamsAsCaseClass[CardUpdatedUrlParams]()
     _ = logger.info(s"from: ${queryParams.stripeAccount}")
     maybeStripeAccount = queryParams.stripeAccount
-    signatureVerified = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
-    res <- if (signatureVerified) {
-      apiGatewayRequest.bodyAsCaseClass[CardUpdatedMessageBody]()
-    } else
-      ReturnWithResponse(messageResponse(
-        "401",
-        "Couldn't verify the signature of the webhook payload, do you have the correct signing secret key in config? " +
-          "See https://stripe.com/docs/webhooks/signatures for more information"
-      ))
+    signatureVerified = verifyRequest(
+      stripeDeps,
+      apiGatewayRequest.headers.getOrElse(Map()),
+      apiGatewayRequest.body.getOrElse(""),
+      maybeStripeAccount,
+    )
+    res <-
+      if (signatureVerified) {
+        apiGatewayRequest.bodyAsCaseClass[CardUpdatedMessageBody]()
+      } else
+        ReturnWithResponse(
+          messageResponse(
+            "401",
+            "Couldn't verify the signature of the webhook payload, do you have the correct signing secret key in config? " +
+              "See https://stripe.com/docs/webhooks/signatures for more information",
+          ),
+        )
   } yield res
 
   def getPaymentMethodsToUpdate(
-    requests: Requests
+      requests: Requests,
   )(customerId: StripeCustomerId, cardId: StripeCardId): ApiGatewayOp[List[PaymentMethodFields]] = {
     val zuoraQuerier = ZuoraQuery(requests)
     for {
-      zuoraPaymentMethodIds <- ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customerId, cardId)
+      zuoraPaymentMethodIds <- ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(
+        customerId,
+        cardId,
+      )
       paymentMethodFields <- zuoraPaymentMethodIds.flatTraverse { paymentMethodIds =>
-        ZuoraGetAccountSummary(requests)(paymentMethodIds.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed")
+        ZuoraGetAccountSummary(requests)(paymentMethodIds.accountId.value)
+          .toApiGatewayOp("ZuoraGetAccountSummary failed")
           .flatMap { account =>
-            findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethodIds.paymentMethods).toList.pure[ApiGatewayOp].withLogging("findDefaultOrSkip")
+            findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethodIds.paymentMethods).toList
+              .pure[ApiGatewayOp]
+              .withLogging("findDefaultOrSkip")
           }
       }
     } yield paymentMethodFields
@@ -88,32 +116,42 @@ object CardUpdatedSteps extends Logging {
   import com.gu.util.reader.Types._
 
   def createPaymentMethod(requests: Requests)(
-    eventDataObject: EventDataObject,
-    paymentMethodFields: PaymentMethodFields
+      eventDataObject: EventDataObject,
+      paymentMethodFields: PaymentMethodFields,
   ): ApiGatewayOp[CreatePaymentMethodResult] = {
     for {
-      creditCardType <- Some(eventDataObject.brand).collect {
-        case StripeBrand.Visa => Visa
-        case StripeBrand.Discover => Discover
-        case StripeBrand.MasterCard => MasterCard
-        case StripeBrand.AmericanExpress => AmericanExpress
-      }.toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"not valid card type for zuora: ${eventDataObject.brand}"))
-      result <- CreatePaymentMethod.createPaymentMethod(requests)(CreateStripePaymentMethod(
-        paymentMethodFields.AccountId,
-        eventDataObject.id,
-        eventDataObject.customer,
-        eventDataObject.country,
-        eventDataObject.last4,
-        eventDataObject.expiry,
-        creditCardType,
-        paymentMethodFields.NumConsecutiveFailures
-      )).toApiGatewayOp("CreatePaymentMethod failed")
+      creditCardType <- Some(eventDataObject.brand)
+        .collect {
+          case StripeBrand.Visa => Visa
+          case StripeBrand.Discover => Discover
+          case StripeBrand.MasterCard => MasterCard
+          case StripeBrand.AmericanExpress => AmericanExpress
+        }
+        .toApiGatewayContinueProcessing(
+          ApiGatewayResponse.internalServerError(s"not valid card type for zuora: ${eventDataObject.brand}"),
+        )
+      result <- CreatePaymentMethod
+        .createPaymentMethod(requests)(
+          CreateStripePaymentMethod(
+            paymentMethodFields.AccountId,
+            eventDataObject.id,
+            eventDataObject.customer,
+            eventDataObject.country,
+            eventDataObject.last4,
+            eventDataObject.expiry,
+            creditCardType,
+            paymentMethodFields.NumConsecutiveFailures,
+          ),
+        )
+        .toApiGatewayOp("CreatePaymentMethod failed")
     } yield result
   }
 
-  def findDefaultOrSkip(defaultPaymentMethod: PaymentMethodId, paymentMethods: NonEmptyList[PaymentMethodFields]): Option[PaymentMethodFields] = {
+  def findDefaultOrSkip(
+      defaultPaymentMethod: PaymentMethodId,
+      paymentMethods: NonEmptyList[PaymentMethodFields],
+  ): Option[PaymentMethodFields] = {
     paymentMethods.find(_.Id == defaultPaymentMethod)
   }
 
 }
-

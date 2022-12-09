@@ -9,9 +9,9 @@ import org.scalatest.matchers.should.Matchers
 class DigitalVoucherFulfilmentDatesSpec extends AnyFlatSpec with Matchers with DateSupport {
 
   private def shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek(
-    today: LocalDate,
-    expectedDayOfWeek: String,
-    expectedDate: LocalDate
+      today: LocalDate,
+      expectedDayOfWeek: String,
+      expectedDate: LocalDate,
   ) = {
     val result = apply(today)
     result.values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List(expectedDate)
@@ -19,8 +19,7 @@ class DigitalVoucherFulfilmentDatesSpec extends AnyFlatSpec with Matchers with D
   }
 
   private def shouldHaveCorrectEarliestHolidayStopAvailableDate(today: LocalDate, expectedDate: LocalDate) =
-    apply(today)
-      .values
+    apply(today).values
       .map(_.holidayStopFirstAvailableDate)
       .toList
       .distinct shouldBe List(expectedDate)
@@ -83,7 +82,9 @@ class DigitalVoucherFulfilmentDatesSpec extends AnyFlatSpec with Matchers with D
     apply( /* Sunday */ "2020-07-26")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-08-05")
     apply( /* Monday */ "2020-07-27")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-08-12")
     apply( /* Tuesday */ "2020-07-28")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-08-12")
-    apply( /* Wednesday */ "2020-07-29")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-08-12")
+    apply( /* Wednesday */ "2020-07-29")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-08-12",
+    )
     apply( /* Thursday */ "2020-07-30")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-08-12")
     apply( /* Friday */ "2020-07-31")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-08-12")
     apply( /* Saturday */ "2020-08-01")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-08-12")

@@ -12,9 +12,9 @@ import play.api.libs.json._
 object ZuoraAquaRequestMaker extends LazyLogging {
 
   case class ZuoraAquaResponse(
-    status: String,
-    errorCode: Option[String] = None,
-    message: Option[String] = None
+      status: String,
+      errorCode: Option[String] = None,
+      message: Option[String] = None,
   )
 
   implicit val reads = Json.reads[ZuoraAquaResponse]
@@ -24,11 +24,11 @@ object ZuoraAquaRequestMaker extends LazyLogging {
     val encodedCredentials = Base64.getEncoder.encodeToString(credentials.getBytes("UTF-8"))
     new RestRequestMaker.Requests(
       headers = Map(
-        "Authorization" -> s"Basic $encodedCredentials"
+        "Authorization" -> s"Basic $encodedCredentials",
       ),
       baseUrl = config.baseUrl + "/",
       getResponse = response,
-      jsonIsSuccessful = zuoraIsSuccessful
+      jsonIsSuccessful = zuoraIsSuccessful,
     )
   }
 
@@ -51,4 +51,3 @@ object ZuoraAquaRequestMaker extends LazyLogging {
     }
   }
 }
-

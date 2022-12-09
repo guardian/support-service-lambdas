@@ -20,9 +20,13 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
-  def apply(appIdentity: AppIdentity, backend: SttpBackend[Identity, Any]): EitherT[IO, MoveSubscriptionApiError, HttpRoutes[IO]] = {
+  def apply(
+      appIdentity: AppIdentity,
+      backend: SttpBackend[Identity, Any],
+  ): EitherT[IO, MoveSubscriptionApiError, HttpRoutes[IO]] = {
     for {
-      apiConfig <- ConfigLoader.loadConfig[IO, MoveSubscriptionApiConfig](appIdentity)
+      apiConfig <- ConfigLoader
+        .loadConfig[IO, MoveSubscriptionApiConfig](appIdentity)
         .leftMap(error => MoveSubscriptionApiError(error.toString))
       routes <- createLogging()(SFMoveSubscriptionsApiRoutes(SFMoveSubscriptionsService(apiConfig, backend)))
         .asRight[MoveSubscriptionApiError]
@@ -35,7 +39,7 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
       logHeaders = true,
       logBody = true,
       redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey.value == "x-api-key" },
-      logAction = Some({ message: String => IO.delay(logger.info(message)) })
+      logAction = Some({ message: String => IO.delay(logger.info(message)) }),
     )
   }
 }

@@ -22,18 +22,18 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
     customerAcceptanceDate = lastWeek,
     startDate = lastWeek,
     endDate = subEndDate,
-    ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge("Digital Pack Monthly", lastWeek, nextWeek))))
+    ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge("Digital Pack Monthly", lastWeek, nextWeek)))),
   )
 
   val monthlyContribution = digitalPack.copy(
-    ratePlans = List(RatePlan("Monthly Contribution", List(RatePlanCharge("Montly Contribution", lastWeek, nextWeek))))
+    ratePlans = List(RatePlan("Monthly Contribution", List(RatePlanCharge("Montly Contribution", lastWeek, nextWeek)))),
   )
 
   val newspaperHomeDelivery = digitalPack.copy(
-    ratePlans = List(RatePlan("Newspaper Delivery", List(RatePlanCharge("Sunday", lastWeek, nextWeek))))
+    ratePlans = List(RatePlan("Newspaper Delivery", List(RatePlanCharge("Sunday", lastWeek, nextWeek)))),
   )
   val newspaperVoucher = digitalPack.copy(
-    ratePlans = List(RatePlan("Newspaper Voucher", List(RatePlanCharge("Sunday", lastWeek, nextWeek))))
+    ratePlans = List(RatePlan("Newspaper Voucher", List(RatePlanCharge("Sunday", lastWeek, nextWeek)))),
   )
 
   val accountSummary = AccountSummaryResult(
@@ -42,16 +42,18 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
     billToPostcode = Some("bill 123"),
     soldToLastName = "SoldLastName",
     soldToPostcode = Some("123 sold"),
-    identityId = Some("12345")
+    identityId = Some("12345"),
   )
 
   val expectedResponse = {
-    val expiry = SuccessResponse(Expiry(
-      expiryDate = subEndDate.plusDays(1),
-      expiryType = ExpiryType.SUB,
-      subscriptionCode = None,
-      provider = None
-    ))
+    val expiry = SuccessResponse(
+      Expiry(
+        expiryDate = subEndDate.plusDays(1),
+        expiryType = ExpiryType.SUB,
+        subscriptionCode = None,
+        provider = None,
+      ),
+    )
     ApiGatewayResponse("200", expiry)
   }
 
@@ -94,7 +96,7 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
     val charges = List(
       RatePlanCharge("DigiPack", lastWeek, nextWeek),
       RatePlanCharge("Saturday", lastWeek, twoWeeksFromNow),
-      RatePlanCharge("Sunday", lastWeek, twoWeeksFromNow)
+      RatePlanCharge("Sunday", lastWeek, twoWeeksFromNow),
     )
 
     val digiPackSub = SubscriptionResult(
@@ -105,7 +107,7 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
       customerAcceptanceDate = lastWeek,
       startDate = lastWeek,
       endDate = subEndDate,
-      ratePlans = List(RatePlan("Weekend+", charges))
+      ratePlans = List(RatePlan("Weekend+", charges)),
     )
 
     val actualResponse = GetSubscriptionExpiry(today)("123-sold", digiPackSub, accountSummary)
@@ -118,7 +120,7 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
     val charges = List(
       RatePlanCharge("Digital Pack-bolt on", lastWeek, nextWeek),
       RatePlanCharge("Saturday", lastWeek, twoWeeksFromNow),
-      RatePlanCharge("Sunday", lastWeek, twoWeeksFromNow)
+      RatePlanCharge("Sunday", lastWeek, twoWeeksFromNow),
     )
 
     val digiPackSub = SubscriptionResult(
@@ -129,7 +131,7 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
       customerAcceptanceDate = lastWeek,
       startDate = lastWeek,
       endDate = subEndDate,
-      ratePlans = List(RatePlan("Weekend+", charges))
+      ratePlans = List(RatePlan("Weekend+", charges)),
     )
 
     val actualResponse = GetSubscriptionExpiry(today)("123-sold", digiPackSub, accountSummary)
@@ -146,7 +148,8 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
   }
 
   it should "[due to Coronavirus] recognise paper subscriptions as having digipack access for the time being" in {
-    val actualHomeDeliveryResponse = GetSubscriptionExpiry(today)("billingLastName", newspaperHomeDelivery, accountSummary)
+    val actualHomeDeliveryResponse =
+      GetSubscriptionExpiry(today)("billingLastName", newspaperHomeDelivery, accountSummary)
     actualHomeDeliveryResponse shouldEqual expectedResponse
     val actualVoucherResponse = GetSubscriptionExpiry(today)("billingLastName", newspaperVoucher, accountSummary)
     actualVoucherResponse shouldEqual expectedResponse
@@ -163,7 +166,7 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
       customerAcceptanceDate = lastYear,
       startDate = lastYear,
       endDate = lastWeek,
-      ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge("Digital Pack Monthly", lastYear, lastWeek))))
+      ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge("Digital Pack Monthly", lastYear, lastWeek)))),
     )
 
     val actualResponse = GetSubscriptionExpiry(today)("123-sold", expiredDigitalPack, accountSummary)

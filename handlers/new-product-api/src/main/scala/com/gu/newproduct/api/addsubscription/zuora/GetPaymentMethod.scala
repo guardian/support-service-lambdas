@@ -10,19 +10,19 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 object GetPaymentMethod {
 
   case class PaymentMethodWire(
-    PaymentMethodStatus: String,
-    Type: String,
-    MandateID: Option[String] = None,
-    BankTransferAccountName: Option[String] = None,
-    BankTransferAccountNumberMask: Option[String] = None,
-    BankCode: Option[String] = None
+      PaymentMethodStatus: String,
+      Type: String,
+      MandateID: Option[String] = None,
+      BankTransferAccountName: Option[String] = None,
+      BankTransferAccountNumberMask: Option[String] = None,
+      BankCode: Option[String] = None,
   ) {
 
     val stringToType = Map(
       "PayPal" -> PayPal,
       "CreditCard" -> CreditCard,
       "CreditCardReferenceTransaction" -> CreditCardReferenceTransaction,
-      "BankTransfer" -> BankTransfer
+      "BankTransfer" -> BankTransfer,
     )
 
     def toPaymentMethod: ClientFailableOp[PaymentMethod] = {
@@ -33,19 +33,26 @@ object GetPaymentMethod {
 
     private def toDirectDebit: ClientFailableOp[DirectDebit] = for {
       mandateId <- MandateID.toClientFailable("no MandateID in zuora direct debit", acceptablePaymentMethod = false)
-      accountName <- BankTransferAccountName.toClientFailable("no account name in zuora direct debit", acceptablePaymentMethod = false)
-      accountNumberMask <- BankTransferAccountNumberMask.toClientFailable("no account number mask in zuora direct debit", acceptablePaymentMethod = false)
+      accountName <- BankTransferAccountName.toClientFailable(
+        "no account name in zuora direct debit",
+        acceptablePaymentMethod = false,
+      )
+      accountNumberMask <- BankTransferAccountNumberMask.toClientFailable(
+        "no account number mask in zuora direct debit",
+        acceptablePaymentMethod = false,
+      )
       sortCode <- BankCode.toClientFailable("no bank code in zuora direct debit", acceptablePaymentMethod = false)
     } yield DirectDebit(
       toStatus(PaymentMethodStatus),
       BankAccountName(accountName),
       BankAccountNumberMask(accountNumberMask),
       SortCode(sortCode),
-      MandateId(mandateId)
+      MandateId(mandateId),
     )
   }
 
-  private def toStatus(statusString: String) = if (statusString == "Active") ActivePaymentMethod else NotActivePaymentMethod
+  private def toStatus(statusString: String) =
+    if (statusString == "Active") ActivePaymentMethod else NotActivePaymentMethod
 
   implicit val wireReads = Json.reads[PaymentMethodWire]
 
@@ -64,16 +71,17 @@ object GetPaymentMethod {
   case class MandateId(value: String) extends AnyVal
 
   case class DirectDebit(
-    status: PaymentMethodStatus,
-    accountName: BankAccountName,
-    accountNumberMask: BankAccountNumberMask,
-    sortCode: SortCode,
-    mandateId: MandateId
+      status: PaymentMethodStatus,
+      accountName: BankAccountName,
+      accountNumberMask: BankAccountNumberMask,
+      sortCode: SortCode,
+      mandateId: MandateId,
   ) extends PaymentMethod {
     val paymentMethodType = BankTransfer
   }
 
-  case class NonDirectDebitMethod(status: PaymentMethodStatus, paymentMethodType: PaymentMethodType) extends PaymentMethod
+  case class NonDirectDebitMethod(status: PaymentMethodStatus, paymentMethodType: PaymentMethodType)
+      extends PaymentMethod
 
   def apply(get: RequestsGet[PaymentMethodWire])(paymentMethodId: PaymentMethodId): ClientFailableOp[PaymentMethod] =
     get(s"object/payment-method/${paymentMethodId.value}", WithoutCheck).flatMap(_.toPaymentMethod)

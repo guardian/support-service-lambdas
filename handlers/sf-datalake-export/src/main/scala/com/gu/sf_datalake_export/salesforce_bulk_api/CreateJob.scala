@@ -9,10 +9,10 @@ import play.api.libs.json.{JsValue, Json}
 object CreateJob {
 
   case class WireRequest(
-    operation: String,
-    concurrencyMode: String,
-    contentType: String,
-    `object`: String,
+      operation: String,
+      concurrencyMode: String,
+      contentType: String,
+      `object`: String,
   )
 
   object WireRequest {
@@ -20,7 +20,7 @@ object CreateJob {
       operation = "query",
       concurrencyMode = "Parallel",
       contentType = "CSV",
-      `object` = objectToQuery
+      `object` = objectToQuery,
     )
   }
 
@@ -39,8 +39,8 @@ object CreateJob {
   }
 
   case class CreateJobRequest(
-    objectType: SfObjectName,
-    maybeChunkSize: Option[BatchSize]
+      objectType: SfObjectName,
+      maybeChunkSize: Option[BatchSize],
   )
 
   def toRequest(request: CreateJobRequest): PostRequestWithHeaders = {
@@ -56,6 +56,9 @@ object CreateJob {
   def toResponse(wireResponse: WireResponse): JobId = JobId(wireResponse.id)
 
   val wrapper: HttpOpWrapper[CreateJobRequest, PostRequestWithHeaders, JsValue, JobId] =
-    HttpOpWrapper[CreateJobRequest, PostRequestWithHeaders, JsValue, JobId](toRequest, RestRequestMaker.toResult[WireResponse](_).map(toResponse))
+    HttpOpWrapper[CreateJobRequest, PostRequestWithHeaders, JsValue, JobId](
+      toRequest,
+      RestRequestMaker.toResult[WireResponse](_).map(toResponse),
+    )
 
 }

@@ -3,7 +3,10 @@ package com.gu.newproduct.api.addsubscription.validation.guardianweekly
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.ValidationResult
-import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAddressValidator.{isDomesticDeliveryCountry, validateBillingAddress}
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAddressValidator.{
+  isDomesticDeliveryCountry,
+  validateBillingAddress,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 
 object GuardianWeeklyDomesticAddressValidator {
@@ -12,7 +15,7 @@ object GuardianWeeklyDomesticAddressValidator {
       _ <- isDomesticDeliveryCountry(soldToAddress.country).orFailWith(
         errorMessage =
           s"Delivery address country ${soldToAddress.country.name} is not valid for a Guardian Weekly (Domestic) " +
-            s"subscription"
+            s"subscription",
       )
       _ <- validateBillingAddress(billToAddress)
     } yield (())
@@ -24,7 +27,7 @@ object GuardianWeeklyROWAddressValidator {
       _ <- (!isDomesticDeliveryCountry(soldToAddress.country)).orFailWith(
         errorMessage =
           s"Delivery address country ${soldToAddress.country.name} is not valid for a Guardian Weekly (ROW) " +
-            s"subscription"
+            s"subscription",
       )
       _ <- validateBillingAddress(billToAddress)
     } yield (())

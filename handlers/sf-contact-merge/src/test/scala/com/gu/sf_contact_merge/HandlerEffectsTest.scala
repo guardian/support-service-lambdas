@@ -19,7 +19,7 @@ class HandlerEffectsTest extends AnyFlatSpec with Matchers {
     val expected = ExpectedJsonFormat(
       "200",
       JsStringContainingJson(ExpectedBodyFormat("Success")),
-      Map("Content-Type" -> "application/json")
+      Map("Content-Type" -> "application/json"),
     )
 
     actualResponse jsonMatchesFormat expected
@@ -30,9 +30,9 @@ class HandlerEffectsTest extends AnyFlatSpec with Matchers {
 object TestData {
 
   case class ExpectedJsonFormat(
-    statusCode: String,
-    body: JsStringContainingJson[ExpectedBodyFormat],
-    headers: Map[String, String] = Map("Content-Type" -> "application/json")
+      statusCode: String,
+      body: JsStringContainingJson[ExpectedBodyFormat],
+      headers: Map[String, String] = Map("Content-Type" -> "application/json"),
   )
 
   case class ExpectedBodyFormat(message: String)

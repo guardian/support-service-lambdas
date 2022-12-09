@@ -9,11 +9,14 @@ import io.circe.generic.auto._
 object NextInvoiceDate {
   private case class NextInvoiceDate(nextInvoiceDate: LocalDate)
   private implicit val sttpBackend: SttpBackend[Identity, Any] = HttpURLConnectionBackend()
-  private val xApiKey = sys.env.getOrElse("InvoicingApiKey", throw new RuntimeException("Missing x-api-key for invoicing-api"))
-  private val invoicingApiUrl = sys.env.getOrElse("InvoicingApiUrl", throw new RuntimeException("Missing invoicing-api url"))
+  private val xApiKey =
+    sys.env.getOrElse("InvoicingApiKey", throw new RuntimeException("Missing x-api-key for invoicing-api"))
+  private val invoicingApiUrl =
+    sys.env.getOrElse("InvoicingApiUrl", throw new RuntimeException("Missing invoicing-api url"))
 
   def getNextInvoiceDate(subscriptionName: String): Either[ZuoraApiFailure, LocalDate] = {
-    basicRequest.get(uri"$invoicingApiUrl/next-invoice-date/$subscriptionName")
+    basicRequest
+      .get(uri"$invoicingApiUrl/next-invoice-date/$subscriptionName")
       .header("x-api-key", xApiKey)
       .response(asJson[NextInvoiceDate])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))

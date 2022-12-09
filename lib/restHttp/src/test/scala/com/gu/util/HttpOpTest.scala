@@ -13,7 +13,7 @@ class HttpOpTest extends AnyFlatSpec with Matchers {
   val dummyJson = Json.parse(
     """{
       |  "body": "test"
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   val testRequest: Request = {

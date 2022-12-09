@@ -23,7 +23,7 @@ object ZuoraCatalogWireModel {
   }
 
   case class RateplanCharge(
-    pricing: List[Price]
+      pricing: List[Price],
   )
 
   object RateplanCharge {
@@ -42,13 +42,14 @@ object ZuoraCatalogWireModel {
     def doubleToMinorUnitsInt(amount: Double): Int = (amount * 100).toInt
     val optionalAmounts: Seq[Option[Double]] = prices.map(_.price)
     val allAmounts = optionalAmounts.flatten.map(doubleToMinorUnitsInt)
-    if (allAmounts.isEmpty) None else
+    if (allAmounts.isEmpty) None
+    else
       Some(AmountMinorUnits(allAmounts.sum))
   }
 
   case class Rateplan(
-    id: String,
-    productRatePlanCharges: List[RateplanCharge]
+      id: String,
+      productRatePlanCharges: List[RateplanCharge],
   ) {
     def toParsedPlan(planIdFor: ProductRatePlanId => Option[PlanId]): Option[PlanWithPrice] = {
       val maybePlanId = planIdFor(ProductRatePlanId(id))
@@ -59,8 +60,8 @@ object ZuoraCatalogWireModel {
           price <- charge.pricing
         } yield price
 
-        val optionaltotalPricesByCurrency = allPrices.groupBy(_.currency).map {
-          case (currencyString, prices) => for {
+        val optionaltotalPricesByCurrency = allPrices.groupBy(_.currency).map { case (currencyString, prices) =>
+          for {
             parsedCurrency <- Currency.fromString(currencyString)
             totalAmount <- sumPrices(prices)
           } yield (parsedCurrency -> totalAmount)
@@ -79,8 +80,8 @@ object ZuoraCatalogWireModel {
   }
 
   case class Product(
-    id: String,
-    productRatePlans: List[Rateplan]
+      id: String,
+      productRatePlans: List[Rateplan],
   )
 
   object Product {
@@ -88,7 +89,7 @@ object ZuoraCatalogWireModel {
   }
 
   case class ZuoraCatalog(
-    products: List[Product]
+      products: List[Product],
   ) {
     def toParsedPlans(planIdFor: ProductRatePlanId => Option[PlanId]): Map[PlanId, Map[Currency, AmountMinorUnits]] = {
       val plansWithPrice = for {
@@ -109,9 +110,9 @@ object ZuoraCatalogWireModel {
 object PricesFromZuoraCatalog {
 
   def apply(
-    zuoraEnvironment: ZuoraEnvironment,
-    fetchString: StringFromS3,
-    planIdFor: ProductRatePlanId => Option[PlanId]
+      zuoraEnvironment: ZuoraEnvironment,
+      fetchString: StringFromS3,
+      planIdFor: ProductRatePlanId => Option[PlanId],
   ): ClientFailableOp[Map[PlanId, Map[Currency, AmountMinorUnits]]] = {
     val tryPrices = for {
       catalogString <- fetchString(
@@ -120,8 +121,8 @@ object PricesFromZuoraCatalog {
           key = zuoraEnvironment match {
             case ZuoraEnvironment("PROD") => s"PROD/Zuora-PROD/catalog.json"
             case ZuoraEnvironment(preProdEnv) => s"CODE/Zuora-${preProdEnv}/catalog.json"
-          }
-        )
+          },
+        ),
       )
       jsonCatalog <- Try(Json.parse(catalogString))
       wireCatalog <- Try(jsonCatalog.as[ZuoraCatalog])

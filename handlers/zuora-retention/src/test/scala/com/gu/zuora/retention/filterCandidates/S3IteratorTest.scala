@@ -23,4 +23,3 @@ class S3IteratorTest extends AnyFlatSpec with Matchers {
   }
 
 }
-

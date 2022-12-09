@@ -20,14 +20,14 @@ object GetSubscription {
   case class RatePlans(ratePlans: List[RatePlan])
 
   case class SubscriptionResult(
-    id: SubscriptionId,
-    name: SubscriptionName,
-    accountId: AccountId,
-    casActivationDate: Option[String],
-    customerAcceptanceDate: LocalDate,
-    startDate: LocalDate,
-    endDate: LocalDate,
-    ratePlans: List[RatePlan]
+      id: SubscriptionId,
+      name: SubscriptionName,
+      accountId: AccountId,
+      casActivationDate: Option[String],
+      customerAcceptanceDate: LocalDate,
+      startDate: LocalDate,
+      endDate: LocalDate,
+      ratePlans: List[RatePlan],
   )
 
   implicit val subscriptionIdReads = Json.reads[SubscriptionId]
@@ -38,19 +38,25 @@ object GetSubscription {
   implicit val reads: Reads[SubscriptionResult] =
     (
       (__ \ "subscriptionNumber").read[String].map(SubscriptionId.apply) and
-      (__ \ "id").read[String].map(SubscriptionName.apply) and
-      (__ \ "accountId").read[String].map(AccountId.apply) and
-      (__ \ "ActivationDate__c").readNullable[String] and
-      (__ \ "customerAcceptanceDate").read[LocalDate] and
-      (__ \ "termStartDate").read[LocalDate] and
-      (__ \ "termEndDate").read[LocalDate] and
-      (__ \ "ratePlans").read[List[RatePlan]]
+        (__ \ "id").read[String].map(SubscriptionName.apply) and
+        (__ \ "accountId").read[String].map(AccountId.apply) and
+        (__ \ "ActivationDate__c").readNullable[String] and
+        (__ \ "customerAcceptanceDate").read[LocalDate] and
+        (__ \ "termStartDate").read[LocalDate] and
+        (__ \ "termEndDate").read[LocalDate] and
+        (__ \ "ratePlans").read[List[RatePlan]]
     )(SubscriptionResult.apply _)
 
   def apply(requests: Requests)(subscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] =
-    requests.get[SubscriptionResult](s"subscriptions/${subscriptionId.value}").toDisjunction.left.map {
-      case genericError: GenericError => ApiGatewayResponse.internalServerError(s"zuora client fail: ${genericError.message}")
-      case notFound: NotFound => notFoundResponse
-    }.toApiGatewayOp
+    requests
+      .get[SubscriptionResult](s"subscriptions/${subscriptionId.value}")
+      .toDisjunction
+      .left
+      .map {
+        case genericError: GenericError =>
+          ApiGatewayResponse.internalServerError(s"zuora client fail: ${genericError.message}")
+        case notFound: NotFound => notFoundResponse
+      }
+      .toApiGatewayOp
 
 }

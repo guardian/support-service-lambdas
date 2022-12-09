@@ -4,7 +4,12 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.Types.{IdentityId, WinningSFContact}
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
-import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, ClearZuoraIdentityId, ReplaceZuoraIdentityId, ZuoraFieldUpdates}
+import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{
+  CRMAccountId,
+  ClearZuoraIdentityId,
+  ReplaceZuoraIdentityId,
+  ZuoraFieldUpdates,
+}
 import com.gu.util.resthttp.RestRequestMaker.{PutRequest, RelativePath}
 import play.api.libs.json._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -23,7 +28,7 @@ class UpdateAccountSFLinksTest extends AnyFlatSpec with Matchers {
         |    "crmId": "crmIdjohn",
         |    "IdentityId__c": ""
         |    }
-      """.stripMargin
+      """.stripMargin,
     )
 
     val actual = UpdateAccountSFLinks.toRequest(
@@ -31,9 +36,9 @@ class UpdateAccountSFLinksTest extends AnyFlatSpec with Matchers {
         WinningSFContact(SFContactId("johnjohn_c")),
         CRMAccountId("crmIdjohn"),
         ClearZuoraIdentityId,
-        None
+        None,
       ),
-      AccountId("1234")
+      AccountId("1234"),
     )
 
     actual should be(PutRequest(expectedInput, RelativePath(expectedUrl)))
@@ -52,7 +57,7 @@ class UpdateAccountSFLinksTest extends AnyFlatSpec with Matchers {
         |    "IdentityId__c": "identity",
         |    "billToContact": {"workEmail": "email@email.com"}
         |    }
-      """.stripMargin
+      """.stripMargin,
     )
 
     val actual = UpdateAccountSFLinks.toRequest(
@@ -60,9 +65,9 @@ class UpdateAccountSFLinksTest extends AnyFlatSpec with Matchers {
         WinningSFContact(SFContactId("johnjohn_c")),
         CRMAccountId("crmIdjohn"),
         ReplaceZuoraIdentityId(IdentityId("identity")),
-        Some(EmailAddress("email@email.com"))
+        Some(EmailAddress("email@email.com")),
       ),
-      AccountId("1234")
+      AccountId("1234"),
     )
 
     actual should be(PutRequest(expectedInput, RelativePath(expectedUrl)))
@@ -70,4 +75,3 @@ class UpdateAccountSFLinksTest extends AnyFlatSpec with Matchers {
   }
 
 }
-

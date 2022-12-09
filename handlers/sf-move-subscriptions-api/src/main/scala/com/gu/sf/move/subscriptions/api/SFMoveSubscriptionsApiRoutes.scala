@@ -20,7 +20,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
       zuoraSubscriptionId = "Zuora Subscription Id",
       sfAccountId = "SF Account Id",
       sfFullContactId = "SF Full contact Id",
-      identityId = "id from guardian identity service, if not set in SF send blank value (empty string)"
+      identityId = "id from guardian identity service, if not set in SF send blank value (empty string)",
     )
 
     val selfDoc = MoveSubscriptionApiRoot(
@@ -29,26 +29,32 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
         ExampleReqDoc(
           method = "POST",
           path = "subscription/move",
-          body = exampleReqBody
+          body = exampleReqBody,
         ),
         ExampleReqDoc(
           method = "POST",
           path = "subscription/move/dry-run",
-          body = exampleReqBody
-        )
-      )
+          body = exampleReqBody,
+        ),
+      ),
     )
 
-    def handleMoveRequest(request: Request[F], moveSubscriptionF: (MoveSubscriptionReqBody) => EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess]): F[Response[F]] = {
+    def handleMoveRequest(
+        request: Request[F],
+        moveSubscriptionF: (
+            MoveSubscriptionReqBody,
+        ) => EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess],
+    ): F[Response[F]] = {
       (for {
-        reqBody <- request.attemptAs[MoveSubscriptionReqBody]
+        reqBody <- request
+          .attemptAs[MoveSubscriptionReqBody]
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
         resp <- moveSubscriptionF(reqBody)
           .bimap(
             err => InternalServerError(MoveSubscriptionApiError(err.toString)),
-            res => Ok(MoveSubscriptionApiSuccess(res.message))
+            res => Ok(MoveSubscriptionApiSuccess(res.message)),
           )
       } yield resp).merge.flatten
     }
