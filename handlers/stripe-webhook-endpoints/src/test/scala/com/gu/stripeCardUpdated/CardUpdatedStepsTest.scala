@@ -4,7 +4,7 @@ import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse}
 import com.gu.stripeCardUpdated.CardUpdatedSteps.CardUpdatedUrlParams
 import com.gu.stripeCardUpdated.CardUpdatedStepsTestData.{accountSummaryJson, defaultAccountSummaryJson}
-import com.gu.stripeCardUpdated.{EventDataObject, CardUpdatedSteps, StripeAccount, StripeBrand, StripeCountry, StripeCustomerId, StripeExpiry, StripeLast4, StripeSourceId}
+import com.gu.stripeCardUpdated.{EventDataObject, CardUpdatedSteps, StripeAccount, StripeBrand, StripeCountry, StripeCustomerId, StripeExpiry, StripeLast4, StripeCardId}
 import com.gu.stripeCardUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
@@ -33,7 +33,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
       ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -69,7 +69,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
       ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -110,7 +110,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
       ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -158,7 +158,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
       ("/accounts/accountidANOTHERONE/summary", HTTPResponse(200, accountSummaryJson("anotherPMAGAIN")))
     ))
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -213,7 +213,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
       ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM")))
     ))
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -270,7 +270,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
       ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -295,7 +295,7 @@ class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Mat
       ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -318,7 +318,7 @@ class CardUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matchers 
     ))
 
     val eventData = EventDataObject(
-      id = StripeSourceId("card_def456"),
+      id = StripeCardId("card_def456"),
       brand = StripeBrand.Visa,
       country = StripeCountry("US"),
       customer = StripeCustomerId("cus_ghi789"),

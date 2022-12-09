@@ -5,7 +5,7 @@ import play.api.libs.json._
 
 case class EventData(`object`: EventDataObject)
 case class EventDataObject(
-  id: StripeSourceId,
+  id: StripeCardId,
   brand: StripeBrand,
   country: StripeCountry,
   customer: StripeCustomerId,
@@ -16,7 +16,7 @@ case class CardUpdatedMessageBody(id: StripeEventId, data: EventData)
 
 case class StripeEventId(value: String) extends AnyVal
 case class StripeCustomerId(value: String) extends AnyVal
-case class StripeSourceId(value: String) extends AnyVal
+case class StripeCardId(value: String) extends AnyVal
 case class StripeLast4(value: String) extends AnyVal
 case class StripeExpiry(exp_month: Int, exp_year: Int)
 
@@ -49,7 +49,7 @@ object CardUpdatedMessageBody {
 
   implicit val stripeEventIdReads = Json.reads[StripeEventId]
   implicit val stripeCustomerIdReads = Json.reads[StripeCustomerId]
-  implicit val stripeSourceIdReads = Json.reads[StripeSourceId]
+  implicit val stripeSourceIdReads = Json.reads[StripeCardId]
 
   implicit val stripeEventIdWrites = new Writes[StripeEventId] {
     def writes(se: StripeEventId) = Json.toJson(se.value)
@@ -59,8 +59,8 @@ object CardUpdatedMessageBody {
     def writes(sc: StripeCustomerId) = Json.toJson(sc.value)
   }
 
-  implicit val stripeSourceIdWrites = new Writes[StripeSourceId] {
-    def writes(sc: StripeSourceId) = Json.toJson(sc.value)
+  implicit val stripeSourceIdWrites = new Writes[StripeCardId] {
+    def writes(sc: StripeCardId) = Json.toJson(sc.value)
   }
 
   implicit val stripeBrandReads: Reads[StripeBrand] = (JsPath).read[String].flatMap { brandString =>
@@ -73,7 +73,7 @@ object CardUpdatedMessageBody {
   }
 
   implicit val eventDataObjectReads: Reads[EventDataObject] = (
-    (JsPath \ "id").read[String].map(StripeSourceId.apply) and
+    (JsPath \ "id").read[String].map(StripeCardId.apply) and
     (JsPath \ "brand").read[StripeBrand] and
     (JsPath \ "country").read[String].map(StripeCountry.apply) and
     (JsPath \ "customer").read[String].map(StripeCustomerId.apply) and

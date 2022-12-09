@@ -1,6 +1,6 @@
 package com.gu.stripeCardUpdated.zuora
 
-import com.gu.stripeCardUpdated.{StripeCountry, StripeCustomerId, StripeExpiry, StripeLast4, StripeSourceId}
+import com.gu.stripeCardUpdated.{StripeCountry, StripeCustomerId, StripeExpiry, StripeLast4, StripeCardId}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
@@ -10,7 +10,7 @@ object CreatePaymentMethod {
 
   case class CreateStripePaymentMethod(
     accountId: AccountId,
-    cardId: StripeSourceId,
+    cardId: StripeCardId,
     customerId: StripeCustomerId,
     cardCountry: StripeCountry,
     last4: StripeLast4,

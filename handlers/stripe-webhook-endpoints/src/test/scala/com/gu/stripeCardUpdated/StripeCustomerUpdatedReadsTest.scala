@@ -1,6 +1,6 @@
 package com.gu.stripeCardUpdated
 
-import com.gu.stripeCardUpdated.{EventData, EventDataObject, CardUpdatedMessageBody, StripeBrand, StripeCountry, StripeCustomerId, StripeEventId, StripeExpiry, StripeLast4, StripeSourceId}
+import com.gu.stripeCardUpdated.{EventData, EventDataObject, CardUpdatedMessageBody, StripeBrand, StripeCountry, StripeCustomerId, StripeEventId, StripeExpiry, StripeLast4, StripeCardId}
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
 import com.gu.stripeCardUpdated.CardUpdatedMessageBody._
@@ -65,7 +65,7 @@ class StripeCustomerUpdatedReadsTest extends AnyFlatSpec {
         id = StripeEventId("evt_abc123"),
         data = EventData(
           `object` = EventDataObject(
-            id = StripeSourceId("card_def456"),
+            id = StripeCardId("card_def456"),
             brand = StripeBrand.Visa,
             country = StripeCountry("US"),
             customer = StripeCustomerId("cus_ghi789"),

@@ -10,7 +10,7 @@ import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json._
 import cats.data.NonEmptyList
-import com.gu.stripeCardUpdated.{StripeCustomerId, StripeSourceId}
+import com.gu.stripeCardUpdated.{StripeCustomerId, StripeCardId}
 
 object ZuoraQueryPaymentMethod extends Logging {
 
@@ -28,7 +28,7 @@ object ZuoraQueryPaymentMethod extends Logging {
     zuoraQuerier: ZuoraQuerier
   )(
     customerId: StripeCustomerId,
-    sourceId: StripeSourceId
+    cardId: StripeCardId
   ): ApiGatewayOp[List[AccountPaymentMethodIds]] = {
     val maybeQueryResult = for {
       query <- zoql"""SELECT
@@ -38,7 +38,7 @@ object ZuoraQueryPaymentMethod extends Logging {
           FROM PaymentMethod
            where Type='CreditCardReferenceTransaction'
           AND PaymentMethodStatus = 'Active'
-          AND TokenId = ${sourceId.value}
+          AND TokenId = ${cardId.value}
           AND SecondTokenId = ${customerId.value}
          """
 

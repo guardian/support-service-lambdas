@@ -1,9 +1,13 @@
 package com.gu.stripeCardUpdated
 
-import StripeRequestSignatureChecker.verifyRequest
-import TypeConvert._
-import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.{CreatePaymentMethodResult, CreateStripePaymentMethod, CreditCardType}
+import cats.data.NonEmptyList
+import cats.syntax.all._
+import com.gu.stripeCardUpdated.StripeRequestSignatureChecker.verifyRequest
+import com.gu.stripeCardUpdated.TypeConvert._
+import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.CreditCardType.{AmericanExpress, Discover, MasterCard, Visa}
+import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.{CreatePaymentMethodResult, CreateStripePaymentMethod}
 import com.gu.stripeCardUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
+import com.gu.stripeCardUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.messageResponse
@@ -14,12 +18,6 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
 import play.api.libs.json.JsPath
-import cats.syntax.all._
-import cats.data.NonEmptyList
-import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.CreatePaymentMethodResult
-import com.gu.stripeCardUpdated.zuora.CreatePaymentMethod.CreditCardType.{AmericanExpress, Discover, MasterCard, Visa}
-import com.gu.stripeCardUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
-import com.gu.stripeCardUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 
 object CardUpdatedSteps extends Logging {
 
@@ -74,10 +72,10 @@ object CardUpdatedSteps extends Logging {
 
   def getPaymentMethodsToUpdate(
     requests: Requests
-  )(customer: StripeCustomerId, source: StripeSourceId): ApiGatewayOp[List[PaymentMethodFields]] = {
+  )(customerId: StripeCustomerId, cardId: StripeCardId): ApiGatewayOp[List[PaymentMethodFields]] = {
     val zuoraQuerier = ZuoraQuery(requests)
     for {
-      zuoraPaymentMethodIds <- ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source)
+      zuoraPaymentMethodIds <- ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customerId, cardId)
       paymentMethodFields <- zuoraPaymentMethodIds.flatTraverse { paymentMethodIds =>
         ZuoraGetAccountSummary(requests)(paymentMethodIds.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed")
           .flatMap { account =>
