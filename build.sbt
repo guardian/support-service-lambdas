@@ -39,6 +39,12 @@ val scala3Settings = Seq(
   autoCompilerPlugins := true
 )
 
+lazy val scalafmtSettings = Seq(
+  (Test / test) := ((Test / test) dependsOn (Test / scalafmtCheckAll)).value,
+  (Test / testOnly) := ((Test / testOnly) dependsOn (Test / scalafmtCheckAll)).evaluated,
+  (Test / testQuick) := ((Test / testQuick) dependsOn (Test / scalafmtCheckAll)).evaluated,
+)
+
 // fixme this whole file needs splitting down appropriately
 
 lazy val EffectsTest = config("effectsTest") extend(Test) describedAs("run the edge tests")
@@ -57,19 +63,19 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
 )
 
 def library(theProject: Project, scalaSettings: SettingsDefinition = scala2Settings) =
-  theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
+  theProject.settings(scalaSettings, testSettings, scalafmtSettings).configs(EffectsTest, HealthCheckTest)
 
 // ==== START libraries ====
 
-lazy val test = library(project in file("lib/test"))
+lazy val testLib = library(project in file("lib/test"))
   .settings(
     libraryDependencies ++= Seq(
       scalatest,
       playJson % "test"
-    )
+    ),
   )
 
-val testDep = test % "test->test"
+val testDep = testLib % "test->test"
 
 lazy val zuora = library(project in file("lib/zuora"))
   .dependsOn(
