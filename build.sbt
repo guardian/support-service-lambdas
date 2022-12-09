@@ -20,14 +20,6 @@ val scala2Settings = Seq(
     "-Ywarn-value-discard",
   ),
   Test / fork := true,
-  {
-    import scalariform.formatter.preferences._
-    scalariformPreferences := scalariformPreferences.value
-      .setPreference(DanglingCloseParenthesis, Force)
-      .setPreference(SpacesAroundMultiImports, false)
-      .setPreference(NewlineAtEndOfFile, true)
-  },
-
   autoCompilerPlugins := true
 )
 
@@ -44,14 +36,6 @@ val scala3Settings = Seq(
     "-Yretain-trees",
   ),
   Test / fork := true,
-  {
-    import scalariform.formatter.preferences._
-    scalariformPreferences := scalariformPreferences.value
-      .setPreference(DanglingCloseParenthesis, Force)
-      .setPreference(SpacesAroundMultiImports, false)
-      .setPreference(NewlineAtEndOfFile, true)
-  },
-
   autoCompilerPlugins := true
 )
 
