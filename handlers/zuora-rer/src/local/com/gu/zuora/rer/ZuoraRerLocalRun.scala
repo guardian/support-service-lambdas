@@ -5,7 +5,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
-import com.gu.zuora.rer.{ConfigLoader, S3Helper, ZuoraPerformRerHandler, ZuoraRerConfig, ZuoraRerHandler, ZuoraRerService}
+import com.gu.zuora.rer.BatonModels.{PerformRerRequest, RerRequest, RerStatusRequest}
 import io.circe.syntax._
 
 object ZuoraRerLocalRun extends App {
@@ -42,7 +42,7 @@ object ZuoraRerLocalRun extends App {
       zuoraHelper = ZuoraRerService(requests, downloadRequests, zuoraQuerier)
     } yield {
       ZuoraPerformRerHandler(zuoraHelper, S3Helper, zuoraRerConfig)
-      }.handleRequest(streams.inputStream, streams.outputStream)
+    }.handleRequest(streams.inputStream, streams.outputStream)
 
     val responseString = new String(streams.outputStream.toByteArray)
     println("lambda output was:" + responseString)

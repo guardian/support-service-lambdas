@@ -98,9 +98,9 @@ object S3Helper extends S3Service with LazyLogging {
   }
 
   override def writeFailedResult(
-                                  initiationId: String,
-                                  zuoraError: ZuoraRerError,
-                                  config: ZuoraRerConfig
+    initiationId: String,
+    zuoraError: ZuoraRerError,
+    config: ZuoraRerConfig
   ): Either[S3Error, S3WriteSuccess] = {
     val resultsPath = s"${config.resultsPath}/$initiationId/failed/$randomUUID"
     logger.info("Uploading file to failed path in S3.")
@@ -112,9 +112,9 @@ object S3Helper extends S3Service with LazyLogging {
   }
 
   override def writeSuccessAccountResult(
-                                          initiationId: String,
-                                          zuoraRerResponse: ZuoraAccountSuccess,
-                                          config: ZuoraRerConfig
+    initiationId: String,
+    zuoraRerResponse: ZuoraAccountSuccess,
+    config: ZuoraRerConfig
   ): Either[S3Error, S3WriteSuccess] = {
     val resultsPath = s"${config.resultsPath}/$initiationId/pending/$randomUUID"
     val accountDetails = Seq(zuoraRerResponse.accountSummary, zuoraRerResponse.accountObj).mkString("\n")
