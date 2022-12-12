@@ -33,11 +33,13 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
         logger.error("Failed to perform subject access request to Zuora.")
         Left(ZuoraClientError(err.message))
       case Right(contactList) =>
-        for {
-          invoiceIds <- processAccountDetails(contactList, request.initiationReference)
-          _ <- processInvoicesForContacts(invoiceIds, request.initiationReference)
-          _ <- s3Service.copyResultsToCompleted(request.initiationReference, zuoraRerConfig)
-        } yield Right(())
+        logger.info(s"Found ${contactList.length} account(s) with id's: ${contactList.map(_.AccountId).mkString(", ")}")
+        Right(())
+//        for {
+//          invoiceIds <- processAccountDetails(contactList, request.initiationReference)
+//          _ <- processInvoicesForContacts(invoiceIds, request.initiationReference)
+//          _ <- s3Service.copyResultsToCompleted(request.initiationReference, zuoraRerConfig)
+//        } yield Right(())
     }
   }
 
