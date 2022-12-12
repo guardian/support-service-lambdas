@@ -171,7 +171,7 @@ object DeliveryCreditProcessor extends Logging {
         }
     }
 
-    // limited to 300 because each record takes ~ 2s to process and lambda has 15 min to run
+    // limited to 150 because each record takes ~ 4s to process and lambda has 15 min to run
     def deliveryRecordsQuery(productType: ZuoraProductType) =
       s"""
          |SELECT Id, SF_Subscription__r.Name, Delivery_Date__c, Charge_Code__c, Invoice_Date__c
@@ -180,7 +180,7 @@ object DeliveryCreditProcessor extends Logging {
          |AND Credit_Requested__c = true
          |AND Is_Actioned__c = false
          |ORDER BY SF_Subscription__r.Name, Delivery_Date__c
-         |LIMIT 300
+         |LIMIT 150
          |""".stripMargin
 
     val results = for {
