@@ -59,8 +59,8 @@ class ZuoraRerHandlerSpec extends AnyFreeSpec with Matchers {
     }
 
     def invokeWithString(
-                          lambda: ZuoraRerHandler,
-                          request: String
+      lambda: ZuoraRerHandler,
+      request: String
     ): String = {
       val testInputStream = new ByteArrayInputStream(request.getBytes)
       val testOutputStream = new ByteArrayOutputStream()

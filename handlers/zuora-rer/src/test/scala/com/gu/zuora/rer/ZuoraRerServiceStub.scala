@@ -7,9 +7,9 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError
 import play.api.libs.json.Json
 
 class ZuoraRerServiceStub(
-                           contacts: ClientFailableOp[List[ZuoraContact]],
-                           zuoraAccountSuccessOrError: Either[ZuoraRerError, ZuoraAccountSuccess],
-                           zuoraInvoiceStreamsOrError: Either[ZuoraRerError, List[DownloadStream]]
+  contacts: ClientFailableOp[List[ZuoraContact]],
+  zuoraAccountSuccessOrError: Either[ZuoraRerError, ZuoraAccountSuccess],
+  zuoraInvoiceStreamsOrError: Either[ZuoraRerError, List[DownloadStream]]
 ) extends ZuoraRer {
   override def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = contacts
   override def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess] = zuoraAccountSuccessOrError

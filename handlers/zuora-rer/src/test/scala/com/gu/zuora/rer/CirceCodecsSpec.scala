@@ -97,7 +97,7 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
 
     "should encode failed RerStatusResponse correctly" in {
       val response: RerResponse = RerStatusResponse(status = Failed, None, Some("error making request"))
-      response.asJson.pretty(jsonPrinter) shouldBe """{"status":"failed","message":"error making request","action":"status","requestType":"RAR","dataProvider":"zuora"}"""
+      response.asJson.pretty(jsonPrinter) shouldBe """{"status":"failed","message":"error making request","action":"status","requestType":"RER","dataProvider":"zuora"}"""
     }
   }
 }
