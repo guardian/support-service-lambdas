@@ -1,4 +1,4 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing

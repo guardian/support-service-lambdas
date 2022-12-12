@@ -1,22 +1,22 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 case class EventData(`object`: EventDataObject)
 case class EventDataObject(
-  id: StripeSourceId,
+  id: StripeCardId,
   brand: StripeBrand,
   country: StripeCountry,
   customer: StripeCustomerId,
   expiry: StripeExpiry,
   last4: StripeLast4
 )
-case class SourceUpdatedCallout(id: StripeEventId, data: EventData)
+case class CardUpdatedMessageBody(id: StripeEventId, data: EventData)
 
 case class StripeEventId(value: String) extends AnyVal
 case class StripeCustomerId(value: String) extends AnyVal
-case class StripeSourceId(value: String) extends AnyVal
+case class StripeCardId(value: String) extends AnyVal
 case class StripeLast4(value: String) extends AnyVal
 case class StripeExpiry(exp_month: Int, exp_year: Int)
 
@@ -45,11 +45,11 @@ object StripeBrand {
 
 case class StripeCountry(value: String) extends AnyVal
 
-object SourceUpdatedCallout {
+object CardUpdatedMessageBody {
 
   implicit val stripeEventIdReads = Json.reads[StripeEventId]
   implicit val stripeCustomerIdReads = Json.reads[StripeCustomerId]
-  implicit val stripeSourceIdReads = Json.reads[StripeSourceId]
+  implicit val stripeSourceIdReads = Json.reads[StripeCardId]
 
   implicit val stripeEventIdWrites = new Writes[StripeEventId] {
     def writes(se: StripeEventId) = Json.toJson(se.value)
@@ -59,8 +59,8 @@ object SourceUpdatedCallout {
     def writes(sc: StripeCustomerId) = Json.toJson(sc.value)
   }
 
-  implicit val stripeSourceIdWrites = new Writes[StripeSourceId] {
-    def writes(sc: StripeSourceId) = Json.toJson(sc.value)
+  implicit val stripeSourceIdWrites = new Writes[StripeCardId] {
+    def writes(sc: StripeCardId) = Json.toJson(sc.value)
   }
 
   implicit val stripeBrandReads: Reads[StripeBrand] = (JsPath).read[String].flatMap { brandString =>
@@ -73,7 +73,7 @@ object SourceUpdatedCallout {
   }
 
   implicit val eventDataObjectReads: Reads[EventDataObject] = (
-    (JsPath \ "id").read[String].map(StripeSourceId.apply) and
+    (JsPath \ "id").read[String].map(StripeCardId.apply) and
     (JsPath \ "brand").read[StripeBrand] and
     (JsPath \ "country").read[String].map(StripeCountry.apply) and
     (JsPath \ "customer").read[String].map(StripeCustomerId.apply) and
@@ -86,9 +86,9 @@ object SourceUpdatedCallout {
 
   implicit val eventDataReads: Reads[EventData] = (JsPath \ "object").read[EventDataObject].map(EventData.apply _)
 
-  implicit val jf: Reads[SourceUpdatedCallout] = (
+  implicit val jf: Reads[CardUpdatedMessageBody] = (
     (JsPath \ "id").read[String].map(StripeEventId.apply) and
     (JsPath \ "data").read[EventData]
-  )(SourceUpdatedCallout.apply _)
+  )(CardUpdatedMessageBody.apply _)
 
 }

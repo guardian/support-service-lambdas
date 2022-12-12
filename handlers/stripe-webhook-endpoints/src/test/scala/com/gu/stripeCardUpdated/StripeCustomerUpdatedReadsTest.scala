@@ -1,8 +1,9 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
+import com.gu.stripeCardUpdated.{EventData, EventDataObject, CardUpdatedMessageBody, StripeBrand, StripeCountry, StripeCustomerId, StripeEventId, StripeExpiry, StripeLast4, StripeCardId}
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
-import SourceUpdatedCallout._
+import com.gu.stripeCardUpdated.CardUpdatedMessageBody._
 import org.scalatest.matchers
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -59,12 +60,12 @@ class StripeCustomerUpdatedReadsTest extends AnyFlatSpec {
         |}
       """.stripMargin
 
-    val expected: JsResult[SourceUpdatedCallout] = JsSuccess(
-      SourceUpdatedCallout(
+    val expected: JsResult[CardUpdatedMessageBody] = JsSuccess(
+      CardUpdatedMessageBody(
         id = StripeEventId("evt_abc123"),
         data = EventData(
           `object` = EventDataObject(
-            id = StripeSourceId("card_def456"),
+            id = StripeCardId("card_def456"),
             brand = StripeBrand.Visa,
             country = StripeCountry("US"),
             customer = StripeCustomerId("cus_ghi789"),
@@ -75,7 +76,7 @@ class StripeCustomerUpdatedReadsTest extends AnyFlatSpec {
       )
     )
 
-    val event: JsResult[SourceUpdatedCallout] = Json.parse(validEventJson).validate[SourceUpdatedCallout]
+    val event: JsResult[CardUpdatedMessageBody] = Json.parse(validEventJson).validate[CardUpdatedMessageBody]
 
     event should be(expected)
   }

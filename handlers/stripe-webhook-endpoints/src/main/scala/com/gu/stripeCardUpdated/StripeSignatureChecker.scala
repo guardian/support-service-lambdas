@@ -1,4 +1,4 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import com.gu.util.config.{StripeConfig, StripeSecretKey}
 import com.gu.util.Logging
@@ -14,7 +14,7 @@ object StripeRequestSignatureChecker extends Logging {
     val signatureHeader: Option[String] = headers.get("Stripe-Signature")
 
     stripeAccount.exists { account =>
-      val secretKey = if (account == StripeAccount.GNM_Membership_AUS) stripeDeps.config.customerSourceUpdatedWebhook.auStripeSecretKey else stripeDeps.config.customerSourceUpdatedWebhook.ukStripeSecretKey
+      val secretKey = if (account == StripeAccount.GNM_Membership_AUS) stripeDeps.config.customerUpdatedWebhook.auStripeSecretKey else stripeDeps.config.customerUpdatedWebhook.ukStripeSecretKey
       val headerVerified: Try[Boolean] = Try(stripeDeps.signatureChecker.verifySignature(secretKey, payload, signatureHeader, 10000l))
 
       headerVerified match {

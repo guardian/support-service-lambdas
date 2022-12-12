@@ -1,6 +1,7 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
-import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
+import com.gu.stripeCardUpdated.{SignatureChecker, StripeAccount, StripeDeps}
+import com.gu.stripeCardUpdated.StripeRequestSignatureChecker.verifyRequest
 import com.gu.util.config.{StripeConfig, StripeSecretKey}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers._
@@ -81,9 +82,9 @@ class StripeRequestSignatureCheckerTest extends AnyFlatSpec {
     override def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean = {
       val signatureHeaderWithoutTimestamp = signatureHeader map { header => header.split("v1=")(1) }
       (secretKey, payload, signatureHeaderWithoutTimestamp, tolerance) match {
-        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.auStripeSecretKey, _, Some("longAlphanumericString"), _) => false
-        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.ukStripeSecretKey, _, Some("test signature"), _) => true
-        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.auStripeSecretKey, _, Some("test signature"), _) => true
+        case (TestData.fakeStripeConfig.customerUpdatedWebhook.auStripeSecretKey, _, Some("longAlphanumericString"), _) => false
+        case (TestData.fakeStripeConfig.customerUpdatedWebhook.ukStripeSecretKey, _, Some("test signature"), _) => true
+        case (TestData.fakeStripeConfig.customerUpdatedWebhook.auStripeSecretKey, _, Some("test signature"), _) => true
         case (_, _, _, _) => false
       }
     }

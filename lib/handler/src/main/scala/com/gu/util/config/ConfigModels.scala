@@ -19,13 +19,13 @@ object StripeWebhook {
   )(StripeWebhook.apply _)
 }
 
-case class StripeConfig(customerSourceUpdatedWebhook: StripeWebhook, signatureChecking: Boolean)
+case class StripeConfig(customerUpdatedWebhook: StripeWebhook, signatureChecking: Boolean)
 
 object StripeConfig {
   implicit val location = ConfigLocation[StripeConfig](path = "stripe", version = 1)
 
   implicit val stripeConfigReads: Reads[StripeConfig] = (
-    (JsPath \ "customerSourceUpdatedWebhook").read[StripeWebhook] and
+    (JsPath \ "customerUpdatedWebhook").read[StripeWebhook] and
     (JsPath \ "signatureChecking").readNullable[String].map(!_.contains("false"))
   )(StripeConfig.apply _)
 }

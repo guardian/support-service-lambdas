@@ -1,19 +1,20 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse}
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.SourceUpdatedUrlParams
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedStepsTestData.{accountSummaryJson, defaultAccountSummaryJson}
-import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
+import com.gu.stripeCardUpdated.CardUpdatedSteps.CardUpdatedUrlParams
+import com.gu.stripeCardUpdated.CardUpdatedStepsTestData.{accountSummaryJson, defaultAccountSummaryJson}
+import com.gu.stripeCardUpdated.{EventDataObject, CardUpdatedSteps, StripeAccount, StripeBrand, StripeCountry, StripeCustomerId, StripeExpiry, StripeLast4, StripeCardId}
+import com.gu.stripeCardUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
 import play.api.libs.json.{JsSuccess, Json}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Matchers {
+class CardUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with Matchers {
 
-  "SourceUpdatedSteps" should "getAccountToUpdate non default pm" in {
+  "CardUpdatedSteps" should "getAccountToUpdate non default pm" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -32,7 +33,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
       ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -49,7 +50,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
     actual.toDisjunction should be(Right(List()))
   }
 
-  "SourceUpdatedSteps" should "getAccountToUpdate default pm" in {
+  it should "getAccountToUpdate default pm" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -68,7 +69,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
       ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -85,7 +86,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
     actual.toDisjunction should be(Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accid"), NumConsecutiveFailures(3)))))
   }
 
-  "SourceUpdatedSteps" should "getAccountToUpdate default pm with multiple on the same account" in {
+  it should "getAccountToUpdate default pm with multiple on the same account" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -109,7 +110,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
       ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -126,7 +127,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
     actual.toDisjunction should be(Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)))))
   }
 
-  "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account three only" in {
+  it should "getAccountToUpdate multiple on different account three only" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -157,7 +158,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
       ("/accounts/accountidANOTHERONE/summary", HTTPResponse(200, accountSummaryJson("anotherPMAGAIN")))
     ))
 
-    val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -187,7 +188,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
     )))
   }
 
-  "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account two of them but only one is default PM" in {
+  it should "getAccountToUpdate multiple on different account two of them but only one is default PM" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -212,7 +213,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
       ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM")))
     ))
 
-    val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -235,7 +236,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
     )))
   }
 
-  "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account more than three" in {
+  it should "getAccountToUpdate multiple on different account more than three" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -269,7 +270,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
       ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -280,7 +281,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
     actual.toDisjunction should be(Left(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
   }
 
-  "SourceUpdatedSteps" should "getAccountToUpdate no payment methods at all" in {
+  it should "getAccountToUpdate no payment methods at all" in {
     val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
@@ -294,7 +295,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
       ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
     ))
 
-    val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
+    val actual = CardUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeCardId("fakecardid"))
 
     val expectedPOST = BasicRequest(
       "POST",
@@ -307,9 +308,9 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends AnyFlatSpec with M
 
 }
 
-class SourceUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matchers {
+class CardUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matchers {
 
-  "SourceUpdatedSteps" should "updatePaymentMethod" in {
+  "CardUpdatedSteps" should "updatePaymentMethod" in {
 
     val effects = new TestingRawEffects(500, Map(
       ("/object/payment-method", HTTPResponse(200, """{"Success": true,"Id": "newPMID"}""")),
@@ -317,7 +318,7 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matcher
     ))
 
     val eventData = EventDataObject(
-      id = StripeSourceId("card_def456"),
+      id = StripeCardId("card_def456"),
       brand = StripeBrand.Visa,
       country = StripeCountry("US"),
       customer = StripeCustomerId("cus_ghi789"),
@@ -325,7 +326,7 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matcher
       last4 = StripeLast4("1234")
     )
 
-    val actual = SourceUpdatedSteps.createUpdatedDefaultPaymentMethod(
+    val actual = CardUpdatedSteps.createUpdatedDefaultPaymentMethod(
       TestData.zuoraDeps(effects)
     )(
         PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)),
@@ -349,11 +350,11 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends AnyFlatSpec with Matcher
 
 }
 
-class SourceUpdatedStepsApplyTest extends AnyFlatSpec with Matchers {
+class CardUpdatedStepsApplyTest extends AnyFlatSpec with Matchers {
 
-  "SourceUpdatedSteps" should "fail with unauthorised if the Stripe Signature header check fails" in {
+  "CardUpdatedSteps" should "fail with unauthorised if the Stripe Signature header check fails" in {
     val effects = new TestingRawEffects(500)
-    val sourceUpdatedSteps = SourceUpdatedSteps(TestData.zuoraDeps(effects), TestData.stripeDeps)
+    val cardUpdatedSteps = CardUpdatedSteps(TestData.zuoraDeps(effects), TestData.stripeDeps)
 
     val badHeaders = Map(
       "SomeHeader1" -> "testvalue",
@@ -393,7 +394,7 @@ class SourceUpdatedStepsApplyTest extends AnyFlatSpec with Matchers {
 
     val testGatewayRequest = ApiGatewayRequest(None, None, Some(body.toString), Some(badHeaders), None, None)
 
-    val actual = sourceUpdatedSteps.steps(testGatewayRequest)
+    val actual = cardUpdatedSteps.steps(testGatewayRequest)
 
     effects.requestsAttempted should be(Nil)
     actual.statusCode should be("401")
@@ -401,30 +402,30 @@ class SourceUpdatedStepsApplyTest extends AnyFlatSpec with Matchers {
 
   it should "manage without the stripe param in Url" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b"}"""
-    Json.parse(queryStringJson).validate[SourceUpdatedUrlParams] should be(JsSuccess(SourceUpdatedUrlParams(None)))
+    Json.parse(queryStringJson).validate[CardUpdatedUrlParams] should be(JsSuccess(CardUpdatedUrlParams(None)))
 
   }
 
   it should "manage without a valid stripe param in Url" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "invalidValue"}"""
 
-    Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(None))
+    Json.parse(queryStringJson).as[CardUpdatedUrlParams] should be(CardUpdatedUrlParams(None))
 
   }
 
   it should "manage with the GMN AUS stripe param set" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership_AUS"}"""
-    Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)))
+    Json.parse(queryStringJson).as[CardUpdatedUrlParams] should be(CardUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)))
   }
 
   it should "manage with the GMN stripe param set" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership"}"""
-    Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership)))
+    Json.parse(queryStringJson).as[CardUpdatedUrlParams] should be(CardUpdatedUrlParams(Some(StripeAccount.GNM_Membership)))
   }
 
 }
 
-object SourceUpdatedStepsTestData {
+object CardUpdatedStepsTestData {
 
   val defaultAccountSummaryJson: String = accountSummaryJson("defaultPMID")
   def accountSummaryJson(pmID: String): String =

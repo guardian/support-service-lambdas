@@ -1,13 +1,17 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 import com.gu.effects.TestingRawEffects
+import com.gu.stripeCardUpdated.{StripeDeps, StripeSignatureChecker}
 import com.gu.util.config._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.matchers.should.Matchers
 
 object TestData extends Matchers {
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
-  val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")), true)
+  val fakeStripeConfig = StripeConfig(
+    customerUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")),
+    signatureChecking = true
+  )
 
   val missingCredentialsResponse =
     """{
