@@ -621,9 +621,13 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
   )
 ).settings {
   lazy val deployTo =
-    inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+    inputKey[Unit]("Command to directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
 
-  // run from stripe-webhook-endpoints project eg. deployTo CODE
+  /*
+  To run script in sbt shell:
+    1. run `project stripe-webhook-endpoints`
+    2. run `deployTo CODE` or `deployTo DEV`
+    */
   deployTo := {
     import scala.sys.process._
     import complete.DefaultParsers._
@@ -633,9 +637,9 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     val s3Bucket = "support-service-lambdas-dist"
     val s3Path = s"membership/$stage/stripe-webhook-endpoints/stripe-webhook-endpoints.jar"
 
-    s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
-    s"aws lambda update-function-code --function-name stripe-customer-updated-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
-    s"aws lambda update-function-code --function-name stripe-payment-intent-issues-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+    s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!
+    s"aws lambda update-function-code --function-name stripe-customer-updated-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!
+    s"aws lambda update-function-code --function-name stripe-payment-intent-issues-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!
   }
 }.dependsOn(handler, `config-cats`, zuora, `zuora-core`, effectsDepIncludingTestFolder, testDep)
 
