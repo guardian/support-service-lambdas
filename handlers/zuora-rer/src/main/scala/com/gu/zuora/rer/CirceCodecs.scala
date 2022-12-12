@@ -14,7 +14,7 @@ object circeCodecs {
       def dataProviderIsZuora(cursor: HCursor): Boolean =
         cursor.downField("dataProvider").as[String] match {
           case Left(_) => false
-          case Right(dataProvider) => dataProvider == "zuora"
+          case Right(dataProvider) => dataProvider == "zuorarer"
         }
 
       cursor.downField("action").as[String].flatMap {
