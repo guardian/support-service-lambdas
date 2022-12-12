@@ -94,12 +94,16 @@ object HandlerSpec extends ZIOSpecDefault {
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
           sqsRequests <- MockSQS.requests
+          sortedSqsRequests = sqsRequests.sortWith {
+            case (_: EmailMessage, _) => true
+            case _ => false
+          }
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
             assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
             assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
             assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
-            assert(sqsRequests)(equalTo(List(emailMessageBodyRefund, refundInput1)))
+            assert(sortedSqsRequests)(equalTo(List(emailMessageBodyRefund, refundInput1)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs)),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
