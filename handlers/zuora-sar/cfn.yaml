@@ -44,7 +44,7 @@ Resources:
                 - Effect: Allow
                   Action:
                     - lambda:InvokeFunction
-                  Resource: !GetAtt ZuoraBatonSarLambda.Arn
+                  Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:zuora-baton-*-lambda-${Stage}"
 
     ZuoraBatonSarLambdaRole:
         Type: AWS::IAM::Role
