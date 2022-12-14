@@ -17,9 +17,9 @@ import zio.{IO, RIO, Task, ZIO, ZLayer}
 object ZuoraClientLive {
 
   case class ZuoraRestConfig(
-    baseUrl: String,
-    username: String,
-    password: String,
+      baseUrl: String,
+      username: String,
+      password: String,
   )
 
   object ZuoraRestConfig {
@@ -41,19 +41,26 @@ object ZuoraClientLive {
 
 }
 
-private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], zuoraRestConfig: ZuoraRestConfig) extends ZuoraClient:
+private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], zuoraRestConfig: ZuoraRestConfig)
+    extends ZuoraClient:
 
   override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
     val absoluteUri = baseUrl.resolve(request.uri)
-    sttpClient.send(
-      request
-        .headers(Map(
-          "zuora-version" -> "211.0",
-          "apiSecretAccessKey" -> zuoraRestConfig.password,
-          "apiAccessKeyId" -> zuoraRestConfig.username
-        ))
-        .copy(uri = absoluteUri)
-    ).mapError(_.toString).map(_.body).absolve
+    sttpClient
+      .send(
+        request
+          .headers(
+            Map(
+              "zuora-version" -> "211.0",
+              "apiSecretAccessKey" -> zuoraRestConfig.password,
+              "apiAccessKeyId" -> zuoraRestConfig.username,
+            ),
+          )
+          .copy(uri = absoluteUri),
+      )
+      .mapError(_.toString)
+      .map(_.body)
+      .absolve
   }
 
 trait ZuoraClient {

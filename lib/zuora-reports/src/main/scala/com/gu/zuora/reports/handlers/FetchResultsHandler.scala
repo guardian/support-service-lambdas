@@ -20,6 +20,11 @@ object FetchResultsHandler {
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    ReportsLambda[JobResultRequest, JobResult](RawEffects.stage, GetFromS3.fetchString, LambdaIO(inputStream, outputStream, context), wireCall)
+    ReportsLambda[JobResultRequest, JobResult](
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      LambdaIO(inputStream, outputStream, context),
+      wireCall,
+    )
   }
 }

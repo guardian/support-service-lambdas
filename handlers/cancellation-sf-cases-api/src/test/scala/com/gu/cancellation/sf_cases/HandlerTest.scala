@@ -15,7 +15,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
     val reason = Reason("mma_editorial")
     val subName = SubscriptionName("A-S12345678")
     val gaData = GaDataJsonString(
-      "{\"UA-51507017-5\":{\"experiments\":{\"9ycLuqmFRBGBDGV5bnFlCA\":\"1\"},\"hitcount\":3}}"
+      "{\"UA-51507017-5\":{\"experiments\":{\"9ycLuqmFRBGBDGV5bnFlCA\":\"1\"},\"hitcount\":3}}",
     )
 
     val actual = RaiseCase.buildWireNewCaseForSalesforce(
@@ -23,10 +23,10 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         product,
         reason,
         subName,
-        gaData
+        gaData,
       ),
       subName,
-      contactId
+      contactId,
     )
 
     val expected = WireNewCase(
@@ -37,7 +37,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
       Enquiry_Type__c = reason.value,
       Case_Closure_Reason__c = gaData.value,
       Status = "Closed",
-      Subject = CaseSubject(STARTING_CASE_SUBJECT)
+      Subject = CaseSubject(STARTING_CASE_SUBJECT),
     )
 
     actual shouldEqual expected

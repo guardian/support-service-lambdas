@@ -27,11 +27,11 @@ object Config {
         client_secret = sfClientSecret,
         username = sfUserName,
         password = sfPassword,
-        token = sfToken
+        token = sfToken,
       ),
       imovo = ImovoConfig(
         imovoBaseUrl = imovoUrl,
-        imovoApiKey = imovoApiKey
-      )
+        imovoApiKey = imovoApiKey,
+      ),
     )
 }

@@ -11,7 +11,16 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput,
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import com.gu.productmove.zuora.{CreditBalanceAdjustment, GetAccountLive, GetSubscriptionLive, InvoicePreviewLive, SubscribeLive, ZuoraCancel, ZuoraCancelLive, ZuoraSetCancellationReason}
+import com.gu.productmove.zuora.{
+  CreditBalanceAdjustment,
+  GetAccountLive,
+  GetSubscriptionLive,
+  InvoicePreviewLive,
+  SubscribeLive,
+  ZuoraCancel,
+  ZuoraCancelLive,
+  ZuoraSetCancellationReason,
+}
 import sttp.client3.SttpBackend
 import zio.{Task, ZIO}
 import zio.json.{JsonDecoder, DeriveJsonDecoder, JsonEncoder, DeriveJsonEncoder}
@@ -25,13 +34,27 @@ object RefundInput {
 }
 
 object Refund {
-  def applyRefund(refundInput: RefundInput): ZIO[InvoicingApiRefund with CreditBalanceAdjustment with Stage with SttpBackend[Task, Any] with AwsS3, String, Unit] = {
+  def applyRefund(refundInput: RefundInput): ZIO[
+    InvoicingApiRefund with CreditBalanceAdjustment with Stage with SttpBackend[Task, Any] with AwsS3,
+    String,
+    Unit,
+  ] = {
     import refundInput.{subscriptionName, refundAmount, invoiceId}
 
     for {
       res <- InvoicingApiRefund.refund(subscriptionName, refundAmount, false)
-      _ <- CreditBalanceAdjustment.adjust(refundAmount, s"[Product-switching] Transfer $refundAmount from negative invoice $invoiceId to the account balance", invoiceId, "Increase")
-      _ <- CreditBalanceAdjustment.adjust(refundAmount, s"[Product-switching] Transfer $refundAmount from credit balance to invoice ${res.invoiceId}", res.invoiceId, "Decrease")
+      _ <- CreditBalanceAdjustment.adjust(
+        refundAmount,
+        s"[Product-switching] Transfer $refundAmount from negative invoice $invoiceId to the account balance",
+        invoiceId,
+        "Increase",
+      )
+      _ <- CreditBalanceAdjustment.adjust(
+        refundAmount,
+        s"[Product-switching] Transfer $refundAmount from credit balance to invoice ${res.invoiceId}",
+        res.invoiceId,
+        "Decrease",
+      )
     } yield ()
   }
 }

@@ -22,20 +22,22 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
 
   def endToEndTest(endToEndData: EndtoEndBaseData) = {
 
-    val stream = new ByteArrayInputStream(endToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val stream = new ByteArrayInputStream(
+      endToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+    )
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(200, EndToEndData.responses)
     var capturedPayload: Option[Payload] = None
 
     def sqsSend(queueName: QueueName)(payload: Payload): Try[Unit] = Success { capturedPayload = Some(payload) }
 
-    //execute
+    // execute
     Lambda.runForLegacyTestsSeeTestingMd(
       Stage("DEV"),
       FakeFetchString.fetchString,
       config.response,
       LambdaIO(stream, os, null),
-      sqsSend
+      sqsSend,
     )
 
     capturedPayload.get.value jsonMatches endToEndData.expectedEmailSend
@@ -61,7 +63,7 @@ trait EndtoEndBaseData {
   def responses: Map[String, HTTPResponse] = Map(
     ("/transactions/invoices/accounts/2c92c0f85fc90734015fca884c3f04cf", HTTPResponse(200, invoices)),
     ("/v1/requestToken", HTTPResponse(200, """{"accessToken":"", "expiresIn":1}""")),
-    ("/messaging/v1/messageDefinitionSends/111/send", HTTPResponse(202, ""))
+    ("/messaging/v1/messageDefinitionSends/111/send", HTTPResponse(202, "")),
   )
 
   val invoices =

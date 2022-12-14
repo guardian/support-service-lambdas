@@ -25,7 +25,7 @@ class GetAccountEffectsTest extends AnyFlatSpec with Matchers {
       paymentMethodId = Some(PaymentMethodId("8ad095dd82f7aaa50182f96de2883de1")),
       autoPay = AutoPay(true),
       accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
-      currency = GBP
+      currency = GBP,
     )
     actual shouldBe Right(expected)
   }

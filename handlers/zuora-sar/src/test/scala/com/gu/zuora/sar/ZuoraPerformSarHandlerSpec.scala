@@ -10,15 +10,16 @@ class ZuoraPerformSarHandlerSpec extends AnyFreeSpec with Matchers {
   "ZuoraPerformSarLambda" - {
     val validPerformSarRequest = PerformSarRequest(
       initiationReference = "someRequestId",
-      subjectEmail = "someSubjectEmail"
+      subjectEmail = "someSubjectEmail",
     )
 
     "should return a successful PerformSarResponse when a SAR runs successfully and writes to S3" in {
-      val lambda = ZuoraPerformSarHandler(ZuoraSarServiceStub.withSuccessResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val lambda =
+        ZuoraPerformSarHandler(ZuoraSarServiceStub.withSuccessResponse, S3HelperStub.withSuccessResponse, mockConfig)
       val expectedResponse = PerformSarResponse(
         status = Completed,
         initiationReference = "someRequestId",
-        subjectEmail = "someSubjectEmail"
+        subjectEmail = "someSubjectEmail",
       )
       lambda
         .handle(validPerformSarRequest)
@@ -26,12 +27,13 @@ class ZuoraPerformSarHandlerSpec extends AnyFreeSpec with Matchers {
     }
 
     "should return a failed PerformSarResponse when request is successful but upload to S3 is unsuccessful" in {
-      val lambda = ZuoraPerformSarHandler(ZuoraSarServiceStub.withSuccessResponse, S3HelperStub.withFailedResponse, mockConfig)
+      val lambda =
+        ZuoraPerformSarHandler(ZuoraSarServiceStub.withSuccessResponse, S3HelperStub.withFailedResponse, mockConfig)
       val expectedResponse = PerformSarResponse(
         status = Failed,
         initiationReference = "someRequestId",
         subjectEmail = "someSubjectEmail",
-        message = Some("S3Error(couldn't write to s3)")
+        message = Some("S3Error(couldn't write to s3)"),
       )
 
       lambda
@@ -40,12 +42,16 @@ class ZuoraPerformSarHandlerSpec extends AnyFreeSpec with Matchers {
     }
 
     "should return a failed PerformSarResponse when Zuora contacts can't be retrieved" in {
-      val lambda = ZuoraPerformSarHandler(ZuoraSarServiceStub.withFailedContactResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val lambda = ZuoraPerformSarHandler(
+        ZuoraSarServiceStub.withFailedContactResponse,
+        S3HelperStub.withSuccessResponse,
+        mockConfig,
+      )
       val expectedResponse = PerformSarResponse(
         status = Failed,
         initiationReference = "someRequestId",
         subjectEmail = "someSubjectEmail",
-        message = Some("ZuoraClientError(Failed to get contacts)")
+        message = Some("ZuoraClientError(Failed to get contacts)"),
       )
 
       lambda
@@ -54,12 +60,16 @@ class ZuoraPerformSarHandlerSpec extends AnyFreeSpec with Matchers {
     }
 
     "should return a failed PerformSarResponse when unable to retrieve account data" in {
-      val lambda = ZuoraPerformSarHandler(ZuoraSarServiceStub.withFailedAccountResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val lambda = ZuoraPerformSarHandler(
+        ZuoraSarServiceStub.withFailedAccountResponse,
+        S3HelperStub.withSuccessResponse,
+        mockConfig,
+      )
       val expectedResponse = PerformSarResponse(
         status = Failed,
         initiationReference = "someRequestId",
         subjectEmail = "someSubjectEmail",
-        message = Some("ZuoraClientError(client error)")
+        message = Some("ZuoraClientError(client error)"),
       )
 
       lambda
@@ -68,12 +78,16 @@ class ZuoraPerformSarHandlerSpec extends AnyFreeSpec with Matchers {
     }
 
     "should return a failed PerformSarResponse when unable to retrieve invoice data" in {
-      val lambda = ZuoraPerformSarHandler(ZuoraSarServiceStub.withFailedInvoiceResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val lambda = ZuoraPerformSarHandler(
+        ZuoraSarServiceStub.withFailedInvoiceResponse,
+        S3HelperStub.withSuccessResponse,
+        mockConfig,
+      )
       val expectedResponse = PerformSarResponse(
         status = Failed,
         initiationReference = "someRequestId",
         subjectEmail = "someSubjectEmail",
-        message = Some("JsonDeserialisationError(failed to deserialise invoices)")
+        message = Some("JsonDeserialisationError(failed to deserialise invoices)"),
       )
 
       lambda
@@ -82,13 +96,17 @@ class ZuoraPerformSarHandlerSpec extends AnyFreeSpec with Matchers {
     }
 
     "should return a failed PerformSarResponse when PerformSarRequest can't be decoded" in {
-      val lambda = ZuoraPerformSarHandler(ZuoraSarServiceStub.withFailedInvoiceResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val lambda = ZuoraPerformSarHandler(
+        ZuoraSarServiceStub.withFailedInvoiceResponse,
+        S3HelperStub.withSuccessResponse,
+        mockConfig,
+      )
       val invalidRequest = SarInitiateRequest(subjectEmail = "someSubjectEmail")
       val expectedResponse = PerformSarResponse(
         status = Failed,
         initiationReference = "",
         subjectEmail = "",
-        message = Some("Unable to retrieve email and initiation reference from request")
+        message = Some("Unable to retrieve email and initiation reference from request"),
       )
 
       lambda

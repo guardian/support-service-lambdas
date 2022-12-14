@@ -27,14 +27,20 @@ class CreateGuestAccountEffectsTest extends AnyFlatSpec with Matchers {
       identityClient = IdentityClient(response, identityConfig)
       createGuestAccount = identityClient.wrapWith(JsonHttp.post).wrapWith(CreateGuestAccount.wrapper)
       createdId <- createGuestAccount.runRequest(testContact).toDisjunction
-      fetchedId <- identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmailForTesting.wrapper).runRequest(testContact).toDisjunction
+      fetchedId <- identityClient
+        .wrapWith(JsonHttp.getWithParams)
+        .wrapWith(GetByEmailForTesting.wrapper)
+        .runRequest(testContact)
+        .toDisjunction
     } yield (createdId, fetchedId)
 
     val failure = actual.map {
       case (createdId, fetchedId) if createdId == fetchedId =>
         None
       case (createdId, fetchedId) =>
-        Some(s"for email $testContact createdId by email address was $createdId but afterwards fetchedId by email address was $fetchedId")
+        Some(
+          s"for email $testContact createdId by email address was $createdId but afterwards fetchedId by email address was $fetchedId",
+        )
     }
     failure should be(Right(None))
 
@@ -52,8 +58,9 @@ object GetByEmailForTesting {
 
   val wrapper: HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityId] =
     HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityId](
-      emailAddress => GetRequestWithParams(RelativePath(s"/user"), UrlParams(Map("emailAddress" -> emailAddress.value))),
-      RestRequestMaker.toResult[UserResponse](_).map((wire: UserResponse) => IdentityId(wire.user.id))
+      emailAddress =>
+        GetRequestWithParams(RelativePath(s"/user"), UrlParams(Map("emailAddress" -> emailAddress.value))),
+      RestRequestMaker.toResult[UserResponse](_).map((wire: UserResponse) => IdentityId(wire.user.id)),
     )
 
 }

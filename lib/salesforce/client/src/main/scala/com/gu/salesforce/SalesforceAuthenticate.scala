@@ -27,8 +27,14 @@ object SalesforceAuthenticate extends Logging {
   }
 
   def apply(response: Request => Response): SFAuthConfig => LazyClientFailableOp[SalesforceAuth] =
-    HttpOp(response).setupRequest(buildAuthRequest).flatMap(toClientFailableOp).map { response =>
-      Json.parse(response.value)
-    }.parse[SalesforceAuth].map(_.withLogging(s"salesforce auth")).runRequestLazy
+    HttpOp(response)
+      .setupRequest(buildAuthRequest)
+      .flatMap(toClientFailableOp)
+      .map { response =>
+        Json.parse(response.value)
+      }
+      .parse[SalesforceAuth]
+      .map(_.withLogging(s"salesforce auth"))
+      .runRequestLazy
 
 }

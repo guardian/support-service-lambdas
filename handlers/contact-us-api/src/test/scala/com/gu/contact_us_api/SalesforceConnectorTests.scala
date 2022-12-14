@@ -9,7 +9,10 @@ import scalaj.http.{HttpRequest, HttpResponse}
 
 class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with EitherValues {
 
-  def getRunRequest(body: String, statusCode: Int = 200): HttpRequest => Either[ContactUsError, HttpResponse[String]] = {
+  def getRunRequest(
+      body: String,
+      statusCode: Int = 200,
+  ): HttpRequest => Either[ContactUsError, HttpResponse[String]] = {
     def mockedRunRequest(http: HttpRequest): Either[ContactUsError, HttpResponse[String]] = {
       Right(HttpResponse(body, statusCode, Map.empty[String, IndexedSeq[String]]))
     }
@@ -17,8 +20,11 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
     mockedRunRequest
   }
 
-  private val fakeConfg = ContactUsConfig("clientID", "clientSecret", "username", "password", "token", "authEndpoint", "reqEndpoint")
-  private val fakeRequest = SFCompositeRequest(List(SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage)))
+  private val fakeConfg =
+    ContactUsConfig("clientID", "clientSecret", "username", "password", "token", "authEndpoint", "reqEndpoint")
+  private val fakeRequest = SFCompositeRequest(
+    List(SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage)),
+  )
   private val invalidJson = "{}"
 
   private val authToken = "THIS_IS_A_TOKEN"
@@ -27,19 +33,23 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   private val failedAuthStatusCode = 400
   private val failedAuthError = "invalid_grant"
   private val failedAuthErrorDescription = "authentication failure"
-  private val failedAuthReqJson = s"""{ "error": "$failedAuthError", "error_description": "$failedAuthErrorDescription" }"""
+  private val failedAuthReqJson =
+    s"""{ "error": "$failedAuthError", "error_description": "$failedAuthErrorDescription" }"""
 
   private val compositeReferenceId = "newCase"
   private val compositeErrorCode = "ERROR"
   private val compositeErrorMessage = "request failure"
 
-  private val successfulCompositeReqJson = s"""{ "compositeResponse": [{ "httpStatusCode": 201, "referenceId": "$compositeReferenceId" }] }"""
+  private val successfulCompositeReqJson =
+    s"""{ "compositeResponse": [{ "httpStatusCode": 201, "referenceId": "$compositeReferenceId" }] }"""
 
   private val compositeErrorStatusCode = 400
-  private val successfulCompositeReqWithErrorJson = s"""{ "compositeResponse": [{ "httpStatusCode": $compositeErrorStatusCode, "referenceId": "$compositeReferenceId", "body": [{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }] }] }"""
+  private val successfulCompositeReqWithErrorJson =
+    s"""{ "compositeResponse": [{ "httpStatusCode": $compositeErrorStatusCode, "referenceId": "$compositeReferenceId", "body": [{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }] }] }"""
 
   private val failedCompositeStatusCode = 500
-  private val failedCompositeReqJson = s"""[{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }]"""
+  private val failedCompositeReqJson =
+    s"""[{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }]"""
 
   "auth" should "return a token when the request is successful " in {
     new SalesforceConnector(getRunRequest(successfulAuthRequestJson))
@@ -49,7 +59,12 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   it should "return a ContactUsError when the request fails" in {
     new SalesforceConnector(getRunRequest(failedAuthReqJson, failedAuthStatusCode))
       .auth(fakeConfg) shouldBe
-      Left(ContactUsError("Salesforce", s"Could not authenticate: Status code: $failedAuthStatusCode. $failedAuthError - $failedAuthErrorDescription"))
+      Left(
+        ContactUsError(
+          "Salesforce",
+          s"Could not authenticate: Status code: $failedAuthStatusCode. $failedAuthError - $failedAuthErrorDescription",
+        ),
+      )
   }
 
   it should "return a ContactUsError of type Decoder when it receives as unexpected response body in a 2xx response" in {
@@ -78,13 +93,23 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   it should "return ContactUsError when the request is successful but reports an error" in {
     new SalesforceConnector(getRunRequest(successfulCompositeReqWithErrorJson))
       .sendReq(fakeConfg, authToken, fakeRequest) shouldBe
-      Left(ContactUsError("Salesforce", s"Could not complete composite request. Status code: 200. Status code for $compositeReferenceId: $compositeErrorStatusCode ${SFErrorDetails(compositeErrorCode, compositeErrorMessage).asString}"))
+      Left(
+        ContactUsError(
+          "Salesforce",
+          s"Could not complete composite request. Status code: 200. Status code for $compositeReferenceId: $compositeErrorStatusCode ${SFErrorDetails(compositeErrorCode, compositeErrorMessage).asString}",
+        ),
+      )
   }
 
   it should "return a ContactUsError when the request fails" in {
     new SalesforceConnector(getRunRequest(failedCompositeReqJson, failedCompositeStatusCode))
       .sendReq(fakeConfg, authToken, fakeRequest) shouldBe
-      Left(ContactUsError("Salesforce", s"Could not complete request. Status code: $failedCompositeStatusCode. $compositeErrorCode - $compositeErrorMessage"))
+      Left(
+        ContactUsError(
+          "Salesforce",
+          s"Could not complete request. Status code: $failedCompositeStatusCode. $compositeErrorCode - $compositeErrorMessage",
+        ),
+      )
   }
 
   it should "return a ContactUsError of type Decoder when it receives as unexpected response body in a 2xx response" in {

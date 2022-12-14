@@ -9,8 +9,8 @@ object BatonModels {
   case class SarStatusRequest(initiationReference: String) extends SarRequest
 
   case class PerformSarRequest(
-    initiationReference: String,
-    subjectEmail: String
+      initiationReference: String,
+      subjectEmail: String,
   ) extends SarRequest
 
   sealed trait BatonTaskStatus
@@ -26,15 +26,15 @@ object BatonModels {
   case class SarInitiateResponse(initiationReference: String) extends SarResponse
 
   case class SarStatusResponse(
-    status: BatonTaskStatus,
-    resultLocations: Option[List[String]] = None,
-    message: Option[String] = None
+      status: BatonTaskStatus,
+      resultLocations: Option[List[String]] = None,
+      message: Option[String] = None,
   ) extends SarResponse
 
   case class PerformSarResponse(
-    status: BatonTaskStatus,
-    initiationReference: String,
-    subjectEmail: String,
-    message: Option[String] = None
+      status: BatonTaskStatus,
+      initiationReference: String,
+      subjectEmail: String,
+      message: Option[String] = None,
   ) extends SarResponse
 }

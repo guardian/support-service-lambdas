@@ -7,9 +7,16 @@ import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransa
 
 object GetPaymentData extends Logging {
 
-  case class PaymentFailureInformation(subscriptionName: String, product: String, serviceStartDate: LocalDate, serviceEndDate: LocalDate)
+  case class PaymentFailureInformation(
+      subscriptionName: String,
+      product: String,
+      serviceStartDate: LocalDate,
+      serviceEndDate: LocalDate,
+  )
 
-  def apply(message: String)(invoiceTransactionSummary: InvoiceTransactionSummary): Either[String, PaymentFailureInformation] = {
+  def apply(
+      message: String,
+  )(invoiceTransactionSummary: InvoiceTransactionSummary): Either[String, PaymentFailureInformation] = {
     logger.info(s"Attempting to get further details from account $message")
     val positiveInvoices = invoiceTransactionSummary.invoices.filter(isPositive)
     positiveInvoices.headOption match {
@@ -18,13 +25,17 @@ object GetPaymentData extends Logging {
         val positiveInvoiceItems = invoice.invoiceItems.filter(invoiceItemFilter)
         // TODO payment failure may be subjected to invoice that have multiple items not only one
         // here we are generating PaymentFailureInformation based on the head of InvoiceItems
-        val maybePaymentFailureInfo = positiveInvoiceItems.headOption.map {
-          item =>
-            {
-              val paymentFailureInfo = PaymentFailureInformation(item.subscriptionName, item.productName, item.serviceStartDate, item.serviceEndDate)
-              logger.info(s"Payment failure information for account: $message is: $paymentFailureInfo")
-              paymentFailureInfo
-            }
+        val maybePaymentFailureInfo = positiveInvoiceItems.headOption.map { item =>
+          {
+            val paymentFailureInfo = PaymentFailureInformation(
+              item.subscriptionName,
+              item.productName,
+              item.serviceStartDate,
+              item.serviceEndDate,
+            )
+            logger.info(s"Payment failure information for account: $message is: $paymentFailureInfo")
+            paymentFailureInfo
+          }
         }
         maybePaymentFailureInfo.toRight(s"Could not retrieve additional data for account $message")
       case None =>

@@ -12,7 +12,7 @@ object LocalDateHelpers {
       TUESDAY,
       WEDNESDAY,
       THURSDAY,
-      FRIDAY
+      FRIDAY,
     )
 
     def isWorkingDay: Boolean =

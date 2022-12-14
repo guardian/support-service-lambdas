@@ -12,7 +12,7 @@ object TypeConvert extends LazyLogging {
       logger.error(s"Failed to $action: $error")
       messageResponse(
         "500",
-        s"Failed to execute lambda - unable to $action, $error"
+        s"Failed to execute lambda - unable to $action, $error",
       )
     }
   }

@@ -9,13 +9,13 @@ import scala.util.Try
 
 case class ZuoraAccountId(value: String) extends AnyVal
 case class AddSubscriptionRequest(
-  zuoraAccountId: ZuoraAccountId,
-  startDate: LocalDate,
-  acquisitionSource: AcquisitionSource,
-  createdByCSR: CreatedByCSR,
-  amountMinorUnits: Option[AmountMinorUnits],
-  acquisitionCase: CaseId,
-  planId: PlanId
+    zuoraAccountId: ZuoraAccountId,
+    startDate: LocalDate,
+    acquisitionSource: AcquisitionSource,
+    createdByCSR: CreatedByCSR,
+    amountMinorUnits: Option[AmountMinorUnits],
+    acquisitionCase: CaseId,
+    planId: PlanId,
 )
 
 case class CaseId(value: String) extends AnyVal
@@ -24,13 +24,13 @@ case class CreatedByCSR(value: String) extends AnyVal
 object AddSubscriptionRequest {
 
   case class AddSubscriptionRequestWire(
-    zuoraAccountId: String,
-    startDate: String,
-    acquisitionSource: String,
-    createdByCSR: String,
-    amountMinorUnits: Option[Int],
-    acquisitionCase: String,
-    planId: String
+      zuoraAccountId: String,
+      startDate: String,
+      acquisitionSource: String,
+      createdByCSR: String,
+      amountMinorUnits: Option[Int],
+      acquisitionCase: String,
+      planId: String,
   ) {
     def toAddSubscriptionRequest = {
       val parsedRequestOrError = for {
@@ -43,7 +43,7 @@ object AddSubscriptionRequest {
         createdByCSR = CreatedByCSR(this.createdByCSR),
         amountMinorUnits = amountMinorUnits.map(AmountMinorUnits.apply),
         CaseId(acquisitionCase),
-        parsedPlanId
+        parsedPlanId,
       )
 
       parsedRequestOrError match {

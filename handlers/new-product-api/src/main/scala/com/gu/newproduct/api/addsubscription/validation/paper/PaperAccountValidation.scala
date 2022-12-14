@@ -5,7 +5,7 @@ import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, Validat
 
 object PaperAccountValidation {
   def apply(
-    account: ValidatedAccount
+      account: ValidatedAccount,
   ): ValidationResult[ValidatedAccount] = {
     account.currency match {
       case GBP => Passed(account)

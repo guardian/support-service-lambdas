@@ -10,19 +10,19 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.Subscription
 case class DigipackCustomerData(
-  account: ValidatedAccount,
-  paymentMethod: PaymentMethod,
-  contacts: Contacts,
-  subscriptions: List[Subscription]
+    account: ValidatedAccount,
+    paymentMethod: PaymentMethod,
+    contacts: Contacts,
+    subscriptions: List[Subscription],
 )
 
 object GetDigipackCustomerData {
   def apply(
-    getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
-    getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]],
-    getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
-    getContacts: ZuoraAccountId => ClientFailableOp[Contacts],
-    accountId: ZuoraAccountId
+      getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
+      getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]],
+      getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
+      getContacts: ZuoraAccountId => ClientFailableOp[Contacts],
+      accountId: ZuoraAccountId,
   ) = for {
     account <- getAccount(accountId)
     accountSubscriptions <- getAccountSubscriptions(accountId)
@@ -31,4 +31,3 @@ object GetDigipackCustomerData {
   } yield DigipackCustomerData(account, paymentMethod, contacts, accountSubscriptions)
 
 }
-

@@ -11,7 +11,7 @@ class GetBatchesTest extends AnyFlatSpec with Matchers {
     val batches = Seq(
       BatchInfo(BatchId("1"), Completed),
       BatchInfo(BatchId("2"), Failed),
-      BatchInfo(BatchId("3"), InProgress)
+      BatchInfo(BatchId("3"), InProgress),
     )
     GetBatchesHandler.getJobStatus(batches) shouldBe FailedJob
   }
@@ -20,7 +20,7 @@ class GetBatchesTest extends AnyFlatSpec with Matchers {
     val batches = Seq(
       BatchInfo(BatchId("1"), Completed),
       BatchInfo(BatchId("2"), InProgress),
-      BatchInfo(BatchId("3"), Completed)
+      BatchInfo(BatchId("3"), Completed),
     )
     GetBatchesHandler.getJobStatus(batches) shouldBe PendingJob
   }
@@ -29,7 +29,7 @@ class GetBatchesTest extends AnyFlatSpec with Matchers {
     val batches = Seq(
       BatchInfo(BatchId("1"), Completed),
       BatchInfo(BatchId("2"), Queued),
-      BatchInfo(BatchId("3"), NotProcessed)
+      BatchInfo(BatchId("3"), NotProcessed),
     )
     GetBatchesHandler.getJobStatus(batches) shouldBe PendingJob
   }
@@ -38,7 +38,7 @@ class GetBatchesTest extends AnyFlatSpec with Matchers {
     val batches = Seq(
       BatchInfo(BatchId("1"), Completed),
       BatchInfo(BatchId("2"), Completed),
-      BatchInfo(BatchId("3"), Completed)
+      BatchInfo(BatchId("3"), Completed),
     )
     GetBatchesHandler.getJobStatus(batches) shouldBe CompletedJob
   }
@@ -47,7 +47,7 @@ class GetBatchesTest extends AnyFlatSpec with Matchers {
     val batches = Seq(
       BatchInfo(BatchId("1"), NotProcessed),
       BatchInfo(BatchId("2"), NotProcessed),
-      BatchInfo(BatchId("3"), NotProcessed)
+      BatchInfo(BatchId("3"), NotProcessed),
     )
     GetBatchesHandler.getJobStatus(batches) shouldBe CompletedJob
   }
@@ -56,7 +56,7 @@ class GetBatchesTest extends AnyFlatSpec with Matchers {
     val batches = Seq(
       BatchInfo(BatchId("1"), NotProcessed),
       BatchInfo(BatchId("2"), Completed),
-      BatchInfo(BatchId("3"), NotProcessed)
+      BatchInfo(BatchId("3"), NotProcessed),
     )
     GetBatchesHandler.getJobStatus(batches) shouldBe CompletedJob
   }

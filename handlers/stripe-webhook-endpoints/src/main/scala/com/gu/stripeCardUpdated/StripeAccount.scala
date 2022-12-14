@@ -1,4 +1,4 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
 sealed abstract class StripeAccount(val string: String)
 

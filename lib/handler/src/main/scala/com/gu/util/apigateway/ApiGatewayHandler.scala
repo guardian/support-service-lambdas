@@ -32,9 +32,13 @@ object ApiGatewayHandler extends Logging {
     for {
 
       jsonString <- inputFromApiGateway(inputStream)
-        .toApiGatewayOp("get json data from API gateway").withLogging("payload from api gateway")
-      apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest]
-        .toApiGatewayOp().withLogging("parsed api gateway object")
+        .toApiGatewayOp("get json data from API gateway")
+        .withLogging("payload from api gateway")
+      apiGatewayRequest <- Json
+        .parse(jsonString)
+        .validate[ApiGatewayRequest]
+        .toApiGatewayOp()
+        .withLogging("parsed api gateway object")
 
     } yield apiGatewayRequest
   }
@@ -46,8 +50,8 @@ object ApiGatewayHandler extends Logging {
   }
 
   case class Operation(
-    steps: ApiGatewayRequest => ApiResponse,
-    healthcheck: () => ApiResponse
+      steps: ApiGatewayRequest => ApiResponse,
+      healthcheck: () => ApiResponse,
   ) {
 
     def prependRequestValidationToSteps(validate: ApiGatewayRequest => ApiGatewayOp[Unit]): Operation = {
@@ -66,8 +70,8 @@ object ApiGatewayHandler extends Logging {
     def noHealthcheck(steps: ApiGatewayRequest => ApiResponse) =
       Operation(steps, () => ApiGatewayResponse.successfulExecution)
     def async(
-      steps: ApiGatewayRequest => Future[ApiResponse],
-      healthcheck: () => ApiResponse
+        steps: ApiGatewayRequest => Future[ApiResponse],
+        healthcheck: () => ApiResponse,
     ) = {
       def syncSteps(request: ApiGatewayRequest) = Await.result(steps(request), Duration.Inf)
       Operation(syncSteps _, healthcheck)

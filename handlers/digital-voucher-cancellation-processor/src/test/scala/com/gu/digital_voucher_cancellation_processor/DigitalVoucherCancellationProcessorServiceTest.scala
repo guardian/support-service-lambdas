@@ -31,12 +31,12 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
     client_secret = "unit-test-client-secret",
     username = "unit-tests@guardian.co.uk.dev",
     password = "unit-test-password",
-    token = "unit-test-token"
+    token = "unit-test-token",
   )
 
   val authResponse = SalesforceAuth(
     access_token = "unit-test-access-token",
-    instance_url = "https://unit-test-instance-url.salesforce.com"
+    instance_url = "https://unit-test-instance-url.salesforce.com",
   )
 
   val imovoConfig = ImovoConfig("https://unit-test.imovo.com", "unit-test-imovo-api-key")
@@ -50,8 +50,10 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
     CObjectAttribues(s"/services/data/v$salesforceApiVersion/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId"),
     SubscriptionQueryResult(
       s"sf-subscription-id-$resultId",
-      CObjectAttribues(s"/services/data/v$salesforceApiVersion/sobjects/SF_Subscription__c/sf-subscription-id-$resultId")
-    )
+      CObjectAttribues(
+        s"/services/data/v$salesforceApiVersion/sobjects/SF_Subscription__c/sf-subscription-id-$resultId",
+      ),
+    ),
   )
 
   private def salesforceVoucherUpdate(resultId: String) = {
@@ -59,7 +61,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
       s"digital-voucher-id-$resultId",
       "PATCH",
       s"/services/data/v$salesforceApiVersion/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId",
-      DigitalVoucherUpdate(now, "Deactivated")
+      DigitalVoucherUpdate(now, "Deactivated"),
     )
   }
 
@@ -74,48 +76,52 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
             response = QueryRecordsWrapperCaseClass(
               List(
                 voucherToCancelQueryResult("valid-sub-1"),
-                voucherToCancelQueryResult("valid-sub-2")
+                voucherToCancelQueryResult("valid-sub-2"),
               ),
-              None
-            )
+              None,
+            ),
           )
           .stubSubscriptionCancel(
             config = imovoConfig,
             subscriptionId = "sf-subscription-id-valid-sub-1",
             lastActiveDate = None,
-            response = ImovoSuccessResponse("OK", true)
+            response = ImovoSuccessResponse("OK", true),
           )
           .stubSubscriptionCancel(
             config = imovoConfig,
             subscriptionId = "sf-subscription-id-valid-sub-2",
             lastActiveDate = None,
-            response = ImovoSuccessResponse("OK", true)
+            response = ImovoSuccessResponse("OK", true),
           )
           .stubComposite(
             auth = authResponse,
-            expectedRequest = Some(SFApiCompositeRequest(
-              true,
-              false,
-              List(
-                salesforceVoucherUpdate("valid-sub-1"),
-                salesforceVoucherUpdate("valid-sub-2")
-              )
-            )),
+            expectedRequest = Some(
+              SFApiCompositeRequest(
+                true,
+                false,
+                List(
+                  salesforceVoucherUpdate("valid-sub-1"),
+                  salesforceVoucherUpdate("valid-sub-2"),
+                ),
+              ),
+            ),
             response = SFApiCompositeResponse(
               List(
                 SFApiCompositeResponsePart(200, "VoucherUpdated"),
-                SFApiCompositeResponsePart(200, "VoucherUpdated")
-              )
-            )
+                SFApiCompositeResponsePart(200, "VoucherUpdated"),
+              ),
+            ),
           )
 
       runApp(salesforceBackendStub, testClock) should ===(
         Right(
-          ImovoCancellationResults(successfullyCancelled = List(
-            voucherToCancelQueryResult("valid-sub-1"),
-            voucherToCancelQueryResult("valid-sub-2")
-          ))
-        )
+          ImovoCancellationResults(successfullyCancelled =
+            List(
+              voucherToCancelQueryResult("valid-sub-1"),
+              voucherToCancelQueryResult("valid-sub-2"),
+            ),
+          ),
+        ),
       )
     }
 
@@ -129,16 +135,16 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           response = QueryRecordsWrapperCaseClass(
             List(
               voucherToCancelQueryResult("valid-sub"),
-              voucherToCancelQueryResult("already-cancelled")
+              voucherToCancelQueryResult("already-cancelled"),
             ),
-            None
-          )
+            None,
+          ),
         )
         .stubSubscriptionCancel(
           config = imovoConfig,
           subscriptionId = "sf-subscription-id-valid-sub",
           lastActiveDate = None,
-          response = ImovoSuccessResponse("OK", true)
+          response = ImovoSuccessResponse("OK", true),
         )
         .stubSubscriptionCancel(
           config = imovoConfig,
@@ -146,25 +152,27 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           lastActiveDate = None,
           response = ImovoErrorResponse(
             List("Unable to cancel vouchers: no live subscription vouchers exist for the supplied subscription id"),
-            false
-          )
+            false,
+          ),
         )
         .stubComposite(
           auth = authResponse,
-          expectedRequest = Some(SFApiCompositeRequest(
-            true,
-            false,
-            List(
-              salesforceVoucherUpdate("valid-sub"),
-              salesforceVoucherUpdate("already-cancelled")
-            )
-          )),
+          expectedRequest = Some(
+            SFApiCompositeRequest(
+              true,
+              false,
+              List(
+                salesforceVoucherUpdate("valid-sub"),
+                salesforceVoucherUpdate("already-cancelled"),
+              ),
+            ),
+          ),
           response = SFApiCompositeResponse(
             List(
               SFApiCompositeResponsePart(200, "VoucherUpdated"),
-              SFApiCompositeResponsePart(200, "VoucherUpdated")
-            )
-          )
+              SFApiCompositeResponsePart(200, "VoucherUpdated"),
+            ),
+          ),
         )
 
     inside(runApp(salesforceBackendStub, testClock)) {
@@ -173,8 +181,8 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
         message should include(
           ImovoCancellationResults(
             successfullyCancelled = List(voucherToCancelQueryResult("valid-sub")),
-            alreadyCancelled = List(voucherToCancelQueryResult("already-cancelled"))
-          ).show
+            alreadyCancelled = List(voucherToCancelQueryResult("already-cancelled")),
+          ).show,
         )
     }
   }
@@ -189,16 +197,16 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           response = QueryRecordsWrapperCaseClass(
             List(
               voucherToCancelQueryResult("valid-sub"),
-              voucherToCancelQueryResult("imovo-failure")
+              voucherToCancelQueryResult("imovo-failure"),
             ),
-            None
-          )
+            None,
+          ),
         )
         .stubSubscriptionCancel(
           config = imovoConfig,
           subscriptionId = "sf-subscription-id-valid-sub",
           lastActiveDate = None,
-          response = ImovoSuccessResponse("OK", true)
+          response = ImovoSuccessResponse("OK", true),
         )
         .stubSubscriptionCancel(
           config = imovoConfig,
@@ -206,23 +214,25 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           lastActiveDate = None,
           response = ImovoErrorResponse(
             List("Unexpected error"),
-            false
-          )
+            false,
+          ),
         )
         .stubComposite(
           auth = authResponse,
-          expectedRequest = Some(SFApiCompositeRequest(
-            true,
-            false,
-            List(
-              salesforceVoucherUpdate("valid-sub")
-            )
-          )),
+          expectedRequest = Some(
+            SFApiCompositeRequest(
+              true,
+              false,
+              List(
+                salesforceVoucherUpdate("valid-sub"),
+              ),
+            ),
+          ),
           response = SFApiCompositeResponse(
             List(
-              SFApiCompositeResponsePart(200, "VoucherUpdated")
-            )
-          )
+              SFApiCompositeResponsePart(200, "VoucherUpdated"),
+            ),
+          ),
         )
 
     runApp(salesforceBackendStub, testClock) should ===(
@@ -244,12 +254,12 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
                   |    "Unexpected error"
                   |  ],
                   |  "successfulRequest" : false
-                  |}""".stripMargin
-              )
-            )
-          )
-        )
-      )
+                  |}""".stripMargin,
+              ),
+            ),
+          ),
+        ),
+      ),
     )
   }
 
@@ -262,8 +272,8 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           query = subscriptionsCancelledTodayQuery,
           response = QueryRecordsWrapperCaseClass(
             records = List[SFApiCompositePart[DigitalVoucherUpdate]](),
-            nextRecordsUrl = None
-          )
+            nextRecordsUrl = None,
+          ),
         )
 
     runApp(salesforceBackendStub, testClock) should ===(Right(ImovoCancellationResults()))
@@ -279,39 +289,41 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           response = QueryRecordsWrapperCaseClass(
             List(
               voucherToCancelQueryResult("valid-sub"),
-              voucherToCancelQueryResult("salesforce-failure")
+              voucherToCancelQueryResult("salesforce-failure"),
             ),
-            None
-          )
+            None,
+          ),
         )
         .stubSubscriptionCancel(
           config = imovoConfig,
           subscriptionId = "sf-subscription-id-valid-sub",
           lastActiveDate = None,
-          response = ImovoSuccessResponse("OK", true)
+          response = ImovoSuccessResponse("OK", true),
         )
         .stubSubscriptionCancel(
           config = imovoConfig,
           subscriptionId = "sf-subscription-id-salesforce-failure",
           lastActiveDate = None,
-          response = ImovoSuccessResponse("OK", true)
+          response = ImovoSuccessResponse("OK", true),
         )
         .stubComposite(
           auth = authResponse,
-          expectedRequest = Some(SFApiCompositeRequest(
-            true,
-            false,
-            List(
-              salesforceVoucherUpdate("valid-sub"),
-              salesforceVoucherUpdate("salesforce-failure")
-            )
-          )),
+          expectedRequest = Some(
+            SFApiCompositeRequest(
+              true,
+              false,
+              List(
+                salesforceVoucherUpdate("valid-sub"),
+                salesforceVoucherUpdate("salesforce-failure"),
+              ),
+            ),
+          ),
           response = SFApiCompositeResponse(
             List(
               SFApiCompositeResponsePart(200, "VoucherUpdated"),
-              SFApiCompositeResponsePart(500, "VoucherUpdateFailed")
-            )
-          )
+              SFApiCompositeResponsePart(500, "VoucherUpdateFailed"),
+            ),
+          ),
         )
 
     inside(runApp(salesforceBackendStub, testClock)) {
@@ -322,5 +334,9 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
   }
 
   private def runApp(salesforceBackendStub: SttpBackendStub[IO, Nothing], testClock: Clock) =
-    DigitalVoucherCancellationProcessorApp(DevIdentity("digital-voucher-cancellation-processor"), salesforceBackendStub, testClock).value.unsafeRunSync()
+    DigitalVoucherCancellationProcessorApp(
+      DevIdentity("digital-voucher-cancellation-processor"),
+      salesforceBackendStub,
+      testClock,
+    ).value.unsafeRunSync()
 }

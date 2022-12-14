@@ -21,7 +21,12 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
 
   val zuoraResult = List(
     ZuoraAccountIdentitySFContact(AccountId("acc"), None, personContact, CrmId("crmId")), // customer's direct sub
-    ZuoraAccountIdentitySFContact(AccountId("acc2"), None, SFContactId("sf2"), CrmId("crmId")) // same customer's gift sub
+    ZuoraAccountIdentitySFContact(
+      AccountId("acc2"),
+      None,
+      SFContactId("sf2"),
+      CrmId("crmId"),
+    ), // same customer's gift sub
   )
 
   it should "go through a happy case" in {
@@ -31,15 +36,15 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
         _ => ContinueProcessing(zuoraResult),
         _ => ContinueProcessing(()),
         _ => ContinueProcessing(()),
-        _ => ContinueProcessing(salesforceResult)
+        _ => ContinueProcessing(salesforceResult),
       )(EmailAddress("email@address"))
 
     val expectedResult = ContinueProcessing(
       PreReqResult(
         Set(AccountId("acc"), AccountId("acc2")),
         Some(personContact),
-        Some(IdentityId("asdf"))
-      )
+        Some(IdentityId("asdf")),
+      ),
     )
 
     result should be(expectedResult)
@@ -53,15 +58,15 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
         _ => ContinueProcessing(zuoraResult),
         _ => ContinueProcessing(()),
         _ => ContinueProcessing(()),
-        _ => ContinueProcessing(salesforceResult)
+        _ => ContinueProcessing(salesforceResult),
       )(EmailAddress("email@address"))
 
     val expectedResult = ContinueProcessing(
       PreReqResult(
         Set(AccountId("acc"), AccountId("acc2")),
         Some(personContact),
-        None
-      )
+        None,
+      ),
     )
 
     result should be(expectedResult)
@@ -89,7 +94,9 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
   "checkSfContactsSyncable" should "ReturnWithResponse if more than one CRM account" in {
     val errorResponse = ApiGatewayResponse.badRequest("foo")
     val ReturnWithResponse(result) = PreReqCheck
-      .checkSfContactsSyncable(_ => ReturnWithResponse(errorResponse))(Set(SFAccountId("crmId1"), SFAccountId("crmId2")))
+      .checkSfContactsSyncable(_ => ReturnWithResponse(errorResponse))(
+        Set(SFAccountId("crmId1"), SFAccountId("crmId2")),
+      )
     result.body should include("more than one CRM account")
     result.body shouldNot include("foo")
   }
@@ -109,10 +116,10 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
             AccountId("acc"),
             Some(IdentityId("haha")),
             SFContactId("sf"),
-            CrmId("asf")
-          )
-        )
-      )
+            CrmId("asf"),
+          ),
+        ),
+      ),
     )(EmailAddress("email@gu.com"))
 
     result.statusCode shouldBe "400"
@@ -129,16 +136,16 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
             AccountId("acc"),
             None,
             SFContactId("sf"),
-            CrmId("CrmId")
+            CrmId("CrmId"),
           ),
           ZuoraAccountIdentitySFContact(
             AccountId("acc2"),
             None,
             SFContactId("sf2"),
-            CrmId("CrmId2")
-          )
-        )
-      )
+            CrmId("CrmId2"),
+          ),
+        ),
+      ),
     )(EmailAddress("email@gu.com"))
 
     result.statusCode shouldBe "400"
@@ -148,7 +155,8 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
 
   "validateZuoraAccountsFound" should "stop processing if no zuora accounts found" in {
 
-    val ReturnWithResponse(result) = PreReqCheck.validateZuoraAccountsFound(ClientSuccess(Nil))(EmailAddress("email@gu.com"))
+    val ReturnWithResponse(result) =
+      PreReqCheck.validateZuoraAccountsFound(ClientSuccess(Nil))(EmailAddress("email@gu.com"))
 
     result.statusCode shouldBe "400"
     result.body should include("no zuora accounts found for")
@@ -169,7 +177,7 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
       email => fail("shouldn't be called 1"),
       identityId => fail("shouldn't be called 2"),
       _ => fail("shouldn't be called 3"),
-      _ => fail("shouldn't be called 4")
+      _ => fail("shouldn't be called 4"),
     )(EmailAddress("email@address"))
   }
 
@@ -191,16 +199,22 @@ class PreReqCheckTest extends AnyFlatSpec with Matchers {
 
   "acceptable reader type" should "not allow agent" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Agent"))
-    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(Left("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(
+      Left("404"),
+    )
   }
 
   "acceptable reader type" should "not allow gift" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Gift"))
-    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(Left("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(
+      Left("404"),
+    )
   }
 
   "acceptable reader type" should "not allow a combination of valid and invalid" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Direct"), ReaderType.ReaderTypeValue("Gift"))
-    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(Left("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(
+      Left("404"),
+    )
   }
 }

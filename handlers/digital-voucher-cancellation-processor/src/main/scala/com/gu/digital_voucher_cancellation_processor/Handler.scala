@@ -18,13 +18,19 @@ object Handler extends LazyLogging {
 
     implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
-    val results = AsyncHttpClientCatsBackend[IO]().flatMap { sttpBackend =>
-      DigitalVoucherCancellationProcessorApp(AppIdentity.whoAmI(defaultAppName = "digital-voucher-api"), sttpBackend).value
-    }.unsafeRunSync()
+    val results = AsyncHttpClientCatsBackend[IO]()
+      .flatMap { sttpBackend =>
+        DigitalVoucherCancellationProcessorApp(
+          AppIdentity.whoAmI(defaultAppName = "digital-voucher-api"),
+          sttpBackend,
+        ).value
+      }
+      .unsafeRunSync()
       .valueOr { error =>
         logger.error(s"Processor failed: ${error.toString}")
         throw new RuntimeException(error.toString)
-      }.show
+      }
+      .show
     logger.info(s"Processor ran successfully: ${results.show}")
     os.write(s"Processor ran successfully: ${results.show}".getBytes("UTF-8"))
   }

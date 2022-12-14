@@ -19,7 +19,7 @@ object LoadConfigModule extends Logging {
 
   val bucketName = "gu-reader-revenue-private"
 
-  //we need this extra class here because otherwise we cannot partially apply the LoadConfig apply method without specifying the generic param
+  // we need this extra class here because otherwise we cannot partially apply the LoadConfig apply method without specifying the generic param
   class PartialApply(stage: Stage, fetchString: StringFromS3) {
     def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): Either[ConfigFailure, CONF] = {
       logger.info(s"Attempting to load config in $stage")
@@ -38,7 +38,8 @@ object LoadConfigModule extends Logging {
   def validateStage(jsValue: JsValue, expectedStage: Stage): Either[ConfigFailure, Unit] = {
     jsValue.validate[ConfigWithStage] match {
       case JsSuccess(ConfigWithStage(expectedStage.value), _) => Right(())
-      case JsSuccess(ConfigWithStage(otherStage), _) => Left(ConfigFailure(s"Expected to load ${expectedStage.value} config, but loaded $otherStage config"))
+      case JsSuccess(ConfigWithStage(otherStage), _) =>
+        Left(ConfigFailure(s"Expected to load ${expectedStage.value} config, but loaded $otherStage config"))
       case JsError(error) => Left(ConfigFailure(s"could not parse stage in configuration file: ${error}"))
     }
   }

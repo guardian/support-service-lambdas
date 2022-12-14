@@ -12,13 +12,13 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 object UpdateSFContacts {
 
   def apply(
-    setOrClearIdentityId: SetOrClearIdentityId
+      setOrClearIdentityId: SetOrClearIdentityId,
   ): UpdateSFContacts = (
-    sfContactId: WinningSFContact,
-    maybeMoveIdentityIdData: Option[IdentityIdMoveData],
-    firstName: Option[FirstName],
-    maybeSFAddressOverride: SFAddressOverride,
-    maybeOverwriteEmailAddress: Option[EmailAddress]
+      sfContactId: WinningSFContact,
+      maybeMoveIdentityIdData: Option[IdentityIdMoveData],
+      firstName: Option[FirstName],
+      maybeSFAddressOverride: SFAddressOverride,
+      maybeOverwriteEmailAddress: Option[EmailAddress],
   ) =>
     for {
       _ <- maybeMoveIdentityIdData.map(_.oldSFContact) match {
@@ -33,7 +33,7 @@ object UpdateSFContacts {
           maybeMoveIdentityIdData.map(_.identityIdUpdate.value),
           firstName.map(SetFirstName.apply).getOrElse(DummyFirstName),
           maybeSFAddressOverride,
-          maybeOverwriteEmailAddress
+          maybeOverwriteEmailAddress,
         )
         setOrClearIdentityId.apply(sfContactId.id, sFContactUpdate) // this causes the sync to identity and zuora
       }
@@ -49,11 +49,11 @@ object UpdateSFContacts {
 trait UpdateSFContacts {
 
   def apply(
-    sfContactId: WinningSFContact,
-    maybeMoveIdentityIdData: Option[IdentityIdMoveData],
-    firstNameToUse: Option[FirstName],
-    maybeSFAddressOverride: SFAddressOverride,
-    maybeOverwriteEmailAddress: Option[EmailAddress]
+      sfContactId: WinningSFContact,
+      maybeMoveIdentityIdData: Option[IdentityIdMoveData],
+      firstNameToUse: Option[FirstName],
+      maybeSFAddressOverride: SFAddressOverride,
+      maybeOverwriteEmailAddress: Option[EmailAddress],
   ): ClientFailableOp[Unit]
 
 }

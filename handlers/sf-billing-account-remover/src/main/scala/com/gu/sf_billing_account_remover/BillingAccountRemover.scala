@@ -12,52 +12,52 @@ import scala.util.Try
 
 object BillingAccountRemover extends App with LazyLogging {
 
-  //Salesforce
+  // Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
 
   case class SfGetBillingAccsResponse(
-    done: Boolean,
-    records: Seq[BillingAccountsRecords.Records],
-    nextRecordsUrl: Option[String] = None
+      done: Boolean,
+      records: Seq[BillingAccountsRecords.Records],
+      nextRecordsUrl: Option[String] = None,
   )
 
   case class SfGetCustomSettingResponse(
-    done: Boolean,
-    records: Seq[CustomSettingRecords.Records]
+      done: Boolean,
+      records: Seq[CustomSettingRecords.Records],
   )
 
   case class Attributes(`type`: String)
 
   case class SfBillingAccountToUpdate(
-    id: String,
-    GDPR_Removal_Attempts__c: Int,
-    GDPR_Date_Last_Removal_Attempt__c: LocalDateTime = LocalDateTime.now(),
-    attributes: Attributes = Attributes(`type` = "Zuora__CustomerAccount__c")
+      id: String,
+      GDPR_Removal_Attempts__c: Int,
+      GDPR_Date_Last_Removal_Attempt__c: LocalDateTime = LocalDateTime.now(),
+      attributes: Attributes = Attributes(`type` = "Zuora__CustomerAccount__c"),
   )
 
   case class SfBillingAccountsToUpdate(
-    allOrNone: Boolean,
-    records: Seq[SfBillingAccountToUpdate]
+      allOrNone: Boolean,
+      records: Seq[SfBillingAccountToUpdate],
   )
 
   case class SfErrorRecordToCreate(
-    Type__c: String,
-    Info__c: String,
-    Message__c: String,
-    attributes: Attributes = Attributes(
-      `type` = "Apex_Error__c"
-    )
+      Type__c: String,
+      Info__c: String,
+      Message__c: String,
+      attributes: Attributes = Attributes(
+        `type` = "Apex_Error__c",
+      ),
   )
 
   case class SfErrorRecordsToCreate(
-    allOrNone: Boolean,
-    records: Seq[SfErrorRecordToCreate]
+      allOrNone: Boolean,
+      records: Seq[SfErrorRecordToCreate],
   )
 
-  //Zuora
+  // Zuora
   case class BillingAccountsForRemoval(
-    CrmId: String = "",
-    Status: String = "Canceled"
+      CrmId: String = "",
+      Status: String = "Canceled",
   )
   case class Errors(Code: String, Message: String)
   case class ZuoraResponse(Success: Boolean, Errors: Seq[Errors])
@@ -81,13 +81,13 @@ object BillingAccountRemover extends App with LazyLogging {
       clientSecret = sfClientSecret,
       password = sfPassword,
       token = sfToken,
-      authUrl = sfAuthUrl
+      authUrl = sfAuthUrl,
     ),
     ZuoraConfig(
       apiAccessKeyId = zuoraApiAccessKeyId,
       apiSecretAccessKey = zuoraApiSecretAccessKey,
-      zuoraInstanceUrl = zuoraInstanceUrl
-    )
+      zuoraInstanceUrl = zuoraInstanceUrl,
+    ),
   )
   processBillingAccounts()
 
@@ -100,13 +100,13 @@ object BillingAccountRemover extends App with LazyLogging {
       maxAttempts = getCustomSettingResponse.records.headOption
         .getOrElse(
           throw new RuntimeException(
-            "There should be at least one record returned for MaxAttempts"
-          )
+            "There should be at least one record returned for MaxAttempts",
+          ),
         )
         .Property_Value__c
       getBillingAccountsResponse <- getSfBillingAccounts(
         maxAttempts,
-        sfAuthDetails
+        sfAuthDetails,
       )
     } yield {
       val sfRecords = getBillingAccountsResponse.records
@@ -132,8 +132,8 @@ object BillingAccountRemover extends App with LazyLogging {
           "client_id" -> salesforceConfig.clientId,
           "client_secret" -> salesforceConfig.clientSecret,
           "username" -> salesforceConfig.username,
-          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
-        )
+          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}",
+        ),
       )
       .asString
       .body
@@ -141,7 +141,7 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def getSfCustomSetting(
-    sfAuthentication: SfAuthDetails
+      sfAuthentication: SfAuthDetails,
   ): Either[Error, SfGetCustomSettingResponse] = {
     logger.info("Getting GDPR Max Number of Removal Attempts Custom Setting value from Salesforce...")
 
@@ -149,13 +149,13 @@ object BillingAccountRemover extends App with LazyLogging {
       "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
 
     decode[SfGetCustomSettingResponse](
-      doSfGetWithQuery(sfAuthentication, query)
+      doSfGetWithQuery(sfAuthentication, query),
     )
   }
 
   def getSfBillingAccounts(
-    maxAttempts: Int,
-    sfAuthentication: SfAuthDetails
+      maxAttempts: Int,
+      sfAuthentication: SfAuthDetails,
   ): Either[Error, SfGetBillingAccsResponse] = {
     logger.info("Getting Billing Accounts from Salesforce...")
 
@@ -178,14 +178,14 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def doSfCompositeRequest(
-    sfAuthDetails: SfAuthDetails,
-    jsonBody: String,
-    requestType: String
+      sfAuthDetails: SfAuthDetails,
+      jsonBody: String,
+      requestType: String,
   ): Either[Throwable, String] = {
 
     Try {
       Http(
-        s"${sfAuthDetails.instance_url}/services/data/v54.0/composite/sobjects"
+        s"${sfAuthDetails.instance_url}/services/data/v54.0/composite/sobjects",
       ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
         .put(jsonBody)
@@ -196,16 +196,15 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def parseBillingAccountsFromSf(
-    billingAccountList: String
+      billingAccountList: String,
   ): Either[Exception, Seq[BillingAccountsRecords.Records]] =
-    decode[SfGetBillingAccsResponse](billingAccountList) map {
-      billingAccountsObject =>
-        billingAccountsObject.records
+    decode[SfGetBillingAccsResponse](billingAccountList) map { billingAccountsObject =>
+      billingAccountsObject.records
     }
 
   def updateRecordsInZuora(
-    zuoraConfig: ZuoraConfig,
-    recordsForUpdate: Seq[BillingAccountsRecords.Records]
+      zuoraConfig: ZuoraConfig,
+      recordsForUpdate: Seq[BillingAccountsRecords.Records],
   ): Seq[BillingAccountsRecords.Records] = {
 
     logger.info(s"Removing crm Id from ${recordsForUpdate.length} records in Zuora...")
@@ -215,25 +214,25 @@ object BillingAccountRemover extends App with LazyLogging {
       billingAccount <- recordsForUpdate
       zuoraCancellationResponses <- updateBillingAccountInZuora(
         zuoraConfig,
-        billingAccount
+        billingAccount,
       )
     } yield zuoraCancellationResponses
 
   }
 
   def updateBillingAccountInZuora(
-    zuoraConfig: ZuoraConfig,
-    accountToDelete: BillingAccountsRecords.Records
+      zuoraConfig: ZuoraConfig,
+      accountToDelete: BillingAccountsRecords.Records,
   ): Option[BillingAccountsRecords.Records] = {
     logger.info(
-      s"Updating Billing Account in Zuora (${accountToDelete.Zuora__External_Id__c})"
+      s"Updating Billing Account in Zuora (${accountToDelete.Zuora__External_Id__c})",
     )
 
     val response =
       updateZuoraBillingAcc(
         zuoraConfig,
         BillingAccountsForRemoval().asJson.spaces2,
-        accountToDelete.Zuora__External_Id__c
+        accountToDelete.Zuora__External_Id__c,
       )
 
     val parsedResponse = decode[ZuoraResponse](response)
@@ -245,8 +244,8 @@ object BillingAccountRemover extends App with LazyLogging {
           Some(
             accountToDelete.copy(
               ErrorCode = Some(dr.Errors(0).Code),
-              ErrorMessage = Some(dr.Errors(0).Message)
-            )
+              ErrorMessage = Some(dr.Errors(0).Message),
+            ),
           )
         }
       case Left(ex) => {
@@ -257,12 +256,12 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def updateZuoraBillingAcc(
-    zuoraConfig: ZuoraConfig,
-    billingAccountForRemovalAsJson: String,
-    zuoraBillingAccountId: String
+      zuoraConfig: ZuoraConfig,
+      billingAccountForRemovalAsJson: String,
+      zuoraBillingAccountId: String,
   ) = {
     Http(
-      s"${zuoraConfig.zuoraInstanceUrl}/v1/object/account/$zuoraBillingAccountId"
+      s"${zuoraConfig.zuoraInstanceUrl}/v1/object/account/$zuoraBillingAccountId",
     ).header("apiAccessKeyId", zuoraConfig.apiAccessKeyId)
       .header("apiSecretAccessKey", zuoraConfig.apiSecretAccessKey)
       .header("Content-Type", "application/json")
@@ -273,8 +272,8 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def writeErrorsBackToSf(
-    sfAuthDetails: SfAuthDetails,
-    failedUpdates: Seq[BillingAccountsRecords.Records]
+      sfAuthDetails: SfAuthDetails,
+      failedUpdates: Seq[BillingAccountsRecords.Records],
   ): Unit = {
     logger.info(s"Writing ${failedUpdates.length} errors back to Salesforce...")
     logger.info(s"failedUpdates: ${failedUpdates}")
@@ -287,11 +286,11 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def updateBillingAccountsInSf(
-    sfAuthDetails: SfAuthDetails,
-    recordsToUpdate: Seq[BillingAccountsRecords.Records]
+      sfAuthDetails: SfAuthDetails,
+      recordsToUpdate: Seq[BillingAccountsRecords.Records],
   ): Either[Throwable, String] = {
     logger.info(
-      "Updating GDPR_Removal_Attempts__c on Billing Accounts in Salesforce..."
+      "Updating GDPR_Removal_Attempts__c on Billing Accounts in Salesforce...",
     )
 
     val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
@@ -300,8 +299,8 @@ object BillingAccountRemover extends App with LazyLogging {
   }
 
   def insertErrorRecordsInSf(
-    sfAuthDetails: SfAuthDetails,
-    recordsToUpdate: Seq[BillingAccountsRecords.Records]
+      sfAuthDetails: SfAuthDetails,
+      recordsToUpdate: Seq[BillingAccountsRecords.Records],
   ): Either[Throwable, String] = {
     logger.info("Inserting Apex Errors in Salesforce...")
 
@@ -311,13 +310,11 @@ object BillingAccountRemover extends App with LazyLogging {
 
   object SfUpdateBillingAccounts {
     def apply(
-      recordList: Seq[BillingAccountsRecords.Records]
+        recordList: Seq[BillingAccountsRecords.Records],
     ): SfBillingAccountsToUpdate = {
 
       val recordListWithIncrementedGDPRAttempts =
-        recordList.map(
-          a => a.copy(GDPR_Removal_Attempts__c = a.GDPR_Removal_Attempts__c + 1)
-        )
+        recordList.map(a => a.copy(GDPR_Removal_Attempts__c = a.GDPR_Removal_Attempts__c + 1))
 
       val sfBillingAccounts = recordListWithIncrementedGDPRAttempts
         .map(a => SfBillingAccountToUpdate(a.Id, a.GDPR_Removal_Attempts__c))
@@ -329,16 +326,15 @@ object BillingAccountRemover extends App with LazyLogging {
 
   object SfCreateErrorRecords {
     def apply(
-      recordList: Seq[BillingAccountsRecords.Records]
+        recordList: Seq[BillingAccountsRecords.Records],
     ): SfErrorRecordsToCreate = {
       val sfErrorRecords = recordList
-        .map(
-          a =>
-            SfErrorRecordToCreate(
-              Type__c = a.ErrorCode.get,
-              Info__c = "Billing Account Id:" + a.Id,
-              Message__c = a.ErrorMessage.get
-            )
+        .map(a =>
+          SfErrorRecordToCreate(
+            Type__c = a.ErrorCode.get,
+            Info__c = "Billing Account Id:" + a.Id,
+            Message__c = a.ErrorMessage.get,
+          ),
         )
         .toSeq
 

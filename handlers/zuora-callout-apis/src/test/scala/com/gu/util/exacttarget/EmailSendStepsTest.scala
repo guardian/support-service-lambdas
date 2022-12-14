@@ -27,12 +27,12 @@ class EmailSendStepsTest extends AnyFlatSpec with Matchers {
             last_name = "lastNameValue",
             primaryKey = PaymentId("paymentId"),
             serviceStartDate = "31 January 2016",
-            serviceEndDate = "31 January 2017"
-          )
-        )
+            serviceEndDate = "31 January 2017",
+          ),
+        ),
       ),
       "dataExtensionName",
-      SfContactId = "1000000"
+      SfContactId = "1000000",
     )
   }
 
@@ -65,14 +65,16 @@ class EmailSendStepsTest extends AnyFlatSpec with Matchers {
         |  "DataExtensionName": "dataExtensionName",
         |  "SfContactId": "1000000"
         |}
-      """.stripMargin
+      """.stripMargin,
     )
   }
 
   "EmailSendSteps" should "return with response on failure" in {
     def sqsSend(payload: Payload): Try[Unit] = Failure(new RuntimeException("foo"))
 
-    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe GenericError("failure to send email payload to sqs")
+    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe GenericError(
+      "failure to send email payload to sqs",
+    )
   }
 
 }

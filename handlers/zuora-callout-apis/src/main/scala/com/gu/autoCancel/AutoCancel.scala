@@ -14,12 +14,14 @@ import java.time.LocalDate
 object AutoCancel extends Logging {
 
   case class AutoCancelRequest(
-    accountId: String,
-    subToCancel: SubscriptionNumber,
-    cancellationDate: LocalDate
+      accountId: String,
+      subToCancel: SubscriptionNumber,
+      cancellationDate: LocalDate,
   )
 
-  def apply(requests: Requests)(acRequests: List[AutoCancelRequest], urlParams: AutoCancelUrlParams): ApiGatewayOp[Unit] = {
+  def apply(
+      requests: Requests,
+  )(acRequests: List[AutoCancelRequest], urlParams: AutoCancelUrlParams): ApiGatewayOp[Unit] = {
     logger.info(s"dryRun: ${urlParams.dryRun}")
     val ac = executeCancel(requests, urlParams.dryRun) _
     val responses = acRequests.map(cancelReq => ac(cancelReq))
@@ -38,45 +40,70 @@ object AutoCancel extends Logging {
    */
   private def executeCancel(requests: Requests, dryRun: Boolean)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
     val AutoCancelRequest(accountId, subToCancel, cancellationDate) = acRequest
-    logger.info(s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}")
-    val zuoraUpdateCancellationReasonF = if (dryRun) ZuoraUpdateCancellationReason.dryRun(requests) _ else ZuoraUpdateCancellationReason(requests) _
-    val zuoraCancelSubscriptionF = if (dryRun) ZuoraCancelSubscription.dryRun(requests) _ else ZuoraCancelSubscription(requests) _
-    val zuoraGetInvoiceTransactionsF = if (dryRun) ZuoraGetInvoiceTransactions.dryRun(requests) _ else ZuoraGetInvoiceTransactions(requests) _
-    val zuoraTransferToCreditBalanceF = if (dryRun) TransferToCreditBalance.dryRun(requests) _ else TransferToCreditBalance(requests) _
+    logger.info(
+      s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}",
+    )
+    val zuoraUpdateCancellationReasonF =
+      if (dryRun) ZuoraUpdateCancellationReason.dryRun(requests) _ else ZuoraUpdateCancellationReason(requests) _
+    val zuoraCancelSubscriptionF =
+      if (dryRun) ZuoraCancelSubscription.dryRun(requests) _ else ZuoraCancelSubscription(requests) _
+    val zuoraGetInvoiceTransactionsF =
+      if (dryRun) ZuoraGetInvoiceTransactions.dryRun(requests) _ else ZuoraGetInvoiceTransactions(requests) _
+    val zuoraTransferToCreditBalanceF =
+      if (dryRun) TransferToCreditBalance.dryRun(requests) _ else TransferToCreditBalance(requests) _
     val zuoraApplyCreditBalanceF = if (dryRun) ApplyCreditBalance.dryRun(requests) _ else ApplyCreditBalance(requests) _
     val zuoraOp = for {
       _ <- zuoraUpdateCancellationReasonF(subToCancel).withLogging("updateCancellationReason")
       cancellationResponse <- zuoraCancelSubscriptionF(subToCancel, cancellationDate).withLogging("cancelSubscription")
       invoiceTransactionSummary <- zuoraGetInvoiceTransactionsF(accountId)
-      unbalancedInvoices <- UnbalancedInvoices.fromSummary(accountId, invoiceTransactionSummary, cancellationResponse.invoiceId)
+      unbalancedInvoices <- UnbalancedInvoices.fromSummary(
+        accountId,
+        invoiceTransactionSummary,
+        cancellationResponse.invoiceId,
+      )
       creditTransferAmount = -unbalancedInvoices.negativeInvoice.balance
-      _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation").withLogging("transferToCreditBalance")
-      _ <- applyCreditBalances(zuoraApplyCreditBalanceF)(subToCancel, unbalancedInvoices.unpaidInvoices, "Auto-cancellation").withLogging("applyCreditBalance")
+      _ <- zuoraTransferToCreditBalanceF(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation")
+        .withLogging("transferToCreditBalance")
+      _ <- applyCreditBalances(zuoraApplyCreditBalanceF)(
+        subToCancel,
+        unbalancedInvoices.unpaidInvoices,
+        "Auto-cancellation",
+      ).withLogging("applyCreditBalance")
     } yield ()
     zuoraOp.toApiGatewayOp("AutoCancel failed")
   }
 
   private[autoCancel] def applyCreditBalances(applyCreditBalance: (String, Double, String) => ClientFailableOp[Unit])(
-    subToCancel: SubscriptionNumber, invoices: Seq[ItemisedInvoice], comment: String
+      subToCancel: SubscriptionNumber,
+      invoices: Seq[ItemisedInvoice],
+      comment: String,
   ): ClientFailableOp[Unit] = {
-    invoices.map(invoice =>
-      invoice.invoiceItems.length match {
-        case 0 => GenericError(s"Invoice ${invoice.id} has no items")
-        case 1 => applyCreditBalance(invoice.id, invoice.balance, comment)
-        case _ =>
-          invoice.invoiceItems.filter(_.subscriptionName == subToCancel.value) match {
-            case Nil => GenericError(s"Invoice ${invoice.id} isn't for subscription $subToCancel")
-            case items =>
-              val amount = items.map(_.chargeAmount).sum
-              applyCreditBalance(invoice.id, amount, comment)
-          }
-      }).collectFirst { case failure: ClientFailure => failure }.getOrElse(ClientSuccess(()))
+    invoices
+      .map(invoice =>
+        invoice.invoiceItems.length match {
+          case 0 => GenericError(s"Invoice ${invoice.id} has no items")
+          case 1 => applyCreditBalance(invoice.id, invoice.balance, comment)
+          case _ =>
+            invoice.invoiceItems.filter(_.subscriptionName == subToCancel.value) match {
+              case Nil => GenericError(s"Invoice ${invoice.id} isn't for subscription $subToCancel")
+              case items =>
+                val amount = items.map(_.chargeAmount).sum
+                applyCreditBalance(invoice.id, amount, comment)
+            }
+        },
+      )
+      .collectFirst { case failure: ClientFailure => failure }
+      .getOrElse(ClientSuccess(()))
   }
 
   case class UnbalancedInvoices(negativeInvoice: ItemisedInvoice, unpaidInvoices: Seq[ItemisedInvoice])
 
   object UnbalancedInvoices {
-    def fromSummary(accountId: String, summary: InvoiceTransactionSummary, idOfNegativeInvoice: String): ClientFailableOp[UnbalancedInvoices] =
+    def fromSummary(
+        accountId: String,
+        summary: InvoiceTransactionSummary,
+        idOfNegativeInvoice: String,
+    ): ClientFailableOp[UnbalancedInvoices] =
       for {
         negativeInvoice <- summary.invoices.find(_.id == idOfNegativeInvoice) match {
           case None => NotFound(s"No negative invoice in account $accountId")

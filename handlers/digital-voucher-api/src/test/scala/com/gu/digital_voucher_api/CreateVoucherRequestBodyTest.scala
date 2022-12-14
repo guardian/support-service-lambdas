@@ -8,16 +8,12 @@ import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
-class CreateVoucherRequestBodyTest
-  extends AnyFlatSpec
-  with should.Matchers
-  with DiffMatcher
-  with EitherValues {
+class CreateVoucherRequestBodyTest extends AnyFlatSpec with should.Matchers with DiffMatcher with EitherValues {
 
   "Json decode" should "decode expected Json object successfully" in {
     val json = """{"ratePlanName": "Weekend"}"""
     decode[CreateVoucherRequestBody](json).value should matchTo(
-      CreateVoucherRequestBody("Weekend")
+      CreateVoucherRequestBody("Weekend"),
     )
   }
 }

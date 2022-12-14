@@ -11,13 +11,21 @@ import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.digipack.DigipackAddressValidator
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GuardianWeeklyDomesticAddressValidator, GuardianWeeklyROWAddressValidator}
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{
+  GuardianWeeklyDomesticAddressValidator,
+  GuardianWeeklyROWAddressValidator,
+}
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
-import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROW6for6, GuardianWeeklyROWQuarterly}
+import com.gu.newproduct.api.productcatalog.PlanId.{
+  GuardianWeeklyDomestic6for6,
+  GuardianWeeklyDomesticQuarterly,
+  GuardianWeeklyROW6for6,
+  GuardianWeeklyROWQuarterly,
+}
 import com.gu.newproduct.api.productcatalog.{ContributionPlanId, _}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -36,20 +44,26 @@ object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, SqsAsync.send(SqsAsync.buildClient), RawEffects.now)
+      Steps.operationForEffects(
+        RawEffects.response,
+        RawEffects.stage,
+        GetFromS3.fetchString,
+        SqsAsync.send(SqsAsync.buildClient),
+        RawEffects.now,
+      )
     }
 }
 
 object Steps {
   def handleRequest(
-    addSupporterPlus: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addGuardianWeeklyDomesticSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addGuardianWeeklyROWSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
+      addSupporterPlus: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+      addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+      addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+      addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+      addGuardianWeeklyDomesticSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+      addGuardianWeeklyROWSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
   )(
-    apiGatewayRequest: ApiGatewayRequest
+      apiGatewayRequest: ApiGatewayRequest,
   ): Future[ApiResponse] = (for {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
     subscriptionName <- request.planId match {
@@ -65,11 +79,11 @@ object Steps {
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
   def operationForEffects(
-    response: Request => Response,
-    stage: Stage,
-    fetchString: StringFromS3,
-    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-    currentDatetime: () => LocalDateTime
+      response: Request => Response,
+      stage: Stage,
+      fetchString: StringFromS3,
+      awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
+      currentDatetime: () => LocalDateTime,
   ): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage).toApiGatewayOp(ApiGatewayResponse.internalServerError _)
@@ -93,7 +107,7 @@ object Steps {
       isValidStartDateForPlan = Function.uncurried(
         catalog.planForId andThen { plan =>
           StartDateValidator.fromRule(validatorFor, plan.startDateRules)
-        }
+        },
       )
       createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription], currentDate) _
 
@@ -105,7 +119,7 @@ object Steps {
         createSubscription,
         awsSQSSend,
         queueNames,
-        currentDate
+        currentDate,
       )
 
       contributionSteps = AddContribution.wireSteps(
@@ -116,7 +130,7 @@ object Steps {
         createSubscription,
         awsSQSSend,
         queueNames,
-        currentDate
+        currentDate,
       )
 
       paperSteps = AddPaperSub.wireSteps(
@@ -127,7 +141,7 @@ object Steps {
         PaperAddressValidator.apply,
         createSubscription,
         awsSQSSend,
-        queueNames
+        queueNames,
       )
 
       digipackSteps = AddDigipackSub.wireSteps(
@@ -139,7 +153,7 @@ object Steps {
         createSubscription,
         awsSQSSend,
         queueNames,
-        currentDate
+        currentDate,
       )
 
       guardianWeeklyDomesticStep = AddGuardianWeeklySub.wireSteps(
@@ -152,7 +166,7 @@ object Steps {
         awsSQSSend,
         queueNames,
         GuardianWeeklyDomestic6for6,
-        GuardianWeeklyDomesticQuarterly
+        GuardianWeeklyDomesticQuarterly,
       )
 
       guardianWeeklyROWStep = AddGuardianWeeklySub.wireSteps(
@@ -165,7 +179,7 @@ object Steps {
         awsSQSSend,
         queueNames,
         GuardianWeeklyROW6for6,
-        GuardianWeeklyROWQuarterly
+        GuardianWeeklyROWQuarterly,
       )
 
       addSubSteps = handleRequest(
@@ -174,15 +188,14 @@ object Steps {
         addPaperSub = paperSteps,
         addDigipackSub = digipackSteps,
         addGuardianWeeklyDomesticSub = guardianWeeklyDomesticStep,
-        addGuardianWeeklyROWSub = guardianWeeklyROWStep
+        addGuardianWeeklyROWSub = guardianWeeklyROWStep,
       ) _
 
       configuredOp = Operation.async(
         steps = addSubSteps,
-        healthcheck = () =>
-          HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage))
+        healthcheck =
+          () => HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage)),
       )
     } yield configuredOp
 
 }
-

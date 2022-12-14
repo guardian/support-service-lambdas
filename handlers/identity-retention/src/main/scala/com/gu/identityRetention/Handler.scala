@@ -16,13 +16,27 @@ object Handler {
 
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    runForLegacyTestsSeeTestingMd(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, LambdaIO(inputStream, outputStream, context))
+    runForLegacyTestsSeeTestingMd(
+      RawEffects.response,
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      LambdaIO(inputStream, outputStream, context),
+    )
   }
 
-  def runForLegacyTestsSeeTestingMd(response: Request => Response, stage: Stage, fetchString: StringFromS3, lambdaIO: LambdaIO) =
+  def runForLegacyTestsSeeTestingMd(
+      response: Request => Response,
+      stage: Stage,
+      fetchString: StringFromS3,
+      lambdaIO: LambdaIO,
+  ) =
     ApiGatewayHandler(lambdaIO)(operationForEffects(response, stage, fetchString))
 
-  def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] = {
+  def operationForEffects(
+      response: Request => Response,
+      stage: Stage,
+      fetchString: StringFromS3,
+  ): ApiGatewayOp[Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config").map { zuoraRestConfig =>
       val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)

@@ -12,7 +12,9 @@ class ValidatePaymentMethodTest extends AnyFlatSpec with Matchers {
   val paymentMethodId = PaymentMethodId("paymentMethodId")
   it should "fail if payment method is not active" in {
     val inactivePaymentMethod = NonDirectDebitMethod(NotActivePaymentMethod, CreditCard)
-    ValidatePaymentMethod(inactivePaymentMethod).shouldBe(Failed("Default payment method status in Zuora account is not active"))
+    ValidatePaymentMethod(inactivePaymentMethod).shouldBe(
+      Failed("Default payment method status in Zuora account is not active"),
+    )
   }
 
   it should "succeed if payment method is active" in {
@@ -23,7 +25,8 @@ class ValidatePaymentMethodTest extends AnyFlatSpec with Matchers {
   it should "fail if payment method is of an unknown type" in {
     val unknownTypePaymentMethod = NonDirectDebitMethod(ActivePaymentMethod, Other)
     val validPaymentTypes = PaymentMethodType.all.filterNot(_ == Other)
-    val expectedMessage = s"Invalid payment method type in Zuora account, must be one of ${validPaymentTypes.mkString(",")}"
+    val expectedMessage =
+      s"Invalid payment method type in Zuora account, must be one of ${validPaymentTypes.mkString(",")}"
     ValidatePaymentMethod(unknownTypePaymentMethod) shouldBe Failed(expectedMessage)
   }
 }

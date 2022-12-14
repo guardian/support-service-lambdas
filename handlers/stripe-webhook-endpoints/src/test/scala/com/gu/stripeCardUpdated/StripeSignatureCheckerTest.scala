@@ -1,6 +1,7 @@
-package com.gu.stripeCustomerSourceUpdated
+package com.gu.stripeCardUpdated
 
-import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
+import com.gu.stripeCardUpdated.{SignatureChecker, StripeAccount, StripeDeps}
+import com.gu.stripeCardUpdated.StripeRequestSignatureChecker.verifyRequest
 import com.gu.util.config.{StripeConfig, StripeSecretKey}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers._
@@ -14,13 +15,23 @@ class StripeRequestSignatureCheckerTest extends AnyFlatSpec {
     val nonsense = "longAlphanumericString"
     val badHeaders = headersWithStripeSignature("1513759648", nonsense)
 
-    val signatureCheckPassed = verifyRequest(headers = badHeaders, payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership_AUS))
+    val signatureCheckPassed = verifyRequest(
+      headers = badHeaders,
+      payload = someBody,
+      stripeDeps = testStripeDeps,
+      stripeAccount = Some(StripeAccount.GNM_Membership_AUS),
+    )
 
     signatureCheckPassed shouldBe (false)
   }
 
   it should "fail if there are no headers" in {
-    val signatureCheckPassed = verifyRequest(headers = Map(), payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership_AUS))
+    val signatureCheckPassed = verifyRequest(
+      headers = Map(),
+      payload = someBody,
+      stripeDeps = testStripeDeps,
+      stripeAccount = Some(StripeAccount.GNM_Membership_AUS),
+    )
 
     signatureCheckPassed shouldBe (false)
   }
@@ -29,7 +40,12 @@ class StripeRequestSignatureCheckerTest extends AnyFlatSpec {
     val nowInSeconds = (System.currentTimeMillis() / 1000).toString
     val headers = headersWithStripeSignature(nowInSeconds, "test signature")
 
-    val signatureCheckPassed = verifyRequest(headers = headers, payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership))
+    val signatureCheckPassed = verifyRequest(
+      headers = headers,
+      payload = someBody,
+      stripeDeps = testStripeDeps,
+      stripeAccount = Some(StripeAccount.GNM_Membership),
+    )
 
     signatureCheckPassed shouldBe (true)
   }
@@ -38,7 +54,12 @@ class StripeRequestSignatureCheckerTest extends AnyFlatSpec {
     val nowInSeconds = (System.currentTimeMillis() / 1000).toString
     val headers = headersWithStripeSignature(nowInSeconds, "test signature")
 
-    val signatureCheckPassed = verifyRequest(headers = headers, payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership_AUS))
+    val signatureCheckPassed = verifyRequest(
+      headers = headers,
+      payload = someBody,
+      stripeDeps = testStripeDeps,
+      stripeAccount = Some(StripeAccount.GNM_Membership_AUS),
+    )
 
     signatureCheckPassed shouldBe (true)
   }
@@ -74,16 +95,27 @@ class StripeRequestSignatureCheckerTest extends AnyFlatSpec {
     """.stripMargin
 
   def headersWithStripeSignature(timestamp: String, signature: String) = Map(
-    "Stripe-Signature" -> s"t=$timestamp,v1=$signature"
+    "Stripe-Signature" -> s"t=$timestamp,v1=$signature",
   )
 
   class FakeStripeSignatureChecker(stripeConfig: StripeConfig) extends SignatureChecker {
-    override def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean = {
+    override def verifySignature(
+        secretKey: StripeSecretKey,
+        payload: String,
+        signatureHeader: Option[String],
+        tolerance: Long,
+    ): Boolean = {
       val signatureHeaderWithoutTimestamp = signatureHeader map { header => header.split("v1=")(1) }
       (secretKey, payload, signatureHeaderWithoutTimestamp, tolerance) match {
-        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.auStripeSecretKey, _, Some("longAlphanumericString"), _) => false
-        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.ukStripeSecretKey, _, Some("test signature"), _) => true
-        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.auStripeSecretKey, _, Some("test signature"), _) => true
+        case (
+              TestData.fakeStripeConfig.customerUpdatedWebhook.auStripeSecretKey,
+              _,
+              Some("longAlphanumericString"),
+              _,
+            ) =>
+          false
+        case (TestData.fakeStripeConfig.customerUpdatedWebhook.ukStripeSecretKey, _, Some("test signature"), _) => true
+        case (TestData.fakeStripeConfig.customerUpdatedWebhook.auStripeSecretKey, _, Some("test signature"), _) => true
         case (_, _, _, _) => false
       }
     }

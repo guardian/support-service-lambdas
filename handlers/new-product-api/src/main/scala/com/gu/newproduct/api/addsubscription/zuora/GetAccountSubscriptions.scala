@@ -11,18 +11,18 @@ object GetAccountSubscriptions {
   object WireModel {
     case class ZuoraSubscriptionsResponse(subscriptions: List[ZuoraSubscription])
     case class ZuoraRatePlan(
-      productRatePlanId: String
+        productRatePlanId: String,
     )
 
     case class ZuoraSubscription(
-      subscriptionNumber: String,
-      status: String,
-      ratePlans: List[ZuoraRatePlan]
+        subscriptionNumber: String,
+        status: String,
+        ratePlans: List[ZuoraRatePlan],
     )
 
     def fromWire(zuoraSubscription: ZuoraSubscription): Subscription = Subscription(
       status = if (zuoraSubscription.status == "Active") Active else NotActive,
-      productRateplanIds = zuoraSubscription.ratePlans.map(rp => ProductRatePlanId(rp.productRatePlanId)).toSet
+      productRateplanIds = zuoraSubscription.ratePlans.map(rp => ProductRatePlanId(rp.productRatePlanId)).toSet,
     )
 
     implicit val zuoraRateplanReads = Json.reads[ZuoraRatePlan]
@@ -39,11 +39,13 @@ object GetAccountSubscriptions {
   object NotActive extends SubscriptionStatus
 
   case class Subscription(
-    status: SubscriptionStatus,
-    productRateplanIds: Set[ProductRatePlanId]
+      status: SubscriptionStatus,
+      productRateplanIds: Set[ProductRatePlanId],
   )
 
-  def apply(get: RequestsGet[ZuoraSubscriptionsResponse])(accountId: ZuoraAccountId): ClientFailableOp[List[Subscription]] =
+  def apply(get: RequestsGet[ZuoraSubscriptionsResponse])(
+      accountId: ZuoraAccountId,
+  ): ClientFailableOp[List[Subscription]] =
     get(s"subscriptions/accounts/${accountId.value}", WithCheck).map(_.subscriptions.map(fromWire))
 
 }

@@ -24,7 +24,9 @@ class StepsTest extends AnyFlatSpec with Matchers {
       val preReqCheck: EmailAddress => ApiGatewayOp[PreReqCheck.PreReqResult] = { email =>
         emailToCheck = Some(email)
         if (succeed)
-          ContinueProcessing(PreReqCheck.PreReqResult(Set(AccountId("acc")), Some(SFContactId("sf")), Some(IdentityId("existing"))))
+          ContinueProcessing(
+            PreReqCheck.PreReqResult(Set(AccountId("acc")), Some(SFContactId("sf")), Some(IdentityId("existing"))),
+          )
         else
           ContinueProcessing(PreReqCheck.PreReqResult(Set(AccountId("acc")), Some(SFContactId("sf")), None))
       }
@@ -38,7 +40,7 @@ class StepsTest extends AnyFlatSpec with Matchers {
         updateSalesforceAccount = (sFContactId, identityId) => {
           salesforceUpdate = Some((sFContactId, identityId))
           ContinueProcessing(())
-        }
+        },
       )
     }
 

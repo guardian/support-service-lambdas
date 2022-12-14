@@ -1,7 +1,18 @@
 package com.gu.sf_gocardless_sync.gocardless
 
 import ai.x.play.json.Jsonx
-import com.gu.sf_gocardless_sync.SyncSharedObjects.{BankAccountNumberEnding, BankName, Cause, Description, GoCardlessMandateID, GoCardlessMandateEventID, MandateCreatedAt, ReasonCode, Reference, Status}
+import com.gu.sf_gocardless_sync.SyncSharedObjects.{
+  BankAccountNumberEnding,
+  BankName,
+  Cause,
+  Description,
+  GoCardlessMandateID,
+  GoCardlessMandateEventID,
+  MandateCreatedAt,
+  ReasonCode,
+  Reference,
+  Status,
+}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -18,10 +29,10 @@ object GoCardlessDDMandateEvent extends Logging {
   implicit val linksReads = Json.reads[GoCardlessMandateLinks]
 
   case class GoCardlessMandateDetail(
-    id: GoCardlessMandateID,
-    created_at: MandateCreatedAt,
-    reference: Reference,
-    links: GoCardlessMandateLinks
+      id: GoCardlessMandateID,
+      created_at: MandateCreatedAt,
+      reference: Reference,
+      links: GoCardlessMandateLinks,
   )
   implicit val detailsReads = Json.reads[GoCardlessMandateDetail]
 
@@ -35,44 +46,49 @@ object GoCardlessDDMandateEvent extends Logging {
     implicit val linksReads = Json.reads[GoCardlessEventLinks]
 
     case class GoCardlessEventDetails(
-      cause: Cause,
-      description: Description,
-      reason_code: Option[ReasonCode]
+        cause: Cause,
+        description: Description,
+        reason_code: Option[ReasonCode],
     )
     implicit val detailsReads = Json.reads[GoCardlessEventDetails]
 
     case class GoCardlessMandateEvent(
-      id: GoCardlessMandateEventID,
-      created_at: String,
-      action: Status,
-      links: GoCardlessEventLinks,
-      details: GoCardlessEventDetails
+        id: GoCardlessMandateEventID,
+        created_at: String,
+        action: Status,
+        links: GoCardlessEventLinks,
+        details: GoCardlessEventDetails,
     )
     implicit val reads = Json.reads[GoCardlessMandateEvent]
 
     case class GoCardlessLinkedMandates(
-      mandates: List[GoCardlessMandateDetail]
+        mandates: List[GoCardlessMandateDetail],
     )
     implicit val readsLinked = Json.reads[GoCardlessLinkedMandates]
 
     private case class MandateEventsResponse(
-      events: List[GoCardlessMandateEvent],
-      linked: GoCardlessLinkedMandates
+        events: List[GoCardlessMandateEvent],
+        linked: GoCardlessLinkedMandates,
     )
     private implicit val readsEvents = Json.reads[MandateEventsResponse]
 
     case class MandateEventWithMandateDetail(
-      event: GoCardlessMandateEvent,
-      mandate: GoCardlessMandateDetail
+        event: GoCardlessMandateEvent,
+        mandate: GoCardlessMandateDetail,
     )
 
-    def apply(gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue], batchSize: Int): GoCardlessMandateEventID => ClientFailableOp[List[MandateEventWithMandateDetail]] =
+    def apply(
+        gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue],
+        batchSize: Int,
+    ): GoCardlessMandateEventID => ClientFailableOp[List[MandateEventWithMandateDetail]] =
       gcGet.setupRequest(toRequest(batchSize)).parse[MandateEventsResponse].map(toResponse).runRequest
 
     def toRequest(batchSize: Int)(lastProcessedEventID: GoCardlessMandateEventID) =
-      RestRequestMaker.GetRequest(RelativePath(
-        s"$gcEventsBaseUrl&limit=${Math.min(batchSize, 200)}&before=${lastProcessedEventID.value}"
-      ))
+      RestRequestMaker.GetRequest(
+        RelativePath(
+          s"$gcEventsBaseUrl&limit=${Math.min(batchSize, 200)}&before=${lastProcessedEventID.value}",
+        ),
+      )
 
     def toResponse(mandateEventsResponse: MandateEventsResponse) = {
       val mandatesMap = mandateEventsResponse.linked.mandates.map(mandate => mandate.id -> mandate).toMap
@@ -82,18 +98,20 @@ object GoCardlessDDMandateEvent extends Logging {
     object GetAlternateStartEvent {
 
       def apply(
-        gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue]
+          gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue],
       )(
-        defaultEventID: Option[GoCardlessMandateEventID]
+          defaultEventID: Option[GoCardlessMandateEventID],
       ): ClientFailableOp[GoCardlessMandateEventID] = defaultEventID match {
         case Some(lastEventProcessed) => ClientSuccess(lastEventProcessed)
         case None => gcGet.parse[MandateEventsResponse].map(toResponse).runRequest(createRequest())
       }
 
       def createRequest() =
-        RestRequestMaker.GetRequest(RelativePath(
-          s"$gcEventsBaseUrl&limit=1&created_at[lte]=2015-08-25T13:13:56.000Z" // TODO make this timestamp configurable
-        ))
+        RestRequestMaker.GetRequest(
+          RelativePath(
+            s"$gcEventsBaseUrl&limit=1&created_at[lte]=2015-08-25T13:13:56.000Z", // TODO make this timestamp configurable
+          ),
+        )
 
       def toResponse(mandateEventsResponse: MandateEventsResponse) = {
         mandateEventsResponse.events.head.id
@@ -109,8 +127,8 @@ object GoCardlessDDMandateEvent extends Logging {
     private val gcCustomerBankAccountsBaseUrl = "/customer_bank_accounts"
 
     case class GoCardlessCustomerBankDetail(
-      account_number_ending: BankAccountNumberEnding,
-      bank_name: BankName
+        account_number_ending: BankAccountNumberEnding,
+        bank_name: BankName,
     )
     implicit val detailsReads = Json.reads[GoCardlessCustomerBankDetail]
 
@@ -118,11 +136,17 @@ object GoCardlessDDMandateEvent extends Logging {
     private implicit val responseReads = Json.reads[GoCardlessCustomerBankDetailResponse]
 
     def apply(gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): GetBankDetailOp =
-      gcGet.setupRequest[GoCardlessCustomerBankAccountID] { goCardlessCustomerBankAccountID =>
-        RestRequestMaker.GetRequest(RelativePath(
-          s"$gcCustomerBankAccountsBaseUrl/${goCardlessCustomerBankAccountID.value}"
-        ))
-      }.parse[GoCardlessCustomerBankDetailResponse].map(_.customer_bank_accounts).runRequest
+      gcGet
+        .setupRequest[GoCardlessCustomerBankAccountID] { goCardlessCustomerBankAccountID =>
+          RestRequestMaker.GetRequest(
+            RelativePath(
+              s"$gcCustomerBankAccountsBaseUrl/${goCardlessCustomerBankAccountID.value}",
+            ),
+          )
+        }
+        .parse[GoCardlessCustomerBankDetailResponse]
+        .map(_.customer_bank_accounts)
+        .runRequest
 
   }
 

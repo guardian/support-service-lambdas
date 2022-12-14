@@ -14,9 +14,11 @@ class StripeConfigTest extends AnyFlatSpec with Matchers {
                          |     }
                          |  }""".stripMargin
     val actualConfigObject = Json.fromJson[StripeConfig](Json.parse(configString))
-    actualConfigObject should be(JsSuccess(
-      StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true)
-    ))
+    actualConfigObject should be(
+      JsSuccess(
+        StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true),
+      ),
+    )
   }
 
   it should "sig verifying is on if we ask for it to be on" in {
@@ -28,9 +30,11 @@ class StripeConfigTest extends AnyFlatSpec with Matchers {
                          |     "signatureChecking": "true"
                          |  }""".stripMargin
     val actualConfigObject = Json.fromJson[StripeConfig](Json.parse(configString))
-    actualConfigObject should be(JsSuccess(
-      StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true)
-    ))
+    actualConfigObject should be(
+      JsSuccess(
+        StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true),
+      ),
+    )
   }
 
   it should "sig verifying is still on if we ask for sdjfkhgsdf" in {
@@ -42,9 +46,11 @@ class StripeConfigTest extends AnyFlatSpec with Matchers {
                          |     "signatureChecking": "sdfjhgsdf"
                          |  }""".stripMargin
     val actualConfigObject = Json.fromJson[StripeConfig](Json.parse(configString))
-    actualConfigObject should be(JsSuccess(
-      StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true)
-    ))
+    actualConfigObject should be(
+      JsSuccess(
+        StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true),
+      ),
+    )
   }
 
   it should "sig verifying is ONLY off if we ask for false" in {
@@ -56,8 +62,10 @@ class StripeConfigTest extends AnyFlatSpec with Matchers {
                          |     "signatureChecking": "false"
                          |  }""".stripMargin
     val actualConfigObject = Json.fromJson[StripeConfig](Json.parse(configString))
-    actualConfigObject should be(JsSuccess(
-      StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), false)
-    ))
+    actualConfigObject should be(
+      JsSuccess(
+        StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), false),
+      ),
+    )
   }
 }

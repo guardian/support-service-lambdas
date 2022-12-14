@@ -23,7 +23,7 @@ class ValidateNoLosingDigitalVoucherTest extends AnyFlatSpec with Matchers {
     val input: List[LazyClientFailableOp[IsDigitalVoucherUser]] =
       List(
         LazyClientFailableOp(() => ClientSuccess(IsDigitalVoucherUser(false))),
-        LazyClientFailableOp(() => ClientSuccess(IsDigitalVoucherUser(false)))
+        LazyClientFailableOp(() => ClientSuccess(IsDigitalVoucherUser(false))),
       )
 
     val actual = ValidateNoLosingDigitalVoucher(input)
@@ -35,7 +35,7 @@ class ValidateNoLosingDigitalVoucherTest extends AnyFlatSpec with Matchers {
 
     val input: List[LazyClientFailableOp[IsDigitalVoucherUser]] =
       List(
-        LazyClientFailableOp(() => ClientSuccess(IsDigitalVoucherUser(true)))
+        LazyClientFailableOp(() => ClientSuccess(IsDigitalVoucherUser(true))),
       )
 
     val actual = ValidateNoLosingDigitalVoucher(input)
@@ -47,7 +47,7 @@ class ValidateNoLosingDigitalVoucherTest extends AnyFlatSpec with Matchers {
 
     val input: List[LazyClientFailableOp[IsDigitalVoucherUser]] =
       List(
-        LazyClientFailableOp(() => GenericError("test"))
+        LazyClientFailableOp(() => GenericError("test")),
       )
 
     val actual = ValidateNoLosingDigitalVoucher(input)

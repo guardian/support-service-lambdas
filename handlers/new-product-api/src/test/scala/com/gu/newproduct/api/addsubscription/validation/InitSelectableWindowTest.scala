@@ -17,8 +17,8 @@ class InitSelectableWindowTest extends AnyFlatSpec with Matchers {
       now = getWedAugust8,
       WindowRule(
         startDate = wednesdayAugust8,
-        maybeSize = None
-      )
+        maybeSize = None,
+      ),
     )
 
     window shouldBe SelectableWindow(wednesdayAugust8, None)
@@ -29,8 +29,8 @@ class InitSelectableWindowTest extends AnyFlatSpec with Matchers {
       now = getWedAugust8,
       WindowRule(
         startDate = wednesdayAugust8,
-        maybeSize = Some(WindowSizeDays(10))
-      )
+        maybeSize = Some(WindowSizeDays(10)),
+      ),
     )
 
     window shouldBe SelectableWindow(wednesdayAugust8, Some(wednesdayAugust8.plusDays(10)))

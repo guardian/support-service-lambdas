@@ -5,7 +5,15 @@ import io.circe.{Encoder, Json}
 
 trait SFRequestItem
 
-case class SFCaseRequest(topic: String, subtopic: Option[String], subsubtopic: Option[String], name: String, email: String, subject: String, message: String) extends SFRequestItem
+case class SFCaseRequest(
+    topic: String,
+    subtopic: Option[String],
+    subsubtopic: Option[String],
+    name: String,
+    email: String,
+    subject: String,
+    message: String,
+) extends SFRequestItem
 
 case class SFAttachmentRequest(name: String, contents: String) extends SFRequestItem
 
@@ -34,19 +42,21 @@ object SFCaseRequest {
         ("SuppliedEmail", a.email),
         ("Subject", a.subject),
         ("Description", a.message),
-        ("Form_Topic__c", a.topic)
+        ("Form_Topic__c", a.topic),
       ) ++
         a.subtopic.map(i => ("Form_Subtopic__c", i)) ++
-        a.subsubtopic.map(i => ("Form_subsubtopic__c", i))).
-        map(i => (i._1, Json.fromString(i._2)))
+        a.subsubtopic.map(i => ("Form_subsubtopic__c", i))).map(i => (i._1, Json.fromString(i._2)))
 
       Json.obj(
         ("method", Json.fromString(method)),
         ("url", Json.fromString(url)),
         ("referenceId", Json.fromString(referenceId)),
-        ("body", Json.obj(
-          itemList: _*
-        ))
+        (
+          "body",
+          Json.obj(
+            itemList: _*,
+          ),
+        ),
       )
     }
   }
@@ -63,11 +73,14 @@ object SFAttachmentRequest {
       ("method", Json.fromString(method)),
       ("url", Json.fromString(url)),
       ("referenceId", Json.fromString(referenceId)),
-      ("body", Json.obj(
-        ("ParentId", Json.fromString(s"@{${SFCaseRequest.referenceId}.id}")),
-        ("name", Json.fromString(a.name)),
-        ("body", Json.fromString(a.contents))
-      ))
+      (
+        "body",
+        Json.obj(
+          ("ParentId", Json.fromString(s"@{${SFCaseRequest.referenceId}.id}")),
+          ("name", Json.fromString(a.name)),
+          ("body", Json.fromString(a.contents)),
+        ),
+      ),
     )
   }
 }

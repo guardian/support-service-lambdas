@@ -16,10 +16,10 @@ class PotentialHolidayStopsResponseTest extends AnyFlatSpec with Matchers {
         publicationDate = LocalDate.of(2019, 9, 27),
         expectedCredit = Credit(
           amount = -2.89,
-          invoiceDate = LocalDate.of(2019, 10, 1)
-        )
-      )
-    )
+          invoiceDate = LocalDate.of(2019, 10, 1),
+        ),
+      ),
+    ),
   )
 
   private val jsonString =

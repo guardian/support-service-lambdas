@@ -24,11 +24,11 @@ import scala.util.Try
 object AutoCancelHandler extends App with Logging {
 
   def operationForEffects(
-    stage: Stage,
-    fetchString: StringFromS3,
-    response: Request => Response,
-    now: () => LocalDateTime,
-    awsSQSSend: QueueName => Payload => Try[Unit]
+      stage: Stage,
+      fetchString: StringFromS3,
+      response: Request => Response,
+      now: () => LocalDateTime,
+      awsSQSSend: QueueName => Payload => Try[Unit],
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
     for {
@@ -40,7 +40,7 @@ object AutoCancelHandler extends App with Logging {
         now().toLocalDate,
         ZuoraGetAccountSummary(zuoraRequest),
         ZuoraGetAccountSubscriptions(zuoraRequest),
-        ZuoraGetSubsNamesOnInvoice(zuoraRequest)
+        ZuoraGetSubsNamesOnInvoice(zuoraRequest),
       ) _
 
       AutoCancelSteps(
@@ -48,8 +48,8 @@ object AutoCancelHandler extends App with Logging {
         cancelRequestsProducer,
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps(awsSQSSend(emailQueueFor(stage))),
-          ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))
-        )
+          ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig)),
+        ),
       ).prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
     }
   }
@@ -59,7 +59,13 @@ object AutoCancelHandler extends App with Logging {
   // it's the only part you can't test of the handler
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      operationForEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.now, SqsSync.send(SqsSync.buildClient))
+      operationForEffects(
+        RawEffects.stage,
+        GetFromS3.fetchString,
+        RawEffects.response,
+        RawEffects.now,
+        SqsSync.send(SqsSync.buildClient),
+      )
     }
 
   def emailQueueFor(stage: Stage): QueueName = stage match {

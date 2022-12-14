@@ -20,11 +20,12 @@ object PaperEmailDataSerialiser {
 
 object PaperEmailFields {
 
-  val digipackPlans = List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
+  val digipackPlans =
+    List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def apply(
-    data: PaperEmailData
+      data: PaperEmailData,
   ) = {
     Map(
       "ZuoraSubscriberId" -> data.subscriptionName.value,
@@ -34,7 +35,7 @@ object PaperEmailFields {
       "date_of_first_paper" -> data.firstPaperDate.format(dateformat),
       "date_of_first_payment" -> data.firstPaymentDate.format(dateformat),
       "package" -> data.plan.description.value,
-      "subscription_rate" -> data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")
+      "subscription_rate" -> data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse(""),
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts)
   }
 
@@ -48,21 +49,18 @@ object PaperEmailFields {
       "first_name" -> soldTo.firstName.value,
       "last_name" -> soldTo.lastName.value,
       "EmailAddress" -> billTo.email.map(_.value).getOrElse(""),
-
       "billing_address_line_1" -> billToAddress.address1.map(_.value).getOrElse(""),
       "billing_address_line_2" -> billToAddress.address2.map(_.value).getOrElse(""),
       "billing_address_town" -> billToAddress.city.map(_.value).getOrElse(""),
       "billing_county" -> billToAddress.state.map(_.value).getOrElse(""),
       "billing_postcode" -> billToAddress.postcode.map(_.value).getOrElse(""),
       "billing_country" -> billToAddress.country.map(_.name).getOrElse(""),
-
       "delivery_address_line_1" -> soldToAddress.address1.map(_.value).getOrElse(""),
       "delivery_address_line_2" -> soldToAddress.address2.map(_.value).getOrElse(""),
       "delivery_address_town" -> soldToAddress.city.map(_.value).getOrElse(""),
       "delivery_county" -> soldToAddress.state.map(_.value).getOrElse(""),
       "delivery_postcode" -> soldToAddress.postcode.map(_.value).getOrElse(""),
-      "delivery_country" -> soldToAddress.country.name
+      "delivery_country" -> soldToAddress.country.name,
     )
   }
 }
-

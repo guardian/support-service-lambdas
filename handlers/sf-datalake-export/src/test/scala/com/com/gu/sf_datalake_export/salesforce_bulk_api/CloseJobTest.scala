@@ -13,13 +13,13 @@ class CloseJobTest extends AnyFlatSpec with Matchers {
 
     val actual = CloseJob.toRequest(JobId("someJobId"))
 
-    val expectedBody = JsObject(List(
-      "state" -> JsString("Closed"),
-
-    ))
+    val expectedBody = JsObject(
+      List(
+        "state" -> JsString("Closed"),
+      ),
+    )
     val expected = new PostRequest(expectedBody, RelativePath("/services/async/44.0/job/someJobId"))
     actual should be(expected)
   }
-
 
 }

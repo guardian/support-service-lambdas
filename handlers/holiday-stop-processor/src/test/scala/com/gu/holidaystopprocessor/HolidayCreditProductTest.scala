@@ -37,8 +37,14 @@ class HolidayCreditProductTest extends AnyFlatSpec with Matchers {
 
   it should "throw an exception when subscription has no applicable rate plan" in {
     val subscription = Fixtures.subscriptionFromJson("AlternativeSubscription.json")
-    the[IllegalArgumentException] thrownBy HolidayCreditProduct.forStage(Dev)(subscription) should have message "No holiday credit product available for subscription A-S00051570"
-    the[IllegalArgumentException] thrownBy HolidayCreditProduct.forStage(Code)(subscription) should have message "No holiday credit product available for subscription A-S00051570"
-    the[IllegalArgumentException] thrownBy HolidayCreditProduct.forStage(Prod)(subscription) should have message "No holiday credit product available for subscription A-S00051570"
+    the[IllegalArgumentException] thrownBy HolidayCreditProduct.forStage(Dev)(
+      subscription,
+    ) should have message "No holiday credit product available for subscription A-S00051570"
+    the[IllegalArgumentException] thrownBy HolidayCreditProduct.forStage(Code)(
+      subscription,
+    ) should have message "No holiday credit product available for subscription A-S00051570"
+    the[IllegalArgumentException] thrownBy HolidayCreditProduct.forStage(Prod)(
+      subscription,
+    ) should have message "No holiday credit product available for subscription A-S00051570"
   }
 }

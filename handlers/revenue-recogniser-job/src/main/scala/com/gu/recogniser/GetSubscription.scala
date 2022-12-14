@@ -9,20 +9,22 @@ import java.time.LocalDate
 object GetSubscription {
 
   case class GetSubscriptionResponse(
-    redemptionDate: Option[LocalDate],
-    isRedeemed: Boolean,
-    termStartDate: LocalDate,
-    initialTerm: Int,
-    initialTermPeriodType: String,
+      redemptionDate: Option[LocalDate],
+      isRedeemed: Boolean,
+      termStartDate: LocalDate,
+      initialTerm: Int,
+      initialTermPeriodType: String,
   )
 
   implicit val revenueScheduleResponseReads: Reads[GetSubscriptionResponse] = (
-    (JsPath \ "GiftRedemptionDate__c").readNullable[String].map(_.flatMap(date => if (date.isEmpty) None else Some(LocalDate.parse(date)))) and
+    (JsPath \ "GiftRedemptionDate__c")
+      .readNullable[String]
+      .map(_.flatMap(date => if (date.isEmpty) None else Some(LocalDate.parse(date)))) and
       (JsPath \ "GifteeIdentityId__c").readNullable[String].map(_.nonEmpty) and
       (JsPath \ "termStartDate").read[LocalDate] and
       (JsPath \ "initialTerm").read[Int] and
       (JsPath \ "initialTermPeriodType").read[String]
-    )(GetSubscriptionResponse.apply _)
+  )(GetSubscriptionResponse.apply _)
 
 }
 

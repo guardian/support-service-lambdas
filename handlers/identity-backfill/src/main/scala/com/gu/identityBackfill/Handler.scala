@@ -12,7 +12,12 @@ import com.gu.identityBackfill.WireRequestToDomainObject.WireModel.IdentityBackf
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
-import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
+import com.gu.identityBackfill.zuora.{
+  AddIdentityIdToAccount,
+  CountZuoraAccountsForIdentityId,
+  GetZuoraAccountsForEmail,
+  GetZuoraSubTypeForAccount,
+}
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.SalesforceReads._
@@ -38,21 +43,30 @@ object Handler {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runForLegacyTestsSeeTestingMd(
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      RawEffects.response,
+      LambdaIO(inputStream, outputStream, context),
+    )
 
   def runForLegacyTestsSeeTestingMd(
-    stage: Stage,
-    fetchString: StringFromS3,
-    response: Request => Response,
-    lambdaIO: LambdaIO
+      stage: Stage,
+      fetchString: StringFromS3,
+      response: Request => Response,
+      lambdaIO: LambdaIO,
   ): Unit =
     ApiGatewayHandler(lambdaIO)(operationForEffects(stage, fetchString, response))
 
-  def operationForEffects(stage: Stage, fetchString: StringFromS3, response: Request => Response): ApiGatewayOp[Operation] = {
+  def operationForEffects(
+      stage: Stage,
+      fetchString: StringFromS3,
+      response: Request => Response,
+  ): ApiGatewayOp[Operation] = {
     def operation(
-      zuoraRestConfig: ZuoraRestConfig,
-      sfConfig: SFAuthConfig,
-      identityConfig: IdentityConfig
+        zuoraRestConfig: ZuoraRestConfig,
+        sfConfig: SFAuthConfig,
+        identityConfig: IdentityConfig,
     ) = {
       val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       val zuoraQuerier = ZuoraQuery(zuoraRequests)
@@ -63,15 +77,21 @@ object Handler {
       val findExistingIdentityId = FindExistingIdentityId(getByEmail.runRequest, getById.runRequest) _
 
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
-      val updateZuoraAccounts = IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId(AddIdentityIdToAccount(zuoraRequests))(_, _)
+      val updateZuoraAccounts =
+        IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId(AddIdentityIdToAccount(zuoraRequests))(_, _)
 
-      lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
+      lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] =
+        SalesforceClient(response, sfConfig)
       lazy val sfPatch = sfAuth.map(_.wrapWith(JsonHttp.patch))
       lazy val sfGet = sfAuth.map(_.wrapWith(JsonHttp.get))
-      lazy val checkSfContactsSyncable = PreReqCheck.checkSfContactsSyncable(getSFBillingContactIfSyncable(sfGet, stage)) _
-      lazy val updateBuyersIdentityId = IdentityBackfillSteps.updateBuyersIdentityId(updateSalesforceContactIdentityId(sfPatch)) _
+      lazy val checkSfContactsSyncable =
+        PreReqCheck.checkSfContactsSyncable(getSFBillingContactIfSyncable(sfGet, stage)) _
+      lazy val updateBuyersIdentityId =
+        IdentityBackfillSteps.updateBuyersIdentityId(updateSalesforceContactIdentityId(sfPatch)) _
 
-      def findAndValidateZuoraAccounts(zuoraQuerier: ZuoraQuerier)(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] =
+      def findAndValidateZuoraAccounts(zuoraQuerier: ZuoraQuerier)(
+          emailAddress: EmailAddress,
+      ): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] =
         PreReqCheck.validateZuoraAccountsFound(GetZuoraAccountsForEmail(zuoraQuerier)(emailAddress))(emailAddress)
 
       Operation(
@@ -82,18 +102,19 @@ object Handler {
               findAndValidateZuoraAccounts(zuoraQuerier),
               countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
               GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
-              checkSfContactsSyncable
+              checkSfContactsSyncable,
             ),
             createGuestAccount.runRequest,
             updateZuoraAccounts,
-            updateBuyersIdentityId
-          )
+            updateBuyersIdentityId,
+          ),
         ),
-        healthcheck = () => Healthcheck(
-          getByEmail,
-          countZuoraAccounts,
-          sfAuth
-        )
+        healthcheck = () =>
+          Healthcheck(
+            getByEmail,
+            countZuoraAccounts,
+            sfAuth,
+          ),
       )
     }
 
@@ -112,15 +133,18 @@ object Handler {
     val mappings = Map(
       Stage("PROD") -> RecordTypeId("01220000000VB52AAG"),
       Stage("CODE") -> RecordTypeId("012g0000000DZmNAAW"),
-      Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY")
+      Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY"),
     )
-    mappings.get(stage)
-      .toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"))
+    mappings
+      .get(stage)
+      .toApiGatewayContinueProcessing(
+        ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"),
+      )
   }
 
   def getSFBillingContactIfSyncable(
-    sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]],
-    stage: Stage
+      sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]],
+      stage: Stage,
   )(sfAccountId: SFAccountId): ApiGatewayOp[Option[SFContactId]] = {
     val result = for {
       sfRequests <- sfRequests
@@ -130,17 +154,16 @@ object Handler {
       syncable <- GetSFBillingContactIfSyncable(standardRecordType)(fields)
     } yield syncable
 
-    result
-      .value
+    result.value
       .toApiGatewayOp("load SF contact")
       .flatMap(identity)
   }
 
   def updateSalesforceContactIdentityId(
-    sfRequests: LazyClientFailableOp[HttpOp[PatchRequest, Unit]]
+      sfRequests: LazyClientFailableOp[HttpOp[PatchRequest, Unit]],
   )(
-    sFContactId: SFContactId,
-    identityId: IdentityId
+      sFContactId: SFContactId,
+      identityId: IdentityId,
   ): ClientFailableOp[Unit] =
     for {
       sfRequests <- sfRequests.value
@@ -151,9 +174,9 @@ object Handler {
 
 object Healthcheck {
   def apply(
-    getByEmail: HttpOp[EmailAddress, GetByEmail.IdentityAccount],
-    countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
-    sfAuth: LazyClientFailableOp[Any]
+      getByEmail: HttpOp[EmailAddress, GetByEmail.IdentityAccount],
+      countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
+      sfAuth: LazyClientFailableOp[Any],
   ): ApiResponse =
     (for {
       identityAccount <- getByEmail
@@ -161,7 +184,9 @@ object Healthcheck {
         .toApiGatewayOp("problem with email")
         .withLogging("healthcheck getByEmail")
 
-      _ <- countZuoraAccountsForIdentityId(identityAccount.identityId).toApiGatewayOp("get zuora accounts for identity id")
+      _ <- countZuoraAccountsForIdentityId(identityAccount.identityId).toApiGatewayOp(
+        "get zuora accounts for identity id",
+      )
       _ <- sfAuth.value.toApiGatewayOp("Failed to authenticate with Salesforce")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
@@ -172,15 +197,15 @@ object WireRequestToDomainObject {
   object WireModel {
 
     case class IdentityBackfillRequest(
-      emailAddress: String,
-      dryRun: Boolean
+        emailAddress: String,
+        dryRun: Boolean,
     )
     implicit val identityBackfillRequest: Reads[IdentityBackfillRequest] = Json.reads[IdentityBackfillRequest]
 
   }
 
   def apply(
-    steps: DomainRequest => ResponseModels.ApiResponse
+      steps: DomainRequest => ResponseModels.ApiResponse,
   ): ApiGatewayRequest => ResponseModels.ApiResponse = req =>
     (for {
       wireInput <- req.bodyAsCaseClass[IdentityBackfillRequest]()
@@ -190,7 +215,7 @@ object WireRequestToDomainObject {
   def toDomainRequest(request: IdentityBackfillRequest): DomainRequest =
     DomainRequest(
       EmailAddress(request.emailAddress),
-      request.dryRun
+      request.dryRun,
     )
 
 }

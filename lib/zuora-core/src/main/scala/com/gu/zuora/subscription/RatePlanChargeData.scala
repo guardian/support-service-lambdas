@@ -7,15 +7,19 @@ import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
 
 case class RatePlanChargeData(
-  ratePlanCharge: RatePlanCharge,
-  billingSchedule: RatePlanChargeBillingSchedule,
-  billingPeriodName: String,
-  issueDayOfWeek: DayOfWeek,
-  issueCreditAmount: Double
+    ratePlanCharge: RatePlanCharge,
+    billingSchedule: RatePlanChargeBillingSchedule,
+    billingPeriodName: String,
+    issueDayOfWeek: DayOfWeek,
+    issueCreditAmount: Double,
 ) {
   def getIssuesForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
     @tailrec
-    def getIssuesForPeriod(firstIssueDate: LocalDate, endDateInclusive: LocalDate, issueData: List[IssueData]): List[IssueData] = {
+    def getIssuesForPeriod(
+        firstIssueDate: LocalDate,
+        endDateInclusive: LocalDate,
+        issueData: List[IssueData],
+    ): List[IssueData] = {
       if (firstIssueDate.isAfter(endDateInclusive)) {
         issueData
       } else {
@@ -25,7 +29,7 @@ case class RatePlanChargeData(
           billingSchedule.billDatesCoveringDate(firstIssueDate) match {
             case Left(_) => issueData
             case Right(billingPeriod) => IssueData(firstIssueDate, billingPeriod, issueCreditAmount) :: issueData
-          }
+          },
         )
       }
     }
@@ -33,21 +37,20 @@ case class RatePlanChargeData(
     getIssuesForPeriod(
       startDateInclusive.`with`(TemporalAdjusters.nextOrSame(issueDayOfWeek)),
       endDateInclusive,
-      Nil
+      Nil,
     )
   }
 }
 
 object RatePlanChargeData {
   def apply(
-    subscription: Subscription,
-    ratePlanCharge: RatePlanCharge,
-    account: ZuoraAccount,
-    issueDayOfWeek: DayOfWeek,
+      subscription: Subscription,
+      ratePlanCharge: RatePlanCharge,
+      account: ZuoraAccount,
+      issueDayOfWeek: DayOfWeek,
   ): Either[ZuoraApiFailure, RatePlanChargeData] = {
     for {
-      billingPeriodName <- ratePlanCharge
-        .billingPeriod
+      billingPeriodName <- ratePlanCharge.billingPeriod
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       schedule <- RatePlanChargeBillingSchedule(subscription, ratePlanCharge, account)
       issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge)
@@ -56,10 +59,12 @@ object RatePlanChargeData {
 
   private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge) = {
     for {
-      billingPeriodName <- ratePlanCharge
-        .billingPeriod
+      billingPeriodName <- ratePlanCharge.billingPeriod
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
-      approximateBillingPeriodWeeks <- approximateBillingPeriodWeeksForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
+      approximateBillingPeriodWeeks <- approximateBillingPeriodWeeksForName(
+        billingPeriodName,
+        ratePlanCharge.specificBillingPeriod,
+      )
       roundedCredit = -round2Places(ratePlanCharge.price / approximateBillingPeriodWeeks)
     } yield {
       roundedCredit
@@ -69,8 +74,8 @@ object RatePlanChargeData {
   def round2Places(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
 
   private def approximateBillingPeriodWeeksForName(
-    billingPeriodName: String,
-    optionalSpecificBillingPeriod: Option[Int]
+      billingPeriodName: String,
+      optionalSpecificBillingPeriod: Option[Int],
   ): Either[ZuoraApiFailure, Int] = {
     billingPeriodName match {
       case "Annual" => Right(52)

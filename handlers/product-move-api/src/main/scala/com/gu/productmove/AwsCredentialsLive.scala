@@ -1,6 +1,11 @@
 package com.gu.productmove
 
-import software.amazon.awssdk.auth.credentials.{AwsCredentialsProvider, AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProvider,
+  AwsCredentialsProviderChain,
+  EnvironmentVariableCredentialsProvider,
+  ProfileCredentialsProvider,
+}
 import zio.ZIO.attemptBlocking
 import zio.{IO, Layer, ZIO, ZLayer}
 
@@ -12,9 +17,12 @@ object AwsCredentialsLive {
     ZLayer.scoped(ZIO.fromAutoCloseable(ZIO.attempt(impl))).mapError(_.toString)
 
   private def impl: AwsCredentialsProviderChain =
-    AwsCredentialsProviderChain.builder().credentialsProviders(
-      ProfileCredentialsProvider.create(ProfileName),
-      EnvironmentVariableCredentialsProvider.create()
-    ).build()
+    AwsCredentialsProviderChain
+      .builder()
+      .credentialsProviders(
+        ProfileCredentialsProvider.create(ProfileName),
+        EnvironmentVariableCredentialsProvider.create(),
+      )
+      .build()
 
 }

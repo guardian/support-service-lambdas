@@ -18,11 +18,12 @@ import java.time.LocalDate
 object GetCatalogueLive:
   val layer: URLayer[AwsS3 with Stage, GetCatalogue] = ZLayer.fromFunction(GetCatalogueLive(_, _))
 
-private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue :
+private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
   private val zuoraCatalogueBucket = "gu-zuora-catalog"
 
   private def key(stage: Stage) = {
-    val stagePath = if (stage == Stage.DEV) "CODE/Zuora-DEV" else if (stage == Stage.CODE) "CODE/Zuora-UAT" else "PROD/Zuora-PROD"
+    val stagePath =
+      if (stage == Stage.DEV) "CODE/Zuora-DEV" else if (stage == Stage.CODE) "CODE/Zuora-UAT" else "PROD/Zuora-PROD"
     val relativePath = "catalog.json"
     s"$stagePath/$relativePath"
   }
@@ -47,8 +48,8 @@ object ZuoraProductCatalogue {
 }
 
 case class ZuoraProduct(
-  name: String,
-  productRatePlans: List[ZuoraProductRatePlan]
+    name: String,
+    productRatePlans: List[ZuoraProductRatePlan],
 )
 
 object ZuoraProduct {
@@ -56,9 +57,9 @@ object ZuoraProduct {
 }
 
 case class ZuoraProductRatePlan(
-  id: String,
-  name: String,
-  productRatePlanCharges: List[ZuoraProductRatePlanCharge]
+    id: String,
+    name: String,
+    productRatePlanCharges: List[ZuoraProductRatePlanCharge],
 )
 
 object ZuoraProductRatePlan {

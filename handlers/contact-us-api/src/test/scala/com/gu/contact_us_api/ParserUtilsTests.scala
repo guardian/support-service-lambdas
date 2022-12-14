@@ -22,10 +22,15 @@ class ParserUtilsTests extends AnyFlatSpec with should.Matchers {
   }
 
   it should "correctly return a ContactUsError case class when the decoding fails" in {
-    val errorDetails = parser.decode[SFAuthSuccess](invalidJson)
-      .swap.map(i => s"Failed to decode JSON string into $decodeTarget: $i").getOrElse("")
+    val errorDetails = parser
+      .decode[SFAuthSuccess](invalidJson)
+      .swap
+      .map(i => s"Failed to decode JSON string into $decodeTarget: $i")
+      .getOrElse("")
 
-    decode[SFAuthSuccess](invalidJson, Some(decodeTarget), errorType) shouldBe Left(ContactUsError(errorType, errorDetails))
+    decode[SFAuthSuccess](invalidJson, Some(decodeTarget), errorType) shouldBe Left(
+      ContactUsError(errorType, errorDetails),
+    )
   }
 
 }

@@ -10,7 +10,10 @@ class MockCancelZuora(responses: Map[(String, LocalDate), CancellationResponse])
 
   def requests = mutableStore.reverse
 
-  override def cancel(subscriptionNumber: String, chargedThroughDate: LocalDate): ZIO[Any, String, CancellationResponse] = {
+  override def cancel(
+      subscriptionNumber: String,
+      chargedThroughDate: LocalDate,
+  ): ZIO[Any, String, CancellationResponse] = {
     mutableStore = (subscriptionNumber, chargedThroughDate) :: mutableStore
 
     responses.get((subscriptionNumber, chargedThroughDate)) match

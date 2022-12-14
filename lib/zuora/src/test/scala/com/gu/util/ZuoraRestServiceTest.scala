@@ -17,27 +17,27 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
   val dummyJson = Json.parse(
     """{
       |  "body": "test"
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   val validUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": true,
       |  "id": "id123", "balance": 1.2, "defaultPaymentMethod": {"id": "pmid"}
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   val validFailedUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": false,
       |  "subscriptionId": "id123"
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   val validZuoraNoOtherFields = Json.parse(
     """{
       |  "success": true
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   def constructTestRequest(json: JsValue = dummyJson): Request = {
@@ -82,10 +82,12 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
     // TODO tests for POST/PUT as well
     def response(request: Request): Response = {
       println(s"request: $request")
-      if (request.method() == "GET"
+      if (
+        request.method() == "GET"
         && request.url().toString == "https://www.test.com/getget"
         && request.header("apiSecretAccessKey") == "fakePassword"
-        && request.header("apiAccessKeyId") == "fakeUser")
+        && request.header("apiAccessKeyId") == "fakeUser"
+      )
         // check body for post/put
         constructTestResponse(200, validUpdateSubscriptionResult)
       else {

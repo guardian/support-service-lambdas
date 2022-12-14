@@ -22,16 +22,19 @@ object GetJobBatches {
   }
 
   object BatchState {
-    //https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_batches_interpret_status.htm
+    // https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_batches_interpret_status.htm
     val allStates = List(Queued, InProgress, Completed, Failed, NotProcessed)
     val pendingStates = List(InProgress, Queued)
     // when pk chunking is enabled the original batch is not processed
     val doneStates = List(Completed, NotProcessed)
     implicit val writes: Writes[BatchState] = (state: BatchState) => JsString(state.name)
 
-    def fromStringState(state: String): ClientFailableOp[BatchState] = allStates.find(_.name == state).map {
-      ClientSuccess(_)
-    }.getOrElse(GenericError(s"unknown batch state: $state"))
+    def fromStringState(state: String): ClientFailableOp[BatchState] = allStates
+      .find(_.name == state)
+      .map {
+        ClientSuccess(_)
+      }
+      .getOrElse(GenericError(s"unknown batch state: $state"))
   }
 
   object Queued extends BatchState {
@@ -55,8 +58,8 @@ object GetJobBatches {
   }
 
   case class BatchInfo(
-    batchId: BatchId,
-    state: BatchState
+      batchId: BatchId,
+      state: BatchState,
   )
 
   object BatchInfo {

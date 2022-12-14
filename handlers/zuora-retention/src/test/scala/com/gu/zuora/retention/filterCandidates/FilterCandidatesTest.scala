@@ -38,7 +38,7 @@ class FilterCandidatesTest extends AnyFlatSpec with Matchers {
   private def wiredOperation = FilterCandidates.operation(
     s3Iterator,
     uploadToS3,
-    diff
+    diff,
   ) _
 
   it should "return error if request doesn't contain exclusion query results file" in {

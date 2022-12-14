@@ -8,7 +8,8 @@ object IdentityRetentionResponseModels {
 
   sealed trait IdentityRetentionResponse
 
-  case class SuccessResponse(ongoingRelationship: Boolean, relationshipEndDate: Option[LocalDate]) extends IdentityRetentionResponse
+  case class SuccessResponse(ongoingRelationship: Boolean, relationshipEndDate: Option[LocalDate])
+      extends IdentityRetentionResponse
 
   object SuccessResponse {
     implicit val successResponseWrites = Json.writes[SuccessResponse]
@@ -33,7 +34,11 @@ object IdentityRetentionResponseModels {
 
 object IdentityRetentionApiResponses {
 
-  import com.gu.identityRetention.IdentityRetentionResponseModels.{IdentityRetentionResponse, NotFoundResponse, SuccessResponse}
+  import com.gu.identityRetention.IdentityRetentionResponseModels.{
+    IdentityRetentionResponse,
+    NotFoundResponse,
+    SuccessResponse,
+  }
 
   def apiResponse(body: IdentityRetentionResponse, status: String) = {
     val bodyTxt = Json.prettyPrint(Json.toJson(body))
@@ -41,9 +46,9 @@ object IdentityRetentionApiResponses {
   }
 
   val ongoingRelationship = apiResponse(SuccessResponse(true, None), "200")
-  def cancelledRelationship(latestCancellationDate: LocalDate) = apiResponse(SuccessResponse(false, Some(latestCancellationDate)), "200")
+  def cancelledRelationship(latestCancellationDate: LocalDate) =
+    apiResponse(SuccessResponse(false, Some(latestCancellationDate)), "200")
 
   val canBeDeleted = apiResponse(NotFoundResponse(), "404")
 
 }
-

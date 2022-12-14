@@ -1,7 +1,13 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
-import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{contributionMapping, guWeeklyMapping, membershipMapping, newspaperMapping, testConsentMappings}
+import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{
+  contributionMapping,
+  guWeeklyMapping,
+  membershipMapping,
+  newspaperMapping,
+  testConsentMappings,
+}
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -34,19 +40,27 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there is an owned product that partially overlaps" in {
-    calculator.getCancellationConsents("newspaper", Set("guardianweekly")) shouldBe Right(newspaperMapping.diff(guWeeklyMapping))
+    calculator.getCancellationConsents("newspaper", Set("guardianweekly")) shouldBe Right(
+      newspaperMapping.diff(guWeeklyMapping),
+    )
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that partially overlap" in {
-    calculator.getCancellationConsents("newspaper", Set("membership", "guardianweekly")) shouldBe Right(newspaperMapping.diff(membershipMapping ++ guWeeklyMapping))
+    calculator.getCancellationConsents("newspaper", Set("membership", "guardianweekly")) shouldBe Right(
+      newspaperMapping.diff(membershipMapping ++ guWeeklyMapping),
+    )
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there is an owned products completely overlaps" in {
-    calculator.getCancellationConsents("guardianweekly", Set("membership")) shouldBe Right(guWeeklyMapping.diff(membershipMapping))
+    calculator.getCancellationConsents("guardianweekly", Set("membership")) shouldBe Right(
+      guWeeklyMapping.diff(membershipMapping),
+    )
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that completely overlap" in {
-    calculator.getCancellationConsents("guardianweekly", Set("membership", "contributions")) shouldBe Right(guWeeklyMapping.diff(membershipMapping ++ contributionMapping))
+    calculator.getCancellationConsents("guardianweekly", Set("membership", "contributions")) shouldBe Right(
+      guWeeklyMapping.diff(membershipMapping ++ contributionMapping),
+    )
   }
 
   // getCancellationConsents failure cases
@@ -103,4 +117,3 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     stringToRemoveWhitespaceFrom.replaceAll("\\s", "")
   }
 }
-

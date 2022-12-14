@@ -7,10 +7,22 @@ import com.gu.newproduct.api.addsubscription.validation.contribution.Contributio
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyCustomerData
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperCustomerData
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusCustomerData
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId, SfContactId}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{
+  AccountBalanceMinorUnits,
+  AutoPay,
+  IdentityId,
+  PaymentMethodId,
+  SfContactId,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 
@@ -21,7 +33,7 @@ object TestData {
     autoPay = AutoPay(true),
     accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
     currency = GBP,
-    sfContactId = Some(SfContactId("sfContactId"))
+    sfContactId = Some(SfContactId("sfContactId")),
   )
   val contacts = Contacts(
     billTo = BillToContact(
@@ -35,8 +47,8 @@ object TestData {
         Some(City("billToCity")),
         Some(State("billToState")),
         Some(Country.UK),
-        Some(Postcode("billToPostcode"))
-      )
+        Some(Postcode("billToPostcode")),
+      ),
     ),
     soldTo = SoldToContact(
       Some(Title("soldToTitle")),
@@ -49,9 +61,9 @@ object TestData {
         Some(City("soldToCity")),
         Some(State("soldToState")),
         Country.US,
-        Some(Postcode("soldToPostcode"))
-      )
-    )
+        Some(Postcode("soldToPostcode")),
+      ),
+    ),
   )
 
   val directDebitPaymentMethod = DirectDebit(
@@ -59,39 +71,39 @@ object TestData {
     BankAccountName("someName"),
     BankAccountNumberMask("123312***"),
     SortCode("233331"),
-    MandateId("1234 ")
+    MandateId("1234 "),
   )
 
   val subscriptionList = List(
     Subscription(
       Active,
-      Set(ProductRatePlanId("planId"))
-    )
+      Set(ProductRatePlanId("planId")),
+    ),
   )
 
   val contributionCustomerData = ContributionCustomerData(
     account = validatedAccount,
     paymentMethod = directDebitPaymentMethod,
     accountSubscriptions = subscriptionList,
-    contacts = contacts
+    contacts = contacts,
   )
 
   val supporterPlusCustomerData = SupporterPlusCustomerData(
     account = validatedAccount,
     paymentMethod = directDebitPaymentMethod,
     accountSubscriptions = subscriptionList,
-    contacts = contacts
+    contacts = contacts,
   )
 
   val voucherCustomerData = PaperCustomerData(
     account = validatedAccount,
     paymentMethod = directDebitPaymentMethod,
-    contacts = contacts
+    contacts = contacts,
   )
 
   val guardianWeeklyCustomerData = GuardianWeeklyCustomerData(
     account = validatedAccount,
     paymentMethod = directDebitPaymentMethod,
-    contacts = contacts
+    contacts = contacts,
   )
 }

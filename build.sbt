@@ -20,14 +20,6 @@ val scala2Settings = Seq(
     "-Ywarn-value-discard",
   ),
   Test / fork := true,
-  {
-    import scalariform.formatter.preferences._
-    scalariformPreferences := scalariformPreferences.value
-      .setPreference(DanglingCloseParenthesis, Force)
-      .setPreference(SpacesAroundMultiImports, false)
-      .setPreference(NewlineAtEndOfFile, true)
-  },
-
   autoCompilerPlugins := true
 )
 
@@ -44,15 +36,13 @@ val scala3Settings = Seq(
     "-Yretain-trees",
   ),
   Test / fork := true,
-  {
-    import scalariform.formatter.preferences._
-    scalariformPreferences := scalariformPreferences.value
-      .setPreference(DanglingCloseParenthesis, Force)
-      .setPreference(SpacesAroundMultiImports, false)
-      .setPreference(NewlineAtEndOfFile, true)
-  },
-
   autoCompilerPlugins := true
+)
+
+lazy val scalafmtSettings = Seq(
+  (Test / test) := ((Test / test) dependsOn (Test / scalafmtCheckAll)).value,
+  (Test / testOnly) := ((Test / testOnly) dependsOn (Test / scalafmtCheckAll)).evaluated,
+  (Test / testQuick) := ((Test / testQuick) dependsOn (Test / scalafmtCheckAll)).evaluated,
 )
 
 // fixme this whole file needs splitting down appropriately
@@ -73,19 +63,19 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
 )
 
 def library(theProject: Project, scalaSettings: SettingsDefinition = scala2Settings) =
-  theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
+  theProject.settings(scalaSettings, testSettings, scalafmtSettings).configs(EffectsTest, HealthCheckTest)
 
 // ==== START libraries ====
 
-lazy val test = library(project in file("lib/test"))
+lazy val testLib = library(project in file("lib/test"))
   .settings(
     libraryDependencies ++= Seq(
       scalatest,
       playJson % "test"
-    )
+    ),
   )
 
-val testDep = test % "test->test"
+val testDep = testLib % "test->test"
 
 lazy val zuora = library(project in file("lib/zuora"))
   .dependsOn(
@@ -619,7 +609,29 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     sttp,
     sttpCirce
   )
-).dependsOn(handler, `config-cats`, zuora, `zuora-core`, effectsDepIncludingTestFolder, testDep)
+).settings {
+  lazy val deployTo =
+    inputKey[Unit]("Command to directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+
+  /*
+  To run script in sbt shell:
+    1. run `project stripe-webhook-endpoints`
+    2. run `deployTo CODE` or `deployTo DEV`
+    */
+  deployTo := {
+    import scala.sys.process._
+    import complete.DefaultParsers._
+    val jarFile = assembly.value
+
+    val Seq(stage) = spaceDelimited("<arg>").parsed
+    val s3Bucket = "support-service-lambdas-dist"
+    val s3Path = s"membership/$stage/stripe-webhook-endpoints/stripe-webhook-endpoints.jar"
+
+    s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!
+    s"aws lambda update-function-code --function-name stripe-customer-updated-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!
+    s"aws lambda update-function-code --function-name stripe-payment-intent-issues-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!
+  }
+}.dependsOn(handler, `config-cats`, zuora, `zuora-core`, effectsDepIncludingTestFolder, testDep)
 
 
 // ==== END handlers ====

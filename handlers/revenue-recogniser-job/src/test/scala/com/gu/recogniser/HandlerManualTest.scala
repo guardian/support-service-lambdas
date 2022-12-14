@@ -25,7 +25,11 @@ object CreateExpiredGiftTestSubscriptionManualTest {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      subNumber <- ZuoraGiftSubscribe.subscribe(zuoraDeps, startDate).toDisjunction.left.map(httpError => new RuntimeException(httpError.toString))
+      subNumber <- ZuoraGiftSubscribe
+        .subscribe(zuoraDeps, startDate)
+        .toDisjunction
+        .left
+        .map(httpError => new RuntimeException(httpError.toString))
     } yield subNumber
     println("result: " + actual)
     println("****\nNOTE: wait a while as the revenue schedule isn't created straight away\n****")
@@ -42,7 +46,11 @@ object CreateRefundedBeforeRedemptionTestSubscriptionManualTest {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      subNumber <- ZuoraGiftSubscribe.subscribe(zuoraDeps, startDate).toDisjunction.left.map(httpError => new RuntimeException(httpError.toString))
+      subNumber <- ZuoraGiftSubscribe
+        .subscribe(zuoraDeps, startDate)
+        .toDisjunction
+        .left
+        .map(httpError => new RuntimeException(httpError.toString))
     } yield subNumber
     println("result: " + actual)
     println("****\nNOTE: wait a while as the revenue schedule isn't created straight away\n****")
@@ -102,7 +110,7 @@ object RunLambdaManualTest {
         RawEffects.downloadResponse,
         RawEffects.response,
         zuoraRestConfig,
-        () => LocalDate.now()
+        () => LocalDate.now(),
       ).execute()
     } yield ()
     println("result: " + actual)
@@ -110,11 +118,11 @@ object RunLambdaManualTest {
   }
 
   def fakeSteps(
-    log: String => Unit,
-    downloadResponse: Request => Response,
-    response: Request => Response,
-    zuoraRestConfig: ZuoraRestConfig,
-    today: () => LocalDate
+      log: String => Unit,
+      downloadResponse: Request => Response,
+      response: Request => Response,
+      zuoraRestConfig: ZuoraRestConfig,
+      today: () => LocalDate,
   ): Steps = {
     val downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
     val requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
@@ -126,7 +134,11 @@ object RunLambdaManualTest {
       }
     }
     val fakeDistributeRevenueWithDateRange = new DistributeRevenueWithDateRange(null) {
-      override def distribute(revenueScheduleNumber: String, startDate: LocalDate, endDate: LocalDate): ClientFailableOp[Unit] = {
+      override def distribute(
+          revenueScheduleNumber: String,
+          startDate: LocalDate,
+          endDate: LocalDate,
+      ): ClientFailableOp[Unit] = {
         log(s"trying to distribute $revenueScheduleNumber across dates $startDate - $endDate")
         ClientSuccess(())
       }
@@ -162,20 +174,20 @@ object GetSubscriptionChargeId {
 object CreateRevenueSchedule {
 
   case class RevenueEvent(
-    eventType: String = "Digital Subscription Gift Redeemed",
-    eventTypeSystemId: String = "DigitalSubscriptionGiftRedeemed"
+      eventType: String = "Digital Subscription Gift Redeemed",
+      eventTypeSystemId: String = "DigitalSubscriptionGiftRedeemed",
   )
 
   case class RevenueDistribution(
-    newAmount: String,
-    accountingPeriodName: String = "Open-Ended"
+      newAmount: String,
+      accountingPeriodName: String = "Open-Ended",
   )
 
   case class CreateRevenueScheduleRequest(
-    amount: String,
-    revenueScheduleDate: LocalDate,
-    revenueDistributions: List[RevenueDistribution],
-    revenueEvent: RevenueEvent = RevenueEvent()
+      amount: String,
+      revenueScheduleDate: LocalDate,
+      revenueDistributions: List[RevenueDistribution],
+      revenueEvent: RevenueEvent = RevenueEvent(),
   )
 
   implicit val eventWrites = Json.writes[RevenueEvent]
@@ -194,13 +206,15 @@ case class CreateRevenueSchedule(restRequestMaker: RestRequestMaker.Requests) {
 
   // https://www.zuora.com/developer/api-reference/#operation/POST_RSforSubscCharge
   def create(
-    chargeId: String,
-    today: LocalDate
+      chargeId: String,
+      today: LocalDate,
   ) = {
-    restRequestMaker.post[CreateRevenueScheduleRequest, CreateRevenueScheduleResult](
-      CreateRevenueScheduleRequest("10.01", today, List(RevenueDistribution("0.00"))),
-      s"revenue-schedules/subscription-charges/${chargeId}"
-    ).map(_.number)
+    restRequestMaker
+      .post[CreateRevenueScheduleRequest, CreateRevenueScheduleResult](
+        CreateRevenueScheduleRequest("10.01", today, List(RevenueDistribution("0.00"))),
+        s"revenue-schedules/subscription-charges/${chargeId}",
+      )
+      .map(_.number)
   }
 }
 
@@ -209,10 +223,15 @@ object GetRevenueSchedule {
   case class SubscriptionResult(undistributedUnrecognizedRevenueInPence: Int)
 
   implicit val reads: Reads[SubscriptionResult] =
-    (((__ \ "revenueSchedules")(0) \ "undistributedUnrecognizedRevenue").read[Double].map(amount => (amount * 100).toInt)).map(SubscriptionResult.apply _)
+    (((__ \ "revenueSchedules")(0) \ "undistributedUnrecognizedRevenue")
+      .read[Double]
+      .map(amount => (amount * 100).toInt))
+      .map(SubscriptionResult.apply _)
 
   def apply(requests: Requests, chargeId: String): ClientFailableOp[Int] =
-    requests.get[SubscriptionResult](s"revenue-schedules/subscription-charges/$chargeId").map(_.undistributedUnrecognizedRevenueInPence)
+    requests
+      .get[SubscriptionResult](s"revenue-schedules/subscription-charges/$chargeId")
+      .map(_.undistributedUnrecognizedRevenueInPence)
 
 }
 
@@ -224,7 +243,9 @@ object ZuoraGiftSubscribe {
     (__(0) \ "SubscriptionNumber").read[String].map(SubscribeResult)
 
   def subscribe(requests: Requests, startDate: LocalDate): ClientFailableOp[String] =
-    requests.post[JsValue, SubscribeResult](requestJson(startDate), s"action/subscribe", WithoutCheck).map(_.SubscriptionNumber)
+    requests
+      .post[JsValue, SubscribeResult](requestJson(startDate), s"action/subscribe", WithoutCheck)
+      .map(_.SubscriptionNumber)
 
   def requestJson(startDate: LocalDate) = Json.parse(
     s"""{
@@ -282,6 +303,6 @@ object ZuoraGiftSubscribe {
       |            }
       |        }
       |    ]
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 }

@@ -23,7 +23,10 @@ object Salesforce extends LazyLogging {
    */
   private val batchSize = 66
 
-  def holidayStopRequests(sfCredentials: SFAuthConfig)(productVariant: ZuoraProductType, datesToProcess: List[LocalDate]): SalesforceApiResponse[List[HolidayStopRequestsDetail]] = {
+  def holidayStopRequests(sfCredentials: SFAuthConfig)(
+      productVariant: ZuoraProductType,
+      datesToProcess: List[LocalDate],
+  ): SalesforceApiResponse[List[HolidayStopRequestsDetail]] = {
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       FetchHolidayStopRequestsDetailsForProductType(sfGet)(datesToProcess, productVariant)
@@ -36,7 +39,9 @@ object Salesforce extends LazyLogging {
     }
   }
 
-  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: List[ZuoraHolidayCreditAddResult]): SalesforceApiResponse[Unit] =
+  def holidayStopUpdateResponse(
+      sfCredentials: SFAuthConfig,
+  )(responses: List[ZuoraHolidayCreditAddResult]): SalesforceApiResponse[Unit] =
     SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
       val patch = sfAuth.wrapWith(JsonHttp.patch)
       val sendOp = ActionSalesforceHolidayStopRequestsDetail(patch) _
