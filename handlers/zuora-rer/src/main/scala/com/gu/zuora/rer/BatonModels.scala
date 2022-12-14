@@ -23,9 +23,10 @@ object BatonModels {
 
   sealed trait RerResponse
 
-  case class RerInitiateResponse(initiationReference: String) extends RerResponse
+  case class RerInitiateResponse(initiationReference: String, message: String, status: BatonTaskStatus) extends RerResponse
 
   case class RerStatusResponse(
+    initiationReference: String,
     status: BatonTaskStatus,
     resultLocations: Option[List[String]] = None,
     message: Option[String] = None

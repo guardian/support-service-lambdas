@@ -31,11 +31,12 @@ class ZuoraRerHandlerSpec extends AnyFreeSpec with Matchers {
 
     "should return completed status upon successful completion" in {
       val lambda = ZuoraRerHandler(S3HelperStub.withSuccessResponse, mockConfig)
-      val statusRequest = RerStatusRequest("initiationReference")
+      val statusRequest = RerStatusRequest("someRequestId")
 
       lambda
         .handle(statusRequest)
         .unsafeRunSync() shouldBe RerStatusResponse(
+          initiationReference = "someRequestId",
           status = Completed,
           resultLocations = Some(List("s3Location"))
         )
@@ -47,7 +48,7 @@ class ZuoraRerHandlerSpec extends AnyFreeSpec with Matchers {
 
       lambda
         .handle(statusRequest)
-        .unsafeRunSync() shouldBe RerStatusResponse(status = Failed)
+        .unsafeRunSync() shouldBe RerStatusResponse(initiationReference = "initiationReference", status = Failed)
     }
 
     "should return pending status when found to be neither success nor failure" in {
@@ -55,7 +56,7 @@ class ZuoraRerHandlerSpec extends AnyFreeSpec with Matchers {
       val statusRequest = RerStatusRequest("initiationReference")
       lambda
         .handle(statusRequest)
-        .unsafeRunSync() shouldBe RerStatusResponse(status = Pending)
+        .unsafeRunSync() shouldBe RerStatusResponse(initiationReference = "initiationReference", status = Pending)
     }
 
     def invokeWithString(

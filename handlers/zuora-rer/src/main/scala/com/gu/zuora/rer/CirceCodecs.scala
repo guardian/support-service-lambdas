@@ -31,7 +31,7 @@ object circeCodecs {
     response
       .add("action", action.asJson)
       .add("requestType", "RER".asJson)
-      .add("dataProvider", "zuora".asJson)
+      .add("dataProvider", "zuorarer".asJson)
       .asJson
 
   implicit val batonTaskStatusEncoder: Encoder[BatonTaskStatus] =

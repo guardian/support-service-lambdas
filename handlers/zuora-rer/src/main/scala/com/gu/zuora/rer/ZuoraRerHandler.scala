@@ -24,15 +24,15 @@ case class ZuoraRerHandler(s3Service: S3Service, zuoraRerConfig: ZuoraRerConfig)
       initiateRequest.subjectEmail
     )
     InvokeLambda.invokeLambda(zuoraRerConfig.performLambdaFunctionName, performRerRequest.asJson.toString)
-      .map(_ => RerInitiateResponse(initiationId))
+      .map(_ => RerInitiateResponse(initiationId, "PerformRerLambda invoked", Pending))
   }
 
   def status(requestIdValue: String): Try[RerStatusResponse] = {
     s3Service.checkForResults(requestIdValue, zuoraRerConfig).map {
       case S3CompletedPathFound(resultLocations) =>
-        RerStatusResponse(Completed, Some(resultLocations))
-      case S3FailedPathFound() => RerStatusResponse(Failed)
-      case S3NoResultsFound() => RerStatusResponse(Pending)
+        RerStatusResponse(requestIdValue, Completed, Some(resultLocations))
+      case S3FailedPathFound() => RerStatusResponse(requestIdValue, Failed)
+      case S3NoResultsFound() => RerStatusResponse(requestIdValue, Pending)
     }
   }
 
