@@ -51,13 +51,13 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
         res match {
           case Left(err) =>
             s3Service.writeFailedResult(r.initiationReference, err, zuoraRerConfig)
-            IO.pure(PerformRerResponse(Failed, r.initiationReference, r.subjectEmail, Some(err.toString)))
-          case Right(_) => IO.pure(PerformRerResponse(Completed, r.initiationReference, r.subjectEmail))
+            IO.pure(PerformRerResponse(r.initiationReference, err.toString, Failed, r.subjectEmail))
+          case Right(_) => IO.pure(PerformRerResponse(r.initiationReference, "Success", Completed, r.subjectEmail))
         }
       case _ =>
         val error = "Unable to retrieve email and initiation reference from request"
         logger.error(error)
-        IO.pure(PerformRerResponse(Failed, "", "", Some(error)))
+        IO.pure(PerformRerResponse("", error, Failed, ""))
     }
   }
 }

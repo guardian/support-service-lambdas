@@ -17,8 +17,9 @@ class ZuoraPerformRerHandlerSpec extends AnyFreeSpec with Matchers {
     "should return a successful PerformRerResponse when a RER runs successfully and writes to S3" in {
       val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withSuccessResponse, S3HelperStub.withSuccessResponse, mockConfig)
       val expectedResponse = PerformRerResponse(
-        status = Completed,
         initiationReference = "someRequestId",
+        message = "Success",
+        status = Completed,
         subjectEmail = "someSubjectEmail"
       )
       lambda
@@ -29,10 +30,10 @@ class ZuoraPerformRerHandlerSpec extends AnyFreeSpec with Matchers {
     "should return a failed PerformRerResponse when request is successful but upload to S3 is unsuccessful" in {
       val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withSuccessResponse, S3HelperStub.withFailedResponse, mockConfig)
       val expectedResponse = PerformRerResponse(
-        status = Failed,
         initiationReference = "someRequestId",
-        subjectEmail = "someSubjectEmail",
-        message = Some("S3Error(couldn't write to s3)")
+        message = "S3Error(couldn't write to s3)",
+        status = Failed,
+        subjectEmail = "someSubjectEmail"
       )
 
       lambda
@@ -43,10 +44,10 @@ class ZuoraPerformRerHandlerSpec extends AnyFreeSpec with Matchers {
     "should return a failed PerformRerResponse when Zuora contacts can't be retrieved" in {
       val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withFailedContactResponse, S3HelperStub.withSuccessResponse, mockConfig)
       val expectedResponse = PerformRerResponse(
-        status = Failed,
         initiationReference = "someRequestId",
+        message = "ZuoraClientError(Failed to get contacts)",
+        status = Failed,
         subjectEmail = "someSubjectEmail",
-        message = Some("ZuoraClientError(Failed to get contacts)")
       )
 
       lambda
@@ -86,10 +87,10 @@ class ZuoraPerformRerHandlerSpec extends AnyFreeSpec with Matchers {
       val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withFailedInvoiceResponse, S3HelperStub.withSuccessResponse, mockConfig)
       val invalidRequest = RerInitiateRequest(subjectEmail = "someSubjectEmail")
       val expectedResponse = PerformRerResponse(
-        status = Failed,
         initiationReference = "",
-        subjectEmail = "",
-        message = Some("Unable to retrieve email and initiation reference from request")
+        message = "Unable to retrieve email and initiation reference from request",
+        status = Failed,
+        subjectEmail = ""
       )
 
       lambda

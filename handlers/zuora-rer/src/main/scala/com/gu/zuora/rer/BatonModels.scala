@@ -27,15 +27,15 @@ object BatonModels {
 
   case class RerStatusResponse(
     initiationReference: String,
+    message: String,
     status: BatonTaskStatus,
-    resultLocations: Option[List[String]] = None,
-    message: Option[String] = None
+    resultLocations: Option[List[String]] = None
   ) extends RerResponse
 
   case class PerformRerResponse(
-    status: BatonTaskStatus,
     initiationReference: String,
-    subjectEmail: String,
-    message: Option[String] = None
+    message: String,
+    status: BatonTaskStatus,
+    subjectEmail: String
   ) extends RerResponse
 }

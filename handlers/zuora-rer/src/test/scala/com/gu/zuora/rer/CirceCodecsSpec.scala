@@ -85,20 +85,21 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
     "should encode completed RerStatusResponse correctly" in {
       val response: RerResponse = RerStatusResponse(
         initiationReference = "someRequestId",
+        message = "test message",
         status = Completed,
         resultLocations = Some(List("locationValue"))
       )
-      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
+      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","message":"test message","status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
     }
 
     "should encode pending RerStatusResponse correctly" in {
-      val response: RerResponse = RerStatusResponse(initiationReference = "someRequestId", status = Pending)
-      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","status":"pending","action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
+      val response: RerResponse = RerStatusResponse(initiationReference = "someRequestId", message = "test message", status = Pending)
+      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","message":"test message","status":"pending","action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
     }
 
     "should encode failed RerStatusResponse correctly" in {
-      val response: RerResponse = RerStatusResponse(initiationReference = "someRequestId", status = Failed, None, Some("error making request"))
-      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","status":"failed","message":"error making request","action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
+      val response: RerResponse = RerStatusResponse(initiationReference = "someRequestId", message = "error making request", status = Failed, None)
+      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","message":"error making request","status":"failed","action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
     }
   }
 }
