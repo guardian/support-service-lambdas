@@ -67,6 +67,7 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       },
 
+      /*
       test("productMove endpoint is successful for a refunded customer") {
         val expectedSubNameInput = "A-S00339056"
         val endpointJsonInputBody = ExpectedInput(50.00)
@@ -112,6 +113,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(Stage.valueOf("PROD"))
         )
       },
+      */
 
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
         val expectedSubNameInput = "A-S00339056"

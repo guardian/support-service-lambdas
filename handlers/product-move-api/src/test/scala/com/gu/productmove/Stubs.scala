@@ -3,6 +3,8 @@ package com.gu.productmove
 import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
+import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
 import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview, SubscriptionUpdateResponse}
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
@@ -206,3 +208,22 @@ val DigiSubWithOfferInvoicePreview = ZuoraInvoiceList(
 val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as")
 val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2")
 
+//-----------------------------------------------------
+// Stubs for GetSfSubscription service
+//-----------------------------------------------------
+val sfSubscription1 = GetSfSubscriptionResponse(
+  Id = "123456"
+)
+
+//-----------------------------------------------------
+// Stubs for CreateRecord service
+//-----------------------------------------------------
+val createRecordRequest1 = CreateRecordRequest(
+  SF_Subscription__c = "123456",
+  Previous_Amount__c = BigDecimal(100),
+  Previous_Rate_Plan_Name__c = "prev rate plan",
+  New_Rate_Plan_Name__c = "new rate plan",
+  Requested_Date__c = LocalDate.parse("2022-12-08"),
+  Effective_Date__c = LocalDate.parse("2022-12-09"),
+  Refund_Amount__c = BigDecimal(50)
+)
