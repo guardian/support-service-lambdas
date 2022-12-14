@@ -1,7 +1,7 @@
 package com.gu.deliveryproblemcreditprocessor
 
 import cats.data.EitherT
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import cats.syntax.all._
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
