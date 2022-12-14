@@ -9,8 +9,6 @@ import org.http4s.dsl.io._
 import org.scalatest.Inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.http4s.syntax.literals._
-import org.typelevel.ci._
 
 class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
   "Http4sLambdaHandler" should "handle GET request with no body" in {
@@ -48,14 +46,14 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
         |    "body": null
         |}""".stripMargin
 
-    val response = Ok("Response body").map(_.putHeaders(Header.Raw(ci"ResponseHeader", "Response Header Value1")))
+    val response = Ok("Response body").map(_.putHeaders(Header("ResponseHeader", "Response Header Value1")))
 
     val (decodedRequest: Request[IO], apiGatewayResponse: String) = sendRequest(apiGatewayRequest, response)
 
     decodedRequest.method should equal(Method.GET)
     decodedRequest.uri should equal(
       Uri(
-        path = path"/uri/path",
+        path = "/uri/path",
         query = Query(
           "Query1" -> Some("Query Value1"),
           "Query2" -> Some("Query Value2.1"),
@@ -64,7 +62,11 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
       )
     )
     decodedRequest.headers should equal(
-      Headers(Header("Header1", "Header Value1"), Header("Header2", "Header Value2.1"), Header("Header2", "Header Value2.2"))Header.Rawci"Header1"Header.Rawci"Header2"Header.Rawci"Header2"
+      Headers.of(
+        Header("Header1", "Header Value1"),
+        Header("Header2", "Header Value2.1"),
+        Header("Header2", "Header Value2.2")
+      )
     )
     decodedRequest.httpVersion should equal(HttpVersion.`HTTP/1.1`)
     decodedRequest.body should equal(EmptyBody)
@@ -116,14 +118,14 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
         |    "body": "{\"bodyKey\":\"bodyValue\"}"
         |}""".stripMargin
 
-    val response = Ok("Response body").map(_.putHeaders(Header.Raw(ci"ResponseHeader", "Response Header Value1")))
+    val response = Ok("Response body").map(_.putHeaders(Header("ResponseHeader", "Response Header Value1")))
 
     val (decodedRequest: Request[IO], apiGatewayResponse: String) = sendRequest(apiGatewayRequest, response)
 
     decodedRequest.method should equal(Method.POST)
     decodedRequest.uri should equal(
       Uri(
-        path = path"/uri/path",
+        path = "/uri/path",
         query = Query(
           "Query1" -> Some("Query Value1"),
           "Query2" -> Some("Query Value2.1"),
@@ -132,7 +134,11 @@ class Http4sLambdaHandlerTest extends AnyFlatSpec with Matchers {
       )
     )
     decodedRequest.headers should equal(
-      Headers(Header("Header1", "Header Value1"), Header("Header2", "Header Value2.1"), Header("Header2", "Header Value2.2"))Header.Rawci"Header1"Header.Rawci"Header2"Header.Rawci"Header2"
+      Headers.of(
+        Header("Header1", "Header Value1"),
+        Header("Header2", "Header Value2.1"),
+        Header("Header2", "Header Value2.2")
+      )
     )
     decodedRequest.httpVersion should equal(HttpVersion.`HTTP/1.1`)
     new String(decodedRequest.body.compile.toVector.unsafeRunSync().toArray, "UTF-8") should equal(

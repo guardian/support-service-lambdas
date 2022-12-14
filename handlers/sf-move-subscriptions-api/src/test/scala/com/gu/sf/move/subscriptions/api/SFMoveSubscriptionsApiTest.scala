@@ -14,7 +14,6 @@ import io.circe.syntax._
 import org.http4s._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import org.http4s.syntax.literals._
 
 class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with ZuoraTestBackendMixin {
 
@@ -29,7 +28,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     val responseActual = api.run(
       Request[IO](
         method = Method.POST,
-        uri = Uri(path = path"/subscription/move")
+        uri = Uri(path = "/subscription/move")
       ).withEntity[String](
           moveSubscriptionReq.asJson.spaces2
         )
@@ -52,7 +51,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     val responseActual = api.run(
       Request[IO](
         method = Method.POST,
-        uri = Uri(path = path"/subscription/move")
+        uri = Uri(path = "/subscription/move")
       ).withEntity[String](
           moveSubscriptionReq.asJson.spaces2
         )
@@ -74,7 +73,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     val responseActual = api.run(
       Request[IO](
         method = Method.POST,
-        uri = Uri(path = path"/subscription/move")
+        uri = Uri(path = "/subscription/move")
       ).withEntity[String](
           moveSubscriptionReq.asJson.spaces2
         )
@@ -96,7 +95,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     val responseActual = api.run(
       Request[IO](
         method = Method.POST,
-        uri = Uri(path = path"/subscription/move")
+        uri = Uri(path = "/subscription/move")
       ).withEntity[String](
           moveSubscriptionReq.asJson.spaces2
         )
@@ -119,7 +118,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     val responseActual = api.run(
       Request[IO](
         method = Method.POST,
-        uri = Uri(path = path"/subscription/move/dry-run")
+        uri = Uri(path = "/subscription/move/dry-run")
       ).withEntity[String](
           moveSubscriptionReq.asJson.spaces2
         )
