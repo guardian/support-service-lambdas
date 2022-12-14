@@ -25,7 +25,9 @@ class ExportS3PathTest extends AnyFlatSpec with Matchers {
     val contactName = BulkApiParams.contact.objectName
     val codeBasePath = ExportS3Path(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
     val codeBasePathUploadToDl = ExportS3Path(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
-    List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(S3Path(BucketName("gu-salesforce-export-code"), None))
+    List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(
+      S3Path(BucketName("gu-salesforce-export-code"), None),
+    )
   }
 
   it should "convert object name to hyphen case in ophan raw bucket name if object name is camel case" in {

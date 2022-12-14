@@ -7,7 +7,7 @@ object DigipackAccountValidation {
   val missingIdentityIdError = "Account has no associated identity Id"
 
   def apply(
-    account: ValidatedAccount
+      account: ValidatedAccount,
   ): ValidationResult[ValidatedAccount] = for {
     identityId <- account.identityId getOrFailWith (missingIdentityIdError)
     _ <- !identityId.value.trim.isEmpty orFailWith (missingIdentityIdError)

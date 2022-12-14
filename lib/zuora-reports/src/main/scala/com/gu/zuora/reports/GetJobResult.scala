@@ -17,11 +17,16 @@ object GetJobResult {
       GenericError("tries must be > 0")
   }
 
-  def toBatch(aquaBatch: aqua.Batch): Option[Batch] = aquaBatch.fileId.map {
-    fileId => Batch(name = aquaBatch.name, fileId = fileId)
+  def toBatch(aquaBatch: aqua.Batch): Option[Batch] = aquaBatch.fileId.map { fileId =>
+    Batch(name = aquaBatch.name, fileId = fileId)
   }
 
-  def toJobResultResponse(aquaResponse: ClientFailableOp[AquaJobResponse], dryRun: Boolean, jobId: String, tries: Int): ClientFailableOp[JobResult] = {
+  def toJobResultResponse(
+      aquaResponse: ClientFailableOp[AquaJobResponse],
+      dryRun: Boolean,
+      jobId: String,
+      tries: Int,
+  ): ClientFailableOp[JobResult] = {
     aquaResponse match {
       case ClientSuccess(AquaJobResponse(status, name, aquaBatches, _)) if status == "completed" =>
         val batches = aquaBatches.map(toBatch)
@@ -31,13 +36,18 @@ object GetJobResult {
           ClientSuccess(Completed(name, jobId, batches.flatten, dryRun, tries))
         }
 
-      case ClientSuccess(AquaJobResponse(status, name, _, _)) if pendingValues.contains(status) => ClientSuccess(Pending(name, jobId, dryRun, tries))
+      case ClientSuccess(AquaJobResponse(status, name, _, _)) if pendingValues.contains(status) =>
+        ClientSuccess(Pending(name, jobId, dryRun, tries))
       case ClientSuccess(zuoraResponse) => (GenericError(s"unexpected status in zuora response: $zuoraResponse"))
       case error: ClientFailure => error
     }
   }
 
-  val pendingValues = List("submitted", "pending", "executing") // https://knowledgecenter.zuora.com/Central_Platform/API/AB_Aggregate_Query_API/C_Get_Job_ID
+  val pendingValues = List(
+    "submitted",
+    "pending",
+    "executing",
+  ) // https://knowledgecenter.zuora.com/Central_Platform/API/AB_Aggregate_Query_API/C_Get_Job_ID
 }
 
 case class JobResultRequest(jobId: String, dryRun: Boolean, tries: Option[Int])
@@ -53,8 +63,7 @@ sealed trait JobResult {
   def tries: Int
 }
 
-case class Completed(name: String, jobId: String, batches: Seq[Batch], dryRun: Boolean, tries: Int)
-  extends JobResult
+case class Completed(name: String, jobId: String, batches: Seq[Batch], dryRun: Boolean, tries: Int) extends JobResult
 
 object Completed {
   implicit val writes: Writes[Completed] = result => {
@@ -73,19 +82,20 @@ object Pending {
 }
 
 case class JobResultWire(
-  name: String,
-  jobId: String,
-  status: String,
-  batches: Option[Seq[Batch]],
-  dryRun: Boolean,
-  tries: Int
+    name: String,
+    jobId: String,
+    status: String,
+    batches: Option[Seq[Batch]],
+    dryRun: Boolean,
+    tries: Int,
 )
 
 object JobResultWire {
   implicit val writes = Json.writes[JobResultWire]
 
   def fromJobResult(jobResult: JobResult) = jobResult match {
-    case Completed(name, jobId, batches, dryRun, tries) => JobResultWire(name, jobId, "completed", Some(batches), dryRun, tries)
+    case Completed(name, jobId, batches, dryRun, tries) =>
+      JobResultWire(name, jobId, "completed", Some(batches), dryRun, tries)
     case Pending(name, jobId, dryRun, tries) => JobResultWire(name, jobId, "pending", None, dryRun, tries)
   }
 }

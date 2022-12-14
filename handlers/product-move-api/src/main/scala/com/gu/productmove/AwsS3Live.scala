@@ -18,7 +18,8 @@ object AwsS3Live {
     }
 
   private def impl(creds: AwsCredentialsProvider): S3Client =
-    S3Client.builder()
+    S3Client
+      .builder()
       .region(Region.EU_WEST_1)
       .credentialsProvider(creds)
       .build()
@@ -45,6 +46,7 @@ trait AwsS3 {
 }
 object AwsS3 {
 
-  def getObject(bucket: String, key: String): RIO[AwsS3, String] = ZIO.environmentWithZIO[AwsS3](_.get.getObject(bucket, key))
+  def getObject(bucket: String, key: String): RIO[AwsS3, String] =
+    ZIO.environmentWithZIO[AwsS3](_.get.getObject(bucket, key))
 
 }

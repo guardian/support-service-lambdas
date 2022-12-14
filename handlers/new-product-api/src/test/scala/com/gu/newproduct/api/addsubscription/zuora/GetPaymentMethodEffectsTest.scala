@@ -17,11 +17,12 @@ class GetPaymentMethodEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      res <- GetPaymentMethod(zuoraDeps.get[PaymentMethodWire])(PaymentMethodId("8ad095dd82f7aaa50182f96de2883de1")).toDisjunction
+      res <- GetPaymentMethod(zuoraDeps.get[PaymentMethodWire])(
+        PaymentMethodId("8ad095dd82f7aaa50182f96de2883de1"),
+      ).toDisjunction
     } yield {
       res
     }
     actual shouldBe Right(NonDirectDebitMethod(ActivePaymentMethod, CreditCardReferenceTransaction))
   }
 }
-

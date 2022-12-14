@@ -19,7 +19,7 @@ object ResponseWriters {
 
   implicit val headersWrites = new Writes[Headers] {
     def writes(headers: Headers) = Json.obj(
-      "Content-Type" -> headers.contentType
+      "Content-Type" -> headers.contentType,
     )
   }
 
@@ -27,7 +27,7 @@ object ResponseWriters {
     def writes(response: ApiResponse) = Json.obj(
       "statusCode" -> response.statusCode,
       "headers" -> response.headers,
-      "body" -> response.body
+      "body" -> response.body,
     )
   }
 
@@ -56,51 +56,51 @@ object ApiGatewayResponse extends Logging {
 
   val successfulExecution = messageResponse(
     "200",
-    "Success"
+    "Success",
   )
 
   def noActionRequired(reason: String) = messageResponse(
     "200",
-    s"Processing is not required: $reason"
+    s"Processing is not required: $reason",
   )
 
   def badRequest(reason: String) = messageResponse(
     "400",
-    s"Bad request: $reason"
+    s"Bad request: $reason",
   )
 
   val unauthorized = messageResponse(
     "401",
-    "Credentials are missing or invalid"
+    "Credentials are missing or invalid",
   )
 
   val paymentRequired = messageResponse(
     "402",
-    "Payment was declined"
+    "Payment was declined",
   )
 
   def forbidden(message: String) = messageResponse(
     "403",
-    message
+    message,
   )
 
   def notFound(message: String) = messageResponse(
     "404",
-    message
+    message,
   )
 
   def internalServerError(error: String) = {
     logger.error(s"Processing failed due to $error")
     messageResponse(
       "500",
-      "Internal server error"
+      "Internal server error",
     )
   }
 
   def messageResponse(statusCode: String, message: String) = {
     ApiResponse(
       statusCode,
-      toJsonBody(ResponseBody(message))
+      toJsonBody(ResponseBody(message)),
     )
   }
 

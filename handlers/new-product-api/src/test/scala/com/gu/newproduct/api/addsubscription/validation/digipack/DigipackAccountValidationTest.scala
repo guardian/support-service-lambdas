@@ -13,7 +13,7 @@ class DigipackAccountValidationTest extends AnyFlatSpec with Matchers {
     paymentMethodId = PaymentMethodId("id"),
     autoPay = AutoPay(true),
     accountBalanceMinorUnits = AccountBalanceMinorUnits(1233),
-    currency = USD
+    currency = USD,
   )
   it should "pass if identity id is defined" in {
     DigipackAccountValidation(account) shouldBe Passed(account)

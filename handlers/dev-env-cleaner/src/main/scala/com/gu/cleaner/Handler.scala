@@ -28,7 +28,9 @@ object Handler extends RequestStreamHandler {
     println("main: STARTING!")
     // FOR TESTING
     handleRequest(
-      new ByteArrayInputStream(Array[Byte]()), new ByteArrayOutputStream(), new Context {
+      new ByteArrayInputStream(Array[Byte]()),
+      new ByteArrayOutputStream(),
+      new Context {
         override def getAwsRequestId: String = ???
 
         override def getLogGroupName: String = ???
@@ -54,16 +56,16 @@ object Handler extends RequestStreamHandler {
 
           override def log(message: Array[Byte]): Unit = ???
         }
-      }
+      },
     )
     println("main: FINISHED!")
   }
 
-  //referenced in cloudformation, change with care
+  // referenced in cloudformation, change with care
   def handleRequest(
-    input: InputStream,
-    output: OutputStream,
-    context: Context
+      input: InputStream,
+      output: OutputStream,
+      context: Context,
   ): Unit = {
     def log(message: String) = context.getLogger.log(message)
 
@@ -81,7 +83,14 @@ object Handler extends RequestStreamHandler {
       downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
       aquaQuerier = Querier.lowLevel(downloadRequests) _
       getJobResult = GetJobResult(downloadRequests.get[AquaJobResponse]) _
-      _ <- new Steps(log).steps(aquaQuerier, getJobResult, downloadRequests, cancelSub, cancelAccount, () => RawEffects.now().toLocalDate)
+      _ <- new Steps(log).steps(
+        aquaQuerier,
+        getJobResult,
+        downloadRequests,
+        cancelSub,
+        cancelAccount,
+        () => RawEffects.now().toLocalDate,
+      )
     } yield ()
     val _ = maybeSuccess.toTry.get // throws exception if something failed
     log("finished successfully - sending metric!")
@@ -98,26 +107,28 @@ object Handler extends RequestStreamHandler {
                   Value: dev-env-cleaner
    */
   def putMetric(stage: Stage): Unit = {
-    AwsCloudWatch.metricPut(MetricRequest(
-      MetricNamespace("support-service-lambdas"),
-      MetricName("cleanup-succeeded"),
-      Map(
-        MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
-        MetricDimensionName("app") -> MetricDimensionValue("dev-env-cleaner")
-      )
-    ))
+    AwsCloudWatch.metricPut(
+      MetricRequest(
+        MetricNamespace("support-service-lambdas"),
+        MetricName("cleanup-succeeded"),
+        Map(
+          MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
+          MetricDimensionName("app") -> MetricDimensionValue("dev-env-cleaner"),
+        ),
+      ),
+    )
   }
 
 }
 class Steps(log: String => Unit) {
 
   def steps(
-    aquaQuerier: AquaQueryRequest => ClientFailableOp[String],
-    getJobResult: JobResultRequest => ClientFailableOp[JobResult],
-    downloadRequests: RestRequestMaker.Requests,
-    cancelSub: CancelSub,
-    cancelAccount: CancelAccount,
-    today: () => LocalDate
+      aquaQuerier: AquaQueryRequest => ClientFailableOp[String],
+      getJobResult: JobResultRequest => ClientFailableOp[JobResult],
+      downloadRequests: RestRequestMaker.Requests,
+      cancelSub: CancelSub,
+      cancelAccount: CancelAccount,
+      today: () => LocalDate,
   ): Either[Throwable, Unit] = {
     val subs_to_cancel = "subs_to_cancel"
     val subsQuery = AquaQuery(
@@ -125,7 +136,7 @@ class Steps(log: String => Unit) {
       """select Id, TermEndDate
         |from Subscription
         |where (billtocontact.WorkEmail = 'integration-test@gu.com' OR billtocontact.WorkEmail = 'test@gu.com') and Status = 'Active' and account.Status = 'Active'
-        |""".stripMargin
+        |""".stripMargin,
     )
     val accounts_to_cancel = "accounts_to_cancel"
     val accountsQuery = AquaQuery(
@@ -133,28 +144,34 @@ class Steps(log: String => Unit) {
       """select Id
         |from Account
         |where (billtocontact.WorkEmail = 'integration-test@gu.com' OR billtocontact.WorkEmail = 'test@gu.com') and Status = 'Active'
-        |""".stripMargin
+        |""".stripMargin,
     )
     val request = AquaQueryRequest(
       name = "test_accounts_and_subs",
-      queries = List(subsQuery, accountsQuery)
+      queries = List(subsQuery, accountsQuery),
     )
     val zRes = for {
       jobId <- aquaQuerier(request)
       batches <- waitForResult(jobId, getJobResult)
       streams <- batches.toList.traverse { batch =>
-        downloadRequests.getDownloadStream(s"batch-query/file/${batch.fileId}").map(stream => (batch.name, stream.stream))
+        downloadRequests
+          .getDownloadStream(s"batch-query/file/${batch.fileId}")
+          .map(stream => (batch.name, stream.stream))
       }
-      queryResults = streams.map {
-        case (name, stream) =>
-          val csvLines = Source.fromInputStream(stream).getLines()
-          val values = csvLines.drop(1).map(_.split(',').toList) // first line is a header
-          (name, values)
+      queryResults = streams.map { case (name, stream) =>
+        val csvLines = Source.fromInputStream(stream).getLines()
+        val values = csvLines.drop(1).map(_.split(',').toList) // first line is a header
+        (name, values)
       }.toMap
-      _ <- queryResults(subs_to_cancel).map { case id :: termEndDate :: Nil => cancelSub.run(id, dateToCancel(LocalDate.parse(termEndDate), today())) }.toList.sequence
+      _ <- queryResults(subs_to_cancel)
+        .map { case id :: termEndDate :: Nil => cancelSub.run(id, dateToCancel(LocalDate.parse(termEndDate), today())) }
+        .toList
+        .sequence
       _ <- queryResults(accounts_to_cancel).map { case id :: Nil => cancelAccount.run(id) }.toList.sequence
     } yield ()
-    zRes.toDisjunction.leftMap(failure => new RuntimeException(s"one of the preceding requests has failed: ${failure.toString}"))
+    zRes.toDisjunction.leftMap(failure =>
+      new RuntimeException(s"one of the preceding requests has failed: ${failure.toString}"),
+    )
 
   }
 
@@ -165,16 +182,20 @@ class Steps(log: String => Unit) {
       today
 
   @tailrec
-  final def waitForResult(jobId: String, getJobResult: JobResultRequest => ClientFailableOp[JobResult]): ClientFailableOp[Seq[Batch]] = {
+  final def waitForResult(
+      jobId: String,
+      getJobResult: JobResultRequest => ClientFailableOp[JobResult],
+  ): ClientFailableOp[Seq[Batch]] = {
     getJobResult(JobResultRequest(jobId, false, None)) match {
-      case ClientSuccess(success) => success match {
-        case pending: Pending =>
-          Thread.sleep(10000)
-          log(s"still pending: $pending")
-          waitForResult(jobId, getJobResult)
-        case c: Completed =>
-          ClientSuccess(c.batches)
-      }
+      case ClientSuccess(success) =>
+        success match {
+          case pending: Pending =>
+            Thread.sleep(10000)
+            log(s"still pending: $pending")
+            waitForResult(jobId, getJobResult)
+          case c: Completed =>
+            ClientSuccess(c.batches)
+        }
       case fail: ClientFailure => fail
     }
   }
@@ -192,8 +213,8 @@ body='{
  */
 object CancelSub {
   case class CancelRequest(
-    cancellationEffectiveDate: LocalDate,
-    cancellationPolicy: String = "SpecificDate"
+      cancellationEffectiveDate: LocalDate,
+      cancellationPolicy: String = "SpecificDate",
   )
   implicit val writes = Json.writes[CancelRequest]
 
@@ -218,7 +239,7 @@ object/account/$id
 
 object CancelAccount {
   case class CancelAccountRequest(
-    Status: String = "Canceled"
+      Status: String = "Canceled",
   )
   implicit val writes = Json.writes[CancelAccountRequest]
 

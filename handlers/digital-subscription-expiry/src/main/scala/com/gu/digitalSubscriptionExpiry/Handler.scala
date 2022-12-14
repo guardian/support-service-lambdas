@@ -22,22 +22,28 @@ object Handler extends Logging {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
+    runForLegacyTestsSeeTestingMd(
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      RawEffects.response,
+      RawEffects.now,
+      LambdaIO(inputStream, outputStream, context),
+    )
 
   def runForLegacyTestsSeeTestingMd(
-    stage: Stage,
-    fetchString: StringFromS3,
-    response: Request => Response,
-    now: () => LocalDateTime,
-    lambdaIO: LambdaIO
+      stage: Stage,
+      fetchString: StringFromS3,
+      response: Request => Response,
+      now: () => LocalDateTime,
+      lambdaIO: LambdaIO,
   ): Unit =
     ApiGatewayHandler(lambdaIO)(operationForEffects(stage, fetchString, response, now))
 
   def operationForEffects(
-    stage: Stage,
-    fetchString: StringFromS3,
-    response: Request => Response,
-    now: () => LocalDateTime
+      stage: Stage,
+      fetchString: StringFromS3,
+      response: Request => Response,
+      now: () => LocalDateTime,
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
@@ -50,13 +56,14 @@ object Handler extends Logging {
       DigitalSubscriptionExpirySteps(
         getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
         getSubscription = GetSubscription(zuoraRequests),
-        setActivationDate = (SetActivationDate(zuoraRequests, now) _).andThen(_.toApiGatewayOp(s"zuora SetActivationDate fail")),
-        getAccountSummary = (GetAccountSummary(zuoraRequests) _).andThen(_.toApiGatewayOp(s"zuora GetAccountSummary fail")),
+        setActivationDate =
+          (SetActivationDate(zuoraRequests, now) _).andThen(_.toApiGatewayOp(s"zuora SetActivationDate fail")),
+        getAccountSummary =
+          (GetAccountSummary(zuoraRequests) _).andThen(_.toApiGatewayOp(s"zuora GetAccountSummary fail")),
         getSubscriptionExpiry = GetSubscriptionExpiry(today),
-        skipActivationDateUpdate = SkipActivationDateUpdate.apply
+        skipActivationDateUpdate = SkipActivationDateUpdate.apply,
       )
     }
   }
 
 }
-

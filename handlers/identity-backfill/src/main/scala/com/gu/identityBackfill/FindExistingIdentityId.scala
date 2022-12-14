@@ -14,14 +14,15 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSucces
 object FindExistingIdentityId {
 
   def apply(
-    getByEmail: EmailAddress => ClientFailableOp[GetByEmail.IdentityAccount],
-    getByIdentityId: IdentityId => ClientFailableOp[GetByIdentityId.IdentityUser]
+      getByEmail: EmailAddress => ClientFailableOp[GetByEmail.IdentityAccount],
+      getByIdentityId: IdentityId => ClientFailableOp[GetByIdentityId.IdentityUser],
   )(emailAddress: EmailAddress): ApiGatewayOp[Option[IdentityId]] = {
 
     def continueIfNoPassword(identityId: IdentityId) = {
       getByIdentityId(identityId) match {
         case ClientSuccess(IdentityUser(_, false)) => ContinueProcessing(Some(identityId))
-        case _ => ReturnWithResponse(notFound(s"Identity account not validated but password is set: ${identityId.value}"))
+        case _ =>
+          ReturnWithResponse(notFound(s"Identity account not validated but password is set: ${identityId.value}"))
       }
     }
 

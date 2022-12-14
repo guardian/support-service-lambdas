@@ -11,22 +11,22 @@ import play.api.libs.json.Json
 object UpdateAccountSFLinks {
 
   case class WireZuoraAccount(
-    crmId: String,
-    sfContactId__c: String,
-    IdentityId__c: String,
-    billToContact: Option[WireZuoraContact]
+      crmId: String,
+      sfContactId__c: String,
+      IdentityId__c: String,
+      billToContact: Option[WireZuoraContact],
   )
   case class WireZuoraContact(
-    workEmail: String
+      workEmail: String,
   )
   implicit val writesC = Json.writes[WireZuoraContact]
   implicit val writesA = Json.writes[WireZuoraAccount]
 
   case class ZuoraFieldUpdates(
-    sfContactId: WinningSFContact,
-    crmAccountId: CRMAccountId,
-    identityIdUpdate: ZuoraIdentityIdUpdate,
-    refreshEmailWith: Option[EmailAddress]
+      sfContactId: WinningSFContact,
+      crmAccountId: CRMAccountId,
+      identityIdUpdate: ZuoraIdentityIdUpdate,
+      refreshEmailWith: Option[EmailAddress],
   )
 
   sealed trait ZuoraIdentityIdUpdate
@@ -47,9 +47,11 @@ object UpdateAccountSFLinks {
         case ReplaceZuoraIdentityId(identityIdToUse) => identityIdToUse.value
         case ClearZuoraIdentityId => ""
       },
-      sFPointer.refreshEmailWith.map(e => WireZuoraContact(e.value))
+      sFPointer.refreshEmailWith.map(e => WireZuoraContact(e.value)),
     )
-    val path = RelativePath(s"accounts/${account.value}") // TODO danger - we shoudn't go building urls with string concatenation!
+    val path = RelativePath(
+      s"accounts/${account.value}",
+    ) // TODO danger - we shoudn't go building urls with string concatenation!
     PutRequest(request, path)
   }
 

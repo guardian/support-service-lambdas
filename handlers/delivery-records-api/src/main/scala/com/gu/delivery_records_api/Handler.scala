@@ -7,10 +7,13 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import scala.concurrent.ExecutionContext
 
-object Handler extends Http4sLambdaHandler({
-  implicit val contextShift = IO.contextShift(ExecutionContext.global)
-  AsyncHttpClientCatsBackend[IO]().flatMap { sttpBackend =>
-    DeliveryRecordsApiApp(sttpBackend).value
-  }.unsafeRunSync()
-    .valueOr((error: DeliveryRecordsApiError) => throw new RuntimeException(error.toString))
-})
+object Handler
+    extends Http4sLambdaHandler({
+      implicit val contextShift = IO.contextShift(ExecutionContext.global)
+      AsyncHttpClientCatsBackend[IO]()
+        .flatMap { sttpBackend =>
+          DeliveryRecordsApiApp(sttpBackend).value
+        }
+        .unsafeRunSync()
+        .valueOr((error: DeliveryRecordsApiError) => throw new RuntimeException(error.toString))
+    })

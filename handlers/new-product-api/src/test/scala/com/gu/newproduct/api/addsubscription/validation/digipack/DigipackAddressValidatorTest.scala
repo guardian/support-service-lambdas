@@ -15,7 +15,7 @@ class DigipackAddressValidatorTest extends AnyFlatSpec with Matchers {
     Some(City("City")),
     Some(State("State")),
     Some(Country.UK),
-    Some(Postcode("N1 9GU"))
+    Some(Postcode("N1 9GU")),
   )
 
   val validatedAddress = ValidatedAddress(
@@ -24,7 +24,7 @@ class DigipackAddressValidatorTest extends AnyFlatSpec with Matchers {
     City("City"),
     Some(State("State")),
     Country.UK,
-    Postcode("N1 9GU")
+    Postcode("N1 9GU"),
   )
 
   it should "succeed if all required fields are populated" in {

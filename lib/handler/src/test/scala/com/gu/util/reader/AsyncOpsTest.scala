@@ -9,16 +9,17 @@ import org.scalatest.matchers.should.Matchers
 class AsyncOpsTest extends AsyncFlatSpec with Matchers {
 
   "recoverAndLog" should "replace any async returnWithResponse with continueProcessing" in {
-    val asyncReturn: AsyncApiGatewayOp[Unit] = ReturnWithResponse(ApiGatewayResponse.internalServerError("some error")).toAsync
-    asyncReturn.recoverAndLog("action description").underlying.map {
-      result => result shouldBe ContinueProcessing(())
+    val asyncReturn: AsyncApiGatewayOp[Unit] =
+      ReturnWithResponse(ApiGatewayResponse.internalServerError("some error")).toAsync
+    asyncReturn.recoverAndLog("action description").underlying.map { result =>
+      result shouldBe ContinueProcessing(())
     }
   }
 
   it should "not modify the response if it is already continueProcessing" in {
     val asyncContinue = ContinueProcessing(()).toAsync
-    asyncContinue.recoverAndLog("action description").underlying.map {
-      result => result shouldBe ContinueProcessing(())
+    asyncContinue.recoverAndLog("action description").underlying.map { result =>
+      result shouldBe ContinueProcessing(())
     }
   }
 

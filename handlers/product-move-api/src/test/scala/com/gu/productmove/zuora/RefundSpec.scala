@@ -23,19 +23,21 @@ object RefundSpec extends ZIOSpecDefault {
     suite("Refund")(test("Run refund lambda locally") {
       /*
            Test suite used to run the refund lambda locally
-         */
+       */
 
-    for {
-      _ <- Refund.applyRefund(RefundInput("A-S00446886", "8ad09c4b8455ccff018462254418702f", 4)).provide(
-        AwsS3Live.layer,
-        AwsCredentialsLive.layer,
-        SttpClientLive.layer,
-        ZuoraClientLive.layer,
-        ZuoraGetLive.layer,
-        GuStageLive.layer,
-        InvoicingApiRefundLive.layer,
-        CreditBalanceAdjustmentLive.layer
-      )
-    } yield assert(true)(equalTo(true))
-  } @@ TestAspect.ignore)
+      for {
+        _ <- Refund
+          .applyRefund(RefundInput("A-S00446886", "8ad09c4b8455ccff018462254418702f", 4))
+          .provide(
+            AwsS3Live.layer,
+            AwsCredentialsLive.layer,
+            SttpClientLive.layer,
+            ZuoraClientLive.layer,
+            ZuoraGetLive.layer,
+            GuStageLive.layer,
+            InvoicingApiRefundLive.layer,
+            CreditBalanceAdjustmentLive.layer,
+          )
+      } yield assert(true)(equalTo(true))
+    } @@ TestAspect.ignore)
 }

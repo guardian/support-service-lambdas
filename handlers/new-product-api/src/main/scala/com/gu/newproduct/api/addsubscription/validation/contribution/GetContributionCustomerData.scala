@@ -8,19 +8,19 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
 import com.gu.util.reader.Types.ApiGatewayOp
 case class ContributionCustomerData(
-  account: ValidatedAccount,
-  paymentMethod: PaymentMethod,
-  accountSubscriptions: List[Subscription],
-  contacts: Contacts
+    account: ValidatedAccount,
+    paymentMethod: PaymentMethod,
+    accountSubscriptions: List[Subscription],
+    contacts: Contacts,
 )
 
 object GetContributionCustomerData {
   def apply(
-    getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
-    getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
-    getContacts: ZuoraAccountId => ApiGatewayOp[Contacts],
-    getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]],
-    accountId: ZuoraAccountId
+      getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
+      getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
+      getContacts: ZuoraAccountId => ApiGatewayOp[Contacts],
+      getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]],
+      accountId: ZuoraAccountId,
   ) = for {
     account <- getAccount(accountId)
     paymentMethod <- getPaymentMethod(account.paymentMethodId)
@@ -29,4 +29,3 @@ object GetContributionCustomerData {
   } yield ContributionCustomerData(account, paymentMethod, accountSubscriptions, contacts)
 
 }
-

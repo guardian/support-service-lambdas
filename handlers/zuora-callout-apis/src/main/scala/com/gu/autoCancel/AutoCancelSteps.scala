@@ -20,12 +20,14 @@ object AutoCancelSteps extends Logging {
 
     case class UrlParamsWire(onlyCancelDirectDebit: Option[String], dryRun: Option[String]) {
       def toAutoCancelUrlParams = AutoCancelUrlParams(
-        onlyCancelDirectDebit.contains("true"), dryRun.contains("true")
+        onlyCancelDirectDebit.contains("true"),
+        dryRun.contains("true"),
       )
     }
 
     val wireReads = Json.reads[UrlParamsWire]
-    implicit val autoCancelUrlParamsReads: Reads[AutoCancelUrlParams] = json => wireReads.reads(json).map(_.toAutoCancelUrlParams)
+    implicit val autoCancelUrlParamsReads: Reads[AutoCancelUrlParams] = json =>
+      wireReads.reads(json).map(_.toAutoCancelUrlParams)
   }
 
   /*
@@ -33,29 +35,41 @@ object AutoCancelSteps extends Logging {
    * Each invoice can have multiple invoice items applying to a different subscription.
    */
   def apply(
-    callZuoraAutoCancel: (List[AutoCancelRequest], AutoCancelUrlParams) => ApiGatewayOp[Unit],
-    autoCancelReqProducer: AutoCancelCallout => ApiGatewayOp[List[AutoCancelRequest]],
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit]
+      callZuoraAutoCancel: (List[AutoCancelRequest], AutoCancelUrlParams) => ApiGatewayOp[Unit],
+      autoCancelReqProducer: AutoCancelCallout => ApiGatewayOp[List[AutoCancelRequest]],
+      sendEmailRegardingAccount: (
+          String,
+          PaymentFailureInformation => Either[String, EmailMessage],
+      ) => ClientFailableOp[Unit],
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       autoCancelCallout <- apiGatewayRequest.bodyAsCaseClass[AutoCancelCallout]()
       urlParams <- apiGatewayRequest.queryParamsAsCaseClass[AutoCancelUrlParams]()
       _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = urlParams.onlyCancelDirectDebit)
-      autoCancelRequests <- autoCancelReqProducer(autoCancelCallout).withLogging(s"auto-cancellation requests for ${autoCancelCallout.accountId}")
-      _ <- callZuoraAutoCancel(autoCancelRequests, urlParams).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
+      autoCancelRequests <- autoCancelReqProducer(autoCancelCallout).withLogging(
+        s"auto-cancellation requests for ${autoCancelCallout.accountId}",
+      )
+      _ <- callZuoraAutoCancel(autoCancelRequests, urlParams).withLogging(
+        s"auto-cancellation for ${autoCancelCallout.accountId}",
+      )
       request = makeRequest(autoCancelCallout) _
       _ <- handleSendPaymentFailureEmail(autoCancelCallout.accountId, request, sendEmailRegardingAccount, urlParams)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
-  def makeRequest(autoCancelCallout: AutoCancelCallout)(paymentFailureInformation: PaymentFailureInformation): Either[String, EmailMessage] =
+  def makeRequest(autoCancelCallout: AutoCancelCallout)(
+      paymentFailureInformation: PaymentFailureInformation,
+  ): Either[String, EmailMessage] =
     ToMessage(autoCancelCallout, paymentFailureInformation, EmailId.cancelledId)
 
   private def handleSendPaymentFailureEmail(
-    accountId: String,
-    request: PaymentFailureInformation => Either[String, EmailMessage],
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit],
-    urlParams: AutoCancelUrlParams
+      accountId: String,
+      request: PaymentFailureInformation => Either[String, EmailMessage],
+      sendEmailRegardingAccount: (
+          String,
+          PaymentFailureInformation => Either[String, EmailMessage],
+      ) => ClientFailableOp[Unit],
+      urlParams: AutoCancelUrlParams,
   ) = {
     if (urlParams.dryRun) {
       val msg = "DryRun of SendPaymentFailureEmail"
@@ -64,10 +78,11 @@ object AutoCancelSteps extends Logging {
     } else logErrorsAndContinueProcessing(sendEmailRegardingAccount(accountId, request))
   }
 
-  private def logErrorsAndContinueProcessing(clientFailableOp: ClientFailableOp[Unit]): ContinueProcessing[Unit] = clientFailableOp match {
-    case e: ClientFailure =>
-      logger.warn(s"ignored error: ${e.message}")
-      ContinueProcessing(())
-    case ClientSuccess(()) => ContinueProcessing(())
-  }
+  private def logErrorsAndContinueProcessing(clientFailableOp: ClientFailableOp[Unit]): ContinueProcessing[Unit] =
+    clientFailableOp match {
+      case e: ClientFailure =>
+        logger.warn(s"ignored error: ${e.message}")
+        ContinueProcessing(())
+      case ClientSuccess(()) => ContinueProcessing(())
+    }
 }

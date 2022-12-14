@@ -16,7 +16,7 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
       """{
         "cutOffDate" : "2012-11-03",
         "dryRun": true
-        |}""".stripMargin
+        |}""".stripMargin,
     )
 
     val expected = RetentionQueryRequest(Some(LocalDate.of(2012, 11, 3)), true)
@@ -58,13 +58,12 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
                  |  (MIN(Status) = 'Active' OR MAX(SubscriptionEndDate) >= '$dateStr')
                  |ORDER BY
                  |  Account.CrmId
-    """.stripMargin
+    """.stripMargin,
     )
 
     val expectedCandidatesQuery = AquaQuery(
       name = "candidatesQuery",
-      query =
-        s"""
+      query = s"""
            |SELECT
            |  Account.Id, Account.CrmId
            |FROM
@@ -79,13 +78,12 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
            |  SubscriptionEndDate > '1000-01-01'
            |ORDER BY
            |  Account.CrmId
-    """.stripMargin
+    """.stripMargin,
     )
 
     AquaQueryRequest(
       name = "zuora-retention",
-      queries = List(expectedCandidatesQuery, expectedExclusionQuery)
+      queries = List(expectedCandidatesQuery, expectedExclusionQuery),
     )
   }
 }
-

@@ -13,17 +13,23 @@ class CreateJobTest extends AnyFlatSpec with Matchers {
   it should "create a request ok" in {
     val createJobRequest = CreateJobRequest(
       objectType = SfObjectName("Contact"),
-      maybeChunkSize = Some(BatchSize(250000))
+      maybeChunkSize = Some(BatchSize(250000)),
     )
     val actual = CreateJob.toRequest(createJobRequest)
 
-    val expectedBody = JsObject(List(
-      "operation" -> JsString("query"),
-      "concurrencyMode" -> JsString("Parallel"),
-      "contentType" -> JsString("CSV"),
-      "object" -> JsString("Contact")
-    ))
-    val expected = new PostRequestWithHeaders(expectedBody, RelativePath("/services/async/44.0/job"), List(Header("Sforce-Enable-PKChunking", "chunkSize=250000")))
+    val expectedBody = JsObject(
+      List(
+        "operation" -> JsString("query"),
+        "concurrencyMode" -> JsString("Parallel"),
+        "contentType" -> JsString("CSV"),
+        "object" -> JsString("Contact"),
+      ),
+    )
+    val expected = new PostRequestWithHeaders(
+      expectedBody,
+      RelativePath("/services/async/44.0/job"),
+      List(Header("Sforce-Enable-PKChunking", "chunkSize=250000")),
+    )
     actual should be(expected)
   }
 

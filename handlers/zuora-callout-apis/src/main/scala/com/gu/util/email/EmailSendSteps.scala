@@ -10,23 +10,23 @@ import scala.util.{Failure, Success, Try}
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 
 case class SubscriberAttributesDef(
-  subscriber_id: String,
-  product: String,
-  payment_method: String,
-  card_type: String,
-  card_expiry_date: String,
-  first_name: String,
-  last_name: String,
-  primaryKey: PrimaryKey,
-  serviceStartDate: String,
-  serviceEndDate: String,
-  billing_address1: Option[String] = None,
-  billing_address2: Option[String] = None,
-  billing_postcode: Option[String] = None,
-  billing_city: Option[String] = None,
-  billing_state: Option[String] = None,
-  billing_country: Option[String] = None,
-  title: Option[String] = None
+    subscriber_id: String,
+    product: String,
+    payment_method: String,
+    card_type: String,
+    card_expiry_date: String,
+    first_name: String,
+    last_name: String,
+    primaryKey: PrimaryKey,
+    serviceStartDate: String,
+    serviceEndDate: String,
+    billing_address1: Option[String] = None,
+    billing_address2: Option[String] = None,
+    billing_postcode: Option[String] = None,
+    billing_city: Option[String] = None,
+    billing_state: Option[String] = None,
+    billing_country: Option[String] = None,
+    title: Option[String] = None,
 )
 
 sealed trait PrimaryKey {
@@ -68,7 +68,7 @@ trait EmailSqsSerialisation {
           case InvoiceId(id) => "invoiceId" -> JsString(id)
         },
         "serviceStartDate" -> JsString(o.serviceStartDate),
-        "serviceEndDate" -> JsString(o.serviceEndDate)
+        "serviceEndDate" -> JsString(o.serviceEndDate),
       )
 
       val optionalFields = Map(
@@ -78,7 +78,7 @@ trait EmailSqsSerialisation {
         "billing_city" -> o.billing_city.map(JsString),
         "billing_state" -> o.billing_state.map(JsString),
         "billing_country" -> o.billing_country.map(JsString),
-        "title" -> o.title.map(JsString)
+        "title" -> o.title.map(JsString),
       ).collect { case (key, Some(value)) => key -> value }
 
       val allFields = fields ++ optionalFields

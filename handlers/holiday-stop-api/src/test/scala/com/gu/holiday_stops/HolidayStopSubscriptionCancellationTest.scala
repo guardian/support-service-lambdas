@@ -28,15 +28,15 @@ class HolidayStopSubscriptionCancellationTest extends AnyFlatSpec with Matchers 
         requestDetail = List(
           unprocessedStopForDateBeforeCancellation,
           unprocessedStopForDateOnCancellation,
-          unprocessedStopForDateAfterCancellation
-        )
-      )
+          unprocessedStopForDateAfterCancellation,
+        ),
+      ),
     )
 
-    HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only(
+    HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only (
       unprocessedStopForDateBeforeCancellation.copy(
         Actual_Price__c = Some(Price(estimatedPrice)),
-        Charge_Code__c = Some(RatePlanChargeCode("ManualRefund_Cancellation"))
+        Charge_Code__c = Some(RatePlanChargeCode("ManualRefund_Cancellation")),
       )
     )
   }
@@ -46,25 +46,25 @@ class HolidayStopSubscriptionCancellationTest extends AnyFlatSpec with Matchers 
       dateBeforeCancellation,
       Some("ChargeCode-1111"),
       estimatedPrice,
-      estimatedInvoiceDate = Some(dateBeforeCancellation)
+      estimatedInvoiceDate = Some(dateBeforeCancellation),
     )
     val processedExpectedRefundedOnCancellationDate = testDetail(
       dateBeforeCancellation,
       Some("ChargeCode-1111"),
       estimatedPrice,
-      estimatedInvoiceDate = Some(cancellationDate)
+      estimatedInvoiceDate = Some(cancellationDate),
     )
     val processedExpectedRefundedAfterCancellationDate = testDetail(
       dateBeforeCancellation,
       Some("ChargeCode-1111"),
       estimatedPrice,
-      estimatedInvoiceDate = Some(dateAfterCancellation)
+      estimatedInvoiceDate = Some(dateAfterCancellation),
     )
     val processedMissingExpectedRefundedDate = testDetail(
       dateBeforeCancellation,
       Some("ChargeCode-1111"),
       estimatedPrice,
-      estimatedInvoiceDate = None
+      estimatedInvoiceDate = None,
     )
     val holidayStopRequests = List(
       Fixtures.mkHolidayStopRequest(
@@ -73,12 +73,12 @@ class HolidayStopSubscriptionCancellationTest extends AnyFlatSpec with Matchers 
           processedMissingExpectedRefundedDate,
           processedExpectedRefundedBeforeCancellationDate,
           processedExpectedRefundedOnCancellationDate,
-          processedExpectedRefundedAfterCancellationDate
-        )
-      )
+          processedExpectedRefundedAfterCancellationDate,
+        ),
+      ),
     )
 
-    HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only(
+    HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only (
       processedExpectedRefundedOnCancellationDate.copy(
         Actual_Price__c = Some(Price(estimatedPrice)),
       ),
@@ -88,16 +88,18 @@ class HolidayStopSubscriptionCancellationTest extends AnyFlatSpec with Matchers 
     )
   }
 
-  private def testDetail(stopDate: LocalDate,
-                         chargeCode: Option[String],
-                         estimatedPrice: Double,
-                         estimatedInvoiceDate: Option[LocalDate]) = {
+  private def testDetail(
+      stopDate: LocalDate,
+      chargeCode: Option[String],
+      estimatedPrice: Double,
+      estimatedInvoiceDate: Option[LocalDate],
+  ) = {
     Fixtures.mkHolidayStopRequestDetails(
       estimatedPrice = Some(estimatedPrice),
       actualPrice = None,
       chargeCode = chargeCode,
       stopDate = stopDate,
-      expectedInvoiceDate = estimatedInvoiceDate
+      expectedInvoiceDate = estimatedInvoiceDate,
     )
   }
 }

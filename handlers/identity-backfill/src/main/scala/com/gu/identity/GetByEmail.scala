@@ -43,9 +43,7 @@ object GetByEmail {
     for {
       user <- userFromResponse(userResponse)
     } yield {
-      val isUserEmailValidated: Boolean = userResponse
-        .user
-        .statusFields
+      val isUserEmailValidated: Boolean = userResponse.user.statusFields
         .exists(_.userEmailValidated)
 
       IdentityAccount(IdentityId(user.id), isUserEmailValidated)
@@ -56,7 +54,7 @@ object GetByEmail {
   val wrapper: HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount] =
     HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount](
       fromNewParam = emailAddressToParams,
-      toNewResponse = jsToWireModel.andThen(_.flatMap(wireToDomainModel))
+      toNewResponse = jsToWireModel.andThen(_.flatMap(wireToDomainModel)),
     )
 
 }

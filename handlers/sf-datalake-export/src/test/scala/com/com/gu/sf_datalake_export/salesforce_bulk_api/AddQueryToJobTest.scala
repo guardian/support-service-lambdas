@@ -14,18 +14,18 @@ class AddQueryToJobTest extends AnyFlatSpec with Matchers {
   it should "create a request ok" in {
     val addQueryRequest = AddQueryRequest(
       query = Soql("Select something from somewhere"),
-      jobId = JobId("someId")
+      jobId = JobId("someId"),
     )
 
     val expectedMethod = PostMethod(
       body = BodyAsString("Select something from somewhere"),
-      contentType = ContentType("text/csv")
+      contentType = ContentType("text/csv"),
     )
 
     val expected = new StringHttpRequest(
       requestMethod = expectedMethod,
       relativePath = RelativePath("/services/async/44.0/job/someId/batch"),
-      urlParams = UrlParams.empty
+      urlParams = UrlParams.empty,
     )
 
     val actual = AddQueryToJob.toRequest(addQueryRequest)

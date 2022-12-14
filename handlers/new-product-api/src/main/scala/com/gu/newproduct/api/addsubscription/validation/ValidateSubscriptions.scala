@@ -5,7 +5,9 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Acti
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 
 object ValidateSubscriptions {
-  def apply(bannedRateplans: List[ProductRatePlanId], validationFailedMessage: String)(subscriptions: List[Subscription]): ValidationResult[List[Subscription]] = {
+  def apply(bannedRateplans: List[ProductRatePlanId], validationFailedMessage: String)(
+      subscriptions: List[Subscription],
+  ): ValidationResult[List[Subscription]] = {
     def hasActiveBannedPlan = hasActiveRateplans(bannedRateplans) _
 
     val validationResult = !subscriptions.exists(hasActiveBannedPlan) orFailWith validationFailedMessage

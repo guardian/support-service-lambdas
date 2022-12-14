@@ -19,15 +19,15 @@ import java.io.IOException
 
 object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayCreditAddResult]] with zio.App {
 
-  /**
-   * @param productTypeAndStopDateOverride
-   *             Optionally, the handler will take a product type and stopped publication date
-   *             of holiday-stop requests to process.
-   *             This is to facilitate testing.
-   *             In normal use it will be missing and all product types will be processed for
-   *             publication dates determined by the fulfilment dates file.
-   */
-  override def handle(productTypeAndStopDateOverride: Option[ProductTypeAndStopDate], context: Context): Either[Throwable, List[ZuoraHolidayCreditAddResult]] = {
+  /** @param productTypeAndStopDateOverride
+    *   Optionally, the handler will take a product type and stopped publication date of holiday-stop requests to
+    *   process. This is to facilitate testing. In normal use it will be missing and all product types will be processed
+    *   for publication dates determined by the fulfilment dates file.
+    */
+  override def handle(
+      productTypeAndStopDateOverride: Option[ProductTypeAndStopDate],
+      context: Context,
+  ): Either[Throwable, List[ZuoraHolidayCreditAddResult]] = {
 
     val runtime = zio.Runtime.default
 
@@ -39,8 +39,8 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
             config,
             productTypeAndStopDateOverride,
             HttpURLConnectionBackend(),
-            GetFromS3.fetchString
-          )
+            GetFromS3.fetchString,
+          ),
         )
         _ <- RIO.foreach_(results)(result => RIO.effect(ProcessResult.log(result)))
         zuoraWriteResults <- results.flatMap(_.overallFailure.toList) match {
@@ -80,8 +80,8 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
             config,
             productTypeAndStopDate,
             HttpURLConnectionBackend(),
-            GetFromS3.fetchString
-          )
+            GetFromS3.fetchString,
+          ),
         )
         _ <- showResults(processResults)
       } yield ()

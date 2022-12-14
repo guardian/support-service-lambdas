@@ -5,48 +5,48 @@ import java.time.{DayOfWeek, LocalDate}
 import com.gu.i18n.Currency
 
 case class Catalog(
-  voucherWeekend: Plan,
-  voucherSaturday: Plan,
-  voucherSunday: Plan,
-  voucherEveryDay: Plan,
-  voucherSixDay: Plan,
-  voucherWeekendPlus: Plan,
-  voucherSaturdayPlus: Plan,
-  voucherSundayPlus: Plan,
-  voucherEveryDayPlus: Plan,
-  voucherSixDayPlus: Plan,
-  monthlySupporterPlus: Plan,
-  annualSupporterPlus: Plan,
-  monthlyContribution: Plan,
-  annualContribution: Plan,
-  homeDeliveryEveryDay: Plan,
-  homeDeliverySixDay: Plan,
-  homeDeliveryWeekend: Plan,
-  homeDeliverySunday: Plan,
-  homeDeliverySaturday: Plan,
-  homeDeliveryEveryDayPlus: Plan,
-  homeDeliverySixDayPlus: Plan,
-  homeDeliveryWeekendPlus: Plan,
-  homeDeliverySundayPlus: Plan,
-  homeDeliverySaturdayPlus: Plan,
-  digipackAnnual: Plan,
-  digipackMonthly: Plan,
-  guardianWeeklyDomesticSixForSix: Plan,
-  guardianWeeklyDomesticQuarterly: Plan,
-  guardianWeeklyDomesticAnnual: Plan,
-  guardianWeeklyROWSixForSix: Plan,
-  guardianWeeklyROWQuarterly: Plan,
-  guardianWeeklyROWAnnual: Plan,
-  digitalVoucherWeekend: Plan,
-  digitalVoucherWeekendPlus: Plan,
-  digitalVoucherEveryday: Plan,
-  digitalVoucherEverydayPlus: Plan,
-  digitalVoucherSaturday: Plan,
-  digitalVoucherSaturdayPlus: Plan,
-  digitalVoucherSunday: Plan,
-  digitalVoucherSundayPlus: Plan,
-  digitalVoucherSixday: Plan,
-  digitalVoucherSixdayPlus: Plan
+    voucherWeekend: Plan,
+    voucherSaturday: Plan,
+    voucherSunday: Plan,
+    voucherEveryDay: Plan,
+    voucherSixDay: Plan,
+    voucherWeekendPlus: Plan,
+    voucherSaturdayPlus: Plan,
+    voucherSundayPlus: Plan,
+    voucherEveryDayPlus: Plan,
+    voucherSixDayPlus: Plan,
+    monthlySupporterPlus: Plan,
+    annualSupporterPlus: Plan,
+    monthlyContribution: Plan,
+    annualContribution: Plan,
+    homeDeliveryEveryDay: Plan,
+    homeDeliverySixDay: Plan,
+    homeDeliveryWeekend: Plan,
+    homeDeliverySunday: Plan,
+    homeDeliverySaturday: Plan,
+    homeDeliveryEveryDayPlus: Plan,
+    homeDeliverySixDayPlus: Plan,
+    homeDeliveryWeekendPlus: Plan,
+    homeDeliverySundayPlus: Plan,
+    homeDeliverySaturdayPlus: Plan,
+    digipackAnnual: Plan,
+    digipackMonthly: Plan,
+    guardianWeeklyDomesticSixForSix: Plan,
+    guardianWeeklyDomesticQuarterly: Plan,
+    guardianWeeklyDomesticAnnual: Plan,
+    guardianWeeklyROWSixForSix: Plan,
+    guardianWeeklyROWQuarterly: Plan,
+    guardianWeeklyROWAnnual: Plan,
+    digitalVoucherWeekend: Plan,
+    digitalVoucherWeekendPlus: Plan,
+    digitalVoucherEveryday: Plan,
+    digitalVoucherEverydayPlus: Plan,
+    digitalVoucherSaturday: Plan,
+    digitalVoucherSaturdayPlus: Plan,
+    digitalVoucherSunday: Plan,
+    digitalVoucherSundayPlus: Plan,
+    digitalVoucherSixday: Plan,
+    digitalVoucherSixdayPlus: Plan,
 ) {
   val allPlans = List(
     voucherWeekend,
@@ -160,7 +160,9 @@ object PlanId {
 
   case object GuardianWeeklyDomestic6for6 extends PlanId("guardian_weekly_domestic_6for6") with GuardianWeeklyDomestic
 
-  case object GuardianWeeklyDomesticQuarterly extends PlanId("guardian_weekly_domestic_quarterly") with GuardianWeeklyDomestic
+  case object GuardianWeeklyDomesticQuarterly
+      extends PlanId("guardian_weekly_domestic_quarterly")
+      with GuardianWeeklyDomestic
 
   case object GuardianWeeklyDomesticAnnual extends PlanId("guardian_weekly_domestic_annual") with GuardianWeeklyDomestic
 
@@ -200,17 +202,17 @@ object PlanId {
     VoucherSunday,
     VoucherSundayPlus,
     VoucherWeekend,
-    VoucherWeekendPlus
+    VoucherWeekendPlus,
   )
 
   val enabledContributionPlans = List(
     MonthlyContribution,
-    AnnualContribution
+    AnnualContribution,
   )
 
   val enabledSupporterPlusPlans = List(
     MonthlySupporterPlus,
-    AnnualSupporterPlus
+    AnnualSupporterPlus,
   )
 
   val enabledHomeDeliveryPlans = List(
@@ -223,12 +225,12 @@ object PlanId {
     HomeDeliverySunday,
     HomeDeliverySundayPlus,
     HomeDeliveryWeekend,
-    HomeDeliveryWeekendPlus
+    HomeDeliveryWeekendPlus,
   )
 
   val enabledDigipackPlans = List(
     DigipackAnnual,
-    DigipackMonthly
+    DigipackMonthly,
   )
 
   val enabledGuardianWeeklyDomesticPlans = List(
@@ -240,7 +242,7 @@ object PlanId {
   val enabledGuardianWeeklyROWPlans = List(
     GuardianWeeklyROW6for6,
     GuardianWeeklyROWQuarterly,
-    GuardianWeeklyROWAnnual
+    GuardianWeeklyROWAnnual,
   )
 
   val enabledDigitalVoucherPlans = List(
@@ -253,7 +255,7 @@ object PlanId {
     DigitalVoucherSunday,
     DigitalVoucherSundayPlus,
     DigitalVoucherSixday,
-    DigitalVoucherSixdayPlus
+    DigitalVoucherSixdayPlus,
   )
 
   val supportedPlans: List[PlanId] =
@@ -263,7 +265,12 @@ object PlanId {
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
-case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules, paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
+case class Plan(
+    id: PlanId,
+    description: PlanDescription,
+    startDateRules: StartDateRules,
+    paymentPlans: Map[Currency, PaymentPlan] = Map.empty,
+)
 
 sealed trait BillingPeriod
 object Monthly extends BillingPeriod
@@ -271,7 +278,12 @@ object Quarterly extends BillingPeriod
 object Annual extends BillingPeriod
 object SixWeeks extends BillingPeriod
 
-case class PaymentPlan(currency: Currency, amountMinorUnits: AmountMinorUnits, billingPeriod: BillingPeriod, description: String)
+case class PaymentPlan(
+    currency: Currency,
+    amountMinorUnits: AmountMinorUnits,
+    billingPeriod: BillingPeriod,
+    description: String,
+)
 
 case class PlanDescription(value: String) extends AnyVal
 
@@ -289,10 +301,8 @@ case class WindowRule(startDate: LocalDate, maybeSize: Option[WindowSizeDays]) e
 
 case class AmountMinorUnits(value: Int) extends AnyVal
 
-/**
- * ProductType
- * Represents the ProductType field on a Product in Zuora
- */
+/** ProductType Represents the ProductType field on a Product in Zuora
+  */
 case class ProductType(value: String)
 object ProductType {
   val GuardianWeekly = ProductType("Guardian Weekly")

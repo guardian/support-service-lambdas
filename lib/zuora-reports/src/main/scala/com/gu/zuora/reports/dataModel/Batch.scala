@@ -8,4 +8,3 @@ object Batch {
   implicit val reads = Json.reads[Batch]
   implicit val writes = Json.writes[Batch]
 }
-

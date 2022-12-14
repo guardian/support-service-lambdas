@@ -18,7 +18,9 @@ object CustomFailure extends LazyLogging {
   }
 
   def fromThrowableToMetric(throwable: Throwable, eventName: String): CustomFailure = {
-    logger.error(s"CustomFailure.fromThrowableToMetric throwable.getMessage: ${throwable.getMessage} | eventName: $eventName")
+    logger.error(
+      s"CustomFailure.fromThrowableToMetric throwable.getMessage: ${throwable.getMessage} | eventName: $eventName",
+    )
     Metrics.put(event = eventName)
     CustomFailure(throwable.getMessage)
   }

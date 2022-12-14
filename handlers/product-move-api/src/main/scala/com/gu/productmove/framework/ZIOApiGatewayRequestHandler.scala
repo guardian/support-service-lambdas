@@ -73,18 +73,21 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
           path = path,
           protocol = "",
           sourceIp = "",
-          userAgent = ""
-        )
+          userAgent = "",
+        ),
       ),
       body = testInput,
-      isBase64Encoded = false
+      isBase64Encoded = false,
     )
   }
 
   val server: List[ServerEndpoint[Any, TIO]]
 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
-  override def handleRequest(javaRequest: APIGatewayV2WebSocketEvent, context: Context): APIGatewayV2WebSocketResponse = {
+  override def handleRequest(
+      javaRequest: APIGatewayV2WebSocketEvent,
+      context: Context,
+  ): APIGatewayV2WebSocketResponse = {
 
     context.getLogger.log("Lambda input: " + javaRequest)
 
@@ -114,11 +117,12 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
       runtime.unsafe.run(
         routedTask
           .catchAll { error =>
-            ZIO.log(error.toString)
+            ZIO
+              .log(error.toString)
               .map(_ => AwsResponse(Nil, false, 500, Map.empty, ""))
           }
           .provideLayer(Runtime.removeDefaultLoggers)
-          .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger)))
+          .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger))),
       ) match
         case Exit.Success(value) => value
         case Exit.Failure(cause) =>
@@ -131,14 +135,14 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
 
 class AwsLambdaLogger(lambdaLogger: LambdaLogger) extends ZLogger[String, Unit] {
   override def apply(
-    trace: Trace,
-    fiberId: FiberId,
-    logLevel: LogLevel,
-    message: () => String,
-    cause: Cause[Any],
-    context: FiberRefs,
-    spans: List[LogSpan],
-    annotations: Map[String, String]
+      trace: Trace,
+      fiberId: FiberId,
+      logLevel: LogLevel,
+      message: () => String,
+      cause: Cause[Any],
+      context: FiberRefs,
+      spans: List[LogSpan],
+      annotations: Map[String, String],
   ): Unit = lambdaLogger.log(message())
 }
 
@@ -171,4 +175,3 @@ class TestContext() extends Context {
 
     override def log(message: Array[Byte]): Unit = println(s"LOG BYTES: ${message.toString}")
 }
-

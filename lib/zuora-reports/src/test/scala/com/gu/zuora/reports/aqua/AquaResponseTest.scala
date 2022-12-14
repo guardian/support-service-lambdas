@@ -42,7 +42,7 @@ class AquaResponseTest extends AsyncFlatSpec {
       |    "id": "1adsad12983729873298173982173982",
       |    "version": "1.0",
       |    "format": "CSV"
-      |}""".stripMargin
+      |}""".stripMargin,
     )
 
     val expected = AquaJobResponse(
@@ -50,9 +50,9 @@ class AquaResponseTest extends AsyncFlatSpec {
       name = "testJob",
       batches = Seq(
         Batch("pending", "job1"),
-        Batch("pending", "job2")
+        Batch("pending", "job2"),
       ),
-      id = Some("1adsad12983729873298173982173982")
+      id = Some("1adsad12983729873298173982173982"),
     )
 
     val actual = successResponse.as[AquaJobResponse]

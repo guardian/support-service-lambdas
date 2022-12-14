@@ -12,10 +12,10 @@ import scala.util.Try
 object S3UploadCatalog extends Logging {
 
   def apply(
-    stage: Stage,
-    zuoraEnvironment: ZuoraEnvironment,
-    catalog: String,
-    s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse]
+      stage: Stage,
+      zuoraEnvironment: ZuoraEnvironment,
+      catalog: String,
+      s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse],
   ): Either[String, PutObjectResponse] = {
     logger.info("Uploading catalog to S3...")
 
@@ -39,7 +39,7 @@ object S3UploadCatalog extends Logging {
       result => {
         logger.info(s"Successfully uploaded catalog to S3: $result")
         Right(result)
-      }
+      },
     )
   }
 

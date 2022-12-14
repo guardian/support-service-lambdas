@@ -9,24 +9,32 @@ import org.scalatest.flatspec.AsyncFlatSpec
 class QuerierTest extends AsyncFlatSpec {
 
   it should "return error if no job id in response " in {
-    val noJobIdResponse = ClientSuccess(AquaJobResponse(
-      id = None,
-      status = "submitted",
-      name = "someName",
-      batches = Seq()
-    ))
+    val noJobIdResponse = ClientSuccess(
+      AquaJobResponse(
+        id = None,
+        status = "submitted",
+        name = "someName",
+        batches = Seq(),
+      ),
+    )
 
-    Querier.toQuerierResponse(noJobIdResponse, false) shouldBe GenericError("unexpected response from zuora: AquaJobResponse(submitted,someName,List(),None)")
+    Querier.toQuerierResponse(noJobIdResponse, false) shouldBe GenericError(
+      "unexpected response from zuora: AquaJobResponse(submitted,someName,List(),None)",
+    )
   }
 
   it should "return jobId if response from Zuora is successful " in {
-    val noJobIdResponse = ClientSuccess(AquaJobResponse(
-      id = Some("jobId"),
-      status = "submitted",
-      name = "someName",
-      batches = Seq()
-    ))
+    val noJobIdResponse = ClientSuccess(
+      AquaJobResponse(
+        id = Some("jobId"),
+        status = "submitted",
+        name = "someName",
+        batches = Seq(),
+      ),
+    )
 
-    Querier.toQuerierResponse(noJobIdResponse, false) shouldBe ClientSuccess(QuerierResponse("someName", "jobId", false))
+    Querier.toQuerierResponse(noJobIdResponse, false) shouldBe ClientSuccess(
+      QuerierResponse("someName", "jobId", false),
+    )
   }
 }

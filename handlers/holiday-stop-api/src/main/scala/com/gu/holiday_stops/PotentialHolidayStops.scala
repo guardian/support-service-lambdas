@@ -7,8 +7,8 @@ import play.api.libs.json.Reads._
 import play.api.libs.json._
 
 case class PotentialHolidayStop(
-  publicationDate: LocalDate,
-  expectedCredit: Credit
+    publicationDate: LocalDate,
+    expectedCredit: Credit,
 )
 
 object PotentialHolidayStop {
@@ -28,7 +28,7 @@ object PotentialHolidayStop {
       Json.obj(
         "publicationDate" -> stop.publicationDate,
         "credit" -> stop.expectedCredit.amount,
-        "invoiceDate" -> stop.expectedCredit.invoiceDate
+        "invoiceDate" -> stop.expectedCredit.invoiceDate,
       )
   }
 }

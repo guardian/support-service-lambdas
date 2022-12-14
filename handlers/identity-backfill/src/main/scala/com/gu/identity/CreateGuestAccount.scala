@@ -25,7 +25,9 @@ object CreateGuestAccount {
     IdentityId(wireGuestRegistrationResponse.guestRegistrationRequest.userId)
 
   val wrapper: HttpOpWrapper[EmailAddress, PostRequest, JsValue, IdentityId] =
-    HttpOpWrapper[EmailAddress, PostRequest, JsValue, IdentityId](toRequest, RestRequestMaker.toResult[WireIdentityResponse](_).map(toResponse))
+    HttpOpWrapper[EmailAddress, PostRequest, JsValue, IdentityId](
+      toRequest,
+      RestRequestMaker.toResult[WireIdentityResponse](_).map(toResponse),
+    )
 
 }
-

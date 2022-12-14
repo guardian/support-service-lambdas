@@ -17,7 +17,9 @@ class EnhancedCancelledSubTests extends AnyFlatSpec with should.Matchers {
   }
 
   "EnhancedCancelledSub.apply" should "set the associatedActiveNonGiftSubs correctly when one exists" in {
-    EnhancedCancelledSub(subRecord, associatedSubsWithOverlap).associatedActiveNonGiftSubs shouldBe Seq(overlappingAssociatedSub)
+    EnhancedCancelledSub(subRecord, associatedSubsWithOverlap).associatedActiveNonGiftSubs shouldBe Seq(
+      overlappingAssociatedSub,
+    )
   }
 
   "EnhancedCancelledSub.apply" should "set the associatedActiveNonGiftSubs correctly when one does not exist" in {

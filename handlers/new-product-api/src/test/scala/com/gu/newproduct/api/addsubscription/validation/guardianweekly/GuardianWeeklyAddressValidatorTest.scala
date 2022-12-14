@@ -14,7 +14,7 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     Some(City("soldToCity")),
     Some(State("soldToState")),
     Some(Country.UK),
-    Some(Postcode("N1 9GU"))
+    Some(Postcode("N1 9GU")),
   )
 
   val testDomesticSoldToAddress = SoldToAddress(
@@ -23,7 +23,7 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     Some(City("soldToCity")),
     Some(State("soldToState")),
     Country.UK,
-    Some(Postcode("N1 9GU"))
+    Some(Postcode("N1 9GU")),
   )
 
   val testROWSoldToAddress = SoldToAddress(
@@ -32,7 +32,7 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     Some(City("soldToCity")),
     Some(State("soldToState")),
     Country("ZW", "Zimbabwe"),
-    Some(Postcode("HR1"))
+    Some(Postcode("HR1")),
   )
 
   it should "succeed for Domestic if delivery address is domestic" in {
@@ -40,12 +40,14 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
       val domesticAddress = testDomesticSoldToAddress.copy(country = domesticCountry)
       GuardianWeeklyDomesticAddressValidator(
         testBillingAddress,
-        domesticAddress
+        domesticAddress,
       ) shouldBe Passed(())
       GuardianWeeklyROWAddressValidator(
         testBillingAddress,
-        domesticAddress
-      ) shouldBe Failed(s"Delivery address country ${domesticCountry.name} is not valid for a Guardian Weekly (ROW) subscription")
+        domesticAddress,
+      ) shouldBe Failed(
+        s"Delivery address country ${domesticCountry.name} is not valid for a Guardian Weekly (ROW) subscription",
+      )
     }
   }
 
@@ -54,12 +56,14 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
       val domesticAddress = testDomesticSoldToAddress.copy(country = rowCountry)
       GuardianWeeklyROWAddressValidator(
         testBillingAddress,
-        domesticAddress
+        domesticAddress,
       ) shouldBe Passed(())
       GuardianWeeklyDomesticAddressValidator(
         testBillingAddress,
-        domesticAddress
-      ) shouldBe Failed(s"Delivery address country ${rowCountry.name} is not valid for a Guardian Weekly (Domestic) subscription")
+        domesticAddress,
+      ) shouldBe Failed(
+        s"Delivery address country ${rowCountry.name} is not valid for a Guardian Weekly (Domestic) subscription",
+      )
     }
   }
 
@@ -67,11 +71,11 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     val invalidBillingAddress = testBillingAddress.copy(address1 = None)
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
-      testDomesticSoldToAddress
+      testDomesticSoldToAddress,
     ) shouldBe Failed(s"bill to address1 must be populated")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
-      testROWSoldToAddress
+      testROWSoldToAddress,
     ) shouldBe Failed(s"bill to address1 must be populated")
   }
 
@@ -79,11 +83,11 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     val invalidBillingAddress = testBillingAddress.copy(city = None)
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
-      testDomesticSoldToAddress
+      testDomesticSoldToAddress,
     ) shouldBe Failed(s"bill to city must be populated")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
-      testROWSoldToAddress
+      testROWSoldToAddress,
     ) shouldBe Failed(s"bill to city must be populated")
   }
 
@@ -91,11 +95,11 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     val invalidBillingAddress = testBillingAddress.copy(postcode = None)
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
-      testDomesticSoldToAddress
+      testDomesticSoldToAddress,
     ) shouldBe Failed(s"bill to postcode must be populated")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
-      testROWSoldToAddress
+      testROWSoldToAddress,
     ) shouldBe Failed(s"bill to postcode must be populated")
   }
 
@@ -103,11 +107,11 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     val invalidBillingAddress = testBillingAddress.copy(country = None)
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
-      testDomesticSoldToAddress
+      testDomesticSoldToAddress,
     ) shouldBe Failed(s"bill to country must be populated")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
-      testROWSoldToAddress
+      testROWSoldToAddress,
     ) shouldBe Failed(s"bill to country must be populated")
   }
 }

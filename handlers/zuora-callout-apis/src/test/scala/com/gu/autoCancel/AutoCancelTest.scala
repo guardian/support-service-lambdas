@@ -31,9 +31,9 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             serviceEndDate = LocalDate.of(2022, 2, 2),
             chargeAmount = 12.34,
             chargeName = "chg",
-            productName = "prd"
-          )
-        )
+            productName = "prd",
+          ),
+        ),
       ),
       ItemisedInvoice(
         id = "invoice2",
@@ -49,10 +49,10 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             serviceEndDate = LocalDate.of(2022, 2, 2),
             chargeAmount = 11.34,
             chargeName = "chg",
-            productName = "prd"
-          )
-        )
-      )
+            productName = "prd",
+          ),
+        ),
+      ),
     )
     AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment")
   }
@@ -76,7 +76,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             serviceEndDate = LocalDate.of(2022, 2, 2),
             chargeAmount = 6.87,
             chargeName = "chg",
-            productName = "prd"
+            productName = "prd",
           ),
           InvoiceItem(
             id = "item2",
@@ -85,10 +85,10 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             serviceEndDate = LocalDate.of(2022, 2, 5),
             chargeAmount = 5.47,
             chargeName = "chg",
-            productName = "prd"
-          )
-        )
-      )
+            productName = "prd",
+          ),
+        ),
+      ),
     )
     AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment")
   }
@@ -112,7 +112,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             serviceEndDate = LocalDate.of(2022, 2, 2),
             chargeAmount = 6.87,
             chargeName = "chg",
-            productName = "prd"
+            productName = "prd",
           ),
           InvoiceItem(
             id = "item3",
@@ -121,7 +121,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             serviceEndDate = LocalDate.of(2022, 2, 2),
             chargeAmount = 5.45,
             chargeName = "chg",
-            productName = "prd"
+            productName = "prd",
           ),
           InvoiceItem(
             id = "item4",
@@ -130,7 +130,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             serviceEndDate = LocalDate.of(2022, 2, 2),
             chargeAmount = -1.23,
             chargeName = "discount",
-            productName = "discount"
+            productName = "discount",
           ),
           InvoiceItem(
             id = "item2",
@@ -139,10 +139,10 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             serviceEndDate = LocalDate.of(2022, 2, 5),
             chargeAmount = 5.47,
             chargeName = "chg",
-            productName = "prd"
-          )
-        )
-      )
+            productName = "prd",
+          ),
+        ),
+      ),
     )
     AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment")
   }

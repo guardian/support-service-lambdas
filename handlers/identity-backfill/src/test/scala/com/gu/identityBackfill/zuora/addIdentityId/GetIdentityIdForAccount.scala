@@ -11,11 +11,11 @@ object GetIdentityIdForAccount {
   object WireModel {
 
     case class BasicInfo(
-      IdentityId__c: String
+        IdentityId__c: String,
     )
 
     case class ZuoraAccount(
-      basicInfo: BasicInfo
+        basicInfo: BasicInfo,
     )
     implicit val zaReadsBasicInfo = Json.reads[BasicInfo]
     implicit val zaReadsZuoraAccount = Json.reads[ZuoraAccount]

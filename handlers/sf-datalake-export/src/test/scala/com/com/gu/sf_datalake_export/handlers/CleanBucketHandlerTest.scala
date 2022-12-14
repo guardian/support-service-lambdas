@@ -49,7 +49,7 @@ class CleanBucketHandlerTest extends AnyFlatSpec with Matchers {
   def listObjectsWithPrefix(path: S3Path) = {
     path shouldBe S3Path(
       bucketName = BucketName("bucketName"),
-      key = Some(Key("basepath-jobName"))
+      key = Some(Key("basepath-jobName")),
     )
     Success(testKeys)
   }
@@ -60,25 +60,22 @@ class CleanBucketHandlerTest extends AnyFlatSpec with Matchers {
     Success(())
   }
 
-
-
   "cleanBucket" should "clean the right files from the bucket" in {
     val wiredCleanBucket = CleanBucketHandler.cleanBucket(
       basePathFor,
       listObjectsWithPrefix,
-      deleteObjects
+      deleteObjects,
     ) _
 
     wiredCleanBucket(ObjectName("something"), JobName("jobName"), ShouldUploadToDataLake(true)) shouldBe Success(())
   }
-
 
   "cleanBucket" should "return success if there's no files to clean" in {
 
     val wiredCleanBucket = CleanBucketHandler.cleanBucket(
       basePathFor = basePathFor,
       listObjectsWithPrefix = (p: S3Path) => Success(Nil),
-      deleteObjects = deleteObjects
+      deleteObjects = deleteObjects,
     ) _
 
     wiredCleanBucket(ObjectName("something"), JobName("jobName"), ShouldUploadToDataLake(true)) shouldBe Success(())

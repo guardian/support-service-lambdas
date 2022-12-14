@@ -17,11 +17,10 @@ class EndToEndTest extends AnyFlatSpec with Matchers {
 
     val expected = ApiResponse(
       statusCode = "200",
-      body =
-        """{
+      body = """{
           |  "message" : "Success"
           |}""".stripMargin,
-      headers = Headers()
+      headers = Headers(),
     )
 
     val body =
@@ -49,11 +48,14 @@ object Runner {
 
   def getResultAndRequests(input: ApiGatewayRequest): (ApiResponse, List[TestingRawEffects.BasicRequest]) = {
 
-    val result = Handler.operationForEffects(
-      Stage("DEV"),
-      FakeFetchString.fetchString,
-      EndToEndTest.mock.response
-    ).map(_.steps(input)).apiResponse
+    val result = Handler
+      .operationForEffects(
+        Stage("DEV"),
+        FakeFetchString.fetchString,
+        EndToEndTest.mock.response,
+      )
+      .map(_.steps(input))
+      .apiResponse
 
     (result, EndToEndTest.mock.requestsAttempted)
   }
@@ -167,17 +169,33 @@ object EndToEndTest {
   val mock = new TestingRawEffects(
     responses = Map(
       s"/services/data/v$salesforceApiVersion/sobjects/Contact/newSFCont" -> HTTPResponse(200, newSFContResponse),
-      s"/services/data/v$salesforceApiVersion/sobjects/Contact/oldSFCont" -> HTTPResponse(200, oldSFContResponse)
+      s"/services/data/v$salesforceApiVersion/sobjects/Contact/oldSFCont" -> HTTPResponse(200, oldSFContResponse),
     ),
     postResponses = Map(
       POSTRequest("/services/oauth2/token", sfAuthReq) -> HTTPResponse(200, sfAuthResponse),
       POSTRequest("/action/query", accountQueryRequest) -> HTTPResponse(200, accountQueryResponse),
       POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse),
-      POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", updateAccountRequestBody, "PUT") -> updateAccountResponse,
-      POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", updateAccountRequestBody, "PUT") -> updateAccountResponse,
-      POSTRequest(s"/services/data/v$salesforceApiVersion/sobjects/Contact/oldSFCont", removeIdentityBody, "PATCH") -> updateAccountResponse,
-      POSTRequest(s"/services/data/v$salesforceApiVersion/sobjects/Contact/newSFCont", addIdentityBody, "PATCH") -> updateAccountResponse
-    )
+      POSTRequest(
+        "/accounts/2c92c0f9624bbc5f016253e573970b16",
+        updateAccountRequestBody,
+        "PUT",
+      ) -> updateAccountResponse,
+      POSTRequest(
+        "/accounts/2c92c0f8644618e30164652a558c6e20",
+        updateAccountRequestBody,
+        "PUT",
+      ) -> updateAccountResponse,
+      POSTRequest(
+        s"/services/data/v$salesforceApiVersion/sobjects/Contact/oldSFCont",
+        removeIdentityBody,
+        "PATCH",
+      ) -> updateAccountResponse,
+      POSTRequest(
+        s"/services/data/v$salesforceApiVersion/sobjects/Contact/newSFCont",
+        addIdentityBody,
+        "PATCH",
+      ) -> updateAccountResponse,
+    ),
   )
 
 }

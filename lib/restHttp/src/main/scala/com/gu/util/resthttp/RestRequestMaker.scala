@@ -13,14 +13,19 @@ object RestRequestMaker extends LazyLogging {
 
   val genericError = GenericError("HTTP request was unsuccessful")
 
-  def httpIsSuccessful(response: Response, maybeErrorBodyParser: Option[String => ClientFailure] = None): ClientFailableOp[Unit] = {
+  def httpIsSuccessful(
+      response: Response,
+      maybeErrorBodyParser: Option[String => ClientFailure] = None,
+  ): ClientFailableOp[Unit] = {
     if (response.isSuccessful) {
       ClientSuccess(())
     } else {
       val body = response.body.string
 
       val truncated = body.take(500) + (if (body.length > 500) "..." else "")
-      logger.error(s"HTTP request was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated")
+      logger.error(
+        s"HTTP request was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated",
+      )
       maybeErrorBodyParser match {
         case Some(errorBodyParser) => errorBodyParser(body)
         case _ if (response.code == 404) => NotFound(response.message)
@@ -44,7 +49,11 @@ object RestRequestMaker extends LazyLogging {
 
   trait RequestsPUT {
     def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP]
-    def put[REQ: Writes, RESP: Reads](req: REQ, path: String, apiVersionHeader: (String, String)): ClientFailableOp[RESP]
+    def put[REQ: Writes, RESP: Reads](
+        req: REQ,
+        path: String,
+        apiVersionHeader: (String, String),
+    ): ClientFailableOp[RESP]
   }
 
   sealed trait IsCheckNeeded
@@ -76,7 +85,8 @@ object RestRequestMaker extends LazyLogging {
   case class PostRequestWithHeaders(body: JsValue, path: RelativePath, headers: List[Header])
 
   object PostRequestWithHeaders {
-    def apply[REQ: Writes](body: REQ, path: RelativePath, headers: List[Header] = List.empty): PostRequestWithHeaders = new PostRequestWithHeaders(Json.toJson(body), path, headers)
+    def apply[REQ: Writes](body: REQ, path: RelativePath, headers: List[Header] = List.empty): PostRequestWithHeaders =
+      new PostRequestWithHeaders(Json.toJson(body), path, headers)
   }
 
   case class GetRequest(path: RelativePath)
@@ -95,10 +105,10 @@ object RestRequestMaker extends LazyLogging {
   }
 
   class Requests(
-    headers: Map[String, String],
-    baseUrl: String,
-    getResponse: Request => Response,
-    jsonIsSuccessful: JsValue => ClientFailableOp[Unit]
+      headers: Map[String, String],
+      baseUrl: String,
+      getResponse: Request => Response,
+      jsonIsSuccessful: JsValue => ClientFailableOp[Unit],
   ) extends RequestsPUT {
     // this can be a class and still be cohesive because every single method in the class needs every single value.  so we are effectively partially
     // applying everything with these params
@@ -113,12 +123,17 @@ object RestRequestMaker extends LazyLogging {
     def put[RESP](putRequest: PutRequest): ClientFailableOp[JsonResponse] = {
       val body = createBodyFromJs(putRequest.body)
       for {
-        bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + putRequest.path.value, _.put(body)), getResponse).map(Json.parse)
+        bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + putRequest.path.value, _.put(body)), getResponse)
+          .map(Json.parse)
         _ <- jsonIsSuccessful(bodyAsJson)
       } yield JsonResponse(bodyAsJson)
     }
 
-    private def put[REQ: Writes, RESP: Reads](req: REQ, path: String, putHeaders: Map[String, String]): ClientFailableOp[RESP] = {
+    private def put[REQ: Writes, RESP: Reads](
+        req: REQ,
+        path: String,
+        putHeaders: Map[String, String],
+    ): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
       for {
         bodyAsJson <- sendRequest(buildRequest(putHeaders, baseUrl + path, _.put(body)), getResponse).map(Json.parse)
@@ -130,10 +145,18 @@ object RestRequestMaker extends LazyLogging {
     def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP] =
       put(req, path, headers)
 
-    def put[REQ: Writes, RESP: Reads](req: REQ, path: String, apiVersionHeader: (String, String)): ClientFailableOp[RESP] =
+    def put[REQ: Writes, RESP: Reads](
+        req: REQ,
+        path: String,
+        apiVersionHeader: (String, String),
+    ): ClientFailableOp[RESP] =
       put(req, path, headers + apiVersionHeader)
 
-    def post[REQ: Writes, RESP: Reads](req: REQ, path: String, skipCheck: IsCheckNeeded = WithCheck): ClientFailableOp[RESP] = {
+    def post[REQ: Writes, RESP: Reads](
+        req: REQ,
+        path: String,
+        skipCheck: IsCheckNeeded = WithCheck,
+    ): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.post(body)), getResponse).map(Json.parse)
@@ -189,13 +212,18 @@ object RestRequestMaker extends LazyLogging {
   def toClientFailableOp(response: Response): ClientFailableOp[BodyAsString] =
     toClientFailableOp(maybeErrorBodyParser = None)(response)
 
-  def toClientFailableOp(maybeErrorBodyParser: Option[String => ClientFailure])(response: Response): ClientFailableOp[BodyAsString] =
+  def toClientFailableOp(maybeErrorBodyParser: Option[String => ClientFailure])(
+      response: Response,
+  ): ClientFailableOp[BodyAsString] =
     httpIsSuccessful(response, maybeErrorBodyParser).map(_ => response).map(_.body.string).map(BodyAsString.apply)
 
-  def buildRequest(headers: Map[String, String], url: String, addMethod: Request.Builder => Request.Builder): Request = {
-    val builder = headers.foldLeft(new Request.Builder())({
-      case (builder, (header, value)) =>
-        builder.addHeader(header, value)
+  def buildRequest(
+      headers: Map[String, String],
+      url: String,
+      addMethod: Request.Builder => Request.Builder,
+  ): Request = {
+    val builder = headers.foldLeft(new Request.Builder())({ case (builder, (header, value)) =>
+      builder.addHeader(header, value)
     })
     val withUrl = builder.url(url)
     addMethod(withUrl).build()
@@ -214,7 +242,7 @@ object RestRequestMaker extends LazyLogging {
 
   case class ContentType(value: String) extends AnyVal
   val JsonContentType = ContentType("application/json")
-  //todo see how to fix this correctly
+  // todo see how to fix this correctly
   def createBodyFromString(bodyAsString: BodyAsString, contentType: ContentType = JsonContentType): RequestBody = {
     RequestBody.create(MediaType.parse(contentType.value), bodyAsString.value)
   }

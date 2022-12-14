@@ -22,36 +22,43 @@ case class FetchZuoraSubscriptionError(message: String) extends MoveSubscription
 case class UpdateZuoraAccountError(message: String) extends MoveSubscriptionServiceError
 
 class SFMoveSubscriptionsService[F[_]: Monad](
-  apiCfg: MoveSubscriptionApiConfig,
-  backend: SttpBackend[Identity, Any]
+    apiCfg: MoveSubscriptionApiConfig,
+    backend: SttpBackend[Identity, Any],
 ) extends LazyLogging {
 
   private val ZuoraConfig = ZuoraRestOauthConfig(
     baseUrl = apiCfg.zuoraBaseUrl,
     oauth = Oauth(
       clientId = apiCfg.zuoraClientId,
-      clientSecret = apiCfg.zuoraSecret
-    )
+      clientSecret = apiCfg.zuoraSecret,
+    ),
   )
 
-  def moveSubscription(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
+  def moveSubscription(
+      moveSubscriptionData: MoveSubscriptionReqBody,
+  ): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     moveSubscriptionInternal(moveSubscriptionData, updateAccountByMovingSubscriptionRun)
   }
 
-  def moveSubscriptionDryRun(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
+  def moveSubscriptionDryRun(
+      moveSubscriptionData: MoveSubscriptionReqBody,
+  ): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     moveSubscriptionInternal(moveSubscriptionData, updateAccountByMovingSubscriptionDryRun)
   }
 
   private def moveSubscriptionInternal(
-    moveSubscriptionData: MoveSubscriptionReqBody,
-    updateAccountByMovingSubscription: (AccessToken, SttpBackend[Identity, Any]) => (Subscription, ZuoraAccountMoveSubscriptionCommand) => ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse]
+      moveSubscriptionData: MoveSubscriptionReqBody,
+      updateAccountByMovingSubscription: (AccessToken, SttpBackend[Identity, Any]) => (
+          Subscription,
+          ZuoraAccountMoveSubscriptionCommand,
+      ) => ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse],
   ): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     import moveSubscriptionData._
 
     val moveSubCommand = ZuoraAccountMoveSubscriptionCommand(
       crmId = sfAccountId,
       sfContactId__c = sfFullContactId,
-      IdentityId__c = identityId
+      IdentityId__c = identityId,
     )
 
     (for {
@@ -67,16 +74,16 @@ class SFMoveSubscriptionsService[F[_]: Monad](
   }
 
   private def updateAccountByMovingSubscriptionDryRun(accessToken: AccessToken, backend: SttpBackend[Identity, Any])(
-    subscription: Subscription,
-    moveSubCommand: ZuoraAccountMoveSubscriptionCommand
+      subscription: Subscription,
+      moveSubCommand: ZuoraAccountMoveSubscriptionCommand,
   ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
     logger.info(s"DRY_RUN, successfully created moveSubscriptionCommand: $moveSubCommand")
     Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS_DRY_RUN"))
   }
 
   private def updateAccountByMovingSubscriptionRun(accessToken: AccessToken, backend: SttpBackend[Identity, Any])(
-    subscription: Subscription,
-    moveSubCommand: ZuoraAccountMoveSubscriptionCommand
+      subscription: Subscription,
+      moveSubCommand: ZuoraAccountMoveSubscriptionCommand,
   ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
     updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
   }
@@ -84,6 +91,9 @@ class SFMoveSubscriptionsService[F[_]: Monad](
 }
 
 object SFMoveSubscriptionsService {
-  def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Identity, Any]): SFMoveSubscriptionsService[F] =
+  def apply[F[_]: Monad](
+      apiCfg: MoveSubscriptionApiConfig,
+      backend: SttpBackend[Identity, Any],
+  ): SFMoveSubscriptionsService[F] =
     new SFMoveSubscriptionsService(apiCfg, backend)
 }

@@ -43,7 +43,7 @@ object Handler extends ZIOApiGatewayRequestHandler {
   def testProductMove(): Unit = super.runTest(
     "POST",
     "/product-move/A-S123",
-    Some(ProductMoveEndpointTypes.ExpectedInput(49.99).toJson)
+    Some(ProductMoveEndpointTypes.ExpectedInput(49.99).toJson),
   )
 
   @main
@@ -51,7 +51,7 @@ object Handler extends ZIOApiGatewayRequestHandler {
   def testAvailableMoves(): Unit = super.runTest(
     "GET",
     "/available-product-moves/A-S123",
-    None
+    None,
   )
 
   @main
@@ -60,7 +60,7 @@ object Handler extends ZIOApiGatewayRequestHandler {
     Handler.runTest(
       "GET",
       "/docs/docs.yaml",
-      None
+      None,
     )
   }
 

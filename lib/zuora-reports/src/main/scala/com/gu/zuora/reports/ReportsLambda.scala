@@ -14,15 +14,17 @@ object ReportsLambda extends Logging {
   type AquaCall[REQUEST, RESPONSE] = REQUEST => ClientFailableOp[RESPONSE]
 
   def apply[REQUEST, RESPONSE](
-    stage: Stage,
-    fetchString: StringFromS3,
-    lambdaIO: LambdaIO,
-    wireCall: ZuoraRestConfig => AquaCall[REQUEST, RESPONSE]
+      stage: Stage,
+      fetchString: StringFromS3,
+      lambdaIO: LambdaIO,
+      wireCall: ZuoraRestConfig => AquaCall[REQUEST, RESPONSE],
   )(implicit r: Reads[REQUEST], w: Writes[RESPONSE]): Unit = {
 
     val lambdaResponse = for {
       request <- ParseRequest[REQUEST](lambdaIO.inputStream).toEither
-      config <- LoadConfigModule(stage, fetchString)[ZuoraRestConfig].left.map(configError => LambdaException(configError.error))
+      config <- LoadConfigModule(stage, fetchString)[ZuoraRestConfig].left.map(configError =>
+        LambdaException(configError.error),
+      )
       aquaCall = wireCall(config)
       callResponse <- aquaCall(request).toDisjunction.left.map(error => LambdaException(error.message))
     } yield callResponse

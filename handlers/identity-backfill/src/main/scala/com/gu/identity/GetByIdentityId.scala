@@ -39,7 +39,7 @@ object GetByIdentityId {
   val wrapper: HttpOpWrapper[IdentityId, GetRequest, JsValue, IdentityUser] =
     HttpOpWrapper[IdentityId, GetRequest, JsValue, IdentityUser](
       fromNewParam = id => GetRequest(RelativePath(s"/user/${id.value}")),
-      toNewResponse = jsToWireModel.andThen(_.flatMap(wireToDomainModel))
+      toNewResponse = jsToWireModel.andThen(_.flatMap(wireToDomainModel)),
     )
 
 }

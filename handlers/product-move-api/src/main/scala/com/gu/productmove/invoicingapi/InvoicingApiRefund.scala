@@ -32,8 +32,13 @@ object InvoicingApiRefundLive {
     }
 }
 
-private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: SttpBackend[Task, Any]) extends InvoicingApiRefund {
-  override def refund(subscriptionName: String, amount: BigDecimal, adjustInvoices: Boolean): ZIO[Any, String, RefundResponse] = {
+private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: SttpBackend[Task, Any])
+    extends InvoicingApiRefund {
+  override def refund(
+      subscriptionName: String,
+      amount: BigDecimal,
+      adjustInvoices: Boolean,
+  ): ZIO[Any, String, RefundResponse] = {
 
     val requestBody = RefundRequest(subscriptionName, amount, adjustInvoices)
     basicRequest
@@ -49,7 +54,8 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
           case Right(body) => println(s"Received a successful response from Invoicing refund endpoint: $body")
         }
         response.body
-      }.absolve
+      }
+      .absolve
       .mapError(_.toString)
   }
 }
@@ -59,7 +65,11 @@ trait InvoicingApiRefund {
 }
 
 object InvoicingApiRefund {
-  def refund(subscriptionName: String, amount: BigDecimal, adjustInvoices: Boolean = true): ZIO[InvoicingApiRefund, String, RefundResponse] =
+  def refund(
+      subscriptionName: String,
+      amount: BigDecimal,
+      adjustInvoices: Boolean = true,
+  ): ZIO[InvoicingApiRefund, String, RefundResponse] =
     ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount, adjustInvoices))
 
   case class RefundRequest(subscriptionName: String, refund: BigDecimal, adjustInvoices: Boolean)
@@ -82,7 +92,7 @@ object InvoicingApiRefund {
     ],
     "guid": "e6282ccd-d06a-49bd-ad2e-9c362e912232"
 }
-  */
+   */
   case class RefundResponse(subscriptionName: String, invoiceId: String)
 
   given JsonEncoder[RefundRequest] = DeriveJsonEncoder.gen[RefundRequest]

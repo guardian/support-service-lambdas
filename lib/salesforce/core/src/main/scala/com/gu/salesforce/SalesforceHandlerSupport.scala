@@ -11,8 +11,14 @@ object SalesforceHandlerSupport {
   val HEADER_SALESFORCE_CONTACT_ID = "x-salesforce-contact-id"
 
   def extractContactFromHeaders(headers: List[(String, String)]): Either[SalesforceHandlerSupportError, Contact] =
-    headers.collectFirst {
-      case (HEADER_SALESFORCE_CONTACT_ID, sfContactId) => SalesforceContactId(sfContactId)
-      case (HEADER_IDENTITY_ID, identityId) => IdentityId(identityId)
-    }.toRight(SalesforceHandlerSupportError(s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)"))
+    headers
+      .collectFirst {
+        case (HEADER_SALESFORCE_CONTACT_ID, sfContactId) => SalesforceContactId(sfContactId)
+        case (HEADER_IDENTITY_ID, identityId) => IdentityId(identityId)
+      }
+      .toRight(
+        SalesforceHandlerSupportError(
+          s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)",
+        ),
+      )
 }

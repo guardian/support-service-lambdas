@@ -9,8 +9,8 @@ import scala.util.{Failure, Success, Try}
 object JsonHandler extends Logging {
 
   def apply[REQUEST, RESPONSE](
-    lambdaIO: LambdaIO,
-    operation: REQUEST => Try[RESPONSE]
+      lambdaIO: LambdaIO,
+      operation: REQUEST => Try[RESPONSE],
   )(implicit r: Reads[REQUEST], w: Writes[RESPONSE]): Unit = {
 
     val lambdaResponse = for {

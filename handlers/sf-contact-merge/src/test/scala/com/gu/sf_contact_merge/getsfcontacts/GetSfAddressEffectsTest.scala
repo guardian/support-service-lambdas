@@ -26,21 +26,27 @@ class GetSfAddressEffectsTest extends AnyFlatSpec with Matchers {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
-      getSfContact = sfAuth.wrapWith(JsonHttp.get).setupRequest(ToSfContactRequest.apply).parse[WireResult].map(WireContactToSfContact.apply)
+      getSfContact = sfAuth
+        .wrapWith(JsonHttp.get)
+        .setupRequest(ToSfContactRequest.apply)
+        .parse[WireResult]
+        .map(WireContactToSfContact.apply)
       address <- getSfContact.runRequest(testContact).toDisjunction
     } yield address
 
     val expected = SFContact(
-      UsableContactAddress(SFAddress(
-        SFStreet("123 dayone street"),
-        Some(SFCity("city1")),
-        Some(SFState("state1")),
-        Some(SFPostalCode("POSTAL1")),
-        SFCountry("Afghanistan"),
-        Some(SFPhone("012345"))
-      )),
+      UsableContactAddress(
+        SFAddress(
+          SFStreet("123 dayone street"),
+          Some(SFCity("city1")),
+          Some(SFState("state1")),
+          Some(SFPostalCode("POSTAL1")),
+          SFCountry("Afghanistan"),
+          Some(SFPhone("012345")),
+        ),
+      ),
       IsDigitalVoucherUser(false),
-      EmailIdentity(EmailAddress("effecttests@gu.com"), Some(IdentityId("100003915")))
+      EmailIdentity(EmailAddress("effecttests@gu.com"), Some(IdentityId("100003915"))),
     )
 
     actual should be(Right(expected))

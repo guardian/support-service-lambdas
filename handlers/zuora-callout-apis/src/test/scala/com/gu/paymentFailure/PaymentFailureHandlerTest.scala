@@ -42,12 +42,12 @@ class PaymentFailureHandlerTest extends AnyFlatSpec with Matchers {
   }
 
   it should "enqueue email and return success for a valid request" in {
-    //set up
+    // set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     var storedReq: Option[EmailMessage] = None
 
     val os = new ByteArrayOutputStream()
-    //execute
+    // execute
     def configToFunction: Operation = {
       PaymentFailureSteps.apply(
         ZuoraEmailSteps.sendEmailRegardingAccount(
@@ -55,14 +55,14 @@ class PaymentFailureHandlerTest extends AnyFlatSpec with Matchers {
             storedReq = Some(message)
             ClientSuccess(())
           },
-          a => ClientSuccess(basicInvoiceTransactionSummary)
+          a => ClientSuccess(basicInvoiceTransactionSummary),
         ),
-        TestData.fakeApiConfig
+        TestData.fakeApiConfig,
       )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
 
-    //verify
+    // verify
     val responseString = new String(os.toByteArray, "UTF-8")
 
     val expectedMessage = EmailMessage(
@@ -80,12 +80,12 @@ class PaymentFailureHandlerTest extends AnyFlatSpec with Matchers {
             last_name = "User",
             primaryKey = PaymentId("somePaymentId"),
             serviceStartDate = "21 November 2016",
-            serviceEndDate = "21 December 2016"
-          )
-        )
+            serviceEndDate = "21 December 2016",
+          ),
+        ),
       ),
       DataExtensionName = "first-failed-payment-email",
-      SfContactId = "1000000"
+      SfContactId = "1000000",
     )
 
     storedReq should be(Some(expectedMessage))
@@ -93,12 +93,12 @@ class PaymentFailureHandlerTest extends AnyFlatSpec with Matchers {
   }
 
   it should "return 200 response with warning message if no email is provided" in {
-    //set up
+    // set up
     val stream = getClass.getResourceAsStream("/paymentFailure/missingEmail.json")
     var storedReq: Option[EmailMessage] = None
 
     val os = new ByteArrayOutputStream()
-    //execute
+    // execute
     def configToFunction: Operation = {
       PaymentFailureSteps.apply(
         ZuoraEmailSteps.sendEmailRegardingAccount(
@@ -106,56 +106,55 @@ class PaymentFailureHandlerTest extends AnyFlatSpec with Matchers {
             storedReq = Some(message)
             ClientSuccess(())
           },
-          a => ClientSuccess(basicInvoiceTransactionSummary)
+          a => ClientSuccess(basicInvoiceTransactionSummary),
         ),
-        TestData.fakeApiConfig
+        TestData.fakeApiConfig,
       )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
 
-    //verify
+    // verify
     val responseString = new String(os.toByteArray, "UTF-8")
     responseString jsonMatches missingEmailResponse
   }
 
   it should "return error if no additional data is found in zuora" in {
-    //set up
+    // set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val invoiceTransactionSummary = InvoiceTransactionSummary(List())
 
     val os = new ByteArrayOutputStream()
 
-    //execute
+    // execute
     apiGatewayHandler(basicOp(invoiceTransactionSummary), LambdaIO(stream, os, null))
 
-    //verify
+    // verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
     responseString jsonMatches couldNotFindDataForAccountResponse
   }
 
-  def apiGatewayHandler: (Operation, LambdaIO) => Unit = {
-    case (op, io) =>
-      ApiGatewayHandler(io)(ContinueProcessing(op))
+  def apiGatewayHandler: (Operation, LambdaIO) => Unit = { case (op, io) =>
+    ApiGatewayHandler(io)(ContinueProcessing(op))
   }
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = {
     PaymentFailureSteps.apply(
       ZuoraEmailSteps.sendEmailRegardingAccount(
         sendEmail = _ => GenericError("something failed!"),
-        getInvoiceTransactions = _ => ClientSuccess(fakeInvoiceTransactionSummary)
+        getInvoiceTransactions = _ => ClientSuccess(fakeInvoiceTransactionSummary),
       ),
-      TestData.fakeApiConfig
+      TestData.fakeApiConfig,
     )
   }
 
   it should "return error if message can't be queued" in {
-    //set up
+    // set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
 
     var storedReq: Option[EmailMessage] = None
     val os = new ByteArrayOutputStream()
 
-    //execute
+    // execute
     def configToFunction: Operation = {
       PaymentFailureSteps.apply(
         ZuoraEmailSteps.sendEmailRegardingAccount(
@@ -163,14 +162,14 @@ class PaymentFailureHandlerTest extends AnyFlatSpec with Matchers {
             storedReq = Some(emailMessage)
             GenericError("something failed!")
           },
-          _ => ClientSuccess(basicInvoiceTransactionSummary)
+          _ => ClientSuccess(basicInvoiceTransactionSummary),
         ),
-        TestData.fakeApiConfig
+        TestData.fakeApiConfig,
       )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
 
-    //verify
+    // verify
 
     storedReq.isDefined should be(true)
 

@@ -18,15 +18,22 @@ class GetContactsTest extends AnyFlatSpec with Matchers {
 
     val zuoraQuerier = FakeZuoraQuerier(accountQueryRequest, accountQueryResponse)
 
-    val actual = GetContacts(zuoraQuerier, NonEmptyList(
-      AccountId("acid1"),
-      List(AccountId("acid2"))
-    ))
+    val actual = GetContacts(
+      zuoraQuerier,
+      NonEmptyList(
+        AccountId("acid1"),
+        List(AccountId("acid2")),
+      ),
+    )
 
-    actual should be(ClientSuccess(Map(
-      ContactId("b2id1") -> IdentityAndSFContact(Some(IdentityId("idid1")), SFContactId("sfsf1")),
-      ContactId("b2id2") -> IdentityAndSFContact(Some(IdentityId("idid2")), SFContactId("sfsf2"))
-    )))
+    actual should be(
+      ClientSuccess(
+        Map(
+          ContactId("b2id1") -> IdentityAndSFContact(Some(IdentityId("idid1")), SFContactId("sfsf1")),
+          ContactId("b2id2") -> IdentityAndSFContact(Some(IdentityId("idid2")), SFContactId("sfsf2")),
+        ),
+      ),
+    )
 
   }
 

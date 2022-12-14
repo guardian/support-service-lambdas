@@ -27,7 +27,10 @@ class CODEPRODHealthCheck extends AnyFlatSpec with Matchers {
   }
 
   private def healthcheckForEnv(env: HealthChecks => List[HealthCheckConfig]) = {
-    val configLocation = S3Location(bucket = "gu-reader-revenue-private", key = "membership/support-service-lambdas/DEV/support-service-lambdas-healthcheck.private.json")
+    val configLocation = S3Location(
+      bucket = "gu-reader-revenue-private",
+      key = "membership/support-service-lambdas/DEV/support-service-lambdas-healthcheck.private.json",
+    )
     val healthchecks = for {
       jsonString <- GetFromS3.fetchString(configLocation).toApiGatewayOp("read local config")
       healthcheck <- Json.parse(jsonString).validate[HealthChecks](HealthChecks.reads).toApiGatewayOp()
@@ -47,7 +50,11 @@ class CODEPRODHealthCheck extends AnyFlatSpec with Matchers {
   }
 
   def post(healthcheck: HealthCheckConfig, response: Request => Response): String = {
-    val request = new Request.Builder().url(healthcheck.url).header("x-api-key", healthcheck.apiKey).post(RequestBody.create(MediaType.parse("application/json"), "{}")).build()
+    val request = new Request.Builder()
+      .url(healthcheck.url)
+      .header("x-api-key", healthcheck.apiKey)
+      .post(RequestBody.create(MediaType.parse("application/json"), "{}"))
+      .build()
     val responseO = response(request)
     if (responseO.isSuccessful) {
       responseO.body().string()

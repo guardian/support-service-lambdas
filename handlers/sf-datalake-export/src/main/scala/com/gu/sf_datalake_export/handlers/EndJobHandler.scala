@@ -28,10 +28,10 @@ import scala.util.Try
 object EndJobHandler {
 
   case class WireRequest(
-    jobName: String,
-    uploadToDataLake: Boolean,
-    objectName: String,
-    jobId: String
+      jobName: String,
+      uploadToDataLake: Boolean,
+      objectName: String,
+      jobId: String,
   )
 
   object WireRequest {
@@ -50,15 +50,16 @@ object EndJobHandler {
 
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = operation(RawEffects.stage, GetFromS3.fetchString, uploadSuccessFile, RawEffects.response)
+      operation = operation(RawEffects.stage, GetFromS3.fetchString, uploadSuccessFile, RawEffects.response),
     )
   }
 
-  /**
-   * Upload a dummy success file to indicate all raw files are uploaded and ready to be processed.
-   * The ETL job will be triggered once this file is seen in S3
-   */
-  def uploadDummySuccessFileToTriggerOphanJob(stage: Stage, uploadFile: (S3Path, File) => Try[_])(request: WireRequest): Try[_] = {
+  /** Upload a dummy success file to indicate all raw files are uploaded and ready to be processed. The ETL job will be
+    * triggered once this file is seen in S3
+    */
+  def uploadDummySuccessFileToTriggerOphanJob(stage: Stage, uploadFile: (S3Path, File) => Try[_])(
+      request: WireRequest,
+  ): Try[_] = {
 
     val shouldUploadToDataLake = ShouldUploadToDataLake(request.uploadToDataLake)
     val jobName = JobName(request.jobName)
@@ -72,10 +73,10 @@ object EndJobHandler {
     uploadFile(uploadPath, successFile)
   }
   def operation(
-    stage: Stage,
-    fetchString: StringFromS3,
-    uploadDummySuccessFileToTriggerOphanJob: WireRequest => Try[_],
-    getResponse: Request => Response
+      stage: Stage,
+      fetchString: StringFromS3,
+      uploadDummySuccessFileToTriggerOphanJob: WireRequest => Try[_],
+      getResponse: Request => Response,
   )(request: WireRequest): Try[WireResponse] = {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
@@ -88,7 +89,7 @@ object EndJobHandler {
       wiredCloseJob = sfClient.wrapWith(JsonHttp.post).wrapWith(CloseJob.wrapper)
       _ <- wiredCloseJob.runRequest(jobId).toTry
     } yield WireResponse(
-      jobId = request.jobId
+      jobId = request.jobId,
     )
 
   }

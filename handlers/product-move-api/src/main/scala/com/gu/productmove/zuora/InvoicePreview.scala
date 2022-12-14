@@ -22,12 +22,15 @@ import scala.util.Try
 object InvoicePreviewLive:
   val layer: URLayer[ZuoraGet, InvoicePreview] = ZLayer.fromFunction(InvoicePreviewLive(_))
 
-private class InvoicePreviewLive(zuoraGet: ZuoraGet) extends InvoicePreview :
+private class InvoicePreviewLive(zuoraGet: ZuoraGet) extends InvoicePreview:
   override def get(zuoraAccountId: String, targetDate: LocalDate): IO[String, ZuoraInvoiceList] =
     val invoicePreviewRequest = InvoicePreviewRequest(zuoraAccountId, targetDate)
 
     for {
-      response <- zuoraGet.post[InvoicePreviewRequest, ZuoraInvoiceList](uri"operations/billing-preview", invoicePreviewRequest)
+      response <- zuoraGet.post[InvoicePreviewRequest, ZuoraInvoiceList](
+        uri"operations/billing-preview",
+        invoicePreviewRequest,
+      )
     } yield response
 
 trait InvoicePreview:
@@ -41,29 +44,41 @@ object InvoicePreview {
   }
 
   case class ZuoraInvoiceItem(
-    subscriptionName: String,
-    serviceStartDate: LocalDate,
-    chargeAmount: Double,
-    taxAmount: Double,
+      subscriptionName: String,
+      serviceStartDate: LocalDate,
+      chargeAmount: Double,
+      taxAmount: Double,
   )
 
   object ZuoraInvoiceItem {
     private case class ZuoraInvoiceItemWire(
-      subscriptionName: String,
-      serviceStartDate: LocalDate,
-      chargeAmount: BigDecimal,
-      taxAmount: BigDecimal,
+        subscriptionName: String,
+        serviceStartDate: LocalDate,
+        chargeAmount: BigDecimal,
+        taxAmount: BigDecimal,
     )
 
     given JsonDecoder[ZuoraInvoiceItem] = DeriveJsonDecoder.gen[ZuoraInvoiceItemWire].map {
-      case ZuoraInvoiceItemWire(subscriptionName, serviceStartDate, chargeAmount, taxAmount) => ZuoraInvoiceItem(subscriptionName, serviceStartDate, chargeAmount.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble, taxAmount.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
+      case ZuoraInvoiceItemWire(subscriptionName, serviceStartDate, chargeAmount, taxAmount) =>
+        ZuoraInvoiceItem(
+          subscriptionName,
+          serviceStartDate,
+          chargeAmount.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
+          taxAmount.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
+        )
     }
   }
 
-  def get(zuoraAccountId: String, targetDate: LocalDate): ZIO[InvoicePreview, String, ZuoraInvoiceList] = ZIO.serviceWithZIO[InvoicePreview](_.get(zuoraAccountId, targetDate))
+  def get(zuoraAccountId: String, targetDate: LocalDate): ZIO[InvoicePreview, String, ZuoraInvoiceList] =
+    ZIO.serviceWithZIO[InvoicePreview](_.get(zuoraAccountId, targetDate))
 }
 
-case class InvoicePreviewRequest(accountId: String, targetDate: LocalDate, assumeRenewal: String = "All", chargeTypeToExclude: String = "OneTime")
+case class InvoicePreviewRequest(
+    accountId: String,
+    targetDate: LocalDate,
+    assumeRenewal: String = "All",
+    chargeTypeToExclude: String = "OneTime",
+)
 
 object InvoicePreviewRequest {
   given JsonEncoder[InvoicePreviewRequest] = DeriveJsonEncoder.gen[InvoicePreviewRequest]
