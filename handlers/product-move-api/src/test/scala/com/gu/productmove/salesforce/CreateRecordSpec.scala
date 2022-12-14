@@ -18,7 +18,8 @@ import java.time.*
 
 object CreateRecordSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("Create Salesforce Record")(test("Run locally") {
+    suite("Create Salesforce Record")(
+      test("Run locally") {
       /*
            Test suite used to run the refund lambda locally
          */
@@ -52,7 +53,8 @@ object CreateRecordSpec extends ZIOSpecDefault {
             assert(subUpdateRequests)(equalTo(List(createRecordRequest1)))
         }).provide(
           ZLayer.succeed(new MockGetSfSubscription(getSfSubscriptionStubs)),
-          ZLayer.succeed(new MockCreateRecord(createRecordStubs)))
+          ZLayer.succeed(new MockCreateRecord(createRecordStubs))
+        )
       }
     )
 }
