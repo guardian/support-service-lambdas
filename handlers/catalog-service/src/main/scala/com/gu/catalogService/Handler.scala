@@ -20,17 +20,17 @@ object Handler extends Logging {
       RawEffects.stage,
       RawEffects.zuoraEnvironment,
       GetFromS3.fetchString,
-      RawEffects.s3Write
+      RawEffects.s3Write,
     )
   }
 
   // this does the wiring except side effects but not any decisions, so can be used for an end to end test
   def runWithEffects(
-    response: Request => Response,
-    stage: Stage,
-    zuoraEnvironment: ZuoraEnvironment,
-    fetchString: StringFromS3,
-    s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse]
+      response: Request => Response,
+      stage: Stage,
+      zuoraEnvironment: ZuoraEnvironment,
+      fetchString: StringFromS3,
+      s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse],
   ): Unit = {
     val attempt = for {
       zuoraRestConfig <- LoadConfigModule(zuoraEnvironment.stageToLoad, fetchString)[ZuoraRestConfig].left.map(_.error)

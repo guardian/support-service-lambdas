@@ -17,7 +17,7 @@ class GetAccountTest extends AnyFlatSpec with Matchers {
     AutoPay = false,
     Balance = 24.55,
     Currency = "GBP",
-    sfContactId__c = Some("sfContactId")
+    sfContactId__c = Some("sfContactId"),
   )
   it should "get account as object" in {
 
@@ -26,14 +26,16 @@ class GetAccountTest extends AnyFlatSpec with Matchers {
       case in => GenericError(s"bad request: $in")
     }
     val actual = GetAccount(accF)(ZuoraAccountId("2c92c0f9624bbc5f016253e573970b16"))
-    actual shouldBe ClientSuccess(Account(
-      Some(IdentityId("6002")),
-      Some(SfContactId("sfContactId")),
-      Some(PaymentMethodId("2c92c0f8649cc8a60164a2bfd475000c")),
-      AutoPay(false),
-      AccountBalanceMinorUnits(2455),
-      GBP
-    ))
+    actual shouldBe ClientSuccess(
+      Account(
+        Some(IdentityId("6002")),
+        Some(SfContactId("sfContactId")),
+        Some(PaymentMethodId("2c92c0f8649cc8a60164a2bfd475000c")),
+        AutoPay(false),
+        AccountBalanceMinorUnits(2455),
+        GBP,
+      ),
+    )
   }
 
   it should "deserialise accounts with missing identity id or default payment method" in {
@@ -43,14 +45,16 @@ class GetAccountTest extends AnyFlatSpec with Matchers {
       case in => GenericError(s"bad request: $in")
     }
     val actual = GetAccount(accF)(ZuoraAccountId("missingFieldsAccount"))
-    actual shouldBe ClientSuccess(Account(
-      None,
-      None,
-      None,
-      AutoPay(false),
-      AccountBalanceMinorUnits(2455),
-      GBP
-    ))
+    actual shouldBe ClientSuccess(
+      Account(
+        None,
+        None,
+        None,
+        AutoPay(false),
+        AccountBalanceMinorUnits(2455),
+        GBP,
+      ),
+    )
   }
   it should "return error if Account has unknown currencyu" in {
     val unknownCurrencyAccount = acc.copy(Currency = "unknown currency code here")
@@ -62,4 +66,3 @@ class GetAccountTest extends AnyFlatSpec with Matchers {
     actual.isFailure shouldBe (true)
   }
 }
-

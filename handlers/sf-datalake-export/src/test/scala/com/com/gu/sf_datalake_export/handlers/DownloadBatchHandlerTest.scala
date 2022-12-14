@@ -49,8 +49,7 @@ class DownloadBatchHandlerTest extends AnyFlatSpec with Matchers {
     ObjectName("someObjectName"),
     List(batch1, batch2),
     ShouldUploadToDataLake(false),
-    IsDone(false)
-
+    IsDone(false),
   )
 
   "DownloadBatches.steps" should "download first batch in request and remove it from response " in {
@@ -99,10 +98,15 @@ class DownloadBatchHandlerTest extends AnyFlatSpec with Matchers {
     val wiredDownloadBatch = DownloadBatchHandler.download(
       validatingUploadFile,
       validatingGetBatchResultId,
-      validatingGetBatchResult
+      validatingGetBatchResult,
     ) _
 
-    wiredDownloadBatch(JobName("someJobName"), JobId("someJobId"), BatchId("someBatchId"), testBasePath) shouldBe Success(())
+    wiredDownloadBatch(
+      JobName("someJobName"),
+      JobId("someJobId"),
+      BatchId("someBatchId"),
+      testBasePath,
+    ) shouldBe Success(())
   }
 
   val wireBatch1 = WireBatchInfo(batchId = "batch1", state = "Completed")
@@ -113,7 +117,7 @@ class DownloadBatchHandlerTest extends AnyFlatSpec with Matchers {
     objectName = "someObjectName",
     jobId = "someJobId",
     uploadToDataLake = false,
-    batches = List(wireBatch1, wireBatch2)
+    batches = List(wireBatch1, wireBatch2),
   )
 
   val twoBatchJson =
@@ -149,4 +153,3 @@ class DownloadBatchHandlerTest extends AnyFlatSpec with Matchers {
     Json.toJson(twoBatchWirestate) shouldBe Json.parse(twoBatchJson)
   }
 }
-

@@ -40,11 +40,10 @@ class GetTokenExpiryTest extends AnyFlatSpec with Matchers {
       expiryDate = expiryDate,
       expiryType = ExpiryType.SUB,
       subscriptionCode = Some(SevenDay),
-      provider = Some("G99")
+      provider = Some("G99"),
     )
 
     val responseBody = Json.prettyPrint(Json.toJson(SuccessResponse(expiry)))
     ReturnWithResponse(ApiResponse("200", responseBody))
   }
 }
-

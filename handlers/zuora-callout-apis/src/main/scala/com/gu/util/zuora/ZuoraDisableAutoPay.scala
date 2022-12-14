@@ -11,7 +11,7 @@ object ZuoraDisableAutoPay extends LazyLogging {
 
   implicit val accountUpdateWrites = new Writes[AccountUpdate] {
     def writes(accountUpdate: AccountUpdate) = Json.obj(
-      "autoPay" -> accountUpdate.autoPay
+      "autoPay" -> accountUpdate.autoPay,
     )
   }
 

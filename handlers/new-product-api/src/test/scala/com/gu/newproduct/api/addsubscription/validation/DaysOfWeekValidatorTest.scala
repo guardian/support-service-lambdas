@@ -12,10 +12,11 @@ class DaysOfWeekValidatorTest extends AnyFlatSpec with Matchers {
 
     val actualValidationResponse = DayOfWeekValidator(
       allowedDays = List(TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
-      dateToValidate = mondayDate
+      dateToValidate = mondayDate,
     )
 
-    val expectedMsg = "invalid day of the week: 2018-08-06 is a MONDAY. Allowed days are TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY"
+    val expectedMsg =
+      "invalid day of the week: 2018-08-06 is a MONDAY. Allowed days are TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY"
     actualValidationResponse shouldBe Failed(expectedMsg)
   }
   it should "succeed if day matches rules" in {

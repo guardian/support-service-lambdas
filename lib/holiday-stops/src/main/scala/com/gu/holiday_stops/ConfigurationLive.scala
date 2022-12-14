@@ -6,11 +6,13 @@ import zio.{Task, TaskLayer, UIO}
 object ConfigurationLive {
 
   val impl: TaskLayer[Configuration] =
-    Task.effect(Config.fromS3(GetFromS3.fetchString)
-      .left.map(e => new RuntimeException(e.reason)))
+    Task
+      .effect(Config.fromS3(GetFromS3.fetchString).left.map(e => new RuntimeException(e.reason)))
       .absolve
       .map(cnfg =>
         new Configuration.Service {
           val config: UIO[Config] = UIO(cnfg)
-        }).toLayer
+        },
+      )
+      .toLayer
 }

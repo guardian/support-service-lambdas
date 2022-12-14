@@ -4,9 +4,9 @@ import com.gu.util.config.ConfigLocation
 import play.api.libs.json.Json
 
 case class ZuoraRestConfig(
-  baseUrl: String,
-  username: String,
-  password: String,
+    baseUrl: String,
+    username: String,
+    password: String,
 )
 
 object ZuoraRestConfig {

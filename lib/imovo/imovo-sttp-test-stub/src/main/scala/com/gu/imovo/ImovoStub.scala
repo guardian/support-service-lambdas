@@ -13,35 +13,62 @@ import java.time.format.DateTimeFormatter
 object ImovoStub {
   class ImovoStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
 
-    def stubCreateSubscription[A: Encoder](config: ImovoConfig, subscriptionId: String, schemeName: String, startDate: String, response: A): SttpBackendStub[F, S] = {
+    def stubCreateSubscription[A: Encoder](
+        config: ImovoConfig,
+        subscriptionId: String,
+        schemeName: String,
+        startDate: String,
+        response: A,
+    ): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
-        case request: Request[_, _] if matchesQueryCreateSubscription(config, subscriptionId, schemeName, startDate, request) =>
+        case request: Request[_, _]
+            if matchesQueryCreateSubscription(config, subscriptionId, schemeName, startDate, request) =>
           Response.ok(response.asJson.spaces2)
       }
     }
 
-    def stubReplaceSubscription[A: Encoder](config: ImovoConfig, subscriptionId: String, imovoSubscriptionType: ImovoSubscriptionType, response: A): SttpBackendStub[F, S] = {
+    def stubReplaceSubscription[A: Encoder](
+        config: ImovoConfig,
+        subscriptionId: String,
+        imovoSubscriptionType: ImovoSubscriptionType,
+        response: A,
+    ): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
-        case request: Request[_, _] if matchesReplaceSubscriptionRequest(config, subscriptionId, imovoSubscriptionType, request) =>
+        case request: Request[_, _]
+            if matchesReplaceSubscriptionRequest(config, subscriptionId, imovoSubscriptionType, request) =>
           Response.ok(response.asJson.spaces2)
       }
     }
 
-    def stubSubscriptionCancel[A: Encoder](config: ImovoConfig, subscriptionId: String, lastActiveDate: Option[LocalDate], response: A): SttpBackendStub[F, S] = {
+    def stubSubscriptionCancel[A: Encoder](
+        config: ImovoConfig,
+        subscriptionId: String,
+        lastActiveDate: Option[LocalDate],
+        response: A,
+    ): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
-        case request: Request[_, _] if matchesSubscriptionCancelRequest(config, subscriptionId, lastActiveDate, request) =>
+        case request: Request[_, _]
+            if matchesSubscriptionCancelRequest(config, subscriptionId, lastActiveDate, request) =>
           Response.ok(response.asJson.spaces2)
       }
     }
 
-    def stubGetSubscription[A: Encoder](config: ImovoConfig, subscriptionId: String, response: A): SttpBackendStub[F, S] = {
+    def stubGetSubscription[A: Encoder](
+        config: ImovoConfig,
+        subscriptionId: String,
+        response: A,
+    ): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesGetRequest(config, subscriptionId, request) =>
           Response.ok(response.asJson.spaces2)
       }
     }
 
-    def stubRedemptionHistorySubscription[A: Encoder](config: ImovoConfig, subscriptionId: String, response: A): SttpBackendStub[F, S] = {
+    def stubRedemptionHistorySubscription[A: Encoder](
+        config: ImovoConfig,
+        subscriptionId: String,
+        response: A,
+    ): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesRedemptionHistoryRequest(config, subscriptionId, request) =>
           Response.ok(response.asJson.spaces2)
@@ -57,44 +84,72 @@ object ImovoStub {
 
   private def apiKeyMatches(config: ImovoConfig, request: Request[_, _]) =
     request.headers
-      .map(header => header.name -> header.value).toMap
+      .map(header => header.name -> header.value)
+      .toMap
       .get("X-API-KEY")
       .contains(config.imovoApiKey)
 
-  private def matchesQueryCreateSubscription(config: ImovoConfig, subscriptionId: String, schemeName: String, startDate: String, request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/RequestSubscriptionVouchers")
+  private def matchesQueryCreateSubscription(
+      config: ImovoConfig,
+      subscriptionId: String,
+      schemeName: String,
+      startDate: String,
+      request: Request[_, _],
+  ) = {
+    val urlMatches =
+      urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/RequestSubscriptionVouchers")
     val queryParamsMatch = {
       val params = request.uri.paramsMap
       params.get("SubscriptionId").contains(subscriptionId) &&
-        params.get("SchemeName").contains(schemeName) &&
-        params.get("StartDate").contains(startDate)
+      params.get("SchemeName").contains(schemeName) &&
+      params.get("StartDate").contains(startDate)
     }
     urlMatches && methodIsGet(request) && queryParamsMatch && apiKeyMatches(config, request)
   }
 
-  private def matchesReplaceSubscriptionRequest(config: ImovoConfig, subscriptionId: String, imovoSubscriptionType: ImovoSubscriptionType, request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/ReplaceVoucherBySubscriptionId")
+  private def matchesReplaceSubscriptionRequest(
+      config: ImovoConfig,
+      subscriptionId: String,
+      imovoSubscriptionType: ImovoSubscriptionType,
+      request: Request[_, _],
+  ) = {
+    val urlMatches =
+      urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/ReplaceVoucherBySubscriptionId")
     val queryParamMatches =
       request.uri.paramsMap.get("SubscriptionId").contains(subscriptionId) &&
         request.uri.paramsMap.get("SubscriptionType").contains(imovoSubscriptionType.value)
     urlMatches && methodIsGet(request) && queryParamMatches && apiKeyMatches(config, request)
   }
 
-  private def matchesSubscriptionCancelRequest(config: ImovoConfig, subscriptionId: String, expiryDate: Option[LocalDate], request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/CancelSubscriptionVoucher")
+  private def matchesSubscriptionCancelRequest(
+      config: ImovoConfig,
+      subscriptionId: String,
+      expiryDate: Option[LocalDate],
+      request: Request[_, _],
+  ) = {
+    val urlMatches =
+      urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/CancelSubscriptionVoucher")
     val queryParamMatches = request.uri.paramsMap.get("SubscriptionId") === Some(subscriptionId) &&
       request.uri.paramsMap.get("LastActiveDay") === expiryDate.map(DateTimeFormatter.ISO_DATE.format)
     urlMatches && methodIsGet(request) && queryParamMatches && apiKeyMatches(config, request)
   }
 
   private def matchesGetRequest(config: ImovoConfig, subscriptionId: String, request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/GetSubscriptionVoucherDetails")
-    urlMatches && methodIsGet(request) && subscriptionIdMatches(subscriptionId, request) && apiKeyMatches(config, request)
+    val urlMatches =
+      urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/GetSubscriptionVoucherDetails")
+    urlMatches && methodIsGet(request) && subscriptionIdMatches(subscriptionId, request) && apiKeyMatches(
+      config,
+      request,
+    )
   }
 
   private def matchesRedemptionHistoryRequest(config: ImovoConfig, subscriptionId: String, request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/SubscriptionRedemptionHistory")
-    urlMatches && methodIsGet(request) && subscriptionIdMatches(subscriptionId, request) && apiKeyMatches(config, request)
+    val urlMatches =
+      urlNoQueryString(request).contains(s"${config.imovoBaseUrl}/Subscription/SubscriptionRedemptionHistory")
+    urlMatches && methodIsGet(request) && subscriptionIdMatches(subscriptionId, request) && apiKeyMatches(
+      config,
+      request,
+    )
   }
 
   private def urlNoQueryString(request: Request[_, _]): Option[String] =

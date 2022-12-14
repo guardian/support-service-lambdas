@@ -17,7 +17,9 @@ class GetContactsEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      res <- GetContacts(zuoraDeps.get[GetContactsResponse])(ZuoraAccountId("8ad095dd830721b201830e51862b425b")).toDisjunction
+      res <- GetContacts(zuoraDeps.get[GetContactsResponse])(
+        ZuoraAccountId("8ad095dd830721b201830e51862b425b"),
+      ).toDisjunction
     } yield res
 
     val expectedBillTo = BillToContact(
@@ -31,8 +33,8 @@ class GetContactsEffectsTest extends AnyFlatSpec with Matchers {
         Some(City("Vancouver")),
         Some(State("British Columbia")),
         Some(Country.Canada),
-        Some(Postcode("1234"))
-      )
+        Some(Postcode("1234")),
+      ),
     )
 
     val expectedSoldTo = SoldToContact(
@@ -46,8 +48,8 @@ class GetContactsEffectsTest extends AnyFlatSpec with Matchers {
         Some(City("lethbridge")),
         None,
         Country.UK,
-        Some(Postcode("W134GH"))
-      )
+        Some(Postcode("W134GH")),
+      ),
     )
 
     actual shouldBe Right(Contacts(billTo = expectedBillTo, soldTo = expectedSoldTo))

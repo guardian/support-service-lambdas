@@ -23,11 +23,10 @@ import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode.HALF_UP
 import scala.util.Try
 
-
 object GetAccountLive:
   val layer: URLayer[ZuoraGet, GetAccount] = ZLayer.fromFunction(GetAccountLive(_))
 
-private class GetAccountLive(zuoraGet: ZuoraGet) extends GetAccount :
+private class GetAccountLive(zuoraGet: ZuoraGet) extends GetAccount:
   override def get(accountNumber: String): IO[String, GetAccountResponse] =
     zuoraGet.get[GetAccountResponse](uri"accounts/$accountNumber/summary", ZuoraSuccessCheck.SuccessCheckLowercase)
 
@@ -45,46 +44,67 @@ object GetAccount {
   given JsonDecoder[PaymentMethodResponse] = DeriveJsonDecoder.gen[PaymentMethodResponse]
 
   case class GetAccountResponse(
-    basicInfo: BasicInfo,
-    billToContact: BillToContact,
-    subscriptions: List[AccountSubscription],
+      basicInfo: BasicInfo,
+      billToContact: BillToContact,
+      subscriptions: List[AccountSubscription],
   )
 
   case class AccountSubscription(
-    id: String
+      id: String,
   )
 
   case class BasicInfo(
-    defaultPaymentMethod: DefaultPaymentMethod,
-    IdentityId__c: Option[String],
-    sfContactId__c: String,
-    balance: BigDecimal,
-    currency: Currency,
-  )
-
-  case class BillToContact(
-    firstName: String,
-    lastName: String,
-    workEmail: String
-  )
-
-  object BasicInfo {
-    private case class BasicInfoWire(
       defaultPaymentMethod: DefaultPaymentMethod,
       IdentityId__c: Option[String],
       sfContactId__c: String,
       balance: BigDecimal,
-      currency: String
+      currency: Currency,
+  )
+
+  case class BillToContact(
+      firstName: String,
+      lastName: String,
+      workEmail: String,
+  )
+
+  object BasicInfo {
+    private case class BasicInfoWire(
+        defaultPaymentMethod: DefaultPaymentMethod,
+        IdentityId__c: Option[String],
+        sfContactId__c: String,
+        balance: BigDecimal,
+        currency: String,
     )
 
     given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen[BasicInfoWire].map {
       case BasicInfoWire(defaultPaymentMethod, identityId, sfContactId__c, balance, currency) =>
         identityId match {
-          case None => BasicInfo(defaultPaymentMethod, None, sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+          case None =>
+            BasicInfo(
+              defaultPaymentMethod,
+              None,
+              sfContactId__c,
+              (balance.toDouble * 100).toInt,
+              currencyCodetoObject(currency),
+            )
           case Some(id) =>
             id match {
-              case "" => BasicInfo(defaultPaymentMethod, None, sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
-              case _ => BasicInfo(defaultPaymentMethod, Some(id), sfContactId__c, (balance.toDouble * 100).toInt, currencyCodetoObject(currency))
+              case "" =>
+                BasicInfo(
+                  defaultPaymentMethod,
+                  None,
+                  sfContactId__c,
+                  (balance.toDouble * 100).toInt,
+                  currencyCodetoObject(currency),
+                )
+              case _ =>
+                BasicInfo(
+                  defaultPaymentMethod,
+                  Some(id),
+                  sfContactId__c,
+                  (balance.toDouble * 100).toInt,
+                  currencyCodetoObject(currency),
+                )
             }
         }
     }
@@ -93,12 +113,12 @@ object GetAccount {
   /* The zuora API has slightly different responses for ratePlans in the catalogue and when querying a subscription, e.g.: productRatePlanId in the subscription response and id in the catalogue response */
 
   case class ZuoraSubscription(
-    ratePlans: List[ZuoraRatePlan]
+      ratePlans: List[ZuoraRatePlan],
   )
 
   case class ZuoraRatePlan(
-    productRatePlanId: String // TBC what field should we check in the rateplan to know it's a recurring contribution?
-    /*
+      productRatePlanId: String, // TBC what field should we check in the rateplan to know it's a recurring contribution?
+      /*
     {
                     "productId": "2c92c0f84b786da2014b91d3629b4298",//DEV
                     "productName": "Digital Pack",
@@ -121,36 +141,37 @@ object GetAccount {
   def get(accountNumber: String): ZIO[GetAccount, String, GetAccountResponse] =
     ZIO.serviceWithZIO[GetAccount](_.get(accountNumber))
 
-  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, String, PaymentMethodResponse] = ZIO.serviceWithZIO[GetAccount](_.getPaymentMethod(paymentMethodId))
+  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, String, PaymentMethodResponse] =
+    ZIO.serviceWithZIO[GetAccount](_.getPaymentMethod(paymentMethodId))
 }
 
 case class DefaultPaymentMethod(
-  id: String,
-  creditCardExpirationDate: Option[LocalDate],
+    id: String,
+    creditCardExpirationDate: Option[LocalDate],
 )
 
 object DefaultPaymentMethod {
   private case class WireDefaultPaymentMethod(
-    id: String,
-    creditCardExpirationMonth: Option[Int],
-    creditCardExpirationYear: Option[Int],
+      id: String,
+      creditCardExpirationMonth: Option[Int],
+      creditCardExpirationYear: Option[Int],
   )
 
-  given JsonDecoder[DefaultPaymentMethod] = DeriveJsonDecoder.gen[WireDefaultPaymentMethod].map {
-    case WireDefaultPaymentMethod(id, month, year) =>
+  given JsonDecoder[DefaultPaymentMethod] =
+    DeriveJsonDecoder.gen[WireDefaultPaymentMethod].map { case WireDefaultPaymentMethod(id, month, year) =>
       val creditCardExpirationDate = for {
         creditCardExpirationMonth <- month
         creditCardExpirationYear <- year
       } yield LocalDate.of(creditCardExpirationYear, creditCardExpirationMonth, 1)
 
       DefaultPaymentMethod(id, creditCardExpirationDate)
-  }
+    }
 }
 
 /*
-* Don't use discount percentage from product catalogue,
-* because it can be overridden so the default value is unreliable.
-*/
+ * Don't use discount percentage from product catalogue,
+ * because it can be overridden so the default value is unreliable.
+ */
 // price can be null, this is only for percentage discounts, so default to 0 rather than option handling
 case class ZuoraPricing(currency: String, priceMinorUnits: Int)
 

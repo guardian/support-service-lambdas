@@ -20,8 +20,8 @@ class EmergencyTokensConfigTest extends AnyFlatSpec {
     val expected: JsResult[EmergencyTokensConfig] = JsSuccess(
       EmergencyTokensConfig(
         prefix = "somePrefix",
-        secret = "someSecret"
-      )
+        secret = "someSecret",
+      ),
     )
 
     val actual: JsResult[EmergencyTokensConfig] = Json.parse(config).validate[EmergencyTokensConfig]

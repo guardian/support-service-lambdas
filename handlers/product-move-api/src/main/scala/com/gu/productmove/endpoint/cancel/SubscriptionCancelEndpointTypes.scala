@@ -9,16 +9,17 @@ import zio.json.*
 object SubscriptionCancelEndpointTypes {
 
   case class ExpectedInput(
-    @description("User cancellation reason - from a picklist.")
-    @encodedExample("mma_other")// also "mma_value_for_money" , "mma_support_another_way" , "mma_financial_circumstances", etc
-    reason: String
+      @description("User cancellation reason - from a picklist.")
+      @encodedExample(
+        "mma_other",
+      ) // also "mma_value_for_money" , "mma_support_another_way" , "mma_financial_circumstances", etc
+      reason: String,
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
   given JsonEncoder[ExpectedInput] = DeriveJsonEncoder.gen[ExpectedInput] // needed to keep tapir happy
 
   given Schema[ExpectedInput] = inlineSchema(Schema.derived)
-
 
   sealed trait OutputBody
   case class Success(message: String) extends OutputBody

@@ -17,9 +17,9 @@ object SalesforceToBrazeTransformations {
     }
   }
 
-  /**
-   * Salesforce mailingStreet field concatenates on a single line (line1,line), whilst MMA has it over two separate lines
-   */
+  /** Salesforce mailingStreet field concatenates on a single line (line1,line), whilst MMA has it over two separate
+    * lines
+    */
   private val sfStreetPattern = """([^,]+),(.*)""".r
 
   def sfStreetToLine1(in: String): Option[String] =

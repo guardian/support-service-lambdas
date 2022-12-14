@@ -27,7 +27,10 @@ object DeliveryRecordsApiApp extends LazyLogging {
     } yield app
   }
 
-  def apply[S](config: SFAuthConfig, sttpBackend: SttpBackend[IO, S]): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
+  def apply[S](
+      config: SFAuthConfig,
+      sttpBackend: SttpBackend[IO, S],
+  ): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
     for {
       salesforceClient <- SalesforceClient(sttpBackend, config)
         .leftMap(error => DeliveryRecordsApiError(error.toString))
@@ -39,7 +42,7 @@ object DeliveryRecordsApiApp extends LazyLogging {
       logHeaders = true,
       logBody = true,
       redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey.value == "x-api-key" },
-      logAction = Some({ message: String => IO.delay(logger.info(message)) })
+      logAction = Some({ message: String => IO.delay(logger.info(message)) }),
     )
   }
 

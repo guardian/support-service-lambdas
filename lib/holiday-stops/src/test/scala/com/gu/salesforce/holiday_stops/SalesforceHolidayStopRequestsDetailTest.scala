@@ -10,11 +10,13 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 class SalesforceHolidayStopRequestsDetailTest extends AnyFlatSpec {
   "SalesforceHolidayStopRequestsDetail" should "generate correct soql" in {
-    FetchHolidayStopRequestsDetailsForProductType.createSoql(
-      List(LocalDate.parse("2019-12-20"), LocalDate.parse("2019-12-21")),
-      ZuoraProductTypes.GuardianWeekly
-    ).trim should ===(
-        """SELECT Id, Subscription_Name__c, Product_Name__c, Stopped_Publication_Date__c,
+    FetchHolidayStopRequestsDetailsForProductType
+      .createSoql(
+        List(LocalDate.parse("2019-12-20"), LocalDate.parse("2019-12-21")),
+        ZuoraProductTypes.GuardianWeekly,
+      )
+      .trim should ===(
+      """SELECT Id, Subscription_Name__c, Product_Name__c, Stopped_Publication_Date__c,
         | Estimated_Price__c, Charge_Code__c, Is_Actioned__c, Actual_Price__c, Expected_Invoice_Date__c
         |
         | FROM Holiday_Stop_Requests_Detail__c
@@ -24,7 +26,7 @@ class SalesforceHolidayStopRequestsDetailTest extends AnyFlatSpec {
         | AND Is_Actioned__c = false
         | AND Is_Withdrawn__c = false
         |
-        | ORDER BY Stopped_Publication_Date__c ASC""".stripMargin
-      )
+        | ORDER BY Stopped_Publication_Date__c ASC""".stripMargin,
+    )
   }
 }

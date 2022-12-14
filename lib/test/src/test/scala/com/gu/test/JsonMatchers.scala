@@ -51,8 +51,7 @@ object JsonMatchers {
   case class WithoutExtras[CONTAINED](contained: CONTAINED)
 
   implicit def withoutExtrasWrites[C: OFormat]: Writes[WithoutExtras[C]] =
-    (objectToWrite: WithoutExtras[C]) =>
-      Json.toJson(objectToWrite.contained)
+    (objectToWrite: WithoutExtras[C]) => Json.toJson(objectToWrite.contained)
 
   implicit def withoutExtrasReads[CONTAINED: OFormat]: Reads[WithoutExtras[CONTAINED]] =
     (jsValueToRead: JsValue) =>
@@ -82,7 +81,7 @@ object JsonMatchers {
         !keysMatch.contains(false)
       } else false
     case (s1: JsArray, s2: JsArray) => false // may need to check inside JsArray too later
-    case (v1, v2) => true //don't care about the content, will be chceck by the normal equals
+    case (v1, v2) => true // don't care about the content, will be chceck by the normal equals
   }
 
 }

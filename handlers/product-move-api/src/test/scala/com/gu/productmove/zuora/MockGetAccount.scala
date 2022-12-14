@@ -3,7 +3,10 @@ package com.gu.productmove.zuora
 import com.gu.productmove.zuora.GetAccount.PaymentMethodResponse
 import zio.{IO, ZIO}
 
-class MockGetAccount(accountResponse: Map[String, GetAccount.GetAccountResponse], paymentResponse: Map[String, PaymentMethodResponse]) extends GetAccount {
+class MockGetAccount(
+    accountResponse: Map[String, GetAccount.GetAccountResponse],
+    paymentResponse: Map[String, PaymentMethodResponse],
+) extends GetAccount {
 
   private var mutableStore: List[String] = Nil // we need to remember the side effects
 

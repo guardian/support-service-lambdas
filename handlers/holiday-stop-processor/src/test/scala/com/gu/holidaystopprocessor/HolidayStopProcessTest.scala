@@ -26,7 +26,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
     termEndDate = LocalDate.of(2019, 1, 1),
     price = 75.5,
     billingPeriod = "Quarter",
-    effectiveStartDate = effectiveStartDate
+    effectiveStartDate = effectiveStartDate,
   )
 
   private val request = HolidayStopRequestsDetail(
@@ -38,22 +38,24 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
     Charge_Code__c = None,
     Is_Actioned__c = false,
     Actual_Price__c = None,
-    Expected_Invoice_Date__c = None
+    Expected_Invoice_Date__c = None,
   )
 
   private def updateSubscription(
-    subscriptionUpdate: Either[ZuoraApiFailure, Unit]
-  ): (Subscription, SubscriptionUpdate) => Either[ZuoraApiFailure, Unit] = {
-    case (_, _) => subscriptionUpdate
+      subscriptionUpdate: Either[ZuoraApiFailure, Unit],
+  ): (Subscription, SubscriptionUpdate) => Either[ZuoraApiFailure, Unit] = { case (_, _) =>
+    subscriptionUpdate
   }
 
   private def getAccount(
-    getAccountResult: Either[ZuoraApiFailure, ZuoraAccount]
-  ): String => Either[ZuoraApiFailure, ZuoraAccount] = {
-    _ => getAccountResult
+      getAccountResult: Either[ZuoraApiFailure, ZuoraAccount],
+  ): String => Either[ZuoraApiFailure, ZuoraAccount] = { _ =>
+    getAccountResult
   }
 
-  private def exportAmendments(amendmentExport: Either[SalesforceApiFailure, Unit]): List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] =
+  private def exportAmendments(
+      amendmentExport: Either[SalesforceApiFailure, Unit],
+  ): List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] =
     _ => amendmentExport
 
   val today = LocalDate.now()
@@ -61,7 +63,10 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
   val targetProcessingDate = today `with` TemporalAdjusters.next(DayOfWeek.FRIDAY)
 
   private val fulfilmentDatesFetcher = new FulfilmentDatesFetcher {
-    override def getFulfilmentDates(zuoraProductType: ZuoraProductType, date: LocalDate): Either[FulfilmentDatesFetcherError, Map[DayOfWeek, FulfilmentDates]] = {
+    override def getFulfilmentDates(
+        zuoraProductType: ZuoraProductType,
+        date: LocalDate,
+    ): Either[FulfilmentDatesFetcherError, Map[DayOfWeek, FulfilmentDates]] = {
       Map(DayOfWeek.FRIDAY -> FulfilmentDates(today, today, Some(targetProcessingDate), today)).asRight
     }
   }
@@ -69,17 +74,17 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
   private val creditProduct: CreditProductForSubscription = _ => HolidayCreditProduct.Dev.GuardianWeekly
 
   private def updateToApply(
-    creditProduct: CreditProductForSubscription,
-    subscription: Subscription,
-    account: ZuoraAccount,
-    request: HolidayStopRequestsDetail
+      creditProduct: CreditProductForSubscription,
+      subscription: Subscription,
+      account: ZuoraAccount,
+      request: HolidayStopRequestsDetail,
   ) =
     SubscriptionUpdate(
       creditProduct(subscription),
       subscription,
       account,
       request.Stopped_Publication_Date__c,
-      None
+      None,
     )
 
   "HolidayStopProcess" should "give correct added charge" in {
@@ -89,7 +94,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Right(())),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
     )(request)
 
     response.right.value shouldBe ZuoraHolidayCreditAddResult(
@@ -99,7 +104,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       chargeCode = RatePlanChargeCode("C2"),
       estimatedPrice = None,
       actualPrice = Price(-3.27),
-      pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 9))
+      pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 9)),
     )
   }
 
@@ -110,7 +115,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Left(ZuoraApiFailure("update went wrong"))),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
     )(request)
     response.left.value shouldBe ZuoraApiFailure("update went wrong")
   }
@@ -122,7 +127,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Right(())),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
     )(request)
     response.left.value shouldBe ZuoraApiFailure("get went wrong")
   }
@@ -139,7 +144,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Right(())),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
     )(request)
     response.isRight shouldBe true
   }
@@ -151,7 +156,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
     )(request)
     response.left.value.reason should include("Apply manual refund")
   }
@@ -163,7 +168,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
     )(request)
     response.right.value shouldBe ZuoraHolidayCreditAddResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
@@ -172,7 +177,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       chargeCode = RatePlanChargeCode("C2"),
       estimatedPrice = None,
       actualPrice = Price(-3.27),
-      pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 9))
+      pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 9)),
     )
   }
 
@@ -183,7 +188,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
-      ZuoraHolidayCreditAddResult.apply
+      ZuoraHolidayCreditAddResult.apply,
     )(request)
     response.left.value shouldBe ZuoraApiFailure("shouldn't need to apply an update")
   }
@@ -191,11 +196,23 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
   "processHolidayStops" should "give correct charges added" in {
     val responses = Processor.processProduct(
       creditProduct,
-      (_, _) => Right(List(
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C4")
-      )),
+      (_, _) =>
+        Right(
+          List(
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)),
+              "C1",
+            ),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)),
+              "C3",
+            ),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)),
+              "C4",
+            ),
+          ),
+        ),
       fulfilmentDatesFetcher,
       None,
       ZuoraProductTypes.GuardianWeekly,
@@ -204,7 +221,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
     )
     responses.creditResults.headOption.value.right.value shouldBe ZuoraHolidayCreditAddResult(
       requestId = HolidayStopRequestsDetailId("R1"),
@@ -213,7 +230,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       chargeCode = RatePlanChargeCode("C3"),
       estimatedPrice = None,
       actualPrice = Price(-5.81),
-      pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 2))
+      pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 2)),
     )
     responses.creditResults.lastOption.value.right.value shouldBe ZuoraHolidayCreditAddResult(
       requestId = HolidayStopRequestsDetailId("R3"),
@@ -222,7 +239,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       chargeCode = RatePlanChargeCode("C2"),
       estimatedPrice = None,
       actualPrice = Price(-3.27),
-      pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 9))
+      pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 9)),
     )
   }
   it should "get target dates from fulfilment dates" in {
@@ -241,7 +258,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
     )
   }
   it should "get target date from overridedate" in {
@@ -261,18 +278,30 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
     )
   }
 
   it should "only export results that haven't already been exported" in {
     val responses = Processor.processProduct(
       creditProduct,
-      (_, _) => Right(List(
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C6")
-      )),
+      (_, _) =>
+        Right(
+          List(
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)),
+              "C2",
+            ),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)),
+              "C5",
+            ),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)),
+              "C6",
+            ),
+          ),
+        ),
       fulfilmentDatesFetcher,
       None,
       ZuoraProductTypes.GuardianWeekly,
@@ -281,7 +310,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
     )
     responses.resultsToExport shouldBe List(
       ZuoraHolidayCreditAddResult(
@@ -291,19 +320,22 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
         RatePlanChargeCode("C3"),
         None,
         Price(-5.81),
-        AffectedPublicationDate(LocalDate.of(2019, 8, 2))
-      )
+        AffectedPublicationDate(LocalDate.of(2019, 8, 2)),
+      ),
     )
   }
 
   it should "give an exception message if exporting results fails" in {
     val responses = Processor.processProduct(
       creditProduct,
-      (_, _) => Right(List(
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r1"), ""),
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r2"), ""),
-        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r3"), "")
-      )),
+      (_, _) =>
+        Right(
+          List(
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r1"), ""),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r2"), ""),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r3"), ""),
+          ),
+        ),
       fulfilmentDatesFetcher,
       None,
       ZuoraProductTypes.GuardianWeekly,
@@ -312,7 +344,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Left(SalesforceApiFailure("Export failed")))
+      exportAmendments(Left(SalesforceApiFailure("Export failed"))),
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }

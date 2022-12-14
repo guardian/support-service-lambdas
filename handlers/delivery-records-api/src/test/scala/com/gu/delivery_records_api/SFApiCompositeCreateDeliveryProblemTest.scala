@@ -26,23 +26,25 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
           DeliveryRecordToLink(
             id = "deliveryRecordIdA",
             creditAmount = Some(1.23),
-            invoiceDate = Some(LocalDate.of(2019, 12, 10))
+            invoiceDate = Some(LocalDate.of(2019, 12, 10)),
           ),
           DeliveryRecordToLink(
             id = "deliveryRecordIdB",
             creditAmount = Some(3.21),
-            invoiceDate = Some(LocalDate.of(2020, 1, 10))
-          )
+            invoiceDate = Some(LocalDate.of(2020, 1, 10)),
+          ),
         ),
-        newContactPhoneNumbers = Some(SFApiContactPhoneNumbers(
-          Id = Some("id"),
-          Phone = Some("1234567890")
-        )),
-        repeatDeliveryProblem = Some(true)
+        newContactPhoneNumbers = Some(
+          SFApiContactPhoneNumbers(
+            Id = Some("id"),
+            Phone = Some("1234567890"),
+          ),
+        ),
+        repeatDeliveryProblem = Some(true),
       ),
-      now
+      now,
     ).asJson.spaces2 should equal(
-        s"""{
+      s"""{
          |  "allOrNone" : true,
          |  "collateSubrequests" : false,
          |  "compositeRequest" : [
@@ -105,8 +107,8 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
          |      }
          |    }
          |  ]
-         |}""".stripMargin
-      )
+         |}""".stripMargin,
+    )
 
   }
 
@@ -114,39 +116,59 @@ class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers 
 
     val baseContactNumbers = SFApiContactPhoneNumbers(Some("id"))
 
-    baseContactNumbers.copy(
-      Phone = Some("123456789")
-    ).filterOutGarbage() should equal(baseContactNumbers.copy(
-        Phone = Some("123456789")
-      ))
-
-    baseContactNumbers.copy(
-      Phone = Some("123456789"),
-      HomePhone = Some("whats_an_email_address_doing_here@123.com"),
-      OtherPhone = Some("some garbage text which shouldn't be in a phone field!!!")
-    ).filterOutGarbage() should equal(baseContactNumbers.copy(
-        Phone = Some("123456789")
-      ))
-
-    baseContactNumbers.copy(
-      Phone = Some("123456789"),
-      OtherPhone = Some("123-456-789")
-    ).filterOutGarbage() should equal(baseContactNumbers.copy(
+    baseContactNumbers
+      .copy(
         Phone = Some("123456789"),
-        OtherPhone = Some("123-456-789")
-      ))
+      )
+      .filterOutGarbage() should equal(
+      baseContactNumbers.copy(
+        Phone = Some("123456789"),
+      ),
+    )
 
-    baseContactNumbers.copy(
-      Phone = Some("+44123456789")
-    ).filterOutGarbage() should equal(baseContactNumbers.copy(
-        Phone = Some("+44123456789")
-      ))
+    baseContactNumbers
+      .copy(
+        Phone = Some("123456789"),
+        HomePhone = Some("whats_an_email_address_doing_here@123.com"),
+        OtherPhone = Some("some garbage text which shouldn't be in a phone field!!!"),
+      )
+      .filterOutGarbage() should equal(
+      baseContactNumbers.copy(
+        Phone = Some("123456789"),
+      ),
+    )
 
-    baseContactNumbers.copy(
-      Phone = Some("123 456 789")
-    ).filterOutGarbage() should equal(baseContactNumbers.copy(
-        Phone = Some("123 456 789")
-      ))
+    baseContactNumbers
+      .copy(
+        Phone = Some("123456789"),
+        OtherPhone = Some("123-456-789"),
+      )
+      .filterOutGarbage() should equal(
+      baseContactNumbers.copy(
+        Phone = Some("123456789"),
+        OtherPhone = Some("123-456-789"),
+      ),
+    )
+
+    baseContactNumbers
+      .copy(
+        Phone = Some("+44123456789"),
+      )
+      .filterOutGarbage() should equal(
+      baseContactNumbers.copy(
+        Phone = Some("+44123456789"),
+      ),
+    )
+
+    baseContactNumbers
+      .copy(
+        Phone = Some("123 456 789"),
+      )
+      .filterOutGarbage() should equal(
+      baseContactNumbers.copy(
+        Phone = Some("123 456 789"),
+      ),
+    )
 
   }
 

@@ -3,9 +3,9 @@ package com.gu.recogniser
 import kantan.csv.HeaderDecoder
 
 case class RevenueScheduleAquaRow(
-  number: String,
-  undistributedAmountInPence: Int,
-  subscriptionNumber: String,
+    number: String,
+    undistributedAmountInPence: Int,
+    subscriptionNumber: String,
 )
 
 object RevenueScheduleAquaRow {
@@ -20,10 +20,10 @@ object RevenueScheduleAquaRow {
     case a1 :: a2 :: a3 :: Nil =>
       HeaderDecoder.decoder(a1, a2, a3) {
         (
-        number: String,
-        amount: Double,
-        subscriptionNumber: String,
-      ) =>
+            number: String,
+            amount: Double,
+            subscriptionNumber: String,
+        ) =>
           RevenueScheduleAquaRow(
             number,
             (amount * 100).toInt,

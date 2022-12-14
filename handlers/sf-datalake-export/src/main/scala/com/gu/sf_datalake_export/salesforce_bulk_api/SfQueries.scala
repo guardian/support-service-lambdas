@@ -13,25 +13,55 @@ object BulkApiParams {
   val maxBatchSize = BatchSize(250000)
   val minBatchSize = BatchSize(100000)
 
-  case class SfQueryInfo(soql: Soql, objectName: ObjectName, sfObjectName: SfObjectName, batchSize: Option[BatchSize] = Some(maxBatchSize))
+  case class SfQueryInfo(
+      soql: Soql,
+      objectName: ObjectName,
+      sfObjectName: SfObjectName,
+      batchSize: Option[BatchSize] = Some(maxBatchSize),
+  )
 
   val contact = SfQueryInfo(Soql(SfQueries.contactQuery), ObjectName("Contact"), SfObjectName("Contact"))
-  val subscription = SfQueryInfo(Soql(SfQueries.subscriptionsQuery), ObjectName("Subscription"), SfObjectName("SF_Subscription__c"))
+  val subscription =
+    SfQueryInfo(Soql(SfQueries.subscriptionsQuery), ObjectName("Subscription"), SfObjectName("SF_Subscription__c"))
   val account = SfQueryInfo(Soql(SfQueries.accounts), ObjectName("Account"), SfObjectName("Account"))
-  val cancellationSurvey = SfQueryInfo(Soql(SfQueries.cancellationSurvey), ObjectName("CancellationSurvey"), SfObjectName("Cancellation_Survey_Voluntary__c"))
+  val cancellationSurvey = SfQueryInfo(
+    Soql(SfQueries.cancellationSurvey),
+    ObjectName("CancellationSurvey"),
+    SfObjectName("Cancellation_Survey_Voluntary__c"),
+  )
   val cardExpiry = SfQueryInfo(Soql(SfQueries.cardExpiry), ObjectName("CardExpiry"), SfObjectName("Card_Expiry__c"))
   val cases = SfQueryInfo(Soql(SfQueries.cases), ObjectName("Case"), SfObjectName("Case"))
   val caseComment = SfQueryInfo(Soql(SfQueries.caseComment), ObjectName("CaseComment"), SfObjectName("CaseComment"))
   val csSurvey = SfQueryInfo(Soql(SfQueries.csSurvey), ObjectName("CsSurvey"), SfObjectName("CS_Survey__c"))
   val discount = SfQueryInfo(Soql(SfQueries.discount), ObjectName("Discount"), SfObjectName("Discount__c"))
-  val fulfilmentProcessInformation = SfQueryInfo(Soql(SfQueries.fulfilmentProcessInformation), ObjectName("FulfilmentProcessInformation"), SfObjectName("Fulfilment_Process_Information__c"))
-  val imovoContract = SfQueryInfo(Soql(SfQueries.imovoContract), ObjectName("ImovoContract"), SfObjectName("Imovo_Contract__c"))
-  val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentFailure), ObjectName("PaymentFailure"), SfObjectName("Payment_Failure__c"))
-  val directDebitMandateFailure = SfQueryInfo(Soql(SfQueries.directDebitMandateFailure), ObjectName("DirectDebitMandateFailure"), SfObjectName("DD_Mandate_Failure__c"))
-  val directDebitMandate = SfQueryInfo(Soql(SfQueries.directDebitMandate), ObjectName("DirectDebitMandate"), SfObjectName("DD_Mandate__c"))
-  val directDebitMandateEvent = SfQueryInfo(Soql(SfQueries.directDebitMandateEvent), ObjectName("DirectDebitMandateEvent"), SfObjectName("DD_Mandate_Event__c"))
-  val digitalVoucher = SfQueryInfo(Soql(SfQueries.digitalVoucher), ObjectName("DigitalVoucher"), SfObjectName("Digital_Voucher__c"))
-  val subscriptionProductFeature = SfQueryInfo(Soql(SfQueries.subscriptionProductFeature), ObjectName("ZuoraSubscriptionProductFeature"), SfObjectName("Zuora__SubscriptionProductFeature__c"))
+  val fulfilmentProcessInformation = SfQueryInfo(
+    Soql(SfQueries.fulfilmentProcessInformation),
+    ObjectName("FulfilmentProcessInformation"),
+    SfObjectName("Fulfilment_Process_Information__c"),
+  )
+  val imovoContract =
+    SfQueryInfo(Soql(SfQueries.imovoContract), ObjectName("ImovoContract"), SfObjectName("Imovo_Contract__c"))
+  val paymentFailure =
+    SfQueryInfo(Soql(SfQueries.paymentFailure), ObjectName("PaymentFailure"), SfObjectName("Payment_Failure__c"))
+  val directDebitMandateFailure = SfQueryInfo(
+    Soql(SfQueries.directDebitMandateFailure),
+    ObjectName("DirectDebitMandateFailure"),
+    SfObjectName("DD_Mandate_Failure__c"),
+  )
+  val directDebitMandate =
+    SfQueryInfo(Soql(SfQueries.directDebitMandate), ObjectName("DirectDebitMandate"), SfObjectName("DD_Mandate__c"))
+  val directDebitMandateEvent = SfQueryInfo(
+    Soql(SfQueries.directDebitMandateEvent),
+    ObjectName("DirectDebitMandateEvent"),
+    SfObjectName("DD_Mandate_Event__c"),
+  )
+  val digitalVoucher =
+    SfQueryInfo(Soql(SfQueries.digitalVoucher), ObjectName("DigitalVoucher"), SfObjectName("Digital_Voucher__c"))
+  val subscriptionProductFeature = SfQueryInfo(
+    Soql(SfQueries.subscriptionProductFeature),
+    ObjectName("ZuoraSubscriptionProductFeature"),
+    SfObjectName("Zuora__SubscriptionProductFeature__c"),
+  )
 
   val all = List(
     contact,
@@ -50,7 +80,7 @@ object BulkApiParams {
     directDebitMandate,
     directDebitMandateEvent,
     digitalVoucher,
-    subscriptionProductFeature
+    subscriptionProductFeature,
   )
 
   val byName = all.map(obj => obj.objectName -> obj).toMap
@@ -165,7 +195,7 @@ object SfQueries {
       |
   """.stripMargin
 
-  //TODO BillingAccount__c doesn't exist ?
+  // TODO BillingAccount__c doesn't exist ?
   val accounts =
     """
    |SELECT
@@ -298,7 +328,7 @@ object SfQueries {
       |where Parent.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
-  //Date_Submitted__c, doesnt seem to exist
+  // Date_Submitted__c, doesnt seem to exist
   val csSurvey =
     """select
       |Case_Contact_Email__c,
@@ -371,7 +401,7 @@ object SfQueries {
       |where Contact__r.Account.GDPR_Deletion_Pending__c =false
     """.stripMargin
 
-  //the object Imovo_Contract__c doesn't seem to exist
+  // the object Imovo_Contract__c doesn't seem to exist
   val imovoContract =
     """
       |select
@@ -400,7 +430,7 @@ object SfQueries {
       |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
-  //Last_Attempt_Error_Code__c doesnt seem to exist
+  // Last_Attempt_Error_Code__c doesnt seem to exist
   val paymentFailure =
     """
       |select

@@ -39,13 +39,15 @@ class StartJobStepTest extends AnyFlatSpec with Matchers {
       jobId = "someJobId",
       objectName = "Contact",
       jobName = "Contact_2018-10-21",
-      uploadToDataLake = false
+      uploadToDataLake = false,
     )
     testSteps(ObjectName("Contact"), ShouldUploadToDataLake(false)) shouldBe Success(expectedResponse)
   }
 
   it should "return failure if object in request is unknown" in {
-    testSteps(ObjectName("unknownObject"), ShouldUploadToDataLake(false)) shouldBe Failure(LambdaException("invalid object name unknownObject"))
+    testSteps(ObjectName("unknownObject"), ShouldUploadToDataLake(false)) shouldBe Failure(
+      LambdaException("invalid object name unknownObject"),
+    )
   }
 
   "UploadToDataLake" should "be set to true by default in PROD" in {
@@ -56,7 +58,9 @@ class StartJobStepTest extends AnyFlatSpec with Matchers {
   }
 
   it should "return an error if attempted to set to true in non PROD ENV" in {
-    ShouldUploadToDataLake(Some(true), Stage("NOT-PROD")) shouldBe Failure(LambdaException("uploadToDatalake can only be enabled in PROD"))
+    ShouldUploadToDataLake(Some(true), Stage("NOT-PROD")) shouldBe Failure(
+      LambdaException("uploadToDatalake can only be enabled in PROD"),
+    )
   }
 
   it should "should be set to the correct value in PROD" in {

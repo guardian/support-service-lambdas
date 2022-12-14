@@ -9,9 +9,17 @@ import org.scalatest.matchers.should.Matchers
 object FakeZuoraQuerier extends Matchers {
 
   def apply(expectedQuery: String, response: String): ZuoraQuery.ZuoraQuerier = new ZuoraQuerier {
-    override def apply[QUERYRECORD: Reads](query: SafeQueryBuilder.SafeQuery): ClientFailableOp[ZuoraQuery.QueryResult[QUERYRECORD]] = {
+    override def apply[QUERYRECORD: Reads](
+        query: SafeQueryBuilder.SafeQuery,
+    ): ClientFailableOp[ZuoraQuery.QueryResult[QUERYRECORD]] = {
       query.queryString should be(expectedQuery)
-      Json.parse(response).validate[QueryResult[QUERYRECORD]].asEither.left.map(err => GenericError(err.toString)).toClientFailableOp
+      Json
+        .parse(response)
+        .validate[QueryResult[QUERYRECORD]]
+        .asEither
+        .left
+        .map(err => GenericError(err.toString))
+        .toClientFailableOp
     }
   }
 

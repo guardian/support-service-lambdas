@@ -10,14 +10,14 @@ import scala.util.{Failure, Success, Try}
 
 /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
   header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
-  */
+ */
 case class ApiGatewayRequest(
-  httpMethod: Option[String],
-  queryStringParameters: Option[Map[String, String]],
-  body: Option[String],
-  headers: Option[Map[String, String]],
-  pathParameters: Option[JsValue] = None,
-  path: Option[String]
+    httpMethod: Option[String],
+    queryStringParameters: Option[Map[String, String]],
+    body: Option[String],
+    headers: Option[Map[String, String]],
+    pathParameters: Option[JsValue] = None,
+    path: Option[String],
 ) extends LazyLogging {
 
   def queryParamsAsCaseClass[A]()(implicit reads: Reads[A]): ApiGatewayOp[A] = {
@@ -32,7 +32,9 @@ case class ApiGatewayRequest(
       theTry match {
         case Success(success) => ContinueProcessing(success)
         case Failure(error) =>
-          ReturnWithResponse(action.getOrElse(ApiGatewayResponse.badRequest(s"request body couldn't be parsed: $error")))
+          ReturnWithResponse(
+            action.getOrElse(ApiGatewayResponse.badRequest(s"request body couldn't be parsed: $error")),
+          )
       }
     }
 
@@ -58,7 +60,9 @@ case class ApiGatewayRequest(
         } yield obj
       case None =>
         logger.warn(s"Attempted to access response body but there was none")
-        None.toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError("attempted to parse body when handling a GET request"))
+        None.toApiGatewayContinueProcessing(
+          ApiGatewayResponse.internalServerError("attempted to parse body when handling a GET request"),
+        )
     }
   }
 

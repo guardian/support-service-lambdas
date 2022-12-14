@@ -15,10 +15,10 @@ object S3UploadFile extends Logging {
   case class FileName(value: String) extends AnyVal
   case class File(fileName: FileName, content: FileContent)
   def apply(
-    s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse]
+      s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse],
   )(
-    basePath: S3Path,
-    file: File
+      basePath: S3Path,
+      file: File,
   ): Try[PutObjectResponse] = {
     logger.info(s"Uploading ${file.fileName.value} to S3...")
 

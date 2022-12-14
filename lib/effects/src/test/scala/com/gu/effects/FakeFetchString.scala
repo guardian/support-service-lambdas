@@ -103,7 +103,7 @@ object FakeFetchString {
     "membership/support-service-lambdas/DEV/trustedApi-DEV.json" -> trustedApiconfig,
     "membership/support-service-lambdas/DEV/zuoraRest-DEV.json" -> zuoraRestTestConfig,
     "membership/support-service-lambdas/DEV/exactTarget-DEV.json" -> exactTargetConfig,
-    "membership/support-service-lambdas/DEV/stripe-DEV.json" -> stripeConfig
+    "membership/support-service-lambdas/DEV/stripe-DEV.json" -> stripeConfig,
   )
 
   def fetchString(location: S3Location): Try[String] = {

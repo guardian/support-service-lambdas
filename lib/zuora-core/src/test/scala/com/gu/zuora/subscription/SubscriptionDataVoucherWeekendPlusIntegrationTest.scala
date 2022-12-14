@@ -12,17 +12,17 @@ class SubscriptionDataVoucherWeekendPlusIntegrationTest extends AnyFlatSpec {
   "SubscriptionData" should "calculate issue data correctly for weekend voucher subscription" in {
     MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
 
-    val startDate = LocalDate.parse("2019-03-16") //Sunday
+    val startDate = LocalDate.parse("2019-03-16") // Sunday
     val firstSaturday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
     val firstSunday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
     val billDates1 = BillDates(
       startDate,
-      startDate.plusMonths(1).minusDays(1)
+      startDate.plusMonths(1).minusDays(1),
     )
     val billDates2 = BillDates(
       startDate.plusMonths(1),
-      startDate.plusMonths(2).minusDays(1)
+      startDate.plusMonths(2).minusDays(1),
     )
 
     val expectedIssueData = List(
@@ -46,7 +46,7 @@ class SubscriptionDataVoucherWeekendPlusIntegrationTest extends AnyFlatSpec {
       expectedIssueData = expectedIssueData,
       expectedTotalAnnualIssueLimitPerSubscription = 20,
       expectedProductType = ZuoraProductTypes.NewspaperVoucherBook,
-      expectedEditionDaysOfWeek = List(SATURDAY, SUNDAY)
+      expectedEditionDaysOfWeek = List(SATURDAY, SUNDAY),
     )
   }
 }

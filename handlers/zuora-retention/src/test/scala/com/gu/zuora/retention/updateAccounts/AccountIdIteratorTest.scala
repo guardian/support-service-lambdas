@@ -28,7 +28,9 @@ class AccountIdIteratorTest extends AnyFlatSpec with Matchers {
         |data1,data2,data3
       """.stripMargin
 
-    AccountIdIterator(linesIterator(noAccountIdData), 0) shouldBe errorResponse("No Account.Id column found in csv file header")
+    AccountIdIterator(linesIterator(noAccountIdData), 0) shouldBe errorResponse(
+      "No Account.Id column found in csv file header",
+    )
   }
 
   it should "skip to the correct starting position" in {
@@ -61,7 +63,9 @@ class AccountIdIteratorTest extends AnyFlatSpec with Matchers {
         |Line_2
         |Line_3""".stripMargin
 
-    AccountIdIterator(linesIterator(csvData), 0).map(getAllAccounts) shouldBe Success(List("Line_0", "Line_1", "Line_2", "Line_3"))
+    AccountIdIterator(linesIterator(csvData), 0).map(getAllAccounts) shouldBe Success(
+      List("Line_0", "Line_1", "Line_2", "Line_3"),
+    )
 
     def getAllAccounts(iterator: AccountIdIterator): List[String] = {
       def appendNextId(): List[String] = {

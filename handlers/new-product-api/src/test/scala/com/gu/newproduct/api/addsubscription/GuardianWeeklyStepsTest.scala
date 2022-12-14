@@ -6,7 +6,12 @@ import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  ChargeOverride,
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly}
@@ -35,8 +40,10 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
   val newSubscriptionName = "A-Sxxxxxxxx"
   val testFirstPaymentDate = LocalDate.of(2018, 7, 18)
   val testZuoraAccountId = ZuoraAccountId("acccc")
-  val quarterlyRatePlan = Plan(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), testStartDateRules)
-  val sixForSixRatePlan = Plan(GuardianWeeklyDomestic6for6, PlanDescription("GW Oct 18 - 6 for 6 - Domestic"), testStartDateRules)
+  val quarterlyRatePlan =
+    Plan(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), testStartDateRules)
+  val sixForSixRatePlan =
+    Plan(GuardianWeeklyDomestic6for6, PlanDescription("GW Oct 18 - 6 for 6 - Domestic"), testStartDateRules)
   val testCaseId = CaseId("case")
   val testAcquistionSource = AcquisitionSource("CSR")
   val testCSR = CreatedByCSR("bob")
@@ -62,7 +69,8 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
 
   def stubGetPlanAndCharge(planId: PlanId): Option[PlanAndCharge] = {
     planId match {
-      case GuardianWeeklyDomestic6for6 => Some(PlanAndCharge(sixForSixTestRatePlanZuoraId, sixForSixTestRatePlanChargeZuoraId))
+      case GuardianWeeklyDomestic6for6 =>
+        Some(PlanAndCharge(sixForSixTestRatePlanZuoraId, sixForSixTestRatePlanChargeZuoraId))
       case _ => fail()
     }
   }
@@ -97,7 +105,9 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
   }
 
   it should "create subscription for non 6-for-6 rate plan" in {
-    def stubCreate(request: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+    def stubCreate(
+        request: CreateSubscription.ZuoraCreateSubRequest,
+    ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       request shouldBe ZuoraCreateSubRequest(
         testZuoraAccountId,
         testFirstPaymentDate,
@@ -107,9 +117,9 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
         List(
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = quarterlyTestRatePlanZuoraId,
-            maybeChargeOverride = None
-          )
-        )
+            maybeChargeOverride = None,
+          ),
+        ),
       )
       ClientSuccess(SubscriptionName(newSubscriptionName))
     }
@@ -124,7 +134,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       stubCreate,
       stubSendEmail(quarterlyRatePlan),
       GuardianWeeklyDomestic6for6,
-      GuardianWeeklyDomesticQuarterly
+      GuardianWeeklyDomesticQuarterly,
     ) _
 
     val futureActual = Steps.handleRequest(
@@ -133,17 +143,30 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       addPaperSub = dummySteps,
       addDigipackSub = dummySteps,
       addGuardianWeeklyDomesticSub = stubAddVoucherSteps,
-      addGuardianWeeklyROWSub = stubAddVoucherSteps
-    )(ApiGatewayRequest(None, None, Some(Json.stringify(JsObject(
-      Map(
-        "acquisitionCase" -> JsString(testCaseId.value),
-        "startDate" -> JsString(testFirstPaymentDate.toString),
-        "zuoraAccountId" -> JsString(testZuoraAccountId.value),
-        "acquisitionSource" -> JsString(testAcquistionSource.value),
-        "createdByCSR" -> JsString(testCSR.value),
-        "planId" -> JsString(GuardianWeeklyDomesticQuarterly.name)
-      )
-    ))), None, None, None))
+      addGuardianWeeklyROWSub = stubAddVoucherSteps,
+    )(
+      ApiGatewayRequest(
+        None,
+        None,
+        Some(
+          Json.stringify(
+            JsObject(
+              Map(
+                "acquisitionCase" -> JsString(testCaseId.value),
+                "startDate" -> JsString(testFirstPaymentDate.toString),
+                "zuoraAccountId" -> JsString(testZuoraAccountId.value),
+                "acquisitionSource" -> JsString(testAcquistionSource.value),
+                "createdByCSR" -> JsString(testCSR.value),
+                "planId" -> JsString(GuardianWeeklyDomesticQuarterly.name),
+              ),
+            ),
+          ),
+        ),
+        None,
+        None,
+        None,
+      ),
+    )
 
     implicit val format: OFormat[AddedSubscription] = Json.format[AddedSubscription]
     val actual = Await.result(futureActual, 30 seconds)
@@ -154,7 +177,9 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
   it should "create subscription for 6-for-6 rate plan" in {
     val monthlySubscriptionStartDate = testFirstPaymentDate.plusWeeks(6)
 
-    def stubCreate(request: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+    def stubCreate(
+        request: CreateSubscription.ZuoraCreateSubRequest,
+    ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       request shouldBe ZuoraCreateSubRequest(
         testZuoraAccountId,
         monthlySubscriptionStartDate,
@@ -168,15 +193,15 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
               ChargeOverride(
                 amountMinorUnits = None,
                 productRatePlanChargeId = sixForSixTestRatePlanChargeZuoraId,
-                triggerDate = Some(testFirstPaymentDate)
-              )
-            )
+                triggerDate = Some(testFirstPaymentDate),
+              ),
+            ),
           ),
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = quarterlyTestRatePlanZuoraId,
-            maybeChargeOverride = None
-          )
-        )
+            maybeChargeOverride = None,
+          ),
+        ),
       )
       ClientSuccess(SubscriptionName(newSubscriptionName))
     }
@@ -191,7 +216,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       stubCreate,
       stubSendEmail(sixForSixRatePlan),
       GuardianWeeklyDomestic6for6,
-      GuardianWeeklyDomesticQuarterly
+      GuardianWeeklyDomesticQuarterly,
     ) _
 
     val futureActual = Steps.handleRequest(
@@ -200,17 +225,30 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       addPaperSub = dummySteps,
       addDigipackSub = dummySteps,
       addGuardianWeeklyDomesticSub = stubAddVoucherSteps,
-      addGuardianWeeklyROWSub = stubAddVoucherSteps
-    )(ApiGatewayRequest(None, None, Some(Json.stringify(JsObject(
-      Map(
-        "acquisitionCase" -> JsString(testCaseId.value),
-        "startDate" -> JsString(testFirstPaymentDate.toString),
-        "zuoraAccountId" -> JsString(testZuoraAccountId.value),
-        "acquisitionSource" -> JsString(testAcquistionSource.value),
-        "createdByCSR" -> JsString(testCSR.value),
-        "planId" -> JsString(GuardianWeeklyDomestic6for6.name)
-      )
-    ))), None, None, None))
+      addGuardianWeeklyROWSub = stubAddVoucherSteps,
+    )(
+      ApiGatewayRequest(
+        None,
+        None,
+        Some(
+          Json.stringify(
+            JsObject(
+              Map(
+                "acquisitionCase" -> JsString(testCaseId.value),
+                "startDate" -> JsString(testFirstPaymentDate.toString),
+                "zuoraAccountId" -> JsString(testZuoraAccountId.value),
+                "acquisitionSource" -> JsString(testAcquistionSource.value),
+                "createdByCSR" -> JsString(testCSR.value),
+                "planId" -> JsString(GuardianWeeklyDomestic6for6.name),
+              ),
+            ),
+          ),
+        ),
+        None,
+        None,
+        None,
+      ),
+    )
 
     implicit val format: OFormat[AddedSubscription] = Json.format[AddedSubscription]
     val actual = Await.result(futureActual, 30 seconds)

@@ -25,7 +25,7 @@ class S3EffectsTest extends AsyncFlatSpec with Matchers {
   }
 
   private def initialiseTestBucket(): Unit = {
-    //put test data in
+    // put test data in
     put("S3EffectsTest/test-prefix-file1", "this is file1")
     put("S3EffectsTest/test-prefix-file2", "this is file2")
     put("S3EffectsTest/ignored-prefix-file3", "this is file3")
@@ -39,7 +39,7 @@ class S3EffectsTest extends AsyncFlatSpec with Matchers {
 
     val expectedObjectsWithPrefix = List(
       Key("S3EffectsTest/test-prefix-file1"),
-      Key("S3EffectsTest/test-prefix-file2")
+      Key("S3EffectsTest/test-prefix-file2"),
     )
 
     withClue("should list objects with a prefix") {
@@ -52,10 +52,11 @@ class S3EffectsTest extends AsyncFlatSpec with Matchers {
     }
 
     withClue("objects that do not match the deleted prefix should still be there") {
-      //object with other prefixes should still be there
+      // object with other prefixes should still be there
       val ignoredPrefixPath = testPath.copy(key = Some(Key("S3EffectsTest/ignored-prefix")))
-      ListS3Objects.listObjectsWithPrefix(ignoredPrefixPath) shouldBe Success(List(Key("S3EffectsTest/ignored-prefix-file3")))
+      ListS3Objects.listObjectsWithPrefix(ignoredPrefixPath) shouldBe Success(
+        List(Key("S3EffectsTest/ignored-prefix-file3")),
+      )
     }
   }
 }
-

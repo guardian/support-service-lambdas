@@ -2,8 +2,18 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import java.time.LocalDate
 
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{
+  ChargeOverrides,
+  SubscribeToRatePlans,
+  WireCreateRequest,
+  WireSubscription,
+}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  ChargeOverride,
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription._
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
@@ -19,7 +29,7 @@ class CreateSubscriptionTest extends AnyFlatSpec with Matchers {
 
     val ids = PlanAndCharge(
       productRatePlanId = ProductRatePlanId("hiProductRatePlanId"),
-      productRatePlanChargeId = ProductRatePlanChargeId("hiProductRatePlanChargeId")
+      productRatePlanChargeId = ProductRatePlanChargeId("hiProductRatePlanChargeId"),
     )
     val expectedReq = WireCreateRequest(
       accountKey = "zac",
@@ -40,11 +50,11 @@ class CreateSubscriptionTest extends AnyFlatSpec with Matchers {
               price = Some(1.25),
               productRatePlanChargeId = "hiProductRatePlanChargeId",
               triggerDate = Some(LocalDate.of(2020, 1, 1)),
-              triggerEvent = Some("USD")
-            )
-          )
-        )
-      )
+              triggerEvent = Some("USD"),
+            ),
+          ),
+        ),
+      ),
     )
     val accF: RequestsPost[WireCreateRequest, WireSubscription] = {
       case (req, "subscriptions", WithCheck) if req == expectedReq =>
@@ -64,14 +74,13 @@ class CreateSubscriptionTest extends AnyFlatSpec with Matchers {
             ChargeOverride(
               amountMinorUnits = Some(AmountMinorUnits(125)),
               productRatePlanChargeId = ids.productRatePlanChargeId,
-              triggerDate = Some(LocalDate.of(2020, 1, 1))
-            )
-          )
-        )
-      )
+              triggerDate = Some(LocalDate.of(2020, 1, 1)),
+            ),
+          ),
+        ),
+      ),
     )
     val actual = CreateSubscription(accF, currentDate)(createReq)
     actual shouldBe ClientSuccess(SubscriptionName("a-s123"))
   }
 }
-

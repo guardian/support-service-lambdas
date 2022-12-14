@@ -23,15 +23,21 @@ object SalesforceSFSubscription extends Logging {
     implicit val formatHolidayStopRequestId = Jsonx.formatInline[SFSubscriptionId]
 
     case class MatchingSubscription(
-      Id: SFSubscriptionId,
-      Name: SubscriptionName,
-      Product_Name__c: ProductName,
+        Id: SFSubscriptionId,
+        Name: SubscriptionName,
+        Product_Name__c: ProductName,
     )
     implicit val readsMatchingSubscription = Json.reads[MatchingSubscription]
     implicit val readsResults = Json.reads[RecordsWrapperCaseClass[MatchingSubscription]]
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (SubscriptionName, Contact) => ClientFailableOp[Option[MatchingSubscription]] =
-      sfGet.setupRequestMultiArg(toRequest _).parse[RecordsWrapperCaseClass[MatchingSubscription]].map(_.records.headOption).runRequestMultiArg
+    def apply(
+        sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue],
+    ): (SubscriptionName, Contact) => ClientFailableOp[Option[MatchingSubscription]] =
+      sfGet
+        .setupRequestMultiArg(toRequest _)
+        .parse[RecordsWrapperCaseClass[MatchingSubscription]]
+        .map(_.records.headOption)
+        .runRequestMultiArg
 
     def toRequest(subscriptionName: SubscriptionName, contact: Contact) = {
       val soqlQuery = s"SELECT Id, Name, Product_Name__c " +

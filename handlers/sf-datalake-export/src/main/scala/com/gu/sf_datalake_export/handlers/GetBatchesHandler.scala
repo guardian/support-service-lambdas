@@ -22,10 +22,10 @@ import scala.util.Try
 object GetBatchesHandler {
 
   case class WireRequest(
-    jobId: String,
-    jobName: String,
-    objectName: String,
-    uploadToDataLake: Boolean
+      jobId: String,
+      jobName: String,
+      objectName: String,
+      uploadToDataLake: Boolean,
   )
 
   object WireRequest {
@@ -57,12 +57,12 @@ object GetBatchesHandler {
   }
 
   case class WireResponse(
-    jobId: String,
-    jobName: String,
-    objectName: String,
-    jobStatus: String,
-    batches: Seq[WireBatch],
-    uploadToDataLake: Boolean
+      jobId: String,
+      jobName: String,
+      objectName: String,
+      jobStatus: String,
+      batches: Seq[WireBatch],
+      uploadToDataLake: Boolean,
   )
 
   object WireResponse {
@@ -72,28 +72,29 @@ object GetBatchesHandler {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = operation(RawEffects.stage, GetFromS3.fetchString, RawEffects.response)
+      operation = operation(RawEffects.stage, GetFromS3.fetchString, RawEffects.response),
     )
   }
 
   def getJobStatus(batches: Seq[BatchInfo]): JobStatus = {
 
-    def fromStatusList(remainingBatchStates: Seq[BatchState], jobStatusSoFar: JobStatus): JobStatus = remainingBatchStates match {
-      case Nil => jobStatusSoFar
-      case Failed :: _ => FailedJob
-      case Queued :: tail => fromStatusList(tail, PendingJob)
-      case InProgress :: tail => fromStatusList(tail, PendingJob)
-      case Completed :: tail => fromStatusList(tail, jobStatusSoFar)
-      case NotProcessed :: tail => fromStatusList(tail, jobStatusSoFar)
-    }
+    def fromStatusList(remainingBatchStates: Seq[BatchState], jobStatusSoFar: JobStatus): JobStatus =
+      remainingBatchStates match {
+        case Nil => jobStatusSoFar
+        case Failed :: _ => FailedJob
+        case Queued :: tail => fromStatusList(tail, PendingJob)
+        case InProgress :: tail => fromStatusList(tail, PendingJob)
+        case Completed :: tail => fromStatusList(tail, jobStatusSoFar)
+        case NotProcessed :: tail => fromStatusList(tail, jobStatusSoFar)
+      }
 
     fromStatusList(batches.map(_.state), CompletedJob)
   }
 
   def operation(
-    stage: Stage,
-    fetchString: StringFromS3,
-    getResponse: Request => Response
+      stage: Stage,
+      fetchString: StringFromS3,
+      getResponse: Request => Response,
   )(request: WireRequest): Try[WireResponse] = {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
@@ -111,7 +112,7 @@ object GetBatchesHandler {
       objectName = request.objectName,
       jobStatus = status.name,
       uploadToDataLake = request.uploadToDataLake,
-      batches = batches.map(WireBatch.fromBatch)
+      batches = batches.map(WireBatch.fromBatch),
     )
   }
 }

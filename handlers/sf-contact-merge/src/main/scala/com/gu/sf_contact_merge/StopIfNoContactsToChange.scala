@@ -7,7 +7,8 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResp
 object StopIfNoContactsToChange {
   def apply[SFContactId](targetId: SFContactId, existingIds: List[SFContactId]): ApiGatewayOp[Unit] = {
     existingIds.distinct match {
-      case existingId :: Nil if existingId == targetId => ReturnWithResponse(ApiGatewayResponse.noActionRequired("already merged"))
+      case existingId :: Nil if existingId == targetId =>
+        ReturnWithResponse(ApiGatewayResponse.noActionRequired("already merged"))
       case _ => ContinueProcessing(())
     }
   }

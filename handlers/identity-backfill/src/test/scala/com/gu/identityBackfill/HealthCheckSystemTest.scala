@@ -20,8 +20,13 @@ class HealthCheckSystemTest extends AnyFlatSpec with Matchers {
     val stream = new ByteArrayInputStream(healthcheckRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
 
-    //execute
-    Handler.runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(stream, os, null))
+    // execute
+    Handler.runForLegacyTestsSeeTestingMd(
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      RawEffects.response,
+      LambdaIO(stream, os, null),
+    )
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

@@ -25,7 +25,7 @@ class AquaRequestTest extends AsyncFlatSpec {
       |	"query" : "select anotherThing from yetAnotherThing",
       |	"type" : "zoqlexport"
       |}]
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   it should "serialise aqua request " in {
@@ -33,9 +33,8 @@ class AquaRequestTest extends AsyncFlatSpec {
       name = "TestQuery",
       queries = List(
         AquaQuery("query1", "select something from somethingElse"),
-        AquaQuery("query2", "select anotherThing from yetAnotherThing")
-      )
-
+        AquaQuery("query2", "select anotherThing from yetAnotherThing"),
+      ),
     )
     val actual = Json.toJson(aquaQueryRequest)
     actual shouldBe expectedJson

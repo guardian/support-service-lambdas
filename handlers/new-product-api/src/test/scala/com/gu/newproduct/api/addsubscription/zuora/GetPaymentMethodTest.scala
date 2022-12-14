@@ -1,7 +1,15 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, PaymentMethodWire, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  NonDirectDebitMethod,
+  PaymentMethodWire,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.{ActivePaymentMethod, NotActivePaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
 import com.gu.test.EffectsTest
@@ -32,10 +40,14 @@ class GetPaymentMethodTest extends AnyFlatSpec with Matchers {
   }
 
   "paymentMethodWires.toPaymentMethod" should "convert PayPal payment" in {
-    PaymentMethodWire("Active", "PayPal").toPaymentMethod shouldBe ClientSuccess(NonDirectDebitMethod(ActivePaymentMethod, PayPal))
+    PaymentMethodWire("Active", "PayPal").toPaymentMethod shouldBe ClientSuccess(
+      NonDirectDebitMethod(ActivePaymentMethod, PayPal),
+    )
   }
   it should "convert credit card payment" in {
-    PaymentMethodWire("Active", "CreditCard").toPaymentMethod shouldBe ClientSuccess(NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
+    PaymentMethodWire("Active", "CreditCard").toPaymentMethod shouldBe ClientSuccess(
+      NonDirectDebitMethod(ActivePaymentMethod, CreditCard),
+    )
   }
   it should "convert credit card reference payment" in {
     val actual = PaymentMethodWire("Active", "CreditCardReferenceTransaction").toPaymentMethod
@@ -48,7 +60,7 @@ class GetPaymentMethodTest extends AnyFlatSpec with Matchers {
       BankAccountName("bankAccountName"),
       BankAccountNumberMask("accountNumberMask"),
       SortCode("sortCode"),
-      MandateId("mandateId")
+      MandateId("mandateId"),
     )
     validDirectDebitWire.toPaymentMethod shouldBe ClientSuccess(expectedPaymentMethod)
   }
@@ -87,7 +99,6 @@ class GetPaymentMethodTest extends AnyFlatSpec with Matchers {
     MandateID = Some("mandateId"),
     BankTransferAccountName = Some("bankAccountName"),
     BankTransferAccountNumberMask = Some("accountNumberMask"),
-    BankCode = Some("sortCode")
+    BankCode = Some("sortCode"),
   )
 }
-

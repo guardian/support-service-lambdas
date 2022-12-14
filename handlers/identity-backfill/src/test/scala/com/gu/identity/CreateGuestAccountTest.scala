@@ -13,7 +13,8 @@ class CreateGuestAccountTest extends AnyFlatSpec with Matchers {
   it should "create a request ok" in {
     val actual = CreateGuestAccount.toRequest(EmailAddress("hello@gu.com"))
 
-    val expected = new PostRequest(JsObject(List("primaryEmailAddress" -> JsString("hello@gu.com"))), RelativePath("/guest"))
+    val expected =
+      new PostRequest(JsObject(List("primaryEmailAddress" -> JsString("hello@gu.com"))), RelativePath("/guest"))
     actual should be(expected)
   }
 

@@ -12,7 +12,6 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, Quarterly, SixWeeks}
 import play.api.libs.json.{Json, Writes}
 
-
 object DigipackEmailDataSerialiser {
   implicit val writes: Writes[DigipackEmailData] = (data: DigipackEmailData) => {
     val fields: Map[String, String] = DigipackEmailFields(data)
@@ -22,7 +21,8 @@ object DigipackEmailDataSerialiser {
 
 object DigipackEmailFields {
 
-  val digipackPlans = List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
+  val digipackPlans =
+    List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def nounFor(billingPeriod: BillingPeriod) = billingPeriod match {
@@ -32,7 +32,7 @@ object DigipackEmailFields {
     case SixWeeks => "six weeks"
   }
   def apply(
-    data: DigipackEmailData
+      data: DigipackEmailData,
   ): Map[String, String] = {
 
     val emailAddress = data.contacts.billTo.email.map(_.value).getOrElse("")
@@ -44,24 +44,26 @@ object DigipackEmailFields {
       "Subscription term" -> paymentPLan.map(plan => nounFor(plan.billingPeriod)).getOrElse(""),
       "Payment amount" -> paymentPLan.map(_.amountMinorUnits.formatted).getOrElse(""),
       "Date of first payment" -> data.firstPaymentDate.format(dateformat),
-       "Currency" -> data.currency.glyph,
+      "Currency" -> data.currency.glyph,
       "Trial period" -> data.trialPeriod.days.toString,
-      "Subscription details" -> paymentPLan.map(_.description).getOrElse("")
+      "Subscription details" -> paymentPLan.map(_.description).getOrElse(""),
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts.billTo)
 
   }
 
   def paymentMethodFields(paymentMethod: PaymentMethod) = paymentMethod match {
-    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) => Map(
-      "Account number" -> accountNumberMask.value,
-      "Sort Code" -> sortCode.hyphenated,
-      "Account Name" -> accountName.value,
-      "MandateID" -> mandateId.value,
-      "Default payment method" -> toDescription(BankTransfer)
-    )
-    case NonDirectDebitMethod(_, paymentMethodType) => Map(
-      "Default payment method" -> toDescription(paymentMethodType)
-    )
+    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) =>
+      Map(
+        "Account number" -> accountNumberMask.value,
+        "Sort Code" -> sortCode.hyphenated,
+        "Account Name" -> accountName.value,
+        "MandateID" -> mandateId.value,
+        "Default payment method" -> toDescription(BankTransfer),
+      )
+    case NonDirectDebitMethod(_, paymentMethodType) =>
+      Map(
+        "Default payment method" -> toDescription(paymentMethodType),
+      )
   }
 
   def addressFields(contact: BillToContact) = {
@@ -70,7 +72,6 @@ object DigipackEmailFields {
       "First Name" -> contact.firstName.value,
       "Last Name" -> contact.lastName.value,
       "EmailAddress" -> contact.email.map(_.value).getOrElse(""),
-
       "Address 1" -> address.address1.map(_.value).getOrElse(""),
       "Address 2" -> address.address2.map(_.value).getOrElse(""),
       "City" -> address.city.map(_.value).getOrElse(""),
@@ -79,4 +80,3 @@ object DigipackEmailFields {
     )
   }
 }
-

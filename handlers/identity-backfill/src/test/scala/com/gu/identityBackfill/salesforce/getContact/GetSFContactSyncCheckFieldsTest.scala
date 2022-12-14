@@ -1,7 +1,10 @@
 package com.gu.identityBackfill.salesforce.getContact
 
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
-import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.{ContactSyncCheckFields, ContactsByAccountIdQueryResponse}
+import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.{
+  ContactSyncCheckFields,
+  ContactsByAccountIdQueryResponse,
+}
 import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
 import com.gu.salesforce.TypesForSFEffectsData.SFAccountId
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
@@ -16,8 +19,8 @@ class GetSFContactSyncCheckFieldsTest extends AnyFlatSpec with Matchers {
     val expected = GetRequest(
       RelativePath(
         s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
-          "WHERE AccountId = '001g000000XrQcaAAF'"
-      )
+          "WHERE AccountId = '001g000000XrQcaAAF'",
+      ),
     )
     actual should be(expected)
   }
@@ -30,10 +33,15 @@ class GetSFContactSyncCheckFieldsTest extends AnyFlatSpec with Matchers {
         done = true,
         records = List(
           ContactSyncCheckFields(
-            "00110000011AABBAAB", Some("STANDARD_TEST_DUMMY"), "123", "Testing", Some("United Kingdom"), Some("testing123@g.com")
-          )
-        )
-      )
+            "00110000011AABBAAB",
+            Some("STANDARD_TEST_DUMMY"),
+            "123",
+            "Testing",
+            Some("United Kingdom"),
+            Some("testing123@g.com"),
+          ),
+        ),
+      ),
     )
     actual should be(expected)
   }
@@ -67,4 +75,3 @@ object GetSFContactSyncCheckFieldsTest {
     """.stripMargin
 
 }
-

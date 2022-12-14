@@ -28,7 +28,7 @@ class GetSFIdentityIdMoveDataTest extends AnyFlatSpec with Matchers {
 
     val canonicalEmail = CanonicalEmail(EmailAddress("hi@email.com"))
     val contactEmailIdentities: List[SFContactIdEmailIdentity] = List(
-      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(canonicalEmail.emailAddress, identityId = None))
+      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(canonicalEmail.emailAddress, identityId = None)),
     )
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
@@ -43,12 +43,16 @@ class GetSFIdentityIdMoveDataTest extends AnyFlatSpec with Matchers {
 
     val canonicalEmail = CanonicalEmail(EmailAddress("hi@email.com"))
     val contactEmailIdentities: List[SFContactIdEmailIdentity] = List(
-      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))))
+      SFContactIdEmailIdentity(
+        SFContactId("con1"),
+        EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))),
+      ),
     )
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con1")), IdentityIdToUse(IdentityId("1234")))))
+    val expected =
+      Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con1")), IdentityIdToUse(IdentityId("1234")))))
 
     actual should be(expected)
 
@@ -59,12 +63,16 @@ class GetSFIdentityIdMoveDataTest extends AnyFlatSpec with Matchers {
     val canonicalEmail = CanonicalEmail(EmailAddress("hi@email.com"))
     val contactEmailIdentities: List[SFContactIdEmailIdentity] = List(
       SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(canonicalEmail.emailAddress, identityId = None)),
-      SFContactIdEmailIdentity(SFContactId("con2"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))))
+      SFContactIdEmailIdentity(
+        SFContactId("con2"),
+        EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))),
+      ),
     )
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con2")), IdentityIdToUse(IdentityId("1234")))))
+    val expected =
+      Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con2")), IdentityIdToUse(IdentityId("1234")))))
 
     actual should be(expected)
 
@@ -74,13 +82,20 @@ class GetSFIdentityIdMoveDataTest extends AnyFlatSpec with Matchers {
 
     val canonicalEmail = CanonicalEmail(EmailAddress("hi@email.com"))
     val contactEmailIdentities: List[SFContactIdEmailIdentity] = List(
-      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(EmailAddress("hi+gnm9@email.com"), identityId = Some(IdentityId("14")))),
-      SFContactIdEmailIdentity(SFContactId("con2"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))))
+      SFContactIdEmailIdentity(
+        SFContactId("con1"),
+        EmailIdentity(EmailAddress("hi+gnm9@email.com"), identityId = Some(IdentityId("14"))),
+      ),
+      SFContactIdEmailIdentity(
+        SFContactId("con2"),
+        EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))),
+      ),
     )
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con2")), IdentityIdToUse(IdentityId("1234")))))
+    val expected =
+      Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con2")), IdentityIdToUse(IdentityId("1234")))))
 
     actual should be(expected)
 
@@ -90,8 +105,14 @@ class GetSFIdentityIdMoveDataTest extends AnyFlatSpec with Matchers {
 
     val canonicalEmail = CanonicalEmail(EmailAddress("hi@email.com"))
     val contactEmailIdentities: List[SFContactIdEmailIdentity] = List(
-      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("14")))),
-      SFContactIdEmailIdentity(SFContactId("con2"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))))
+      SFContactIdEmailIdentity(
+        SFContactId("con1"),
+        EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("14"))),
+      ),
+      SFContactIdEmailIdentity(
+        SFContactId("con2"),
+        EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))),
+      ),
     )
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)

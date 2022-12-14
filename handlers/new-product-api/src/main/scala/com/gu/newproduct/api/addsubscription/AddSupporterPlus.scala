@@ -10,8 +10,19 @@ import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.supporterplus
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
-import com.gu.newproduct.api.addsubscription.validation.supporterplus.{GetSupporterPlusCustomerData, SupporterPlusAccountValidation, SupporterPlusCustomerData, SupporterPlusValidations, AmountLimits}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.validation.supporterplus.{
+  GetSupporterPlusCustomerData,
+  SupporterPlusAccountValidation,
+  SupporterPlusCustomerData,
+  SupporterPlusValidations,
+  AmountLimits,
+}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  ChargeOverride,
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
@@ -34,21 +45,31 @@ import scala.concurrent.Future
 
 object AddSupporterPlus {
   def steps(
-    getPlan: PlanId => Plan,
-    getCurrentDate: () => LocalDate,
-    getPlanAndCharge: PlanId => Option[PlanAndCharge],
-    getCustomerData: ZuoraAccountId => ApiGatewayOp[SupporterPlusCustomerData],
-    supporterPlusValidations: (SupporterPlusValidations.ValidatableFields, PlanId, Currency) => ValidationResult[AmountMinorUnits],
-    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    sendConfirmationEmail: (Option[SfContactId], SupporterPlusEmailData) => AsyncApiGatewayOp[Unit]
+      getPlan: PlanId => Plan,
+      getCurrentDate: () => LocalDate,
+      getPlanAndCharge: PlanId => Option[PlanAndCharge],
+      getCustomerData: ZuoraAccountId => ApiGatewayOp[SupporterPlusCustomerData],
+      supporterPlusValidations: (
+          SupporterPlusValidations.ValidatableFields,
+          PlanId,
+          Currency,
+      ) => ValidationResult[AmountMinorUnits],
+      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+      sendConfirmationEmail: (Option[SfContactId], SupporterPlusEmailData) => AsyncApiGatewayOp[Unit],
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = {
     for {
       customerData <- getCustomerData(request.zuoraAccountId).toAsync
       SupporterPlusCustomerData(account, paymentMethod, subscriptions, contacts) = customerData
       validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
-      amountMinorUnits <- supporterPlusValidations(validatableFields, request.planId, account.currency).toApiGatewayOp.toAsync
+      amountMinorUnits <- supporterPlusValidations(
+        validatableFields,
+        request.planId,
+        account.currency,
+      ).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
-      planAndCharge <- getPlanAndCharge(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
+      planAndCharge <- getPlanAndCharge(request.planId)
+        .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
+        .toAsync
       chargeOverride = ChargeOverride(Some(amountMinorUnits), planAndCharge.productRatePlanChargeId, None)
       zuoraCreateSubRequest = ZuoraCreateSubRequest(
         request = request,
@@ -56,9 +77,9 @@ object AddSupporterPlus {
         ratePlans = List(
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = planAndCharge.productRatePlanId,
-            maybeChargeOverride = Some(chargeOverride)
-          )
-        )
+            maybeChargeOverride = Some(chargeOverride),
+          ),
+        ),
       )
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly supporter plus")
       supporterPlusEmailData = toSupporterPlusEmailData(
@@ -69,25 +90,30 @@ object AddSupporterPlus {
         contacts = contacts,
         amountMinorUnits = amountMinorUnits,
         plan = getPlan(request.planId),
-        currentDate = getCurrentDate()
+        currentDate = getCurrentDate(),
       )
-      _ <- sendConfirmationEmail(account.sfContactId, supporterPlusEmailData).recoverAndLog("send supporter plus confirmation email")
+      _ <- sendConfirmationEmail(account.sfContactId, supporterPlusEmailData).recoverAndLog(
+        "send supporter plus confirmation email",
+      )
     } yield subscriptionName
   }
 
   def wireSteps(
-    catalog: Catalog,
-    zuoraIds: ZuoraIds,
-    zuoraClient: Requests,
-    isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-    emailQueueNames: EmailQueueNames,
-    currentDate: () => LocalDate
+      catalog: Catalog,
+      zuoraIds: ZuoraIds,
+      zuoraClient: Requests,
+      isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
+      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+      awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
+      emailQueueNames: EmailQueueNames,
+      currentDate: () => LocalDate,
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
     val planAndChargeForSupporterPlusPlanId = zuoraIds.apiIdToPlanAndCharge.get _
-    val supporterPlusIds = List(zuoraIds.supporterPlusZuoraIds.monthly.productRatePlanId, zuoraIds.supporterPlusZuoraIds.annual.productRatePlanId)
+    val supporterPlusIds = List(
+      zuoraIds.supporterPlusZuoraIds.monthly.productRatePlanId,
+      zuoraIds.supporterPlusZuoraIds.annual.productRatePlanId,
+    )
     val getCustomerData = getValidatedSupporterPlusCustomerData(zuoraClient, supporterPlusIds)
     val isValidSupporterPlusStartDate = isValidStartDateForPlan(MonthlySupporterPlus, _: LocalDate)
     val validateRequest = SupporterPlusValidations(isValidSupporterPlusStartDate, AmountLimits.limitsFor) _
@@ -103,25 +129,25 @@ object AddSupporterPlus {
       getCustomerData = getCustomerData,
       supporterPlusValidations = validateRequest,
       createSubscription = createSubscription,
-      sendConfirmationEmail = sendConfirmationEmail
+      sendConfirmationEmail = sendConfirmationEmail,
     ) _
 
   }
 
   def paymentDelayFor(paymentMethod: PaymentMethod): Long = paymentMethod match {
-    case d: DirectDebit => 10l
-    case _ => 0l
+    case d: DirectDebit => 10L
+    case _ => 0L
   }
 
   def toSupporterPlusEmailData(
-    request: AddSubscriptionRequest,
-    plan: Plan,
-    currency: Currency,
-    paymentMethod: PaymentMethod,
-    firstPaymentDate: LocalDate,
-    contacts: Contacts,
-    amountMinorUnits: AmountMinorUnits,
-    currentDate: LocalDate
+      request: AddSubscriptionRequest,
+      plan: Plan,
+      currency: Currency,
+      paymentMethod: PaymentMethod,
+      firstPaymentDate: LocalDate,
+      contacts: Contacts,
+      amountMinorUnits: AmountMinorUnits,
+      currentDate: LocalDate,
   ) =
     SupporterPlusEmailData(
       accountId = request.zuoraAccountId,
@@ -131,12 +157,12 @@ object AddSupporterPlus {
       amountMinorUnits = amountMinorUnits,
       firstPaymentDate = firstPaymentDate,
       contacts = contacts,
-      created = currentDate
+      created = currentDate,
     )
 
   def getValidatedSupporterPlusCustomerData(
-    zuoraClient: Requests,
-    supporterPlusPlanIds: List[ProductRatePlanId]
+      zuoraClient: Requests,
+      supporterPlusPlanIds: List[ProductRatePlanId],
   ): ZuoraAccountId => ApiGatewayOp[SupporterPlusCustomerData] = {
 
     val validateAccount = ValidateAccount.apply _ thenValidate SupporterPlusAccountValidation.apply _
@@ -144,9 +170,12 @@ object AddSupporterPlus {
       validate = validateAccount,
       ifNotFoundReturn = Some("Zuora account id is not valid")
     )
-    val getValidatedPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
-    val validateSubs = ValidateSubscriptions(supporterPlusPlanIds, "Zuora account already has an active supporter plus subscription") _
-    val getValidatedSubs = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _ andValidateWith validateSubs
+    val getValidatedPaymentMethod =
+      GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
+    val validateSubs =
+      ValidateSubscriptions(supporterPlusPlanIds, "Zuora account already has an active supporter plus subscription") _
+    val getValidatedSubs =
+      GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _ andValidateWith validateSubs
     val getContactsFromZuora = GetContacts(zuoraClient.get[GetContactsResponse]) _
     val getUnvalidatedContacts = getContactsFromZuora.andThen(_.toApiGatewayOp("getting contacts from Zuora"))
     GetSupporterPlusCustomerData(
@@ -154,8 +183,7 @@ object AddSupporterPlus {
       getPaymentMethod = getValidatedPaymentMethod,
       getContacts = getUnvalidatedContacts,
       getAccountSubscriptions = getValidatedSubs,
-      _
+      _,
     )
   }
 }
-

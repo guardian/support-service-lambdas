@@ -10,18 +10,18 @@ object GetZuoraAccount {
   object WireModel {
 
     case class BasicInfo(
-      sfContactId__c: String,
-      crmId: String,
-      IdentityId__c: Option[String]
+        sfContactId__c: String,
+        crmId: String,
+        IdentityId__c: Option[String],
     )
 
     case class ZContact(
-      workEmail: String
+        workEmail: String,
     )
 
     case class ZuoraAccount(
-      basicInfo: BasicInfo,
-      billToContact: ZContact
+        basicInfo: BasicInfo,
+        billToContact: ZContact,
     )
     implicit val zaReadsZContact = Json.reads[ZContact]
     implicit val zaReadsBasicInfo = Json.reads[BasicInfo]

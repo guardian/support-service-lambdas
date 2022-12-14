@@ -11,7 +11,8 @@ import org.scalatest.matchers.should.Matchers
 class LoadConfigModuleTest extends AnyFlatSpec with Matchers {
 
   def fakeS3Load(response: String)(location: S3Location): Try[String] = Try {
-    if (location.bucket != "gu-reader-revenue-private") throw (new RuntimeException(s"test failed: unexpected bucket name ${location.bucket}"))
+    if (location.bucket != "gu-reader-revenue-private")
+      throw (new RuntimeException(s"test failed: unexpected bucket name ${location.bucket}"))
     if (location.key == "membership/support-service-lambdas/PROD/someDir/filename-PROD.v2.json") response
     else
       throw (new RuntimeException(s"test failed unexpected key ${location.key}"))
@@ -80,7 +81,7 @@ class LoadConfigModuleTest extends AnyFlatSpec with Matchers {
 
   it should "fail if the stage in the config file differs from the expected stage provided" in {
 
-    //note this will return the dev json when asking for the prod stage
+    // note this will return the dev json when asking for the prod stage
     def wrongFileS3Load = fakeS3Load(devJSon) _
 
     val prodConfig = LoadConfigModule(prodStage, wrongFileS3Load)

@@ -9,17 +9,17 @@ import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 object ContributionValidations {
 
   case class ValidatableFields(
-    amountMinorUnits: Option[AmountMinorUnits],
-    startDate: LocalDate
+      amountMinorUnits: Option[AmountMinorUnits],
+      startDate: LocalDate,
   )
 
   def apply(
-    isValidStartDate: LocalDate => ValidationResult[Unit],
-    limitsFor: (PlanId, Currency) => AmountLimits
+      isValidStartDate: LocalDate => ValidationResult[Unit],
+      limitsFor: (PlanId, Currency) => AmountLimits,
   )(
-    validatableFields: ValidatableFields,
-    planId: PlanId,
-    currency: Currency
+      validatableFields: ValidatableFields,
+      planId: PlanId,
+      currency: Currency,
   ): ValidationResult[AmountMinorUnits] =
     for {
       amount <- validatableFields.amountMinorUnits getOrFailWith s"amountMinorUnits is missing"

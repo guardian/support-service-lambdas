@@ -1,6 +1,10 @@
 package com.gu.soft_opt_in_consent_setter.models
 
-case class EnhancedCancelledSub(identityId: String, cancelledSub: SFSubRecord, associatedActiveNonGiftSubs: Seq[SFAssociatedSubRecord])
+case class EnhancedCancelledSub(
+    identityId: String,
+    cancelledSub: SFSubRecord,
+    associatedActiveNonGiftSubs: Seq[SFAssociatedSubRecord],
+)
 
 object EnhancedCancelledSub {
   def apply(cancelledSub: SFSubRecord, associatedSubs: Seq[SFAssociatedSubRecord]): EnhancedCancelledSub = {
@@ -11,7 +15,7 @@ object EnhancedCancelledSub {
     EnhancedCancelledSub(
       identityId = cancelledSub.Buyer__r.IdentityID__c,
       cancelledSub = cancelledSub,
-      associatedActiveNonGiftSubs = associatedActiveNonGiftSubs
+      associatedActiveNonGiftSubs = associatedActiveNonGiftSubs,
     )
   }
 }
