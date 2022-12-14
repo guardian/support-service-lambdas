@@ -21,7 +21,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
     suite("Create Salesforce Record")(
       test("Run locally") {
       /*
-           Test suite used to run the refund lambda locally
+           Test suite used to run the salesforce lambda locally
          */
 
       for {
