@@ -12,14 +12,18 @@ class SalesforceAuthenticateTest extends AnyFlatSpec with Matchers {
 
   it should "get auth SF correctly" in {
     val effects = new TestingRawEffects(postResponses = SalesforceAuthenticateData.postResponses)
-    val auth = SalesforceAuthenticate.apply(effects.response)(SFAuthConfig(
-      "https://sfurl.haha",
-      "clientsfclient",
-      "clientsecretsfsecret",
-      "usernamesf",
-      "passSFpassword",
-      "tokentokenSFtoken"
-    )).value
+    val auth = SalesforceAuthenticate
+      .apply(effects.response)(
+        SFAuthConfig(
+          "https://sfurl.haha",
+          "clientsfclient",
+          "clientsecretsfsecret",
+          "usernamesf",
+          "passSFpassword",
+          "tokentokenSFtoken",
+        ),
+      )
+      .value
     val expected = ClientSuccess(SalesforceAuth("tokentoken", "https://instance.url"))
     auth should be(expected)
   }

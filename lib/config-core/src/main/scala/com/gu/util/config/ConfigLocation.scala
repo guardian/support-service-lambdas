@@ -9,4 +9,3 @@ case class ConfigLocation[CONFIG](path: String, version: Int) {
     s"$basePath/$relativePath"
   }
 }
-

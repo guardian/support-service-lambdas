@@ -42,14 +42,14 @@ object SQSLive {
                 SendMessageRequest.builder
                   .queueUrl(emailQueueUrlResponse.queueUrl)
                   .messageBody(message.toJson)
-                  .build()
+                  .build(),
               )
             }
             .mapError { ex =>
               s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id} with error: ${ex.toString}"
             }
           _ <- ZIO.log(
-            s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}"
+            s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}",
           )
         } yield ()
 
@@ -61,14 +61,14 @@ object SQSLive {
                 SendMessageRequest.builder
                   .queueUrl(refundQueueUrlResponse.queueUrl)
                   .messageBody(refundInput.toJson)
-                  .build()
+                  .build(),
               )
             }
             .mapError { ex =>
               s"Failed to send sqs refund message with subscription Number: ${refundInput.subscriptionName} with error: ${ex.toString}"
             }
           _ <- ZIO.log(
-            s"Successfully sent refund message for subscription number: ${refundInput.subscriptionName}"
+            s"Successfully sent refund message for subscription number: ${refundInput.subscriptionName}",
           )
         } yield ()
     })
@@ -86,8 +86,9 @@ object SQSLive {
 
     ZIO
       .fromCompletableFuture(
-        sqsAsyncClient.getQueueUrl(queueUrl)
-      ).mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
+        sqsAsyncClient.getQueueUrl(queueUrl),
+      )
+      .mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
 
   private def getRefundQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
     val queueName = s"product-switch-refund-${stage.toString}"
@@ -95,8 +96,9 @@ object SQSLive {
 
     ZIO
       .fromCompletableFuture(
-        sqsAsyncClient.getQueueUrl(queueUrl)
-      ).mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
+        sqsAsyncClient.getQueueUrl(queueUrl),
+      )
+      .mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
 
   private def impl(creds: AwsCredentialsProvider): SqsAsyncClient =
     SqsAsyncClient.builder
@@ -106,15 +108,15 @@ object SQSLive {
 }
 
 case class EmailPayloadSubscriberAttributes(
-  first_name: String,
-  last_name: String,
-  first_payment_amount: String,
-  date_of_first_payment: String,
-  price: String,
-  payment_frequency: String,
-  contribution_cancellation_date: String,
-  currency: String,
-  subscription_id: String,
+    first_name: String,
+    last_name: String,
+    first_payment_amount: String,
+    date_of_first_payment: String,
+    price: String,
+    payment_frequency: String,
+    contribution_cancellation_date: String,
+    currency: String,
+    subscription_id: String,
 )
 
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
@@ -122,14 +124,13 @@ case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubsc
 case class EmailPayload(Address: Option[String], ContactAttributes: EmailPayloadContactAttributes)
 
 case class EmailMessage(
-  To: EmailPayload,
-  DataExtensionName: String,
-  SfContactId: String,
-  IdentityUserId: Option[String]
+    To: EmailPayload,
+    DataExtensionName: String,
+    SfContactId: String,
+    IdentityUserId: Option[String],
 )
 
 given JsonEncoder[EmailPayloadSubscriberAttributes] = DeriveJsonEncoder.gen[EmailPayloadSubscriberAttributes]
 given JsonEncoder[EmailPayloadContactAttributes] = DeriveJsonEncoder.gen[EmailPayloadContactAttributes]
 given JsonEncoder[EmailPayload] = DeriveJsonEncoder.gen[EmailPayload]
 given JsonEncoder[EmailMessage] = DeriveJsonEncoder.gen[EmailMessage]
-

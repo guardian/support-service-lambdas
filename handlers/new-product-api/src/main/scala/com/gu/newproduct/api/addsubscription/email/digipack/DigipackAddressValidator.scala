@@ -7,12 +7,12 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.AddressField
 
 case class ValidatedAddress(
-  address1: Address1,
-  address2: Option[Address2],
-  city: City,
-  state: Option[State],
-  country: Country,
-  postcode: Postcode
+    address1: Address1,
+    address2: Option[Address2],
+    city: City,
+    state: Option[State],
+    country: Country,
+    postcode: Postcode,
 )
 
 object DigipackAddressValidator {
@@ -28,11 +28,14 @@ object DigipackAddressValidator {
       validatedCity,
       address.state,
       validatedCountry,
-      validatedPostcode
+      validatedPostcode,
     )
   }
 
-  def validateNotEmpty[Field <: AddressField](fieldName: String, maybeAddressField: Option[Field]): ValidationResult[Field] = for {
+  def validateNotEmpty[Field <: AddressField](
+      fieldName: String,
+      maybeAddressField: Option[Field],
+  ): ValidationResult[Field] = for {
     addressField <- maybeAddressField getOrFailWith (s"bill to $fieldName must be populated")
     _ <- !addressField.value.trim.isEmpty orFailWith s"bill to $fieldName must be populated"
   } yield addressField

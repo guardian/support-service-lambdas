@@ -22,15 +22,15 @@ object Main extends App with LazyLogging {
   case class setPasswordRequestBody(NewPassword: String)
 
   case class SfGetAwsApiUsersResponse(
-    done: Boolean,
-    records: Seq[Records],
-    nextRecordsUrl: Option[String] = None
+      done: Boolean,
+      records: Seq[Records],
+      nextRecordsUrl: Option[String] = None,
   )
 
   case class Records(
-    Id: String,
-    Username: String,
-    CommunityNickname: String
+      Id: String,
+      Username: String,
+      CommunityNickname: String,
   )
 
   lazy val optConfig = for {
@@ -48,11 +48,11 @@ object Main extends App with LazyLogging {
       clientSecret = sfClientSecret,
       password = sfPassword,
       token = sfToken,
-      authUrl = sfAuthUrl
+      authUrl = sfAuthUrl,
     ),
     AwsConfig(
-      stageName = stage
-    )
+      stageName = stage,
+    ),
   )
 
   setApiUserPasswordInSfAndSyncToAwsSecret(SecretsManagerClient.create())
@@ -70,7 +70,7 @@ object Main extends App with LazyLogging {
           secretsManagerClient,
           awsApiUser,
           newPassword,
-          config.awsConfig.stageName
+          config.awsConfig.stageName,
         )
       }
 
@@ -79,22 +79,22 @@ object Main extends App with LazyLogging {
 
   }
 
-  //Convention: <stage>/<system>/User/<user>
+  // Convention: <stage>/<system>/User/<user>
   def getSecretName(
-    awsApiUserCommunityNickname: String,
-    stage: String
+      awsApiUserCommunityNickname: String,
+      stage: String,
   ): String = {
     s"$stage/Salesforce/User/$awsApiUserCommunityNickname"
   }
 
   def setPasswordInSecretsManager(
-    secretsManagerClient: SecretsManagerClient,
-    awsApiUser: Records,
-    newPassword: String,
-    stage: String
+      secretsManagerClient: SecretsManagerClient,
+      awsApiUser: Records,
+      newPassword: String,
+      stage: String,
   ): Unit = {
     logger.info(
-      s"Setting password for user ${awsApiUser.Username} in Secrets Manager..."
+      s"Setting password for user ${awsApiUser.Username} in Secrets Manager...",
     )
 
     val secretName = getSecretName(awsApiUser.CommunityNickname, stage)
@@ -107,7 +107,7 @@ object Main extends App with LazyLogging {
 
   }
 
-  //As of 22/10/2020, Password Policy in Sf is (minimum 8 chars, must include alpha and numeric chars)
+  // As of 22/10/2020, Password Policy in Sf is (minimum 8 chars, must include alpha and numeric chars)
   def generatePassword(): String = {
     logger.info("Generating password for api user")
     val newRandomAlphaString =
@@ -123,12 +123,12 @@ object Main extends App with LazyLogging {
   }
 
   def updatePassword(
-    sfAuthDetails: SfAuthDetails,
-    awsApiUserInSf: Records,
-    newPassword: String
+      sfAuthDetails: SfAuthDetails,
+      awsApiUserInSf: Records,
+      newPassword: String,
   ): Unit = {
     logger.info(
-      s"Setting password for user ${awsApiUserInSf.Username} in Salesforce..."
+      s"Setting password for user ${awsApiUserInSf.Username} in Salesforce...",
     )
 
     val sfUpdateResponse =
@@ -141,13 +141,13 @@ object Main extends App with LazyLogging {
       val decodedResponse =
         decode[List[setPasswordResponse]](setPasswordResponseJson)
       logger.error(
-        s"Error setting password for user ${awsApiUserInSf.Username} in Salesforce: $decodedResponse"
+        s"Error setting password for user ${awsApiUserInSf.Username} in Salesforce: $decodedResponse",
       )
     }
   }
 
   def getAwsApiUsersInSf(
-    sfAuthDetails: SfAuthDetails
+      sfAuthDetails: SfAuthDetails,
   ): Either[Error, SfGetAwsApiUsersResponse] = {
     logger.info("Getting Aws Api users from Salesforce...")
 
@@ -168,61 +168,63 @@ object Main extends App with LazyLogging {
   }
 
   def secretExists(
-    secretsManagerClient: SecretsManagerClient,
-    secretName: String
+      secretsManagerClient: SecretsManagerClient,
+      secretName: String,
   ): Boolean = {
     val filter = Filter.builder.key("name").values(secretName).build()
     val listSecrets =
       secretsManagerClient.listSecrets(
-        ListSecretsRequest.builder.filters(filter).build()
+        ListSecretsRequest.builder.filters(filter).build(),
       )
     listSecrets.hasSecretList
   }
 
   def createSecret(
-    secretsManagerClient: SecretsManagerClient,
-    awsApiUserInSf: Records,
-    secretName: String,
-    newPwd: String
+      secretsManagerClient: SecretsManagerClient,
+      awsApiUserInSf: Records,
+      secretName: String,
+      newPwd: String,
   ): Either[Throwable, CreateSecretResponse] = {
     Try(
       secretsManagerClient.createSecret(
         CreateSecretRequest.builder
           .name(secretName)
           .secretString(
-            s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
-          ).build()
-      )
+            s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}""",
+          )
+          .build(),
+      ),
     ).toEither
   }
 
   def updateSecret(
-    secretsManagerClient: SecretsManagerClient,
-    awsApiUserInSf: Records,
-    secretName: String,
-    newPwd: String
+      secretsManagerClient: SecretsManagerClient,
+      awsApiUserInSf: Records,
+      secretName: String,
+      newPwd: String,
   ): Either[Throwable, UpdateSecretResponse] = {
     Try(
       secretsManagerClient.updateSecret(
         UpdateSecretRequest.builder
           .secretId(secretName)
           .secretString(
-            s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}"""
-          ).build()
-      )
+            s"""{"username":"${awsApiUserInSf.Username}","password":"$newPwd","token":""}""",
+          )
+          .build(),
+      ),
     ).toEither
   }
 
   def setSfPasswordPostRequest(
-    sfAuthDetails: SfAuthDetails,
-    newPwd: String,
-    sfUserId: String
+      sfAuthDetails: SfAuthDetails,
+      newPwd: String,
+      sfUserId: String,
   ): Either[Throwable, String] = {
     val newPassword =
       setPasswordRequestBody(NewPassword = newPwd).asJson.spaces2
     Try {
       Http(
-        s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/sobjects/User/$sfUserId/password"
+        s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/sobjects/User/$sfUserId/password",
       ).option(HttpOptions.readTimeout(30000))
         .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
@@ -241,8 +243,8 @@ object Main extends App with LazyLogging {
           "client_id" -> salesforceConfig.clientId,
           "client_secret" -> salesforceConfig.clientSecret,
           "username" -> salesforceConfig.userName,
-          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
-        )
+          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}",
+        ),
       )
       .asString
       .body
@@ -255,7 +257,7 @@ object Main extends App with LazyLogging {
     }
   }
 
-  //main method for lambda
+  // main method for lambda
   def handler(): Unit = {
     setApiUserPasswordInSfAndSyncToAwsSecret(SecretsManagerClient.create())
   }

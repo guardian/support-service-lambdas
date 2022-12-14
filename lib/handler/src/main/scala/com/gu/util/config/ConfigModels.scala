@@ -15,7 +15,7 @@ case class StripeWebhook(ukStripeSecretKey: StripeSecretKey, auStripeSecretKey: 
 object StripeWebhook {
   implicit val stripeWebhookConfigReads: Reads[StripeWebhook] = (
     (JsPath \ "api.key.secret").read[String].map(StripeSecretKey.apply) and
-    (JsPath \ "au-membership.key.secret").read[String].map(StripeSecretKey.apply)
+      (JsPath \ "au-membership.key.secret").read[String].map(StripeSecretKey.apply)
   )(StripeWebhook.apply _)
 }
 
@@ -26,7 +26,7 @@ object StripeConfig {
 
   implicit val stripeConfigReads: Reads[StripeConfig] = (
     (JsPath \ "customerUpdatedWebhook").read[StripeWebhook] and
-    (JsPath \ "signatureChecking").readNullable[String].map(!_.contains("false"))
+      (JsPath \ "signatureChecking").readNullable[String].map(!_.contains("false"))
   )(StripeConfig.apply _)
 }
 

@@ -15,17 +15,19 @@ class GetSfAddressOverrideTest extends AnyFlatSpec with Matchers {
     Some(SFState("state1")),
     Some(SFPostalCode("postalcode1")),
     SFCountry("country1"),
-    Some(SFPhone("phone1"))
+    Some(SFPhone("phone1")),
   )
 
   "GetSfAddressOverride" should "not give an override if it's already set" in {
 
     val getSfAddressOverride = GetSfAddressOverride.apply
 
-    val actual = getSfAddressOverride.apply(SFContactsForMerge(
-      ClientSuccess(UsableContactAddress(testAddress("a1"))),
-      List()
-    ))
+    val actual = getSfAddressOverride.apply(
+      SFContactsForMerge(
+        ClientSuccess(UsableContactAddress(testAddress("a1"))),
+        List(),
+      ),
+    )
 
     actual should be(ClientSuccess(DontOverrideAddress))
   }
@@ -34,22 +36,26 @@ class GetSfAddressOverrideTest extends AnyFlatSpec with Matchers {
 
     val getSfAddressOverride = GetSfAddressOverride.apply
 
-    val actual = getSfAddressOverride.apply(SFContactsForMerge(
-      ClientSuccess(UnusableContactAddress),
-      List()
-    ))
+    val actual = getSfAddressOverride.apply(
+      SFContactsForMerge(
+        ClientSuccess(UnusableContactAddress),
+        List(),
+      ),
+    )
 
     actual should be(ClientSuccess(DontOverrideAddress))
   }
 
   "GetSfAddressOverride" should "give an override if the main contact doesn't have but the other does" in {
 
-    val actual = GetSfAddressOverride.apply(SFContactsForMerge(
-      ClientSuccess(UnusableContactAddress),
-      List(
-        ClientSuccess(UsableContactAddress(testAddress("a1")))
-      )
-    ))
+    val actual = GetSfAddressOverride.apply(
+      SFContactsForMerge(
+        ClientSuccess(UnusableContactAddress),
+        List(
+          ClientSuccess(UsableContactAddress(testAddress("a1"))),
+        ),
+      ),
+    )
 
     actual should be(ClientSuccess(OverrideAddressWith(testAddress("a1"))))
   }

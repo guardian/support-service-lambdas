@@ -20,15 +20,16 @@ object IdentityRetentionSteps extends Logging {
     implicit val reads = Json.reads[UrlParams]
   }
 
-  def apply(zuoraQuerier: ZuoraQuerier): Operation = Operation.noHealthcheck({
-    apiGatewayRequest: ApiGatewayRequest =>
-      (for {
-        queryStringParameters <- apiGatewayRequest.queryParamsAsCaseClass[UrlParams]()
-        identityId <- extractIdentityId(queryStringParameters)
-        possibleAccounts <- GetActiveZuoraAccounts(zuoraQuerier)(identityId)
-        accounts <- MaybeNonEmptyList(possibleAccounts).toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("no active zuora accounts"))
-        subs <- SubscriptionsForAccounts(zuoraQuerier)(accounts)
-      } yield RelationshipForSubscriptions(subs)).apiResponse
+  def apply(zuoraQuerier: ZuoraQuerier): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
+    (for {
+      queryStringParameters <- apiGatewayRequest.queryParamsAsCaseClass[UrlParams]()
+      identityId <- extractIdentityId(queryStringParameters)
+      possibleAccounts <- GetActiveZuoraAccounts(zuoraQuerier)(identityId)
+      accounts <- MaybeNonEmptyList(possibleAccounts).toApiGatewayContinueProcessing(
+        ApiGatewayResponse.notFound("no active zuora accounts"),
+      )
+      subs <- SubscriptionsForAccounts(zuoraQuerier)(accounts)
+    } yield RelationshipForSubscriptions(subs)).apiResponse
   })
 
   def extractIdentityId(queryStringParams: UrlParams): ApiGatewayOp[IdentityId] = {

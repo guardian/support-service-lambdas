@@ -26,11 +26,11 @@ object ReportsManualEffectsTest extends App {
 
       val query1 = AquaQuery(
         name = "testQuery",
-        query = statements
+        query = statements,
       )
       AquaQueryRequest(
         name = "testRequest",
-        queries = List(query1)
+        queries = List(query1),
       )
     }
 
@@ -60,7 +60,12 @@ object ReportsManualEffectsTest extends App {
   def fetchFileTest(): Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
-      request = FetchFileRequest("2c92c0f963f800ac0164174918d905f2", Nil, List(Batch("2c92c08663f7f01701641749196b2a76", "manualTest/SomeTest2")), false)
+      request = FetchFileRequest(
+        "2c92c0f963f800ac0164174918d905f2",
+        Nil,
+        List(Batch("2c92c08663f7f01701641749196b2a76", "manualTest/SomeTest2")),
+        false,
+      )
       upload = S3ReportUpload("zuora-retention-dev", RawEffects.s3Write) _
       res <- FetchFile(upload, zuoraRequests.getDownloadStream)(request).toDisjunction
     } yield {
@@ -72,4 +77,3 @@ object ReportsManualEffectsTest extends App {
   println("Executing manual test for Zuora reports")
   getResultsTest
 }
-

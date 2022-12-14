@@ -13,7 +13,7 @@ class ContributionAccountValidationTest extends AnyFlatSpec with Matchers {
     paymentMethodId = PaymentMethodId("id"),
     autoPay = AutoPay(true),
     accountBalanceMinorUnits = AccountBalanceMinorUnits(1233),
-    currency = GBP
+    currency = GBP,
   )
   it should "pass if account has an identity Id" in {
     ContributionAccountValidation(account) shouldBe Passed(account)

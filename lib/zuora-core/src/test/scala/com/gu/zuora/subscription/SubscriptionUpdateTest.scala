@@ -8,11 +8,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.time.LocalDate
 
-class SubscriptionUpdateTest
-  extends AnyFlatSpec
-  with Matchers
-  with DiffMatcher
-  with EitherValues {
+class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher with EitherValues {
 
   it should "extend term of sub if invoice date is later than term end" in {
     val invoiceDate = InvoiceDate(LocalDate.parse("2020-06-14"))
@@ -21,13 +17,12 @@ class SubscriptionUpdateTest
       creditProduct = CreditProduct(
         productRatePlanId = "prp1",
         productRatePlanChargeId = "prpc3",
-        productRatePlanChargeName = ""
+        productRatePlanChargeName = "",
       ),
-      subscription =
-        Fixtures.subscriptionFromJson("GWTermEndsBeforeInvoiceDate.json"),
+      subscription = Fixtures.subscriptionFromJson("GWTermEndsBeforeInvoiceDate.json"),
       account = Fixtures.mkAccount(),
       affectedDate = publicationDate,
-      maybeInvoiceDate = Some(invoiceDate)
+      maybeInvoiceDate = Some(invoiceDate),
     )
 
     update.value should matchTo(
@@ -45,12 +40,12 @@ class SubscriptionUpdateTest
                 productRatePlanChargeId = "prpc3",
                 HolidayStart__c = publicationDate.value,
                 HolidayEnd__c = publicationDate.value,
-                price = -4.72
-              )
-            )
-          )
-        )
-      )
+                price = -4.72,
+              ),
+            ),
+          ),
+        ),
+      ),
     )
   }
 }

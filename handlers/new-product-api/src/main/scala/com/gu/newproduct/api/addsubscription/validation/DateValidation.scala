@@ -21,11 +21,11 @@ case class SelectableWindow(start: LocalDate, maybeEndExclusive: Option[LocalDat
 
 object SelectableWindow {
   def apply(
-    now: () => LocalDate,
-    windowRule: WindowRule
+      now: () => LocalDate,
+      windowRule: WindowRule,
   ): SelectableWindow = {
-    val maybeWindowEnd = windowRule.maybeSize.map {
-      windowSize => windowRule.startDate.plusDays(windowSize.value.toLong)
+    val maybeWindowEnd = windowRule.maybeSize.map { windowSize =>
+      windowRule.startDate.plusDays(windowSize.value.toLong)
     }
     SelectableWindow(windowRule.startDate, maybeWindowEnd)
   }
@@ -33,17 +33,17 @@ object SelectableWindow {
 
 object StartDateValidator {
   def apply(
-    isValidDayOfWeek: LocalDate => ValidationResult[Unit],
-    isInSelectableWindow: LocalDate => ValidationResult[Unit],
-    dateToValidate: LocalDate
+      isValidDayOfWeek: LocalDate => ValidationResult[Unit],
+      isInSelectableWindow: LocalDate => ValidationResult[Unit],
+      dateToValidate: LocalDate,
   ): ValidationResult[Unit] = for {
     _ <- isInSelectableWindow(dateToValidate)
     _ <- isValidDayOfWeek(dateToValidate)
   } yield ()
 
   def fromRule(
-    validatorFor: DateRule => LocalDate => ValidationResult[Unit],
-    startDateRules: StartDateRules
+      validatorFor: DateRule => LocalDate => ValidationResult[Unit],
+      startDateRules: StartDateRules,
   ): LocalDate => ValidationResult[Unit] = {
     val maybeDaysValidation = startDateRules.daysOfWeekRule.map(validatorFor)
     StartDateValidator(maybeDaysValidation orPass, validatorFor(startDateRules.windowRule), _)
@@ -64,8 +64,8 @@ object DateValidator {
 
 object DayOfWeekValidator {
   def apply(
-    allowedDays: List[DayOfWeek],
-    dateToValidate: LocalDate
+      allowedDays: List[DayOfWeek],
+      dateToValidate: LocalDate,
   ): ValidationResult[Unit] = {
 
     def errorMessage(date: LocalDate) = {
@@ -80,8 +80,8 @@ object DayOfWeekValidator {
 
 object WindowValidator {
   def apply(
-    selectableWindow: SelectableWindow,
-    dateToValidate: LocalDate
+      selectableWindow: SelectableWindow,
+      dateToValidate: LocalDate,
   ): ValidationResult[Unit] = {
 
     def errorMessage = {

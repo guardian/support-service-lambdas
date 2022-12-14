@@ -26,5 +26,6 @@ class MockInvoicePreview(responses: Map[(String, LocalDate), ZuoraInvoiceList]) 
 }
 
 object MockInvoicePreview {
-  def requests: ZIO[MockInvoicePreview, Nothing, List[(String, LocalDate)]] = ZIO.serviceWith[MockInvoicePreview](_.requests)
+  def requests: ZIO[MockInvoicePreview, Nothing, List[(String, LocalDate)]] =
+    ZIO.serviceWith[MockInvoicePreview](_.requests)
 }

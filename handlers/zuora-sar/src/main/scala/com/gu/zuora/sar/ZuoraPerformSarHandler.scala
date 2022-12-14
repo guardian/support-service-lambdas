@@ -6,10 +6,13 @@ import com.typesafe.scalalogging.LazyLogging
 import cats.syntax.traverse._
 
 case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSar, s3Service: S3Service, zuoraSarConfig: ZuoraSarConfig)
-  extends LazyLogging
-  with ZuoraHandler[SarRequest, SarResponse] {
+    extends LazyLogging
+    with ZuoraHandler[SarRequest, SarResponse] {
 
-  def processAccountDetails(contacts: List[ZuoraContact], initiationReference: String): Either[ZuoraSarError, List[InvoiceIds]] =
+  def processAccountDetails(
+      contacts: List[ZuoraContact],
+      initiationReference: String,
+  ): Either[ZuoraSarError, List[InvoiceIds]] =
     contacts.traverse { contact =>
       for {
         zuoraAccountSuccess <- zuoraHelper.accountResponse(contact)
@@ -17,7 +20,10 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSar, s3Service: S3Service, z
       } yield zuoraAccountSuccess.invoiceList
     }
 
-  def processInvoicesForContacts(allContactInvoices: List[InvoiceIds], initiationReference: String): Either[ZuoraSarError, List[Unit]] =
+  def processInvoicesForContacts(
+      allContactInvoices: List[InvoiceIds],
+      initiationReference: String,
+  ): Either[ZuoraSarError, List[Unit]] =
     allContactInvoices.traverse { accountInvoices =>
       for {
         downloadStreams <- zuoraHelper.invoicesResponse(accountInvoices.invoices)
@@ -26,7 +32,7 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSar, s3Service: S3Service, z
     }
 
   def initiateSar(
-    request: PerformSarRequest
+      request: PerformSarRequest,
   ): Either[ZuoraSarError, Unit] = {
     zuoraHelper.zuoraContactsWithEmail(request.subjectEmail).toDisjunction match {
       case Left(err) =>
@@ -42,7 +48,7 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSar, s3Service: S3Service, z
   }
 
   override def handle(
-    request: SarRequest
+      request: SarRequest,
   ): IO[SarResponse] = {
     request match {
       case r: PerformSarRequest =>

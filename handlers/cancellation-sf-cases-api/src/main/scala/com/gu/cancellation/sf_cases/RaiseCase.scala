@@ -33,10 +33,10 @@ object RaiseCase {
   implicit val readsContactIdContainer = Json.reads[ContactIdContainer]
 
   case class RaiseCaseDetail(
-    product: ProductName,
-    reason: Reason,
-    subscriptionName: SubscriptionName,
-    gaData: GaDataJsonString
+      product: ProductName,
+      reason: Reason,
+      subscriptionName: SubscriptionName,
+      gaData: GaDataJsonString,
   )
   implicit val readsRaiseCaseDetail = Json.reads[RaiseCaseDetail]
   implicit val writesCaseWithId = Json.writes[CaseWithId]
@@ -44,9 +44,9 @@ object RaiseCase {
   val STARTING_CASE_SUBJECT = "Online Cancellation Attempt"
 
   val buildWireNewCaseForSalesforce = (
-    raiseCaseDetail: RaiseCaseDetail,
-    subscriptionName: SubscriptionName,
-    sfContactIdContainer: ContactIdContainer
+      raiseCaseDetail: RaiseCaseDetail,
+      subscriptionName: SubscriptionName,
+      sfContactIdContainer: ContactIdContainer,
   ) =>
     WireNewCase(
       ContactId = ContactId(sfContactIdContainer.Id),
@@ -56,36 +56,36 @@ object RaiseCase {
       Enquiry_Type__c = raiseCaseDetail.reason.value,
       Case_Closure_Reason__c = raiseCaseDetail.gaData.value,
       Status = "Closed",
-      Subject = CaseSubject(STARTING_CASE_SUBJECT)
+      Subject = CaseSubject(STARTING_CASE_SUBJECT),
     )
 
   def updateCaseReason(
-    sfUpdateOp: (CaseId, JsValue) => Types.ClientFailableOp[Unit]
+      sfUpdateOp: (CaseId, JsValue) => Types.ClientFailableOp[Unit],
   )(
-    reason: Reason,
-    sfCase: CaseWithId
+      reason: Reason,
+      sfCase: CaseWithId,
   ): ClientFailableOp[Unit] = sfUpdateOp(sfCase.id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
 
   type TNewOrResumeCase = (ContactIdContainer, SubscriptionName, Option[CaseWithId]) => ApiGatewayOp[CaseWithId]
 
   def raiseCase(
-    lookupByIdOp: TSalesforceGenericIdLookup,
-    recentCasesOp: TGetMostRecentCaseByContactId,
-    newOrResumeCaseOp: TNewOrResumeCase
+      lookupByIdOp: TSalesforceGenericIdLookup,
+      recentCasesOp: TGetMostRecentCaseByContactId,
+      newOrResumeCaseOp: TNewOrResumeCase,
   )(
-    identityId: IdentityId,
-    subscriptionName: SubscriptionName
+      identityId: IdentityId,
+      subscriptionName: SubscriptionName,
   ): ApiGatewayOp[CaseWithId] =
     for {
       sfContactId <- lookupByIdOp(
         SfObjectType("Contact"),
         FieldName("IdentityID__c"),
-        LookupValue(identityId.value)
+        LookupValue(identityId.value),
       ).map(_.Id).map(ContactIdContainer).toApiGatewayOp("lookup SF contact from identityID")
       sfRecentCases <- recentCasesOp(
         ContactId(sfContactId.Id),
         subscriptionName,
-        CaseSubject(STARTING_CASE_SUBJECT)
+        CaseSubject(STARTING_CASE_SUBJECT),
       ).toApiGatewayOp("find most recent case for identity user")
       raiseCaseResponse <- newOrResumeCaseOp(sfContactId, subscriptionName, sfRecentCases)
     } yield raiseCaseResponse
@@ -93,22 +93,24 @@ object RaiseCase {
   type NewCase = (RaiseCaseDetail, SubscriptionName, ContactIdContainer)
 
   private def newOrResumeCase(
-    createCaseOp: NewCase => ClientFailableOp[CaseWithId],
-    updateReasonOnRecentCaseOp: (Reason, CaseWithId) => ClientFailableOp[Unit],
-    raiseCaseDetail: RaiseCaseDetail
+      createCaseOp: NewCase => ClientFailableOp[CaseWithId],
+      updateReasonOnRecentCaseOp: (Reason, CaseWithId) => ClientFailableOp[Unit],
+      raiseCaseDetail: RaiseCaseDetail,
   )(
-    sfContactIdContainer: ContactIdContainer,
-    subscriptionName: SubscriptionName,
-    sfRecentCase: Option[CaseWithId]
+      sfContactIdContainer: ContactIdContainer,
+      subscriptionName: SubscriptionName,
+      sfRecentCase: Option[CaseWithId],
   ) = sfRecentCase match {
     // recent case exists, so just update the reason and return the case
-    case Some(recentCase) => for {
-      _ <- updateReasonOnRecentCaseOp(raiseCaseDetail.reason, recentCase)
-        .toApiGatewayOp("update reason of recent sf case")
-    } yield recentCase
+    case Some(recentCase) =>
+      for {
+        _ <- updateReasonOnRecentCaseOp(raiseCaseDetail.reason, recentCase)
+          .toApiGatewayOp("update reason of recent sf case")
+      } yield recentCase
     // no recent cases so create one
-    case None => createCaseOp((raiseCaseDetail, subscriptionName, sfContactIdContainer))
-      .toApiGatewayOp("create sf case")
+    case None =>
+      createCaseOp((raiseCaseDetail, subscriptionName, sfContactIdContainer))
+        .toApiGatewayOp("create sf case")
   }
 
   def steps(sfClient: SfClient)(apiGatewayRequest: ApiGatewayRequest, identityId: IdentityId) =
@@ -119,9 +121,9 @@ object RaiseCase {
       createCaseOp = SalesforceCase.Create(sfClient.wrapWith(JsonHttp.post))
       wiredCreateCaseOp = buildWireNewCaseForSalesforce.tupled andThen createCaseOp
       sfUpdateOp = SalesforceCase.Update(sfClient.wrapWith(JsonHttp.patch))
-      updateReasonOnRecentCaseOp = updateCaseReason(sfUpdateOp)_
-      newOrResumeCaseOp = newOrResumeCase(wiredCreateCaseOp, updateReasonOnRecentCaseOp, raiseCaseDetail)_
-      wiredRaiseCase = raiseCase(lookupByIdOp, mostRecentCaseOp, newOrResumeCaseOp)_
+      updateReasonOnRecentCaseOp = updateCaseReason(sfUpdateOp) _
+      newOrResumeCaseOp = newOrResumeCase(wiredCreateCaseOp, updateReasonOnRecentCaseOp, raiseCaseDetail) _
+      wiredRaiseCase = raiseCase(lookupByIdOp, mostRecentCaseOp, newOrResumeCaseOp) _
       raiseCaseResponse <- wiredRaiseCase(identityId, raiseCaseDetail.subscriptionName)
     } yield ApiGatewayResponse("200", raiseCaseResponse)).apiResponse
 }

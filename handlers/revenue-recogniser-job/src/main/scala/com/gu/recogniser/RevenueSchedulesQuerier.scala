@@ -4,9 +4,9 @@ import cats.syntax.all._
 import com.gu.recogniser.RevenueScheduleAquaRow.csvFields
 
 class RevenueSchedulesQuerier(
-  log: String => Unit,
-  blockingAquaQuery: BlockingAquaQuery,
-  getSubscription: GetSubscription,
+    log: String => Unit,
+    blockingAquaQuery: BlockingAquaQuery,
+    getSubscription: GetSubscription,
 ) {
 
   def execute(): Either[String, List[(RevenueScheduleAquaRow, GetSubscription.GetSubscriptionResponse)]] = {
@@ -18,16 +18,22 @@ class RevenueSchedulesQuerier(
          | AND UndistributedAmount != 0
          |""".stripMargin
     for {
-      undistributedRevenue <- blockingAquaQuery.executeQuery[RevenueScheduleAquaRow](
-        expiredGiftsAndRefunds
-      ).toDisjunction.leftMap(_.toString)
+      undistributedRevenue <- blockingAquaQuery
+        .executeQuery[RevenueScheduleAquaRow](
+          expiredGiftsAndRefunds,
+        )
+        .toDisjunction
+        .leftMap(_.toString)
       undistributedSchedules <- undistributedRevenue.toList.sequence.leftMap(_.toString)
       subsToFetch = undistributedSchedules.map(_.subscriptionNumber).distinct
       numberToFetch = subsToFetch.length
-      fetchedSubs <- subsToFetch.zipWithIndex.traverse({ case (subNo, index) =>
-        log(s"$index/${numberToFetch}: fetching subscription $subNo")
-        getSubscription.execute(subNo).toDisjunction.map(sub => (subNo, sub))
-      }).map(_.toMap).leftMap(_.toString)
+      fetchedSubs <- subsToFetch.zipWithIndex
+        .traverse({ case (subNo, index) =>
+          log(s"$index/${numberToFetch}: fetching subscription $subNo")
+          getSubscription.execute(subNo).toDisjunction.map(sub => (subNo, sub))
+        })
+        .map(_.toMap)
+        .leftMap(_.toString)
     } yield undistributedSchedules.map(sch => (sch, fetchedSubs(sch.subscriptionNumber)))
   }
 

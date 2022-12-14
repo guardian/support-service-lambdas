@@ -29,13 +29,25 @@ object SubscribeSpec extends ZIOSpecDefault {
         CreatedByCSR__c = "na",
         subscribeToRatePlans = List(
           SubscribeToRatePlans(productRatePlanId = "targetProductId"),
-          SubscribeToRatePlans(productRatePlanId = "2c92a0ff5345f9220153559d915d5c26", chargeOverrides = List(ChargeOverrides(productRatePlanChargeId = "2c92a0fd5345efa10153559e97bb76c6", discountPercentage = Some(50), upToPeriods = Some(3), endDateCondition = Some("Fixed_Period"))))
-        )
+          SubscribeToRatePlans(
+            productRatePlanId = "2c92a0ff5345f9220153559d915d5c26",
+            chargeOverrides = List(
+              ChargeOverrides(
+                productRatePlanChargeId = "2c92a0fd5345efa10153559e97bb76c6",
+                discountPercentage = Some(50),
+                upToPeriods = Some(3),
+                endDateCondition = Some("Fixed_Period"),
+              ),
+            ),
+          ),
+        ),
       )
 
       for {
         _ <- TestClock.setTime(time)
-        createRequestBody <- SubscribeRequest.withTodaysDate("zuoraAccountId", "targetProductId").provideLayer(ZLayer.succeed(Stage.valueOf("PROD")))
+        createRequestBody <- SubscribeRequest
+          .withTodaysDate("zuoraAccountId", "targetProductId")
+          .provideLayer(ZLayer.succeed(Stage.valueOf("PROD")))
       } yield assert(createRequestBody)(equalTo(expectedSubscribeRequest))
     })
 }

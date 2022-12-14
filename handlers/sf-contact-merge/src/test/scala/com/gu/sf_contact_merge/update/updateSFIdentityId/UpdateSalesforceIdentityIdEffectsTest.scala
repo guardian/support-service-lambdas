@@ -41,7 +41,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
       Some(SFState(s"state$unique")),
       Some(SFPostalCode(s"post$unique")),
       SFCountry(s"country$unique"),
-      Some(SFPhone(s"phone$unique"))
+      Some(SFPhone(s"phone$unique")),
     )
     val testEmail = EmailAddress(s"fulfilment.dev+$unique@guardian.co.uk")
 
@@ -55,24 +55,28 @@ class UpdateSalesforceIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
         Some(testIdentityId),
         SetFirstName(testFirstName),
         OverrideAddressWith(testAddress),
-        Some(testEmail)
+        Some(testEmail),
       )
       _ <- updateSalesforceIdentityId.apply(testContact, sFContactUpdate).toDisjunction
       getSalesforceIdentityId = GetSalesforceIdentityId(sfClient.wrapWith(JsonHttp.get)) _
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield updatedIdentityId
 
-    actual should be(Right(WireResult(
-      testIdentityId.value,
-      testFirstName.value,
-      s"street$unique",
-      s"city$unique",
-      s"state$unique",
-      s"post$unique",
-      s"country$unique",
-      s"phone$unique",
-      s"fulfilment.dev+$unique@guardian.co.uk"
-    )))
+    actual should be(
+      Right(
+        WireResult(
+          testIdentityId.value,
+          testFirstName.value,
+          s"street$unique",
+          s"city$unique",
+          s"state$unique",
+          s"post$unique",
+          s"country$unique",
+          s"phone$unique",
+          s"fulfilment.dev+$unique@guardian.co.uk",
+        ),
+      ),
+    )
 
   }
 
@@ -81,15 +85,15 @@ class UpdateSalesforceIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
 object GetSalesforceIdentityId {
 
   case class WireResult(
-    IdentityID__c: String,
-    FirstName: String,
-    OtherStreet: String, // billing
-    OtherCity: String,
-    OtherState: String,
-    OtherPostalCode: String,
-    OtherCountry: String,
-    Phone: String,
-    Email: String
+      IdentityID__c: String,
+      FirstName: String,
+      OtherStreet: String, // billing
+      OtherCity: String,
+      OtherState: String,
+      OtherPostalCode: String,
+      OtherCountry: String,
+      Phone: String,
+      Email: String,
   )
 
   object WireResult {
@@ -99,6 +103,8 @@ object GetSalesforceIdentityId {
   def apply(getOp: HttpOp[GetRequest, JsValue])(sFContactId: SFContactId): ClientFailableOp[WireResult] =
     getOp.setupRequest(toRequest).parse[WireResult].runRequest(sFContactId)
 
-  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sfContactId.value}"))
+  def toRequest(sfContactId: SFContactId) = GetRequest(
+    RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sfContactId.value}"),
+  )
 
 }

@@ -23,28 +23,33 @@ class GetZuoraEmailsForAccountsEffectsTest extends AnyFlatSpec with Matchers {
     val testData = NonEmptyList(DevZuora.account1, List(DevZuora.account2))
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")
+      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+        .toApiGatewayOp("parse config")
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))
       getZuoraEmailsForAccounts = GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier)
       maybeEmailAddresses <- getZuoraEmailsForAccounts(testData).toApiGatewayOp("get zuora emails for accounts")
     } yield maybeEmailAddresses
 
-    actual should be(ContinueProcessing(List(
-      IdentityAndSFContactAndEmail(
-        Some(IdentityId("1234567890")),
-        SFContactId("contactIdForEffectsTests"),
-        Some(EmailAddress("peppa.pig@guardian.co.uk")),
-        Some(FirstName("Peppa")),
-        LastName("Pig")
+    actual should be(
+      ContinueProcessing(
+        List(
+          IdentityAndSFContactAndEmail(
+            Some(IdentityId("1234567890")),
+            SFContactId("contactIdForEffectsTests"),
+            Some(EmailAddress("peppa.pig@guardian.co.uk")),
+            Some(FirstName("Peppa")),
+            LastName("Pig"),
+          ),
+          IdentityAndSFContactAndEmail(
+            None,
+            SFContactId("contactIdForEffectsTests3"),
+            None,
+            Some(FirstName("Suzie")),
+            LastName("Sheep"),
+          ),
+        ),
       ),
-      IdentityAndSFContactAndEmail(
-        None,
-        SFContactId("contactIdForEffectsTests3"),
-        None,
-        Some(FirstName("Suzie")),
-        LastName("Sheep")
-      )
-    )))
+    )
   }
 
 }

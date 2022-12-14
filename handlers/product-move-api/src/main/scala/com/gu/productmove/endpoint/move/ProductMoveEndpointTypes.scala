@@ -15,7 +15,7 @@ import scala.deriving.Mirror
 object ProductMoveEndpointTypes {
 
   case class ExpectedInput(
-    @description("price of new Supporter Plus subscription") price: Double
+      @description("price of new Supporter Plus subscription") price: Double,
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
@@ -25,7 +25,7 @@ object ProductMoveEndpointTypes {
 
   sealed trait OutputBody
   case class Success(
-    @description("Success message.") message: String,
+      @description("Success message.") message: String,
   ) extends OutputBody
   case class InternalServerError(message: String) extends OutputBody
   given Schema[Success] = inlineSchema(Schema.derived)

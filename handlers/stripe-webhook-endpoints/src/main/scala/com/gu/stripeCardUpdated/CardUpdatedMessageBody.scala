@@ -5,12 +5,12 @@ import play.api.libs.json._
 
 case class EventData(`object`: EventDataObject)
 case class EventDataObject(
-  id: StripeCardId,
-  brand: StripeBrand,
-  country: StripeCountry,
-  customer: StripeCustomerId,
-  expiry: StripeExpiry,
-  last4: StripeLast4
+    id: StripeCardId,
+    brand: StripeBrand,
+    country: StripeCountry,
+    customer: StripeCustomerId,
+    expiry: StripeExpiry,
+    last4: StripeLast4,
 )
 case class CardUpdatedMessageBody(id: StripeEventId, data: EventData)
 
@@ -74,13 +74,13 @@ object CardUpdatedMessageBody {
 
   implicit val eventDataObjectReads: Reads[EventDataObject] = (
     (JsPath \ "id").read[String].map(StripeCardId.apply) and
-    (JsPath \ "brand").read[StripeBrand] and
-    (JsPath \ "country").read[String].map(StripeCountry.apply) and
-    (JsPath \ "customer").read[String].map(StripeCustomerId.apply) and
-    (
-      (JsPath \ "exp_month").read[Int] and
-      (JsPath \ "exp_year").read[Int]
-    )(StripeExpiry.apply _) and
+      (JsPath \ "brand").read[StripeBrand] and
+      (JsPath \ "country").read[String].map(StripeCountry.apply) and
+      (JsPath \ "customer").read[String].map(StripeCustomerId.apply) and
+      (
+        (JsPath \ "exp_month").read[Int] and
+          (JsPath \ "exp_year").read[Int],
+      ) (StripeExpiry.apply _) and
       (JsPath \ "last4").read[String].map(StripeLast4.apply)
   )(EventDataObject.apply _)
 
@@ -88,7 +88,7 @@ object CardUpdatedMessageBody {
 
   implicit val jf: Reads[CardUpdatedMessageBody] = (
     (JsPath \ "id").read[String].map(StripeEventId.apply) and
-    (JsPath \ "data").read[EventData]
+      (JsPath \ "data").read[EventData]
   )(CardUpdatedMessageBody.apply _)
 
 }

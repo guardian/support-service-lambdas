@@ -22,12 +22,15 @@ object Auth extends Logging {
     implicit val apiConfigReads = Json.reads[TrustedApiConfig]
   }
 
-  def apply(loadConfigModule: Either[ConfigFailure, TrustedApiConfig])(apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[Unit] = {
+  def apply(
+      loadConfigModule: Either[ConfigFailure, TrustedApiConfig],
+  )(apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[Unit] = {
     for {
       trustedApiConfig <- loadConfigModule.toApiGatewayOp("load trusted Api config")
       requestAuth <- apiGatewayRequest.queryParamsAsCaseClass[RequestAuth]()
       _ <- credentialsAreValid(trustedApiConfig, requestAuth)
-        .toApiGatewayContinueProcessing(unauthorized).withLogging("authentication")
+        .toApiGatewayContinueProcessing(unauthorized)
+        .withLogging("authentication")
     } yield ()
   }
 

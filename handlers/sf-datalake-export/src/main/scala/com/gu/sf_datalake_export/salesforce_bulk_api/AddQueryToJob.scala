@@ -10,11 +10,11 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 object AddQueryToJob {
 
   case class AddQueryRequest(
-    query: Soql,
-    jobId: JobId,
+      query: Soql,
+      jobId: JobId,
   )
 
-  def toRequest(addQueryRequest: AddQueryRequest) : StringHttpRequest = {
+  def toRequest(addQueryRequest: AddQueryRequest): StringHttpRequest = {
     val jobIdStr = addQueryRequest.jobId.value
     val queryStr = addQueryRequest.query.value
 
@@ -24,9 +24,8 @@ object AddQueryToJob {
     StringHttpRequest(postMethod, relativePath, UrlParams.empty)
   }
 
-  def toResponse(postResponse:BodyAsString):ClientFailableOp[Unit] = ClientSuccess(())
+  def toResponse(postResponse: BodyAsString): ClientFailableOp[Unit] = ClientSuccess(())
 
-  val wrapper =  HttpOpWrapper[AddQueryRequest, StringHttpRequest, BodyAsString, Unit](toRequest, toResponse )
-
+  val wrapper = HttpOpWrapper[AddQueryRequest, StringHttpRequest, BodyAsString, Unit](toRequest, toResponse)
 
 }

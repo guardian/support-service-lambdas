@@ -9,15 +9,15 @@ import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscripton
 import org.scalatest.flatspec.AnyFlatSpec
 
 class SubscriptionDataDeliveryEveryDayPlusIntegrationTest extends AnyFlatSpec {
-  /**
-   * This tests the echo legacy subscription description described in EchoLegacySubscription.json
-   * This subscription is for Friday/Saturday ie it has non-zero rate plan charge price for those days
-   */
+
+  /** This tests the echo legacy subscription description described in EchoLegacySubscription.json This subscription is
+    * for Friday/Saturday ie it has non-zero rate plan charge price for those days
+    */
 
   "SubscriptionData" should "calculate issue data correctly for delivery everyday plus" in {
     MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
 
-    val startDate = LocalDate.parse("2019-10-06") //Sunday
+    val startDate = LocalDate.parse("2019-10-06") // Sunday
     val firstSunday = startDate.`with`(TemporalAdjusters.nextOrSame(SUNDAY))
     val firstMonday = startDate.`with`(TemporalAdjusters.nextOrSame(MONDAY))
     val firstTuesday = startDate.`with`(TemporalAdjusters.nextOrSame(TUESDAY))
@@ -28,11 +28,11 @@ class SubscriptionDataDeliveryEveryDayPlusIntegrationTest extends AnyFlatSpec {
 
     val billingPeriod1 = BillDates(
       startDate,
-      startDate.plusMonths(1).minusDays(1)
+      startDate.plusMonths(1).minusDays(1),
     )
     val billingPeriod2 = BillDates(
       startDate.plusMonths(1),
-      startDate.plusMonths(2).minusDays(1)
+      startDate.plusMonths(2).minusDays(1),
     )
 
     val expectedIssueData = List(
@@ -79,7 +79,7 @@ class SubscriptionDataDeliveryEveryDayPlusIntegrationTest extends AnyFlatSpec {
       expectedIssueData = expectedIssueData,
       expectedTotalAnnualIssueLimitPerSubscription = 42,
       expectedProductType = ZuoraProductTypes.NewspaperHomeDelivery,
-      expectedEditionDaysOfWeek = List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
+      expectedEditionDaysOfWeek = List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
     )
   }
 }

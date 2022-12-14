@@ -6,7 +6,12 @@ import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  ChargeOverride,
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
@@ -35,7 +40,7 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
 
     val planAndCharge = PlanAndCharge(
       ProductRatePlanId("ratePlanId"),
-      ProductRatePlanChargeId("ratePlanChargeId")
+      ProductRatePlanChargeId("ratePlanChargeId"),
     )
 
     def getPlanAndCharge(planId: PlanId) = Some(planAndCharge)
@@ -49,16 +54,20 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
       ratePlans = List(
         ZuoraCreateSubRequestRatePlan(
           productRatePlanId = planAndCharge.productRatePlanId,
-          maybeChargeOverride = Some(ChargeOverride(
-            amountMinorUnits = Some(AmountMinorUnits(123)),
-            productRatePlanChargeId = planAndCharge.productRatePlanChargeId,
-            triggerDate = None
-          ))
-        )
-      )
+          maybeChargeOverride = Some(
+            ChargeOverride(
+              amountMinorUnits = Some(AmountMinorUnits(123)),
+              productRatePlanChargeId = planAndCharge.productRatePlanChargeId,
+              triggerDate = None,
+            ),
+          ),
+        ),
+      ),
     )
 
-    def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+    def fakeCreate(
+        in: CreateSubscription.ZuoraCreateSubRequest,
+    ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       in shouldBe expectedIn
       ClientSuccess(SubscriptionName("well done"))
     }
@@ -77,16 +86,17 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
 
     def currentDate() = LocalDate.of(2018, 12, 12)
 
-    val requestInput = JsObject(Map(
-      "acquisitionCase" -> JsString("case"),
-      "amountMinorUnits" -> JsNumber(123),
-      "startDate" -> JsString("2018-07-18"),
-      "zuoraAccountId" -> JsString("acccc"),
-      "acquisitionSource" -> JsString("CSR"),
-      "createdByCSR" -> JsString("bob"),
-      "planId" -> JsString("monthly_supporter_plus")
-
-    ))
+    val requestInput = JsObject(
+      Map(
+        "acquisitionCase" -> JsString("case"),
+        "amountMinorUnits" -> JsNumber(123),
+        "startDate" -> JsString("2018-07-18"),
+        "zuoraAccountId" -> JsString("acccc"),
+        "acquisitionSource" -> JsString("CSR"),
+        "createdByCSR" -> JsString("bob"),
+        "planId" -> JsString("monthly_supporter_plus"),
+      ),
+    )
 
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
@@ -98,7 +108,7 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
       fakeGetCustomerData,
       fakeValidateRequest,
       fakeCreate,
-      fakeSendEmails
+      fakeSendEmails,
     ) _
 
     val dummySteps = (req: AddSubscriptionRequest) => {
@@ -110,7 +120,7 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
       addPaperSub = dummySteps,
       addDigipackSub = dummySteps,
       addGuardianWeeklyDomesticSub = dummySteps,
-      addGuardianWeeklyROWSub = dummySteps
+      addGuardianWeeklyROWSub = dummySteps,
     )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None, None))
 
     val actual = Await.result(futureActual, 30 seconds)
@@ -119,4 +129,3 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
   }
 
 }
-

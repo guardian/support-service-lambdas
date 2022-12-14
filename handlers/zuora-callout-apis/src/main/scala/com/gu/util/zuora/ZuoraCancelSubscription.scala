@@ -22,19 +22,23 @@ object ZuoraCancelSubscription extends LazyLogging {
       "cancellationEffectiveDate" -> subscriptionCancellation.cancellationEffectiveDate,
       "cancellationPolicy" -> "SpecificDate",
       "runBilling" -> true,
-      "collect" -> false
+      "collect" -> false,
     )
   }
 
   private def toBodyAndPath(subscription: SubscriptionNumber, cancellationDate: LocalDate) =
     (SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.value}/cancel")
 
-  def apply(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[CancellationResponse] = {
+  def apply(
+      requests: Requests,
+  )(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[CancellationResponse] = {
     val (body, path) = toBodyAndPath(subscription, cancellationDate)
     requests.put[SubscriptionCancellation, CancellationResponse](body, path, "zuora-version" -> zuoraApiMinorVersion)
   }
 
-  def dryRun(requests: Requests)(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[CancellationResponse] = {
+  def dryRun(
+      requests: Requests,
+  )(subscription: SubscriptionNumber, cancellationDate: LocalDate): ClientFailableOp[CancellationResponse] = {
     val (body, path) = toBodyAndPath(subscription, cancellationDate)
     val msg = s"DryRun for ZuoraCancelSubscription: body=$body, path=$path"
     logger.info(msg)

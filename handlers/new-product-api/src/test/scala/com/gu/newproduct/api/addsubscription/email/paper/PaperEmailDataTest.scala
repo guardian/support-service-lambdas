@@ -7,7 +7,14 @@ import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  NonDirectDebitMethod,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog._
@@ -30,8 +37,8 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       Some(City("billToCity")),
       Some(State("billToState")),
       Some(Country.UK),
-      Some(Postcode("billToPostcode"))
-    )
+      Some(Postcode("billToPostcode")),
+    ),
   )
 
   val soldto = SoldToContact(
@@ -45,8 +52,8 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       Some(City("soldToCity")),
       Some(State("soldToState")),
       Country.US,
-      Some(Postcode("soldToPostcode"))
-    )
+      Some(Postcode("soldToPostcode")),
+    ),
   )
   val contacts = Contacts(billto, soldto)
 
@@ -55,7 +62,7 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       id = VoucherEveryDayPlus,
       description = PlanDescription("Everyday+"),
       testStartDateRules,
-      paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month"))
+      paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month")),
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
     firstPaperDate = LocalDate.of(2018, 11, 1),
@@ -66,9 +73,9 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       BankAccountName("someAccountName"),
       BankAccountNumberMask("*****mask"),
       SortCode("123456"),
-      MandateId("MandateId")
+      MandateId("MandateId"),
     ),
-    currency = GBP
+    currency = GBP,
   )
   it should "generate json payload for voucher data with direct debit fields" in {
 
@@ -116,7 +123,8 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
 
   it should "not include direct debit fields if payment method is not direct debit" in {
 
-    val cardVoucherData = directDebitVoucherData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
+    val cardVoucherData =
+      directDebitVoucherData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
 
     val directDebitFieldNames = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
 
@@ -124,8 +132,8 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
   }
 
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
-    val allPlansVoucherData = ids.map(
-      planId => directDebitVoucherData.copy(plan = Plan(planId, PlanDescription("test plan"), testStartDateRules))
+    val allPlansVoucherData = ids.map(planId =>
+      directDebitVoucherData.copy(plan = Plan(planId, PlanDescription("test plan"), testStartDateRules)),
     )
     allPlansVoucherData.map(PaperEmailFields(_))
   }
@@ -142,7 +150,8 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
 
   it should "IncludesDigipack should be true for plus plans " in {
 
-    val digipackPlans = List(VoucherEveryDayPlus, VoucherWeekendPlus, VoucherSixDayPlus, VoucherSaturdayPlus, VoucherSundayPlus)
+    val digipackPlans =
+      List(VoucherEveryDayPlus, VoucherWeekendPlus, VoucherSixDayPlus, VoucherSaturdayPlus, VoucherSundayPlus)
 
     val allDigipackPlanFields: List[Map[String, String]] = fieldsForPlanIds(digipackPlans)
 

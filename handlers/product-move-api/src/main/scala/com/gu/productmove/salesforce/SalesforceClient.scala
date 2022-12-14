@@ -17,14 +17,14 @@ import java.time.LocalDate
 import scala.concurrent.duration.{Duration, SECONDS}
 
 case class SalesforceConfig(
-                             stage: String,
-                             url: String,
-                             client_id: String,
-                             client_secret: String,
-                             username: String,
-                             password: String,
-                             token: String
-                           )
+    stage: String,
+    url: String,
+    client_id: String,
+    client_secret: String,
+    username: String,
+    password: String,
+    token: String,
+)
 
 given JsonDecoder[SalesforceConfig] = DeriveJsonDecoder.gen[SalesforceConfig]
 
@@ -38,8 +38,12 @@ trait SalesforceClient {
 }
 
 object SalesforceClient {
-  def get[Response: JsonDecoder](relativeUrl: Uri): ZIO[SalesforceClient, String, Response] = ZIO.environmentWithZIO(_.get.get(relativeUrl))
-  def post[Request: JsonEncoder, Response: JsonDecoder](input: Request, relativeUrl: Uri): ZIO[SalesforceClient, String, Response] = ZIO.environmentWithZIO(_.get.post(input, relativeUrl))
+  def get[Response: JsonDecoder](relativeUrl: Uri): ZIO[SalesforceClient, String, Response] =
+    ZIO.environmentWithZIO(_.get.get(relativeUrl))
+  def post[Request: JsonEncoder, Response: JsonDecoder](
+      input: Request,
+      relativeUrl: Uri,
+  ): ZIO[SalesforceClient, String, Response] = ZIO.environmentWithZIO(_.get.post(input, relativeUrl))
 }
 
 object SalesforceClientLive {
@@ -56,13 +60,15 @@ object SalesforceClientLive {
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
         auth <- basicRequest
           .contentType("application/x-www-form-urlencoded")
-          .body(Map(
-            "grant_type" -> "password",
-            "client_id" -> SalesforceRestConfig.client_id,
-            "client_secret" -> SalesforceRestConfig.client_secret,
-            "username" -> SalesforceRestConfig.username,
-            "password" -> s"${SalesforceRestConfig.password}${SalesforceRestConfig.token}"
-          ))
+          .body(
+            Map(
+              "grant_type" -> "password",
+              "client_id" -> SalesforceRestConfig.client_id,
+              "client_secret" -> SalesforceRestConfig.client_secret,
+              "username" -> SalesforceRestConfig.username,
+              "password" -> s"${SalesforceRestConfig.password}${SalesforceRestConfig.token}",
+            ),
+          )
           .post(uri"${SalesforceRestConfig.url}/services/oauth2/token")
           .response(asJson[SalesforceAuthDetails])
           .send(sttpClient)
@@ -72,7 +78,8 @@ object SalesforceClientLive {
               case Right(body) => println(s"Successfully received access_token from Salesforce: $body")
             }
             response.body
-          }.absolve
+          }
+          .absolve
           .mapError(_.toString)
         base_uri <- ZIO.fromEither(Uri.parse(auth.instance_url))
 
@@ -82,9 +89,11 @@ object SalesforceClientLive {
           val absoluteUri = base_uri.resolve(relativeUrl)
 
           basicRequest
-            .headers(Map(
-              "Authorization" -> s"Bearer ${auth.access_token}"
-            ))
+            .headers(
+              Map(
+                "Authorization" -> s"Bearer ${auth.access_token}",
+              ),
+            )
             .get(absoluteUri)
             .response(asJson[Response])
             .send(sttpClient)
@@ -94,18 +103,24 @@ object SalesforceClientLive {
                 case Right(body) => println(s"Received a successful response from Salesforce endpoint: $body")
               }
               response.body
-            }.absolve
+            }
+            .absolve
             .mapError(_.toString)
         }
 
-        override def post[Request: JsonEncoder, Response: JsonDecoder](input: Request, relativeUrl: Uri): ZIO[Any, String, Response] = {
+        override def post[Request: JsonEncoder, Response: JsonDecoder](
+            input: Request,
+            relativeUrl: Uri,
+        ): ZIO[Any, String, Response] = {
           val absoluteUri = base_uri.resolve(relativeUrl)
 
           basicRequest
             .contentType("application/json")
-            .headers(Map(
-              "Authorization" -> s"Bearer ${auth.access_token}"
-            ))
+            .headers(
+              Map(
+                "Authorization" -> s"Bearer ${auth.access_token}",
+              ),
+            )
             .post(absoluteUri)
             .body(input.toJson)
             .response(asJson[Response])
@@ -116,9 +131,10 @@ object SalesforceClientLive {
                 case Right(body) => println(s"Received a successful response from Salesforce endpoint: $body")
               }
               response.body
-            }.absolve
+            }
+            .absolve
             .mapError(_.toString)
         }
-      }
+      },
     )
 }

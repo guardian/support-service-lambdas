@@ -15,15 +15,19 @@ import scala.jdk.CollectionConverters.*
 
 object SalesforceHandler {
 
-  case class SalesforceRecordInput(subscriptionName: String,
-                                   previousAmount: BigDecimal,
-                                   previousRatePlanName: String,
-                                   newRatePlanName: String,
-                                   requestedDate: LocalDate,
-                                   effectiveDate: LocalDate,
-                                   refundAmount: BigDecimal)
+  case class SalesforceRecordInput(
+      subscriptionName: String,
+      previousAmount: BigDecimal,
+      previousRatePlanName: String,
+      newRatePlanName: String,
+      requestedDate: LocalDate,
+      effectiveDate: LocalDate,
+      refundAmount: BigDecimal,
+  )
 
-  def createSfRecord(salesforceRecordInput: SalesforceRecordInput): ZIO[CreateRecord with GetSfSubscription, String, Unit] =
+  def createSfRecord(
+      salesforceRecordInput: SalesforceRecordInput,
+  ): ZIO[CreateRecord with GetSfSubscription, String, Unit] =
     import salesforceRecordInput.*
 
     for {
@@ -35,7 +39,7 @@ object SalesforceHandler {
         New_Rate_Plan_Name__c = newRatePlanName,
         Requested_Date__c = requestedDate,
         Effective_Date__c = effectiveDate,
-        Refund_Amount__c = refundAmount
+        Refund_Amount__c = refundAmount,
       )
       _ <- CreateRecord.create(request)
     } yield ()
@@ -52,12 +56,10 @@ object SalesforceHandler {
             GuStageLive.layer,
             GetSfSubscriptionLive.layer,
             SalesforceClientLive.layer,
-            CreateRecordLive.layer
-          )
+            CreateRecordLive.layer,
+          ),
       ) match
         case Exit.Success(value) => value
         case Exit.Failure(cause) => context.getLogger.log("Failed with: " + cause.toString)
     }
 }
-
-

@@ -10,8 +10,8 @@ object Handler extends Lambda[None.type, List[DeliveryCreditResult]] {
   private val runtime = zio.Runtime.default
 
   override protected def handle(
-    unused: None.type,
-    context: Context
+      unused: None.type,
+      context: Context,
   ): Either[Throwable, List[DeliveryCreditResult]] =
     runtime.unsafeRun {
       val program = DeliveryCreditProcessor.processAllProducts

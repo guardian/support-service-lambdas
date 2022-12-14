@@ -9,7 +9,9 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 class TypeConvertTest extends AnyFlatSpec with Matchers {
 
-  def api422Response(message: String) = ReturnWithResponse(ApiGatewayResponse.messageResponse(statusCode = "422", message = message))
+  def api422Response(message: String) = ReturnWithResponse(
+    ApiGatewayResponse.messageResponse(statusCode = "422", message = message),
+  )
   "ValidationToApiGatewayOp" should "convert failed validation to status 422 api response" in {
     val failure = Failed("validation error")
     ValidationToApiGatewayOp(failure).toApiGatewayOp shouldBe api422Response("validation error")
@@ -25,7 +27,7 @@ class TypeConvertTest extends AnyFlatSpec with Matchers {
 
     val actual = ClientFailableOpToApiResponse(notFound).toApiResponseCheckingNotFound(
       action = "some action",
-      ifNotFoundReturn = "validation message"
+      ifNotFoundReturn = "validation message",
     )
 
     actual shouldBe api422Response("validation message")
@@ -36,7 +38,7 @@ class TypeConvertTest extends AnyFlatSpec with Matchers {
 
     val actual = ClientFailableOpToApiResponse(genericError).toApiResponseCheckingNotFound(
       action = "some action",
-      ifNotFoundReturn = "validation message"
+      ifNotFoundReturn = "validation message",
     )
 
     actual shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError(error = "ignored log message"))
@@ -47,7 +49,7 @@ class TypeConvertTest extends AnyFlatSpec with Matchers {
 
     val actual = ClientFailableOpToApiResponse(success).toApiResponseCheckingNotFound(
       action = "some action",
-      ifNotFoundReturn = "validation message"
+      ifNotFoundReturn = "validation message",
     )
 
     actual shouldBe ContinueProcessing("something")

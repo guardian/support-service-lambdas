@@ -28,29 +28,53 @@ object AvailableProductMovesEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("false")
+    run("false"),
   )
 
-  val server: sttp.tapir.server.ServerEndpoint.Full[Unit, Unit, String, Unit, OutputBody, Any, ZIOApiGatewayRequestHandler.TIO] = {
+  val server: sttp.tapir.server.ServerEndpoint.Full[
+    Unit,
+    Unit,
+    String,
+    Unit,
+    OutputBody,
+    Any,
+    ZIOApiGatewayRequestHandler.TIO,
+  ] = {
     val subscriptionNameCapture: EndpointInput.PathCapture[String] =
       EndpointInput.PathCapture[String](
         Some("subscriptionName"),
         implicitly,
-        EndpointIO.Info.empty.copy(description = Some("Name of subscription whose eligibility for movement is to be checked."), examples = List(Example("A-S000001", None, None))) // A-S000001
+        EndpointIO.Info.empty.copy(
+          description = Some("Name of subscription whose eligibility for movement is to be checked."),
+          examples = List(Example("A-S000001", None, None)),
+        ), // A-S000001
       )
-    endpoint
-      .get
-      .in("available-product-moves").in(subscriptionNameCapture)
-      .out(oneOf(
-        oneOfVariant(sttp.model.StatusCode.Ok, jsonBody[List[MoveToProduct]].map(AvailableMoves.apply)(_.body).copy(info = EndpointIO.Info.empty.copy(description = Some("Success.")))),
-        oneOfVariant(sttp.model.StatusCode.NotFound, stringBody.map(NotFound.apply)(_.textResponse).copy(info = EndpointIO.Info.empty.copy(description = Some("No such subscription.")))),
-      ))
+    endpoint.get
+      .in("available-product-moves")
+      .in(subscriptionNameCapture)
+      .out(
+        oneOf(
+          oneOfVariant(
+            sttp.model.StatusCode.Ok,
+            jsonBody[List[MoveToProduct]]
+              .map(AvailableMoves.apply)(_.body)
+              .copy(info = EndpointIO.Info.empty.copy(description = Some("Success."))),
+          ),
+          oneOfVariant(
+            sttp.model.StatusCode.NotFound,
+            stringBody
+              .map(NotFound.apply)(_.textResponse)
+              .copy(info = EndpointIO.Info.empty.copy(description = Some("No such subscription."))),
+          ),
+        ),
+      )
       .summary("Gets available products that can be moved to from the given subscription.")
-      .description(
-        """Returns an array of eligible products that the given subscription could be moved to,
+      .description("""Returns an array of eligible products that the given subscription could be moved to,
           |which will be empty if there aren't any for the given subscription.
           |""".stripMargin)
-      .serverLogic[TIO] { subscriptionName => run(subscriptionName).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply) }
+      .serverLogic[TIO] { subscriptionName =>
+        run(subscriptionName).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply)
+      }
   }
 
   // sub to test on: "A-S00334930"
@@ -69,8 +93,10 @@ object AvailableProductMovesEndpoint {
 
   private val freeTrialDays = 14
 
-
-  def getAvailableSwitchRatePlans(zuoraProductCatalogue: ZuoraProductCatalogue, ratePlanNames: List[String]): List[ZuoraProductRatePlan] =
+  def getAvailableSwitchRatePlans(
+      zuoraProductCatalogue: ZuoraProductCatalogue,
+      ratePlanNames: List[String],
+  ): List[ZuoraProductRatePlan] =
     val productRatePlans = for {
       product <- zuoraProductCatalogue.products.filter(product => ratePlanNames.contains(product.name))
       productRatePlan <- product.productRatePlans.toList
@@ -94,31 +120,43 @@ object AvailableProductMovesEndpoint {
       case single :: Nil => ZIO.succeed(single)
       case wrongNumber =>
         for {
-          _ <- ZIO.log(s"subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber")
+          _ <- ZIO.log(
+            s"subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber",
+          )
           resp <- ZIO.fail(AvailableMoves(List()))
         } yield resp
     }
 
-  extension[R, E, A] (zio: ZIO[R, E, A])
-    def mapErrorTo500(message: String) = zio.catchAll {
-      error =>
-        ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
+  extension [R, E, A](zio: ZIO[R, E, A])
+    def mapErrorTo500(message: String) = zio.catchAll { error =>
+      ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
 
-  private[productmove] def runWithEnvironment(subscriptionName: String): URIO[GetSubscription with GetCatalogue with GetAccount with Stage, OutputBody] = {
+  private[productmove] def runWithEnvironment(
+      subscriptionName: String,
+  ): URIO[GetSubscription with GetCatalogue with GetAccount with Stage, OutputBody] = {
     val output = for {
       stage <- ZIO.service[Stage]
-      monthlyContributionRatePlanId = if (stage == Stage.DEV) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
+      monthlyContributionRatePlanId =
+        if (stage == Stage.DEV) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
 
       _ <- ZIO.log("subscription name: " + subscriptionName)
 
       // Kick off catalogue fetch in parallel
       zuoraProductCatalogueFetch <- GetCatalogue.get.fork
-      subscription <- GetSubscription.get(subscriptionName).mapErrorTo500("GetSubscription") // TODO add code to return 404 rather than 500 if it's not found
+      subscription <- GetSubscription
+        .get(subscriptionName)
+        .mapErrorTo500("GetSubscription") // TODO add code to return 404 rather than 500 if it's not found
 
       ratePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName , ratePlan")
-      _ <- succeedIfEligible(ratePlan.productRatePlanId == monthlyContributionRatePlanId, s"Subscription: $subscriptionName is not a monthly contribution")
-      charge <- getSingleOrNotEligible(ratePlan.ratePlanCharges, s"Subscription: $subscriptionName , ratePlan charge for ratePlan $ratePlan")
+      _ <- succeedIfEligible(
+        ratePlan.productRatePlanId == monthlyContributionRatePlanId,
+        s"Subscription: $subscriptionName is not a monthly contribution",
+      )
+      charge <- getSingleOrNotEligible(
+        ratePlan.ratePlanCharges,
+        s"Subscription: $subscriptionName , ratePlan charge for ratePlan $ratePlan",
+      )
 
       // Next payment date
       chargedThroughDate <- ZIO.fromOption(charge.chargedThroughDate).orElse {
@@ -130,11 +168,17 @@ object AvailableProductMovesEndpoint {
 
       account <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount")
 
-      creditCardExpirationDate <- ZIO.fromOption(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate).orElse {
-        ZIO.log(s"Payment method is not a card for subscription $subscriptionName.").flatMap(_ => ZIO.fail(AvailableMoves(List())))
-      }
+      creditCardExpirationDate <- ZIO
+        .fromOption(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate)
+        .orElse {
+          ZIO
+            .log(s"Payment method is not a card for subscription $subscriptionName.")
+            .flatMap(_ => ZIO.fail(AvailableMoves(List())))
+        }
 
-      paymentMethod <- GetAccount.getPaymentMethod(account.basicInfo.defaultPaymentMethod.id).mapErrorTo500("GetAccount.getPaymentMethod")
+      paymentMethod <- GetAccount
+        .getPaymentMethod(account.basicInfo.defaultPaymentMethod.id)
+        .mapErrorTo500("GetAccount.getPaymentMethod")
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
@@ -145,14 +189,29 @@ object AvailableProductMovesEndpoint {
         Currency is GBP (initially on day 1 only?)
         Monthly contribution
         Account balance is 0
-      */
+       */
       accountIsEligible <-
         (for {
-          _ <- succeedIfEligible(account.subscriptions.length == 1, s"More than one subscription for account for subscription: $subscriptionName")
-          _ <- succeedIfEligible(account.basicInfo.currency == Currency.GBP, s"Subscription: $subscriptionName not in GBP")
-          _ <- succeedIfEligible(paymentMethod.NumConsecutiveFailures == 0, s"User is in payment failure with subscription: $subscriptionName")
-          _ <- succeedIfEligible(creditCardExpirationDate.isAfter(today), s"card expired for subscription: $subscriptionName")
-          _ <- succeedIfEligible(account.basicInfo.balance == 0, s"Account balance is not zero for subscription: $subscriptionName")
+          _ <- succeedIfEligible(
+            account.subscriptions.length == 1,
+            s"More than one subscription for account for subscription: $subscriptionName",
+          )
+          _ <- succeedIfEligible(
+            account.basicInfo.currency == Currency.GBP,
+            s"Subscription: $subscriptionName not in GBP",
+          )
+          _ <- succeedIfEligible(
+            paymentMethod.NumConsecutiveFailures == 0,
+            s"User is in payment failure with subscription: $subscriptionName",
+          )
+          _ <- succeedIfEligible(
+            creditCardExpirationDate.isAfter(today),
+            s"card expired for subscription: $subscriptionName",
+          )
+          _ <- succeedIfEligible(
+            account.basicInfo.balance == 0,
+            s"Account balance is not zero for subscription: $subscriptionName",
+          )
         } yield ()).isSuccess
 
       _ <- if (accountIsEligible) ZIO.succeed(()) else ZIO.fail(AvailableMoves(List()))
@@ -167,8 +226,8 @@ object AvailableProductMovesEndpoint {
       _ <- ZIO.log("done")
     } yield AvailableMoves(moveToProduct)
 
-    output.catchAll {
-      failure => ZIO.succeed(failure)
+    output.catchAll { failure =>
+      ZIO.succeed(failure)
     }
   }
 }
@@ -200,4 +259,4 @@ object AvailableSwitches:
 
 }
 
-*/
+ */

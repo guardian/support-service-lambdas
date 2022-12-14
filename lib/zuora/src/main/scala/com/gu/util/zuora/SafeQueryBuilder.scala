@@ -14,7 +14,12 @@ object SafeQueryBuilder {
 
       // only went up to 4 at the moment, might need more
 
-      def zoql[A: MakeSafe, B: MakeSafe, C: MakeSafe, D: MakeSafe](a: A, b: B, c: C, d: D): ClientFailableOp[SafeQuery] =
+      def zoql[A: MakeSafe, B: MakeSafe, C: MakeSafe, D: MakeSafe](
+          a: A,
+          b: B,
+          c: C,
+          d: D,
+      ): ClientFailableOp[SafeQuery] =
         SafeQuery(hardCode = sc, inserts = List(asSafe(a), asSafe(b), asSafe(c), asSafe(d)))
 
       def zoql[A: MakeSafe, B: MakeSafe, C: MakeSafe](a: A, b: B, c: C): ClientFailableOp[SafeQuery] =
@@ -30,7 +35,9 @@ object SafeQueryBuilder {
 
     private def asSafe[A](a: A)(implicit makeSafe: MakeSafe[A]) = makeSafe(a)
 
-    @implicitNotFound("implicitNotFound: SafeQueryBuilder: can only insert a string literal or an already safe query into a parent query")
+    @implicitNotFound(
+      "implicitNotFound: SafeQueryBuilder: can only insert a string literal or an already safe query into a parent query",
+    )
     trait MakeSafe[A] {
       def apply(a: A): ClientFailableOp[String]
     }
@@ -52,7 +59,8 @@ object SafeQueryBuilder {
         if (untrusted.replaceFirst("""\p{Cntrl}""", "") != untrusted) {
           GenericError(s"control characters can't be inserted into a query: $untrusted")
         } else {
-          val trusted = untrusted.replaceAll("""\\""", """\\\\""")
+          val trusted = untrusted
+            .replaceAll("""\\""", """\\\\""")
             .replaceAll("'", """\\'""")
             .replaceAll(""""""", """\\"""")
           ClientSuccess(s"'$trusted'")
@@ -92,7 +100,7 @@ object SafeQueryBuilder {
   }
 
   // to make one of these just
-  //import com.gu.util.zuora.SafeQueryBuilder.Implicits._
+  // import com.gu.util.zuora.SafeQueryBuilder.Implicits._
   // and do
   // zoql"SELECT Id FROM Account where IdentityId__c=${identityId.value}"
   class SafeQuery(val queryString: String)

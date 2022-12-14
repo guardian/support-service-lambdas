@@ -22,8 +22,7 @@ object ToAquaRequest {
     val dateStr = filterDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     val exclusionQuery = AquaQuery(
       name = exclusionQueryName,
-      query =
-        s"""
+      query = s"""
            |SELECT
            | Account.CrmId
            |FROM
@@ -40,12 +39,11 @@ object ToAquaRequest {
            |  (MIN(Status) = 'Active' OR MAX(SubscriptionEndDate) >= '$dateStr')
            |ORDER BY
            |  Account.CrmId
-    """.stripMargin
+    """.stripMargin,
     )
     val candidatesQuery = AquaQuery(
       name = candidatesQueryName,
-      query =
-        s"""
+      query = s"""
            |SELECT
            |  Account.Id, Account.CrmId
            |FROM
@@ -60,11 +58,11 @@ object ToAquaRequest {
            |  SubscriptionEndDate > '1000-01-01'
            |ORDER BY
            |  Account.CrmId
-    """.stripMargin
+    """.stripMargin,
     )
     AquaQueryRequest(
       name = "zuora-retention",
-      queries = List(candidatesQuery, exclusionQuery)
+      queries = List(candidatesQuery, exclusionQuery),
     )
   }
 }

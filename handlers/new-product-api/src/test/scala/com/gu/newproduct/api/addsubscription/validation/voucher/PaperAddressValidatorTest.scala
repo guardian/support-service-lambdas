@@ -16,7 +16,7 @@ class PaperAddressValidatorTest extends AnyFlatSpec with Matchers {
     Some(City("soldToCity")),
     Some(State("soldToState")),
     Country.UK,
-    Some(Postcode("N1 9GU"))
+    Some(Postcode("N1 9GU")),
   )
 
   it should "succeed if address in UK" in {
@@ -29,7 +29,9 @@ class PaperAddressValidatorTest extends AnyFlatSpec with Matchers {
 
   it should "fail if sold to contact is not uk" in {
     val australianAddress = testAddress.copy(country = Country.Australia)
-    PaperAddressValidator(VoucherEveryDay, australianAddress) shouldBe Failed("Invalid country: Australia, only UK addresses are allowed")
+    PaperAddressValidator(VoucherEveryDay, australianAddress) shouldBe Failed(
+      "Invalid country: Australia, only UK addresses are allowed",
+    )
   }
 
   it should "fail if postcode is not provided for home delivery plan" in {
@@ -39,7 +41,9 @@ class PaperAddressValidatorTest extends AnyFlatSpec with Matchers {
 
   it should "fail if postcode is not within the m25 for home delivery plan" in {
     val scottishPostcode = testAddress.copy(postcode = Some(Postcode("EH10 4BF")))
-    PaperAddressValidator(HomeDeliveryWeekendPlus, scottishPostcode) shouldBe Failed("Invalid postcode EH10 4BF: postcode must be within M25")
+    PaperAddressValidator(HomeDeliveryWeekendPlus, scottishPostcode) shouldBe Failed(
+      "Invalid postcode EH10 4BF: postcode must be within M25",
+    )
   }
 
   it should "ignore case in postcode" in {

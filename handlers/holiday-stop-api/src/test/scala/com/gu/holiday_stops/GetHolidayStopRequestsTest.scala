@@ -39,8 +39,8 @@ class GetHolidayStopRequestsTest extends AnyFlatSpec {
       holidayStopFirstAvailableDate = fulfilmentDatesFirstAvailableDate,
       holidayStopProcessorTargetDate = None,
       finalFulfilmentFileGenerationDate = None,
-      newSubscriptionEarliestStartDate = None
-    )
+      newSubscriptionEarliestStartDate = None,
+    ),
   )
 
   "GetHolidayStopRequests" should "generate GetHolidayStopRequest correctly" in {
@@ -48,16 +48,16 @@ class GetHolidayStopRequestsTest extends AnyFlatSpec {
       holidayStopRequests = Nil,
       subscriptionData = subscriptionData,
       fulfilmentDates = fulfilmentDates,
-      fulfilmentStartDate = today
+      fulfilmentStartDate = today,
     ) should equal(
       Right(
         GetHolidayStopRequests(
           Nil,
           List(IssueSpecifics(fulfilmentDatesFirstAvailableDate, 5)),
           annualIssueLimit,
-          fulfilmentDatesFirstAvailableDate
-        )
-      )
+          fulfilmentDatesFirstAvailableDate,
+        ),
+      ),
     )
   }
   it should "adjust first available state if fulfilment has not started" in {
@@ -67,16 +67,16 @@ class GetHolidayStopRequestsTest extends AnyFlatSpec {
       holidayStopRequests = Nil,
       subscriptionData = subscriptionData,
       fulfilmentDates = fulfilmentDates,
-      fulfilmentStartDate = fulfilmentStartDateInFuture
+      fulfilmentStartDate = fulfilmentStartDateInFuture,
     ) should equal(
       Right(
         GetHolidayStopRequests(
           Nil,
           List(IssueSpecifics(fulfilmentStartDateInFuture, 5)),
           annualIssueLimit,
-          fulfilmentStartDateInFuture
-        )
-      )
+          fulfilmentStartDateInFuture,
+        ),
+      ),
     )
   }
 }

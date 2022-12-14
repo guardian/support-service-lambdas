@@ -22,7 +22,7 @@ class ZuoraQueryEffectsTest extends AnyFlatSpec with Matchers {
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))
       subs <- SubscriptionsForPromoCode(zuoraQuerier)("""qwerty"asdf'zxcv\1234""").toDisjunction
 
-      //POST query should be - SELECT Id, promotioncode__c FROM Subscription where PromotionCode__c = 'qwerty\"asdf\'zxcv\\1234'
+      // POST query should be - SELECT Id, promotioncode__c FROM Subscription where PromotionCode__c = 'qwerty\"asdf\'zxcv\\1234'
 
     } yield {
       subs
@@ -35,12 +35,12 @@ class ZuoraQueryEffectsTest extends AnyFlatSpec with Matchers {
 
 object SubscriptionsForPromoCode {
 
-  //POST query - SELECT Id, promotioncode__c FROM Subscription where PromotionCode__c = 'qwerty\"asdf\'zxcv\\1234'
+  // POST query - SELECT Id, promotioncode__c FROM Subscription where PromotionCode__c = 'qwerty\"asdf\'zxcv\\1234'
   // NOTE for "zoql export" we don't escape anything, just double up on single quotes only. tested all june 2018
 
   case class TestQueryResponse(
-    Id: String,
-    PromotionCode__c: String
+      Id: String,
+      PromotionCode__c: String,
   )
 
   implicit val reads = Json.reads[TestQueryResponse]

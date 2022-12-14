@@ -4,13 +4,12 @@ object Diff {
 
   val crmIdColName = "Account.CrmId"
 
-  /**
-   * Returns an iterator for the lines in candidateLines with crmIds that are not in the exclusionLines
-   * The candidates and exclusion iterators are expected to iterate ascending CrmId order.
-   * The point of this is to avoid loading the whole exclusionLines in memory.
-   */
+  /** Returns an iterator for the lines in candidateLines with crmIds that are not in the exclusionLines The candidates
+    * and exclusion iterators are expected to iterate ascending CrmId order. The point of this is to avoid loading the
+    * whole exclusionLines in memory.
+    */
   def apply(candidateLines: Iterator[String], exclusionLines: Iterator[String]): Iterator[String] = {
-    exclusionLines.next() //skip header
+    exclusionLines.next() // skip header
     val exclusionCrmIds = SortedCrmIdIterator(exclusionLines)
     val candidatesHeader = candidateLines.next()
     val crmidLocation = candidatesHeader.split(",").indexOf(crmIdColName)
@@ -37,7 +36,7 @@ case class SortedCrmIdIterator(crmIdIterator: Iterator[String]) {
   def nextGreaterOrEqual(crmId: String): Option[String] = {
     /*salesforce 18 character ids have lower and upper case letters but are actually case insensitive, see : https://help.salesforce.com/articleView?id=000004383&language=en_US&type=1
       we need to do case insensitive comparsion to match the alphabetical order in Zuora query results
-    */
+     */
     while (crmIdIterator.hasNext && !currentCrmId.exists(_.toLowerCase >= crmId.toLowerCase)) {
       currentCrmId = Some(crmIdIterator.next())
     }

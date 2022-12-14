@@ -18,12 +18,12 @@ trait ZuoraTestBackendMixin {
     zuoraSubscriptionId = "test-zuora-sub-id",
     sfAccountId = "test-sf-account-id",
     sfFullContactId = "test-sf-full-contact-id",
-    identityId = "test-guardian-identity-id"
+    identityId = "test-guardian-identity-id",
   )
 
   private val sub = mkAnySubscription().copy(
     subscriptionNumber = moveSubscriptionReq.zuoraSubscriptionId,
-    accountNumber = accountNumber
+    accountNumber = accountNumber,
   )
 
   protected val fetchAccessTokenSuccessRes: Response[Either[ZuoraApiFailure, AccessToken]] =
@@ -45,15 +45,17 @@ trait ZuoraTestBackendMixin {
     Response(Left(ZuoraApiFailure("update ZuoraAccount failure")), StatusCode.InternalServerError)
 
   def createZuoraBackendStub(
-    oauthResponse: Response[Either[ZuoraApiFailure, AccessToken]],
-    getSubscriptionRes: Response[Either[ZuoraApiFailure, Subscription]],
-    updateAccountRes: Response[Either[ZuoraApiFailure, MoveSubscriptionAtZuoraAccountResponse]]
+      oauthResponse: Response[Either[ZuoraApiFailure, AccessToken]],
+      getSubscriptionRes: Response[Either[ZuoraApiFailure, Subscription]],
+      updateAccountRes: Response[Either[ZuoraApiFailure, MoveSubscriptionAtZuoraAccountResponse]],
   ): SttpBackendStub[Identity, Any] = {
     SttpBackendStub.synchronous
       .whenRequestMatchesPartial {
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/oauth/token" =>
           oauthResponse
-        case request if request.uri.toString() == s"$zuoraTestBaseUrl/subscriptions/${moveSubscriptionReq.zuoraSubscriptionId}" =>
+        case request
+            if request.uri
+              .toString() == s"$zuoraTestBaseUrl/subscriptions/${moveSubscriptionReq.zuoraSubscriptionId}" =>
           getSubscriptionRes
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/accounts/$accountNumber" =>
           updateAccountRes
@@ -73,7 +75,7 @@ trait ZuoraTestBackendMixin {
       currentTermPeriodType = "Month",
       ratePlans = Nil,
       accountNumber = "",
-      autoRenew = false
+      autoRenew = false,
     )
   }
 

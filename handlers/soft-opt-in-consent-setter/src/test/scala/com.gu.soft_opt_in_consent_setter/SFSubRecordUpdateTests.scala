@@ -13,7 +13,9 @@ class SFSubRecordUpdateTests extends AnyFlatSpec with should.Matchers {
   }
 
   "SFSubRecordUpdate.successfulUpdate" should "update the stage field correctly" in {
-    SFSubRecordUpdate.successfulUpdate(subRecord, softOptInStage).Soft_Opt_in_Last_Stage_Processed__c shouldBe Some(softOptInStage)
+    SFSubRecordUpdate.successfulUpdate(subRecord, softOptInStage).Soft_Opt_in_Last_Stage_Processed__c shouldBe Some(
+      softOptInStage,
+    )
   }
 
   "SFSubRecordUpdate.successfulUpdate" should "set number of attempts to 0" in {

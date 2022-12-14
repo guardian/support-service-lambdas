@@ -14,25 +14,26 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
       .toRight(
         SoftOptInError(
           "ConsentsCalculator",
-          s"getAcquisitionConsents couldn't find $productName in consentsMappings"
-        )
+          s"getAcquisitionConsents couldn't find $productName in consentsMappings",
+        ),
       )
   }
 
-  def getCancellationConsents(cancelledProductName: String, ownedProductNames: Set[String]): Either[SoftOptInError, Set[String]] = {
+  def getCancellationConsents(
+      cancelledProductName: String,
+      ownedProductNames: Set[String],
+  ): Either[SoftOptInError, Set[String]] = {
     ownedProductNames
-      .foldLeft[Either[SoftOptInError, Set[String]]](Right(Set())) {
-        (acc, ownedProductName) =>
-          consentsMappings
-            .get(ownedProductName)
-            .toRight(
-              SoftOptInError(
-                "ConsentsCalculator",
-                s"getCancellationConsents couldn't find $ownedProductName in consentsMappings"
-              )
-            )
-            .flatMap(productConsents =>
-              acc.map(_.union(productConsents)))
+      .foldLeft[Either[SoftOptInError, Set[String]]](Right(Set())) { (acc, ownedProductName) =>
+        consentsMappings
+          .get(ownedProductName)
+          .toRight(
+            SoftOptInError(
+              "ConsentsCalculator",
+              s"getCancellationConsents couldn't find $ownedProductName in consentsMappings",
+            ),
+          )
+          .flatMap(productConsents => acc.map(_.union(productConsents)))
       }
       .flatMap(ownedProductConsents => {
         consentsMappings
@@ -40,11 +41,10 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
           .toRight(
             SoftOptInError(
               "ConsentsCalculator",
-              s"getCancellationConsents couldn't find $cancelledProductName in consentsMappings"
-            )
+              s"getCancellationConsents couldn't find $cancelledProductName in consentsMappings",
+            ),
           )
-          .flatMap(cancelledProductConsents =>
-            Right(cancelledProductConsents.diff(ownedProductConsents)))
+          .flatMap(cancelledProductConsents => Right(cancelledProductConsents.diff(ownedProductConsents)))
       })
   }
 

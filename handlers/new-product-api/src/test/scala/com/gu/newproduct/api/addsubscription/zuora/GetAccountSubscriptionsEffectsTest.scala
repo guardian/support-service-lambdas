@@ -17,7 +17,9 @@ class GetAccountSubscriptionsEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      res <- GetAccountSubscriptions(zuoraDeps.get[ZuoraSubscriptionsResponse])(ZuoraAccountId("8ad095b882f7aaa60182f9c2a69a043a")).toDisjunction
+      res <- GetAccountSubscriptions(zuoraDeps.get[ZuoraSubscriptionsResponse])(
+        ZuoraAccountId("8ad095b882f7aaa60182f9c2a69a043a"),
+      ).toDisjunction
     } yield {
       res
     }
@@ -25,10 +27,9 @@ class GetAccountSubscriptionsEffectsTest extends AnyFlatSpec with Matchers {
     val expected = List(
       Subscription(
         status = Active,
-        productRateplanIds = Set(ProductRatePlanId("2c92c0f85a6b134e015a7fcd9f0c7855"))
-      )
+        productRateplanIds = Set(ProductRatePlanId("2c92c0f85a6b134e015a7fcd9f0c7855")),
+      ),
     )
     actual shouldBe Right(expected)
   }
 }
-

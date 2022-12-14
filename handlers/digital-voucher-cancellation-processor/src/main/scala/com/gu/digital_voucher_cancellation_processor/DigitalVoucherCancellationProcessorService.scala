@@ -14,24 +14,28 @@ import scala.collection.immutable
 
 object DigitalVoucherCancellationProcessorService extends LazyLogging {
 
-  private val ImovoSubscriptionDoesNotExistMessage = "no live subscription vouchers exist for the supplied subscription id"
+  private val ImovoSubscriptionDoesNotExistMessage =
+    "no live subscription vouchers exist for the supplied subscription id"
   case class CObjectAttribues(url: String)
-  case class DigitalVoucherQueryResult(Id: String, attributes: CObjectAttribues, SF_Subscription__r: SubscriptionQueryResult)
+  case class DigitalVoucherQueryResult(
+      Id: String,
+      attributes: CObjectAttribues,
+      SF_Subscription__r: SubscriptionQueryResult,
+  )
   case class DigitalVoucherUpdate(Cancellation_Processed_At__c: Instant, Status__c: String)
   case class SubscriptionQueryResult(Id: String, attributes: CObjectAttribues)
   case class DigitalVoucherCancellationProcessorServiceError(message: String)
   case class ImovoCancellationResults(
-    successfullyCancelled: List[DigitalVoucherQueryResult] = Nil,
-    alreadyCancelled: List[DigitalVoucherQueryResult] = Nil,
-    cancellationFailures: List[ImovoClientException] = Nil
+      successfullyCancelled: List[DigitalVoucherQueryResult] = Nil,
+      alreadyCancelled: List[DigitalVoucherQueryResult] = Nil,
+      cancellationFailures: List[ImovoClientException] = Nil,
   )
 
   object ImovoCancellationResults {
     implicit val show: Show[ImovoCancellationResults] = {
-      implicit val resultShow: Show[DigitalVoucherQueryResult] = Show.show[DigitalVoucherQueryResult](result =>
-        s"subscriptionId=${result.SF_Subscription__r.Id}")
-      Show.show[ImovoCancellationResults](results =>
-        s"""
+      implicit val resultShow: Show[DigitalVoucherQueryResult] =
+        Show.show[DigitalVoucherQueryResult](result => s"subscriptionId=${result.SF_Subscription__r.Id}")
+      Show.show[ImovoCancellationResults](results => s"""
            |ImovoCancellationResults(
            |  successfullyCancelled=[${results.successfullyCancelled.map(_.show).mkString(",")}]
            |  alreadyCancelled=[${results.alreadyCancelled.map(_.show).mkString(",")}]
@@ -42,22 +46,28 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
   }
 
   def apply[F[_]: Monad](
-    salesforceClient: SalesforceClient[F],
-    imovoClient: ImovoClient[F],
-    clock: Clock
+      salesforceClient: SalesforceClient[F],
+      imovoClient: ImovoClient[F],
+      clock: Clock,
   ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, ImovoCancellationResults] =
     for {
-      vouchersToProcess <- salesforceClient.query[DigitalVoucherQueryResult](
-        subscriptionsCancelledTodayQuery
-      ).leftMap(error => DigitalVoucherCancellationProcessorServiceError(s"Failed to query for cancelled digital vouchers: ${error.message}"))
+      vouchersToProcess <- salesforceClient
+        .query[DigitalVoucherQueryResult](
+          subscriptionsCancelledTodayQuery,
+        )
+        .leftMap(error =>
+          DigitalVoucherCancellationProcessorServiceError(
+            s"Failed to query for cancelled digital vouchers: ${error.message}",
+          ),
+        )
       results <- processCancellations(imovoClient, salesforceClient, vouchersToProcess.records, clock)
     } yield results
 
   def processCancellations[F[_]: Monad](
-    imovoClient: ImovoClient[F],
-    salesforceClient: SalesforceClient[F],
-    vouchersToCancel: List[DigitalVoucherQueryResult],
-    clock: Clock
+      imovoClient: ImovoClient[F],
+      salesforceClient: SalesforceClient[F],
+      vouchersToCancel: List[DigitalVoucherQueryResult],
+      clock: Clock,
   ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, ImovoCancellationResults] = {
     for {
       imovoResults <- cancelSubscriptionsInImovo[F](vouchersToCancel, imovoClient)
@@ -67,52 +77,53 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
   }
 
   private def updateSFCancellationProcessedDate[F[_]: Monad](
-    imovoCancellationResults: ImovoCancellationResults,
-    salesforceClient: SalesforceClient[F],
-    clock: Clock
+      imovoCancellationResults: ImovoCancellationResults,
+      salesforceClient: SalesforceClient[F],
+      clock: Clock,
   ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, Unit] = {
     val now = clock.instant()
 
     val optionalSucessfullyProcessedVouchers = NonEmptyList.fromList(
-      imovoCancellationResults.successfullyCancelled ++ imovoCancellationResults.alreadyCancelled
+      imovoCancellationResults.successfullyCancelled ++ imovoCancellationResults.alreadyCancelled,
     )
 
     optionalSucessfullyProcessedVouchers
       .fold(EitherT.rightT[F, DigitalVoucherCancellationProcessorServiceError](())) { sucessfullyProcessedVouchers =>
-        salesforceClient.composite(
-          SFApiCompositeRequest(
-            allOrNone = true,
-            collateSubrequests = false,
-            sucessfullyProcessedVouchers
-              .toList
-              .map(voucherToMarkAsProcessed => {
-                SFApiCompositePart(
-                  voucherToMarkAsProcessed.Id,
-                  "PATCH",
-                  voucherToMarkAsProcessed.attributes.url,
-                  DigitalVoucherUpdate(now, "Deactivated")
-                )
-              })
+        salesforceClient
+          .composite(
+            SFApiCompositeRequest(
+              allOrNone = true,
+              collateSubrequests = false,
+              sucessfullyProcessedVouchers.toList
+                .map(voucherToMarkAsProcessed => {
+                  SFApiCompositePart(
+                    voucherToMarkAsProcessed.Id,
+                    "PATCH",
+                    voucherToMarkAsProcessed.attributes.url,
+                    DigitalVoucherUpdate(now, "Deactivated"),
+                  )
+                }),
+            ),
           )
-        ).bimap(
+          .bimap(
             { salesforceError =>
               DigitalVoucherCancellationProcessorServiceError(
                 s"Failed to write changes to salesforce:${salesforceError} however the following updates were made in " +
-                  s"imovo ${imovoCancellationResults.show} "
+                  s"imovo ${imovoCancellationResults.show} ",
               )
             },
-            _ => ()
+            _ => (),
           )
       }
   }
 
   private def cancelSubscriptionsInImovo[F[_]: Monad](
-    vouchersToCancel: List[DigitalVoucherQueryResult],
-    imovoClient: ImovoClient[F]
+      vouchersToCancel: List[DigitalVoucherQueryResult],
+      imovoClient: ImovoClient[F],
   ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, ImovoCancellationResults] = {
     EitherT.right[DigitalVoucherCancellationProcessorServiceError](
-      vouchersToCancel.traverse[F, ImovoCancellationResults] {
-        voucherToCancel =>
+      vouchersToCancel
+        .traverse[F, ImovoCancellationResults] { voucherToCancel =>
           imovoClient
             .cancelSubscriptionVoucher(SfSubscriptionId(voucherToCancel.SF_Subscription__r.Id), None)
             .fold(
@@ -122,17 +133,19 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
                 case error: ImovoClientException =>
                   ImovoCancellationResults(cancellationFailures = List(error))
               },
-              _ => ImovoCancellationResults(successfullyCancelled = List(voucherToCancel))
+              _ => ImovoCancellationResults(successfullyCancelled = List(voucherToCancel)),
             )
-      }.map { resultList: immutable.Seq[ImovoCancellationResults] =>
-        resultList.foldLeft(ImovoCancellationResults()) { (r1: ImovoCancellationResults, r2: ImovoCancellationResults) =>
-          ImovoCancellationResults(
-            r1.successfullyCancelled ++ r2.successfullyCancelled,
-            r1.alreadyCancelled ++ r2.alreadyCancelled,
-            r1.cancellationFailures ++ r2.cancellationFailures
-          )
         }
-      }
+        .map { resultList: immutable.Seq[ImovoCancellationResults] =>
+          resultList.foldLeft(ImovoCancellationResults()) {
+            (r1: ImovoCancellationResults, r2: ImovoCancellationResults) =>
+              ImovoCancellationResults(
+                r1.successfullyCancelled ++ r2.successfullyCancelled,
+                r1.alreadyCancelled ++ r2.alreadyCancelled,
+                r1.cancellationFailures ++ r2.cancellationFailures,
+              )
+          }
+        },
     )
   }
 
@@ -152,14 +165,16 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
   }
 
   def failProcessorRunIfSubscriptionsWereAlreadyCancelled[F[_]: Monad](
-    imovoCancellationResults: ImovoCancellationResults
+      imovoCancellationResults: ImovoCancellationResults,
   ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, Unit] = {
     if (imovoCancellationResults.alreadyCancelled.isEmpty)
       EitherT.rightT[F, DigitalVoucherCancellationProcessorServiceError](())
     else
-      EitherT.leftT[F, Unit](DigitalVoucherCancellationProcessorServiceError(
-        s"Some digital vouchers did not exist in imovo, they may have already been cancelled. " +
-          s"${imovoCancellationResults.show}"
-      ))
+      EitherT.leftT[F, Unit](
+        DigitalVoucherCancellationProcessorServiceError(
+          s"Some digital vouchers did not exist in imovo, they may have already been cancelled. " +
+            s"${imovoCancellationResults.show}",
+        ),
+      )
   }
 }

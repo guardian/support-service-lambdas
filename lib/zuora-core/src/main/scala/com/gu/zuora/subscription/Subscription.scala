@@ -3,17 +3,17 @@ package com.gu.zuora.subscription
 import java.time.LocalDate
 
 case class Subscription(
-  subscriptionNumber: String,
-  termStartDate: LocalDate,
-  termEndDate: LocalDate,
-  customerAcceptanceDate: LocalDate,
-  contractEffectiveDate: LocalDate,
-  currentTerm: Int,
-  currentTermPeriodType: String,
-  autoRenew: Boolean,
-  ratePlans: List[RatePlan],
-  status: String,
-  accountNumber: String
+    subscriptionNumber: String,
+    termStartDate: LocalDate,
+    termEndDate: LocalDate,
+    customerAcceptanceDate: LocalDate,
+    contractEffectiveDate: LocalDate,
+    currentTerm: Int,
+    currentTermPeriodType: String,
+    autoRenew: Boolean,
+    ratePlans: List[RatePlan],
+    status: String,
+    accountNumber: String,
 ) {
 
   def ratePlanCharge(request: CreditRequest): Option[RatePlanCharge] = {
@@ -23,12 +23,12 @@ case class Subscription(
     def isMatchingCharge(charge: RatePlanCharge): Boolean = {
       val publicationDate = request.publicationDate.value
       charge.name == request.productRatePlanChargeName &&
-        charge.HolidayStart__c.exists { start =>
-          start.isEqual(publicationDate) || start.isBefore(publicationDate)
-        } &&
-        charge.HolidayEnd__c.exists { end =>
-          end.isEqual(publicationDate) || end.isAfter(publicationDate)
-        }
+      charge.HolidayStart__c.exists { start =>
+        start.isEqual(publicationDate) || start.isBefore(publicationDate)
+      } &&
+      charge.HolidayEnd__c.exists { end =>
+        end.isEqual(publicationDate) || end.isAfter(publicationDate)
+      }
     }
 
     val charges = for {
@@ -50,32 +50,32 @@ case class Subscription(
 }
 
 case class RatePlan(
-  productName: String,
-  ratePlanName: String,
-  ratePlanCharges: List[RatePlanCharge],
-  productRatePlanId: String,
-  id: String,
-  lastChangeType: Option[String]
+    productName: String,
+    ratePlanName: String,
+    ratePlanCharges: List[RatePlanCharge],
+    productRatePlanId: String,
+    id: String,
+    lastChangeType: Option[String],
 )
 
 case class RatePlanCharge(
-  name: String,
-  number: String,
-  price: Double,
-  billingPeriod: Option[String],
-  effectiveStartDate: LocalDate,
-  chargedThroughDate: Option[LocalDate],
-  HolidayStart__c: Option[LocalDate],
-  HolidayEnd__c: Option[LocalDate],
-  processedThroughDate: Option[LocalDate],
-  productRatePlanChargeId: String,
-  specificBillingPeriod: Option[Int],
-  endDateCondition: Option[String],
-  upToPeriodsType: Option[String],
-  upToPeriods: Option[Int],
-  billingDay: Option[String],
-  triggerEvent: Option[String],
-  triggerDate: Option[LocalDate],
-  discountPercentage: Option[Double],
-  effectiveEndDate: LocalDate,
+    name: String,
+    number: String,
+    price: Double,
+    billingPeriod: Option[String],
+    effectiveStartDate: LocalDate,
+    chargedThroughDate: Option[LocalDate],
+    HolidayStart__c: Option[LocalDate],
+    HolidayEnd__c: Option[LocalDate],
+    processedThroughDate: Option[LocalDate],
+    productRatePlanChargeId: String,
+    specificBillingPeriod: Option[Int],
+    endDateCondition: Option[String],
+    upToPeriodsType: Option[String],
+    upToPeriods: Option[Int],
+    billingDay: Option[String],
+    triggerEvent: Option[String],
+    triggerDate: Option[LocalDate],
+    discountPercentage: Option[Double],
+    effectiveEndDate: LocalDate,
 )

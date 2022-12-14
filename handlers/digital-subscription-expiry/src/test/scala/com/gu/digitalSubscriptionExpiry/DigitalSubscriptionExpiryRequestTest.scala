@@ -23,11 +23,12 @@ class DigitalSubscriptionExpiryRequestTest extends AnyFlatSpec {
     val expected: JsResult[DigitalSubscriptionExpiryRequest] = JsSuccess(
       DigitalSubscriptionExpiryRequest(
         subscriberId = "A-SOMESTUFF",
-        password = Some("abc 123")
-      )
+        password = Some("abc 123"),
+      ),
     )
 
-    val event: JsResult[DigitalSubscriptionExpiryRequest] = Json.parse(validSubsAuthorisationRequest).validate[DigitalSubscriptionExpiryRequest]
+    val event: JsResult[DigitalSubscriptionExpiryRequest] =
+      Json.parse(validSubsAuthorisationRequest).validate[DigitalSubscriptionExpiryRequest]
 
     event should be(expected)
   }

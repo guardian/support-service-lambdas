@@ -18,21 +18,23 @@ class GetPaperCustomerDataTest extends AnyFlatSpec with Matchers {
 
   "GetVoucherCustomerData" should "return data succesfully" in {
     val actual = getPaperCustomerData(
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
 
-    actual shouldBe ContinueProcessing(PaperCustomerData(
-      TestData.validatedAccount,
-      TestData.directDebitPaymentMethod,
-      TestData.contacts
-    ))
+    actual shouldBe ContinueProcessing(
+      PaperCustomerData(
+        TestData.validatedAccount,
+        TestData.directDebitPaymentMethod,
+        TestData.contacts,
+      ),
+    )
   }
 
   it should "return error if get account fails" in {
 
     val actual = getPaperCustomerData(
       getAccount = failedCall,
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
     actual shouldBe errorResponse
   }
@@ -41,7 +43,7 @@ class GetPaperCustomerDataTest extends AnyFlatSpec with Matchers {
 
     val actual = getPaperCustomerData(
       getPaymentMethod = failedPaymentMethodCall,
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
     actual shouldBe errorResponse
   }
@@ -50,7 +52,7 @@ class GetPaperCustomerDataTest extends AnyFlatSpec with Matchers {
 
     val actual = getPaperCustomerData(
       getContacts = _ => GenericError("something failed!"),
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
     actual shouldBe errorResponse
   }
@@ -80,14 +82,14 @@ class GetPaperCustomerDataTest extends AnyFlatSpec with Matchers {
   }
 
   def getPaperCustomerData(
-    getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = getAccountSuccess,
-    getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod] = getPaymentMethodSuccess,
-    getContacts: ZuoraAccountId => ClientFailableOp[Contacts] = getContactsSuccess,
-    accountId: ZuoraAccountId
+      getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = getAccountSuccess,
+      getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod] = getPaymentMethodSuccess,
+      getContacts: ZuoraAccountId => ClientFailableOp[Contacts] = getContactsSuccess,
+      accountId: ZuoraAccountId,
   ) = GetPaperCustomerData(
     getAccount,
     getPaymentMethod,
     getContacts,
-    accountId
+    accountId,
   )
 }

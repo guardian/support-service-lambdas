@@ -2,7 +2,12 @@ package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.SFAddressOverride
-import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.{SFAddress, SFMaybeAddress, UnusableContactAddress, UsableContactAddress}
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.{
+  SFAddress,
+  SFMaybeAddress,
+  UnusableContactAddress,
+  UsableContactAddress,
+}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
 
 object GetSfAddressOverride {
@@ -18,9 +23,12 @@ object GetSfAddressOverride {
         case UnusableContactAddress =>
           val maybeSuitableAddress = sfAddresses.others.collectFirst {
             case fail: ClientFailure => fail // give up, error
-            case ClientSuccess(UsableContactAddress(address)) => ClientSuccess(OverrideAddressWith(address)) // found a decent address
+            case ClientSuccess(UsableContactAddress(address)) =>
+              ClientSuccess(OverrideAddressWith(address)) // found a decent address
           }
-          maybeSuitableAddress.getOrElse(ClientSuccess(DontOverrideAddress)) //we're not going to lose any decent address
+          maybeSuitableAddress.getOrElse(
+            ClientSuccess(DontOverrideAddress),
+          ) // we're not going to lose any decent address
       }
     } yield winning
   }
@@ -38,7 +46,7 @@ object GetSfAddressOverride {
 trait GetSfAddressOverride {
 
   def apply(
-    sfAddresses: SFContactsForMerge[ClientFailableOp[SFMaybeAddress]]
+      sfAddresses: SFContactsForMerge[ClientFailableOp[SFMaybeAddress]],
   ): ClientFailableOp[SFAddressOverride]
 
 }

@@ -9,9 +9,9 @@ import org.scalatest.matchers.should.Matchers
 class VoucherBookletFulfilmentDatesSpec extends AnyFlatSpec with Matchers with DateSupport {
 
   def shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek(
-    today: LocalDate,
-    expectedDayOfWeek: String,
-    expectedDate: LocalDate
+      today: LocalDate,
+      expectedDayOfWeek: String,
+      expectedDate: LocalDate,
   ) = {
     val result = VoucherBookletFulfilmentDates(today)
     result.values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List(expectedDate)
@@ -62,17 +62,39 @@ class VoucherBookletFulfilmentDatesSpec extends AnyFlatSpec with Matchers with D
   }
 
   "WEDNESDAY VoucherBookletFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
-    apply( /* Wednesday */ "2019-12-04")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-01")
-    apply( /* Thursday  */ "2019-12-05")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-01")
-    apply( /* Friday    */ "2019-12-06")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-01")
-    apply( /* Saturday  */ "2019-12-07")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-01")
-    apply( /* Sunday    */ "2019-12-08")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-01")
-    apply( /* Monday    */ "2019-12-09")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-01")
-    apply( /* Tuesday   */ "2019-12-10")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-01")
-    apply( /* Wednesday */ "2019-12-11")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-08")
-    apply( /* Thursday  */ "2019-12-12")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-08")
-    apply( /* Friday    */ "2019-12-13")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-08")
-    apply( /* Saturday  */ "2019-12-14")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate("2020-01-08")
+    apply( /* Wednesday */ "2019-12-04")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-01",
+    )
+    apply( /* Thursday  */ "2019-12-05")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-01",
+    )
+    apply( /* Friday    */ "2019-12-06")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-01",
+    )
+    apply( /* Saturday  */ "2019-12-07")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-01",
+    )
+    apply( /* Sunday    */ "2019-12-08")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-01",
+    )
+    apply( /* Monday    */ "2019-12-09")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-01",
+    )
+    apply( /* Tuesday   */ "2019-12-10")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-01",
+    )
+    apply( /* Wednesday */ "2019-12-11")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-08",
+    )
+    apply( /* Thursday  */ "2019-12-12")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-08",
+    )
+    apply( /* Friday    */ "2019-12-13")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-08",
+    )
+    apply( /* Saturday  */ "2019-12-14")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+      "2020-01-08",
+    )
   }
 
   "THURSDAY VoucherBookletFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {

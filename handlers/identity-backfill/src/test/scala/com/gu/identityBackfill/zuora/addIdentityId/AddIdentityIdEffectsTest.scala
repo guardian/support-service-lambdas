@@ -23,7 +23,8 @@ class AddIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
     val testAccount = Types.AccountId("2c92c0f9624bbc5f016253e573970b16")
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load config")
+      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+        .toApiGatewayOp("load config")
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       _ <- AddIdentityIdToAccount(zuoraDeps)(testAccount, IdentityId(unique)).toApiGatewayOp("AddIdentityIdToAccount")
       identityId <- GetIdentityIdForAccount(zuoraDeps)(testAccount).toApiGatewayOp("GetIdentityIdForAccount")

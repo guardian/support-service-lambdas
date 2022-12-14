@@ -15,9 +15,9 @@ import org.scalatest.matchers.should.Matchers
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with Matchers {
 
   case class EndToEndResults(
-    createResult: HolidayStopRequestId,
-    preProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
-    postProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest]
+      createResult: HolidayStopRequestId,
+      preProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
+      postProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
   )
 
   it should "Salesforce Holiday Stop Requests should work end to end" taggedAs EffectsTest in {
@@ -32,10 +32,12 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
 
-      verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfAuth.wrapWith(JsonHttp.getWithParams))
+      verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(
+        sfAuth.wrapWith(JsonHttp.getWithParams),
+      )
       maybeMatchingSubscription <- verifySubOwnerOp(
         subscriptionName,
-        contact
+        contact,
       ).toDisjunction
 
       fakeSubscription: Subscription = Fixtures.mkGuardianWeeklySubscription()
@@ -46,35 +48,48 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
         .get
 
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
-      createResult <- createOp(CreateHolidayStopRequestWithDetail.buildBody(
-        startDate,
-        endDate,
-        publicationDatesToBeStopped,
-        maybeMatchingSubscription.get,
-        None
-      )).toDisjunction
+      createResult <- createOp(
+        CreateHolidayStopRequestWithDetail.buildBody(
+          startDate,
+          endDate,
+          publicationDatesToBeStopped,
+          maybeMatchingSubscription.get,
+          None,
+        ),
+      ).toDisjunction
 
-      fetchOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfAuth.wrapWith(JsonHttp.getWithParams))
+      fetchOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(
+        sfAuth.wrapWith(JsonHttp.getWithParams),
+      )
       preProcessingFetchResult <- fetchOp(contact, Some(subscriptionName), None).toDisjunction
 
-      id: HolidayStopRequestsDetailId = preProcessingFetchResult.find(_.Id == createResult).get
-        .Holiday_Stop_Request_Detail__r.get.records
-        .head.Id
+      id: HolidayStopRequestsDetailId = preProcessingFetchResult
+        .find(_.Id == createResult)
+        .get
+        .Holiday_Stop_Request_Detail__r
+        .get
+        .records
+        .head
+        .Id
       processOp = SalesforceHolidayStopRequestsDetail.ActionSalesforceHolidayStopRequestsDetail(
-        sfAuth.wrapWith(JsonHttp.patch)
+        sfAuth.wrapWith(JsonHttp.patch),
       )(id)
-      _ <- processOp(HolidayStopRequestsDetailActioned(
-        RatePlanChargeCode("C-1234567"),
-        Price(-12.34)
-      )).toDisjunction
+      _ <- processOp(
+        HolidayStopRequestsDetailActioned(
+          RatePlanChargeCode("C-1234567"),
+          Price(-12.34),
+        ),
+      ).toDisjunction
 
       postProcessingFetchResult <- fetchOp(contact, Some(subscriptionName), None).toDisjunction
 
       // UN-ACTION in order to delete the parent
-      _ <- processOp(HolidayStopRequestsDetailActioned(
-        RatePlanChargeCode(""),
-        Price(0)
-      )).toDisjunction
+      _ <- processOp(
+        HolidayStopRequestsDetailActioned(
+          RatePlanChargeCode(""),
+          Price(0),
+        ),
+      ).toDisjunction
 
       deleteOp = SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfAuth.wrapWith(JsonHttp.patch))
       _ <- deleteOp(createResult).toDisjunction
@@ -86,8 +101,9 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
       case Left(failure) => fail(failure.toString)
 
       case Right(EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult)) =>
-
-        withClue("should be able to find the freshly created Holiday Stop Request and its Actioned Count should be ZERO") {
+        withClue(
+          "should be able to find the freshly created Holiday Stop Request and its Actioned Count should be ZERO",
+        ) {
           preProcessingFetchResult
             .find(_.Id == createResult)
             .filter(_.Actioned_Count__c.value == 0) should not be None

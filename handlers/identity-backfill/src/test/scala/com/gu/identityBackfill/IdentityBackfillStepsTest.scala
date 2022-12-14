@@ -18,7 +18,7 @@ class IdentityBackfillStepsTest extends AnyFlatSpec with Matchers {
       _ => ContinueProcessing(PreReqResult(Set(AccountId("accountId")), Option(SFContactId("sfContactId")), None)),
       _ => ClientSuccess(IdentityId("123")),
       (_, _) => ContinueProcessing(()),
-      (_, _) => ContinueProcessing(())
+      (_, _) => ContinueProcessing(()),
     )(DomainRequest(EmailAddress("test@gu.com"), dryRun = false))
 
     statusCode shouldBe "200"
@@ -29,7 +29,7 @@ class IdentityBackfillStepsTest extends AnyFlatSpec with Matchers {
       _ => ReturnWithResponse(ApiResponse("400", "")),
       _ => fail(),
       (_, _) => fail(),
-      (_, _) => fail()
+      (_, _) => fail(),
     )(DomainRequest(EmailAddress("test@gu.com"), dryRun = false))
 
     statusCode shouldBe "400"
@@ -48,18 +48,20 @@ class IdentityBackfillStepsTest extends AnyFlatSpec with Matchers {
   }
 
   "updateBuyersIdentityId" should "propagate errors" in {
-    val ReturnWithResponse(result) = IdentityBackfillSteps.updateBuyersIdentityId {
-      (_, _) => GenericError("error")
+    val ReturnWithResponse(result) = IdentityBackfillSteps.updateBuyersIdentityId { (_, _) =>
+      GenericError("error")
     }(Option(SFContactId("sfContactId")), IdentityId("123"))
 
     result.body should include("updateBuyersIdentityId multiple errors updating 123: (sfContactId,error)")
   }
 
   "updateZuoraBillingAccountsIdentityId" should "propagate errors" in {
-    val ReturnWithResponse(result) = IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId {
-      (_, _) => GenericError("error")
+    val ReturnWithResponse(result) = IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId { (_, _) =>
+      GenericError("error")
     }(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
 
-    result.body should include("updateZuoraBillingAccountsIdentityId multiple errors updating 123: (accountId1,error), (accountId2,error)")
+    result.body should include(
+      "updateZuoraBillingAccountsIdentityId multiple errors updating 123: (accountId1,error), (accountId2,error)",
+    )
   }
 }

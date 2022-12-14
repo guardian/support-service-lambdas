@@ -26,42 +26,52 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
   def apply[F[_]: Sync, S](
-    appIdentity: AppIdentity,
-    sttpBackend: SttpBackend[F, S]
+      appIdentity: AppIdentity,
+      sttpBackend: SttpBackend[F, S],
   ): EitherT[IO, DigitalVoucherCancellationProcessorAppError, ImovoCancellationResults] = {
     apply(
       appIdentity = appIdentity,
       sttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient()),
-      clock = Clock.systemDefaultZone()
+      clock = Clock.systemDefaultZone(),
     )
   }
 
   def apply[F[_]: Sync, S](
-    appIdentity: AppIdentity,
-    sttpBackend: SttpBackend[F, S],
-    clock: Clock
+      appIdentity: AppIdentity,
+      sttpBackend: SttpBackend[F, S],
+      clock: Clock,
   ): EitherT[F, DigitalVoucherCancellationProcessorAppError, ImovoCancellationResults] = {
     for {
       config <- loadConfig(appIdentity)
       salesforceClient <- SalesforceClient(sttpBackend, config.salesforce)
-        .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to create salesforce client: ${error.message}"))
+        .leftMap(error =>
+          DigitalVoucherCancellationProcessorAppError(s"Failed to create salesforce client: ${error.message}"),
+        )
       imovoClient <- ImovoClient(sttpBackend, config.imovo)
-        .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to create imovo client: ${error.message}"))
+        .leftMap(error =>
+          DigitalVoucherCancellationProcessorAppError(s"Failed to create imovo client: ${error.message}"),
+        )
       result <- DigitalVoucherCancellationProcessorService(salesforceClient, imovoClient, clock)
-        .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to execute cancellation processor: ${error.message}"))
+        .leftMap(error =>
+          DigitalVoucherCancellationProcessorAppError(s"Failed to execute cancellation processor: ${error.message}"),
+        )
     } yield result
   }
 
   def loadConfig[F[_]: Sync](
-    appIdentity: AppIdentity
+      appIdentity: AppIdentity,
   ): EitherT[F, DigitalVoucherCancellationProcessorAppError, DigitalVoucherCancellationProcessorConfig] = {
     for {
       imovoConfig <- ConfigLoader
         .loadConfig[F, ImovoConfig]("support-service-lambdas-shared-imovo", appIdentity)
-        .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to load imovo config: ${error.message} "))
+        .leftMap(error =>
+          DigitalVoucherCancellationProcessorAppError(s"Failed to load imovo config: ${error.message} "),
+        )
       salesforceConfig <- ConfigLoader
         .loadConfig[F, SFAuthConfig]("support-service-lambdas-shared-salesforce", appIdentity)
-        .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to load salesforce config: ${error.message} "))
+        .leftMap(error =>
+          DigitalVoucherCancellationProcessorAppError(s"Failed to load salesforce config: ${error.message} "),
+        )
     } yield DigitalVoucherCancellationProcessorConfig(imovoConfig, salesforceConfig)
   }
 }

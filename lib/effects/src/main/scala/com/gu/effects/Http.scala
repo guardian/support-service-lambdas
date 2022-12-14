@@ -12,7 +12,8 @@ object Http extends Logging {
   val response: Request => Response = responseWithTimeout(15)
 
   def responseWithTimeout(timeout: Int): Request => Response = {
-    val restClient = new OkHttpClient().newBuilder()
+    val restClient = new OkHttpClient()
+      .newBuilder()
       .readTimeout(timeout, TimeUnit.SECONDS)
       .build()
 
@@ -25,7 +26,11 @@ object Http extends Logging {
 
     { request: Request =>
       val maybeBodySummary = Option(request.body).map(bodySummary)
-      logger.info(s"HTTP request: ${request.method} ${request.url} " + maybeBodySummary.map(summary => s", body:  $summary").getOrElse(""))
+      logger.info(
+        s"HTTP request: ${request.method} ${request.url} " + maybeBodySummary
+          .map(summary => s", body:  $summary")
+          .getOrElse(""),
+      )
       val response = restClient.newCall(request).execute
       logger.info(s"HTTP response: ${response.code}")
       response
@@ -33,7 +38,8 @@ object Http extends Logging {
   }
 
   val downloadResponse: Request => Response = {
-    val restClient = new OkHttpClient().newBuilder()
+    val restClient = new OkHttpClient()
+      .newBuilder()
       .readTimeout(0, TimeUnit.SECONDS)
       .build()
 

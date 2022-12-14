@@ -23,13 +23,19 @@ object ZuoraGetAccountSummary extends LazyLogging {
     case class CreditCardExpirationYear(value: Int) extends AnyVal
     case class CreditCardMaskNumber(value: String) extends AnyVal
     implicit val fPaymentMethodId: Format[PaymentMethodId] =
-      Format[PaymentMethodId](JsPath.read[String].map(PaymentMethodId.apply), Writes { (o: PaymentMethodId) => JsString(o.value) })
+      Format[PaymentMethodId](
+        JsPath.read[String].map(PaymentMethodId.apply),
+        Writes { (o: PaymentMethodId) => JsString(o.value) },
+      )
 
     implicit val fAccountId: Format[AccountId] =
       Format[AccountId](JsPath.read[String].map(AccountId.apply), Writes { (o: AccountId) => JsString(o.value) })
 
     implicit val fNumConsecutiveFailures: Format[NumConsecutiveFailures] =
-      Format[NumConsecutiveFailures](JsPath.read[Int].map(NumConsecutiveFailures.apply), Writes { (o: NumConsecutiveFailures) => JsNumber(o.value) })
+      Format[NumConsecutiveFailures](
+        JsPath.read[Int].map(NumConsecutiveFailures.apply),
+        Writes { (o: NumConsecutiveFailures) => JsNumber(o.value) },
+      )
 
   }
 
@@ -39,31 +45,35 @@ object ZuoraGetAccountSummary extends LazyLogging {
 
   case class Invoice(id: String, dueDate: LocalDate, balance: Double, status: String)
 
-  case class AccountSummary(basicInfo: BasicAccountInfo, subscriptions: List[SubscriptionSummary], invoices: List[Invoice])
+  case class AccountSummary(
+      basicInfo: BasicAccountInfo,
+      subscriptions: List[SubscriptionSummary],
+      invoices: List[Invoice],
+  )
 
   implicit val basicAccountInfoReads: Reads[BasicAccountInfo] = (
     (JsPath \ "id").read[String].map(AccountId.apply) and
-    (JsPath \ "balance").read[Double] and
-    (JsPath \ "defaultPaymentMethod" \ "id").read[PaymentMethodId]
+      (JsPath \ "balance").read[Double] and
+      (JsPath \ "defaultPaymentMethod" \ "id").read[PaymentMethodId]
   )(BasicAccountInfo.apply _)
 
   implicit val invoiceReads: Reads[Invoice] = (
     (JsPath \ "id").read[String] and
-    (JsPath \ "dueDate").read[LocalDate] and
-    (JsPath \ "balance").read[Double] and
-    (JsPath \ "status").read[String]
+      (JsPath \ "dueDate").read[LocalDate] and
+      (JsPath \ "balance").read[Double] and
+      (JsPath \ "status").read[String]
   )(Invoice.apply _)
 
   implicit val subscriptionSummaryReads: Reads[SubscriptionSummary] = (
     (JsPath \ "id").read[String].map(SubscriptionId.apply) and
-    (JsPath \ "subscriptionNumber").read[String] and
-    (JsPath \ "status").read[String]
+      (JsPath \ "subscriptionNumber").read[String] and
+      (JsPath \ "status").read[String]
   )(SubscriptionSummary.apply _)
 
   implicit val accountSummaryReads: Reads[AccountSummary] = (
     (JsPath \ "basicInfo").read[BasicAccountInfo] and
-    (JsPath \ "subscriptions").read[List[SubscriptionSummary]] and
-    (JsPath \ "invoices").read[List[Invoice]]
+      (JsPath \ "subscriptions").read[List[SubscriptionSummary]] and
+      (JsPath \ "invoices").read[List[Invoice]]
   )(AccountSummary.apply _)
 
   def apply(requests: Requests)(accountId: String): ClientFailableOp[AccountSummary] =
@@ -72,6 +82,12 @@ object ZuoraGetAccountSummary extends LazyLogging {
   def dryRun(requests: Requests)(accountId: String): ClientFailableOp[AccountSummary] = {
     val msg = s"DryRun for ZuoraGetAccountSummary: ID $accountId"
     logger.info(msg)
-    ClientSuccess(AccountSummary(basicInfo = BasicAccountInfo(id = AccountId(""), balance = 0, defaultPaymentMethod = PaymentMethodId("")), subscriptions = Nil, invoices = Nil))
+    ClientSuccess(
+      AccountSummary(
+        basicInfo = BasicAccountInfo(id = AccountId(""), balance = 0, defaultPaymentMethod = PaymentMethodId("")),
+        subscriptions = Nil,
+        invoices = Nil,
+      ),
+    )
   }
 }

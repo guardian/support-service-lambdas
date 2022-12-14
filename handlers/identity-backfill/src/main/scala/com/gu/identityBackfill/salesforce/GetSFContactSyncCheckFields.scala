@@ -16,33 +16,35 @@ import play.api.libs.json.{JsValue, Json}
 object GetSFContactSyncCheckFields {
 
   case class ContactSyncCheckFields(
-    Id: String,
-    RecordTypeId: Option[String],
-    LastName: String,
-    FirstName: String,
-    OtherCountry: Option[String],
-    Email: Option[String]
+      Id: String,
+      RecordTypeId: Option[String],
+      LastName: String,
+      FirstName: String,
+      OtherCountry: Option[String],
+      Email: Option[String],
   )
 
   case class ContactsByAccountIdQueryResponse(
-    totalSize: Int,
-    done: Boolean,
-    records: List[ContactSyncCheckFields]
+      totalSize: Int,
+      done: Boolean,
+      records: List[ContactSyncCheckFields],
   )
 
   implicit val readContactSyncCheckFields = Json.reads[ContactSyncCheckFields]
   implicit val readQuery = Json.reads[ContactsByAccountIdQueryResponse]
 
   def apply(getOp: HttpOp[GetRequest, JsValue]): GetSFContactSyncCheckFields = {
-    new GetSFContactSyncCheckFields(getOp.setupRequest(toRequest).parse[ContactsByAccountIdQueryResponse].map(_.records).runRequestLazy)
+    new GetSFContactSyncCheckFields(
+      getOp.setupRequest(toRequest).parse[ContactsByAccountIdQueryResponse].map(_.records).runRequestLazy,
+    )
   }
 
   def toRequest(sfAccountId: SFAccountId) =
     GetRequest(
       RelativePath(
         s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
-          s"WHERE AccountId = '${sfAccountId.value}'"
-      )
+          s"WHERE AccountId = '${sfAccountId.value}'",
+      ),
     )
 
 }
@@ -54,9 +56,9 @@ object ContactSyncCheck {
   case class RecordTypeId(value: String) // this lets us decide whether it's a related or primary contact
 
   def apply(
-    standardRecordType: RecordTypeId
+      standardRecordType: RecordTypeId,
   )(
-    contactSyncCheckFields: List[GetSFContactSyncCheckFields.ContactSyncCheckFields]
+      contactSyncCheckFields: List[GetSFContactSyncCheckFields.ContactSyncCheckFields],
   ): Either[String, SFContactId] = {
 
     def isStandardContact(fields: ContactSyncCheckFields) = fields.RecordTypeId.contains(standardRecordType.value)
@@ -80,13 +82,19 @@ object ContactSyncCheck {
         }
       }
       case _ :: _ :: Nil =>
-        Left(s"There are more than one syncable SF Contacts within this SF Account: ${contactSyncCheckFields.map(_.Id)}")
+        Left(
+          s"There are more than one syncable SF Contacts within this SF Account: ${contactSyncCheckFields.map(_.Id)}",
+        )
       case Nil if contactSyncCheckFields.nonEmpty =>
-        Left(s"There are no syncable SF Contacts within the customer's account: ${contactSyncCheckFields.map(_.Id).mkString(", ")}")
+        Left(
+          s"There are no syncable SF Contacts within the customer's account: ${contactSyncCheckFields.map(_.Id).mkString(", ")}",
+        )
       case Nil if contactSyncCheckFields.isEmpty =>
         Left(s"There are no SF Contacts within the customer's account")
       case _ =>
-        Left(s"Syncable SF Contact did not meet validation: ${contactSyncCheckFields.map(_.Id)}") // should never happen!
+        Left(
+          s"Syncable SF Contact did not meet validation: ${contactSyncCheckFields.map(_.Id)}",
+        ) // should never happen!
     }
   }
 
@@ -94,13 +102,14 @@ object ContactSyncCheck {
 
 object GetSFBillingContactIfSyncable {
   def apply(
-    standardRecordType: RecordTypeId
+      standardRecordType: RecordTypeId,
   )(
-    fields: List[ContactSyncCheckFields]
+      fields: List[ContactSyncCheckFields],
   ): Types.ApiGatewayOp[Option[SFContactId]] = {
     val syncableContactOrError = ContactSyncCheck(standardRecordType)(fields)
     syncableContactOrError match {
-      case Left(reason) => ReturnWithResponse(ApiGatewayResponse.notFound(s"Unable to select SF Contact to update. Reason: $reason"))
+      case Left(reason) =>
+        ReturnWithResponse(ApiGatewayResponse.notFound(s"Unable to select SF Contact to update. Reason: $reason"))
       case Right(contactId) => ContinueProcessing(Some(contactId))
     }
   }

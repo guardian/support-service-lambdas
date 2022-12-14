@@ -15,9 +15,9 @@ import com.gu.stripeCardUpdated.{StripeCustomerId, StripeCardId}
 object ZuoraQueryPaymentMethod extends Logging {
 
   case class PaymentMethodFields(
-    Id: PaymentMethodId,
-    AccountId: AccountId,
-    NumConsecutiveFailures: NumConsecutiveFailures
+      Id: PaymentMethodId,
+      AccountId: AccountId,
+      NumConsecutiveFailures: NumConsecutiveFailures,
   )
   // FIXME create WireRequest/Response and converter layer to replace the custom writes and reads
   implicit val QueryRecordR: Format[PaymentMethodFields] = Json.format[PaymentMethodFields]
@@ -25,10 +25,10 @@ object ZuoraQueryPaymentMethod extends Logging {
   case class AccountPaymentMethodIds(accountId: AccountId, paymentMethods: NonEmptyList[PaymentMethodFields])
 
   def getPaymentMethodForStripeCustomer(
-    zuoraQuerier: ZuoraQuerier
+      zuoraQuerier: ZuoraQuerier,
   )(
-    customerId: StripeCustomerId,
-    cardId: StripeCardId
+      customerId: StripeCustomerId,
+      cardId: StripeCardId,
   ): ApiGatewayOp[List[AccountPaymentMethodIds]] = {
     val maybeQueryResult = for {
       query <- zoql"""SELECT
@@ -50,16 +50,17 @@ object ZuoraQueryPaymentMethod extends Logging {
       paymentMethodIds <- {
 
         def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
-          records.groupBy(_.AccountId).toList.collect {
-            case (accountId, head :: tail) =>
-              (accountId, NonEmptyList(head, tail))
+          records.groupBy(_.AccountId).toList.collect { case (accountId, head :: tail) =>
+            (accountId, NonEmptyList(head, tail))
           }
         }
 
         val accountPaymentMethodIds = groupedList(queryResult.records)
         if (accountPaymentMethodIds.length > 3) {
           logger.warn(s"too many accounts using the customer token, could indicate a fault in the logic: $queryResult")
-          ReturnWithResponse(ApiGatewayResponse.internalServerError("could not find correct account for stripe details"))
+          ReturnWithResponse(
+            ApiGatewayResponse.internalServerError("could not find correct account for stripe details"),
+          )
         } else {
           ContinueProcessing(accountPaymentMethodIds.map((AccountPaymentMethodIds.apply _).tupled))
         }

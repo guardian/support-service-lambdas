@@ -28,7 +28,9 @@ trait ZuoraSar {
   def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraSarError, List[DownloadStream]]
 }
 
-case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends ZuoraSar with LazyLogging {
+case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier)
+    extends ZuoraSar
+    with LazyLogging {
 
   implicit val readsC: Reads[ZuoraContact] = Json.reads[ZuoraContact]
 
@@ -81,7 +83,11 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     for {
       accountSummary <- accountSummary(contact.AccountId).left.map(err => ZuoraClientError(err.message))
       accountObj <- accountObj(contact.AccountId).left.map(err => ZuoraClientError(err.message))
-      invoices <- Json.fromJson[InvoiceIds](accountSummary).asEither.left.map(err => JsonDeserialisationError(err.toString()))
+      invoices <- Json
+        .fromJson[InvoiceIds](accountSummary)
+        .asEither
+        .left
+        .map(err => JsonDeserialisationError(err.toString()))
       zuoraSarResponse = ZuoraAccountSuccess(accountSummary, accountObj, invoices)
     } yield zuoraSarResponse
   }
@@ -91,7 +97,9 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     accountInvoices.flatTraverse { invoice =>
       for {
         invoices <- getInvoiceFiles(invoice.id).left.map(err => ZuoraClientError(err.message))
-        invoiceDownloadStreams <- invoiceFileContents(invoices.invoiceFiles).left.map(err => ZuoraClientError(err.message))
+        invoiceDownloadStreams <- invoiceFileContents(invoices.invoiceFiles).left.map(err =>
+          ZuoraClientError(err.message),
+        )
       } yield {
         invoiceDownloadStreams
       }

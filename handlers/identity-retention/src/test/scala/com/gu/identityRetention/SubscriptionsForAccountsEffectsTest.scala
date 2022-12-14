@@ -17,12 +17,12 @@ class SubscriptionsForAccountsEffectsTest extends AnyFlatSpec with Matchers {
 
     val testAccountIds = NonEmptyList(
       AccountId("2c92c0f86371efdc0163871a9ad72274"),
-      List(AccountId("2c92c0f86371f0360163871d94eb0e68"))
+      List(AccountId("2c92c0f86371f0360163871d94eb0e68")),
     )
 
     val expectedEndDates = List(
       LocalDate.of(2019, 5, 21),
-      LocalDate.of(2018, 4, 4)
+      LocalDate.of(2018, 4, 4),
     )
 
     val actual = for {

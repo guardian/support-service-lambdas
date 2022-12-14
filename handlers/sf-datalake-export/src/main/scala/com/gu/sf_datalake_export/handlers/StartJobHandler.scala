@@ -27,8 +27,8 @@ import scala.util.{Failure, Success, Try}
 object StartJobHandler {
 
   case class WireRequest(
-    objectName: String,
-    uploadToDataLake: Option[Boolean]
+      objectName: String,
+      uploadToDataLake: Option[Boolean],
   )
 
   object WireRequest {
@@ -36,10 +36,10 @@ object StartJobHandler {
   }
 
   case class WireResponse(
-    jobId: String,
-    jobName: String,
-    objectName: String,
-    uploadToDataLake: Boolean
+      jobId: String,
+      jobName: String,
+      objectName: String,
+      uploadToDataLake: Boolean,
   )
 
   object WireResponse {
@@ -58,15 +58,17 @@ object StartJobHandler {
   }
 
   def steps(
-    getCurrentDate: () => LocalDate,
-    createJob: CreateJobRequest => ClientFailableOp[JobId],
-    addQuery: AddQueryRequest => ClientFailableOp[Unit]
+      getCurrentDate: () => LocalDate,
+      createJob: CreateJobRequest => ClientFailableOp[JobId],
+      addQuery: AddQueryRequest => ClientFailableOp[Unit],
   )(
-    objectName: ObjectName,
-    shouldUploadToDataLake: ShouldUploadToDataLake
+      objectName: ObjectName,
+      shouldUploadToDataLake: ShouldUploadToDataLake,
   ): Try[WireResponse] = {
     for {
-      sfQueryInfo <- BulkApiParams.byName.get(objectName).toTry(noneErrorMessage = s"invalid object name ${objectName.value}")
+      sfQueryInfo <- BulkApiParams.byName
+        .get(objectName)
+        .toTry(noneErrorMessage = s"invalid object name ${objectName.value}")
       createJobRequest = CreateJobRequest(sfQueryInfo.sfObjectName, sfQueryInfo.batchSize)
       jobId <- createJob(createJobRequest).toTry
       addQueryRequest = AddQueryRequest(sfQueryInfo.soql, jobId)
@@ -77,10 +79,10 @@ object StartJobHandler {
   }
 
   def operation(
-    getCurrentDate: () => LocalDate,
-    stage: Stage,
-    fetchString: StringFromS3,
-    getResponse: Request => Response
+      getCurrentDate: () => LocalDate,
+      stage: Stage,
+      fetchString: StringFromS3,
+      getResponse: Request => Response,
   )(request: WireRequest): Try[WireResponse] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
@@ -99,7 +101,7 @@ object StartJobHandler {
 
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = operation(getCurrentDate, RawEffects.stage, GetFromS3.fetchString, RawEffects.response)
+      operation = operation(getCurrentDate, RawEffects.stage, GetFromS3.fetchString, RawEffects.response),
     )
 
   }

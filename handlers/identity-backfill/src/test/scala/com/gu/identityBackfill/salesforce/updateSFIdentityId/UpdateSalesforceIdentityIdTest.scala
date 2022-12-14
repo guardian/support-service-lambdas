@@ -15,7 +15,8 @@ class UpdateSalesforceIdentityIdTest extends AnyFlatSpec with Matchers {
 
     val actual = UpdateSalesforceIdentityId.toRequest(SFContactId("contactsf"), IdentityId("identityid"))
     val expectedJson = JsObject(Seq("IdentityID__c" -> JsString("identityid")))
-    val expected = new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
+    val expected =
+      new PatchRequest(expectedJson, RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }

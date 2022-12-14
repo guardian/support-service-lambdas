@@ -19,5 +19,6 @@ class MockCreateRecord(responses: Map[CreateRecordRequest, CreateRecordResponse]
 }
 
 object MockCreateRecord {
-  def requests: ZIO[MockCreateRecord, Nothing, List[CreateRecordRequest]] = ZIO.serviceWith[MockCreateRecord](_.requests)
+  def requests: ZIO[MockCreateRecord, Nothing, List[CreateRecordRequest]] =
+    ZIO.serviceWith[MockCreateRecord](_.requests)
 }

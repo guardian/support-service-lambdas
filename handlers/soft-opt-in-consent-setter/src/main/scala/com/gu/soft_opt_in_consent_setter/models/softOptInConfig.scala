@@ -7,11 +7,11 @@ import io.circe.parser.decode
 import scala.util.{Failure, Success}
 
 case class SoftOptInConfig(
-  sfConfig: SFAuthConfig,
-  sfApiVersion: String,
-  identityConfig: IdentityConfig,
-  consentsMapping: Map[String, Set[String]],
-  stage: String
+    sfConfig: SFAuthConfig,
+    sfApiVersion: String,
+    identityConfig: IdentityConfig,
+    consentsMapping: Map[String, Set[String]],
+    stage: String,
 )
 
 case class IdentityConfig(identityUrl: String, identityToken: String)
@@ -38,20 +38,20 @@ object SoftOptInConfig {
         sfClientSecret,
         sfUsername,
         sfPassword,
-        sfToken
+        sfToken,
       ),
       sfApiVersion,
       IdentityConfig(
         identityUrl,
-        identityToken
+        identityToken,
       ),
       consentsMapping,
-      stage
+      stage,
     )).toRight(
       SoftOptInError(
         "SoftOptInConfig",
-        "Could not obtain all config."
-      )
+        "Could not obtain all config.",
+      ),
     )
   }
 

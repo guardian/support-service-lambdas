@@ -31,7 +31,7 @@ object FilterCandidates {
   val retentionBucketFor = Map(
     Stage("PROD") -> "zuora-retention-prod",
     Stage("CODE") -> "zuora-retention-code",
-    Stage("DEV") -> "zuora-retention-dev"
+    Stage("DEV") -> "zuora-retention-dev",
   )
 
   // this is the entry point
@@ -47,13 +47,15 @@ object FilterCandidates {
 
   def getUri(files: List[FetchedFile], queryName: String) = {
     val queryResultUri = files.find(_.name == queryName).map(_.uri)
-    queryResultUri.map(Success(_)).getOrElse(Failure(new LambdaException(s"could not find query result for $queryName")))
+    queryResultUri
+      .map(Success(_))
+      .getOrElse(Failure(new LambdaException(s"could not find query result for $queryName")))
   }
 
   def operation(
-    s3Iterator: String => Try[Iterator[String]],
-    uploadToS3: (Iterator[String], String) => Try[String],
-    diff: (Iterator[String], Iterator[String]) => Iterator[String]
+      s3Iterator: String => Try[Iterator[String]],
+      uploadToS3: (Iterator[String], String) => Try[String],
+      diff: (Iterator[String], Iterator[String]) => Iterator[String],
   )(request: FilterCandidatesRequest) = for {
     exclusionsUri <- getUri(request.fetched, ToAquaRequest.exclusionQueryName)
     exclusionsIterator <- s3Iterator(exclusionsUri)
@@ -65,4 +67,3 @@ object FilterCandidates {
     filterResponse = FilterCandidatesResponse(request.jobId, uploadUri, request.dryRun)
   } yield (filterResponse)
 }
-

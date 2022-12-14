@@ -19,19 +19,19 @@ object Fixtures extends Assertions {
   }
 
   def mkRatePlanCharge(
-    name: String,
-    price: Double,
-    billingPeriod: String,
-    chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2)),
-    processedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 8, 2)),
-    effectiveStartDate: LocalDate = LocalDate.of(2019, 6, 2),
-    specificBillingPeriod: Option[Int] = None,
-    upToPeriodsType: Option[String] = None,
-    upToPeriods: Option[Int] = None,
-    endDateCondition: Option[String] = Some("Subscription_End"),
-    billingDay: Option[String] = None,
-    triggerEvent: Option[String] = Some("SpecificDate"),
-    triggerDate: Option[LocalDate] = Some(LocalDate.of(2019, 6, 2))
+      name: String,
+      price: Double,
+      billingPeriod: String,
+      chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2)),
+      processedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 8, 2)),
+      effectiveStartDate: LocalDate = LocalDate.of(2019, 6, 2),
+      specificBillingPeriod: Option[Int] = None,
+      upToPeriodsType: Option[String] = None,
+      upToPeriods: Option[Int] = None,
+      endDateCondition: Option[String] = Some("Subscription_End"),
+      billingDay: Option[String] = None,
+      triggerEvent: Option[String] = Some("SpecificDate"),
+      triggerDate: Option[LocalDate] = Some(LocalDate.of(2019, 6, 2)),
   ) = RatePlanCharge(
     name = name,
     number = "C1",
@@ -55,15 +55,15 @@ object Fixtures extends Assertions {
   )
 
   def mkGuardianWeeklySubscription(
-    termStartDate: LocalDate = LocalDate.now(),
-    termEndDate: LocalDate = LocalDate.now(),
-    customerAcceptanceDate: LocalDate = LocalDate.now(),
-    contractEffectiveDate: LocalDate = LocalDate.now(),
-    price: Double = -1.0,
-    billingPeriod: String = "Quarter",
-    chargedThroughDate: Option[LocalDate] = None,
-    effectiveStartDate: LocalDate = LocalDate.now(),
-    accountNumber: String = "123456"
+      termStartDate: LocalDate = LocalDate.now(),
+      termEndDate: LocalDate = LocalDate.now(),
+      customerAcceptanceDate: LocalDate = LocalDate.now(),
+      contractEffectiveDate: LocalDate = LocalDate.now(),
+      price: Double = -1.0,
+      billingPeriod: String = "Quarter",
+      chargedThroughDate: Option[LocalDate] = None,
+      effectiveStartDate: LocalDate = LocalDate.now(),
+      accountNumber: String = "123456",
   ): Subscription =
     Subscription(
       subscriptionNumber = "S1",
@@ -78,8 +78,8 @@ object Fixtures extends Assertions {
         RatePlan(
           productName = "Guardian Weekly - Domestic",
           ratePlanName = "GW Oct 18 - Quarterly - Domestic",
-          ratePlanCharges =
-            List(mkRatePlanCharge(
+          ratePlanCharges = List(
+            mkRatePlanCharge(
               name = "GW Oct 18 - Quarterly - Domestic",
               price = price,
               billingPeriod = billingPeriod,
@@ -87,15 +87,16 @@ object Fixtures extends Assertions {
               processedThroughDate = chargedThroughDate,
               effectiveStartDate = effectiveStartDate,
               triggerEvent = Some("SpecificDate"),
-              triggerDate = Some(effectiveStartDate)
-            )),
+              triggerDate = Some(effectiveStartDate),
+            ),
+          ),
           productRatePlanId = "",
           id = "",
-          lastChangeType = None
-        )
+          lastChangeType = None,
+        ),
       ),
       status = "Active",
-      accountNumber = accountNumber
+      accountNumber = accountNumber,
     )
 
   def subscriptionFromJson(resource: String): Subscription = {
@@ -105,7 +106,7 @@ object Fixtures extends Assertions {
 
   def mkAccount(billCycleDay: Int = 1) = {
     ZuoraAccount(
-      ZuoraAccountBillingAndPayment(billCycleDay = billCycleDay)
+      ZuoraAccountBillingAndPayment(billCycleDay = billCycleDay),
     )
   }
 }

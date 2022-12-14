@@ -15,7 +15,7 @@ class ContributionValidationsTest extends AnyFlatSpec with Matchers {
 
   val testRequest = ValidatableFields(
     startDate = LocalDate.of(2018, 7, 20),
-    amountMinorUnits = Some(AmountMinorUnits(100))
+    amountMinorUnits = Some(AmountMinorUnits(100)),
   )
 
   def now = () => LocalDate.of(2018, 7, 20)
@@ -36,18 +36,32 @@ class ContributionValidationsTest extends AnyFlatSpec with Matchers {
     wiredValidator(oldRequest, MonthlyContribution, GBP) shouldBe Failed("Date validation failed!")
   }
   it should "return error if amount is too small" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))), MonthlyContribution, GBP) shouldBe Failed("amount must be at least 100")
+    wiredValidator(
+      testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))),
+      MonthlyContribution,
+      GBP,
+    ) shouldBe Failed("amount must be at least 100")
   }
 
   it should "return error if amount is too large" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))), MonthlyContribution, GBP) shouldBe Failed("amount must not be more than 200")
+    wiredValidator(
+      testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))),
+      MonthlyContribution,
+      GBP,
+    ) shouldBe Failed("amount must not be more than 200")
   }
   it should "return success if amount is within valid range" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(150))), MonthlyContribution, GBP) shouldBe Passed((AmountMinorUnits(150)))
+    wiredValidator(
+      testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(150))),
+      MonthlyContribution,
+      GBP,
+    ) shouldBe Passed((AmountMinorUnits(150)))
   }
 
   it should "return error if amount is missing" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = None), MonthlyContribution, GBP) shouldBe Failed("amountMinorUnits is missing")
+    wiredValidator(testRequest.copy(amountMinorUnits = None), MonthlyContribution, GBP) shouldBe Failed(
+      "amountMinorUnits is missing",
+    )
   }
 
 }
