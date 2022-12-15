@@ -1,6 +1,7 @@
 package com.gu.productmove.zuora
 
 import com.gu.newproduct.api.productcatalog.BillingPeriod
+import com.gu.productmove.GuStageLive
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
@@ -25,6 +26,20 @@ class MockSubscriptionUpdate(responses: Map[(String, BillingPeriod, Double, Stri
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(s"success = false")
   }
+
+  override def preview(subscriptionId: String, billingPeriod: BillingPeriod, price: Double, ratePlanIdToRemove: String): ZIO[GuStageLive.Stage, String, SubscriptionUpdatePreviewResponse] = {
+    val subscriptionUpdatePreviewResponse = SubscriptionUpdatePreviewResponse(
+      SubscriptionUpdateInvoice(
+        10,
+        List(
+          SubscriptionUpdateInvoiceItem(-10, "2c92c0f85e2d19af015e3896e84d092e"),
+          SubscriptionUpdateInvoiceItem(20, "8ad09fc281de1ce70181de3b29223787"),
+        ),
+      ),
+    )
+    ZIO.succeed(subscriptionUpdatePreviewResponse) //TODO: test this for real
+  }
+
 }
 
 object MockSubscriptionUpdate {

@@ -7,7 +7,13 @@ import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
-import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview, SubscriptionUpdateResponse}
+import com.gu.productmove.zuora.{
+  DefaultPaymentMethod,
+  InvoicePreview,
+  SubscriptionUpdateInvoice,
+  SubscriptionUpdateInvoiceItem,
+  SubscriptionUpdateResponse,
+}
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoicePreview.*
