@@ -1,6 +1,6 @@
 package com.gu.zuora.rer
 
-import com.gu.util.resthttp.RestRequestMaker.{DownloadStream, Requests, WithoutCheck}
+import com.gu.util.resthttp.RestRequestMaker.{DownloadStream, PutRequest, RelativePath, Requests, WithoutCheck}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, GenericError}
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
@@ -11,6 +11,7 @@ import cats.syntax.traverse._
 // For Zuora response deserialisation
 case class ZuoraContact(AccountId: String)
 case class AccountNumber(AccountNumber: String)
+case class CustomerAccount(AccountNumber: String)
 case class InvoiceId(id: String)
 case class InvoiceIds(invoices: List[InvoiceId])
 case class InvoicePdfUrl(pdfFileUrl: String)
@@ -26,6 +27,7 @@ trait ZuoraRer {
   def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]]
   def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess]
   def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]]
+  def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit]
 }
 
 case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends ZuoraRer with LazyLogging {
@@ -56,6 +58,34 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       }
     }
   }
+
+  private def accountPaymentMethods(accountId: String): Either[ClientFailure, JsValue] =
+    zuoraClient.get[JsValue](s"accounts/$accountId/payment-methods").toDisjunction
+
+  private def scrubAccountObject(accountId: String, newName: String): Either[ClientFailure, JsValue] = {
+    val putReq = PutRequest(
+      Json.obj(
+        "Name" -> newName,
+        "CrmId" -> "",
+        "sfContactId__c" -> "",
+        "IdentityId__c" -> "",
+        "AutoPay" -> false
+      ),
+      RelativePath(s"object/account/$accountId?rejectUnknownFields=true")
+    )
+    zuoraClient.put[JsValue](putReq).toDisjunction.map(_.bodyAsJson)
+  }
+
+  private def scrubPaymentMethods(paymentMethodIds: Set[String]): Either[ClientFailure, Unit] =
+    paymentMethodIds.foldLeft(Right(()): Either[ClientFailure, Unit]) {
+      (lastResult, paymentMethodId) =>
+        if (lastResult.isRight) {
+          val putReq = PutRequest(Json.obj(), RelativePath(s"payment-methods/$paymentMethodId/scrub"))
+          zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
+        }
+        else // fail on first error
+          lastResult
+    }
 
   implicit val readsPdfUrls: Reads[InvoicePdfUrl] = Json.reads[InvoicePdfUrl]
   implicit val readInvoiceFiles: Reads[InvoiceFiles] = Json.reads[InvoiceFiles]
@@ -96,6 +126,24 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
         invoiceDownloadStreams
       }
     }
+  }
+
+  implicit val readsAccount: Reads[CustomerAccount] = Json.reads[CustomerAccount]
+
+  override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
+    logger.info("Updating account to remove personal data for contact.")
+    for {
+      accountObj <- accountObj(contact.AccountId).left.map(err => ZuoraClientError(err.message))
+      paymentMethods <- accountPaymentMethods(contact.AccountId).left.map(err => ZuoraClientError(err.message))
+      accountNumber = accountObj.as[CustomerAccount].AccountNumber
+      _ = logger.info(s"accountObj: $accountObj")
+      _ = logger.info(s"paymentMethods: $paymentMethods")
+      _ = logger.info(s"paymentMethod id's: ${paymentMethods \\ "id"}")
+      _ = logger.debug(s"account number = $accountNumber")
+      _ <- scrubAccountObject(contact.AccountId, accountNumber).left.map(err => ZuoraClientError(err.message))
+      paymentMethodIds = (paymentMethods \\ "id").map(jsId => jsId.as[String]).toSet
+      _ <- scrubPaymentMethods(paymentMethodIds).left.map(err => ZuoraClientError(err.message))
+    } yield ()
   }
 
 }

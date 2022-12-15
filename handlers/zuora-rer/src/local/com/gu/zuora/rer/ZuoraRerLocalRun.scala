@@ -51,9 +51,10 @@ object ZuoraRerLocalRun extends App {
   val rerStatusRequest = RerStatusRequest(initiationReference = "testSubjectId")
   val performRerInitiateRequest = PerformRerRequest(
     initiationReference = "testSubjectId",
-    subjectEmail = "test@testco.uk"
+    subjectEmail = "andytest@example.com"
   )
 
-  runTestZuoraRer(rerStatusRequest)
+  runTestPerformZuoraRer(performRerInitiateRequest)
+//  runTestZuoraRer(rerStatusRequest)
 }
 

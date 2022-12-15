@@ -9,11 +9,13 @@ import play.api.libs.json.Json
 class ZuoraRerServiceStub(
   contacts: ClientFailableOp[List[ZuoraContact]],
   zuoraAccountSuccessOrError: Either[ZuoraRerError, ZuoraAccountSuccess],
-  zuoraInvoiceStreamsOrError: Either[ZuoraRerError, List[DownloadStream]]
+  zuoraInvoiceStreamsOrError: Either[ZuoraRerError, List[DownloadStream]],
+  zuoraAccountUpdateOrError: Either[ZuoraRerError, Unit] = Right(()),
 ) extends ZuoraRer {
   override def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = contacts
   override def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess] = zuoraAccountSuccessOrError
   override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]] = zuoraInvoiceStreamsOrError
+  override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = zuoraAccountUpdateOrError
 }
 
 object ZuoraRerServiceStub {

@@ -9,6 +9,13 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
   extends LazyLogging
   with ZuoraHandler[RerRequest, RerResponse] {
 
+  def scrubAccounts(contacts: List[ZuoraContact]): Either[ZuoraRerError, List[Unit]] =
+    contacts.traverse { contact =>
+      for {
+        _ <- zuoraHelper.scrubAccount(contact)
+      } yield ()
+    }
+
   def processAccountDetails(contacts: List[ZuoraContact], initiationReference: String): Either[ZuoraRerError, List[InvoiceIds]] =
     contacts.traverse { contact =>
       for {
@@ -35,6 +42,7 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
       case Right(contactList) =>
         logger.info(s"Found ${contactList.length} account(s) with id's: ${contactList.map(_.AccountId).mkString(", ")}")
         for {
+          _ <- scrubAccounts(contactList)
           //                invoiceIds <- processAccountDetails(contactList, request.initiationReference)
           //                _ <- processInvoicesForContacts(invoiceIds, request.initiationReference)
           _ <- s3Service.copyResultsToCompleted(request.initiationReference, zuoraRerConfig)
