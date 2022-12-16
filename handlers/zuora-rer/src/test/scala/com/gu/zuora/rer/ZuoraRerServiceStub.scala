@@ -19,7 +19,7 @@ class ZuoraRerServiceStub(
 }
 
 object ZuoraRerServiceStub {
-  val successfulZuoraContacts: ClientSuccess[List[ZuoraContact]] = ClientSuccess(List(ZuoraContact("123456789")))
+  val successfulZuoraContacts: ClientSuccess[List[ZuoraContact]] = ClientSuccess(List(ZuoraContact("123456789", "a@b.com")))
   val failedZuoraContactResponse: GenericError = GenericError("Failed to get contacts")
 
   val accountSummary: String =

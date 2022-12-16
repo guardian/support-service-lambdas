@@ -9,8 +9,9 @@ import play.api.libs.json.{JsValue, Json, Reads}
 import cats.syntax.traverse._
 
 // For Zuora response deserialisation
-case class ZuoraContact(AccountId: String)
+case class ZuoraContact(AccountId: String, WorkEmail: String)
 case class AccountNumber(AccountNumber: String)
+case class AccountContact(Id: String, WorkEmail: String)
 case class CustomerAccount(AccountNumber: String)
 case class InvoiceId(id: String)
 case class InvoiceIds(invoices: List[InvoiceId])
@@ -36,9 +37,19 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
 
   override def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = {
     for {
-      contactQuery <- zoql"SELECT AccountId FROM Contact where WorkEmail=$emailAddress"
+      contactQuery <- zoql"SELECT AccountId, WorkEmail FROM Contact where WorkEmail=$emailAddress"
       queryResult <- zuoraQuerier[ZuoraContact](contactQuery).map(_.records)
     } yield queryResult
+  }
+
+  implicit val readsAccountContact: Reads[AccountContact] = Json.reads[AccountContact]
+
+  private def accountContacts(accountId: String): Either[ClientFailure, List[AccountContact]] = {
+    val result = for {
+      contactQuery <- zoql"SELECT Id, WorkEmail FROM Contact where AccountId=$accountId"
+      queryResult <- zuoraQuerier[AccountContact](contactQuery).map(_.records)
+    } yield queryResult
+    result.toDisjunction
   }
 
   private def accountSummary(accountId: String): Either[ClientFailure, JsValue] =
@@ -76,7 +87,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     zuoraClient.put[JsValue](putReq).toDisjunction.map(_.bodyAsJson)
   }
 
-  private def scrubPaymentMethods(paymentMethodIds: Set[String]): Either[ClientFailure, Unit] =
+  private def scrubPaymentMethods(paymentMethodIds: Set[String]): Either[ClientFailure, Unit] = {
     paymentMethodIds.foldLeft(Right(()): Either[ClientFailure, Unit]) {
       (lastResult, paymentMethodId) =>
         if (lastResult.isRight) {
@@ -86,6 +97,19 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
         else // fail on first error
           lastResult
     }
+  }
+
+  private def scrubContacts(contactIds: Set[String]): Either[ClientFailure, Unit] = {
+    contactIds.foldLeft(Right(()): Either[ClientFailure, Unit]) {
+      (lastResult, contactId) =>
+        if (lastResult.isRight) {
+          val putReq = PutRequest(Json.obj(), RelativePath(s"contacts/$contactId/scrub"))
+          zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
+        }
+        else // fail on first error
+          lastResult
+    }
+  }
 
   implicit val readsPdfUrls: Reads[InvoicePdfUrl] = Json.reads[InvoicePdfUrl]
   implicit val readInvoiceFiles: Reads[InvoiceFiles] = Json.reads[InvoiceFiles]
@@ -132,18 +156,38 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
 
   override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
     logger.info("Updating account to remove personal data for contact.")
-    for {
-      accountObj <- accountObj(contact.AccountId).left.map(err => ZuoraClientError(err.message))
-      paymentMethods <- accountPaymentMethods(contact.AccountId).left.map(err => ZuoraClientError(err.message))
+    val scrubOperations = for {
+      accountObj <- accountObj(contact.AccountId)
       accountNumber = accountObj.as[CustomerAccount].AccountNumber
-      _ = logger.info(s"accountObj: $accountObj")
-      _ = logger.info(s"paymentMethods: $paymentMethods")
-      _ = logger.info(s"paymentMethod id's: ${paymentMethods \\ "id"}")
+      _ = logger.debug(s"accountObj: $accountObj")
       _ = logger.debug(s"account number = $accountNumber")
-      _ <- scrubAccountObject(contact.AccountId, accountNumber).left.map(err => ZuoraClientError(err.message))
+      _ = logger.info(s"scrubbing account object")
+      _ <- scrubAccountObject(contact.AccountId, accountNumber)
+
+      paymentMethods <- accountPaymentMethods(contact.AccountId)
       paymentMethodIds = (paymentMethods \\ "id").map(jsId => jsId.as[String]).toSet
-      _ <- scrubPaymentMethods(paymentMethodIds).left.map(err => ZuoraClientError(err.message))
+      _ = logger.debug(s"paymentMethods: $paymentMethods")
+      _ = logger.debug(s"paymentMethod id's: ${paymentMethods \\ "id"}")
+      _ = logger.info("scrubbing payment methods")
+      _ <- scrubPaymentMethods(paymentMethodIds)
+
+      accountContacts <- accountContacts(contact.AccountId)
+      _ = logger.debug(s"account contacts: $accountContacts")
+      mainContactId = accountContacts.filter(_.WorkEmail == contact.WorkEmail).head.Id
+      otherContactIds = accountContacts.collect{
+        case(contact) if contact.Id != mainContactId => contact.Id
+      }.toSet
+      _ = logger.info("scrubbing non-main contacts")
+      _ <- scrubContacts(otherContactIds)
+
+      // TODO: Delete Billing documents and wait for result
+//      _ <- deleteBillingDocuments()
+
+      // TODO: scrub main contact
+//      _ <- scrubContacts(Set(mainContactId))
+
     } yield ()
+    scrubOperations.left.map(err => ZuoraClientError(err.message))
   }
 
 }
