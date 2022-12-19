@@ -153,6 +153,54 @@ Resources:
       EventSourceArn: !GetAtt RefundQueue.Arn
       FunctionName: !Ref RefundLambda
 
+  SalesforceTrackingLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub product-switch-salesforce-tracking-${Stage}
+      Description: An SQS-triggered lambda that refunds customer's going through product-switching
+      Runtime: java11
+      Handler: com.gu.productmove.salesforce.SalesforceHandler::handleRequest
+      MemorySize: 1024
+      Timeout: 300
+      Environment:
+        Variables:
+          App: product-move-api
+          Stack: !Ref Stack
+          Stage: !Ref Stage
+      CodeUri:
+        Bucket: !Ref DeployBucket
+        Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            Effect: Allow
+            Action: s3:GetObject
+            Resource:
+              - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+              - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/invoicingApi-${Stage}*.json
+              - arn:aws:s3::*:membership-dist/*
+        - Statement:
+            Effect: Allow
+            Action:
+              - sqs:DeleteMessage
+              - sqs:GetQueueAttributes
+              - sqs:ReceiveMessage
+            Resource: "*"
+
+  SalesforceTrackingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 3000
+      QueueName: !Sub product-switch-salesforce-tracking-${Stage}
+
+  SQSTriggerSF:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn: !GetAtt SalesforceTrackingQueue.Arn
+      FunctionName: !Ref SalesforceTrackingLambda
+
   # alarms
   ProductMovementFailureAlarm:
     Type: AWS::CloudWatch::Alarm

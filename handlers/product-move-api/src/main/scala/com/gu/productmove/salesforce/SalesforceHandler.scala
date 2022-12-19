@@ -13,7 +13,23 @@ import zio.{Exit, Runtime, Task, Unsafe, ZIO}
 import java.time.LocalDate
 import scala.jdk.CollectionConverters.*
 
-object SalesforceHandler {
+object SalesforceHandler extends SalesforceHandler {
+  type TIO[+A] = ZIO[Any, Any, A] // Succeed with an `A`, may fail with anything`, no requirements.
+}
+trait SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
+  override def handleRequest(input: SQSEvent, context: Context): Unit = {
+    val records: List[SQSEvent.SQSMessage] = input.getRecords.asScala.toList
+
+    records.map { record =>
+      val maybeSalesforceRecordInput = record.getBody.fromJson[SalesforceRecordInput]
+
+      maybeSalesforceRecordInput match {
+        case Right(salesforceRecordInput) => runZio(salesforceRecordInput, context)
+        case Left(ex) =>
+          context.getLogger.log(s"Error '$ex' when decoding JSON to SalesforceRecordInput with body: ${record.getBody}")
+      }
+    }
+  }
 
   case class SalesforceRecordInput(
       subscriptionName: String,
@@ -24,6 +40,8 @@ object SalesforceHandler {
       effectiveDate: LocalDate,
       refundAmount: BigDecimal,
   )
+  given JsonDecoder[SalesforceRecordInput] = DeriveJsonDecoder.gen[SalesforceRecordInput]
+  given JsonEncoder[SalesforceRecordInput] = DeriveJsonEncoder.gen[SalesforceRecordInput]
 
   def createSfRecord(
       salesforceRecordInput: SalesforceRecordInput,
@@ -44,7 +62,7 @@ object SalesforceHandler {
       _ <- CreateRecord.create(request)
     } yield ()
 
-  def main(salesforceRecordInput: SalesforceRecordInput, context: Context) =
+  def runZio(salesforceRecordInput: SalesforceRecordInput, context: Context) =
     val runtime = Runtime.default
     Unsafe.unsafe {
       runtime.unsafe.run(
