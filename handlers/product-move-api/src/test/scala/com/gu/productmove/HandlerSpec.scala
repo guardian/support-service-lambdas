@@ -28,9 +28,9 @@ object HandlerSpec extends ZIOSpecDefault {
       test("productMove endpoint is successful") {
 
         val expectedSubNameInput = "A-S00339056"
-        val endpointJsonInputBody = ExpectedInput(50.00)
+        val endpointJsonInputBody = ExpectedInput(50.00, false)
 
-        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) =
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, BigDecimal, String) =
           (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "89ad8casd9c0asdcaj89sdc98as")
 
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse)
@@ -113,9 +113,9 @@ object HandlerSpec extends ZIOSpecDefault {
 
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
         val expectedSubNameInput = "A-S00339056"
-        val endpointJsonInputBody = ExpectedInput(50.00)
+        val endpointJsonInputBody = ExpectedInput(50.00, false)
 
-        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, Double, String) =
+        val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, BigDecimal, String) =
           (expectedSubNameInput, Monthly, endpointJsonInputBody.price, "R1")
 
         val getSubscriptionStubs = Map(expectedSubNameInput -> getSubscriptionResponse2)

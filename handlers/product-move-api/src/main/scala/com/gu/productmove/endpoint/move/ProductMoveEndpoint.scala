@@ -7,10 +7,35 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
-import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
+import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
+import com.gu.productmove.zuora.{
+  GetAccount,
+  GetAccountLive,
+  GetSubscription,
+  GetSubscriptionLive,
+  InvoicePreview,
+  InvoicePreviewLive,
+  Subscribe,
+  SubscribeLive,
+  SubscriptionUpdate,
+  SubscriptionUpdateInvoice,
+  SubscriptionUpdateLive,
+  ZuoraCancel,
+  ZuoraCancelLive,
+}
+import com.gu.productmove.{
+  AwsCredentialsLive,
+  AwsS3Live,
+  EmailMessage,
+  EmailPayload,
+  EmailPayloadContactAttributes,
+  EmailPayloadSubscriberAttributes,
+  GuStageLive,
+  SQS,
+  SQSLive,
+  SttpClientLive,
+}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -26,7 +51,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00448793", ExpectedInput(1)),
+    run("A-S00448793", ExpectedInput(1, false)),
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[
@@ -127,7 +152,6 @@ object ProductMoveEndpoint {
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
-      getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
 
       currentRatePlan <- getSingleOrNotEligible(
         subscription.ratePlans,
@@ -138,41 +162,70 @@ object ProductMoveEndpoint {
         s"Subscription: $subscriptionName has more than one ratePlanCharge",
       )
 
-      updateResponse <- SubscriptionUpdate
-        .update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id)
-        .addLogMessage("SubscriptionUpdate")
-      totalDeltaMrr = updateResponse.totalDeltaMrr
+      result <-
+        if (postData.preview)
+          doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currentRatePlan.id)
+        else
+          doUpdate(subscriptionName, ratePlanCharge, postData.price, currentRatePlan.id, subscription)
+    } yield result
 
-      account <- getAccountFuture.join
+  def doPreview(
+      subscriptionId: String,
+      price: BigDecimal,
+      billingPeriod: BillingPeriod,
+      currentRatePlanId: String,
+  ) = for {
 
-      date <- Clock.currentDateTime.map(_.toLocalDate)
+    previewResponse <- SubscriptionUpdate
+      .preview(subscriptionId, billingPeriod, price, currentRatePlanId)
+      .addLogMessage("SubscriptionUpdate")
 
-      emailFuture <- SQS
-        .sendEmail(
-          message = EmailMessage(
-            EmailPayload(
-              Address = Some(account.billToContact.workEmail),
-              ContactAttributes = EmailPayloadContactAttributes(
-                SubscriberAttributes = EmailPayloadSubscriberAttributes(
-                  first_name = account.billToContact.firstName,
-                  last_name = account.billToContact.lastName,
-                  currency = account.basicInfo.currency.symbol,
-                  price = postData.price.toString,
-                  first_payment_amount = totalDeltaMrr.toString,
-                  date_of_first_payment = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                  payment_frequency = ratePlanCharge.billingPeriod.value,
-                  contribution_cancellation_date = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                  subscription_id = subscriptionName,
-                ),
+  } yield previewResponse
+
+  def doUpdate(
+      subscriptionName: String,
+      ratePlanCharge: RatePlanCharge,
+      price: BigDecimal,
+      currentRatePlanId: String,
+      subscription: GetSubscription.GetSubscriptionResponse,
+  ) = for {
+    getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
+
+    updateResponse <- SubscriptionUpdate
+      .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlanId)
+      .addLogMessage("SubscriptionUpdate")
+    totalDeltaMrr = updateResponse.totalDeltaMrr
+
+    account <- getAccountFuture.join
+
+    date <- Clock.currentDateTime.map(_.toLocalDate)
+
+    emailFuture <- SQS
+      .sendEmail(
+        message = EmailMessage(
+          EmailPayload(
+            Address = Some(account.billToContact.workEmail),
+            ContactAttributes = EmailPayloadContactAttributes(
+              SubscriberAttributes = EmailPayloadSubscriberAttributes(
+                first_name = account.billToContact.firstName,
+                last_name = account.billToContact.lastName,
+                currency = account.basicInfo.currency.symbol,
+                price = price.toString,
+                first_payment_amount = totalDeltaMrr.toString,
+                date_of_first_payment = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                payment_frequency = ratePlanCharge.billingPeriod.value,
+                contribution_cancellation_date = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                subscription_id = subscriptionName,
               ),
             ),
-            "SV_RCtoDP_Switch",
-            account.basicInfo.sfContactId__c,
-            account.basicInfo.IdentityId__c,
           ),
-        )
-        .addLogMessage("SQS sendEmail()")
-        .fork
+          "SV_RCtoDP_Switch",
+          account.basicInfo.sfContactId__c,
+          account.basicInfo.IdentityId__c,
+        ),
+      )
+      .addLogMessage("SQS sendEmail()")
+      .fork
 
       salesforceTrackingFuture <- SQS.queueSalesforceTracking(SalesforceRecordInput(
         subscriptionName,
@@ -196,5 +249,5 @@ object ProductMoveEndpoint {
       sqsRequests = emailFuture.zip(refundFuture).zip(salesforceTrackingFuture)
       _ <- sqsRequests.join
 
-    } yield Success("Product move completed successfully")
+  } yield Success("Product move completed successfully")
 }

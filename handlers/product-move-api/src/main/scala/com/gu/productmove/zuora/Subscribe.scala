@@ -56,7 +56,7 @@ case class CreateSubscriptionResponse(subscriptionNumber: String)
 given JsonDecoder[CreateSubscriptionResponse] = DeriveJsonDecoder.gen[CreateSubscriptionResponse]
 
 case class ChargeOverrides(
-    price: Option[Double] = None,
+    price: Option[BigDecimal] = None,
     productRatePlanChargeId: String,
     discountPercentage: Option[Int] = None,
     upToPeriods: Option[Int] = None,

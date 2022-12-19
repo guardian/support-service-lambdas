@@ -2,22 +2,23 @@ package com.gu.productmove.zuora
 
 import com.gu.newproduct.api.productcatalog.BillingPeriod
 import com.gu.productmove.GuStageLive
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
 import zio.{IO, ZIO}
 
-class MockSubscriptionUpdate(responses: Map[(String, BillingPeriod, Double, String), SubscriptionUpdateResponse])
+class MockSubscriptionUpdate(responses: Map[(String, BillingPeriod, BigDecimal, String), SubscriptionUpdateResponse])
     extends SubscriptionUpdate {
 
-  private var mutableStore: List[(String, BillingPeriod, Double, String)] = Nil // we need to remember the side effects
+  private var mutableStore: List[(String, BillingPeriod, BigDecimal, String)] = Nil // we need to remember the side effects
 
   def requests = mutableStore.reverse
 
   override def update(
       subscriptionId: String,
       billingPeriod: BillingPeriod,
-      price: Double,
+      price: BigDecimal,
       ratePlanIdToRemove: String,
   ): ZIO[Any, String, SubscriptionUpdateResponse] = {
     mutableStore = (subscriptionId, billingPeriod, price, ratePlanIdToRemove) :: mutableStore
@@ -27,22 +28,14 @@ class MockSubscriptionUpdate(responses: Map[(String, BillingPeriod, Double, Stri
       case None => ZIO.fail(s"success = false")
   }
 
-  override def preview(subscriptionId: String, billingPeriod: BillingPeriod, price: Double, ratePlanIdToRemove: String): ZIO[GuStageLive.Stage, String, SubscriptionUpdatePreviewResponse] = {
-    val subscriptionUpdatePreviewResponse = SubscriptionUpdatePreviewResponse(
-      SubscriptionUpdateInvoice(
-        10,
-        List(
-          SubscriptionUpdateInvoiceItem(-10, "2c92c0f85e2d19af015e3896e84d092e"),
-          SubscriptionUpdateInvoiceItem(20, "8ad09fc281de1ce70181de3b29223787"),
-        ),
-      ),
-    )
-    ZIO.succeed(subscriptionUpdatePreviewResponse) //TODO: test this for real
+  override def preview(subscriptionId: String, billingPeriod: BillingPeriod, price: BigDecimal, ratePlanIdToRemove: String): ZIO[GuStageLive.Stage, String, PreviewResult] = {
+    val previewResult = PreviewResult(10, -10, 20)
+    ZIO.succeed(previewResult) //TODO: test this for real
   }
 
 }
 
 object MockSubscriptionUpdate {
-  def requests: ZIO[MockSubscriptionUpdate, Nothing, List[(String, BillingPeriod, Double, String)]] =
+  def requests: ZIO[MockSubscriptionUpdate, Nothing, List[(String, BillingPeriod, BigDecimal, String)]] =
     ZIO.serviceWith[MockSubscriptionUpdate](_.requests)
 }
