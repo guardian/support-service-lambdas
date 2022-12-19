@@ -16,21 +16,28 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
       } yield ()
     }
 
-  def processAccountDetails(contacts: List[ZuoraContact], initiationReference: String): Either[ZuoraRerError, List[InvoiceIds]] =
+  def verifyErasure(contacts: List[ZuoraContact]): Either[ZuoraRerError, List[Unit]] =
     contacts.traverse { contact =>
       for {
-        zuoraAccountSuccess <- zuoraHelper.accountResponse(contact)
-        _ <- s3Service.writeSuccessAccountResult(initiationReference, zuoraAccountSuccess, zuoraRerConfig)
-      } yield zuoraAccountSuccess.invoiceList
-    }
-
-  def processInvoicesForContacts(allContactInvoices: List[InvoiceIds], initiationReference: String): Either[ZuoraRerError, List[Unit]] =
-    allContactInvoices.traverse { accountInvoices =>
-      for {
-        downloadStreams <- zuoraHelper.invoicesResponse(accountInvoices.invoices)
-        _ <- s3Service.writeSuccessInvoiceResult(initiationReference, downloadStreams, zuoraRerConfig)
+        _ <- zuoraHelper.verifyErasure(contact)
       } yield ()
     }
+
+//  def processAccountDetails(contacts: List[ZuoraContact], initiationReference: String): Either[ZuoraRerError, List[InvoiceIds]] =
+//    contacts.traverse { contact =>
+//      for {
+//        zuoraAccountSuccess <- zuoraHelper.accountResponse(contact)
+//        _ <- s3Service.writeSuccessAccountResult(initiationReference, zuoraAccountSuccess, zuoraRerConfig)
+//      } yield zuoraAccountSuccess.invoiceList
+//    }
+//
+//  def processInvoicesForContacts(allContactInvoices: List[InvoiceIds], initiationReference: String): Either[ZuoraRerError, List[Unit]] =
+//    allContactInvoices.traverse { accountInvoices =>
+//      for {
+//        downloadStreams <- zuoraHelper.invoicesResponse(accountInvoices.invoices)
+//        _ <- s3Service.writeSuccessInvoiceResult(initiationReference, downloadStreams, zuoraRerConfig)
+//      } yield ()
+//    }
 
   def initiateRer(
     request: PerformRerRequest
@@ -42,6 +49,7 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
       case Right(contactList) =>
         logger.info(s"Found ${contactList.length} account(s) with id's: ${contactList.map(_.AccountId).mkString(", ")}")
         for {
+          _ <- verifyErasure(contactList)
           _ <- scrubAccounts(contactList)
           //                invoiceIds <- processAccountDetails(contactList, request.initiationReference)
           //                _ <- processInvoicesForContacts(invoiceIds, request.initiationReference)

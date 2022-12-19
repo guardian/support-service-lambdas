@@ -13,9 +13,11 @@ class ZuoraRerServiceStub(
   zuoraAccountUpdateOrError: Either[ZuoraRerError, Unit] = Right(()),
 ) extends ZuoraRer {
   override def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = contacts
-  override def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess] = zuoraAccountSuccessOrError
-  override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]] = zuoraInvoiceStreamsOrError
+//  override def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess] = zuoraAccountSuccessOrError
+//  override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]] = zuoraInvoiceStreamsOrError
   override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = zuoraAccountUpdateOrError
+  override def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit] = zuoraAccountUpdateOrError
+
 }
 
 object ZuoraRerServiceStub {

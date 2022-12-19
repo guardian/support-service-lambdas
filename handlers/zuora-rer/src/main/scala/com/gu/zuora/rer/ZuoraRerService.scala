@@ -11,7 +11,7 @@ import cats.syntax.traverse._
 // For Zuora response deserialisation
 case class ZuoraContact(AccountId: String, WorkEmail: String)
 case class AccountNumber(AccountNumber: String)
-case class AccountContact(Id: String, WorkEmail: String)
+case class AccountContact(Id: String, WorkEmail: Option[String])
 case class CustomerAccount(AccountNumber: String)
 case class InvoiceId(id: String)
 case class InvoiceIds(invoices: List[InvoiceId])
@@ -26,9 +26,10 @@ case class JsonDeserialisationError(message: String) extends ZuoraRerError
 
 trait ZuoraRer {
   def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]]
-  def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess]
-  def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]]
+//  def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess]
+//  def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]]
   def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit]
+  def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit]
 }
 
 case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends ZuoraRer with LazyLogging {
@@ -56,6 +57,9 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     zuoraClient.get[JsValue](s"accounts/$accountId/summary").toDisjunction
 
   implicit val readsOb: Reads[AccountNumber] = Json.reads[AccountNumber]
+
+  private def accountSubscriptions(accountId: String): Either[ClientFailure, JsValue] =
+    zuoraClient.get[JsValue](s"subscriptions/accounts/$accountId?page=1&page=10000").toDisjunction
 
   private def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
     /* The WithCheck object validates a JSON response by checking if a 'success' field is set as 'true'.
@@ -130,29 +134,47 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   implicit val readsIIds: Reads[InvoiceId] = Json.reads[InvoiceId]
   implicit val readsIn: Reads[InvoiceIds] = Json.reads[InvoiceIds]
 
-  override def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess] = {
-    logger.info("Retrieving account summary and account object for contact.")
-    for {
-      accountSummary <- accountSummary(contact.AccountId).left.map(err => ZuoraClientError(err.message))
-      accountObj <- accountObj(contact.AccountId).left.map(err => ZuoraClientError(err.message))
-      invoices <- Json.fromJson[InvoiceIds](accountSummary).asEither.left.map(err => JsonDeserialisationError(err.toString()))
-      zuoraRerResponse = ZuoraAccountSuccess(accountSummary, accountObj, invoices)
-    } yield zuoraRerResponse
-  }
+//  override def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess] = {
+//    logger.info("Retrieving account summary and account object for contact.")
+//    for {
+//      accountSummary <- accountSummary(contact.AccountId).left.map(err => ZuoraClientError(err.message))
+//      accountObj <- accountObj(contact.AccountId).left.map(err => ZuoraClientError(err.message))
+//      invoices <- Json.fromJson[InvoiceIds](accountSummary).asEither.left.map(err => JsonDeserialisationError(err.toString()))
+//      zuoraRerResponse = ZuoraAccountSuccess(accountSummary, accountObj, invoices)
+//    } yield zuoraRerResponse
+//  }
 
-  override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]] = {
-    logger.info("Retrieving invoices for contact.")
-    accountInvoices.flatTraverse { invoice =>
-      for {
-        invoices <- getInvoiceFiles(invoice.id).left.map(err => ZuoraClientError(err.message))
-        invoiceDownloadStreams <- invoiceFileContents(invoices.invoiceFiles).left.map(err => ZuoraClientError(err.message))
-      } yield {
-        invoiceDownloadStreams
-      }
-    }
+//  override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]] = {
+//    logger.info("Retrieving invoices for contact.")
+//    accountInvoices.flatTraverse { invoice =>
+//      for {
+//        invoices <- getInvoiceFiles(invoice.id).left.map(err => ZuoraClientError(err.message))
+//        invoiceDownloadStreams <- invoiceFileContents(invoices.invoiceFiles).left.map(err => ZuoraClientError(err.message))
+//      } yield {
+//        invoiceDownloadStreams
+//      }
+//    }
+//  }
+
+  def checkSubscriptionStatus(statuses: Set[String]) : Either[ClientFailure, Unit] = {
+    val invalidStatuses = statuses diff Set("Cancelled", "Expired")
+    if (invalidStatuses == Set())
+      Right(())
+    else
+      Left(GenericError("Subscription contains a non-erasable status: " + invalidStatuses.mkString(",")))
   }
 
   implicit val readsAccount: Reads[CustomerAccount] = Json.reads[CustomerAccount]
+
+  override def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
+    logger.info("Checking that subscription cancelled and payment state balanced for contact.")
+    val verifyOperations = for {
+      subscriptions <- accountSubscriptions(contact.AccountId)
+      subscriptionStatuses = (subscriptions \\ "status").map(jsStatus => jsStatus.as[String]).toSet
+      _ <- checkSubscriptionStatus(subscriptionStatuses)
+    } yield()
+    verifyOperations.left.map(err => ZuoraClientError(err.message))
+  }
 
   override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
     logger.info("Updating account to remove personal data for contact.")
@@ -173,7 +195,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
 
       accountContacts <- accountContacts(contact.AccountId)
       _ = logger.debug(s"account contacts: $accountContacts")
-      mainContactId = accountContacts.filter(_.WorkEmail == contact.WorkEmail).head.Id
+      mainContactId = accountContacts.filter(_.WorkEmail contains contact.WorkEmail).head.Id
       otherContactIds = accountContacts.collect{
         case(contact) if contact.Id != mainContactId => contact.Id
       }.toSet
