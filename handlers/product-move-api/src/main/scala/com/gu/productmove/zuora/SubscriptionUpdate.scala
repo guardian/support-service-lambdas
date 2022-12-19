@@ -63,10 +63,15 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
       price: BigDecimal,
       ratePlanIdToRemove: String,
   ): ZIO[Stage, String, PreviewResult] = {
-    def getPreviewResult(invoice: SubscriptionUpdateInvoice, ids: SupporterPlusRatePlanIds): ZIO[Stage, String, PreviewResult] =
+    def getPreviewResult(
+        invoice: SubscriptionUpdateInvoice,
+        ids: SupporterPlusRatePlanIds,
+    ): ZIO[Stage, String, PreviewResult] =
       invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.ratePlanChargeId) match
         case (supporterPlusInvoice :: Nil, contributionInvoice :: Nil) =>
-          ZIO.succeed(PreviewResult(invoice.amount, contributionInvoice.chargeAmount, supporterPlusInvoice.chargeAmount))
+          ZIO.succeed(
+            PreviewResult(invoice.amount, contributionInvoice.totalAmount, supporterPlusInvoice.totalAmount),
+          )
         case _ =>
           ZIO.fail(
             s"Unexpected invoice item structure was returned from a Zuora preview call. Invoice data was: $invoice",
@@ -124,8 +129,19 @@ case class SubscriptionUpdatePreviewRequest(
     preview: Boolean = true,
 )
 case class SubscriptionUpdatePreviewResponse(invoice: SubscriptionUpdateInvoice)
-case class SubscriptionUpdateInvoiceItem(chargeAmount: BigDecimal, productRatePlanChargeId: String)
-case class SubscriptionUpdateInvoice(amount: BigDecimal, invoiceItems: List[SubscriptionUpdateInvoiceItem])
+case class SubscriptionUpdateInvoiceItem(
+    chargeAmount: BigDecimal,
+    taxAmount: BigDecimal,
+    productRatePlanChargeId: String,
+){
+  val totalAmount = chargeAmount + taxAmount
+}
+case class SubscriptionUpdateInvoice(
+    amount: BigDecimal,
+    amountWithoutTax: BigDecimal,
+    taxAmount: BigDecimal,
+    invoiceItems: List[SubscriptionUpdateInvoiceItem],
+)
 case class SupporterPlusRatePlanIds(ratePlanId: String, ratePlanChargeId: String)
 
 object SubscriptionUpdateRequest {
@@ -170,8 +186,7 @@ private def getSupporterPlusRatePlanIds(
     stage: Stage,
     billingPeriod: BillingPeriod,
 ): Either[String, SupporterPlusRatePlanIds] = {
-  zuoraIdsForStage(config.Stage(stage.toString)).flatMap {
-    zuoraIds =>
+  zuoraIdsForStage(config.Stage(stage.toString)).flatMap { zuoraIds =>
     import zuoraIds.supporterPlusZuoraIds.{monthly, annual}
 
     billingPeriod match {
