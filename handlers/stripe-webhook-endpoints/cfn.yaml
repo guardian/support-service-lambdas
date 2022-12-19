@@ -69,7 +69,7 @@ Resources:
       Description: A lambda for handling customer updates
       Runtime: java11
       Handler: com.gu.stripeCardUpdated.Lambda::apply
-      MemorySize: 1356
+      MemorySize: 1536
       Timeout: 900
       Environment:
         Variables:
