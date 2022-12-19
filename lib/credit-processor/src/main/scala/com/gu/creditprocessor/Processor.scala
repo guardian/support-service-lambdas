@@ -154,6 +154,11 @@ object Processor {
       }
   }(ecForTestInProd)
 
+  def logThis(subscriptionNumber: String, publicationDate: AffectedPublicationDate): Either[Nothing, Unit] = {
+    logger.info(s"subscription ${subscriptionNumber} already has credit amendment for date ${publicationDate}")
+    Right(())
+  }
+
   /** This is the main business logic for adding a credit amendment to a subscription in Zuora
     */
   def addCreditToSubscription[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
@@ -169,7 +174,7 @@ object Processor {
       updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       result: (Request, RatePlanCharge) => Result,
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
-  )(request: Request): ZuoraApiResponse[Result] =
+  )(request: Request): ZuoraApiResponse[Result] = {
     for {
       subscription <- getSubscription(request.subscriptionName)
       account <- getAccount(subscription.accountNumber)
@@ -186,7 +191,8 @@ object Processor {
       // FIXME: nextInvoiceDate <- getNextInvoiceDate(subscription.subscriptionNumber)
       // FIXME: subscriptionUpdate <- SubscriptionUpdate(creditProduct(subscription), subscription, account, request.publicationDate, Some(InvoiceDate(nextInvoiceDate)))
       _ <-
-        if (subscription.hasCreditAmendment(request)) Right(())
+        if (subscription.hasCreditAmendment(request))
+          logThis(subscription.subscriptionNumber, request.publicationDate)
         else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
       addedCharge <- updatedSubscription
@@ -196,6 +202,7 @@ object Processor {
       logger.info(s"Added credit ${addedCharge.number} to ${subscription.subscriptionNumber}")
       result(request, addedCharge)
     }
+  }
 
   def getDatesToProcess(
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
