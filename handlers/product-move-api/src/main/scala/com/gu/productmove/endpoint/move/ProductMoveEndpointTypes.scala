@@ -35,6 +35,7 @@ object ProductMoveEndpointTypes {
   ) extends OutputBody
   case class InternalServerError(message: String) extends OutputBody
   given Schema[Success] = inlineSchema(Schema.derived)
+  given Schema[PreviewResult] = inlineSchema(Schema.derived)
   given JsonEncoder[Success] = DeriveJsonEncoder.gen[Success]
   given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
   given JsonEncoder[PreviewResult] = DeriveJsonEncoder.gen[PreviewResult]

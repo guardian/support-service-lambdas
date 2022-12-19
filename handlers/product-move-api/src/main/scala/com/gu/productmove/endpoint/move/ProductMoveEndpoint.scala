@@ -9,33 +9,8 @@ import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{
-  GetAccount,
-  GetAccountLive,
-  GetSubscription,
-  GetSubscriptionLive,
-  InvoicePreview,
-  InvoicePreviewLive,
-  Subscribe,
-  SubscribeLive,
-  SubscriptionUpdate,
-  SubscriptionUpdateInvoice,
-  SubscriptionUpdateLive,
-  ZuoraCancel,
-  ZuoraCancelLive,
-}
-import com.gu.productmove.{
-  AwsCredentialsLive,
-  AwsS3Live,
-  EmailMessage,
-  EmailPayload,
-  EmailPayloadContactAttributes,
-  EmailPayloadSubscriberAttributes,
-  GuStageLive,
-  SQS,
-  SQSLive,
-  SttpClientLive,
-}
+import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateInvoice, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -43,7 +18,7 @@ import sttp.tapir.json.zio.jsonBody
 import zio.{Clock, IO, URIO, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZoneId}
 import java.time.format.DateTimeFormatter
 
 // this is the description for just the one endpoint
@@ -90,7 +65,11 @@ object ProductMoveEndpoint {
           oneOf(
             oneOfVariant(
               sttp.model.StatusCode.Ok,
-              jsonBody[Success].copy(info = EndpointIO.Info.empty.copy(description = Some("Success."))),
+              jsonBody[Success].copy(info = EndpointIO.Info.empty.copy(description = Some("Update Success."))),
+            ),
+            oneOfVariant(
+              sttp.model.StatusCode.Ok,
+              jsonBody[PreviewResult].copy(info = EndpointIO.Info.empty.copy(description = Some("Preview result."))),
             ),
             oneOfVariant(
               sttp.model.StatusCode.InternalServerError,
@@ -122,7 +101,7 @@ object ProductMoveEndpoint {
       ZuoraGetLive.layer,
       SubscriptionUpdateLive.layer,
       SQSLive.layer,
-      InvoicePreviewLive.layer,
+      //InvoicePreviewLive.layer,
       GetAccountLive.layer,
       GuStageLive.layer,
     )
@@ -174,8 +153,8 @@ object ProductMoveEndpoint {
       price: BigDecimal,
       billingPeriod: BillingPeriod,
       currentRatePlanId: String,
-  ) = for {
-
+  ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Stage, String, OutputBody] = for {
+    _ <- ZIO.log("Fetching Preview from Zuora")
     previewResponse <- SubscriptionUpdate
       .preview(subscriptionId, billingPeriod, price, currentRatePlanId)
       .addLogMessage("SubscriptionUpdate")
@@ -189,6 +168,7 @@ object ProductMoveEndpoint {
       currentRatePlanId: String,
       subscription: GetSubscription.GetSubscriptionResponse,
   ) = for {
+    _ <- ZIO.log("Performing product move update")
     getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
 
     updateResponse <- SubscriptionUpdate
