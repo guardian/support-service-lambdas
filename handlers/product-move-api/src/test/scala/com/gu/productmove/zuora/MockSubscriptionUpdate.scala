@@ -8,10 +8,13 @@ import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
 import zio.{IO, ZIO}
 
-class MockSubscriptionUpdate(responses: Map[(String, BillingPeriod, BigDecimal, String), SubscriptionUpdateResponse])
-    extends SubscriptionUpdate {
+class MockSubscriptionUpdate(
+    previewResponse: Map[(String, BillingPeriod, BigDecimal, String), PreviewResult],
+    updateResponse: Map[(String, BillingPeriod, BigDecimal, String), SubscriptionUpdateResponse],
+) extends SubscriptionUpdate {
 
-  private var mutableStore: List[(String, BillingPeriod, BigDecimal, String)] = Nil // we need to remember the side effects
+  private var mutableStore: List[(String, BillingPeriod, BigDecimal, String)] =
+    Nil // we need to remember the side effects
 
   def requests = mutableStore.reverse
 
@@ -23,14 +26,22 @@ class MockSubscriptionUpdate(responses: Map[(String, BillingPeriod, BigDecimal, 
   ): ZIO[Any, String, SubscriptionUpdateResponse] = {
     mutableStore = (subscriptionId, billingPeriod, price, ratePlanIdToRemove) :: mutableStore
 
-    responses.get(subscriptionId, billingPeriod, price, ratePlanIdToRemove) match
+    updateResponse.get(subscriptionId, billingPeriod, price, ratePlanIdToRemove) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(s"success = false")
   }
 
-  override def preview(subscriptionId: String, billingPeriod: BillingPeriod, price: BigDecimal, ratePlanIdToRemove: String): ZIO[GuStageLive.Stage, String, PreviewResult] = {
-    val previewResult = PreviewResult(10, -10, 20)
-    ZIO.succeed(previewResult) //TODO: test this for real
+  override def preview(
+      subscriptionId: String,
+      billingPeriod: BillingPeriod,
+      price: BigDecimal,
+      ratePlanIdToRemove: String,
+  ): ZIO[GuStageLive.Stage, String, PreviewResult] = {
+    mutableStore = (subscriptionId, billingPeriod, price, ratePlanIdToRemove) :: mutableStore
+
+    previewResponse.get(subscriptionId, billingPeriod, price, ratePlanIdToRemove) match
+      case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
+      case None => ZIO.fail(s"success = false")
   }
 
 }

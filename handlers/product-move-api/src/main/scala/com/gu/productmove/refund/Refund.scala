@@ -6,7 +6,6 @@ import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, SQSLive, GuStag
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.{ExpectedInput, OutputBody, Success}
 import com.gu.productmove.endpoint.cancel.zuora.GetSubscription
-import com.gu.productmove.endpoint.move.ProductMoveEndpoint.productMove
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
@@ -15,7 +14,6 @@ import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
   GetAccountLive,
   GetSubscriptionLive,
-  InvoicePreviewLive,
   SubscribeLive,
   ZuoraCancel,
   ZuoraCancelLive,

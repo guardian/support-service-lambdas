@@ -2,6 +2,7 @@ package com.gu.productmove
 
 import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.productmove.endpoint.available.Currency
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
@@ -9,14 +10,13 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
 import com.gu.productmove.zuora.{
   DefaultPaymentMethod,
-  InvoicePreview,
   SubscriptionUpdateInvoice,
   SubscriptionUpdateInvoiceItem,
+  SubscriptionUpdatePreviewResponse,
   SubscriptionUpdateResponse,
 }
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
-import com.gu.productmove.zuora.InvoicePreview.*
 
 import java.time.LocalDate
 
@@ -211,30 +211,15 @@ val salesforceRecordInput1 = SalesforceRecordInput("A-S00339056", BigDecimal(50)
 val salesforceRecordInput2 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(28))
 
 //-----------------------------------------------------
-// Stubs for InvoicePreview service
-//-----------------------------------------------------
-val DigiSubWithOfferInvoicePreview = ZuoraInvoiceList(
-  List(
-    ZuoraInvoiceItem(
-      subscriptionName = "newSubscriptionName",
-      serviceStartDate = LocalDate.of(2022, 7, 31),
-      chargeAmount = 9.99,
-      taxAmount = 2.00,
-    ),
-    ZuoraInvoiceItem(
-      subscriptionName = "newSubscriptionName",
-      serviceStartDate = LocalDate.of(2022, 7, 31),
-      chargeAmount = -5.00,
-      taxAmount = -1.00,
-    ),
-  ),
-)
-
-//-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
 val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as")
 val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2")
+
+//-----------------------------------------------------
+// Stubs for SubscriptionUpdate preview service
+//-----------------------------------------------------
+val subscriptionUpdatePreviewResult = PreviewResult(40, -10, 50)
 
 //-----------------------------------------------------
 // Stubs for GetSfSubscription service

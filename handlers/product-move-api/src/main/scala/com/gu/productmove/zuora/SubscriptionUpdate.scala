@@ -133,7 +133,7 @@ case class SubscriptionUpdateInvoiceItem(
     chargeAmount: BigDecimal,
     taxAmount: BigDecimal,
     productRatePlanChargeId: String,
-){
+) {
   val totalAmount = chargeAmount + taxAmount
 }
 case class SubscriptionUpdateInvoice(
