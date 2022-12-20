@@ -16,7 +16,7 @@ case class ZuoraAccountMoveSubscriptionCommand(
 
 case class MoveSubscriptionAtZuoraAccountResponse(message: String)
 
-object Zuora {
+object Zuora extends LazyLogging {
 
   /**
    * for legacy calls when Oauth is hardcoded to holidayStopProcessor
@@ -51,17 +51,21 @@ object Zuora {
   }
 
   def subscriptionGetResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Identity, Any])(subscriptionName: SubscriptionName): ZuoraApiResponse[Subscription] = {
-    basicRequest.get(uri"${config.baseUrl}/subscriptions/${subscriptionName.value}")
+    val response = basicRequest.get(uri"${config.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[Subscription])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
       .send(backend)
-      .body
+
+    logger.info(s"subscriptionGetResponse for sub ${subscriptionName.value} is ${response.body.toString}")
+    response.body
   }
 
   def subscriptionUpdateResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Identity, Any])(subscription: Subscription, update: SubscriptionUpdate): ZuoraApiResponse[Unit] = {
+    logger.info(s"request body for subscriptionUpdateResponse is ${update.toString}")
+
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
-    basicRequest.put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
+    val response = basicRequest.put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(update)
       .response(asJson[ZuoraStatusResponse])
@@ -74,7 +78,9 @@ object Zuora {
           else Left(ZuoraApiFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
       .send(backend)
-      .body.left.map(failure => ZuoraApiFailure(errMsg(failure.reason)))
+      logger.info(s"response for subscriptionUpdateResponse is ${response.body.toString}")
+
+      response.body.left.map(failure => ZuoraApiFailure(errMsg(failure.reason)))
   }
 
   def accountGetResponse(
