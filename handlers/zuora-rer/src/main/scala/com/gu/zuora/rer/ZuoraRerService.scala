@@ -1,6 +1,6 @@
 package com.gu.zuora.rer
 
-import com.gu.util.resthttp.RestRequestMaker.{DownloadStream, PutRequest, RelativePath, Requests, WithoutCheck}
+import com.gu.util.resthttp.RestRequestMaker.{DownloadStream, PostRequest, PutRequest, RelativePath, Requests, WithoutCheck}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, GenericError}
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
@@ -12,12 +12,12 @@ import cats.syntax.traverse._
 case class ZuoraContact(AccountId: String, WorkEmail: String)
 case class AccountNumber(AccountNumber: String)
 case class AccountContact(Id: String, WorkEmail: Option[String])
-case class CustomerAccount(AccountNumber: String)
+case class CustomerAccount(AccountNumber: String, Balance: BigDecimal, CreditBalance: BigDecimal)
 case class InvoiceId(id: String)
 case class InvoiceIds(invoices: List[InvoiceId])
 case class InvoicePdfUrl(pdfFileUrl: String)
 case class InvoiceFiles(invoiceFiles: List[InvoicePdfUrl])
-
+case class BillingDeletionResult(id: String, status: String, success: Boolean)
 case class ZuoraAccountSuccess(accountSummary: JsValue, accountObj: JsValue, invoiceList: InvoiceIds)
 
 trait ZuoraRerError
@@ -115,6 +115,15 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     }
   }
 
+  implicit val readBillingDeletionResult: Reads[BillingDeletionResult] = Json.reads[BillingDeletionResult]
+
+  private def deleteBillingDocuments(accountIds: String): Either[ClientFailure, BillingDeletionResult] = {
+    val jsn = Json.obj(
+      "accountIds" -> List(accountIds)
+    )
+    zuoraClient.post[JsValue, BillingDeletionResult](jsn, "accounts/billing-documents/files/deletion-jobs").toDisjunction
+  }
+
   implicit val readsPdfUrls: Reads[InvoicePdfUrl] = Json.reads[InvoicePdfUrl]
   implicit val readInvoiceFiles: Reads[InvoiceFiles] = Json.reads[InvoiceFiles]
 
@@ -164,6 +173,13 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       Left(GenericError("Subscription contains a non-erasable status: " + invalidStatuses.mkString(",")))
   }
 
+  def checkAccountBalances(customer: CustomerAccount): Either[ClientFailure, Unit] = {
+    if(customer.Balance == 0.0 && customer.CreditBalance == 0.0)
+      Right(())
+    else
+      Left(GenericError("Account balances are not zero"))
+  }
+
   implicit val readsAccount: Reads[CustomerAccount] = Json.reads[CustomerAccount]
 
   override def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
@@ -172,6 +188,8 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       subscriptions <- accountSubscriptions(contact.AccountId)
       subscriptionStatuses = (subscriptions \\ "status").map(jsStatus => jsStatus.as[String]).toSet
       _ <- checkSubscriptionStatus(subscriptionStatuses)
+      accountObj <- accountObj(contact.AccountId)
+      _ <- checkAccountBalances(accountObj.as[CustomerAccount])
     } yield()
     verifyOperations.left.map(err => ZuoraClientError(err.message))
   }
@@ -203,7 +221,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       _ <- scrubContacts(otherContactIds)
 
       // TODO: Delete Billing documents and wait for result
-//      _ <- deleteBillingDocuments()
+      _ <- deleteBillingDocuments()
 
       // TODO: scrub main contact
 //      _ <- scrubContacts(Set(mainContactId))
