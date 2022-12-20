@@ -124,7 +124,6 @@ object ProductMoveEndpoint {
       ZuoraGetLive.layer,
       SubscriptionUpdateLive.layer,
       SQSLive.layer,
-      // InvoicePreviewLive.layer,
       GetAccountLive.layer,
       GuStageLive.layer,
     )
@@ -135,10 +134,11 @@ object ProductMoveEndpoint {
     }
 
   extension (billingPeriod: BillingPeriod)
-    def value =
+    def value: IO[String, String] =
       billingPeriod match {
-        case Monthly => "month"
-        case Annual => "annual"
+        case Monthly => ZIO.succeed("month")
+        case Annual => ZIO.succeed("annual")
+        case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
       }
 
   def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
@@ -154,7 +154,6 @@ object ProductMoveEndpoint {
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
-
       currentRatePlan <- getSingleOrNotEligible(
         subscription.ratePlans,
         s"Subscription: $subscriptionName has more than one ratePlan",
@@ -163,7 +162,6 @@ object ProductMoveEndpoint {
         currentRatePlan.ratePlanCharges,
         s"Subscription: $subscriptionName has more than one ratePlanCharge",
       )
-
       result <-
         if (postData.preview)
           doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currentRatePlan.id)
@@ -181,7 +179,6 @@ object ProductMoveEndpoint {
     previewResponse <- SubscriptionUpdate
       .preview(subscriptionId, billingPeriod, price, currentRatePlanId)
       .addLogMessage("SubscriptionUpdate")
-
   } yield previewResponse
 
   def doUpdate(
@@ -193,16 +190,13 @@ object ProductMoveEndpoint {
   ) = for {
     _ <- ZIO.log("Performing product move update")
     getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
-
     updateResponse <- SubscriptionUpdate
       .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlanId)
       .addLogMessage("SubscriptionUpdate")
     totalDeltaMrr = updateResponse.totalDeltaMrr
-
     account <- getAccountFuture.join
-
     date <- Clock.currentDateTime.map(_.toLocalDate)
-
+    billingPeriod <- ratePlanCharge.billingPeriod.value
     emailFuture <- SQS
       .sendEmail(
         message = EmailMessage(
@@ -216,7 +210,7 @@ object ProductMoveEndpoint {
                 price = price.toString,
                 first_payment_amount = totalDeltaMrr.toString,
                 date_of_first_payment = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = ratePlanCharge.billingPeriod.value,
+                payment_frequency = billingPeriod,
                 contribution_cancellation_date = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                 subscription_id = subscriptionName,
               ),

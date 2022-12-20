@@ -27,7 +27,7 @@ object HandlerSpec extends ZIOSpecDefault {
     def getSubscriptionStubs(subscriptionResponse: GetSubscriptionResponse = getSubscriptionResponse) = {
       Map(expectedSubNameInput -> subscriptionResponse)
     }
-    def subscriptionUpdateInputsShouldBe: (String, BillingPeriod, BigDecimal, String) =
+    val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, BigDecimal, String) =
       (expectedSubNameInput, Monthly, 50, "89ad8casd9c0asdcaj89sdc98as")
     val getAccountStubs = Map("accountNumber" -> getAccountResponse)
     val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] = Map(emailMessageBody -> (), salesforceRecordInput2 -> ())
