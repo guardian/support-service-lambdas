@@ -5,6 +5,7 @@ import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
+import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
 import com.gu.productmove.zuora.{DefaultPaymentMethod, InvoicePreview, SubscriptionUpdateResponse}
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
@@ -199,6 +200,9 @@ val refundInput1 = RefundInput(
   invoiceId = "80a23d9sdf9a89fs8cjjk2",
   refundAmount = 4,
 )
+
+val salesforceRecordInput1 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(4))
+val salesforceRecordInput2 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(28))
 
 //-----------------------------------------------------
 // Stubs for InvoicePreview service

@@ -7,7 +7,7 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
-import com.gu.productmove.salesforce.SalesforceHandler.SalesforceRecordInput
+import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, InvoicePreview, InvoicePreviewLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}

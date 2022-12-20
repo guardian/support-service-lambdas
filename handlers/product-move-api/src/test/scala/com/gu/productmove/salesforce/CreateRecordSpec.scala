@@ -6,17 +6,10 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
-import com.gu.productmove.salesforce.SalesforceHandler.SalesforceRecordInput
-import com.gu.productmove.salesforce.{
-  CreateRecordLive,
-  GetSfSubscription,
-  GetSfSubscriptionLive,
-  MockCreateRecord,
-  SalesforceClientLive,
-  SalesforceHandler,
-}
+import com.gu.productmove.salesforce.{CreateRecordLive, GetSfSubscription, GetSfSubscriptionLive, MockCreateRecord, SalesforceClientLive, SalesforceHandler}
 import com.gu.productmove.*
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordResponse
+import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import zio.test.*
 import zio.test.Assertion.*
 import zio.*
@@ -32,8 +25,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
          */
 
         for {
-          _ <- SalesforceHandler
-            .createSfRecord(
+          _ <- Salesforce.createSfRecord(
               SalesforceRecordInput(
                 "A-S00102815",
                 10.0000000,
@@ -60,7 +52,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
         val createRecordStubs = Map(createRecordRequest1 -> CreateRecordResponse("a0s9E00000ehvxUQAQ"))
 
         (for {
-          output <- SalesforceHandler.createSfRecord(
+          output <- Salesforce.createSfRecord(
             SalesforceRecordInput(
               "A-S00102815",
               BigDecimal(100),

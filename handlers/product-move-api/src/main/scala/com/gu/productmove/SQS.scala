@@ -2,7 +2,7 @@ package com.gu.productmove
 
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.refund.RefundInput
-import com.gu.productmove.salesforce.SalesforceHandler.SalesforceRecordInput
+import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 import software.amazon.awssdk.regions.Region
