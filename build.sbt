@@ -497,6 +497,7 @@ lazy val `product-move-api` = lambdaProject(
       s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
       s"aws lambda update-function-code --function-name move-product-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
       s"aws lambda update-function-code --function-name product-switch-refund-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
   .dependsOn(`zuora-models`)
