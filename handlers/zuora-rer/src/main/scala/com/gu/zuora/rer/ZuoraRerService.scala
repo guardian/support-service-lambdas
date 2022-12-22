@@ -110,11 +110,37 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
 
   implicit val readBillingDeletionResult: Reads[BillingDeletionResult] = Json.reads[BillingDeletionResult]
 
-  private def deleteBillingDocuments(accountIds: String): Either[ClientFailure, BillingDeletionResult] = {
+  private def deleteBillingDocuments(accountId: String): Either[ClientFailure, BillingDeletionResult] = {
     val jsn = Json.obj(
-      "accountIds" -> List(accountIds)
+      "accountIds" -> List(accountId)
     )
-    zuoraClient.post[JsValue, BillingDeletionResult](jsn, "accounts/billing-documents/files/deletion-jobs").toDisjunction
+    val outcome = for {
+      result <- zuoraClient.post[JsValue, BillingDeletionResult](jsn, "accounts/billing-documents/files/deletion-jobs").toDisjunction
+      jobId = result.id
+      jobStatus <- checkBillingDeletionSuccess(jobId)
+    } yield jobStatus
+
+    outcome match {
+      case Right(BillingDeletionResult(_, "Pending", _)) |
+           Right(BillingDeletionResult(_, "Processing", _)) |
+           Right(BillingDeletionResult(_, "Error", _)) =>
+        Left(GenericError("Billing Deletion processing issue"))
+
+      case _ => outcome
+    }
+  }
+
+  private def checkBillingDeletionSuccess(jobId: String, counter: Int = 0): Either[ClientFailure, BillingDeletionResult] = {
+    val jobStatus = zuoraClient.get[BillingDeletionResult](s"accounts/billing-documents/files/deletion-jobs/${jobId}").toDisjunction
+    logger.info(s"${jobStatus} job deletion")
+    jobStatus match {
+      case Right(BillingDeletionResult(_, "Pending", _)) |
+           Right(BillingDeletionResult(_, "Processing", _))  if counter < 12=>
+        Thread.sleep(5000)
+        checkBillingDeletionSuccess(jobId, counter + 1)
+
+      case _ => jobStatus
+    }
   }
 
   implicit val readsPdfUrls: Reads[InvoicePdfUrl] = Json.reads[InvoicePdfUrl]
@@ -214,9 +240,8 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       }.toSet
       _ = logger.info("scrubbing non-main contacts")
       _ <- scrubContacts(otherContactIds)
-
-      // TODO: Delete Billing documents and wait for result
-      //_ <- deleteBillingDocuments()
+      _ = logger.info("deleting the billing documents")
+      _ <- deleteBillingDocuments(contact.AccountId)
 
       // TODO: scrub main contact
 //      _ <- scrubContacts(Set(mainContactId))
