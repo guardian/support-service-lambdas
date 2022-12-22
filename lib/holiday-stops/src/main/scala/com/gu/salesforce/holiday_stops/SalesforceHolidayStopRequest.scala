@@ -90,6 +90,7 @@ object SalesforceHolidayStopRequest extends Logging {
     Bulk_Suspension_Reason__c: Option[BulkSuspensionReason]
   )
   implicit val format = Json.format[HolidayStopRequest]
+  logger.info(format.toString + "test")
 
   implicit val formatIds = Json.format[RecordsWrapperCaseClass[HolidayStopRequest]]
 
