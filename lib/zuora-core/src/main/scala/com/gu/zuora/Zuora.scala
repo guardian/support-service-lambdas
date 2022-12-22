@@ -5,6 +5,7 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import sttp.client3._
 import sttp.client3.circe._
+import io.circe.syntax._
 
 import scala.annotation.tailrec
 
@@ -57,7 +58,7 @@ object Zuora extends LazyLogging {
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
       .send(backend)
 
-    logger.info(s"subscriptionGetResponse for sub ${subscriptionName.value} is ${response.body.toString}")
+    logger.info(s"subscriptionGetResponse for sub ${subscriptionName.value} is ${response.body.asJson}")
     response.body
   }
 
@@ -78,7 +79,7 @@ object Zuora extends LazyLogging {
           else Left(ZuoraApiFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
       .send(backend)
-      logger.info(s"response for subscriptionUpdateResponse is ${response.body.toString}")
+    logger.info(s"subscriptionUpdateResponse for sub ${subscription.subscriptionNumber} is ${response.body.asJson}")
 
       response.body.left.map(failure => ZuoraApiFailure(errMsg(failure.reason)))
   }
