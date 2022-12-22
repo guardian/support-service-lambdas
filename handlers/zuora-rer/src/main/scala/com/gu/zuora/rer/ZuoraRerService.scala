@@ -12,7 +12,9 @@ import cats.syntax.traverse._
 case class ZuoraContact(AccountId: String, WorkEmail: String)
 case class AccountNumber(AccountNumber: String)
 case class AccountContact(Id: String, WorkEmail: Option[String])
-case class CustomerAccount(AccountNumber: String, Balance: BigDecimal, CreditBalance: BigDecimal)
+case class AccountBasicInfo(accountNumber: String)
+case class AccountMetrics(balance: BigDecimal, creditBalance: BigDecimal, totalInvoiceBalance: BigDecimal)
+case class CustomerAccount(basicInfo: AccountBasicInfo, metrics: AccountMetrics)
 case class InvoiceId(id: String)
 case class InvoiceIds(invoices: List[InvoiceId])
 case class InvoicePdfUrl(pdfFileUrl: String)
@@ -61,22 +63,13 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   private def accountSubscriptions(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"subscriptions/accounts/$accountId?page=1&page=10000").toDisjunction
 
-  private def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
-    /* The WithCheck object validates a JSON response by checking if a 'success' field is set as 'true'.
-     * For some reason, this particular endpoint doesn't return that field so WithoutCheck is passed to the .get method
-     * and a custom check to see if an AccountNumber is present in the response is made instead.
-     */
-    zuoraClient.get[JsValue](s"object/account/$accountId", WithoutCheck).toDisjunction.flatMap { accountObjectRes =>
-      Json.fromJson[AccountNumber](accountObjectRes).asEither match {
-        case Left(err) => Left(GenericError(s"Unable to find AccountNumber in account object response: $err"))
-        case Right(_) => Right(accountObjectRes)
-      }
-    }
-  }
+  private def accountObj(accountId: String): Either[ClientFailure, JsValue] =
+    zuoraClient.get[JsValue](s"accounts/$accountId").toDisjunction
 
   private def accountPaymentMethods(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"accounts/$accountId/payment-methods").toDisjunction
 
+  // TODO: move to using the newer API (Accounts CRUD:update an account is deprecated.
   private def scrubAccountObject(accountId: String, newName: String): Either[ClientFailure, JsValue] = {
     val putReq = PutRequest(
       Json.obj(
@@ -174,12 +167,14 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   }
 
   def checkAccountBalances(customer: CustomerAccount): Either[ClientFailure, Unit] = {
-    if(customer.Balance == 0.0 && customer.CreditBalance == 0.0)
+    if(customer.metrics.balance == 0.0 && customer.metrics.creditBalance == 0.0 && customer.metrics.totalInvoiceBalance == 0.0)
       Right(())
     else
       Left(GenericError("Account balances are not zero"))
   }
 
+  implicit val readsAccountBasicInfo: Reads[AccountBasicInfo] = Json.reads[AccountBasicInfo]
+  implicit val readsAccountMetrics: Reads[AccountMetrics] = Json.reads[AccountMetrics]
   implicit val readsAccount: Reads[CustomerAccount] = Json.reads[CustomerAccount]
 
   override def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
@@ -198,7 +193,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     logger.info("Updating account to remove personal data for contact.")
     val scrubOperations = for {
       accountObj <- accountObj(contact.AccountId)
-      accountNumber = accountObj.as[CustomerAccount].AccountNumber
+      accountNumber = accountObj.as[CustomerAccount].basicInfo.accountNumber
       _ = logger.debug(s"accountObj: $accountObj")
       _ = logger.debug(s"account number = $accountNumber")
       _ = logger.info(s"scrubbing account object")
@@ -221,7 +216,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       _ <- scrubContacts(otherContactIds)
 
       // TODO: Delete Billing documents and wait for result
-      _ <- deleteBillingDocuments()
+      //_ <- deleteBillingDocuments()
 
       // TODO: scrub main contact
 //      _ <- scrubContacts(Set(mainContactId))
