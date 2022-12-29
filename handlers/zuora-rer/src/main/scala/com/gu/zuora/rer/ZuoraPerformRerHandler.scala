@@ -23,22 +23,6 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
       } yield ()
     }
 
-//  def processAccountDetails(contacts: List[ZuoraContact], initiationReference: String): Either[ZuoraRerError, List[InvoiceIds]] =
-//    contacts.traverse { contact =>
-//      for {
-//        zuoraAccountSuccess <- zuoraHelper.accountResponse(contact)
-//        _ <- s3Service.writeSuccessAccountResult(initiationReference, zuoraAccountSuccess, zuoraRerConfig)
-//      } yield zuoraAccountSuccess.invoiceList
-//    }
-//
-//  def processInvoicesForContacts(allContactInvoices: List[InvoiceIds], initiationReference: String): Either[ZuoraRerError, List[Unit]] =
-//    allContactInvoices.traverse { accountInvoices =>
-//      for {
-//        downloadStreams <- zuoraHelper.invoicesResponse(accountInvoices.invoices)
-//        _ <- s3Service.writeSuccessInvoiceResult(initiationReference, downloadStreams, zuoraRerConfig)
-//      } yield ()
-//    }
-
   def initiateRer(
     request: PerformRerRequest
   ): Either[ZuoraRerError, Unit] = {
@@ -51,8 +35,6 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
         for {
           _ <- verifyErasure(contactList)
           _ <- scrubAccounts(contactList)
-          //                invoiceIds <- processAccountDetails(contactList, request.initiationReference)
-          //                _ <- processInvoicesForContacts(invoiceIds, request.initiationReference)
           _ <- s3Service.copyResultsToCompleted(request.initiationReference, zuoraRerConfig)
         } yield Right(())
     }

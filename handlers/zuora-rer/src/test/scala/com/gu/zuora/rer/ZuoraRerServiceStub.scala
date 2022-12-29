@@ -8,16 +8,11 @@ import play.api.libs.json.Json
 
 class ZuoraRerServiceStub(
   contacts: ClientFailableOp[List[ZuoraContact]],
-  zuoraAccountSuccessOrError: Either[ZuoraRerError, ZuoraAccountSuccess],
-  zuoraInvoiceStreamsOrError: Either[ZuoraRerError, List[DownloadStream]],
   zuoraAccountUpdateOrError: Either[ZuoraRerError, Unit] = Right(()),
 ) extends ZuoraRer {
   override def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = contacts
-//  override def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess] = zuoraAccountSuccessOrError
-//  override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]] = zuoraInvoiceStreamsOrError
   override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = zuoraAccountUpdateOrError
   override def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit] = zuoraAccountUpdateOrError
-
 }
 
 object ZuoraRerServiceStub {
@@ -46,8 +41,10 @@ object ZuoraRerServiceStub {
   val zuoraInvoiceSuccess = Right(List(DownloadStream(stubInputStream, 123)))
   val zuoraInvoiceFailure = Left(JsonDeserialisationError("failed to deserialise invoices"))
 
-  def withSuccessResponse = new ZuoraRerServiceStub(successfulZuoraContacts, zuoraAccountSuccess, zuoraInvoiceSuccess)
-  def withFailedContactResponse = new ZuoraRerServiceStub(failedZuoraContactResponse, zuoraAccountSuccess, zuoraInvoiceSuccess)
-  def withFailedAccountResponse = new ZuoraRerServiceStub(successfulZuoraContacts, zuoraAccountFailure, zuoraInvoiceSuccess)
-  def withFailedInvoiceResponse = new ZuoraRerServiceStub(successfulZuoraContacts, zuoraAccountSuccess, zuoraInvoiceFailure)
+  val zuoraScrubAccountSuccess = Right(())
+  val zuoraScrubAccountFailure = Left(ZuoraClientError("scrub account error"))
+
+  def withSuccessResponse = new ZuoraRerServiceStub(successfulZuoraContacts, zuoraScrubAccountSuccess)
+  def withFailedContactResponse = new ZuoraRerServiceStub(failedZuoraContactResponse, zuoraScrubAccountSuccess)
+  def withFailedScrubAccountResponse = new ZuoraRerServiceStub(successfulZuoraContacts, zuoraScrubAccountFailure
 }

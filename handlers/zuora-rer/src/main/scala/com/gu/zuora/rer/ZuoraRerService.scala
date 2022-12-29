@@ -15,12 +15,7 @@ case class AccountContact(Id: String, WorkEmail: Option[String])
 case class AccountBasicInfo(accountNumber: String)
 case class AccountMetrics(balance: BigDecimal, creditBalance: BigDecimal, totalInvoiceBalance: BigDecimal)
 case class CustomerAccount(basicInfo: AccountBasicInfo, metrics: AccountMetrics)
-case class InvoiceId(id: String)
-case class InvoiceIds(invoices: List[InvoiceId])
-case class InvoicePdfUrl(pdfFileUrl: String)
-case class InvoiceFiles(invoiceFiles: List[InvoicePdfUrl])
 case class BillingDeletionResult(id: String, status: String, success: Boolean)
-case class ZuoraAccountSuccess(accountSummary: JsValue, accountObj: JsValue, invoiceList: InvoiceIds)
 
 trait ZuoraRerError
 case class ZuoraClientError(message: String) extends ZuoraRerError
@@ -28,8 +23,6 @@ case class JsonDeserialisationError(message: String) extends ZuoraRerError
 
 trait ZuoraRer {
   def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]]
-//  def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess]
-//  def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]]
   def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit]
   def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit]
 }
@@ -142,47 +135,6 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       case _ => jobStatus
     }
   }
-
-  implicit val readsPdfUrls: Reads[InvoicePdfUrl] = Json.reads[InvoicePdfUrl]
-  implicit val readInvoiceFiles: Reads[InvoiceFiles] = Json.reads[InvoiceFiles]
-
-  private def getInvoiceFiles(invoiceId: String): Either[ClientFailure, InvoiceFiles] =
-    zuoraClient.get[InvoiceFiles](s"invoices/$invoiceId/files").toDisjunction
-
-  private def invoiceFileContents(pdfUrls: List[InvoicePdfUrl]): Either[ClientFailure, List[DownloadStream]] = {
-    pdfUrls.traverse(pdfUrl => {
-      /* The pdf url provided in the invoice only sometimes includes a content-length header. Content-length
-       * is required to upload to S3. For this reason, we're using the 'batch-query' endpoint and a zuoraDownloadClient instead.
-       */
-      val fileIdUrl = pdfUrl.pdfFileUrl.replace("/v1/files/", "batch-query/file/")
-      zuoraDownloadClient.getDownloadStream(fileIdUrl).toDisjunction
-    })
-  }
-
-  implicit val readsIIds: Reads[InvoiceId] = Json.reads[InvoiceId]
-  implicit val readsIn: Reads[InvoiceIds] = Json.reads[InvoiceIds]
-
-//  override def accountResponse(contact: ZuoraContact): Either[ZuoraRerError, ZuoraAccountSuccess] = {
-//    logger.info("Retrieving account summary and account object for contact.")
-//    for {
-//      accountSummary <- accountSummary(contact.AccountId).left.map(err => ZuoraClientError(err.message))
-//      accountObj <- accountObj(contact.AccountId).left.map(err => ZuoraClientError(err.message))
-//      invoices <- Json.fromJson[InvoiceIds](accountSummary).asEither.left.map(err => JsonDeserialisationError(err.toString()))
-//      zuoraRerResponse = ZuoraAccountSuccess(accountSummary, accountObj, invoices)
-//    } yield zuoraRerResponse
-//  }
-
-//  override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraRerError, List[DownloadStream]] = {
-//    logger.info("Retrieving invoices for contact.")
-//    accountInvoices.flatTraverse { invoice =>
-//      for {
-//        invoices <- getInvoiceFiles(invoice.id).left.map(err => ZuoraClientError(err.message))
-//        invoiceDownloadStreams <- invoiceFileContents(invoices.invoiceFiles).left.map(err => ZuoraClientError(err.message))
-//      } yield {
-//        invoiceDownloadStreams
-//      }
-//    }
-//  }
 
   def checkSubscriptionStatus(statuses: Set[String]) : Either[ClientFailure, Unit] = {
     val invalidStatuses = statuses diff Set("Cancelled", "Expired")
