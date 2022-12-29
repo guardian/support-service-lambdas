@@ -55,6 +55,6 @@ object ZuoraRerLocalRun extends App {
   )
 
   runTestPerformZuoraRer(performRerInitiateRequest)
-//  runTestZuoraRer(rerStatusRequest)
+  //  runTestZuoraRer(rerStatusRequest)
 }
 

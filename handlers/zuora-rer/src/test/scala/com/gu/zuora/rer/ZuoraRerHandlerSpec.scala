@@ -2,8 +2,7 @@ package com.gu.zuora.rer
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import circeCodecs._
-import com.gu.zuora.rer.BatonModels.{Completed, Failed, Pending, RerStatusResponse}
-import BatonModels.{Completed, Failed, Pending, RerInitiateRequest, RerInitiateResponse, RerStatusRequest, RerStatusResponse}
+import BatonModels.{Completed, Failed, Pending, RerStatusRequest, RerStatusResponse}
 import io.circe.ParsingFailure
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
@@ -64,7 +63,8 @@ class ZuoraRerHandlerSpec extends AnyFreeSpec with Matchers {
         .unsafeRunSync() shouldBe RerStatusResponse(
           initiationReference = "initiationReference",
           message = "No results found",
-          status = Pending)
+          status = Pending
+        )
     }
 
     def invokeWithString(

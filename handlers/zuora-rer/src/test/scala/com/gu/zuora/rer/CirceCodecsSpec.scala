@@ -4,7 +4,6 @@ import BatonModels.{Completed, Failed, Pending, PerformRerRequest, RerInitiateRe
 import io.circe.parser._
 import io.circe.syntax._
 import circeCodecs._
-import com.gu.zuora.rer.BatonModels.{Completed, Failed, Pending, RerRequest, RerResponse}
 import io.circe.Printer
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers

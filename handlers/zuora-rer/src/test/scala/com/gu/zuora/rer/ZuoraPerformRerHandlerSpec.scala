@@ -84,7 +84,7 @@ class ZuoraPerformRerHandlerSpec extends AnyFreeSpec with Matchers {
     //    }
 
     "should return a failed PerformRerResponse when PerformRerRequest can't be decoded" in {
-      val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withFailedInvoiceResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withSuccessResponse, S3HelperStub.withSuccessResponse, mockConfig)
       val invalidRequest = RerInitiateRequest(subjectEmail = "someSubjectEmail")
       val expectedResponse = PerformRerResponse(
         initiationReference = "",
