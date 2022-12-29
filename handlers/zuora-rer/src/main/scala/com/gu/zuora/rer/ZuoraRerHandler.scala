@@ -2,14 +2,14 @@ package com.gu.zuora.rer
 
 import BatonModels.{Completed, Failed, Pending, PerformRerRequest, RerInitiateRequest, RerInitiateResponse, RerRequest, RerResponse, RerStatusRequest, RerStatusResponse}
 import com.typesafe.scalalogging.LazyLogging
-import java.util.UUID.randomUUID
 
+import java.util.UUID.randomUUID
 import cats.effect.IO
 import circeCodecs._
 import io.circe.syntax._
 import com.gu.effects.InvokeLambda
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 case class ZuoraRerHandler(s3Service: S3Service, zuoraRerConfig: ZuoraRerConfig)
   extends LazyLogging
@@ -40,6 +40,7 @@ case class ZuoraRerHandler(s3Service: S3Service, zuoraRerConfig: ZuoraRerConfig)
     request match {
       case r: RerInitiateRequest => initiate(r)
       case RerStatusRequest(requestIdValue) => status(requestIdValue)
+      case _ => Failure(new RuntimeException("Unexpected request"))
     }
   }
 }

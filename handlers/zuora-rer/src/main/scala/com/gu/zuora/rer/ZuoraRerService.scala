@@ -1,16 +1,14 @@
 package com.gu.zuora.rer
 
-import com.gu.util.resthttp.RestRequestMaker.{DownloadStream, PostRequest, PutRequest, RelativePath, Requests, WithoutCheck}
+import com.gu.util.resthttp.RestRequestMaker.{PutRequest, RelativePath, Requests}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, GenericError}
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json.{JsValue, Json, Reads}
-import cats.syntax.traverse._
 
 // For Zuora response deserialisation
 case class ZuoraContact(AccountId: String, WorkEmail: String)
-case class AccountNumber(AccountNumber: String)
 case class AccountContact(Id: String, WorkEmail: Option[String])
 case class AccountBasicInfo(accountNumber: String)
 case class AccountMetrics(balance: BigDecimal, creditBalance: BigDecimal, totalInvoiceBalance: BigDecimal)
@@ -48,11 +46,6 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     result.toDisjunction
   }
 
-  private def accountSummary(accountId: String): Either[ClientFailure, JsValue] =
-    zuoraClient.get[JsValue](s"accounts/$accountId/summary").toDisjunction
-
-  implicit val readsOb: Reads[AccountNumber] = Json.reads[AccountNumber]
-
   private def accountSubscriptions(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"subscriptions/accounts/$accountId?page=1&page=10000").toDisjunction
 
@@ -83,8 +76,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
         if (lastResult.isRight) {
           val putReq = PutRequest(Json.obj(), RelativePath(s"payment-methods/$paymentMethodId/scrub"))
           zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
-        }
-        else // fail on first error
+        } else // fail on first error
           lastResult
     }
   }
@@ -95,8 +87,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
         if (lastResult.isRight) {
           val putReq = PutRequest(Json.obj(), RelativePath(s"contacts/$contactId/scrub"))
           zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
-        }
-        else // fail on first error
+        } else // fail on first error
           lastResult
     }
   }
@@ -115,8 +106,8 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
 
     outcome match {
       case Right(BillingDeletionResult(_, "Pending", _)) |
-           Right(BillingDeletionResult(_, "Processing", _)) |
-           Right(BillingDeletionResult(_, "Error", _)) =>
+        Right(BillingDeletionResult(_, "Processing", _)) |
+        Right(BillingDeletionResult(_, "Error", _)) =>
         Left(GenericError("Billing Deletion processing issue"))
 
       case _ => outcome
@@ -128,7 +119,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     logger.info(s"${jobStatus} job deletion")
     jobStatus match {
       case Right(BillingDeletionResult(_, "Pending", _)) |
-           Right(BillingDeletionResult(_, "Processing", _))  if counter < 12=>
+        Right(BillingDeletionResult(_, "Processing", _)) if counter < 12 =>
         Thread.sleep(5000)
         checkBillingDeletionSuccess(jobId, counter + 1)
 
@@ -136,7 +127,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     }
   }
 
-  def checkSubscriptionStatus(statuses: Set[String]) : Either[ClientFailure, Unit] = {
+  def checkSubscriptionStatus(statuses: Set[String]): Either[ClientFailure, Unit] = {
     val invalidStatuses = statuses diff Set("Cancelled", "Expired")
     if (invalidStatuses == Set())
       Right(())
@@ -145,7 +136,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   }
 
   def checkAccountBalances(customer: CustomerAccount): Either[ClientFailure, Unit] = {
-    if(customer.metrics.balance == 0.0 && customer.metrics.creditBalance == 0.0 && customer.metrics.totalInvoiceBalance == 0.0)
+    if (customer.metrics.balance == 0.0 && customer.metrics.creditBalance == 0.0 && customer.metrics.totalInvoiceBalance == 0.0)
       Right(())
     else
       Left(GenericError("Account balances are not zero"))
@@ -163,7 +154,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       _ <- checkSubscriptionStatus(subscriptionStatuses)
       accountObj <- accountObj(contact.AccountId)
       _ <- checkAccountBalances(accountObj.as[CustomerAccount])
-    } yield()
+    } yield ()
     verifyOperations.left.map(err => ZuoraClientError(err.message))
   }
 
@@ -187,8 +178,8 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       accountContacts <- accountContacts(contact.AccountId)
       _ = logger.debug(s"account contacts: $accountContacts")
       mainContactId = accountContacts.filter(_.WorkEmail contains contact.WorkEmail).head.Id
-      otherContactIds = accountContacts.collect{
-        case(contact) if contact.Id != mainContactId => contact.Id
+      otherContactIds = accountContacts.collect {
+        case (contact) if contact.Id != mainContactId => contact.Id
       }.toSet
       _ = logger.info("scrubbing non-main contacts")
       _ <- scrubContacts(otherContactIds)
@@ -196,7 +187,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       _ <- deleteBillingDocuments(contact.AccountId)
 
       // TODO: scrub main contact
-//      _ <- scrubContacts(Set(mainContactId))
+      //      _ <- scrubContacts(Set(mainContactId))
 
     } yield ()
     scrubOperations.left.map(err => ZuoraClientError(err.message))

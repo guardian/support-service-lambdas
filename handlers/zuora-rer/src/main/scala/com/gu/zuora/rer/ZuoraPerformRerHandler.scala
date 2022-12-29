@@ -28,7 +28,7 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
   ): Either[ZuoraRerError, Unit] = {
     zuoraHelper.zuoraContactsWithEmail(request.subjectEmail).toDisjunction match {
       case Left(err) =>
-        logger.error("Failed to perform subject access request to Zuora.")
+        logger.error("Failed to request contact account ids from Zuora.")
         Left(ZuoraClientError(err.message))
       case Right(contactList) =>
         logger.info(s"Found ${contactList.length} account(s) with id's: ${contactList.map(_.AccountId).mkString(", ")}")
@@ -36,7 +36,7 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
           _ <- verifyErasure(contactList)
           _ <- scrubAccounts(contactList)
           _ <- s3Service.copyResultsToCompleted(request.initiationReference, zuoraRerConfig)
-        } yield Right(())
+        } yield ()
     }
   }
 
