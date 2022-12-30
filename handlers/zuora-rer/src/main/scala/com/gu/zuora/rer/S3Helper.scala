@@ -26,17 +26,10 @@ case class S3WriteSuccess() extends S3Response
 
 case class S3Error(message: String) extends ZuoraRerError
 
-case class InvoiceId(id: String)
-case class InvoiceIds(invoices: List[InvoiceId])
-
-case class ZuoraAccountSuccess(accountSummary: JsValue, accountObj: JsValue, invoiceList: InvoiceIds)
-
 trait S3Service {
   def checkForResults(initiationId: String, config: ZuoraRerConfig): Try[S3StatusResponse]
   def copyResultsToCompleted(initiationReference: String, config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess]
   def writeFailedResult(initiationId: String, zuoraError: ZuoraRerError, config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess]
-  def writeSuccessAccountResult(initiationId: String, zuoraSuccess: ZuoraAccountSuccess, config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess]
-  def writeSuccessInvoiceResult(initiationId: String, zuoraSuccess: List[DownloadStream], config: ZuoraRerConfig): Either[S3Error, List[S3WriteSuccess]]
 }
 
 object S3Helper extends S3Service with LazyLogging {
@@ -114,40 +107,5 @@ object S3Helper extends S3Service with LazyLogging {
       ObjectCannedACL.BUCKET_OWNER_READ,
       zuoraError.toString
     ).toEither.map(_ => S3WriteSuccess()).left.map(err => S3Error(err.getMessage))
-  }
-
-  override def writeSuccessAccountResult(
-    initiationId: String,
-    zuoraRerResponse: ZuoraAccountSuccess,
-    config: ZuoraRerConfig
-  ): Either[S3Error, S3WriteSuccess] = {
-    val resultsPath = s"${config.resultsPath}/$initiationId/pending/$randomUUID"
-    val accountDetails = Seq(zuoraRerResponse.accountSummary, zuoraRerResponse.accountObj).mkString("\n")
-    logger.info("Uploading successful account result to S3.")
-    UploadToS3.putStringWithAcl(
-      S3Location(config.resultsBucket, resultsPath),
-      ObjectCannedACL.BUCKET_OWNER_READ,
-      accountDetails
-    ).toEither.map(_ => S3WriteSuccess()).left.map(err => S3Error(err.getMessage))
-  }
-
-  override def writeSuccessInvoiceResult(
-    initiationId: String,
-    zuoraInvoiceStreams: List[DownloadStream],
-    config: ZuoraRerConfig
-  ): Either[S3Error, List[S3WriteSuccess]] = {
-    logger.info("Uploading successful invoice results to S3.")
-    val resultsPath = s"${config.resultsPath}/$initiationId/pending/$randomUUID"
-    val uploadRequest = PutObjectRequest.builder
-      .bucket(config.resultsBucket)
-      .key(resultsPath)
-      .build()
-    zuoraInvoiceStreams.traverse { invoiceStream =>
-      val requestBody = RequestBody.fromInputStream(invoiceStream.stream, invoiceStream.lengthBytes)
-      UploadToS3.putObject(uploadRequest, requestBody) match {
-        case Failure(err) => Left(S3Error(err.getMessage))
-        case Success(_) => Right(S3WriteSuccess())
-      }
-    }
   }
 }
