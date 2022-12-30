@@ -23,20 +23,20 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
       } yield ()
     }
 
-  def initiateRer(
-    request: PerformRerRequest
-  ): Either[ZuoraRerError, Unit] = {
+  def initiateRer(request: PerformRerRequest): Either[ZuoraRerError, String] = {
     zuoraHelper.zuoraContactsWithEmail(request.subjectEmail).toDisjunction match {
       case Left(err) =>
         logger.error("Failed to request contact account ids from Zuora.")
         Left(ZuoraClientError(err.message))
       case Right(contactList) =>
-        logger.info(s"Found ${contactList.length} account(s) with id's: ${contactList.map(_.AccountId).mkString(", ")}")
+        val accountIds = contactList.map(_.AccountId).mkString(", ")
+        logger.info(s"Found ${contactList.length} account(s) with id's: $accountIds")
         for {
           _ <- verifyErasure(contactList)
           _ <- scrubAccounts(contactList)
           _ <- s3Service.copyResultsToCompleted(request.initiationReference, zuoraRerConfig)
-        } yield ()
+        } yield if (contactList.length > 0) s"Successfully scrubbed account(s): $accountIds"
+                else "No accounts found with requested subject email"
     }
   }
 
@@ -50,7 +50,7 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
           case Left(err) =>
             s3Service.writeFailedResult(r.initiationReference, err, zuoraRerConfig)
             IO.pure(PerformRerResponse(r.initiationReference, err.toString, Failed, r.subjectEmail))
-          case Right(_) => IO.pure(PerformRerResponse(r.initiationReference, "Success", Completed, r.subjectEmail))
+          case Right(message) => IO.pure(PerformRerResponse(r.initiationReference, message, Completed, r.subjectEmail))
         }
       case _ =>
         val error = "Unable to retrieve email and initiation reference from request"
