@@ -18,7 +18,7 @@ class ZuoraPerformRerHandlerSpec extends AnyFreeSpec with Matchers {
       val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withSuccessResponse, S3HelperStub.withSuccessResponse, mockConfig)
       val expectedResponse = PerformRerResponse(
         initiationReference = "someRequestId",
-        message = "Success",
+        message = "Successfully scrubbed account(s): 123456789",
         status = Completed,
         subjectEmail = "someSubjectEmail"
       )
@@ -55,33 +55,33 @@ class ZuoraPerformRerHandlerSpec extends AnyFreeSpec with Matchers {
         .unsafeRunSync() shouldBe expectedResponse
     }
 
-    //    "should return a failed PerformRerResponse when unable to retrieve account data" in {
-    //      val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withFailedAccountResponse, S3HelperStub.withSuccessResponse, mockConfig)
-    //      val expectedResponse = PerformRerResponse(
-    //        status = Failed,
-    //        initiationReference = "someRequestId",
-    //        subjectEmail = "someSubjectEmail",
-    //        message = Some("ZuoraClientError(client error)")
-    //      )
-    //
-    //      lambda
-    //        .handle(validPerformRerRequest)
-    //        .unsafeRunSync() shouldBe expectedResponse
-    //    }
-    //
-    //    "should return a failed PerformRerResponse when unable to retrieve invoice data" in {
-    //      val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withFailedInvoiceResponse, S3HelperStub.withSuccessResponse, mockConfig)
-    //      val expectedResponse = PerformRerResponse(
-    //        status = Failed,
-    //        initiationReference = "someRequestId",
-    //        subjectEmail = "someSubjectEmail",
-    //        message = Some("JsonDeserialisationError(failed to deserialise invoices)")
-    //      )
-    //
-    //      lambda
-    //        .handle(validPerformRerRequest)
-    //        .unsafeRunSync() shouldBe expectedResponse
-    //    }
+    "should return a failed PerformRerResponse when unable to verify that account data is ready for deletion" in {
+      val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withFailedVerifyErasureResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val expectedResponse = PerformRerResponse(
+        status = Failed,
+        initiationReference = "someRequestId",
+        subjectEmail = "someSubjectEmail",
+        message = "PreconditionCheckError(pre-condition checks failed)"
+      )
+
+      lambda
+        .handle(validPerformRerRequest)
+        .unsafeRunSync() shouldBe expectedResponse
+    }
+
+    "should return a failed PerformRerResponse when unable to scrub account data" in {
+      val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withFailedScrubAccountResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val expectedResponse = PerformRerResponse(
+        status = Failed,
+        initiationReference = "someRequestId",
+        subjectEmail = "someSubjectEmail",
+        message = "ZuoraClientError(scrub account error)"
+      )
+
+      lambda
+        .handle(validPerformRerRequest)
+        .unsafeRunSync() shouldBe expectedResponse
+    }
 
     "should return a failed PerformRerResponse when PerformRerRequest can't be decoded" in {
       val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withSuccessResponse, S3HelperStub.withSuccessResponse, mockConfig)

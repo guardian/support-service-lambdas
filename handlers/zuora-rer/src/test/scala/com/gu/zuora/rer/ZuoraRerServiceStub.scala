@@ -1,10 +1,6 @@
 package com.gu.zuora.rer
 
-import java.io.ByteArrayInputStream
-
-import com.gu.util.resthttp.RestRequestMaker.DownloadStream
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
-import play.api.libs.json.Json
 
 class ZuoraRerServiceStub(
   contacts: ClientFailableOp[List[ZuoraContact]],
@@ -20,30 +16,8 @@ object ZuoraRerServiceStub {
   val successfulZuoraContacts: ClientSuccess[List[ZuoraContact]] = ClientSuccess(List(ZuoraContact("123456789", "a@b.com")))
   val failedZuoraContactResponse: GenericError = GenericError("Failed to get contacts")
 
-  val accountSummary: String =
-    """
-      {
-        "accountSummary": "summary"
-      }
-    """.stripMargin
-
-  val accountObject: String =
-    """
-      {
-        "accountSummary": "summary"
-      }
-    """.stripMargin
-
-  val stubInputStream = new ByteArrayInputStream("test data".getBytes)
-
-  val zuoraAccountSuccess = Right(ZuoraAccountSuccess(Json.parse(accountSummary), Json.parse(accountObject), InvoiceIds(List(InvoiceId("123abc")))))
-  val zuoraAccountFailure = Left(ZuoraClientError("client error"))
-
-  val zuoraInvoiceSuccess = Right(List(DownloadStream(stubInputStream, 123)))
-  val zuoraInvoiceFailure = Left(JsonDeserialisationError("failed to deserialise invoices"))
-
   val zuoraVerifyErasureSuccess = Right(())
-  val zuoraVerifyErasureFailure = Left(ZuoraClientError("can't erase account"))
+  val zuoraVerifyErasureFailure = Left(PreconditionCheckError("pre-condition checks failed"))
 
   val zuoraScrubAccountSuccess = Right(())
   val zuoraScrubAccountFailure = Left(ZuoraClientError("scrub account error"))

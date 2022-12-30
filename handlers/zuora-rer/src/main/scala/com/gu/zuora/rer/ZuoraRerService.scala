@@ -17,7 +17,7 @@ case class BillingDeletionResult(id: String, status: String, success: Boolean)
 
 trait ZuoraRerError
 case class ZuoraClientError(message: String) extends ZuoraRerError
-case class JsonDeserialisationError(message: String) extends ZuoraRerError
+case class PreconditionCheckError(message: String) extends ZuoraRerError
 
 trait ZuoraRer {
   def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]]
@@ -135,20 +135,22 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     }
   }
 
-  def checkSubscriptionStatus(statuses: Set[String]): Either[ClientFailure, Unit] = {
+  def checkSubscriptionStatus(statuses: Set[String]): Either[ZuoraRerError, Unit] = {
     val invalidStatuses = statuses diff Set("Cancelled", "Expired")
     if (invalidStatuses == Set())
       Right(())
     else
-      Left(GenericError("Subscription contains a non-erasable status: " + invalidStatuses.mkString(",")))
+      Left(PreconditionCheckError("Subscription contains a non-erasable status: " + invalidStatuses.mkString(",")))
   }
 
-  def checkAccountBalances(customer: CustomerAccount): Either[ClientFailure, Unit] = {
+  def checkAccountBalances(customer: CustomerAccount): Either[ZuoraRerError, Unit] = {
     if (customer.metrics.balance == 0.0 && customer.metrics.creditBalance == 0.0 && customer.metrics.totalInvoiceBalance == 0.0)
       Right(())
     else
-      Left(GenericError("Account balances are not zero"))
+      Left(PreconditionCheckError("Account balances are not zero"))
   }
+
+  def toZuoraClientError(err: ClientFailure) = ZuoraClientError(err.message)
 
   implicit val readsAccountBasicInfo: Reads[AccountBasicInfo] = Json.reads[AccountBasicInfo]
   implicit val readsAccountMetrics: Reads[AccountMetrics] = Json.reads[AccountMetrics]
@@ -156,14 +158,13 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
 
   override def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
     logger.info("Checking that subscription cancelled and payment state balanced for contact.")
-    val verifyOperations = for {
-      subscriptions <- accountSubscriptions(contact.AccountId)
+    for {
+      subscriptions <- accountSubscriptions(contact.AccountId).left.map(toZuoraClientError)
       subscriptionStatuses = (subscriptions \\ "status").map(jsStatus => jsStatus.as[String]).toSet
       _ <- checkSubscriptionStatus(subscriptionStatuses)
-      accountObj <- accountObj(contact.AccountId)
+      accountObj <- accountObj(contact.AccountId).left.map(toZuoraClientError)
       _ <- checkAccountBalances(accountObj.as[CustomerAccount])
     } yield ()
-    verifyOperations.left.map(err => ZuoraClientError(err.message))
   }
 
   override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
@@ -199,7 +200,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       _ <- scrubContacts(Set(mainContactId))
 
     } yield ()
-    scrubOperations.left.map(err => ZuoraClientError(err.message))
+    scrubOperations.left.map(toZuoraClientError)
   }
 
 }
