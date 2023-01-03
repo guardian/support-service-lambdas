@@ -22,10 +22,13 @@ Results are stored in the `baton` AWS account in the `gu-baton-results` bucket:
 
 ## ZuoraPerformRerLambda 
 The ZuoraPerformRerLambda works as follows:
-1. Retrieves all contacts associated with an email address
-2. Iterates through each contact and obtains their account details (comprising of an account summary and account object) and writes this to a /pending path in S3.
-3. TBC
-4. TBC
+1. Retrieves all contacts and account id's associated with an email address
+2. Checks that all accounts are ready for erasure (all subs cancelled, no outstanding balances)
+3. Iterates through each account and:
+   - scrubs personal data from the Account object
+   - scrubs payment methods for the account
+   - scrub personal data from Contacts
+   - deleted Billing Documents
 
 ### Zuora Service Account Config
 

@@ -21,8 +21,8 @@ case class PreconditionCheckError(message: String) extends ZuoraRerError
 
 trait ZuoraRer {
   def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]]
-  def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit]
   def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit]
+  def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit]
 }
 
 case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends ZuoraRer with LazyLogging {
@@ -64,8 +64,8 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
         "IdentityId__c" -> "",
         "autoPay" -> false,
         // we set soldToContact.country here to satisfy account validation rules,
-        // in case the sold-to contact has already been scrubbed.
-        // If the contact has no country, we'll get the error:
+        // i.e. the account will not update unless it has a country.
+        // If the sold-to contact has already been scrubbed and has no country, we'll get the error:
         // "Taxation Requirement: Country is a required field for Sold To Contact"
         "soldToContact" -> Json.obj("country" -> "United Kingdom")
       ),
@@ -196,6 +196,8 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       _ = logger.info("deleting the billing documents")
       _ <- deleteBillingDocuments(contact.AccountId)
 
+      // The main contact is scrubbed last, so that any failing operations,
+      // when retried, will still be able to locate the account by email address
       _ = logger.info("scrubbing main contact")
       _ <- scrubContacts(Set(mainContactId))
 
