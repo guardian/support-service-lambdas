@@ -47,7 +47,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   }
 
   private def accountSubscriptions(accountId: String): Either[ClientFailure, JsValue] =
-    zuoraClient.get[JsValue](s"subscriptions/accounts/$accountId?page=1&page=10000").toDisjunction
+    zuoraClient.get[JsValue](s"subscriptions/accounts/$accountId?page=1&pageSize=10000").toDisjunction
 
   private def accountObj(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"accounts/$accountId").toDisjunction
