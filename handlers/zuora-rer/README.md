@@ -26,3 +26,17 @@ The ZuoraPerformRerLambda works as follows:
 2. Iterates through each contact and obtains their account details (comprising of an account summary and account object) and writes this to a /pending path in S3.
 3. TBC
 4. TBC
+
+### Zuora Service Account Config
+
+The lambda is configured to make API calls to Zuora using a service account specified for each STAGE in:
+`s3://gu-reader-revenue-private/membership/support-service-lambdas/<stage>/zuoraRest-<stage>.json` 
+
+The config specifies a username, password and API baseUrl.
+
+For Zuora RER, the following additional permissions are required beyond the standard read/write:
+- "Scrub Sensitive Data of Specific Payment Method" payments permission
+- "Scrub Sensitive Data of Contact" billing permission
+- "Hard Delete Billing Document Files" Billing user permission 
+
+
