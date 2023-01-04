@@ -62,9 +62,8 @@ object Handler {
       zuoraRerConfig <- loadZuoraRerConfig[ZuoraRerConfig]
       zuoraRestConfig <- loadZuoraRestConfig[ZuoraRestConfig]
       requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
-      downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
-      zuoraHelper = ZuoraRerService(requests, downloadRequests, zuoraQuerier)
+      zuoraHelper = ZuoraRerService(requests, zuoraQuerier)
     } yield {
       val performRerLambda = ZuoraPerformRerHandler(zuoraHelper, S3Helper, zuoraRerConfig)
       performRerLambda.handleRequest(input, output)

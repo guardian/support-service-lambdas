@@ -25,7 +25,7 @@ trait ZuoraRer {
   def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit]
 }
 
-case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends ZuoraRer with LazyLogging {
+case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) extends ZuoraRer with LazyLogging {
 
   implicit val readsC: Reads[ZuoraContact] = Json.reads[ZuoraContact]
 
@@ -49,7 +49,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   private def accountSubscriptions(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"subscriptions/accounts/$accountId?page=1&pageSize=10000").toDisjunction
 
-  private def accountObj(accountId: String): Either[ClientFailure, JsValue] =
+  private def retrieveAccount(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"accounts/$accountId").toDisjunction
 
   private def accountPaymentMethods(accountId: String): Either[ClientFailure, JsValue] =
@@ -162,7 +162,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       subscriptions <- accountSubscriptions(contact.AccountId).left.map(toZuoraClientError)
       subscriptionStatuses = (subscriptions \\ "status").map(jsStatus => jsStatus.as[String]).toSet
       _ <- checkSubscriptionStatus(subscriptionStatuses)
-      accountObj <- accountObj(contact.AccountId).left.map(toZuoraClientError)
+      accountObj <- retrieveAccount(contact.AccountId).left.map(toZuoraClientError)
       _ <- checkAccountBalances(accountObj.as[CustomerAccount])
     } yield ()
   }
@@ -170,9 +170,9 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
     logger.info("Updating account to remove personal data for contact.")
     val scrubOperations = for {
-      accountObj <- accountObj(contact.AccountId)
+      accountObj <- retrieveAccount(contact.AccountId)
       accountNumber = accountObj.as[CustomerAccount].basicInfo.accountNumber
-      _ = logger.debug(s"accountObj: $accountObj")
+      _ = logger.debug(s"retrieveAccount: $accountObj")
       _ = logger.debug(s"account number = $accountNumber")
       _ = logger.info(s"scrubbing account object")
       _ <- scrubAccountObject(contact.AccountId, accountNumber)
@@ -186,12 +186,9 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
 
       accountContacts <- accountContacts(contact.AccountId)
       _ = logger.debug(s"account contacts: $accountContacts")
-      mainContactId = accountContacts.filter(_.WorkEmail contains contact.WorkEmail).head.Id
-      otherContactIds = accountContacts.collect {
-        case (contact) if contact.Id != mainContactId => contact.Id
-      }.toSet
+      (mainContacts, otherContacts) = accountContacts.partition(_.WorkEmail contains contact.WorkEmail)
       _ = logger.info("scrubbing non-main contacts")
-      _ <- scrubContacts(otherContactIds)
+      _ <- scrubContacts(otherContacts.map(_.Id).toSet)
 
       _ = logger.info("deleting the billing documents")
       _ <- deleteBillingDocuments(contact.AccountId)
@@ -199,7 +196,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraDownloadClient: Requests,
       // The main contact is scrubbed last, so that any failing operations,
       // when retried, will still be able to locate the account by email address
       _ = logger.info("scrubbing main contact")
-      _ <- scrubContacts(Set(mainContactId))
+      _ <- scrubContacts(mainContacts.map(_.Id).toSet)
 
     } yield ()
     scrubOperations.left.map(toZuoraClientError)

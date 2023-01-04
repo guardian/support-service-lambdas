@@ -37,9 +37,8 @@ object ZuoraRerLocalRun extends App {
       zuoraRerConfig <- loadZuoraRerConfig[ZuoraRerConfig]
       zuoraRestConfig <- loadZuoraRestConfig[ZuoraRestConfig]
       requests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      downloadRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
-      zuoraHelper = ZuoraRerService(requests, downloadRequests, zuoraQuerier)
+      zuoraHelper = ZuoraRerService(requests, zuoraQuerier)
     } yield {
       ZuoraPerformRerHandler(zuoraHelper, S3Helper, zuoraRerConfig)
     }.handleRequest(streams.inputStream, streams.outputStream)
