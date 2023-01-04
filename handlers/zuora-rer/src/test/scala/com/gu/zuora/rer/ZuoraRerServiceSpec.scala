@@ -159,15 +159,5 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
 
     service.scrubAccount(testContact) shouldEqual Left(ZuoraClientError("Received a 'not found' response from Zuora"))
   }
-//  Erasure step fails
-//  API GET calls fail or Json serialisation fails
-//    Retrieve Account
-//    Retrieve payment methods
-//  Retrieve contacts
-//    API PUT/POST calls fail
-//    Scrub account object
-//  Scrub payment methods
-//    Scrub contacts
-//    Delete billing documents (error or timeout)
 
 }
