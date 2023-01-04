@@ -55,6 +55,21 @@ class ZuoraPerformRerHandlerSpec extends AnyFreeSpec with Matchers {
         .unsafeRunSync() shouldBe expectedResponse
     }
 
+    "should return a successful PerformRerResponse when no Zuora contacts match the subject email" in {
+      val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withNoContactsResponse, S3HelperStub.withSuccessResponse, mockConfig)
+      val expectedResponse = PerformRerResponse(
+        initiationReference = "someRequestId",
+        message = "No accounts found with requested subject email",
+        status = Completed,
+        subjectEmail = "someSubjectEmail",
+      )
+
+      lambda
+        .handle(validPerformRerRequest)
+        .unsafeRunSync() shouldBe expectedResponse
+      //
+    }
+
     "should return a failed PerformRerResponse when unable to verify that account data is ready for deletion" in {
       val lambda = ZuoraPerformRerHandler(ZuoraRerServiceStub.withFailedVerifyErasureResponse, S3HelperStub.withSuccessResponse, mockConfig)
       val expectedResponse = PerformRerResponse(

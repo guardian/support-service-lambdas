@@ -14,6 +14,7 @@ class ZuoraRerServiceStub(
 
 object ZuoraRerServiceStub {
   val successfulZuoraContacts: ClientSuccess[List[ZuoraContact]] = ClientSuccess(List(ZuoraContact("123456789", "a@b.com")))
+  val zeroZuoraContactsResponse: ClientSuccess[List[ZuoraContact]] = ClientSuccess(Nil)
   val failedZuoraContactResponse: GenericError = GenericError("Failed to get contacts")
 
   val zuoraVerifyErasureSuccess = Right(())
@@ -24,6 +25,7 @@ object ZuoraRerServiceStub {
 
   def withSuccessResponse = new ZuoraRerServiceStub(successfulZuoraContacts, zuoraVerifyErasureSuccess, zuoraScrubAccountSuccess)
   def withFailedContactResponse = new ZuoraRerServiceStub(failedZuoraContactResponse, zuoraVerifyErasureSuccess, zuoraScrubAccountSuccess)
+  def withNoContactsResponse = new ZuoraRerServiceStub(zeroZuoraContactsResponse, zuoraVerifyErasureSuccess, zuoraScrubAccountSuccess)
   def withFailedVerifyErasureResponse = new ZuoraRerServiceStub(successfulZuoraContacts, zuoraVerifyErasureFailure, zuoraScrubAccountFailure)
   def withFailedScrubAccountResponse = new ZuoraRerServiceStub(successfulZuoraContacts, zuoraVerifyErasureSuccess, zuoraScrubAccountFailure)
 }
