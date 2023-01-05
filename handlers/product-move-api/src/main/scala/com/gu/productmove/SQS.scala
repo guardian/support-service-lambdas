@@ -2,6 +2,7 @@ package com.gu.productmove
 
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 import software.amazon.awssdk.regions.Region
@@ -14,6 +15,8 @@ trait SQS {
   def sendEmail(message: EmailMessage): ZIO[Any, String, Unit]
 
   def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit]
+
+  def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, String, Unit]
 }
 
 object SQS {
@@ -24,6 +27,10 @@ object SQS {
   def queueRefund(refundInput: RefundInput): ZIO[SQS, String, Unit] = {
     ZIO.environmentWithZIO(_.get.queueRefund(refundInput))
   }
+
+  def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[SQS, String, Unit] = {
+    ZIO.environmentWithZIO(_.get.queueSalesforceTracking(salesforceRecordInput))
+  }
 }
 
 object SQSLive {
@@ -31,8 +38,9 @@ object SQSLive {
     ZLayer.scoped(for {
       stage <- ZIO.service[Stage]
       sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
-      emailQueueUrlResponse <- getEmailQueue(stage, sqsClient)
-      refundQueueUrlResponse <- getRefundQueue(stage, sqsClient)
+      emailQueueUrlResponse <- getQueue(if (stage == Stage.PROD) "contributions-thanks" else "contributions-thanks-dev", sqsClient)
+      refundQueueUrlResponse <- getQueue(s"product-switch-refund-${stage.toString}", sqsClient)
+      salesforceTrackingQueueUrlResponse <- getQueue(s"product-switch-salesforce-tracking-${stage.toString}", sqsClient)
     } yield new SQS {
       override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
         for {
@@ -71,6 +79,25 @@ object SQSLive {
             s"Successfully sent refund message for subscription number: ${refundInput.subscriptionName}",
           )
         } yield ()
+
+      override def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, String, Unit] =
+        for {
+          _ <- ZIO
+            .fromCompletableFuture {
+              sqsClient.sendMessage(
+                SendMessageRequest.builder
+                  .queueUrl(salesforceTrackingQueueUrlResponse.queueUrl)
+                  .messageBody(salesforceRecordInput.toJson)
+                  .build(),
+              )
+            }
+            .mapError { ex =>
+              s"Failed to send sqs salesforce tracking message with subscription Number: ${salesforceRecordInput.subscriptionName} with error: ${ex.toString}"
+            }
+          _ <- ZIO.log(
+            s"Successfully sent salesforce tracking message for subscription number: ${salesforceRecordInput.subscriptionName}",
+          )
+        } yield ()
     })
 
   private def initializeSQSClient(): ZIO[AwsCredentialsProvider with Scope, Throwable, SqsAsyncClient] =
@@ -79,19 +106,7 @@ object SQSLive {
       sqsClient <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
     } yield sqsClient
 
-  private def getEmailQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
-    // choose existing SQS queue to test for now, create another queue for this.
-    val queueName = if (stage == Stage.PROD) "contributions-thanks" else "contributions-thanks-dev"
-    val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
-
-    ZIO
-      .fromCompletableFuture(
-        sqsAsyncClient.getQueueUrl(queueUrl),
-      )
-      .mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
-
-  private def getRefundQueue(stage: Stage, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
-    val queueName = s"product-switch-refund-${stage.toString}"
+  private def getQueue(queueName: String, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
     val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
 
     ZIO
