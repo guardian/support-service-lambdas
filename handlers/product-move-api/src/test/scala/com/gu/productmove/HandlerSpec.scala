@@ -3,15 +3,45 @@ package com.gu.productmove
 import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
 import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.available.{AvailableProductMovesEndpoint, Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
+import com.gu.productmove.endpoint.available.{
+  AvailableProductMovesEndpoint,
+  Billing,
+  Currency,
+  MoveToProduct,
+  Offer,
+  TimePeriod,
+  TimeUnit,
+  Trial,
+}
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
-import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse, PaymentMethodResponse, ZuoraSubscription}
-import com.gu.productmove.zuora.{CancellationResponse, CreateSubscriptionResponse, DefaultPaymentMethod, GetAccount, GetSubscription, MockCancelZuora, MockCatalogue, MockGetAccount, MockGetSubscription, MockSQS, MockSubscribe, MockSubscriptionUpdate, SubscriptionUpdateResponse}
+import com.gu.productmove.zuora.GetAccount.{
+  AccountSubscription,
+  BasicInfo,
+  BillToContact,
+  GetAccountResponse,
+  PaymentMethodResponse,
+  ZuoraSubscription,
+}
+import com.gu.productmove.zuora.{
+  CancellationResponse,
+  CreateSubscriptionResponse,
+  DefaultPaymentMethod,
+  GetAccount,
+  GetSubscription,
+  MockCancelZuora,
+  MockCatalogue,
+  MockGetAccount,
+  MockGetSubscription,
+  MockSQS,
+  MockSubscribe,
+  MockSubscriptionUpdate,
+  SubscriptionUpdateResponse,
+}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import zio.*
 import zio.test.*
@@ -30,7 +60,8 @@ object HandlerSpec extends ZIOSpecDefault {
     val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, BigDecimal, String) =
       (expectedSubNameInput, Monthly, 50, "89ad8casd9c0asdcaj89sdc98as")
     val getAccountStubs = Map("accountNumber" -> getAccountResponse)
-    val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] = Map(emailMessageBody -> (), salesforceRecordInput2 -> ())
+    val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+      Map(emailMessageBody -> (), salesforceRecordInput2 -> ())
     val getPaymentMethodResponse = PaymentMethodResponse(
       NumConsecutiveFailures = 0,
     )
@@ -68,7 +99,8 @@ object HandlerSpec extends ZIOSpecDefault {
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse2)
         val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
-        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] = Map(emailMessageBodyRefund -> (), refundInput1 -> (), salesforceRecordInput1 -> ())
+        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+          Map(emailMessageBodyRefund -> (), refundInput1 -> (), salesforceRecordInput1 -> ())
         (for {
           _ <- TestClock.setTime(time)
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
@@ -78,10 +110,10 @@ object HandlerSpec extends ZIOSpecDefault {
           sqsRequests <- MockSQS.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-            assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
-            assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-            assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
-            assert(sqsRequests)(hasSameElements(List(emailMessageBodyRefund, refundInput1, salesforceRecordInput1)))
+          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
+          assert(sqsRequests)(hasSameElements(List(emailMessageBodyRefund, refundInput1, salesforceRecordInput1)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
@@ -94,7 +126,6 @@ object HandlerSpec extends ZIOSpecDefault {
         val endpointJsonInputBody = ExpectedInput(50.00, false)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
-        val emailSenderStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] = Map(emailMessageBody -> ())
         val expectedOutput = "Subscription: A-S00339056 has more than one ratePlan"
         (for {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody).exit
@@ -107,7 +138,6 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockSQS(emailSenderStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),

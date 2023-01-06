@@ -7,6 +7,7 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{
@@ -17,7 +18,6 @@ import com.gu.productmove.zuora.{
   Subscribe,
   SubscribeLive,
   SubscriptionUpdate,
-  SubscriptionUpdateInvoice,
   SubscriptionUpdateLive,
   ZuoraCancel,
   ZuoraCancelLive,
@@ -38,11 +38,11 @@ import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 import zio.{Clock, IO, URIO, ZIO}
+import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, ZoneId}
 
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
@@ -166,7 +166,7 @@ object ProductMoveEndpoint {
         if (postData.preview)
           doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currentRatePlan.id)
         else
-          doUpdate(subscriptionName, ratePlanCharge, postData.price, currentRatePlan.id, subscription)
+          doUpdate(subscriptionName, ratePlanCharge, postData.price, currentRatePlan, subscription)
     } yield result
 
   def doPreview(
@@ -185,13 +185,13 @@ object ProductMoveEndpoint {
       subscriptionName: String,
       ratePlanCharge: RatePlanCharge,
       price: BigDecimal,
-      currentRatePlanId: String,
+      currentRatePlan: GetSubscription.RatePlan,
       subscription: GetSubscription.GetSubscriptionResponse,
   ) = for {
     _ <- ZIO.log("Performing product move update")
     getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
     updateResponse <- SubscriptionUpdate
-      .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlanId)
+      .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlan.id)
       .addLogMessage("SubscriptionUpdate")
     totalDeltaMrr = updateResponse.totalDeltaMrr
     account <- getAccountFuture.join
@@ -224,27 +224,31 @@ object ProductMoveEndpoint {
       .addLogMessage("SQS sendEmail()")
       .fork
 
-      salesforceTrackingFuture <- SQS.queueSalesforceTracking(SalesforceRecordInput(
-        subscriptionName,
-        postData.price,
-        currentRatePlan.ratePlanName,
-        "Supporter Plus",
-        date,
-        date,
-        updateResponse.totalDeltaMrr.abs
-      )).fork
+    salesforceTrackingFuture <- SQS
+      .queueSalesforceTracking(
+        SalesforceRecordInput(
+          subscriptionName,
+          price,
+          currentRatePlan.ratePlanName,
+          "Supporter Plus",
+          date,
+          date,
+          updateResponse.totalDeltaMrr.abs,
+        ),
+      )
+      .fork
 
-      refundFuture <-
-        if (updateResponse.totalDeltaMrr < 0)
-          SQS
-            .queueRefund(RefundInput(subscriptionName, updateResponse.invoiceId, updateResponse.totalDeltaMrr.abs))
-            .addLogMessage("SQS queueRefund()")
-            .fork
-        else
-          ZIO.succeed(()).fork
+    refundFuture <-
+      if (updateResponse.totalDeltaMrr < 0)
+        SQS
+          .queueRefund(RefundInput(subscriptionName, updateResponse.invoiceId, updateResponse.totalDeltaMrr.abs))
+          .addLogMessage("SQS queueRefund()")
+          .fork
+      else
+        ZIO.succeed(()).fork
 
-      sqsRequests = emailFuture.zip(refundFuture).zip(salesforceTrackingFuture)
-      _ <- sqsRequests.join
+    sqsRequests = emailFuture.zip(refundFuture).zip(salesforceTrackingFuture)
+    _ <- sqsRequests.join
 
   } yield Success("Product move completed successfully")
 }

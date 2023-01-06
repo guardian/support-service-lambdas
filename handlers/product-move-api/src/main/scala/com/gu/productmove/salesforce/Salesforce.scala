@@ -7,23 +7,22 @@ import java.time.LocalDate
 
 object Salesforce {
 
-
   case class SalesforceRecordInput(
-                                    subscriptionName: String,
-                                    previousAmount: BigDecimal,
-                                    previousRatePlanName: String,
-                                    newRatePlanName: String,
-                                    requestedDate: LocalDate,
-                                    effectiveDate: LocalDate,
-                                    refundAmount: BigDecimal,
-                                  )
+      subscriptionName: String,
+      previousAmount: BigDecimal,
+      previousRatePlanName: String,
+      newRatePlanName: String,
+      requestedDate: LocalDate,
+      effectiveDate: LocalDate,
+      refundAmount: BigDecimal,
+  )
 
   given JsonDecoder[SalesforceRecordInput] = DeriveJsonDecoder.gen[SalesforceRecordInput]
   given JsonEncoder[SalesforceRecordInput] = DeriveJsonEncoder.gen[SalesforceRecordInput]
 
   def createSfRecord(
-                      salesforceRecordInput: SalesforceRecordInput,
-                    ): ZIO[CreateRecord with GetSfSubscription, String, Unit] =
+      salesforceRecordInput: SalesforceRecordInput,
+  ): ZIO[CreateRecord with GetSfSubscription, String, Unit] =
     import salesforceRecordInput.*
 
     for {
