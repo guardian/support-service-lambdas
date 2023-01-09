@@ -8,9 +8,10 @@ import org.scalatest.matchers.should.Matchers
 
 class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
 
-  def zuoraRerService(fakeGetResponses: Map[String, HTTPResponse],
-                      fakePutAndPostResponses: Map[POSTRequest, HTTPResponse] = Map()
-                     ): ZuoraRerService = {
+  def zuoraRerService(
+    fakeGetResponses: Map[String, HTTPResponse],
+    fakePutAndPostResponses: Map[POSTRequest, HTTPResponse] = Map()
+  ): ZuoraRerService = {
     val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
     val effects = new TestingRawEffects(500, fakeGetResponses, fakePutAndPostResponses)
     val requests = ZuoraRestRequestMaker(effects.response, fakeZuoraConfig)
@@ -21,16 +22,19 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
   val testContact = ZuoraContact("1234567", "test@example.com")
 
   val subsResponseAllCancelled = "/subscriptions/accounts/1234567?page=1&pageSize=10000" ->
-    HTTPResponse(200,
+    HTTPResponse(
+      200,
       """{"success": true,
         | "subscriptions": [
         |   {"id": "sub3", "status": "Cancelled"},
         |   {"id": "sub4", "status": "Expired"}
         | ]
-        |}""".stripMargin)
+        |}""".stripMargin
+    )
 
   val subsResponseNotCancelled = "/subscriptions/accounts/1234567?page=1&pageSize=10000" ->
-    HTTPResponse(200,
+    HTTPResponse(
+      200,
       """{"success": true,
         | "subscriptions": [
         |   {"id": "sub1", "status": "Active"},
@@ -38,34 +42,44 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
         |   {"id": "sub3", "status": "Cancelled"},
         |   {"id": "sub4", "status": "Expired"}
         | ]
-        |}""".stripMargin)
+        |}""".stripMargin
+    )
 
-  val accountResponseZeroBalances = "/accounts/1234567" -> HTTPResponse(200,
+  val accountResponseZeroBalances = "/accounts/1234567" -> HTTPResponse(
+    200,
     """{"success": true,
       | "basicInfo": {"accountNumber": "abc-123"},
       | "metrics": {"balance": "0.00", "creditBalance": "0.00", "totalInvoiceBalance": "0.00"}
-      |}""".stripMargin)
+      |}""".stripMargin
+  )
 
-  val accountResponseNotFound = "/accounts/1234567" -> HTTPResponse(200,
+  val accountResponseNotFound = "/accounts/1234567" -> HTTPResponse(
+    200,
     """{"success":false,
       | "processId":"747E0D5A53240416",
       | "reasons":[
       |   {"code":50000040,"message":"Cannot find entity by key: '1234567'."}
       | ],"requestId":"359b0b97-c59b-439d-be52-f004f4c5e817"
-      |}""".stripMargin)
+      |}""".stripMargin
+  )
 
-  val accountResponseOutstandingBalances = "/accounts/1234567" -> HTTPResponse(200,
+  val accountResponseOutstandingBalances = "/accounts/1234567" -> HTTPResponse(
+    200,
     """{"success": true,
       | "basicInfo": {"accountNumber": "abc-123"},
       | "metrics": {"balance": "10.37", "creditBalance": "0.00", "totalInvoiceBalance": "-3.45"}
-      |}""".stripMargin)
+      |}""".stripMargin
+  )
 
   val scrubAccountPutResponse =
-    POSTRequest("/accounts/1234567",
+    POSTRequest(
+      "/accounts/1234567",
       """{"name":"abc-123","crmId":"","sfContactId__c":"","IdentityId__c":"","autoPay":false,"soldToContact":{"country":"United Kingdom"}}""",
-      "PUT") -> HTTPResponse(200, """{"success": true}""")
+      "PUT"
+    ) -> HTTPResponse(200, """{"success": true}""")
 
-  val paymentMethodsResponse = "/accounts/1234567/payment-methods" -> HTTPResponse(200,
+  val paymentMethodsResponse = "/accounts/1234567/payment-methods" -> HTTPResponse(
+    200,
     """{"success": true,
       | "bankTransfer": [
       |   {"id": "bank0123"}
@@ -73,38 +87,40 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
       | "creditCard": [
       |   {"id": "card0123"}
       | ]
-      |}""".stripMargin)
+      |}""".stripMargin
+  )
 
   val scrubPaymentMethod1Response =
-    POSTRequest("/payment-methods/bank0123/scrub", "{}", "PUT")  -> HTTPResponse(200, """{"success": true}""")
+    POSTRequest("/payment-methods/bank0123/scrub", "{}", "PUT") -> HTTPResponse(200, """{"success": true}""")
 
   val scrubPaymentMethod2Response =
-    POSTRequest("/payment-methods/card0123/scrub", "{}", "PUT")  -> HTTPResponse(200, """{"success": true}""")
+    POSTRequest("/payment-methods/card0123/scrub", "{}", "PUT") -> HTTPResponse(200, """{"success": true}""")
 
   val contactsResponse =
     POSTRequest("/action/query", """{"queryString":"SELECT Id, WorkEmail FROM Contact where AccountId='1234567'"}""") ->
-      HTTPResponse(200,
-    """{"done": true,
+      HTTPResponse(
+        200,
+        """{"done": true,
       | "size": 2,
       | "records": [
       |   {"Id": "5678", "WorkEmail": "test@example.com"},
       |   {"Id": "4567", "WorkEmail": "test2@example.com"}
       | ]
-      |}""".stripMargin)
+      |}""".stripMargin
+      )
 
   val scrubMainContactResponse =
-    POSTRequest("/contacts/5678/scrub", "{}", "PUT")  -> HTTPResponse(200, """{"success": true}""")
+    POSTRequest("/contacts/5678/scrub", "{}", "PUT") -> HTTPResponse(200, """{"success": true}""")
 
   val scrubNonMainContactResponse =
-    POSTRequest("/contacts/4567/scrub", "{}", "PUT")  -> HTTPResponse(200, """{"success": true}""")
+    POSTRequest("/contacts/4567/scrub", "{}", "PUT") -> HTTPResponse(200, """{"success": true}""")
 
   val deleteBillingDocumentsResponse =
-    POSTRequest("/accounts/billing-documents/files/deletion-jobs", """{"accountIds":["1234567"]}""")  ->
+    POSTRequest("/accounts/billing-documents/files/deletion-jobs", """{"accountIds":["1234567"]}""") ->
       HTTPResponse(200, """{"id":"98765","success": true,"status":"Pending"}""")
 
   val deletionJobCheckResponse =
     "/accounts/billing-documents/files/deletion-jobs/98765" -> HTTPResponse(200, """{"id":"98765","success": true,"status":"Completed"}""")
-
 
   "verifyErasure" should "pass if all subs cancelled and no outstanding balances" in {
     val service = zuoraRerService(Map(
@@ -122,25 +138,28 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
     ))
 
     service.verifyErasure(testContact) shouldEqual Left(
-      PreconditionCheckError("Subscription contains a non-erasable status: Active,Draft"))
+      PreconditionCheckError("Subscription contains a non-erasable status: Active,Draft")
+    )
   }
 
   it should "fail if the subject has outstanding balances, positive or negative" in {
     val service = zuoraRerService(Map(
-        subsResponseAllCancelled,
-        accountResponseOutstandingBalances
+      subsResponseAllCancelled,
+      accountResponseOutstandingBalances
     ))
 
     service.verifyErasure(testContact) shouldEqual Left(
-      PreconditionCheckError("Account balances are not zero"))
+      PreconditionCheckError("Account balances are not zero")
+    )
   }
 
   "scrubAccount" should "succeed if all steps succeed" in {
-    val service = zuoraRerService(Map(
-      accountResponseZeroBalances,
-      paymentMethodsResponse,
-      deletionJobCheckResponse
-    ),
+    val service = zuoraRerService(
+      Map(
+        accountResponseZeroBalances,
+        paymentMethodsResponse,
+        deletionJobCheckResponse
+      ),
       Map(
         scrubAccountPutResponse,
         scrubPaymentMethod1Response,
@@ -149,7 +168,8 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
         scrubNonMainContactResponse,
         deleteBillingDocumentsResponse,
         scrubMainContactResponse
-      ))
+      )
+    )
 
     service.scrubAccount(testContact) shouldEqual Right(())
   }

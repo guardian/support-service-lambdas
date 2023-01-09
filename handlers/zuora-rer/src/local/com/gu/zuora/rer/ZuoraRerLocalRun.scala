@@ -4,8 +4,7 @@ import com.gu.zuora.rer.circeCodecs._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
-import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
-import com.gu.zuora.rer.BatonModels.{PerformRerRequest, RerRequest, RerStatusRequest}
+import com.gu.zuora.rer.BatonModels.{PerformRerRequest, RerInitiateRequest, RerRequest, RerStatusRequest}
 import io.circe.syntax._
 
 object ZuoraRerLocalRun extends App {
@@ -48,12 +47,14 @@ object ZuoraRerLocalRun extends App {
   }
 
   val rerStatusRequest = RerStatusRequest(initiationReference = "testSubjectId")
+  val rerInitiateRequest = RerInitiateRequest(subjectEmail = "andytest@example.com")
   val performRerInitiateRequest = PerformRerRequest(
     initiationReference = "testSubjectId",
     subjectEmail = "andytest@example.com"
   )
 
-  runTestPerformZuoraRer(performRerInitiateRequest)
-  //  runTestZuoraRer(rerStatusRequest)
+  // runTestPerformZuoraRer(performRerInitiateRequest)
+  runTestZuoraRer(rerInitiateRequest)
+  // runTestZuoraRer(rerStatusRequest)
 }
 

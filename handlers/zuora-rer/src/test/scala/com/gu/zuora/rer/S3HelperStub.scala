@@ -1,7 +1,5 @@
 package com.gu.zuora.rer
 
-import com.gu.util.resthttp.RestRequestMaker
-
 import scala.util.{Success, Try}
 
 class S3HelperStub(

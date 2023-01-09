@@ -3,11 +3,8 @@ package com.gu.zuora.rer
 import java.util.UUID.randomUUID
 import com.typesafe.scalalogging.LazyLogging
 import com.gu.effects.{BucketName, CopyS3Objects, Key, ListS3Objects, S3Location, S3Path, UploadToS3}
-import com.gu.util.resthttp.RestRequestMaker.DownloadStream
 import cats.syntax.traverse._
-import play.api.libs.json.JsValue
-import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.{ObjectCannedACL, PutObjectRequest}
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL
 
 import scala.util.{Failure, Success, Try}
 

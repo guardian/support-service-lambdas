@@ -36,7 +36,7 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
           _ <- scrubAccounts(contactList)
           _ <- s3Service.copyResultsToCompleted(request.initiationReference, zuoraRerConfig)
         } yield if (contactList.length > 0) s"Successfully scrubbed account(s): $accountIds"
-                else "No accounts found with requested subject email"
+        else "No accounts found with requested subject email"
     }
   }
 
