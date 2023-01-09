@@ -35,11 +35,25 @@ The ZuoraPerformRerLambda works as follows:
 The lambda is configured to make API calls to Zuora using a service account specified for each STAGE in:
 `s3://gu-reader-revenue-private/membership/support-service-lambdas/<stage>/zuoraRest-<stage>.json` 
 
-The config specifies a username, password and API baseUrl.
+The config specifies a baseUrl and then under a `batonZuora` object, a loginName and password.
 
-For Zuora RER, the following additional permissions are required beyond the standard read/write:
-- "Scrub Sensitive Data of Specific Payment Method" payments permission
-- "Scrub Sensitive Data of Contact" billing permission
-- "Hard Delete Billing Document Files" Billing user permission 
+The account should be set up in Zuora with the following roles:
+- Zuora Platform Role: API User Role
+- Billing Role: Billing - Right to Erasure
+- Payments Role: Payments - Right to Erasure
+- Finance Role: No Finance Permissions
+- Commerce Role: No Commerce Permissions
+- Reporting Role: No Reporting Permissions
+
+
+The `Billing - Right to Erasure` role has the following permissions:
+- Modify Account
+- Delete Payment Methods
+- Hard Delete Billing Document Files
+- Scrub Sensitive Data Of Contact
+
+The `Payments - Right to Erasure` role has the following permissions:
+- Scrub Sensitive Date Of Specific Payment Method
+
 
 

@@ -38,7 +38,7 @@ object BatonZuoraRestConfig {
   implicit val userReads = Json.reads[BatonZuoraUser]
   implicit val configReads = Json.reads[BatonZuoraConfig]
   implicit val restConfigReads = Json.reads[BatonZuoraRestConfig]
-  implicit val location = ConfigLocation[BatonZuoraRestConfig](path = "zuoraRest", version = 2)
+  implicit val location = ConfigLocation[BatonZuoraRestConfig](path = "zuoraRest", version = 1)
 
   // convert to flat config that zuora rest lib requires
   def toZuoraRestConfig(config: BatonZuoraRestConfig) =
