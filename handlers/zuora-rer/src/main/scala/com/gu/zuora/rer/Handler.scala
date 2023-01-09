@@ -1,17 +1,16 @@
 package com.gu.zuora.rer
 
 import java.io.{InputStream, OutputStream}
-
 import cats.effect.IO
 import circeCodecs._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.LoadConfigModule
-import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
-import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
+import com.gu.util.zuora.{ZuoraQuery, ZuoraRestRequestMaker}
 import io.circe.parser.decode
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, Printer}
+import BatonZuoraRestConfig._
 
 import scala.io.Source
 
@@ -57,11 +56,10 @@ object Handler {
     val loadZuoraRerConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val response = RawEffects.response
-    val downloadResponse = RawEffects.downloadResponse
     for {
       zuoraRerConfig <- loadZuoraRerConfig[ZuoraRerConfig]
-      zuoraRestConfig <- loadZuoraRestConfig[ZuoraRestConfig]
-      requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
+      batonZuoraRestConfig <- loadZuoraRestConfig[BatonZuoraRestConfig]
+      requests = ZuoraRestRequestMaker(response, toZuoraRestConfig(batonZuoraRestConfig))
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraRerService(requests, zuoraQuerier)
     } yield {
