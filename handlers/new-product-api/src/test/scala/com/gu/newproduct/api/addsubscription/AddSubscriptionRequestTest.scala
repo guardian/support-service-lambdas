@@ -31,7 +31,7 @@ class AddSubscriptionRequestTest extends AnyFlatSpec with Matchers {
       createdByCSR = CreatedByCSR("CSRName"),
       amountMinorUnits = Some(AmountMinorUnits(123)),
       acquisitionCase = CaseId("5006E000005b5cf"),
-      planId = MonthlyContribution
+      planId = MonthlyContribution,
     )
   }
 
@@ -69,7 +69,8 @@ class AddSubscriptionRequestTest extends AnyFlatSpec with Matchers {
       """.stripMargin
 
     val supportedPlansStr = PlanId.supportedPlans.map(_.name).mkString(",")
-    Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError(s"unsupported plan: allowed values are $supportedPlansStr")
+    Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError(
+      s"unsupported plan: allowed values are $supportedPlansStr",
+    )
   }
 }
-

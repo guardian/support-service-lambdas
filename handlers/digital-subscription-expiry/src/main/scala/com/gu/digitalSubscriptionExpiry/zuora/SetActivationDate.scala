@@ -20,7 +20,10 @@ object SetActivationDate extends LazyLogging {
 
   def apply(requests: Requests, now: () => LocalDateTime)(subscriptionId: SubscriptionId): ClientFailableOp[Unit] = {
     val activationDateString = now().format(ISO_LOCAL_DATE_TIME)
-    requests.put[UpdateRequestBody, Unit](UpdateRequestBody(activationDateString), s"subscriptions/${subscriptionId.value}")
+    requests.put[UpdateRequestBody, Unit](
+      UpdateRequestBody(activationDateString),
+      s"subscriptions/${subscriptionId.value}",
+    )
   }
 
 }

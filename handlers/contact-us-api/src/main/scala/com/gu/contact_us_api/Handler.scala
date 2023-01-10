@@ -22,7 +22,10 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
     response
   }
 
-  def process(reqBody: String, handle: SFCompositeRequest => Either[ContactUsError, Unit]): APIGatewayProxyResponseEvent = {
+  def process(
+      reqBody: String,
+      handle: SFCompositeRequest => Either[ContactUsError, Unit],
+  ): APIGatewayProxyResponseEvent = {
     val result = for {
       req <- decode[ContactUsRequest](reqBody, Some("ContactUsRequest"), "Input")
       resp <- handle(req.asSFCompositeRequest)
@@ -33,7 +36,8 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
       case Left(fail) =>
         logger.error(fail.errorDetails)
 
-        val (statusCode, message) = if (fail.errorType == "Input") (400, "Invalid input") else (500, "Internal server error")
+        val (statusCode, message) =
+          if (fail.errorType == "Input") (400, "Invalid input") else (500, "Internal server error")
 
         getResponseEvent(statusCode, ContactUsResponse(success = false, Some(message)))
     }
@@ -43,10 +47,7 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
     new APIGatewayProxyResponseEvent()
       .withStatusCode(statusCode)
       .withBody(
-        payload
-          .asJson
-          .dropNullValues
-          .toString
+        payload.asJson.dropNullValues.toString,
       )
   }
 

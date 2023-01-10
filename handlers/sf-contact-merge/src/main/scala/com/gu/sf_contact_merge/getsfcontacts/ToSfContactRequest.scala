@@ -8,18 +8,20 @@ import play.api.libs.json.Json
 object ToSfContactRequest {
 
   case class WireResult(
-    OtherStreet: Option[String], // billing
-    OtherCity: Option[String],
-    OtherState: Option[String],
-    OtherPostalCode: Option[String],
-    OtherCountry: Option[String],
-    Phone: Option[String],
-    Digital_Voucher_User__c: Boolean,
-    Email: String,
-    IdentityID__c: Option[String]
+      OtherStreet: Option[String], // billing
+      OtherCity: Option[String],
+      OtherState: Option[String],
+      OtherPostalCode: Option[String],
+      OtherCountry: Option[String],
+      Phone: Option[String],
+      Digital_Voucher_User__c: Boolean,
+      Email: String,
+      IdentityID__c: Option[String],
   )
   implicit val wireResultReads = Json.reads[WireResult]
 
-  def apply(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sfContactId.value}"))
+  def apply(sfContactId: SFContactId) = GetRequest(
+    RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sfContactId.value}"),
+  )
 
 }

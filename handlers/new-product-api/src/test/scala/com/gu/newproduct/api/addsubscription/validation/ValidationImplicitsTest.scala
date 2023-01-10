@@ -34,7 +34,9 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
 
-    getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("ignored log message"))
+    getValidatedData("testId") shouldBe ReturnWithResponse(
+      ApiGatewayResponse.internalServerError("ignored log message"),
+    )
   }
 
   it should "return 500 error if getter returns not found and no custom not found mesage was specified" in {
@@ -44,7 +46,9 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
 
-    getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("ignored log message"))
+    getValidatedData("testId") shouldBe ReturnWithResponse(
+      ApiGatewayResponse.internalServerError("ignored log message"),
+    )
   }
 
   it should "return 422 with custom message if getter returns not found and a custom error is specified" in {
@@ -57,7 +61,9 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
       ifNotFoundReturn = Some("invalid test data Id")
     )
 
-    getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.messageResponse("422", "invalid test data Id"))
+    getValidatedData("testId") shouldBe ReturnWithResponse(
+      ApiGatewayResponse.messageResponse("422", "invalid test data Id"),
+    )
   }
 
   it should "return 422 with validation error if validation fails" in {
@@ -67,7 +73,9 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
 
-    getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.messageResponse("422", "validation failed!"))
+    getValidatedData("testId") shouldBe ReturnWithResponse(
+      ApiGatewayResponse.messageResponse("422", "validation failed!"),
+    )
   }
 
   case class Unvalidated(value: String)

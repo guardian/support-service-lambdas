@@ -23,7 +23,8 @@ object ZuoraReaders {
       success <- (JsPath \ "success").read[Boolean].orElse((JsPath \ "Success").read[Boolean])
       errorReasons <- (JsPath \ "reasons").readNullable[List[ErrorReason]]
     } yield {
-      if (success) ZuoraSuccess else {
+      if (success) ZuoraSuccess
+      else {
         val reasons = errorReasons.getOrElse(Nil)
         ZuoraErrorResponse(reasons)
       }

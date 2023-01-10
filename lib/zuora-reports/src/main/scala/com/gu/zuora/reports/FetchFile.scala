@@ -7,8 +7,8 @@ import play.api.libs.json._
 
 object FetchFile {
   def apply(
-    upload: (DownloadStream, String) => ClientFailableOp[String],
-    getDownloadStream: (String) => ClientFailableOp[DownloadStream]
+      upload: (DownloadStream, String) => ClientFailableOp[String],
+      getDownloadStream: (String) => ClientFailableOp[DownloadStream],
   )(fetchFileRequest: FetchFileRequest): ClientFailableOp[FetchFileResponse] = {
     val fileInfo = fetchFileRequest.batches.head
     val key = s"${fetchFileRequest.jobId}/${fileInfo.name}.csv"
@@ -19,14 +19,31 @@ object FetchFile {
     } yield {
       val fetched = FetchedFile(fileInfo.fileId, fileInfo.name, uploadPath)
       val remaining = fetchFileRequest.batches.tail
-      FetchFileResponse(fetchFileRequest.jobId, fetched :: alreadyFetched, remaining, remaining.isEmpty, fetchFileRequest.dryRun)
+      FetchFileResponse(
+        fetchFileRequest.jobId,
+        fetched :: alreadyFetched,
+        remaining,
+        remaining.isEmpty,
+        fetchFileRequest.dryRun,
+      )
     }
   }
 }
 
-case class FetchFileRequest(jobId: String, fetched: List[FetchedFile] = List.empty, batches: List[Batch], dryRun: Boolean)
+case class FetchFileRequest(
+    jobId: String,
+    fetched: List[FetchedFile] = List.empty,
+    batches: List[Batch],
+    dryRun: Boolean,
+)
 
-case class FetchFileResponse(jobId: String, fetched: List[FetchedFile], batches: List[Batch], done: Boolean, dryRun: Boolean)
+case class FetchFileResponse(
+    jobId: String,
+    fetched: List[FetchedFile],
+    batches: List[Batch],
+    done: Boolean,
+    dryRun: Boolean,
+)
 
 object FetchFileRequest {
   implicit val reads = Json.using[Json.WithDefaultValues].reads[FetchFileRequest]

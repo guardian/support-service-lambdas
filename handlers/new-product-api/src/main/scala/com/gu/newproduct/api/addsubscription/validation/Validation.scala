@@ -19,7 +19,10 @@ object Validation {
   }
 
   implicit class GetAndValidate[ID, DATA](getter: ID => ClientFailableOp[DATA]) {
-    def andValidateWith[VALIDATED](validate: DATA => ValidationResult[VALIDATED], ifNotFoundReturn: Option[String] = None): ID => ApiGatewayOp[VALIDATED] =
+    def andValidateWith[VALIDATED](
+        validate: DATA => ValidationResult[VALIDATED],
+        ifNotFoundReturn: Option[String] = None,
+    ): ID => ApiGatewayOp[VALIDATED] =
       (id: ID) =>
         for {
           data <- ifNotFoundReturn match {
@@ -30,8 +33,12 @@ object Validation {
         } yield validatedData
   }
 
-  implicit class ComposeValidation[UNVALIDATED, VALIDATED](initialValidation: UNVALIDATED => ValidationResult[VALIDATED]) {
-    def thenValidate[TWICEVALIDATED](finalValidation: VALIDATED => ValidationResult[TWICEVALIDATED]): UNVALIDATED => ValidationResult[TWICEVALIDATED] =
+  implicit class ComposeValidation[UNVALIDATED, VALIDATED](
+      initialValidation: UNVALIDATED => ValidationResult[VALIDATED],
+  ) {
+    def thenValidate[TWICEVALIDATED](
+        finalValidation: VALIDATED => ValidationResult[TWICEVALIDATED],
+    ): UNVALIDATED => ValidationResult[TWICEVALIDATED] =
       (unvalidated: UNVALIDATED) =>
         for {
           validated <- initialValidation(unvalidated)
@@ -40,4 +47,3 @@ object Validation {
   }
 
 }
-

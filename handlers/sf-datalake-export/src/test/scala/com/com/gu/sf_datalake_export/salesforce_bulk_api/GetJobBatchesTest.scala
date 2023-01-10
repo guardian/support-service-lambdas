@@ -18,7 +18,7 @@ class GetJobBatchesTest extends AnyFlatSpec with Matchers {
     val expected = new StringHttpRequest(
       requestMethod = GetMethod,
       relativePath = RelativePath("/services/async/44.0/job/someId/batch"),
-      urlParams = UrlParams.empty
+      urlParams = UrlParams.empty,
     )
 
     actual should be(expected)
@@ -57,7 +57,7 @@ class GetJobBatchesTest extends AnyFlatSpec with Matchers {
 
     val expectedBatches = Seq(
       BatchInfo(BatchId("batchId1"), Completed),
-      BatchInfo(BatchId("batchId2"), InProgress)
+      BatchInfo(BatchId("batchId2"), InProgress),
     )
     GetJobBatches.toResponse(BodyAsString(sfResponse)) shouldBe ClientSuccess(expectedBatches)
   }

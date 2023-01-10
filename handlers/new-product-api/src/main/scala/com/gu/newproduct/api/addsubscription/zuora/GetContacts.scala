@@ -22,16 +22,16 @@ object GetContacts {
       countryByNameOrCode(countryString).toClientFailable(s"Unknown $countryType country: $countryString")
 
     case class ZuoraBillTo(
-      Title__c: Option[String],
-      firstName: String,
-      lastName: String,
-      workEmail: Option[String],
-      address1: Option[String],
-      address2: Option[String],
-      city: Option[String],
-      state: Option[String],
-      country: Option[String],
-      zipCode: Option[String]
+        Title__c: Option[String],
+        firstName: String,
+        lastName: String,
+        workEmail: Option[String],
+        address1: Option[String],
+        address2: Option[String],
+        city: Option[String],
+        state: Option[String],
+        country: Option[String],
+        zipCode: Option[String],
     ) {
       def toBillToContact: ClientFailableOp[BillToContact] = {
 
@@ -52,42 +52,41 @@ object GetContacts {
               toField(city, City.apply),
               toField(state, State.apply),
               billToCountry,
-              toField(zipCode, Postcode.apply)
-            )
+              toField(zipCode, Postcode.apply),
+            ),
           )
         }
       }
     }
 
     case class ZuoraSoldTo(
-      Title__c: Option[String],
-      firstName: String,
-      lastName: String,
-      workEmail: Option[String],
-      country: String,
-      address1: Option[String],
-      address2: Option[String],
-      city: Option[String],
-      state: Option[String],
-      zipCode: Option[String]
+        Title__c: Option[String],
+        firstName: String,
+        lastName: String,
+        workEmail: Option[String],
+        country: String,
+        address1: Option[String],
+        address2: Option[String],
+        city: Option[String],
+        state: Option[String],
+        zipCode: Option[String],
     ) {
       def toSoldToContact = {
-        stringToCountry(country, "soldTo") map {
-          country =>
-            SoldToContact(
-              toField(Title__c, Title.apply),
-              FirstName(firstName),
-              LastName(lastName),
-              workEmail.map(Email),
-              SoldToAddress(
-                toField(address1, Address1.apply),
-                toField(address2, Address2.apply),
-                toField(city, City.apply),
-                toField(state, State.apply),
-                country,
-                toField(zipCode, Postcode.apply)
-              )
-            )
+        stringToCountry(country, "soldTo") map { country =>
+          SoldToContact(
+            toField(Title__c, Title.apply),
+            FirstName(firstName),
+            LastName(lastName),
+            workEmail.map(Email),
+            SoldToAddress(
+              toField(address1, Address1.apply),
+              toField(address2, Address2.apply),
+              toField(city, City.apply),
+              toField(state, State.apply),
+              country,
+              toField(zipCode, Postcode.apply),
+            ),
+          )
         }
 
       }
@@ -131,37 +130,37 @@ object GetContacts {
   case class Postcode(value: String) extends AddressField
 
   case class SoldToAddress(
-    address1: Option[Address1],
-    address2: Option[Address2],
-    city: Option[City],
-    state: Option[State],
-    country: Country,
-    postcode: Option[Postcode]
+      address1: Option[Address1],
+      address2: Option[Address2],
+      city: Option[City],
+      state: Option[State],
+      country: Country,
+      postcode: Option[Postcode],
   )
 
   case class BillToAddress(
-    address1: Option[Address1],
-    address2: Option[Address2],
-    city: Option[City],
-    state: Option[State],
-    country: Option[Country],
-    postcode: Option[Postcode]
+      address1: Option[Address1],
+      address2: Option[Address2],
+      city: Option[City],
+      state: Option[State],
+      country: Option[Country],
+      postcode: Option[Postcode],
   )
 
   case class BillToContact(
-    title: Option[Title],
-    firstName: FirstName,
-    lastName: LastName,
-    email: Option[Email],
-    address: BillToAddress
+      title: Option[Title],
+      firstName: FirstName,
+      lastName: LastName,
+      email: Option[Email],
+      address: BillToAddress,
   )
 
   case class SoldToContact(
-    title: Option[Title],
-    firstName: FirstName,
-    lastName: LastName,
-    email: Option[Email],
-    address: SoldToAddress
+      title: Option[Title],
+      firstName: FirstName,
+      lastName: LastName,
+      email: Option[Email],
+      address: SoldToAddress,
   )
 
   case class Contacts(billTo: BillToContact, soldTo: SoldToContact)

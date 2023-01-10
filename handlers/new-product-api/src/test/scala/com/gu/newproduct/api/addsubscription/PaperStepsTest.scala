@@ -4,7 +4,11 @@ import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
@@ -35,21 +39,22 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
 
     def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.voucherCustomerData)
 
-    val requestInput = JsObject(Map(
-      "acquisitionCase" -> JsString("case"),
-      "amountMinorUnits" -> JsNumber(123),
-      "startDate" -> JsString("2018-07-18"),
-      "zuoraAccountId" -> JsString("acccc"),
-      "acquisitionSource" -> JsString("CSR"),
-      "createdByCSR" -> JsString("bob"),
-      "planId" -> JsString("voucher_everyday")
-
-    ))
+    val requestInput = JsObject(
+      Map(
+        "acquisitionCase" -> JsString("case"),
+        "amountMinorUnits" -> JsNumber(123),
+        "startDate" -> JsString("2018-07-18"),
+        "zuoraAccountId" -> JsString("acccc"),
+        "acquisitionSource" -> JsString("CSR"),
+        "createdByCSR" -> JsString("bob"),
+        "planId" -> JsString("voucher_everyday"),
+      ),
+    )
 
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
 
-    //todo separate the tests properly so that we don't need this anymore (and the same in the contributionStepsTest)
+    // todo separate the tests properly so that we don't need this anymore (and the same in the contributionStepsTest)
     val dummySteps = (req: AddSubscriptionRequest) => {
       fail("unexpected execution of contribution steps while processing voucher request!")
     }
@@ -63,12 +68,14 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
       List(
         ZuoraCreateSubRequestRatePlan(
           productRatePlanId = ratePlanId,
-          maybeChargeOverride = None
-        )
-      )
+          maybeChargeOverride = None,
+        ),
+      ),
     )
 
-    def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+    def fakeCreate(
+        in: CreateSubscription.ZuoraCreateSubRequest,
+    ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       in shouldBe expectedIn
       ClientSuccess(SubscriptionName("well done"))
     }
@@ -92,7 +99,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
       fakeValidateStartDate,
       fakeValidateAddress,
       fakeCreate,
-      fakeSendEmail
+      fakeSendEmail,
     ) _
 
     val futureActual = Steps.handleRequest(
@@ -101,7 +108,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
       addPaperSub = fakeAddVoucherSteps,
       addDigipackSub = dummySteps,
       addGuardianWeeklyDomesticSub = dummySteps,
-      addGuardianWeeklyROWSub = dummySteps
+      addGuardianWeeklyROWSub = dummySteps,
     )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None, None))
 
     val actual = Await.result(futureActual, 30 seconds)

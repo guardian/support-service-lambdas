@@ -20,7 +20,7 @@ object SFSubscriptionTestData {
     "Ready for Acquisition",
     buyer,
     Some(lastProcessedStage),
-    Some(numberOfAttempts)
+    Some(numberOfAttempts),
   )
 
   val overlappingAssociatedSub = SFAssociatedSubRecord("contribution", identityId)

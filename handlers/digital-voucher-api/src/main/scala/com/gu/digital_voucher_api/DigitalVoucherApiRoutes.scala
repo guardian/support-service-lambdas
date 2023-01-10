@@ -22,17 +22,17 @@ case class CreateVoucherRequestBody(ratePlanName: String)
 case class CancelSubscriptionVoucherRequestBody(subscriptionId: String, cancellationDate: LocalDate)
 
 case class SuspendSubscriptionVoucherRequestBody(
-  subscriptionId: Option[String],
-  startDate: Option[LocalDate],
-  endDateExclusive: Option[LocalDate]
+    subscriptionId: Option[String],
+    startDate: Option[LocalDate],
+    endDateExclusive: Option[LocalDate],
 )
 
 case class SubscriptionActionRequestBody(
-  subscriptionId: Option[String],
-  cardCode: Option[String],
-  letterCode: Option[String],
-  replaceCard: Option[Boolean],
-  replaceLetter: Option[Boolean]
+    subscriptionId: Option[String],
+    cardCode: Option[String],
+    letterCode: Option[String],
+    replaceCard: Option[Boolean],
+    replaceLetter: Option[Boolean],
 )
 
 case class RedemptionHistoryRequestBody(subscriptionId: String)
@@ -82,13 +82,26 @@ object DigitalVoucherApiRoutes {
           .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
           .toEitherT[F]
         replaceCard <- requestBody.replaceCard
-          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"replaceCard flag is required when asking for a replacement")))
+          .toRight(
+            UnprocessableEntity(
+              DigitalVoucherApiRoutesError(s"replaceCard flag is required when asking for a replacement"),
+            ),
+          )
           .toEitherT[F]
         replaceLetter <- requestBody.replaceLetter
-          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"replaceLetter flag is required when asking for a replacement")))
+          .toRight(
+            UnprocessableEntity(
+              DigitalVoucherApiRoutesError(s"replaceLetter flag is required when asking for a replacement"),
+            ),
+          )
           .toEitherT[F]
-        typeOfReplacement <- ImovoSubscriptionType.fromBooleans(replaceCard, replaceLetter)
-          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError("Both replacement flags are set to false - nothing to replace")))
+        typeOfReplacement <- ImovoSubscriptionType
+          .fromBooleans(replaceCard, replaceLetter)
+          .toRight(
+            UnprocessableEntity(
+              DigitalVoucherApiRoutesError("Both replacement flags are set to false - nothing to replace"),
+            ),
+          )
           .toEitherT[F]
         _ = typeOfReplacement
         replacementVoucher <- digitalVoucherService
@@ -102,8 +115,10 @@ object DigitalVoucherApiRoutes {
         .getVoucher(subscriptionId)
         .bimap(
           error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")),
-          voucher => Ok(voucher)
-        ).merge.flatten
+          voucher => Ok(voucher),
+        )
+        .merge
+        .flatten
     }
 
     def handleCancelRequest(request: Request[F]): F[Response[F]] = {
@@ -127,11 +142,12 @@ object DigitalVoucherApiRoutes {
         endDate <- requestBody.endDateExclusive
           .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"endDateExclusive is required")))
           .toEitherT[F]
-        result <- digitalVoucherService.suspendVoucher(
-          SfSubscriptionId(subscriptionId),
-          startDate,
-          endDate
-        )
+        result <- digitalVoucherService
+          .suspendVoucher(
+            SfSubscriptionId(subscriptionId),
+            startDate,
+            endDate,
+          )
           .leftMap {
             case ImovoOperationFailedException(msg) =>
               BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to suspend voucher: $msg"))
@@ -149,7 +165,7 @@ object DigitalVoucherApiRoutes {
     }
 
     HttpRoutes.of[F] {
-      case _@ GET -> Root / "digital-voucher" / "redemption-history" / subscriptionId =>
+      case _ @GET -> Root / "digital-voucher" / "redemption-history" / subscriptionId =>
         handleRedemptionHistoryRequest(RedemptionHistoryRequestBody(subscriptionId))
       case GET -> Root / "digital-voucher" / subscriptionId =>
         handleGetRequest(subscriptionId)

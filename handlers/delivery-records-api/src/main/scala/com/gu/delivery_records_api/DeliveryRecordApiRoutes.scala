@@ -25,21 +25,27 @@ object DeliveryRecordApiRoutes {
     def getContactFromHeaders(request: Request[F]): EitherT[F, F[Response[F]], Contact] = {
       SalesforceHandlerSupport
         .extractContactFromHeaders(
-          request.headers.toList.map(header => header.name.value -> header.value)
+          request.headers.toList.map(header => header.name.value -> header.value),
         )
         .toEitherT[F]
         .leftMap(error => BadRequest(error))
     }
 
     def getDeliveryRecords(
-      subscriptionNumber: String,
-      contact: Contact,
-      optionalStartDate: Option[LocalDate],
-      optionalEndDate: Option[LocalDate],
-      optionalCancellationEffectiveDate: Option[LocalDate]
+        subscriptionNumber: String,
+        contact: Contact,
+        optionalStartDate: Option[LocalDate],
+        optionalEndDate: Option[LocalDate],
+        optionalCancellationEffectiveDate: Option[LocalDate],
     ): EitherT[F, F[Response[F]], DeliveryRecordsApiResponse] = {
       deliveryRecordsService
-        .getDeliveryRecordsForSubscription(subscriptionNumber, contact, optionalStartDate, optionalEndDate, optionalCancellationEffectiveDate)
+        .getDeliveryRecordsForSubscription(
+          subscriptionNumber,
+          contact,
+          optionalStartDate,
+          optionalEndDate,
+          optionalCancellationEffectiveDate,
+        )
         .leftMap {
           case error: DeliveryRecordServiceSubscriptionNotFound =>
             NotFound(error)
@@ -49,26 +55,31 @@ object DeliveryRecordApiRoutes {
     }
 
     def createDeliveryProblem(
-      subscriptionNumber: String,
-      contact: Contact,
-      detail: CreateDeliveryProblem
+        subscriptionNumber: String,
+        contact: Contact,
+        detail: CreateDeliveryProblem,
     ): EitherT[F, F[Response[F]], SFApiCompositeResponse] =
-      deliveryRecordsService.createDeliveryProblemForSubscription(subscriptionNumber, contact, detail)
+      deliveryRecordsService
+        .createDeliveryProblemForSubscription(subscriptionNumber, contact, detail)
         .leftMap(InternalServerError(_))
 
-    def parseDateFromQueryString(request: Request[F], queryParameterKey: String): EitherT[F, F[Response[F]], Option[LocalDate]] = {
-      request
-        .params
+    def parseDateFromQueryString(
+        request: Request[F],
+        queryParameterKey: String,
+    ): EitherT[F, F[Response[F]], Option[LocalDate]] = {
+      request.params
         .get(queryParameterKey)
-        .traverse[RouteResult, LocalDate] {
-          queryStringValue =>
-            Either
-              .catchNonFatal(LocalDate.parse(queryStringValue))
-              .leftMap(ex =>
-                BadRequest(DeliveryRecordApiRoutesError(
-                  s"$queryParameterKey should be formatted yyyy-MM-dd"
-                )))
-              .toEitherT
+        .traverse[RouteResult, LocalDate] { queryStringValue =>
+          Either
+            .catchNonFatal(LocalDate.parse(queryStringValue))
+            .leftMap(ex =>
+              BadRequest(
+                DeliveryRecordApiRoutesError(
+                  s"$queryParameterKey should be formatted yyyy-MM-dd",
+                ),
+              ),
+            )
+            .toEitherT
         }
     }
 
@@ -76,7 +87,7 @@ object DeliveryRecordApiRoutes {
       result
         .fold(
           identity,
-          value => Ok(value)
+          value => Ok(value),
         )
         .flatten
     }
@@ -94,9 +105,9 @@ object DeliveryRecordApiRoutes {
               contact,
               startDate,
               endDate,
-              None
+              None,
             )
-          } yield records
+          } yield records,
         )
 
       case request @ GET -> Root / "delivery-records" / subscriptionNumber / "cancel" =>
@@ -109,31 +120,31 @@ object DeliveryRecordApiRoutes {
               contact,
               None,
               None,
-              cancellationEffectiveDate
+              cancellationEffectiveDate,
             )
-          } yield records
+          } yield records,
         )
 
       case request @ POST -> Root / "delivery-records" / subscriptionNumber =>
         toResponse(
           for {
             contact <- getContactFromHeaders(request)
-            body <- request.attemptAs[CreateDeliveryProblem]
-              .leftMap(error =>
-                BadRequest(DeliveryRecordApiRoutesError(error.getMessage)))
+            body <- request
+              .attemptAs[CreateDeliveryProblem]
+              .leftMap(error => BadRequest(DeliveryRecordApiRoutesError(error.getMessage)))
             _ <- createDeliveryProblem(
               subscriptionNumber,
               contact,
-              body
+              body,
             )
             records <- getDeliveryRecords(
               subscriptionNumber,
               contact,
               None,
               None,
-              None
+              None,
             )
-          } yield records
+          } yield records,
         )
 
     }

@@ -18,30 +18,32 @@ object UpdateCase {
   implicit val caseReads: Reads[CaseWithContactId] = Json.reads[CaseWithContactId]
 
   def verifyCaseBelongsToUser(
-    lookupByIdOp: TSalesforceGenericIdLookup,
-    getCaseByIdOp: CaseId => ClientFailableOp[CaseWithContactId]
+      lookupByIdOp: TSalesforceGenericIdLookup,
+      getCaseByIdOp: CaseId => ClientFailableOp[CaseWithContactId],
   )(
-    identityId: IdentityId,
-    caseId: CaseId
+      identityId: IdentityId,
+      caseId: CaseId,
   ) =
     for {
       sfContactIdFromIdentity <- lookupByIdOp(
         SfObjectType("Contact"),
         FieldName("IdentityID__c"),
-        LookupValue(identityId.value)
+        LookupValue(identityId.value),
       ).toApiGatewayOp("lookup SF contact ID from identityID")
       caseWithContactId <- getCaseByIdOp(caseId).toApiGatewayOp("lookup ContactId from SF Case")
       _ <- (sfContactIdFromIdentity.Id equals caseWithContactId.ContactId.value)
-        .toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden(
-          s"Authenticated user (${sfContactIdFromIdentity.Id}) does not match ContactId ($caseWithContactId) for Case ($caseId)"
-        ))
+        .toApiGatewayContinueProcessing(
+          ApiGatewayResponse.forbidden(
+            s"Authenticated user (${sfContactIdFromIdentity.Id}) does not match ContactId ($caseWithContactId) for Case ($caseId)",
+          ),
+        )
     } yield ()
 
   def steps(sfClient: SfClient)(apiGatewayRequest: ApiGatewayRequest, identityId: IdentityId) =
     (for {
       caseId <- apiGatewayRequest.path.map(_.split("/").last).map(CaseId).toApiGatewayOp("extract caseId from path")
       lookupByIdOp = SalesforceGenericIdLookup(sfClient.wrapWith(JsonHttp.get))
-      getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](sfClient.wrapWith(JsonHttp.get))_
+      getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](sfClient.wrapWith(JsonHttp.get)) _
       _ <- verifyCaseBelongsToUser(lookupByIdOp, getCaseByIdOp)(identityId, caseId)
       requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
       sfUpdateOp = SalesforceCase.Update(sfClient.wrapWith(JsonHttp.patch))

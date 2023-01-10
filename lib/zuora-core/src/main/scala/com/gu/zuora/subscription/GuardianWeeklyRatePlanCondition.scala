@@ -1,8 +1,7 @@
 package com.gu.zuora.subscription
 
-/**
- * Conditions defining what Guardian Weekly subscription the customer has today.
- */
+/** Conditions defining what Guardian Weekly subscription the customer has today.
+  */
 object GuardianWeeklyRatePlanCondition {
 
   def productIsUnexpiredGuardianWeekly(ratePlan: RatePlan): Boolean = {
@@ -13,7 +12,7 @@ object GuardianWeeklyRatePlanCondition {
         "Guardian Weekly - ROW",
         "Guardian Weekly Zone A",
         "Guardian Weekly Zone B",
-        "Guardian Weekly Zone C"
+        "Guardian Weekly Zone C",
       ).contains(ratePlan.productName)
 
     lazy val isExpired =

@@ -13,11 +13,7 @@ import zio.{Exit, Runtime, Unsafe, ZIO}
 
 import scala.jdk.CollectionConverters.*
 
-object RefundHandler extends RefundHandler {
-  type TIO[+A] = ZIO[Any, Any, A] // Succeed with an `A`, may fail with anything`, no requirements.
-}
-
-trait RefundHandler extends RequestHandler[SQSEvent, Unit] {
+class RefundHandler extends RequestHandler[SQSEvent, Unit] {
 
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
     val records: List[SQSEvent.SQSMessage] = input.getRecords.asScala.toList
@@ -27,7 +23,8 @@ trait RefundHandler extends RequestHandler[SQSEvent, Unit] {
 
       maybeRefundInput match {
         case Right(refundInput) => runZio(refundInput, context)
-        case Left(ex) => context.getLogger.log(s"Error '${ex}' when decoding JSON to RefundInput with body: ${record.getBody}")
+        case Left(ex) =>
+          context.getLogger.log(s"Error '${ex}' when decoding JSON to RefundInput with body: ${record.getBody}")
       }
     }
   }
@@ -36,7 +33,8 @@ trait RefundHandler extends RequestHandler[SQSEvent, Unit] {
     val runtime = Runtime.default
     Unsafe.unsafe {
       runtime.unsafe.run(
-        Refund.applyRefund(refundInput)
+        Refund
+          .applyRefund(refundInput)
           .provide(
             AwsS3Live.layer,
             AwsCredentialsLive.layer,
@@ -45,8 +43,8 @@ trait RefundHandler extends RequestHandler[SQSEvent, Unit] {
             ZuoraGetLive.layer,
             GuStageLive.layer,
             InvoicingApiRefundLive.layer,
-            CreditBalanceAdjustmentLive.layer
-          )
+            CreditBalanceAdjustmentLive.layer,
+          ),
       ) match
         case Exit.Success(value) => value
         case Exit.Failure(cause) => context.getLogger.log("Failed with: " + cause.toString)

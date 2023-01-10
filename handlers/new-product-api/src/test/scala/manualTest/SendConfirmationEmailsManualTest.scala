@@ -34,8 +34,8 @@ object SendConfirmationEmailsManualTest {
         city = None,
         state = None,
         country = Country.US,
-        postcode = None
-      )
+        postcode = None,
+      ),
     )
 
     val billto = BillToContact(
@@ -49,8 +49,8 @@ object SendConfirmationEmailsManualTest {
         city = None,
         state = None,
         country = Some(Country.UK),
-        postcode = None
-      )
+        postcode = None,
+      ),
     )
     Contacts(billto, soldTo)
   }
@@ -63,7 +63,7 @@ object SendConfirmationEmailsManualTest {
     LocalDate.of(2018, 9, 1),
     Plan(MonthlyContribution, PlanDescription("some plan"), testStartDateRules),
     contacts,
-    LocalDate.of(2018, 8, 1)
+    LocalDate.of(2018, 8, 1),
   )
 
   val fakeDate = LocalDate.of(2018, 8, 10)
@@ -74,7 +74,7 @@ object SendConfirmationEmailsManualTest {
       queueName = emailQueuesFor(Stage("DEV")).contributions
       sqsSend = SqsAsync.send(SqsAsync.buildClient)(queueName) _
       contributionsSqsSend = EtSqsSend[ContributionsEmailData](sqsSend) _
-      sendConfirmationEmail = SendConfirmationEmail[ContributionsEmailData](contributionsSqsSend)_
+      sendConfirmationEmail = SendConfirmationEmail[ContributionsEmailData](contributionsSqsSend) _
       sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), contributionsEmailData(fakeContacts(email)))
     } yield sendResult
     result match {

@@ -22,8 +22,8 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
     Stopped_Publication_Date__c = suspendedDate,
     Holiday_Stop_Request__r = HolidayStopRequest(
       SF_Subscription__c = sfSubscriptionId,
-      Subscription_Name__c = subscriptionNumber
-    )
+      Subscription_Name__c = subscriptionNumber,
+    ),
   )
 
   private val imovo = mock[ImovoClient[Id]]
@@ -33,7 +33,7 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
       .expects(
         SfSubscriptionId(sfSubscriptionId),
         suspendedDate,
-        suspendedDate.plusDays(1)
+        suspendedDate.plusDays(1),
       )
       .returns(EitherT[Id, ImovoClientException, Unit](Right(())))
 
@@ -45,12 +45,12 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
       .expects(
         SfSubscriptionId(sfSubscriptionId),
         suspendedDate,
-        suspendedDate.plusDays(1)
+        suspendedDate.plusDays(1),
       )
       .returns(EitherT[Id, ImovoClientException, Unit](Left(ImovoClientException("failed"))))
 
     DigitalVoucher.suspend(imovo, suspension).value shouldBe Left(
-      DigitalVoucherSuspendFailure("failed")
+      DigitalVoucherSuspendFailure("failed"),
     )
   }
 
@@ -59,19 +59,23 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
       .expects(
         SfSubscriptionId(sfSubscriptionId),
         suspendedDate,
-        suspendedDate.plusDays(1)
+        suspendedDate.plusDays(1),
       )
-      .returns(EitherT[Id, ImovoClientException, Unit](Left(
-        ImovoClientException(
-          message = "failed",
-          Some(
-            """{"errorMessages":["Invalid Request: Please enter a reactivation date in the future"],"successfulRequest":false}"""
-          )
-        )
-      )))
+      .returns(
+        EitherT[Id, ImovoClientException, Unit](
+          Left(
+            ImovoClientException(
+              message = "failed",
+              Some(
+                """{"errorMessages":["Invalid Request: Please enter a reactivation date in the future"],"successfulRequest":false}""",
+              ),
+            ),
+          ),
+        ),
+      )
 
     DigitalVoucher.suspend(imovo, suspension).value shouldBe Left(
-      DigitalVoucherSuspendFailure("failed")
+      DigitalVoucherSuspendFailure("failed"),
     )
   }
 
@@ -80,10 +84,13 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
       .expects(
         SfSubscriptionId(sfSubscriptionId),
         suspendedDate,
-        suspendedDate.plusDays(1)
+        suspendedDate.plusDays(1),
       )
-      .returns(EitherT[Id, ImovoClientException, Unit](Left(ImovoClientException(
-        message = s"""
+      .returns(
+        EitherT[Id, ImovoClientException, Unit](
+          Left(
+            ImovoClientException(
+              message = s"""
           |Request GET\n
           |https://domain/Subscription/SetHoliday?
           |SubscriptionId=$sfSubscriptionId&StartDate=$suspendedDate&
@@ -92,10 +99,13 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
           |["Unable to create holiday, conflicting holiday found between entered dates"],\n
           |"successfulRequest":false})"))))
           |""".stripMargin,
-        responseBody = Some(
-          """{"errorMessages":["Unable to create holiday, conflicting holiday found between entered dates"],"successfulRequest":false}"""
-        )
-      ))))
+              responseBody = Some(
+                """{"errorMessages":["Unable to create holiday, conflicting holiday found between entered dates"],"successfulRequest":false}""",
+              ),
+            ),
+          ),
+        ),
+      )
 
     DigitalVoucher.suspend(imovo, suspension).value shouldBe Right(())
   }

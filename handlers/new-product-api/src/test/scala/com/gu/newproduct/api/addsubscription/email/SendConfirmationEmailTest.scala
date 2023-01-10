@@ -19,13 +19,18 @@ import org.scalatest.matchers.should.Matchers
 class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   it should "send confirmation email" in {
     def sqsSend(payload: ETPayload[PaperEmailData]): Future[Unit] = Future {
-      payload shouldBe ETPayload("billToEmail@mail.com", testVoucherData, DataExtensionName("paper-voucher"), Some("sfContactId"))
+      payload shouldBe ETPayload(
+        "billToEmail@mail.com",
+        testVoucherData,
+        DataExtensionName("paper-voucher"),
+        Some("sfContactId"),
+      )
       ()
     }
 
     val send = SendConfirmationEmail(sqsSend) _
-    send(Some(SfContactId("sfContactId")), testVoucherData).underlying map {
-      result => result shouldBe ContinueProcessing(())
+    send(Some(SfContactId("sfContactId")), testVoucherData).underlying map { result =>
+      result shouldBe ContinueProcessing(())
     }
   }
 
@@ -38,8 +43,8 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
     def sqsSend(payload: ETPayload[PaperEmailData]): Future[Unit] = Future.successful(())
 
     val send = SendConfirmationEmail(sqsSend) _
-    send(Some(SfContactId("sfContactId")), noBilltoEmailVoucherData).underlying map {
-      result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
+    send(Some(SfContactId("sfContactId")), noBilltoEmailVoucherData).underlying map { result =>
+      result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
   }
 
@@ -49,8 +54,8 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
 
     val send = SendConfirmationEmail(sqsSend) _
 
-    send(Some(SfContactId("sfContactId")), testVoucherData).underlying map {
-      result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
+    send(Some(SfContactId("sfContactId")), testVoucherData).underlying map { result =>
+      result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
   }
 
@@ -61,7 +66,7 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
     subscriptionName = SubscriptionName("subName"),
     contacts = TestData.contacts,
     paymentMethod = TestData.directDebitPaymentMethod,
-    currency = GBP
+    currency = GBP,
   )
 
 }

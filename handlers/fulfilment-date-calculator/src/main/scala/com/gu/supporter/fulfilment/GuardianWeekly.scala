@@ -7,21 +7,23 @@ import java.time.temporal.TemporalAdjusters.{next, previous}
 import com.gu.fulfilmentdates.FulfilmentDates
 import com.gu.fulfilmentdates.FulfilmentDates.dayOfWeekFormat
 
-/**
- * @param issueDayOfWeek                Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
- * @param fulfilmentGenerationDayOfWeek Weekday corresponding to when fulfilment-lambdas generate files
- */
+/** @param issueDayOfWeek
+  *   Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
+  * @param fulfilmentGenerationDayOfWeek
+  *   Weekday corresponding to when fulfilment-lambdas generate files
+  */
 sealed abstract class FulfilmentConstants(
-  val issueDayOfWeek: DayOfWeek,
-  val fulfilmentGenerationDayOfWeek: DayOfWeek
+    val issueDayOfWeek: DayOfWeek,
+    val fulfilmentGenerationDayOfWeek: DayOfWeek,
 ) {
   def holidayStopFirstAvailableDate(today: LocalDate): LocalDate
 }
 
-object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
-  issueDayOfWeek = DayOfWeek.FRIDAY,
-  fulfilmentGenerationDayOfWeek = DayOfWeek.THURSDAY,
-) {
+object GuardianWeeklyFulfilmentDates
+    extends FulfilmentConstants(
+      issueDayOfWeek = DayOfWeek.FRIDAY,
+      fulfilmentGenerationDayOfWeek = DayOfWeek.THURSDAY,
+    ) {
   def apply(today: LocalDate): Map[String, FulfilmentDates] =
     Map(
       dayOfWeekFormat.format(issueDayOfWeek) -> FulfilmentDates(
@@ -30,8 +32,8 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
         holidayStopFirstAvailableDate(today),
         holidayStopProcessorTargetDate(today),
         finalFulfilmentFileGenerationDate(today),
-        newSubscriptionEarliestStartDate(today)
-      )
+        newSubscriptionEarliestStartDate(today),
+      ),
     )
 
   val minDaysBetweenTodayAndFirstAvailableDate = 4
@@ -45,10 +47,9 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
   }
 
   def holidayStopProcessorTargetDate(today: LocalDate): Option[LocalDate] = {
-    if(today.getDayOfWeek == fulfilmentGenerationDayOfWeek.minus(1)){
+    if (today.getDayOfWeek == fulfilmentGenerationDayOfWeek.minus(1)) {
       Some(today `with` next(issueDayOfWeek) `with` next(issueDayOfWeek)) // issue day after next
-    }
-    else {
+    } else {
       None
     }
   }
@@ -65,7 +66,7 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
 
     val todayIsFufilmentDay = today.getDayOfWeek equals fulfilmentGenerationDayOfWeek
 
-    if(todayIsFufilmentDay)
+    if (todayIsFufilmentDay)
       (today `with` next(issueDayOfWeek) `with` next(issueDayOfWeek) `with` next(issueDayOfWeek))
     else
       (today `with` next(issueDayOfWeek) `with` next(issueDayOfWeek))
@@ -78,4 +79,3 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
       previous(fulfilmentGenerationDayOfWeek)
 
 }
-

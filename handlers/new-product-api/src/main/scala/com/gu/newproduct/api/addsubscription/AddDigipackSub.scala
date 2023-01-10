@@ -11,9 +11,22 @@ import com.gu.newproduct.api.addsubscription.email.digipack.DigipackEmailDataSer
 import com.gu.newproduct.api.addsubscription.email.digipack.ValidatedAddress
 import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, EtSqsSend, SendConfirmationEmail, TrialPeriod}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation.digipack.{DigipackAccountValidation, DigipackCustomerData, GetDigipackCustomerData}
-import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidateSubscriptions, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.validation.digipack.{
+  DigipackAccountValidation,
+  DigipackCustomerData,
+  GetDigipackCustomerData,
+}
+import com.gu.newproduct.api.addsubscription.validation.{
+  ValidateAccount,
+  ValidatePaymentMethod,
+  ValidateSubscriptions,
+  ValidationResult,
+}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
@@ -32,29 +45,33 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import scala.concurrent.Future
 object AddDigipackSub {
   def steps(
-    currentDate: () => LocalDate,
-    getPlan: PlanId => Plan,
-    getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-    getCustomerData: ZuoraAccountId => ApiGatewayOp[DigipackCustomerData],
-    isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-    validateAddress: BillToAddress => ValidationResult[ValidatedAddress],
-    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    sendConfirmationEmail: (Option[SfContactId], DigipackEmailData) => AsyncApiGatewayOp[Unit]
+      currentDate: () => LocalDate,
+      getPlan: PlanId => Plan,
+      getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
+      getCustomerData: ZuoraAccountId => ApiGatewayOp[DigipackCustomerData],
+      isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
+      validateAddress: BillToAddress => ValidationResult[ValidatedAddress],
+      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+      sendConfirmationEmail: (Option[SfContactId], DigipackEmailData) => AsyncApiGatewayOp[Unit],
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- isValidStartDateForPlan(request.planId, request.startDate).toApiGatewayOp.toAsync
 
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
-    _ <- validateAddress(customerData.contacts.billTo.address).toApiGatewayOp.toAsync //todo refactor to use the validated version of the address ?
-    zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
+    _ <- validateAddress(
+      customerData.contacts.billTo.address,
+    ).toApiGatewayOp.toAsync // todo refactor to use the validated version of the address ?
+    zuoraRatePlanId <- getZuoraRateplanId(request.planId)
+      .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
+      .toAsync
     createSubRequest = ZuoraCreateSubRequest(
       request = request,
       acceptanceDate = request.startDate,
       ratePlans = List(
         ZuoraCreateSubRequestRatePlan(
           maybeChargeOverride = None,
-          productRatePlanId = zuoraRatePlanId
-        )
-      )
+          productRatePlanId = zuoraRatePlanId,
+        ),
+      ),
     )
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create digiPack subscription")
     plan = getPlan(request.planId)
@@ -66,21 +83,22 @@ object AddDigipackSub {
       contacts = customerData.contacts,
       paymentMethod = customerData.paymentMethod,
       currency = customerData.account.currency,
-      trialPeriod = TrialPeriod(days = trialPeriodDays)
+      trialPeriod = TrialPeriod(days = trialPeriodDays),
     )
-    _ <- sendConfirmationEmail(customerData.account.sfContactId, emailData).recoverAndLog("send digiPack confirmation email")
+    _ <- sendConfirmationEmail(customerData.account.sfContactId, emailData)
+      .recoverAndLog("send digiPack confirmation email")
   } yield subscriptionName
 
   def wireSteps(
-    catalog: Catalog,
-    zuoraIds: ZuoraIds,
-    zuoraClient: Requests,
-    isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-    isValidAddress: BillToAddress => ValidationResult[ValidatedAddress],
-    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-    emailQueueNames: EmailQueueNames,
-    currentDate: () => LocalDate
+      catalog: Catalog,
+      zuoraIds: ZuoraIds,
+      zuoraClient: Requests,
+      isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
+      isValidAddress: BillToAddress => ValidationResult[ValidatedAddress],
+      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+      awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
+      emailQueueNames: EmailQueueNames,
+      currentDate: () => LocalDate,
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
     val digipackPlanIds = zuoraIds.digitalPackIds.byApiPlanId.values.toList
@@ -96,28 +114,36 @@ object AddDigipackSub {
       isValidStartDateForPlan,
       isValidAddress,
       createSubscription,
-      sendConfirmationEmail
+      sendConfirmationEmail,
     )
   }
 
-  def getValidatedCustomerData(zuoraClient: Requests, plansWithDigipack: List[ProductRatePlanId]): ZuoraAccountId => ApiGatewayOp[DigipackCustomerData] = {
+  def getValidatedCustomerData(
+      zuoraClient: Requests,
+      plansWithDigipack: List[ProductRatePlanId],
+  ): ZuoraAccountId => ApiGatewayOp[DigipackCustomerData] = {
 
     val validateAccount = ValidateAccount.apply _ thenValidate DigipackAccountValidation.apply _
     val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith (
       validate = validateAccount,
       ifNotFoundReturn = Some("Zuora account id is not valid")
     )
-    val getValidatedPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
-    val getContacts: ZuoraAccountId => ClientFailableOp[GetContacts.Contacts] = GetContacts(zuoraClient.get[GetContactsResponse]) _
-    val validateSubs = ValidateSubscriptions(plansWithDigipack, "Zuora account already has an active Digital Pack subscription") _
-    val getValidatedSubs = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _ andValidateWith validateSubs
+    val getValidatedPaymentMethod =
+      GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
+    val getContacts: ZuoraAccountId => ClientFailableOp[GetContacts.Contacts] = GetContacts(
+      zuoraClient.get[GetContactsResponse],
+    ) _
+    val validateSubs =
+      ValidateSubscriptions(plansWithDigipack, "Zuora account already has an active Digital Pack subscription") _
+    val getValidatedSubs =
+      GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _ andValidateWith validateSubs
 
     GetDigipackCustomerData(
       getAccount = getValidatedAccount,
       getAccountSubscriptions = getValidatedSubs,
       getPaymentMethod = getValidatedPaymentMethod,
       getContacts = getContacts,
-      _
+      _,
     )
   }
 

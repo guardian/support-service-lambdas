@@ -18,21 +18,21 @@ object SFTestEffects {
        |}
     """.stripMargin
 
-  //stubs successful auth when provided with SF credentials provided in com.gu.effects.FakeFetchString
+  // stubs successful auth when provided with SF credentials provided in com.gu.effects.FakeFetchString
   val authSuccess = (
     POSTRequest(
       "/services/oauth2/token",
       "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
-        "&password=passSFpasswordtokentokenSFtoken&grant_type=password"
+        "&password=passSFpasswordtokentokenSFtoken&grant_type=password",
     ),
-      HTTPResponse(200, authSuccessResponseBody)
+    HTTPResponse(200, authSuccessResponseBody),
   )
 
   def cancelSuccess(referenceId: String, price: Double) = (
     POSTRequest(
       s"/services/data/v$salesforceApiVersion/composite/",
-      s"""{"allOrNone":true,"compositeRequest":[{"method":"PATCH","url":"/services/data/v$salesforceApiVersion/sobjects/Holiday_Stop_Requests_Detail__c/HSD-1","referenceId":"CANCEL_DETAIL_$referenceId","body":{"Actual_Price__c":$price,"Charge_Code__c":"ManualRefund_Cancellation"}}]}"""
+      s"""{"allOrNone":true,"compositeRequest":[{"method":"PATCH","url":"/services/data/v$salesforceApiVersion/sobjects/Holiday_Stop_Requests_Detail__c/HSD-1","referenceId":"CANCEL_DETAIL_$referenceId","body":{"Actual_Price__c":$price,"Charge_Code__c":"ManualRefund_Cancellation"}}]}""",
     ),
-      HTTPResponse(200, """{ "compositeResponse" : [ { "httpStatusCode": 200 } ]}""".stripMargin)
+    HTTPResponse(200, """{ "compositeResponse" : [ { "httpStatusCode": 200 } ]}""".stripMargin),
   )
 }

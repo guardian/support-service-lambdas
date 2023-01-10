@@ -1,6 +1,17 @@
 package com.gu.zuora.sar
 
-import com.gu.zuora.sar.BatonModels.{Completed, Failed, Pending, PerformSarRequest, SarInitiateRequest, SarInitiateResponse, SarRequest, SarResponse, SarStatusRequest, SarStatusResponse}
+import com.gu.zuora.sar.BatonModels.{
+  Completed,
+  Failed,
+  Pending,
+  PerformSarRequest,
+  SarInitiateRequest,
+  SarInitiateResponse,
+  SarRequest,
+  SarResponse,
+  SarStatusRequest,
+  SarStatusResponse,
+}
 import io.circe.parser._
 import io.circe.syntax._
 import circeCodecs._
@@ -78,25 +89,33 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
 
     "should encode SarInitiateResponse correctly" in {
       val response: SarResponse = SarInitiateResponse("someRequestId")
-      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","action":"initiate","requestType":"SAR","dataProvider":"zuora"}"""
+      response.asJson.printWith(
+        jsonPrinter,
+      ) shouldBe """{"initiationReference":"someRequestId","action":"initiate","requestType":"SAR","dataProvider":"zuora"}"""
     }
 
     "should encode completed SarStatusResponse correctly" in {
       val response: SarResponse = SarStatusResponse(
         status = Completed,
-        resultLocations = Some(List("locationValue"))
+        resultLocations = Some(List("locationValue")),
       )
-      response.asJson.printWith(jsonPrinter) shouldBe """{"status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"SAR","dataProvider":"zuora"}"""
+      response.asJson.printWith(
+        jsonPrinter,
+      ) shouldBe """{"status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"SAR","dataProvider":"zuora"}"""
     }
 
     "should encode pending SarStatusResponse correctly" in {
       val response: SarResponse = SarStatusResponse(status = Pending)
-      response.asJson.printWith(jsonPrinter) shouldBe """{"status":"pending","action":"status","requestType":"SAR","dataProvider":"zuora"}"""
+      response.asJson.printWith(
+        jsonPrinter,
+      ) shouldBe """{"status":"pending","action":"status","requestType":"SAR","dataProvider":"zuora"}"""
     }
 
     "should encode failed SarStatusResponse correctly" in {
       val response: SarResponse = SarStatusResponse(status = Failed, None, Some("error making request"))
-      response.asJson.printWith(jsonPrinter) shouldBe """{"status":"failed","message":"error making request","action":"status","requestType":"SAR","dataProvider":"zuora"}"""
+      response.asJson.printWith(
+        jsonPrinter,
+      ) shouldBe """{"status":"failed","message":"error making request","action":"status","requestType":"SAR","dataProvider":"zuora"}"""
     }
   }
 }

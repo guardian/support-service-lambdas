@@ -28,27 +28,27 @@ class RestRequestMakerTest extends AsyncFlatSpec {
   val dummyJson = Json.parse(
     """{
       |  "body": "test"
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   val validUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": true,
       |  "id": "id123", "balance": 1.2, "defaultPaymentMethod": {"id": "pmid"}
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   val validFailedUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": false,
       |  "subscriptionId": "id123"
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   val validZuoraNoOtherFields = Json.parse(
     """{
       |  "success": true
-      |}""".stripMargin
+      |}""".stripMargin,
   )
 
   def constructTestRequest(json: JsValue = dummyJson): Request = {
@@ -98,9 +98,11 @@ class RestRequestMakerTest extends AsyncFlatSpec {
     // TODO tests for POST/PUT as well
     def response(request: Request): Response = {
       println(s"request: $request")
-      if (request.method() == "GET"
+      if (
+        request.method() == "GET"
         && request.url().toString == "https://www.test.com/getget"
-        && request.header("a") == "b")
+        && request.header("a") == "b"
+      )
         // check body for post/put
         constructTestResponse(200, validUpdateSubscriptionResult)
       else {
@@ -108,8 +110,9 @@ class RestRequestMakerTest extends AsyncFlatSpec {
         constructTestResponse(404)
       }
     }
-    val actual = new RestRequestMaker.Requests(Map("a" -> "b"), "https://www.test.com", response, _ => ClientSuccess(()))
-      .get[BasicAccountInfo]("/getget")
+    val actual =
+      new RestRequestMaker.Requests(Map("a" -> "b"), "https://www.test.com", response, _ => ClientSuccess(()))
+        .get[BasicAccountInfo]("/getget")
     val basicInfo = BasicAccountInfo("id123")
 
     actual should be(ClientSuccess(basicInfo))

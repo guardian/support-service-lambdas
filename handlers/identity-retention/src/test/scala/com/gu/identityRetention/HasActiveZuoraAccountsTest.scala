@@ -22,7 +22,8 @@ class HasActiveZuoraAccountsTest extends AnyFlatSpec with Matchers {
 
   it should "return a left(500) if the call to Zuora fails" in {
     val zuoraCheck = GetActiveZuoraAccounts.processQueryResult(GenericError("Zuora response was a 500"))
-    val expected = Left(ApiGatewayResponse.internalServerError("Failed to retrieve the identity user's details from Zuora"))
+    val expected =
+      Left(ApiGatewayResponse.internalServerError("Failed to retrieve the identity user's details from Zuora"))
     zuoraCheck.toDisjunction should be(expected)
   }
 

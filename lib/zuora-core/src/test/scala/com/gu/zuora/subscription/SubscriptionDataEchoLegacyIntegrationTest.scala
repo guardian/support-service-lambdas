@@ -9,10 +9,10 @@ import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscripton
 import org.scalatest.flatspec.AnyFlatSpec
 
 class SubscriptionDataEchoLegacyIntegrationTest extends AnyFlatSpec {
-  /**
-   * This tests the echo legacy subscription description described in EchoLegacySubscription.json
-   * This subscription is for Friday/Saturday ie it has non-zero rate plan charge price for those days
-   */
+
+  /** This tests the echo legacy subscription description described in EchoLegacySubscription.json This subscription is
+    * for Friday/Saturday ie it has non-zero rate plan charge price for those days
+    */
 
   "SubscriptionData" should "calculate issue data correctly for echo legacy subscription" in {
     MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
@@ -23,11 +23,11 @@ class SubscriptionDataEchoLegacyIntegrationTest extends AnyFlatSpec {
 
     val normalBillDates = BillDates(
       startDate,
-      startDate.plusMonths(1).minusDays(1)
+      startDate.plusMonths(1).minusDays(1),
     )
     val normalBillDates2 = BillDates(
       startDate.plusMonths(1),
-      startDate.plusMonths(2).minusDays(1)
+      startDate.plusMonths(2).minusDays(1),
     )
 
     val expectedIssueData = List(
@@ -50,7 +50,7 @@ class SubscriptionDataEchoLegacyIntegrationTest extends AnyFlatSpec {
       expectedTotalAnnualIssueLimitPerSubscription = 12,
       expectedProductType = ZuoraProductTypes.NewspaperHomeDelivery,
       expectedEditionDaysOfWeek = List(FRIDAY, SATURDAY),
-      billCycleDay = 21
+      billCycleDay = 21,
     )
   }
 }

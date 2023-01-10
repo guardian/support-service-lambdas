@@ -19,7 +19,10 @@ object GetContacts {
   case class WireAccount(BillToId: String, IdentityId__c: Option[String], sfContactId__c: String)
   implicit val readWireAccount = Json.reads[WireAccount]
 
-  def apply(zuoraQuerier: ZuoraQuerier, accountIds: NonEmptyList[AccountId]): ClientFailableOp[Map[ContactId, IdentityAndSFContact]] =
+  def apply(
+      zuoraQuerier: ZuoraQuerier,
+      accountIds: NonEmptyList[AccountId],
+  ): ClientFailableOp[Map[ContactId, IdentityAndSFContact]] =
     for {
       or <- OrTraverse(accountIds) { accountId =>
         zoql"""Id = ${accountId.value}"""
@@ -32,8 +35,8 @@ object GetContacts {
         ContactId(acc.BillToId),
         IdentityAndSFContact(
           acc.IdentityId__c.map(IdentityId.apply),
-          SFContactId(acc.sfContactId__c)
-        )
+          SFContactId(acc.sfContactId__c),
+        ),
       )
     }.toMap
 

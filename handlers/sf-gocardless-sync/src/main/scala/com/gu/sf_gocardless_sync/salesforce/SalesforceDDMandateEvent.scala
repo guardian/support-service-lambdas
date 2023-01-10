@@ -17,23 +17,28 @@ object SalesforceDDMandateEvent extends Logging {
   object Create {
 
     case class WireNewMandateEvent(
-      GoCardless_Mandate_Event_ID__c: GoCardlessMandateEventID,
-      DD_Mandate__c: MandateSfId,
-      Event_Happened_At__c: EventHappenedAt,
-      Status__c: Status,
-      Cause__c: Cause,
-      Description__c: Description,
-      Reason_Code__c: Option[ReasonCode]
+        GoCardless_Mandate_Event_ID__c: GoCardlessMandateEventID,
+        DD_Mandate__c: MandateSfId,
+        Event_Happened_At__c: EventHappenedAt,
+        Status__c: Status,
+        Cause__c: Cause,
+        Description__c: Description,
+        Reason_Code__c: Option[ReasonCode],
     )
     implicit val writesWireNewMandateEvent = Json.writes[WireNewMandateEvent]
 
     case class MandateEventWithSfId(id: MandateEventSfId)
     implicit val mandateWithSfIdReads = Json.reads[MandateEventWithSfId]
 
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): WireNewMandateEvent => ClientFailableOp[MandateEventWithSfId] =
-      sfPost.setupRequest[WireNewMandateEvent] { newMandateEvent =>
-        PostRequest(newMandateEvent, RelativePath(mandateSfObjectsBaseUrl))
-      }.parse[MandateEventWithSfId].runRequest
+    def apply(
+        sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue],
+    ): WireNewMandateEvent => ClientFailableOp[MandateEventWithSfId] =
+      sfPost
+        .setupRequest[WireNewMandateEvent] { newMandateEvent =>
+          PostRequest(newMandateEvent, RelativePath(mandateSfObjectsBaseUrl))
+        }
+        .parse[MandateEventWithSfId]
+        .runRequest
 
   }
 
@@ -45,7 +50,9 @@ object SalesforceDDMandateEvent extends Logging {
     private case class MandateEventsQueryResponse(records: List[WithGoCardlessId])
     private implicit val readsEvents = Json.reads[MandateEventsQueryResponse]
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): () => ClientFailableOp[Option[GoCardlessMandateEventID]] = () =>
+    def apply(
+        sfGet: HttpOp[RestRequestMaker.GetRequest, JsValue],
+    ): () => ClientFailableOp[Option[GoCardlessMandateEventID]] = () =>
       sfGet.parse[MandateEventsQueryResponse].map(toResponse).runRequest(createRequest())
 
     def createRequest() = {
@@ -59,7 +66,9 @@ object SalesforceDDMandateEvent extends Logging {
     }
 
     def toResponse(mandateEventsQueryResponse: MandateEventsQueryResponse): Option[GoCardlessMandateEventID] = {
-      mandateEventsQueryResponse.records.headOption.map(withGoCardlessId => withGoCardlessId.GoCardless_Mandate_Event_ID__c)
+      mandateEventsQueryResponse.records.headOption.map(withGoCardlessId =>
+        withGoCardlessId.GoCardless_Mandate_Event_ID__c,
+      )
     }
 
   }

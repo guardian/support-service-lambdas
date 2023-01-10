@@ -37,11 +37,13 @@ class RelationshipForSubscriptionsTest extends AnyFlatSpec with Matchers {
 
   it should "choose the correct date if they have multiple cancelled subs" in {
     val expectedServiceEndDate = today.plusMonths(11)
-    val subResults = RelationshipForSubscriptions(List(
-      cancelledSubResponse(today.minusMonths(3)),
-      cancelledSubResponse(today.plusMonths(1)),
-      cancelledSubResponse(expectedServiceEndDate)
-    ))
+    val subResults = RelationshipForSubscriptions(
+      List(
+        cancelledSubResponse(today.minusMonths(3)),
+        cancelledSubResponse(today.plusMonths(1)),
+        cancelledSubResponse(expectedServiceEndDate),
+      ),
+    )
     subResults should be(IdentityRetentionApiResponses.cancelledRelationship(expectedServiceEndDate))
   }
 

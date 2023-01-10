@@ -12,7 +12,7 @@ object SFCompositeRequest {
 
       Json.obj(
         ("allOrNone", Json.fromBoolean(true)),
-        ("compositeRequest", Json.arr(itemList: _*))
+        ("compositeRequest", Json.arr(itemList: _*)),
       )
     }
   }

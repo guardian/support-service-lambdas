@@ -13,7 +13,7 @@ class PaymentFailureCalloutTest extends AnyFlatSpec with Matchers {
     postCode = Some("somePostalCode"),
     city = Some("someBilltoCity"),
     state = Some("someBilltoState"),
-    country = Some("someBilltoCountry")
+    country = Some("someBilltoCountry"),
   )
 
   "PaymentFailureCallout" should "deserialise callout with email address correctly" in {
@@ -57,7 +57,7 @@ class PaymentFailureCalloutTest extends AnyFlatSpec with Matchers {
       tenantId = "someTenantId",
       title = Some("Mr"),
       billingDetails = expectedBillingDetails,
-      sfContactId = "someSfContactId"
+      sfContactId = "someSfContactId",
     )
 
     Json.parse(calloutJson).as[PaymentFailureCallout] shouldBe expectedCallout
@@ -78,7 +78,7 @@ class PaymentFailureCalloutTest extends AnyFlatSpec with Matchers {
     tenantId = "someTenantId",
     title = Some("Mr"),
     billingDetails = expectedBillingDetails,
-    sfContactId = "someSfContactId"
+    sfContactId = "someSfContactId",
   )
 
   it should "deserialise callout with no email address correctly" in {
@@ -112,7 +112,7 @@ class PaymentFailureCalloutTest extends AnyFlatSpec with Matchers {
       postCode = Some("somePostalCode"),
       city = Some("someBilltoCity"),
       state = Some("someBilltoState"),
-      country = Some("someBilltoCountry")
+      country = Some("someBilltoCountry"),
     )
 
     Json.parse(calloutWithoutEmailJson).as[PaymentFailureCallout] shouldBe calloutWithNoEmail
@@ -150,7 +150,7 @@ class PaymentFailureCalloutTest extends AnyFlatSpec with Matchers {
       postCode = Some("somePostalCode"),
       city = Some("someBilltoCity"),
       state = Some("someBilltoState"),
-      country = Some("someBilltoCountry")
+      country = Some("someBilltoCountry"),
     )
 
     Json.parse(calloutWithEmptyStringEmail).as[PaymentFailureCallout] shouldBe calloutWithNoEmail

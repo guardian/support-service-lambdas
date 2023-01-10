@@ -15,8 +15,8 @@ object Metrics {
         MetricNamespace("soft-opt-in-consent-setter"),
         MetricName(event),
         Map(MetricDimensionName("Stage") -> MetricDimensionValue(stage)),
-        value
-      )
+        value,
+      ),
     )
   }
 

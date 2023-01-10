@@ -7,21 +7,27 @@ import zio.{Task, ZEnvironment, ZIO}
 
 object SttpClientLive {
 
-  val layer = HttpClientZioBackend.layer().map(_.update(underlying =>
-    LoggingBackend(
-      delegate = underlying,
-      logger = new SttpLogger(),
-      logResponseBody = true,
-      logResponseHeaders = true,
-      logRequestBody = true,
-      logRequestHeaders = true
-    )))
+  val layer = HttpClientZioBackend
+    .layer()
+    .map(
+      _.update(underlying =>
+        LoggingBackend(
+          delegate = underlying,
+          logger = new SttpLogger(),
+          logResponseBody = true,
+          logResponseHeaders = true,
+          logRequestBody = true,
+          logRequestHeaders = true,
+        ),
+      ),
+    )
 
   private class SttpLogger extends Logger[Task] {
 
     override def apply(level: logging.LogLevel, message: => String): Task[Unit] = ZIO.log("STTP Backend: " + message)
 
-    override def apply(level: logging.LogLevel, message: => String, t: Throwable): Task[Unit] = ZIO.log("STTP Backend: " + message + t.toString)
+    override def apply(level: logging.LogLevel, message: => String, t: Throwable): Task[Unit] =
+      ZIO.log("STTP Backend: " + message + t.toString)
 
   }
 

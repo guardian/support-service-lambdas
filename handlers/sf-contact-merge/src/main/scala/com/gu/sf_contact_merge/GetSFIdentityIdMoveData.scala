@@ -12,17 +12,21 @@ object GetSFIdentityIdMoveData {
   case class CanonicalEmail(emailAddress: EmailAddress)
 
   def apply(
-    canonicalEmail: CanonicalEmail,
-    contactEmailIdentities: List[SFContactIdEmailIdentity]
+      canonicalEmail: CanonicalEmail,
+      contactEmailIdentities: List[SFContactIdEmailIdentity],
   ): Either[String, Option[IdentityIdMoveData]] = {
-    val identityIdsForTargetEmail = contactEmailIdentities.filter(_.emailIdentity.address == canonicalEmail.emailAddress)
+    val identityIdsForTargetEmail =
+      contactEmailIdentities.filter(_.emailIdentity.address == canonicalEmail.emailAddress)
     val identityIdMoves = identityIdsForTargetEmail.collect({
       case SFContactIdEmailIdentity(contactId, EmailIdentity(address, Some(identity))) =>
         IdentityIdMoveData(OldSFContact(contactId), IdentityIdToUse(identity))
     })
     identityIdMoves match {
       case Nil => Right(None)
-      case id :: Nil => Right(Some(id)) // don't need to distinct because should only have one identity id due to unique constraint in SF
+      case id :: Nil =>
+        Right(
+          Some(id),
+        ) // don't need to distinct because should only have one identity id due to unique constraint in SF
       case multi => Left(s"there are multiple identity ids: $multi")
     }
   }

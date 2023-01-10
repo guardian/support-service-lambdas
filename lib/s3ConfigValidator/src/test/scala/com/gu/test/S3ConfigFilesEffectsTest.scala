@@ -68,8 +68,7 @@ class S3ConfigFilesEffectsTest extends AnyFlatSpec with Matchers {
 
   val configLoaders = Map(
     PROD -> wireConfigLoader(PROD),
-    CODE -> wireConfigLoader(CODE)
-
+    CODE -> wireConfigLoader(CODE),
   )
   def validate[CONF](stage: String)(implicit loc: ConfigLocation[CONF], r: Reads[CONF]) = {
     val configLoader = configLoaders(stage)

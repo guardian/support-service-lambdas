@@ -25,12 +25,12 @@ class EndToEndHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
     // create case (which has new case ID in response body)
     val firstRaiseCaseResponse: CaseWithId = getResponse[CaseWithId](
-      createCaseRequest
+      createCaseRequest,
     )
 
     // try to raise another case, which should 'resume' that case (i.e. same ID)
     val secondRaiseCaseResponse: CaseWithId = getResponse[CaseWithId](
-      createCaseRequest
+      createCaseRequest,
     )
 
     firstRaiseCaseResponse.id shouldEqual secondRaiseCaseResponse.id
@@ -39,7 +39,7 @@ class EndToEndHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
     // update case by setting 'Description' field
     getResponse[JsValue](
-      updateCaseRequest(firstRaiseCaseResponse.id.value, expectedDescription)
+      updateCaseRequest(firstRaiseCaseResponse.id.value, expectedDescription),
     )
 
     // fetch the case to ensure the 'Description' field has been updated
@@ -66,7 +66,7 @@ object Runner extends Matchers {
     Handler.handle(
       inputStream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8)),
       outputStream = os,
-      context = null
+      context = null,
     )
 
     val parsed = Json.parse(new String(os.toByteArray, "UTF-8"))
@@ -91,10 +91,10 @@ object Runner extends Matchers {
 object EndToEndData {
 
   private def ApiGatewayRequestPayloadBuilder(
-    httpMethod: String,
-    bodyString: String,
-    pathSuffix: String = "",
-    pathParameters: String = "null"
+      httpMethod: String,
+      bodyString: String,
+      pathSuffix: String = "",
+      pathParameters: String = "null",
   ): String =
     s"""
        |{
@@ -130,14 +130,14 @@ object EndToEndData {
       "\\\"subscriptionName\\\":\\\"A-S00051910\\\"," +
       "\\\"gaData\\\":\\\"{\\\\\\\"UA-51507017-5\\\\\\\":{\\\\\\\"experiments\\\\\\\":" +
       "{\\\\\\\"9ycLuqmFRBGBDGV5bnFlCA\\\\\\\":\\\\\\\"1\\\\\\\"},\\\\\\\"hitcount\\\\\\\":3}\\\"" +
-      "}"
+      "}",
   )
 
   def updateCaseRequest(caseId: String, description: String): String = ApiGatewayRequestPayloadBuilder(
     httpMethod = "PATCH",
     bodyString = s"""{\\\"Description\\\":\\\"${description}\\\"}""",
     pathParameters = s"""{"caseId":"${caseId}"}""",
-    pathSuffix = "/" + caseId
+    pathSuffix = "/" + caseId,
   )
 
 }

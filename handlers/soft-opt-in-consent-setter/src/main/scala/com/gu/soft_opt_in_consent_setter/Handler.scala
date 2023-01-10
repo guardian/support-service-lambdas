@@ -1,6 +1,14 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{EnhancedCancelledSub, SFAssociatedSubResponse, SFSubRecord, SFSubRecordUpdate, SFSubRecordUpdateRequest, SoftOptInConfig, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{
+  EnhancedCancelledSub,
+  SFAssociatedSubResponse,
+  SFSubRecord,
+  SFSubRecordUpdate,
+  SFSubRecordUpdateRequest,
+  SoftOptInConfig,
+  SoftOptInError,
+}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -37,11 +45,15 @@ object Handler extends LazyLogging {
       activeSubs <- sfConnector.getActiveSubs(cancelledSubsIdentityIds)
       _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
 
-      _ <- processCancelledSubs(cancelledSubs, activeSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
+      _ <- processCancelledSubs(
+        cancelledSubs,
+        activeSubs,
+        identityConnector.sendConsentsReq,
+        sfConnector.updateSubs,
+        consentsCalculator,
+      )
       _ = Metrics.put(event = "successful_run")
-    } yield ())
-      .flatten
-      .left
+    } yield ()).flatten.left
       .foreach(error => {
         Metrics.put(event = "failed_run")
         logger.error(s"${error.errorType}: ${error.errorDetails}")
@@ -49,7 +61,12 @@ object Handler extends LazyLogging {
       })
   }
 
-  def processAcquiredSubs(acquiredSubs: Seq[SFSubRecord], sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+  def processAcquiredSubs(
+      acquiredSubs: Seq[SFSubRecord],
+      sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
+      updateSubs: String => Either[SoftOptInError, Unit],
+      consentsCalculator: ConsentsCalculator,
+  ): Either[SoftOptInError, Unit] = {
     Metrics.put(event = "acquisitions_to_process", acquiredSubs.size)
 
     val recordsToUpdate = acquiredSubs
@@ -74,12 +91,18 @@ object Handler extends LazyLogging {
       updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  def processCancelledSubs(cancelledSubs: Seq[SFSubRecord], activeSubs: SFAssociatedSubResponse, sendConsentsReq: (String, String) => Either[SoftOptInError, Unit], updateSubs: String => Either[SoftOptInError, Unit], consentsCalculator: ConsentsCalculator): Either[SoftOptInError, Unit] = {
+  def processCancelledSubs(
+      cancelledSubs: Seq[SFSubRecord],
+      activeSubs: SFAssociatedSubResponse,
+      sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
+      updateSubs: String => Either[SoftOptInError, Unit],
+      consentsCalculator: ConsentsCalculator,
+  ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
       if (consents.nonEmpty)
         sendConsentsReq(
           identityId,
-          consentsCalculator.buildConsentsBody(consents, state = false)
+          consentsCalculator.buildConsentsBody(consents, state = false),
         )
       else
         Right(())
@@ -92,7 +115,10 @@ object Handler extends LazyLogging {
       .map(sub => {
         val updateResult =
           for {
-            consents <- consentsCalculator.getCancellationConsents(sub.cancelledSub.Product__c, sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet)
+            consents <- consentsCalculator.getCancellationConsents(
+              sub.cancelledSub.Product__c,
+              sub.associatedActiveNonGiftSubs.map(_.Product__c).toSet,
+            )
             _ <- sendCancellationConsents(sub.identityId, consents)
           } yield ()
 
@@ -110,8 +136,7 @@ object Handler extends LazyLogging {
   }
 
   def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {
-    updateResults.left.foreach(error =>
-      logger.warn(s"${error.errorType}: ${error.errorDetails}"))
+    updateResults.left.foreach(error => logger.warn(s"${error.errorType}: ${error.errorDetails}"))
   }
 
   def emitIdentityMetrics(records: Seq[SFSubRecordUpdate]): Unit = {

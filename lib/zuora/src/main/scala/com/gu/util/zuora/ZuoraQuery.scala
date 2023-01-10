@@ -10,22 +10,28 @@ object ZuoraQuery {
 
   case class QueryLocator(value: String) extends AnyVal
 
-  case class QueryResult[QUERYRECORD](records: List[QUERYRECORD], size: Int, done: Boolean, queryLocator: Option[QueryLocator])
+  case class QueryResult[QUERYRECORD](
+      records: List[QUERYRECORD],
+      size: Int,
+      done: Boolean,
+      queryLocator: Option[QueryLocator],
+  )
 
   // can't generate from macro as it needs an apply method for some reason which we'd rather not expose
   implicit val queryW: Writes[SafeQuery] =
-    (response: SafeQuery) => Json.obj(
-      "queryString" -> response.queryString
-    )
+    (response: SafeQuery) =>
+      Json.obj(
+        "queryString" -> response.queryString,
+      )
 
   implicit val queryLocator: Format[QueryLocator] =
     Format[QueryLocator](JsPath.read[String].map(QueryLocator.apply), Writes { (o: QueryLocator) => JsString(o.value) })
 
   implicit def queryResultR[QUERYRECORD: Reads]: Reads[QueryResult[QUERYRECORD]] = (
     (JsPath \ "records").read[List[QUERYRECORD]] and
-    (JsPath \ "size").read[Int] and
-    (JsPath \ "done").read[Boolean] and
-    (JsPath \ "queryLocator").readNullable[QueryLocator]
+      (JsPath \ "size").read[Int] and
+      (JsPath \ "done").read[Boolean] and
+      (JsPath \ "queryLocator").readNullable[QueryLocator]
   ).apply(QueryResult.apply[QUERYRECORD] _)
 
   case class QueryMoreReq(queryLocator: QueryLocator)

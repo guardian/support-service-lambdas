@@ -32,8 +32,8 @@ object DownloadBatchHandler extends LazyLogging {
 
   import com.gu.sf_datalake_export.util.TryOps._
   case class WireBatchInfo(
-    batchId: String,
-    state: String
+      batchId: String,
+      state: String,
   )
   object WireBatchInfo {
     implicit val format = Json.format[WireBatchInfo]
@@ -45,17 +45,17 @@ object DownloadBatchHandler extends LazyLogging {
 
     def fromBatch(batch: BatchInfo) = WireBatchInfo(
       batchId = batch.batchId.value,
-      state = batch.state.name
+      state = batch.state.name,
     )
   }
 
   case class WireState(
-    jobName: String,
-    objectName: String,
-    jobId: String,
-    batches: List[WireBatchInfo],
-    uploadToDataLake: Boolean,
-    done: Boolean = false
+      jobName: String,
+      objectName: String,
+      jobId: String,
+      batches: List[WireBatchInfo],
+      uploadToDataLake: Boolean,
+      done: Boolean = false,
   )
 
   object WireState {
@@ -69,7 +69,7 @@ object DownloadBatchHandler extends LazyLogging {
           ObjectName(wire.objectName),
           batches,
           ShouldUploadToDataLake(wire.uploadToDataLake),
-          IsDone(wire.done)
+          IsDone(wire.done),
         )
     }
 
@@ -86,21 +86,20 @@ object DownloadBatchHandler extends LazyLogging {
 
   case class IsDone(value: Boolean) extends AnyVal
   case class State(
-    jobId: JobId,
-    jobName: JobName,
-    objectName: ObjectName,
-    batches: List[BatchInfo],
-    shouldUploadToDataLake: ShouldUploadToDataLake,
-    isDone: IsDone
+      jobId: JobId,
+      jobName: JobName,
+      objectName: ObjectName,
+      batches: List[BatchInfo],
+      shouldUploadToDataLake: ShouldUploadToDataLake,
+      isDone: IsDone,
   )
 
-  def wireOperation
-  ( stage: Stage,
-    getFromS3 : S3Location => Try[String],
-    getResponse: Request => Response,
-    s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse]
-  )
-  (request: WireState): Try[WireState] = {
+  def wireOperation(
+      stage: Stage,
+      getFromS3: S3Location => Try[String],
+      getResponse: Request => Response,
+      s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse],
+  )(request: WireState): Try[WireState] = {
     val loadConfig = LoadConfigModule(stage, getFromS3)
     for {
       sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
@@ -112,7 +111,7 @@ object DownloadBatchHandler extends LazyLogging {
       wiredDownloadBatch = download(
         uploadFile,
         wiredGetBatchResultId,
-        wiredGetBatchResult
+        wiredGetBatchResult,
       ) _
 
       wiredSteps = steps(wiredBasePathFor, wiredDownloadBatch) _
@@ -124,28 +123,24 @@ object DownloadBatchHandler extends LazyLogging {
   }
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    val wiredOperation: WireState => Try[WireState] = wireOperation(RawEffects.stage,
-      GetFromS3.fetchString _,
-      RawEffects.response,
-      RawEffects.s3Write
-    )
+    val wiredOperation: WireState => Try[WireState] =
+      wireOperation(RawEffects.stage, GetFromS3.fetchString _, RawEffects.response, RawEffects.s3Write)
 
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = wiredOperation
+      operation = wiredOperation,
     )
   }
 
-
   def download(
-    uploadFile: (S3Path, File) => Try[_],
-    getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
-    getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent]
+      uploadFile: (S3Path, File) => Try[_],
+      getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
+      getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent],
   )(
-    jobName: JobName,
-    jobId: JobId,
-    batchToDownload: BatchId,
-    uploadBasePath: S3Path
+      jobName: JobName,
+      jobId: JobId,
+      batchToDownload: BatchId,
+      uploadBasePath: S3Path,
   ): Try[Unit] = {
     val getIdRequest = GetBatchResultRequest(jobId, batchToDownload)
     logger.info(s"downloading $getIdRequest")
@@ -159,13 +154,11 @@ object DownloadBatchHandler extends LazyLogging {
     } yield ()
   }
 
-
-
   case class ShouldCleanBucket(value: Boolean) extends AnyVal
 
   def steps(
-    getUploadPath: (ObjectName, ShouldUploadToDataLake) => S3Path,
-    downloadBatch: (JobName, JobId, BatchId, S3Path) => Try[Unit]
+      getUploadPath: (ObjectName, ShouldUploadToDataLake) => S3Path,
+      downloadBatch: (JobName, JobId, BatchId, S3Path) => Try[Unit],
   )(currentState: State): Try[State] = {
 
     def downloadFirstBatch(uploadBasePath: S3Path) = {
@@ -173,9 +166,10 @@ object DownloadBatchHandler extends LazyLogging {
       downloadableBatches match {
         case Nil => Success(currentState.copy(isDone = IsDone(true)))
 
-        case pendingBatch :: tail => downloadBatch(currentState.jobName, currentState.jobId, pendingBatch.batchId, uploadBasePath).map { _ =>
-          currentState.copy(isDone = IsDone(tail.isEmpty), batches = tail)
-        }
+        case pendingBatch :: tail =>
+          downloadBatch(currentState.jobName, currentState.jobId, pendingBatch.batchId, uploadBasePath).map { _ =>
+            currentState.copy(isDone = IsDone(tail.isEmpty), batches = tail)
+          }
       }
     }
     for {

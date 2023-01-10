@@ -13,14 +13,14 @@ class SubscriptionDataGuardianWeeklyIntegrationTest extends AnyFlatSpec {
     MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
 
     val startDate = LocalDate.parse("2019-10-04")
-    val sixForSixBillDates = BillDates( startDate, startDate.plusWeeks(6).minusDays(1))
+    val sixForSixBillDates = BillDates(startDate, startDate.plusWeeks(6).minusDays(1))
     val normalBillingPeriod = BillDates(
       startDate.plusWeeks(6),
-      startDate.plusWeeks(6).plusMonths(3).minusDays(1)
+      startDate.plusWeeks(6).plusMonths(3).minusDays(1),
     )
     val normalBillDates2 = BillDates(
       startDate.plusWeeks(6).plusMonths(3),
-      startDate.plusWeeks(6).plusMonths(6).minusDays(1)
+      startDate.plusWeeks(6).plusMonths(6).minusDays(1),
     )
 
     val expectedIssueData = List(
@@ -53,7 +53,7 @@ class SubscriptionDataGuardianWeeklyIntegrationTest extends AnyFlatSpec {
       expectedIssueData = expectedIssueData,
       expectedTotalAnnualIssueLimitPerSubscription = 6,
       expectedProductType = ZuoraProductTypes.GuardianWeekly,
-      expectedEditionDaysOfWeek = List(FRIDAY)
+      expectedEditionDaysOfWeek = List(FRIDAY),
     )
   }
 }

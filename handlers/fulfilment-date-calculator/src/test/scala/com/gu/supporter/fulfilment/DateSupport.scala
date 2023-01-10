@@ -12,6 +12,6 @@ trait DateSupport {
       MatchResult(
         right equals left,
         s"actual $left is not equal to expected $right",
-        s"actual $left is equal to expected $right"
+        s"actual $left is equal to expected $right",
       )
 }

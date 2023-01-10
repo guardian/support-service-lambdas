@@ -13,7 +13,7 @@ class ValidateAccountTest extends AnyFlatSpec with Matchers {
     paymentMethodId = Some(PaymentMethodId("activePaymentMethod")),
     autoPay = AutoPay(true),
     accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
-    currency = GBP
+    currency = GBP,
   )
 
   val validatedAccount = ValidatedAccount(
@@ -22,7 +22,7 @@ class ValidateAccountTest extends AnyFlatSpec with Matchers {
     paymentMethodId = PaymentMethodId("activePaymentMethod"),
     autoPay = AutoPay(true),
     accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
-    currency = GBP
+    currency = GBP,
   )
   it should "succeed with valid account" in {
     ValidateAccount(validAccount) shouldBe Passed(validatedAccount)

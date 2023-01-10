@@ -32,7 +32,7 @@ object S3Connector extends LazyLogging {
           caseEmail.Parent.CaseNumber,
           Seq[EmailRecord](caseEmail).asJson.toString(),
           caseEmail.Id,
-          bucketName
+          bucketName,
         )
       }
 
@@ -47,10 +47,10 @@ object S3Connector extends LazyLogging {
               generateJsonForExistingFile(
                 emails,
                 caseEmail,
-                emails.exists(_.Composite_Key__c == caseEmail.Composite_Key__c)
+                emails.exists(_.Composite_Key__c == caseEmail.Composite_Key__c),
               ),
               caseEmail.Id,
-              bucketName
+              bucketName,
             )
         }
       }
@@ -61,17 +61,20 @@ object S3Connector extends LazyLogging {
     logger.info(s"Checking if $fileName exists in S3...")
 
     safelyWithMetric({
-      val filesInS3MatchingFileName = AwsS3.client.listObjects(
-        ListObjectsRequest.builder
-          .bucket(bucketName)
-          .prefix(fileName)
-          .build()
-      ).contents.asScala.toList
+      val filesInS3MatchingFileName = AwsS3.client
+        .listObjects(
+          ListObjectsRequest.builder
+            .bucket(bucketName)
+            .prefix(fileName)
+            .build(),
+        )
+        .contents
+        .asScala
+        .toList
 
       filesInS3MatchingFileName
-        .map(
-          objSummary => Key(objSummary.key)
-        ).contains(Key(fileName))
+        .map(objSummary => Key(objSummary.key))
+        .contains(Key(fileName))
     })("failed_s3_check_file_exists")
   }
 
@@ -80,13 +83,17 @@ object S3Connector extends LazyLogging {
 
     for {
       s3FileJsonBody <- getEmailsJsonFromS3File(caseEmail.Parent.CaseNumber, bucketName)
-      decodedEmails <- decode[Seq[EmailRecord]](s3FileJsonBody)
-        .left
+      decodedEmails <- decode[Seq[EmailRecord]](s3FileJsonBody).left
         .map(CustomFailure.fromThrowable)
     } yield decodedEmails
   }
 
-  def writeEmailsJsonToS3(fileName: String, caseEmailsJson: String, emailId: String, bucketName: String): Either[CustomFailure, String] = {
+  def writeEmailsJsonToS3(
+      fileName: String,
+      caseEmailsJson: String,
+      emailId: String,
+      bucketName: String,
+  ): Either[CustomFailure, String] = {
 
     val uploadResponse = for {
       putRequest <- generateS3PutRequest(bucketName, fileName)
@@ -99,10 +106,12 @@ object S3Connector extends LazyLogging {
       case Right(value) => {
         value match {
           case Failure(ex) => {
-            Left(CustomFailure.fromThrowableToMetric(
-              ex,
-              "failed_s3_write_file"
-            ))
+            Left(
+              CustomFailure.fromThrowableToMetric(
+                ex,
+                "failed_s3_write_file",
+              ),
+            )
           }
           case Success(success) => {
             logger.info(s"$fileName successfully saved to S3")
@@ -127,7 +136,7 @@ object S3Connector extends LazyLogging {
         GetObjectRequest.builder
           .bucket(bucketName)
           .key(fileName)
-          .build()
+          .build(),
       )
     })("failed_s3_get_file")
   }
@@ -136,15 +145,18 @@ object S3Connector extends LazyLogging {
     logger.info(s"Generating PutRequestBody... ")
 
     safely(
-      RequestBody.fromString(caseEmailsJson, StandardCharsets.UTF_8)
+      RequestBody.fromString(caseEmailsJson, StandardCharsets.UTF_8),
     )
   }
 
-  def uploadFileToS3(putRequest: PutObjectRequest, requestBody: RequestBody): Either[CustomFailure, Try[PutObjectResponse]] = {
+  def uploadFileToS3(
+      putRequest: PutObjectRequest,
+      requestBody: RequestBody,
+  ): Either[CustomFailure, Try[PutObjectResponse]] = {
     logger.info(s"saving file (${putRequest.key()}) to S3... ")
 
     safely(
-      UploadToS3.putObject(putRequest, requestBody)
+      UploadToS3.putObject(putRequest, requestBody),
     )
   }
 
@@ -152,18 +164,17 @@ object S3Connector extends LazyLogging {
     logger.info(s"Generating PutRequest for ${fileName}... ")
 
     safely(
-      PutObjectRequest
-        .builder
+      PutObjectRequest.builder
         .bucket(bucketName)
         .key(fileName)
-        .build()
+        .build(),
     )
   }
 
   def generateJsonForExistingFile(
-    emailsAlreadyInFile: Seq[EmailRecord],
-    newEmail: EmailRecord,
-    newEmailAlreadyExistsInFile: Boolean
+      emailsAlreadyInFile: Seq[EmailRecord],
+      newEmail: EmailRecord,
+      newEmailAlreadyExistsInFile: Boolean,
   ): String = {
     logger.info(s"${newEmail.Composite_Key__c} already exists in File: $newEmailAlreadyExistsInFile")
     logger.info(s"Generating json for ${newEmail.Composite_Key__c}... ")

@@ -7,17 +7,17 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
 import com.gu.util.reader.Types.ApiGatewayOp
 case class GuardianWeeklyCustomerData(
-  account: ValidatedAccount,
-  paymentMethod: PaymentMethod,
-  contacts: Contacts
+    account: ValidatedAccount,
+    paymentMethod: PaymentMethod,
+    contacts: Contacts,
 )
 
 object GetGuardianWeeklyCustomerData {
   def apply(
-    getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
-    getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
-    getContacts: ZuoraAccountId => ApiGatewayOp[Contacts],
-    accountId: ZuoraAccountId
+      getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
+      getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
+      getContacts: ZuoraAccountId => ApiGatewayOp[Contacts],
+      accountId: ZuoraAccountId,
   ) = for {
     account <- getAccount(accountId)
     paymentMethod <- getPaymentMethod(account.paymentMethodId)
@@ -25,4 +25,3 @@ object GetGuardianWeeklyCustomerData {
   } yield GuardianWeeklyCustomerData(account, paymentMethod, contacts)
 
 }
-

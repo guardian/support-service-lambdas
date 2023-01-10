@@ -3,7 +3,13 @@ package com.gu.zuora.sar
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import circeCodecs._
-import com.gu.zuora.sar.BatonModels.{Completed, Failed, Pending, SarStatusRequest, SarStatusResponse}
+import com.gu.zuora.sar.BatonModels.{
+  Completed,
+  Failed,
+  Pending,
+  SarStatusRequest,
+  SarStatusResponse,
+}
 import io.circe.ParsingFailure
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
@@ -36,9 +42,9 @@ class ZuoraSarHandlerSpec extends AnyFreeSpec with Matchers {
       lambda
         .handle(statusRequest)
         .unsafeRunSync() shouldBe SarStatusResponse(
-          status = Completed,
-          resultLocations = Some(List("s3Location"))
-        )
+        status = Completed,
+        resultLocations = Some(List("s3Location")),
+      )
     }
 
     "should return failed status upon unsuccessful completion" in {
@@ -59,8 +65,8 @@ class ZuoraSarHandlerSpec extends AnyFreeSpec with Matchers {
     }
 
     def invokeWithString(
-      lambda: ZuoraSarHandler,
-      request: String
+        lambda: ZuoraSarHandler,
+        request: String,
     ): String = {
       val testInputStream = new ByteArrayInputStream(request.getBytes)
       val testOutputStream = new ByteArrayOutputStream()

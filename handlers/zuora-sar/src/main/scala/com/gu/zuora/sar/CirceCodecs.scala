@@ -1,6 +1,19 @@
 package com.gu.zuora.sar
 
-import com.gu.zuora.sar.BatonModels.{BatonTaskStatus, Completed, Failed, Pending, PerformSarRequest, PerformSarResponse, SarInitiateRequest, SarInitiateResponse, SarRequest, SarResponse, SarStatusRequest, SarStatusResponse}
+import com.gu.zuora.sar.BatonModels.{
+  BatonTaskStatus,
+  Completed,
+  Failed,
+  Pending,
+  PerformSarRequest,
+  PerformSarResponse,
+  SarInitiateRequest,
+  SarInitiateResponse,
+  SarRequest,
+  SarResponse,
+  SarStatusRequest,
+  SarStatusResponse,
+}
 import io.circe.{HCursor, Json}
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder}
@@ -25,8 +38,8 @@ object circeCodecs {
     }
 
   private def addAdditionalFields(
-    response: JsonObject,
-    action: String
+      response: JsonObject,
+      action: String,
   ): Json =
     response
       .add("action", action.asJson)

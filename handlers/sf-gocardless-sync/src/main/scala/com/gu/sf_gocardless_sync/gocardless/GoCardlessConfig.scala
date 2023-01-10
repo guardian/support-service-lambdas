@@ -4,9 +4,9 @@ import com.gu.util.config.ConfigLocation
 import play.api.libs.json.{Json, Reads}
 
 case class GoCardlessConfig(
-  url: String,
-  token: String,
-  batchSize: Int
+    url: String,
+    token: String,
+    batchSize: Int,
 )
 
 object GoCardlessConfig {

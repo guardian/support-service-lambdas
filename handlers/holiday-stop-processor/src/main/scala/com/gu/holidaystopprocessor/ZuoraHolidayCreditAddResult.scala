@@ -2,19 +2,23 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailId, ProductName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{
+  HolidayStopRequestsDetail,
+  HolidayStopRequestsDetailId,
+  ProductName,
+}
 import com.gu.zuora.subscription.{AffectedPublicationDate, Price, RatePlanCharge, RatePlanChargeCode, SubscriptionName}
 import cats.syntax.all._
 import com.gu.creditprocessor.ZuoraCreditAddResult
 
 case class ZuoraHolidayCreditAddResult(
-  requestId: HolidayStopRequestsDetailId,
-  subscriptionName: SubscriptionName,
-  productName: ProductName,
-  chargeCode: RatePlanChargeCode,
-  estimatedPrice: Option[Price],
-  actualPrice: Price,
-  pubDate: AffectedPublicationDate
+    requestId: HolidayStopRequestsDetailId,
+    subscriptionName: SubscriptionName,
+    productName: ProductName,
+    chargeCode: RatePlanChargeCode,
+    estimatedPrice: Option[Price],
+    actualPrice: Price,
+    pubDate: AffectedPublicationDate,
 ) extends ZuoraCreditAddResult {
 
   val amountCredited: Price = actualPrice
@@ -29,9 +33,9 @@ case class ZuoraHolidayCreditAddResult(
             s"""Difference between actual and estimated credit
                |in sub ${subscriptionName.value},
                |stop ${requestId.value}. Investigate ASAP!
-               |estimated.value=${estimated.value}; actual.value=${actual.value}""".stripMargin
+               |estimated.value=${estimated.value}; actual.value=${actual.value}""".stripMargin,
           )
-        // throw new RuntimeException(s"Difference between actual and estimated credit. Investigate ASAP! estimated.value=${estimated.value}; actual.value=${actual.value}")
+      // throw new RuntimeException(s"Difference between actual and estimated credit. Investigate ASAP! estimated.value=${estimated.value}; actual.value=${actual.value}")
       }
     }
 
@@ -42,8 +46,8 @@ case class ZuoraHolidayCreditAddResult(
 object ZuoraHolidayCreditAddResult {
 
   def apply(
-    request: HolidayStopRequestsDetail,
-    addedCharge: RatePlanCharge
+      request: HolidayStopRequestsDetail,
+      addedCharge: RatePlanCharge,
   ): ZuoraHolidayCreditAddResult = ZuoraHolidayCreditAddResult(
     request.Id,
     request.Subscription_Name__c,
@@ -51,6 +55,6 @@ object ZuoraHolidayCreditAddResult {
     RatePlanChargeCode(addedCharge.number),
     request.Estimated_Price__c,
     Price(addedCharge.price),
-    AffectedPublicationDate(addedCharge.HolidayStart__c.getOrElse(LocalDate.MIN))
+    AffectedPublicationDate(addedCharge.HolidayStart__c.getOrElse(LocalDate.MIN)),
   )
 }

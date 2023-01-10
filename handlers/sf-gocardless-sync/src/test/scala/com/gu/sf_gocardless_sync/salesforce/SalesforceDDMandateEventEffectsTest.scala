@@ -22,15 +22,19 @@ class SalesforceDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       wiredOp = SalesforceDDMandateEvent.Create(sfAuth.wrapWith(JsonHttp.post))
-      result = wiredOp(WireNewMandateEvent(
-        GoCardless_Mandate_Event_ID__c = GoCardlessMandateEventID("EV001ZY8E579T6"),
-        DD_Mandate__c = MandateSfId("a2q6E0000007XgSQAU"),
-        Event_Happened_At__c = EventHappenedAt("2018-10-22T09:02:00.000+0000"),
-        Status__c = Status("active"),
-        Cause__c = Cause("mandate_activated"),
-        Description__c = Description("The time window after submission for the banks to refuse a mandate has ended without any errors being received, so this mandate is now active."),
-        Reason_Code__c = None
-      ))
+      result = wiredOp(
+        WireNewMandateEvent(
+          GoCardless_Mandate_Event_ID__c = GoCardlessMandateEventID("EV001ZY8E579T6"),
+          DD_Mandate__c = MandateSfId("a2q6E0000007XgSQAU"),
+          Event_Happened_At__c = EventHappenedAt("2018-10-22T09:02:00.000+0000"),
+          Status__c = Status("active"),
+          Cause__c = Cause("mandate_activated"),
+          Description__c = Description(
+            "The time window after submission for the banks to refuse a mandate has ended without any errors being received, so this mandate is now active.",
+          ),
+          Reason_Code__c = None,
+        ),
+      )
     } yield result
 
     System.err.println()

@@ -11,15 +11,15 @@ class PartitionSchedulesTest extends AnyFlatSpec with Matchers {
   it should "partition one sub into each group, and drop an unredeemed unexpired one" in {
     val redeemed = (
       RevenueScheduleAquaRow("RS-redeemed", -15909, "A-S01234"),
-      GetSubscriptionResponse(Some(LocalDate.of(2020, 11, 26)), true, LocalDate.of(2020, 11, 26), 92, "Day")
+      GetSubscriptionResponse(Some(LocalDate.of(2020, 11, 26)), true, LocalDate.of(2020, 11, 26), 92, "Day"),
     )
     val expiredUnredeemed = (
       RevenueScheduleAquaRow("RS-expiredUnredeemed", 9000, "A-S05432"),
-      GetSubscriptionResponse(None, false, LocalDate.of(2020, 6, 28), 13, "Months")
+      GetSubscriptionResponse(None, false, LocalDate.of(2020, 6, 28), 13, "Months"),
     )
     val unexpiredUnredeemed = (
       RevenueScheduleAquaRow("RS-unexpiredUnredeemed", -15909, "A-S01234"),
-      GetSubscriptionResponse(None, false, LocalDate.of(2020, 6, 29), 13, "Months")
+      GetSubscriptionResponse(None, false, LocalDate.of(2020, 6, 29), 13, "Months"),
     )
 
     val data = List(

@@ -32,33 +32,41 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class ProductRatePlanName(value: String) extends AnyVal
 
   case class HolidayStopRequestsDetailExpectedInvoiceDate(value: LocalDate) extends AnyVal
-  implicit val formatHolidayStopRequestsDetailExpectedInvoiceDate = Jsonx.formatInline[HolidayStopRequestsDetailExpectedInvoiceDate]
+  implicit val formatHolidayStopRequestsDetailExpectedInvoiceDate =
+    Jsonx.formatInline[HolidayStopRequestsDetailExpectedInvoiceDate]
 
   case class HolidayStopRequestsDetailActioned(
-    Charge_Code__c: RatePlanChargeCode,
-    Actual_Price__c: Price
+      Charge_Code__c: RatePlanChargeCode,
+      Actual_Price__c: Price,
   )
   implicit val formatActioned = Json.format[HolidayStopRequestsDetailActioned]
 
   object ActionSalesforceHolidayStopRequestsDetail {
 
-    def apply(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit])(detailSfId: HolidayStopRequestsDetailId): HolidayStopRequestsDetailActioned => ClientFailableOp[Unit] =
-      sfPatch.setupRequest[HolidayStopRequestsDetailActioned] { actionedInfo =>
-        PatchRequest(actionedInfo, RelativePath(s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${detailSfId.value}"))
-      }.runRequest
+    def apply(
+        sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit],
+    )(detailSfId: HolidayStopRequestsDetailId): HolidayStopRequestsDetailActioned => ClientFailableOp[Unit] =
+      sfPatch
+        .setupRequest[HolidayStopRequestsDetailActioned] { actionedInfo =>
+          PatchRequest(
+            actionedInfo,
+            RelativePath(s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${detailSfId.value}"),
+          )
+        }
+        .runRequest
 
   }
 
   case class HolidayStopRequestsDetail(
-    Id: HolidayStopRequestsDetailId,
-    Subscription_Name__c: SubscriptionName,
-    Product_Name__c: ProductName,
-    Stopped_Publication_Date__c: AffectedPublicationDate,
-    Estimated_Price__c: Option[Price],
-    Charge_Code__c: Option[RatePlanChargeCode],
-    Is_Actioned__c: Boolean,
-    Actual_Price__c: Option[Price],
-    Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate]
+      Id: HolidayStopRequestsDetailId,
+      Subscription_Name__c: SubscriptionName,
+      Product_Name__c: ProductName,
+      Stopped_Publication_Date__c: AffectedPublicationDate,
+      Estimated_Price__c: Option[Price],
+      Charge_Code__c: Option[RatePlanChargeCode],
+      Is_Actioned__c: Boolean,
+      Actual_Price__c: Option[Price],
+      Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate],
   ) extends CreditRequest {
     val subscriptionName: SubscriptionName = Subscription_Name__c
     val publicationDate: AffectedPublicationDate = Stopped_Publication_Date__c
@@ -86,7 +94,9 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   object FetchHolidayStopRequestsDetailsForProductType {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (List[LocalDate], ZuoraProductType) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+    def apply(
+        sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue],
+    ): (List[LocalDate], ZuoraProductType) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet
         .setupRequestMultiArg(toRequest _)
         .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]

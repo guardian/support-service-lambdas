@@ -9,17 +9,17 @@ import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 case class PaperCustomerData(
-  account: ValidatedAccount,
-  paymentMethod: PaymentMethod,
-  contacts: Contacts
+    account: ValidatedAccount,
+    paymentMethod: PaymentMethod,
+    contacts: Contacts,
 )
 
 object GetPaperCustomerData {
   def apply(
-    getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
-    getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
-    getContacts: ZuoraAccountId => ClientFailableOp[Contacts],
-    accountId: ZuoraAccountId
+      getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
+      getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
+      getContacts: ZuoraAccountId => ClientFailableOp[Contacts],
+      accountId: ZuoraAccountId,
   ) = for {
     account <- getAccount(accountId)
     paymentMethod <- getPaymentMethod(account.paymentMethodId)
@@ -27,4 +27,3 @@ object GetPaperCustomerData {
   } yield PaperCustomerData(account, paymentMethod, contacts)
 
 }
-
