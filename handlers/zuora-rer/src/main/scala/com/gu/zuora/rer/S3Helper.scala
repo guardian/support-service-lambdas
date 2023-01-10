@@ -42,12 +42,12 @@ object S3Helper extends S3Service with LazyLogging {
       completedResults <- ListS3Objects.listObjectsWithPrefix(completedPath)
       failedResults <- ListS3Objects.listObjectsWithPrefix(failedPath)
       failedRerExists = failedResults.nonEmpty
-      completedFileExists = completedResults.exists(k => k.value.contains("ResultsCompleted") | k.value.contains("NoResultsFoundForUser"))
+      completedFileExists = completedResults.exists(k => k.value.contains("ErasureCompleted") | k.value.contains("NoResultsFoundForUser"))
     } yield {
       if (failedRerExists) {
         S3FailedPathFound()
       } else if (completedFileExists) {
-        S3CompletedPathFound(completedResults.filterNot(k => k.value.contains("ResultsCompleted"))
+        S3CompletedPathFound(completedResults
           .map(keyPath => s"s3://${config.resultsBucket}/${keyPath.value}"))
       } else {
         S3NoResultsFound()
