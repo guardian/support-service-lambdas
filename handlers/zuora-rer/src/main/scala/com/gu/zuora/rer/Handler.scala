@@ -7,10 +7,11 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestRequestMaker}
+import com.gu.zuora.baton.BatonZuoraRestConfig
+import com.gu.zuora.baton.BatonZuoraRestConfig._
 import io.circe.parser.decode
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, Printer}
-import BatonZuoraRestConfig._
 
 import scala.io.Source
 

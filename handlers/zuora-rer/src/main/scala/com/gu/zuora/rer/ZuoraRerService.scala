@@ -121,7 +121,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
   }
 
   private def checkBillingDeletionSuccess(jobId: String, counter: Int = 0): Either[ClientFailure, BillingDeletionResult] = {
-    val sleepMs = 5000
+    val sleepMs = 5000L
     val maxTries = 12
     val jobStatus = zuoraClient.get[BillingDeletionResult](s"accounts/billing-documents/files/deletion-jobs/$jobId").toDisjunction
     logger.info(s"$jobStatus job deletion")

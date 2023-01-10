@@ -1,4 +1,4 @@
-package com.gu.zuora.rer
+package com.gu.zuora.baton
 
 import com.gu.util.config.ConfigLocation
 import com.gu.util.zuora.ZuoraRestConfig
