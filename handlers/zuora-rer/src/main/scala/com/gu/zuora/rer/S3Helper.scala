@@ -25,7 +25,7 @@ case class S3Error(message: String) extends ZuoraRerError
 
 trait S3Service {
   def checkForResults(initiationId: String, config: ZuoraRerConfig): Try[S3StatusResponse]
-  def copyResultsToCompleted(initiationReference: String, config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess]
+  def copyResultsToCompleted(initiationReference: String, contactList: List[ZuoraContact], config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess]
   def writeFailedResult(initiationId: String, zuoraError: ZuoraRerError, config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess]
 }
 
@@ -68,27 +68,14 @@ object S3Helper extends S3Service with LazyLogging {
         }
   }
 
-  override def copyResultsToCompleted(initiationReference: String, config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess] = {
-    val pendingPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationReference/pending/")))
-    val pendingObjects = ListS3Objects.listObjectsWithPrefix(pendingPath)
-    pendingObjects match {
-      case Failure(err) => Left(S3Error(err.getMessage))
-      case Success(pendingKeys) =>
-        if (pendingKeys.isEmpty) {
-          logger.info("No results found in /pending. Creating NoResultsFoundForUser object.")
-          createCompletedObject("NoResultsFoundForUser", initiationReference, config)
-        } else {
-          pendingKeys.traverse { pendingKey =>
-            val completedKey = pendingKey.value.replace("pending", "completed")
-            CopyS3Objects
-              .copyStringWithAcl(
-                S3Location(config.resultsBucket, pendingKey.value),
-                S3Location(config.resultsBucket, completedKey),
-                ObjectCannedACL.BUCKET_OWNER_READ
-              ).toEither.left.map(err => S3Error(err.getMessage))
-          }
-          createCompletedObject("ResultsCompleted", initiationReference, config)
-        }.map(_ => S3WriteSuccess())
+  override def copyResultsToCompleted(initiationReference: String, contactList: List[ZuoraContact], config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess] = {
+    contactList match {
+      case Nil =>
+        logger.info("No contacts found for the subject email. Creating NoResultsFoundForUser object.")
+        createCompletedObject("NoResultsFoundForUser", initiationReference, config)
+      case _ =>
+        logger.info(s"Successfully scrubbed ${contactList.length} account(s). Creating ErasureCompleted object.")
+        createCompletedObject("ErasureCompleted", initiationReference, config)
     }
   }
 
