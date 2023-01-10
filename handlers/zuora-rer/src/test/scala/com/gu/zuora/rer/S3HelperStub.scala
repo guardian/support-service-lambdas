@@ -7,7 +7,7 @@ class S3HelperStub(
   writeResult: Either[S3Error, S3WriteSuccess]
 ) extends S3Service {
   override def checkForResults(initiationId: String, config: ZuoraRerConfig): Try[S3StatusResponse] = checkForResults
-  override def copyResultsToCompleted(initiationReference: String, config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess] = writeResult
+  override def copyResultsToCompleted(initiationReference: String, contactList: List[ZuoraContact], config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess] = writeResult
   override def writeFailedResult(initiationId: String, zuoraError: ZuoraRerError, config: ZuoraRerConfig): Either[S3Error, S3WriteSuccess] = writeResult
 }
 
