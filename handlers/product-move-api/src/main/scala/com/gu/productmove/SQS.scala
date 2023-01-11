@@ -113,7 +113,7 @@ object SQSLive {
       .fromCompletableFuture(
         sqsAsyncClient.getQueueUrl(queueUrl),
       )
-      .mapError { ex => s"Failed to get sqs queue url: ${ex.getMessage}" }
+      .mapError { ex => s"Failed to get sqs queue name: $queueName, error: ${ex.getMessage}" }
 
   private def impl(creds: AwsCredentialsProvider): SqsAsyncClient =
     SqsAsyncClient.builder

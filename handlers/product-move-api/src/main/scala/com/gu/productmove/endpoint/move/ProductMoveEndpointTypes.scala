@@ -15,7 +15,8 @@ import scala.deriving.Mirror
 object ProductMoveEndpointTypes {
 
   case class ExpectedInput(
-      @description("price of new Supporter Plus subscription") price: Double,
+      @description("Price of new Supporter Plus subscription") price: BigDecimal,
+      @description("Whether to preview the move or to carry it out") preview: Boolean,
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
@@ -27,10 +28,18 @@ object ProductMoveEndpointTypes {
   case class Success(
       @description("Success message.") message: String,
   ) extends OutputBody
+  case class PreviewResult(
+      @description("The amount payable by the customer today") amountPayableToday: BigDecimal,
+      @description("The amount refunded from the cancelled contribution") contributionRefundAmount: BigDecimal,
+      @description("The cost of the new supporter plus subscription") supporterPlusPurchaseAmount: BigDecimal,
+  ) extends OutputBody
   case class InternalServerError(message: String) extends OutputBody
   given Schema[Success] = inlineSchema(Schema.derived)
+  given Schema[PreviewResult] = inlineSchema(Schema.derived)
   given JsonEncoder[Success] = DeriveJsonEncoder.gen[Success]
   given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
+  given JsonEncoder[PreviewResult] = DeriveJsonEncoder.gen[PreviewResult]
+  given JsonDecoder[PreviewResult] = DeriveJsonDecoder.gen // needed to keep tapir happy
   given JsonEncoder[OutputBody] = DeriveJsonEncoder.gen[OutputBody]
   given JsonDecoder[OutputBody] = DeriveJsonDecoder.gen[OutputBody] // needed to keep tapir happy
 }

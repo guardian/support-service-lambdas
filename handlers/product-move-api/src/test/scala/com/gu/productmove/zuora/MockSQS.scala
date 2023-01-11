@@ -11,7 +11,8 @@ import zio.{IO, ZIO}
 
 class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit]) extends SQS {
 
-  private var mutableStore: List[EmailMessage | RefundInput | SalesforceRecordInput] = Nil // we need to remember the side effects
+  private var mutableStore: List[EmailMessage | RefundInput | SalesforceRecordInput] =
+    Nil // we need to remember the side effects
 
   def requests = mutableStore.reverse
 
@@ -41,5 +42,6 @@ class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput,
 }
 
 object MockSQS {
-  def requests: ZIO[MockSQS, Nothing, List[EmailMessage | RefundInput | SalesforceRecordInput]] = ZIO.serviceWith[MockSQS](_.requests)
+  def requests: ZIO[MockSQS, Nothing, List[EmailMessage | RefundInput | SalesforceRecordInput]] =
+    ZIO.serviceWith[MockSQS](_.requests)
 }
