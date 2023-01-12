@@ -55,5 +55,60 @@ The `Billing - Right to Erasure` role has the following permissions:
 The `Payments - Right to Erasure` role has the following permissions:
 - Scrub Sensitive Date Of Specific Payment Method
 
+## Testing
 
+There's a few different levels of testing you can do with this project.
+1. `scalatest` unit tests are in `src/test/scala` and a selection `Stub` classes are provided for mocking calls to REST endpoints etc.
+2. Local testing against the Zuora DEV environment using AWS credentials.
+3. Manually calling Lambdas in the CODE env.
+4. Integration testing with Baton in the CODE env.
 
+### Local Testing
+
+`src/local` contains a test app `ZuoraRerLocalRun` which can be run from your DEV machine. 
+It allows you to test the code against the Zuora DEV sandbox account.  
+This is a much quicker develop/test cycle compared to deploying a branch to CODE.
+
+### Lambda testing on CODE
+
+Once you're happy with the local testing, push a branch to GitHub and TeamCity will build it.
+Then in RiffRaff deploy the project `support-service-lambdas::zuora-rer` to CODE.
+
+In the membership AWS account, search in the lambda console Functions list for the main lambda:
+- `zuora-baton-rer-lambda-CODE`
+
+Click into the function and go to the Test tab.  Hopefully there will be some test payloads already set up in there, but if not examples are:
+
+```json
+// initiate request for a non-existent email address
+// on checking the status is should say Success with 'no results found'
+{
+  "subjectId": "",
+  "subjectEmail": "invalid.email",
+  "dataProvider": "zuorarer",
+  "action": "initiate",
+  "requestType": "RER"
+}
+
+// initiate should return 'Pending' status, so the following
+// is used to check for completion
+{
+   "initiationReference": "<uuid returned by initiate response>",
+   "action": "status",
+   "requestType": "RER"
+}
+
+// initiate request for an actual email address
+// on checking the status is should say Success or Failure
+// depending on whether the account meets the deletion criteria
+{
+   "subjectId": "",
+   "subjectEmail": "test@example.com",
+   "dataProvider": "zuorarer",
+   "action": "initiate",
+   "requestType": "RER"
+}
+
+```
+
+We shouldn't need to call the `zuora-baton-perform-rer-lambda-CODE` lambda directly, but you can make test calls in a similar way.
