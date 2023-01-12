@@ -14,6 +14,7 @@ case class AccountBasicInfo(accountNumber: String)
 case class AccountMetrics(balance: BigDecimal, creditBalance: BigDecimal, totalInvoiceBalance: BigDecimal)
 case class CustomerAccount(basicInfo: AccountBasicInfo, metrics: AccountMetrics)
 case class BillingDeletionResult(id: String, status: String, success: Boolean)
+case class ZuoraSubscription(id: String, status: String)
 
 trait ZuoraRerError
 case class ZuoraClientError(message: String) extends ZuoraRerError
@@ -62,12 +63,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
         "crmId" -> "",
         "sfContactId__c" -> "",
         "IdentityId__c" -> "",
-        "autoPay" -> false,
-        // we set soldToContact.country here to satisfy account validation rules,
-        // i.e. the account will not update unless it has a country.
-        // If the sold-to contact has already been scrubbed and has no country, we'll get the error:
-        // "Taxation Requirement: Country is a required field for Sold To Contact"
-        "soldToContact" -> Json.obj("country" -> "United Kingdom")
+        "autoPay" -> false
       ),
       RelativePath(s"accounts/$accountId")
     )
@@ -91,7 +87,32 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
     contactIds.foldLeft(initialValue) {
       (lastResult, contactId) =>
         if (lastResult.isRight) {
-          val putReq = PutRequest(Json.obj(), RelativePath(s"contacts/$contactId/scrub"))
+          val putReq = PutRequest(
+            // N.B. leave Country and State unchanged as both are needed for tax assignment
+            Json.obj(
+              "Address1" -> "",
+              "Address2" -> "",
+              "City" -> "",
+              "County" -> "",
+              "Description" -> "",
+              "Fax" -> "",
+              "FirstName" -> ".",
+              "HomePhone" -> "",
+              "LastName" -> ".",
+              "MobilePhone" -> "",
+              "NickName" -> "",
+              "OtherPhone" -> "",
+              "OtherPhoneType" -> "Other",
+              "PersonalEmail" -> "",
+              "PostalCode" -> "",
+              "SpecialDeliveryInstructions__c" -> "",
+              "TaxRegion" -> "",
+              "Title__c" -> "Other",
+              "WorkEmail" -> "",
+              "WorkPhone" -> ""
+            ),
+            RelativePath(s"object/contact/$contactId")
+          )
           zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
         } else // fail on first error
           lastResult
@@ -155,12 +176,13 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
   implicit val readsAccountBasicInfo: Reads[AccountBasicInfo] = Json.reads[AccountBasicInfo]
   implicit val readsAccountMetrics: Reads[AccountMetrics] = Json.reads[AccountMetrics]
   implicit val readsAccount: Reads[CustomerAccount] = Json.reads[CustomerAccount]
+  implicit val readsSub: Reads[ZuoraSubscription] = Json.reads[ZuoraSubscription]
 
   override def verifyErasure(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
     logger.info("Checking that subscription cancelled and payment state balanced for contact.")
     for {
       subscriptions <- accountSubscriptions(contact.AccountId).left.map(toZuoraClientError)
-      subscriptionStatuses = (subscriptions \\ "status").map(jsStatus => jsStatus.as[String]).toSet
+      subscriptionStatuses = (subscriptions \ "subscriptions").as[List[ZuoraSubscription]].map(_.status).toSet
       _ <- checkSubscriptionStatus(subscriptionStatuses)
       accountObj <- retrieveAccount(contact.AccountId).left.map(toZuoraClientError)
       _ <- checkAccountBalances(accountObj.as[CustomerAccount])

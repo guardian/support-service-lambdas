@@ -110,10 +110,12 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
       )
 
   val scrubMainContactResponse =
-    POSTRequest("/contacts/5678/scrub", "{}", "PUT") -> HTTPResponse(200, """{"success": true}""")
+    POSTRequest("/object/contact/5678", """{"Address1":"","Address2":"","City":"","County":"","Description":"","Fax":"","FirstName":".","HomePhone":"","LastName":".","MobilePhone":"","NickName":"","OtherPhone":"","OtherPhoneType":"Other","PersonalEmail":"","PostalCode":"","SpecialDeliveryInstructions__c":"","TaxRegion":"","Title__c":"Other","WorkEmail":"","WorkPhone":""}""",
+      "PUT") -> HTTPResponse(200, """{"success": true}""")
 
   val scrubNonMainContactResponse =
-    POSTRequest("/contacts/4567/scrub", "{}", "PUT") -> HTTPResponse(200, """{"success": true}""")
+    POSTRequest("/object/contact/4567", """{"Address1":"","Address2":"","City":"","County":"","Description":"","Fax":"","FirstName":".","HomePhone":"","LastName":".","MobilePhone":"","NickName":"","OtherPhone":"","OtherPhoneType":"Other","PersonalEmail":"","PostalCode":"","SpecialDeliveryInstructions__c":"","TaxRegion":"","Title__c":"Other","WorkEmail":"","WorkPhone":""}""",
+      "PUT") -> HTTPResponse(200, """{"success": true}""")
 
   val deleteBillingDocumentsResponse =
     POSTRequest("/accounts/billing-documents/files/deletion-jobs", """{"accountIds":["1234567"]}""") ->

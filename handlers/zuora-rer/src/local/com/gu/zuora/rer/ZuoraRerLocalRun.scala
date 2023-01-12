@@ -61,11 +61,11 @@ object ZuoraRerLocalRun extends App {
   )
 
   //  Uncomment one of the calls below that you want to test against the Zuora DEV environment
-  // 1. emmulate call to ZuoraRerLambda with `initiate` request
-  runTestZuoraRer(rerInitiateRequest)
-  // 2. emmulate call to ZuoraRerLambda with `status` request
+  // 1. emulate call to ZuoraRerLambda with `initiate` request
+  // runTestZuoraRer(rerInitiateRequest)
+  // 2. emulate call to ZuoraRerLambda with `status` request
   // runTestZuoraRer(rerStatusRequest)
-  // 3. emmulate call to ZuoraPerformRerLambda with `initiate` request
-  // runTestPerformZuoraRer(performRerInitiateRequest)
+  // 3. emulate call to ZuoraPerformRerLambda with `initiate` request
+  runTestPerformZuoraRer(performRerInitiateRequest)
 }
 
