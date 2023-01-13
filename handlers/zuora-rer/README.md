@@ -50,7 +50,6 @@ The `Billing - Right to Erasure` role has the following permissions:
 - Modify Account
 - Delete Payment Methods
 - Hard Delete Billing Document Files
-- Scrub Sensitive Data Of Contact
 
 The `Payments - Right to Erasure` role has the following permissions:
 - Scrub Sensitive Date Of Specific Payment Method
