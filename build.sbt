@@ -234,6 +234,13 @@ lazy val `fulfilment-dates` = library(project in file("lib/fulfilment-dates"))
     dependencyOverrides ++= jacksonDependencies
   )
 
+lazy val `zuora-baton` = library(project in file("lib/zuora-baton"))
+  .dependsOn(zuora, `config-core`)
+  .settings(
+    libraryDependencies ++= Seq(playJson),
+    dependencyOverrides ++= jacksonDependencies
+  )
+
 lazy val `zuora-core` = library(project in file("lib/zuora-core"))
   .settings(
     libraryDependencies ++= Seq(
@@ -347,11 +354,18 @@ lazy val `zuora-retention` = lambdaProject(
   "find and mark accounts that are out of the retention period"
 ).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
 
+lazy val `zuora-rer` = lambdaProject(
+  "zuora-rer",
+  "Performs Right to Erasure Requests against Zuora",
+  Seq(catsEffect, circeParser, circe)
+).settings(Test / unmanagedSourceDirectories += baseDirectory.value / "src/local")
+  .dependsOn(`zuora-reports`, `zuora-baton`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+
 lazy val `zuora-sar` = lambdaProject(
   "zuora-sar",
   "Performs a Subject Access Requests against Zuora",
   Seq(catsEffect, circeParser, circe)
-).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+).dependsOn(`zuora-reports`, `zuora-baton`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",
@@ -497,6 +511,7 @@ lazy val `product-move-api` = lambdaProject(
       s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
       s"aws lambda update-function-code --function-name move-product-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
       s"aws lambda update-function-code --function-name product-switch-refund-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
   .dependsOn(`zuora-models`)

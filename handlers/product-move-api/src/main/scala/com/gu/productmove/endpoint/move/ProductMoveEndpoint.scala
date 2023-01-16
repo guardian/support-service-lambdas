@@ -1,20 +1,20 @@
 package com.gu.productmove.endpoint.move
 
-import com.gu.newproduct.api.productcatalog.{BillingPeriod, Annual, Monthly}
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
+import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{
   GetAccount,
   GetAccountLive,
   GetSubscription,
   GetSubscriptionLive,
-  InvoicePreview,
-  InvoicePreviewLive,
   Subscribe,
   SubscribeLive,
   SubscriptionUpdate,
@@ -49,7 +49,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00448793", ExpectedInput(1)),
+    run("A-S00448793", ExpectedInput(1, false)),
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[
@@ -88,7 +88,11 @@ object ProductMoveEndpoint {
           oneOf(
             oneOfVariant(
               sttp.model.StatusCode.Ok,
-              jsonBody[Success].copy(info = EndpointIO.Info.empty.copy(description = Some("Success."))),
+              jsonBody[Success].copy(info = EndpointIO.Info.empty.copy(description = Some("Update Success."))),
+            ),
+            oneOfVariant(
+              sttp.model.StatusCode.Ok,
+              jsonBody[PreviewResult].copy(info = EndpointIO.Info.empty.copy(description = Some("Preview result."))),
             ),
             oneOfVariant(
               sttp.model.StatusCode.InternalServerError,
@@ -120,7 +124,6 @@ object ProductMoveEndpoint {
       ZuoraGetLive.layer,
       SubscriptionUpdateLive.layer,
       SQSLive.layer,
-      InvoicePreviewLive.layer,
       GetAccountLive.layer,
       GuStageLive.layer,
     )
@@ -131,10 +134,11 @@ object ProductMoveEndpoint {
     }
 
   extension (billingPeriod: BillingPeriod)
-    def value =
+    def value: IO[String, String] =
       billingPeriod match {
-        case Monthly => "month"
-        case Annual => "annual"
+        case Monthly => ZIO.succeed("month")
+        case Annual => ZIO.succeed("annual")
+        case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
       }
 
   def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
@@ -150,8 +154,6 @@ object ProductMoveEndpoint {
     for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
-      getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
-
       currentRatePlan <- getSingleOrNotEligible(
         subscription.ratePlans,
         s"Subscription: $subscriptionName has more than one ratePlan",
@@ -160,54 +162,93 @@ object ProductMoveEndpoint {
         currentRatePlan.ratePlanCharges,
         s"Subscription: $subscriptionName has more than one ratePlanCharge",
       )
+      result <-
+        if (postData.preview)
+          doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currentRatePlan.id)
+        else
+          doUpdate(subscriptionName, ratePlanCharge, postData.price, currentRatePlan, subscription)
+    } yield result
 
-      updateResponse <- SubscriptionUpdate
-        .update(subscription.id, ratePlanCharge.billingPeriod, postData.price, currentRatePlan.id)
-        .addLogMessage("SubscriptionUpdate")
-      totalDeltaMrr = updateResponse.totalDeltaMrr
+  def doPreview(
+      subscriptionId: String,
+      price: BigDecimal,
+      billingPeriod: BillingPeriod,
+      currentRatePlanId: String,
+  ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Stage, String, OutputBody] = for {
+    _ <- ZIO.log("Fetching Preview from Zuora")
+    previewResponse <- SubscriptionUpdate
+      .preview(subscriptionId, billingPeriod, price, currentRatePlanId)
+      .addLogMessage("SubscriptionUpdate")
+  } yield previewResponse
 
-      account <- getAccountFuture.join
-
-      date <- Clock.currentDateTime.map(_.toLocalDate)
-
-      emailFuture <- SQS
-        .sendEmail(
-          message = EmailMessage(
-            EmailPayload(
-              Address = Some(account.billToContact.workEmail),
-              ContactAttributes = EmailPayloadContactAttributes(
-                SubscriberAttributes = EmailPayloadSubscriberAttributes(
-                  first_name = account.billToContact.firstName,
-                  last_name = account.billToContact.lastName,
-                  currency = account.basicInfo.currency.symbol,
-                  price = postData.price.toString,
-                  first_payment_amount = totalDeltaMrr.toString,
-                  date_of_first_payment = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                  payment_frequency = ratePlanCharge.billingPeriod.value,
-                  contribution_cancellation_date = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                  subscription_id = subscriptionName,
-                ),
+  def doUpdate(
+      subscriptionName: String,
+      ratePlanCharge: RatePlanCharge,
+      price: BigDecimal,
+      currentRatePlan: GetSubscription.RatePlan,
+      subscription: GetSubscription.GetSubscriptionResponse,
+  ) = for {
+    _ <- ZIO.log("Performing product move update")
+    getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
+    updateResponse <- SubscriptionUpdate
+      .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlan.id)
+      .addLogMessage("SubscriptionUpdate")
+    totalDeltaMrr = updateResponse.totalDeltaMrr
+    account <- getAccountFuture.join
+    date <- Clock.currentDateTime.map(_.toLocalDate)
+    billingPeriod <- ratePlanCharge.billingPeriod.value
+    emailFuture <- SQS
+      .sendEmail(
+        message = EmailMessage(
+          EmailPayload(
+            Address = Some(account.billToContact.workEmail),
+            ContactAttributes = EmailPayloadContactAttributes(
+              SubscriberAttributes = EmailPayloadSubscriberAttributes(
+                first_name = account.billToContact.firstName,
+                last_name = account.billToContact.lastName,
+                currency = account.basicInfo.currency.symbol,
+                price = price.toString,
+                first_payment_amount = totalDeltaMrr.toString,
+                date_of_first_payment = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                payment_frequency = billingPeriod,
+                contribution_cancellation_date = date.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                subscription_id = subscriptionName,
               ),
             ),
-            "SV_RCtoDP_Switch",
-            account.basicInfo.sfContactId__c,
-            account.basicInfo.IdentityId__c,
           ),
-        )
-        .addLogMessage("SQS sendEmail()")
-        .fork
+          "SV_RCtoDP_Switch",
+          account.basicInfo.sfContactId__c,
+          account.basicInfo.IdentityId__c,
+        ),
+      )
+      .addLogMessage("SQS sendEmail()")
+      .fork
 
-      refundFuture <-
-        if (updateResponse.totalDeltaMrr < 0)
-          SQS
-            .queueRefund(RefundInput(subscriptionName, updateResponse.invoiceId, updateResponse.totalDeltaMrr.abs))
-            .addLogMessage("SQS queueRefund()")
-            .fork
-        else
-          ZIO.succeed(()).fork
+    salesforceTrackingFuture <- SQS
+      .queueSalesforceTracking(
+        SalesforceRecordInput(
+          subscriptionName,
+          price,
+          currentRatePlan.ratePlanName,
+          "Supporter Plus",
+          date,
+          date,
+          updateResponse.totalDeltaMrr.abs,
+        ),
+      )
+      .fork
 
-      sqsRequests = emailFuture.zip(refundFuture)
-      _ <- sqsRequests.join
+    refundFuture <-
+      if (updateResponse.totalDeltaMrr < 0)
+        SQS
+          .queueRefund(RefundInput(subscriptionName, updateResponse.invoiceId, updateResponse.totalDeltaMrr.abs))
+          .addLogMessage("SQS queueRefund()")
+          .fork
+      else
+        ZIO.succeed(()).fork
 
-    } yield Success("Product move completed successfully")
+    sqsRequests = emailFuture.zip(refundFuture).zip(salesforceTrackingFuture)
+    _ <- sqsRequests.join
+
+  } yield Success("Product move completed successfully")
 }

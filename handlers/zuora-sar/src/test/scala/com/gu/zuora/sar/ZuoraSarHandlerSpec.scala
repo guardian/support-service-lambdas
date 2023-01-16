@@ -7,8 +7,6 @@ import com.gu.zuora.sar.BatonModels.{
   Completed,
   Failed,
   Pending,
-  SarInitiateRequest,
-  SarInitiateResponse,
   SarStatusRequest,
   SarStatusResponse,
 }

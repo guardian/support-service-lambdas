@@ -23,4 +23,5 @@ deployments:
       functionNames:
       - move-product-
       - product-switch-refund-
+      - product-switch-salesforce-tracking-
     dependencies: [cfn]

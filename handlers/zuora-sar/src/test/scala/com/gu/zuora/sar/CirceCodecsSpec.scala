@@ -89,7 +89,7 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
 
     "should encode SarInitiateResponse correctly" in {
       val response: SarResponse = SarInitiateResponse("someRequestId")
-      response.asJson.pretty(
+      response.asJson.printWith(
         jsonPrinter,
       ) shouldBe """{"initiationReference":"someRequestId","action":"initiate","requestType":"SAR","dataProvider":"zuora"}"""
     }
@@ -99,21 +99,21 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
         status = Completed,
         resultLocations = Some(List("locationValue")),
       )
-      response.asJson.pretty(
+      response.asJson.printWith(
         jsonPrinter,
       ) shouldBe """{"status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"SAR","dataProvider":"zuora"}"""
     }
 
     "should encode pending SarStatusResponse correctly" in {
       val response: SarResponse = SarStatusResponse(status = Pending)
-      response.asJson.pretty(
+      response.asJson.printWith(
         jsonPrinter,
       ) shouldBe """{"status":"pending","action":"status","requestType":"SAR","dataProvider":"zuora"}"""
     }
 
     "should encode failed SarStatusResponse correctly" in {
       val response: SarResponse = SarStatusResponse(status = Failed, None, Some("error making request"))
-      response.asJson.pretty(
+      response.asJson.printWith(
         jsonPrinter,
       ) shouldBe """{"status":"failed","message":"error making request","action":"status","requestType":"SAR","dataProvider":"zuora"}"""
     }
