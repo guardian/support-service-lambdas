@@ -261,7 +261,7 @@ object ProductMoveEndpoint {
           identityId = account.basicInfo.IdentityId__c.getOrElse(""),
           gifteeIdentityId = None,
           productRatePlanId = supporterPlusRatePlanIds.ratePlanId,
-          productRatePlanName = "Supporter Plus",
+          productRatePlanName = "product-move-api added Supporter Plus Monthly",
           termEndDate = todaysDate.plusYears(1),
           contractEffectiveDate = todaysDate,
           contributionAmount = None,
