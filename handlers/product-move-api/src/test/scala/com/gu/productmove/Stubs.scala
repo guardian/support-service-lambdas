@@ -17,6 +17,7 @@ import com.gu.productmove.zuora.{
 }
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
+import com.gu.supporterdata.model.SupporterRatePlanItem
 
 import java.time.LocalDate
 
@@ -179,6 +180,21 @@ val emailMessageBody = EmailMessage(
   None,
 )
 
+//-----------------------------------------------------
+// Stubs for Dynamo service
+//-----------------------------------------------------
+
+val supporterRatePlanItem1 = SupporterRatePlanItem(
+  subscriptionName = "A-S00339056",
+  identityId = "",
+  gifteeIdentityId = None,
+  productRatePlanId = "89ad8casd9c0asdcaj89sdc98as",
+  productRatePlanName = "RP1",
+  termEndDate = LocalDate.of(2023, 5, 10),
+  contractEffectiveDate = LocalDate.of(2022, 5, 10),
+  contributionAmount = None,
+)
+
 val emailMessageBodyRefund = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
@@ -207,8 +223,24 @@ val refundInput1 = RefundInput(
   refundAmount = 4,
 )
 
-val salesforceRecordInput1 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(4))
-val salesforceRecordInput2 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(28))
+val salesforceRecordInput1 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(50),
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2022, 5, 10),
+  LocalDate.of(2022, 5, 10),
+  BigDecimal(4),
+)
+val salesforceRecordInput2 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(50),
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2022, 5, 10),
+  LocalDate.of(2022, 5, 10),
+  BigDecimal(28),
+)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service

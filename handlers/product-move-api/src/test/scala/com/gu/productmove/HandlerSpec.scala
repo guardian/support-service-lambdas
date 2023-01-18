@@ -35,6 +35,7 @@ import com.gu.productmove.zuora.{
   GetSubscription,
   MockCancelZuora,
   MockCatalogue,
+  MockDynamo,
   MockGetAccount,
   MockGetSubscription,
   MockSQS,
@@ -62,6 +63,7 @@ object HandlerSpec extends ZIOSpecDefault {
     val getAccountStubs = Map("accountNumber" -> getAccountResponse)
     val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
       Map(emailMessageBody -> (), salesforceRecordInput2 -> ())
+    val dynamoStubs = Map(supporterRatePlanItem1 -> ())
     val getPaymentMethodResponse = PaymentMethodResponse(
       NumConsecutiveFailures = 0,
     )
@@ -80,16 +82,19 @@ object HandlerSpec extends ZIOSpecDefault {
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
           sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
           assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
           assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
-          assert(sqsRequests)(hasSameElements(List(emailMessageBody, salesforceRecordInput2)))
+          assert(sqsRequests)(hasSameElements(List(emailMessageBody, salesforceRecordInput2))) &&
+          assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
@@ -108,16 +113,19 @@ object HandlerSpec extends ZIOSpecDefault {
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
           sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
           assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
           assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
-          assert(sqsRequests)(hasSameElements(List(emailMessageBodyRefund, refundInput1, salesforceRecordInput1)))
+          assert(sqsRequests)(hasSameElements(List(emailMessageBodyRefund, refundInput1, salesforceRecordInput1))) &&
+          assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
@@ -139,6 +147,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
@@ -165,6 +174,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
