@@ -181,7 +181,7 @@ object ProductMoveEndpoint {
       price: BigDecimal,
       billingPeriod: BillingPeriod,
       currentRatePlanId: String,
-  ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with Stage, String, OutputBody] = for {
+  ): ZIO[SubscriptionUpdate with Stage, String, OutputBody] = for {
     _ <- ZIO.log("Fetching Preview from Zuora")
     previewResponse <- SubscriptionUpdate
       .preview(subscriptionId, billingPeriod, price, currentRatePlanId)
