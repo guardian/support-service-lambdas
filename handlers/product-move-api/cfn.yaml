@@ -78,6 +78,13 @@ Resources:
           Action: s3:GetObject
           Resource:
             - arn:aws:s3::*:membership-dist/*
+      - Statement:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+          Resource:
+            - Fn::ImportValue: !Sub supporter-product-data-tables-${Stage}-SupporterProductDataTable
       Events:
         DocsRedirect:
           Type: Api
