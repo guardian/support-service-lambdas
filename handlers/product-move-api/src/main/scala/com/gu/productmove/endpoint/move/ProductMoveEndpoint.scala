@@ -1,7 +1,7 @@
 package com.gu.productmove.endpoint.move
 
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
-import com.gu.supporterdata.model.{SupporterRatePlanItem}
+import com.gu.supporterdata.model.SupporterRatePlanItem
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -22,6 +22,7 @@ import com.gu.productmove.zuora.{
   Subscribe,
   SubscribeLive,
   SubscriptionUpdate,
+  getSupporterPlusRatePlanIds,
   SubscriptionUpdateLive,
   ZuoraCancel,
   ZuoraCancelLive,
@@ -153,7 +154,6 @@ object ProductMoveEndpoint {
       case 1 => ZIO.succeed(list.head)
       case _ => ZIO.fail(message)
     }
-
   private[productmove] def productMove(
       subscriptionName: String,
       postData: ExpectedInput,
@@ -196,6 +196,7 @@ object ProductMoveEndpoint {
       subscription: GetSubscription.GetSubscriptionResponse,
   ) = for {
     _ <- ZIO.log("Performing product move update")
+    stage <- ZIO.service[Stage]
     getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
     updateResponse <- SubscriptionUpdate
       .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlan.id)
@@ -252,14 +253,15 @@ object ProductMoveEndpoint {
       else
         ZIO.succeed(()).fork
 
+    supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, ratePlanCharge.billingPeriod))
     amendSupporterProductDynamoTableFuture <- Dynamo
       .writeItem(
         SupporterRatePlanItem(
           subscriptionName,
           identityId = account.basicInfo.IdentityId__c.getOrElse(""),
           gifteeIdentityId = None,
-          productRatePlanId = currentRatePlan.id,
-          productRatePlanName = currentRatePlan.ratePlanName,
+          productRatePlanId = supporterPlusRatePlanIds.ratePlanId,
+          productRatePlanName = "Supporter Plus",
           termEndDate = todaysDate.plusYears(1),
           contractEffectiveDate = todaysDate,
           contributionAmount = None,

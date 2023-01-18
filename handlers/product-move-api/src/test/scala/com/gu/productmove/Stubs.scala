@@ -156,6 +156,21 @@ val directDebitGetAccountResponse = GetAccountResponse(
 )
 
 //-----------------------------------------------------
+// Stubs for Dynamo service
+//-----------------------------------------------------
+
+val supporterRatePlanItem1 = SupporterRatePlanItem(
+  subscriptionName = "A-S00339056",
+  identityId = "",
+  gifteeIdentityId = None,
+  productRatePlanId = "8a12865b8219d9b401822106192b64dc",
+  productRatePlanName = "Supporter Plus",
+  termEndDate = LocalDate.of(2023, 5, 10),
+  contractEffectiveDate = LocalDate.of(2022, 5, 10),
+  contributionAmount = None,
+)
+
+//-----------------------------------------------------
 // Stubs for SQS service
 //-----------------------------------------------------
 val emailMessageBody = EmailMessage(
@@ -178,21 +193,6 @@ val emailMessageBody = EmailMessage(
   "SV_RCtoDP_Switch",
   "sfContactId",
   None,
-)
-
-//-----------------------------------------------------
-// Stubs for Dynamo service
-//-----------------------------------------------------
-
-val supporterRatePlanItem1 = SupporterRatePlanItem(
-  subscriptionName = "A-S00339056",
-  identityId = "",
-  gifteeIdentityId = None,
-  productRatePlanId = "89ad8casd9c0asdcaj89sdc98as",
-  productRatePlanName = "RP1",
-  termEndDate = LocalDate.of(2023, 5, 10),
-  contractEffectiveDate = LocalDate.of(2022, 5, 10),
-  contributionAmount = None,
 )
 
 val emailMessageBodyRefund = EmailMessage(
