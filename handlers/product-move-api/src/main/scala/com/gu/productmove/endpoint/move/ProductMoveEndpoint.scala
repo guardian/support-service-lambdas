@@ -197,12 +197,17 @@ object ProductMoveEndpoint {
   ) = for {
     _ <- ZIO.log("Performing product move update")
     stage <- ZIO.service[Stage]
-    getAccountFuture <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount").fork
+    account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
+
+    identityId <- ZIO
+      .fromOption(account.basicInfo.IdentityId__c)
+      .orElseFail(s"identityId is null for subscription name $subscriptionName")
+
     updateResponse <- SubscriptionUpdate
       .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlan.id)
       .addLogMessage("SubscriptionUpdate")
     totalDeltaMrr = updateResponse.totalDeltaMrr
-    account <- getAccountFuture.join
+
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriod <- ratePlanCharge.billingPeriod.value
     emailFuture <- SQS
@@ -226,7 +231,7 @@ object ProductMoveEndpoint {
           ),
           "SV_RCtoDP_Switch",
           account.basicInfo.sfContactId__c,
-          account.basicInfo.IdentityId__c,
+          Some(identityId),
         ),
       )
       .fork
@@ -258,7 +263,7 @@ object ProductMoveEndpoint {
       .writeItem(
         SupporterRatePlanItem(
           subscriptionName,
-          identityId = account.basicInfo.IdentityId__c.getOrElse(""),
+          identityId = identityId,
           gifteeIdentityId = None,
           productRatePlanId = supporterPlusRatePlanIds.ratePlanId,
           productRatePlanName = "product-move-api added Supporter Plus Monthly",

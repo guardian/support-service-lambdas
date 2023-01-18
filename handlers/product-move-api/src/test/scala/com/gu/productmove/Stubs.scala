@@ -134,6 +134,18 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
 val getAccountResponse = GetAccountResponse(
   BasicInfo(
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
+    Some("12345"),
+    "sfContactId",
+    balance = 0,
+    currency = Currency.GBP,
+  ),
+  BillToContact("John", "Hee", "example@gmail.com"),
+  List(AccountSubscription("subscriptionId")),
+)
+
+val getAccountResponse2 = GetAccountResponse(
+  BasicInfo(
+    DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     None,
     "sfContactId",
     balance = 0,
@@ -161,7 +173,7 @@ val directDebitGetAccountResponse = GetAccountResponse(
 
 val supporterRatePlanItem1 = SupporterRatePlanItem(
   subscriptionName = "A-S00339056",
-  identityId = "",
+  identityId = "12345",
   gifteeIdentityId = None,
   productRatePlanId = "8a12865b8219d9b401822106192b64dc",
   productRatePlanName = "product-move-api added Supporter Plus Monthly",
@@ -192,7 +204,7 @@ val emailMessageBody = EmailMessage(
   ),
   "SV_RCtoDP_Switch",
   "sfContactId",
-  None,
+  Some("12345"),
 )
 
 val emailMessageBodyRefund = EmailMessage(
@@ -214,7 +226,7 @@ val emailMessageBodyRefund = EmailMessage(
   ),
   "SV_RCtoDP_Switch",
   "sfContactId",
-  None,
+  Some("12345"),
 )
 
 val refundInput1 = RefundInput(

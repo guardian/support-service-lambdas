@@ -61,6 +61,7 @@ object HandlerSpec extends ZIOSpecDefault {
     val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, BigDecimal, String) =
       (expectedSubNameInput, Monthly, 50, "89ad8casd9c0asdcaj89sdc98as")
     val getAccountStubs = Map("accountNumber" -> getAccountResponse)
+    val getAccountStubs2 = Map("accountNumber" -> getAccountResponse2)
     val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
       Map(emailMessageBody -> (), salesforceRecordInput2 -> ())
     val dynamoStubs = Map(supporterRatePlanItem1 -> ())
@@ -96,6 +97,35 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD")),
+        )
+      },
+      test("productMove endpoint returns 500 error if identityId does not exist") {
+        val endpointJsonInputBody = ExpectedInput(50.00, false)
+        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
+        val expectedOutput = "identityId is null for subscription name A-S00339056"
+        (for {
+          _ <- TestClock.setTime(time)
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody).exit
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
+        } yield {
+          assert(output)(fails(equalTo(expectedOutput))) &&
+          assert(getSubRequests)(equalTo(List("A-S00339056"))) &&
+          assert(subUpdateRequests)(equalTo(Nil)) &&
+          assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
+          assert(sqsRequests)(equalTo(Nil)) &&
+          assert(dynamoRequests)(equalTo(Nil))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs2, getPaymentMethodStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
@@ -139,10 +169,16 @@ object HandlerSpec extends ZIOSpecDefault {
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody).exit
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
         } yield {
           assert(output)(fails(equalTo(expectedOutput))) &&
           assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
-          assert(subUpdateRequests)(equalTo(Nil))
+          assert(subUpdateRequests)(equalTo(Nil)) &&
+          assert(getAccountRequests)(equalTo(Nil)) &&
+          assert(sqsRequests)(equalTo(Nil)) &&
+          assert(dynamoRequests)(equalTo(Nil))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
