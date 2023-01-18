@@ -238,6 +238,7 @@ val refundInput1 = RefundInput(
 val salesforceRecordInput1 = SalesforceRecordInput(
   "A-S00339056",
   BigDecimal(50),
+  "P1",
   "RP1",
   "Supporter Plus",
   LocalDate.of(2022, 5, 10),
@@ -247,6 +248,7 @@ val salesforceRecordInput1 = SalesforceRecordInput(
 val salesforceRecordInput2 = SalesforceRecordInput(
   "A-S00339056",
   BigDecimal(50),
+  "P1",
   "RP1",
   "Supporter Plus",
   LocalDate.of(2022, 5, 10),
@@ -278,7 +280,8 @@ val sfSubscription1 = GetSfSubscriptionResponse(
 val createRecordRequest1 = CreateRecordRequest(
   SF_Subscription__c = "123456",
   Previous_Amount__c = BigDecimal(100),
-  Previous_Rate_Plan_Name__c = "prev rate plan",
+  Old_Product__c = "old product name",
+  Previous_Rate_Plan_Name__c = "old rate plan",
   New_Rate_Plan_Name__c = "new rate plan",
   Requested_Date__c = LocalDate.parse("2022-12-08"),
   Effective_Date__c = LocalDate.parse("2022-12-09"),
