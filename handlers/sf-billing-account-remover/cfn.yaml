@@ -96,7 +96,6 @@ Resources:
             - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:username}}'
             - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
           zuoraInstanceUrl: !FindInMap [StageMap, !Ref Stage, ZuoraUrl]
-
       Events:
         ScheduledRun:
           Type: Schedule
