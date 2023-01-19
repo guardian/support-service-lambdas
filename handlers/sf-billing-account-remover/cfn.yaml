@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
 Description: Remove Billing Accounts and related records from SF
 
 Parameters:
@@ -54,7 +54,7 @@ Resources:
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-billing-account-remover-${Stage}:log-stream:*
 
   SFBillingAccountRemoverLambda:
-    Type: AWS::Lambda::Function
+    Type: AWS::Serverless::Function
     Properties:
       Events:
         ScheduledRun:
@@ -66,9 +66,9 @@ Resources:
       FunctionName:
         !Sub sf-billing-account-remover-${Stage}
       Description: Remove Billing Accounts and related records from Salesforce (via Zuora)
-      Code:
-        S3Bucket: support-service-lambdas-dist
-        S3Key: !Sub membership/${Stage}/sf-billing-account-remover/sf-billing-account-remover.jar
+      CodeUri:
+        Bucket: support-service-lambdas-dist
+        Key: !Sub membership/${Stage}/sf-billing-account-remover/sf-billing-account-remover.jar
       Handler: com.gu.sf_billing_account_remover.BillingAccountRemover::lambda
       Environment:
         Variables:
