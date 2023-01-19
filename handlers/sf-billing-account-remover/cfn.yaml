@@ -21,12 +21,14 @@ Mappings:
       SalesforceUser: MembersDataAPI
       ZuoraUrl: https://rest.apisandbox.zuora.com
       ZuoraAccount: SubscriptionsZuoraApi
+      Schedule: 'cron(00 07,08,09,10 * * ? *)'
     PROD:
       SalesforceUrl: https://gnmtouchpoint.my.salesforce.com
       SalesforceConnectedApp: BillingAccountRemover
       SalesforceUser: BillingAccountRemoverAPIUser
       ZuoraUrl: https://rest.zuora.com
       ZuoraAccount: SupportServiceLambdas
+      Schedule: 'cron(00 07,08,09,10 * * ? *)'
 
 Resources:
   SFBillingAccountRemoverRole:
