@@ -19,12 +19,12 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   // getAcquisitionConsents success cases
   "getAcquisitionConsents" should "correctly return the mapping when a known product is passed" in {
-    calculator.getAcquisitionConsents("membership") shouldBe Right(membershipMapping)
+    calculator.getSoftOptInsByProduct("membership") shouldBe Right(membershipMapping)
   }
 
   // getAcquisitionConsents failure cases
   "getAcquisitionConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
-    val result = calculator.getAcquisitionConsents("nonexistentProduct")
+    val result = calculator.getSoftOptInsByProduct("nonexistentProduct")
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]

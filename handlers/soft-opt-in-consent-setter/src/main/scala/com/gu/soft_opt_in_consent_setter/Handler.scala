@@ -89,7 +89,7 @@ object Handler extends LazyLogging {
       .map(sub => {
         val updateResult =
           for {
-            consents <- consentsCalculator.getAcquisitionConsents(sub.Product__c)
+            consents <- consentsCalculator.getSoftOptInsByProduct(sub.Product__c)
             consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
             _ <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
           } yield ()
@@ -136,14 +136,8 @@ object Handler extends LazyLogging {
 
         val updateResult =
           for {
-            consents <- consentsCalculator.getProductSwitchConsents(
-              productSwitchSub.Old_Product__c,
-              productSwitchSub.SF_Subscription__r.Product__c,
-              sub.associatedActiveNonGiftSubs.map(_.Product__c),
-            )
-
-            oldProductSoftOptIns = consents._1
-            newProductSoftOptIns = consents._2
+            oldProductSoftOptIns <- getSoftOptInsByProduct(productSwitchSub.Old_Product__c)
+            newProductSoftOptIns <- getSoftOptInsByProduct(productSwitchSub.SF_Subscription__r.Product__c)
 
             idapiResponse <- getConsentsReq(productSwitchSub.Buyer__r.IdentityID__c)
             currentConsents = idapiResponse.user.consents
