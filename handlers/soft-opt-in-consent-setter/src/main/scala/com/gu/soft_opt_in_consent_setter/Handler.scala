@@ -1,6 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{
+  ConsentOption,
   EnhancedCancelledSub,
   EnhancedProductSwitchSub,
   IdapiUserResponse,
@@ -113,6 +114,21 @@ object Handler extends LazyLogging {
       updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
+  def consentsToRemove(
+      oldProductSoftOptIns: Set[String],
+      currentProductsSoftOptIns: Set[String],
+  ): Set[String] =
+    oldProductSoftOptIns.filter(optIn => !currentProductsSoftOptIns.contains(optIn))
+
+  def consentsToAdd(
+      newProductSoftOptIns: Set[String],
+      oldProductSoftOptIns: Set[String],
+      currentConsents: Seq[ConsentOption],
+  ): Set[String] = {
+    val consentsMap = currentConsents.map(co => (co.id, co.consented)).toMap
+    newProductSoftOptIns.filter(option => !oldProductSoftOptIns.contains(option) && !consentsMap(option))
+  }
+
   // 1. carry across current consents (no action required)
   // 2. Disable any current consents if moving to a product which doesn't have these soft opt-ins
   // 3. Add new consents
@@ -133,22 +149,25 @@ object Handler extends LazyLogging {
       .map(EnhancedProductSwitchSub(_, activeSubs.records))
       .map(sub => {
         import sub._
+        import consentsCalculator._
 
         val updateResult =
           for {
             oldProductSoftOptIns <- getSoftOptInsByProduct(productSwitchSub.Old_Product__c)
             newProductSoftOptIns <- getSoftOptInsByProduct(productSwitchSub.SF_Subscription__r.Product__c)
+            currentProductSoftOptIns <- getSoftOptInsByProducts(associatedActiveNonGiftSubs.map(_.Product__c).toSet)
 
             idapiResponse <- getConsentsReq(productSwitchSub.Buyer__r.IdentityID__c)
             currentConsents = idapiResponse.user.consents
-              .filter(consentOption => oldProductSoftOptIns.contains(consentOption.id))
 
-            toRemove = currentConsents
-              .filter(consentOption => !newProductSoftOptIns.contains(consentOption.id) && consentOption.consented)
-              .map(_.id)
+            toRemove = consentsToRemove(
+              oldProductSoftOptIns,
+              currentProductSoftOptIns,
+            )
+            toAdd = consentsToAdd(newProductSoftOptIns, oldProductSoftOptIns, currentConsents)
 
-            consentsToRemoveBody = consentsCalculator.buildConsentsBody(toRemove.toSet, state = false)
-            consentsToAddBody = consentsCalculator.buildConsentsBody(newProductSoftOptIns, state = true)
+            consentsToRemoveBody = consentsCalculator.buildConsentsBody(toRemove, state = false)
+            consentsToAddBody = consentsCalculator.buildConsentsBody(toAdd, state = true)
             _ <- sendConsentsReq(productSwitchSub.Buyer__r.IdentityID__c, consentsToRemoveBody + consentsToAddBody)
           } yield ()
 

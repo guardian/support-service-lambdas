@@ -18,12 +18,12 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   val calculator = new ConsentsCalculator(testConsentMappings)
 
   // getAcquisitionConsents success cases
-  "getAcquisitionConsents" should "correctly return the mapping when a known product is passed" in {
+  "getSoftOptInsByProduct" should "correctly return the mapping when a known product is passed" in {
     calculator.getSoftOptInsByProduct("membership") shouldBe Right(membershipMapping)
   }
 
   // getAcquisitionConsents failure cases
-  "getAcquisitionConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
+  "getSoftOptInsByProduct" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
     val result = calculator.getSoftOptInsByProduct("nonexistentProduct")
 
     result.isLeft shouldBe true
@@ -31,19 +31,16 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     result.left.value.errorType shouldBe "ConsentsCalculator"
   }
 
-  // getProductSwitchConsents success cases
-  "getProductSwitchConsents" should "correctly return both mappings when two products are passed in" in {
-    calculator.getProductSwitchConsents("contributions", "supporterPlus") shouldBe Right(
-      (
-        contributionMapping,
-        supporterPlusMapping,
-      ),
+  // getSoftOptInsByProducts success cases
+  "getSoftOptInsByProducts" should "correctly return both mappings when two products are passed in" in {
+    calculator.getSoftOptInsByProducts(Set("contributions", "supporterPlus")) shouldBe Right(
+      contributionMapping ++ supporterPlusMapping,
     )
   }
 
-  // getAcquisitionConsents failure cases
-  "getProductSwitchConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
-    val result = calculator.getProductSwitchConsents("nonexistentProduct", "nonexistentProduct")
+  // getSoftOptInsByProducts failure cases
+  "getSoftOptInsByProducts" should "correctly return a SoftOptInError when the products aren't present in the mappings" in {
+    val result = calculator.getSoftOptInsByProducts(Set("nonexistentProduct", "nonexistentProduct"))
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]

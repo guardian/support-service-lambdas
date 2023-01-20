@@ -472,7 +472,6 @@ lazy val `product-move-api` = lambdaProject(
   "moves a supporter from one product to another.",
   Seq(
     zio2,
-    "com.gu" %% "support-product-data-dynamo_2.13" % "0.1" cross CrossVersion.disabled,
     awsEvents,
     awsLambda,
     "com.softwaremill.sttp.client3" %% "zio" % sttpVersion  exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
