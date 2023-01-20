@@ -267,7 +267,7 @@ object ProductMoveEndpoint {
           gifteeIdentityId = None,
           productRatePlanId = supporterPlusRatePlanIds.ratePlanId,
           productRatePlanName = "product-move-api added Supporter Plus Monthly",
-          termEndDate = todaysDate.plusYears(1),
+          termEndDate = todaysDate.plusDays(7),
           contractEffectiveDate = todaysDate,
           contributionAmount = None,
         ),
