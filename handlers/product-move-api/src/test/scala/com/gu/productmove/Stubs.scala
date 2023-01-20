@@ -177,7 +177,7 @@ val supporterRatePlanItem1 = SupporterRatePlanItem(
   gifteeIdentityId = None,
   productRatePlanId = "8a12865b8219d9b401822106192b64dc",
   productRatePlanName = "product-move-api added Supporter Plus Monthly",
-  termEndDate = LocalDate.of(2023, 5, 10),
+  termEndDate = LocalDate.of(2022, 5, 17),
   contractEffectiveDate = LocalDate.of(2022, 5, 10),
   contributionAmount = None,
 )
