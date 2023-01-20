@@ -6,6 +6,7 @@ import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{
   guWeeklyMapping,
   membershipMapping,
   newspaperMapping,
+  supporterPlusMapping,
   testConsentMappings,
 }
 import org.scalatest.EitherValues
@@ -24,6 +25,25 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   // getAcquisitionConsents failure cases
   "getAcquisitionConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
     val result = calculator.getAcquisitionConsents("nonexistentProduct")
+
+    result.isLeft shouldBe true
+    result.left.value shouldBe a[SoftOptInError]
+    result.left.value.errorType shouldBe "ConsentsCalculator"
+  }
+
+  // getProductSwitchConsents success cases
+  "getProductSwitchConsents" should "correctly return both mappings when two products are passed in" in {
+    calculator.getProductSwitchConsents("contributions", "supporterPlus") shouldBe Right(
+      (
+        contributionMapping,
+        supporterPlusMapping,
+      ),
+    )
+  }
+
+  // getAcquisitionConsents failure cases
+  "getProductSwitchConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
+    val result = calculator.getProductSwitchConsents("nonexistentProduct", "nonexistentProduct")
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]

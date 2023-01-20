@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{EnhancedCancelledSub}
+import com.gu.soft_opt_in_consent_setter.models.EnhancedCancelledSub
 import com.gu.soft_opt_in_consent_setter.testData.SFSubscriptionTestData._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should

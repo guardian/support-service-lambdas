@@ -15,26 +15,36 @@ case class SFSubRecordUpdateRequest(records: Seq[SFSubRecordUpdate]) {
 
 object SFSubRecordUpdate {
 
-  def apply(sub: SFSubRecord, softOptInStage: String, updateResult: Either[SoftOptInError, Unit]): SFSubRecordUpdate = {
+  def apply(
+      subId: String,
+      softOptInStage: String,
+      Soft_Opt_in_Number_of_Attempts__c: Option[Int],
+      Soft_Opt_in_Last_Stage_Processed__c: Option[String],
+      updateResult: Either[SoftOptInError, Unit],
+  ): SFSubRecordUpdate = {
     updateResult match {
-      case Right(_) => successfulUpdate(sub, softOptInStage)
-      case Left(_) => failedUpdate(sub)
+      case Right(_) => successfulUpdate(subId, softOptInStage)
+      case Left(_) => failedUpdate(subId, Soft_Opt_in_Number_of_Attempts__c, Soft_Opt_in_Last_Stage_Processed__c)
     }
   }
 
-  def successfulUpdate(sub: SFSubRecord, softOptInStage: String): SFSubRecordUpdate = {
+  def successfulUpdate(subId: String, softOptInStage: String): SFSubRecordUpdate = {
     SFSubRecordUpdate(
-      Id = sub.Id,
+      Id = subId,
       Soft_Opt_in_Number_of_Attempts__c = 0,
       Soft_Opt_in_Last_Stage_Processed__c = Some(softOptInStage),
     )
   }
 
-  def failedUpdate(sub: SFSubRecord): SFSubRecordUpdate = {
+  def failedUpdate(
+      subId: String,
+      Soft_Opt_in_Number_of_Attempts__c: Option[Int],
+      Soft_Opt_in_Last_Stage_Processed__c: Option[String],
+  ): SFSubRecordUpdate = {
     SFSubRecordUpdate(
-      Id = sub.Id,
-      Soft_Opt_in_Number_of_Attempts__c = sub.Soft_Opt_in_Number_of_Attempts__c.getOrElse(0) + 1,
-      Soft_Opt_in_Last_Stage_Processed__c = sub.Soft_Opt_in_Last_Stage_Processed__c,
+      Id = subId,
+      Soft_Opt_in_Number_of_Attempts__c = Soft_Opt_in_Number_of_Attempts__c.getOrElse(0) + 1,
+      Soft_Opt_in_Last_Stage_Processed__c = Soft_Opt_in_Last_Stage_Processed__c,
     )
   }
 

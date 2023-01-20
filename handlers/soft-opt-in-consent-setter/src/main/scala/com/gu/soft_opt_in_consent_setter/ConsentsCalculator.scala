@@ -19,6 +19,44 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
       )
   }
 
+  def getProductSwitchConsents(
+      oldProductName: String,
+      newProductName: String,
+      otherSubs: Seq[String],
+  ): Either[SoftOptInError, (Set[String], Set[String])] = {
+    val asdf = for {
+      oldProduct <- consentsMappings
+        .get(oldProductName)
+        .toRight(
+          SoftOptInError(
+            "ConsentsCalculator",
+            s"getProductSwitchConsents couldn't find $oldProductName in consentsMappings",
+          ),
+        )
+      newProduct <- consentsMappings
+        .get(newProductName)
+        .toRight(
+          SoftOptInError(
+            "ConsentsCalculator",
+            s"getProductSwitchConsents couldn't find $newProductName in consentsMappings",
+          ),
+        )
+
+    } yield (oldProduct, newProduct)
+
+    val asdf2 = otherSubs.map(sub =>
+      consentsMappings
+        .get(sub)
+        .toRight(
+          SoftOptInError(
+            "ConsentsCalculator",
+            s"getProductSwitchConsents couldn't find $newProductName in consentsMappings",
+          ),
+        ),
+    )
+
+  }
+
   def getCancellationConsents(
       cancelledProductName: String,
       ownedProductNames: Set[String],
