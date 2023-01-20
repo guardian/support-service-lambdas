@@ -114,27 +114,27 @@ object Handler extends LazyLogging {
       updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
+  /*
+    replace following with diff function for readability?
+   */
   def consentsToRemove(
       oldProductSoftOptIns: Set[String],
-      currentProductsSoftOptIns: Set[String],
+      currentProductsSoftOptIns: Set[String], // note: this variable should contain the new product too.
   ): Set[String] =
     oldProductSoftOptIns.filter(optIn => !currentProductsSoftOptIns.contains(optIn))
 
+  // add new soft opt-ins:
+  // 1. carry
   def consentsToAdd(
-      newProductSoftOptIns: Set[String],
       oldProductSoftOptIns: Set[String],
-      currentConsents: Seq[ConsentOption],
+      newProductSoftOptIns: Set[String],
+      allOtherProductsSoftOptIns: Set[String],
   ): Set[String] = {
-    val consentsMap = currentConsents.map(co => (co.id, co.consented)).toMap
-    newProductSoftOptIns.filter(option => !oldProductSoftOptIns.contains(option) && !consentsMap(option))
+    newProductSoftOptIns.filter(option =>
+      !oldProductSoftOptIns.contains(option) && !allOtherProductsSoftOptIns.contains(option),
+    )
   }
 
-  // 1. carry across current consents (no action required)
-  // 2. Disable any current consents if moving to a product which doesn't have these soft opt-ins
-  // 3. Add new consents
-
-  // 2. if old not in new, disable
-  // 3. if new not in old, enable
   def processProductSwitchSubs(
       productSwitchSubs: Seq[SubscriptionRatePlanUpdateRecord],
       activeSubs: SFAssociatedSubResponse,
@@ -157,14 +157,16 @@ object Handler extends LazyLogging {
             newProductSoftOptIns <- getSoftOptInsByProduct(productSwitchSub.SF_Subscription__r.Product__c)
             currentProductSoftOptIns <- getSoftOptInsByProducts(associatedActiveNonGiftSubs.map(_.Product__c).toSet)
 
+            /*
             idapiResponse <- getConsentsReq(productSwitchSub.Buyer__r.IdentityID__c)
             currentConsents = idapiResponse.user.consents
+             */
 
             toRemove = consentsToRemove(
               oldProductSoftOptIns,
               currentProductSoftOptIns,
             )
-            toAdd = consentsToAdd(newProductSoftOptIns, oldProductSoftOptIns, currentConsents)
+            toAdd = consentsToAdd(oldProductSoftOptIns, newProductSoftOptIns, currentProductSoftOptIns)
 
             consentsToRemoveBody = consentsCalculator.buildConsentsBody(toRemove, state = false)
             consentsToAddBody = consentsCalculator.buildConsentsBody(toAdd, state = true)

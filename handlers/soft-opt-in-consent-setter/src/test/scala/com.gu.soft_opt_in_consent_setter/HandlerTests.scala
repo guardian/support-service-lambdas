@@ -15,7 +15,7 @@ import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{
 class HandlerTests extends AnyFlatSpec with should.Matchers {
 
   val currentConsents1 = Seq(
-    ConsentOption("your_support_onboarding", false),
+    ConsentOption("your_support_onboarding", true),
     ConsentOption("supporter_newsletter", false),
     ConsentOption("similar_guardian_products", false),
     ConsentOption("digital_subscriber_preview", false),
@@ -23,7 +23,7 @@ class HandlerTests extends AnyFlatSpec with should.Matchers {
     ConsentOption("supporter", false),
     ConsentOption("market_research_optout", false),
     ConsentOption("subscriber_preview", false),
-    ConsentOption("guardian_weekly_newsletter", false),
+    ConsentOption("guardian_weekly_newsletter", true),
     ConsentOption("personalised_advertising", false),
   )
 
@@ -56,17 +56,24 @@ class HandlerTests extends AnyFlatSpec with should.Matchers {
 
   "consentsToAdd" should "return the correct soft opt-ins to add (set as true)" in {
     Handler.consentsToAdd(
-      newspaperMapping,
       guWeeklyMapping,
-      currentConsents1,
+      newspaperMapping,
+      Set(),
     ) shouldBe Set("similar_guardian_products", "subscriber_preview", "supporter_newsletter")
+  }
+
+  "consentsToRemove" should "return remove the correct soft opt-ins to remove (set as false) 23" in {
+    Handler.consentsToRemove(
+      guWeeklyMapping,
+      contributionMapping ++ newspaperMapping,
+    ) shouldBe Set("guardian_weekly_newsletter")
   }
 
   "consentsToAdd" should "return the correct soft opt-ins to add (set as true) 2" in {
     Handler.consentsToAdd(
-      newspaperMapping,
       guWeeklyMapping,
-      currentConsents2,
-    ) shouldBe Set()
+      newspaperMapping,
+      contributionMapping,
+    ) shouldBe Set("subscriber_preview")
   }
 }
