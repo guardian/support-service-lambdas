@@ -36,7 +36,7 @@ class GetTokenExpiryTest extends AnyFlatSpec with Matchers {
   }
 
   it should "be that a codec with same secret key should encode and decode reflexively" in {
-    // replace "secret" with the prod secret  to get a code that'll work with https://content-auth.guardian.co.uk/subs
+    // replace "secret" with the prod secret to get a code that'll work with https://content-auth.guardian.co.uk/subs
     val codec = PrefixedTokens(secretKey = "secret", emergencySubscriberAuthPrefix = "G99")
     val tokenPayload = TokenPayload.apply(org.joda.time.LocalDate.now())(Weeks.weeks(51), SevenDay)
     val encoded = codec.encode(tokenPayload)
