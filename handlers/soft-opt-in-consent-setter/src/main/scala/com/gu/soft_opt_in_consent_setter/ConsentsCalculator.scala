@@ -14,7 +14,7 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
       .toRight(
         SoftOptInError(
           "ConsentsCalculator",
-          s"getConsentsByProduct couldn't find $productName in consentsMappings",
+          s"getSoftOptInsByProduct couldn't find $productName in consentsMappings",
         ),
       )
   }
