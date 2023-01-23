@@ -31,7 +31,7 @@ object Salesforce {
       request = CreateRecordRequest(
         SF_Subscription__c = sfSub.Id,
         Previous_Amount__c = previousAmount,
-        Old_Product__c = previousProductName,
+        Previous_Product_Name__c = previousProductName,
         Previous_Rate_Plan_Name__c = previousRatePlanName,
         New_Rate_Plan_Name__c = newRatePlanName,
         Requested_Date__c = requestedDate,
