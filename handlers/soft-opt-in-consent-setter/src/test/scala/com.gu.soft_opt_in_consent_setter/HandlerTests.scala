@@ -11,69 +11,107 @@ import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{
   supporterPlusMapping,
   testConsentMappings,
 }
+import org.scalatest.EitherValues
 
-class HandlerTests extends AnyFlatSpec with should.Matchers {
+class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {
 
-  val currentConsents1 = Seq(
-    ConsentOption("your_support_onboarding", true),
-    ConsentOption("supporter_newsletter", false),
-    ConsentOption("similar_guardian_products", false),
-    ConsentOption("digital_subscriber_preview", false),
-    ConsentOption("profiling_optout", false),
-    ConsentOption("supporter", false),
-    ConsentOption("market_research_optout", false),
-    ConsentOption("subscriber_preview", false),
-    ConsentOption("guardian_weekly_newsletter", true),
-    ConsentOption("personalised_advertising", false),
-  )
+  def removeWhitespace(stringToRemoveWhitespaceFrom: String): String = {
+    stringToRemoveWhitespaceFrom.replaceAll("\\s", "")
+  }
 
-  val currentConsents2 = Seq(
-    ConsentOption("your_support_onboarding", true),
-    ConsentOption("supporter_newsletter", true),
-    ConsentOption("similar_guardian_products", true),
-    ConsentOption("digital_subscriber_preview", true),
-    ConsentOption("profiling_optout", true),
-    ConsentOption("supporter", true),
-    ConsentOption("market_research_optout", true),
-    ConsentOption("subscriber_preview", true),
-    ConsentOption("guardian_weekly_newsletter", true),
-    ConsentOption("personalised_advertising", true),
-  )
+  val calculator = new ConsentsCalculator(testConsentMappings)
 
-  "buildProductSwitchConsents" should "return the correct soft opt-ins to remove (set as false)" in {
+  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Recurring Contribution to Guardian Weekly subscription" in {
     Handler.buildProductSwitchConsents(
-      contributionMapping,
-      guWeeklyMapping,
-    ) shouldBe Set("similar_guardian_products", "supporter_newsletter")
+      "contributions",
+      "guardianweekly",
+      Set("guardianweekly"),
+      calculator,
+    ) shouldBe Right("""[
+        |  {
+        |    "id" : "similar_guardian_products",
+        |    "consented" : false
+        |  },
+        |  {
+        |    "id" : "supporter_newsletter",
+        |    "consented" : false
+        |  },
+        |  {
+        |    "id" : "guardian_weekly_newsletter",
+        |    "consented" : true
+        |  }
+        |]""".stripMargin)
   }
 
-  "consentsToRemove" should "return the correct soft opt-ins to remove (set as false) 2" in {
-    Handler.consentsToRemove(
-      contributionMapping,
-      guWeeklyMapping ++ newspaperMapping,
-    ) shouldBe Set()
+  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Recurring Contribution to a Guardian Weekly subscription whilst the user also owns a Newspaper subscription" in {
+    Handler.buildProductSwitchConsents(
+      "contributions",
+      "guardianweekly",
+      Set("guardianweekly", "newspaper"),
+      calculator,
+    ) shouldBe Right("""[
+        |  {
+        |    "id" : "guardian_weekly_newsletter",
+        |    "consented" : true
+        |  }
+        |]""".stripMargin)
   }
 
-  "consentsToAdd" should "return the correct soft opt-ins to add (set as true)" in {
-    Handler.consentsToAdd(
-      guWeeklyMapping,
-      newspaperMapping,
-      Set(),
-    ) shouldBe Set("similar_guardian_products", "subscriber_preview", "supporter_newsletter")
+  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Guardian Weekly to a Newspaper subscription" in {
+    Handler.buildProductSwitchConsents(
+      "guardianweekly",
+      "newspaper",
+      Set("newspaper"),
+      calculator,
+    ) shouldBe Right("""[
+        |  {
+        |    "id" : "guardian_weekly_newsletter",
+        |    "consented" : false
+        |  },
+        |  {
+        |    "id" : "similar_guardian_products",
+        |    "consented" : true
+        |  },
+        |  {
+        |    "id" : "subscriber_preview",
+        |    "consented" : true
+        |  },
+        |  {
+        |    "id" : "supporter_newsletter",
+        |    "consented" : true
+        |  }
+        |]""".stripMargin)
   }
 
-  "consentsToRemove" should "return remove the correct soft opt-ins to remove (set as false) 23" in {
-    Handler.consentsToRemove(
-      guWeeklyMapping,
-      contributionMapping ++ newspaperMapping,
-    ) shouldBe Set("guardian_weekly_newsletter")
+  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
+    Handler.buildProductSwitchConsents(
+      "guardianweekly",
+      "contributions",
+      Set("newspaper", "contributions"),
+      calculator,
+    ) shouldBe Right("""[
+        |  {
+        |    "id" : "guardian_weekly_newsletter",
+        |    "consented" : false
+        |  }
+        |]""".stripMargin)
   }
 
-  "consentsToAdd" should "return the correct soft opt-ins to add (set as true) 2" in {
-    Handler.consentsToAdd(
-      guWeeklyMapping,
-      newspaperMapping,
-      contributionMapping,
-    ) shouldBe Set("subscriber_preview")
+  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Recurring Contribution" in {
+    Handler.buildProductSwitchConsents(
+      "guardianweekly",
+      "newspaper",
+      Set("newspaper", "contributions"),
+      calculator,
+    ) shouldBe Right("""[
+        |  {
+        |    "id" : "guardian_weekly_newsletter",
+        |    "consented" : false
+        |  },
+        |  {
+        |    "id" : "subscriber_preview",
+        |    "consented" : true
+        |  }
+        |]""".stripMargin)
   }
 }

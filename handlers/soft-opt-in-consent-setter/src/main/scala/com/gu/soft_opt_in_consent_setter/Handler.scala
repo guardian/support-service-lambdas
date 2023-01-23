@@ -56,7 +56,6 @@ object Handler extends LazyLogging {
       _ <- processProductSwitchSubs(
         productSwitchSubs.records,
         activeSubs,
-        identityConnector.getConsentsReq,
         identityConnector.sendConsentsReq,
         sfConnector.updateSubs,
         consentsCalculator,
@@ -128,19 +127,18 @@ object Handler extends LazyLogging {
       currentProductSoftOptIns <- getSoftOptInsByProducts(allProductsForUser)
       allOtherProductSoftOptIns <- getSoftOptInsByProducts(allProductsForUser - newProductName)
 
-      toRemove = oldProductSoftOptIns.diff(currentProductSoftOptIns)
+      toRemove = oldProductSoftOptIns.diff(currentProductSoftOptIns).map(ConsentsObject(_, false))
       toAdd = newProductSoftOptIns
         .filter(option => !oldProductSoftOptIns.contains(option) && !allOtherProductSoftOptIns.contains(option))
+        .map(ConsentsObject(_, true))
 
-      consentsToRemoveBody = consentsCalculator.buildConsentsBody(toRemove, state = false)
-      consentsToAddBody = consentsCalculator.buildConsentsBody(toAdd, state = true)
-    } yield consentsToRemoveBody + consentsToAddBody
+      consentsBody = (toRemove ++ toAdd).asJson.toString()
+    } yield consentsBody
   }
 
   def processProductSwitchSubs(
       productSwitchSubs: Seq[SubscriptionRatePlanUpdateRecord],
       activeSubs: SFAssociatedSubResponse,
-      getConsentsReq: String => Either[SoftOptInError, IdapiUserResponse],
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,

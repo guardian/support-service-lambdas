@@ -6,7 +6,7 @@ import io.circe.syntax.EncoderOps
 
 class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
 
-  private case class ConsentsObject(id: String, consented: Boolean)
+  case class ConsentsObject(id: String, consented: Boolean)
 
   def getSoftOptInsByProduct(productName: String): Either[SoftOptInError, Set[String]] = {
     consentsMappings
