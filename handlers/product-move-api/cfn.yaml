@@ -243,7 +243,7 @@ Resources:
 
   5xxApiAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsProd
+    #Condition: IsProd
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
