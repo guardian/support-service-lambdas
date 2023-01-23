@@ -1,24 +1,19 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{IdapiUserResponse, IdentityConfig, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{IdentityConfig, SoftOptInError}
 import scalaj.http.{Http, HttpResponse}
-
 import scala.util.Try
-import io.circe.Decoder
-import io.circe.generic.auto._
-import io.circe.parser.decode
 
 class IdentityConnector(config: IdentityConfig) {
 
   def sendConsentsReq(identityId: String, body: String): Either[SoftOptInError, Unit] = {
-    val url = s"${config.identityUrl}/user/$identityId"
-
     handleConsentsResp(
-      sendPatchReq(url, body),
-      errorDesc = s"Identity PATCH request failed while processing $identityId with body $body",
+      sendReq(url = s"${config.identityUrl}/users/$identityId/consents", body),
+      errorDesc = s"Identity request failed while processing $identityId with body $body",
     )
   }
-  def sendPatchReq(url: String, body: String): Either[Throwable, HttpResponse[String]] = {
+
+  def sendReq(url: String, body: String): Either[Throwable, HttpResponse[String]] = {
     Try(
       Http(url)
         .header("Content-Type", "application/json")

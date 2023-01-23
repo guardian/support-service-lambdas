@@ -1,16 +1,8 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.ConsentOption
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{
-  contributionMapping,
-  guWeeklyMapping,
-  membershipMapping,
-  newspaperMapping,
-  supporterPlusMapping,
-  testConsentMappings,
-}
+import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{testConsentMappings}
 import org.scalatest.EitherValues
 
 class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {

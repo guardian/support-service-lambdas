@@ -1,10 +1,8 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{
-  ConsentOption,
   EnhancedCancelledSub,
   EnhancedProductSwitchSub,
-  IdapiUserResponse,
   SFAssociatedSubResponse,
   SFSubRecord,
   SFSubRecordUpdate,
@@ -151,7 +149,7 @@ object Handler extends LazyLogging {
         import sub._
 
         val updateResult = buildProductSwitchConsents(
-          productSwitchSub.Old_Product__c,
+          productSwitchSub.Previous_Product_Name__c,
           productSwitchSub.SF_Subscription__r.Product__c,
           associatedActiveNonGiftSubs.map(_.Product__c).toSet,
           consentsCalculator,

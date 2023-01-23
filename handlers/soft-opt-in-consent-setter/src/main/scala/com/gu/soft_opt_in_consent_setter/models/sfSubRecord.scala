@@ -14,7 +14,7 @@ case class SFSubRecord(
 case class SubscriptionRatePlanUpdateRecord(
     Id: String,
     Name: String,
-    Old_Product__c: String,
+    Previous_Product_Name__c: String,
     SF_Subscription__r: SFSubscription__r,
     Soft_Opt_in_Status__c: String,
     Buyer__r: SFBuyer,
