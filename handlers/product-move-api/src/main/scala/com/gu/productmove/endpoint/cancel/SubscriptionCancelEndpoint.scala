@@ -128,16 +128,6 @@ object SubscriptionCancelEndpoint {
   private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
     now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 
-  private def getEffectiveCancellationDate(
-      shouldBeRefunded: Boolean,
-      contractEffectiveDate: LocalDate,
-      charge: RatePlanCharge,
-  ) =
-    if (shouldBeRefunded)
-      Some(contractEffectiveDate)
-    else
-      charge.chargedThroughDate
-
   private[productmove] def subscriptionCancel(subscriptionName: String, postData: ExpectedInput): ZIO[
     GetSubscription with ZuoraCancel with InvoicingApiRefund with Stage with ZuoraSetCancellationReason,
     String,
