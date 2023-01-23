@@ -13,7 +13,7 @@ class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {
 
   val calculator = new ConsentsCalculator(testConsentMappings)
 
-  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Recurring Contribution to Guardian Weekly subscription" in {
+  "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to Guardian Weekly subscription" in {
     Handler.buildProductSwitchConsents(
       "contributions",
       "guardianweekly",
@@ -35,7 +35,7 @@ class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {
         |]""".stripMargin)
   }
 
-  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Recurring Contribution to a Guardian Weekly subscription whilst the user also owns a Newspaper subscription" in {
+  "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to a Guardian Weekly subscription whilst the user also owns a Newspaper subscription" in {
     Handler.buildProductSwitchConsents(
       "contributions",
       "guardianweekly",
@@ -49,7 +49,7 @@ class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {
         |]""".stripMargin)
   }
 
-  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Guardian Weekly to a Newspaper subscription" in {
+  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription" in {
     Handler.buildProductSwitchConsents(
       "guardianweekly",
       "newspaper",
@@ -75,7 +75,7 @@ class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {
         |]""".stripMargin)
   }
 
-  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
+  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
     Handler.buildProductSwitchConsents(
       "guardianweekly",
       "contributions",
@@ -89,7 +89,7 @@ class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {
         |]""".stripMargin)
   }
 
-  "buildProductSwitchConsents" should "return the correct soft opt-ins to and remove when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Recurring Contribution" in {
+  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Recurring Contribution" in {
     Handler.buildProductSwitchConsents(
       "guardianweekly",
       "newspaper",
