@@ -114,25 +114,27 @@ object Handler extends LazyLogging {
       updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
-  /*
-    replace following with diff function for readability?
-   */
-  def consentsToRemove(
-      oldProductSoftOptIns: Set[String],
-      currentProductsSoftOptIns: Set[String], // note: this variable should contain the new product too.
-  ): Set[String] =
-    oldProductSoftOptIns.filter(optIn => !currentProductsSoftOptIns.contains(optIn))
+  def buildProductSwitchConsents(
+      oldProductName: String,
+      newProductName: String,
+      allProductsForUser: Set[String],
+      consentsCalculator: ConsentsCalculator,
+  ): Either[SoftOptInError, String] = {
+    import consentsCalculator._
 
-  // add new soft opt-ins:
-  // 1. carry
-  def consentsToAdd(
-      oldProductSoftOptIns: Set[String],
-      newProductSoftOptIns: Set[String],
-      allOtherProductsSoftOptIns: Set[String],
-  ): Set[String] = {
-    newProductSoftOptIns.filter(option =>
-      !oldProductSoftOptIns.contains(option) && !allOtherProductsSoftOptIns.contains(option),
-    )
+    for {
+      oldProductSoftOptIns <- getSoftOptInsByProduct(oldProductName)
+      newProductSoftOptIns <- getSoftOptInsByProduct(newProductName)
+      currentProductSoftOptIns <- getSoftOptInsByProducts(allProductsForUser)
+      allOtherProductSoftOptIns <- getSoftOptInsByProducts(allProductsForUser - newProductName)
+
+      toRemove = oldProductSoftOptIns.diff(currentProductSoftOptIns)
+      toAdd = newProductSoftOptIns
+        .filter(option => !oldProductSoftOptIns.contains(option) && !allOtherProductSoftOptIns.contains(option))
+
+      consentsToRemoveBody = consentsCalculator.buildConsentsBody(toRemove, state = false)
+      consentsToAddBody = consentsCalculator.buildConsentsBody(toAdd, state = true)
+    } yield consentsToRemoveBody + consentsToAddBody
   }
 
   def processProductSwitchSubs(
@@ -149,29 +151,13 @@ object Handler extends LazyLogging {
       .map(EnhancedProductSwitchSub(_, activeSubs.records))
       .map(sub => {
         import sub._
-        import consentsCalculator._
 
-        val updateResult =
-          for {
-            oldProductSoftOptIns <- getSoftOptInsByProduct(productSwitchSub.Old_Product__c)
-            newProductSoftOptIns <- getSoftOptInsByProduct(productSwitchSub.SF_Subscription__r.Product__c)
-            currentProductSoftOptIns <- getSoftOptInsByProducts(associatedActiveNonGiftSubs.map(_.Product__c).toSet)
-
-            /*
-            idapiResponse <- getConsentsReq(productSwitchSub.Buyer__r.IdentityID__c)
-            currentConsents = idapiResponse.user.consents
-             */
-
-            toRemove = consentsToRemove(
-              oldProductSoftOptIns,
-              currentProductSoftOptIns,
-            )
-            toAdd = consentsToAdd(oldProductSoftOptIns, newProductSoftOptIns, currentProductSoftOptIns)
-
-            consentsToRemoveBody = consentsCalculator.buildConsentsBody(toRemove, state = false)
-            consentsToAddBody = consentsCalculator.buildConsentsBody(toAdd, state = true)
-            _ <- sendConsentsReq(productSwitchSub.Buyer__r.IdentityID__c, consentsToRemoveBody + consentsToAddBody)
-          } yield ()
+        val updateResult = buildProductSwitchConsents(
+          productSwitchSub.Old_Product__c,
+          productSwitchSub.SF_Subscription__r.Product__c,
+          associatedActiveNonGiftSubs.map(_.Product__c).toSet,
+          consentsCalculator,
+        ).flatMap(consentsBody => sendConsentsReq(productSwitchSub.Buyer__r.IdentityID__c, consentsBody))
 
         logErrors(updateResult)
 

@@ -40,8 +40,8 @@ class HandlerTests extends AnyFlatSpec with should.Matchers {
     ConsentOption("personalised_advertising", true),
   )
 
-  "consentsToRemove" should "return the correct soft opt-ins to remove (set as false)" in {
-    Handler.consentsToRemove(
+  "buildProductSwitchConsents" should "return the correct soft opt-ins to remove (set as false)" in {
+    Handler.buildProductSwitchConsents(
       contributionMapping,
       guWeeklyMapping,
     ) shouldBe Set("similar_guardian_products", "supporter_newsletter")
