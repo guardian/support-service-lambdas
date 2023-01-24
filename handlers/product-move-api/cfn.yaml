@@ -243,25 +243,25 @@ Resources:
 
   5xxApiAlarm:
     Type: AWS::CloudWatch::Alarm
-    #Condition: IsProd
+    Condition: IsProd
     DependsOn:
       - ProductMoveApiGateway
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName:
         !Sub The product-move-api returned a 500 response
       AlarmDescription: Check the logs for details - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmove-product-PROD
-      ComparisonOperator: GreaterThanThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: ApiName
-          Value: product-move-api-${Stage}-ApiGateway
+          Value: !Sub product-move-api-${Stage}-ApiGateway
         - Name: Stage
           Value: !Sub ${Stage}
       EvaluationPeriods: 1
       MetricName: 5XXError
       Namespace: AWS/ApiGateway
-      Period: 900
+      Period: 60
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
@@ -273,7 +273,7 @@ Resources:
       - ProductMoveApiGateway
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub The product-move-api returned multiple 4xx responses
       AlarmDescription: Check the logs for details - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmove-product-PROD
       ComparisonOperator: GreaterThanThreshold
