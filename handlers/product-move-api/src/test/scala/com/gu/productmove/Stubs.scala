@@ -207,8 +207,24 @@ val refundInput1 = RefundInput(
   refundAmount = 4,
 )
 
-val salesforceRecordInput1 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(4))
-val salesforceRecordInput2 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(28))
+val salesforceRecordInput1 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(50),
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2022, 5, 10),
+  LocalDate.of(2022, 5, 10),
+  BigDecimal(4),
+)
+val salesforceRecordInput2 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(50),
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2022, 5, 10),
+  LocalDate.of(2022, 5, 10),
+  BigDecimal(28),
+)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
