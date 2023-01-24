@@ -12,8 +12,8 @@ object GuReaderRevenuePrivateS3 {
     val stageUsingDevForCode = if (stage == CODE) DEV else stage
     val basePath = s"membership/support-service-lambdas/$stageUsingDevForCode"
 
-    val versionString = if (stage == Stage.DEV) "" else s".v$version"
-    val relativePath = s"$configFileName-$stage$versionString.json"
+    val versionString = if (stageUsingDevForCode == Stage.DEV) "" else s".v$version"
+    val relativePath = s"$configFileName-$stageUsingDevForCode$versionString.json"
     s"$basePath/$relativePath"
   }
 
