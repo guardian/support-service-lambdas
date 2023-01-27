@@ -37,8 +37,8 @@ object CreateRecordSpec extends ZIOSpecDefault {
               SalesforceRecordInput(
                 "A-S00102815",
                 10.0000000,
-                "old product name",
-                "old rate plan",
+                "previous product name",
+                "previous rate plan",
                 "new rate plan",
                 LocalDate.now(),
                 LocalDate.now(),
@@ -65,8 +65,8 @@ object CreateRecordSpec extends ZIOSpecDefault {
             SalesforceRecordInput(
               "A-S00102815",
               BigDecimal(100),
-              "old product name",
-              "old rate plan",
+              "previous product name",
+              "previous rate plan",
               "new rate plan",
               LocalDate.parse("2022-12-08"),
               LocalDate.parse("2022-12-09"),
