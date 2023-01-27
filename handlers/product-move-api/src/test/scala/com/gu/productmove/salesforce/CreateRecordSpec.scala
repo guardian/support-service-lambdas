@@ -6,7 +6,14 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
-import com.gu.productmove.salesforce.{CreateRecordLive, GetSfSubscription, GetSfSubscriptionLive, MockCreateRecord, SalesforceClientLive, SalesforceHandler}
+import com.gu.productmove.salesforce.{
+  CreateRecordLive,
+  GetSfSubscription,
+  GetSfSubscriptionLive,
+  MockCreateRecord,
+  SalesforceClientLive,
+  SalesforceHandler,
+}
 import com.gu.productmove.*
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordResponse
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
@@ -25,11 +32,13 @@ object CreateRecordSpec extends ZIOSpecDefault {
          */
 
         for {
-          _ <- Salesforce.createSfRecord(
+          _ <- Salesforce
+            .createSfRecord(
               SalesforceRecordInput(
                 "A-S00102815",
                 10.0000000,
-                "prev rate plan",
+                "previous product name",
+                "previous rate plan",
                 "new rate plan",
                 LocalDate.now(),
                 LocalDate.now(),
@@ -56,7 +65,8 @@ object CreateRecordSpec extends ZIOSpecDefault {
             SalesforceRecordInput(
               "A-S00102815",
               BigDecimal(100),
-              "prev rate plan",
+              "previous product name",
+              "previous rate plan",
               "new rate plan",
               LocalDate.parse("2022-12-08"),
               LocalDate.parse("2022-12-09"),

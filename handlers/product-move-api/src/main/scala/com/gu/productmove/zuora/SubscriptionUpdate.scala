@@ -182,7 +182,7 @@ private def getRatePlans(
     addRatePlan = AddRatePlan(date, supporterPlusRatePlanIds.ratePlanId, chargeOverrides = List(chargeOverride))
     removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
   } yield (List(addRatePlan), List(removeRatePlan))
-private def getSupporterPlusRatePlanIds(
+def getSupporterPlusRatePlanIds(
     stage: Stage,
     billingPeriod: BillingPeriod,
 ): Either[String, SupporterPlusRatePlanIds] = {
