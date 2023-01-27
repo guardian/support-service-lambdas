@@ -13,6 +13,7 @@ import zio.{Exit, Runtime, Task, Unsafe, ZIO}
 
 import scala.jdk.CollectionConverters.*
 
+
 class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
     val records: List[SQSEvent.SQSMessage] = input.getRecords.asScala.toList
@@ -27,6 +28,7 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
       }
     }
   }
+
 
   def runZio(salesforceRecordInput: SalesforceRecordInput, context: Context) =
     val runtime = Runtime.default

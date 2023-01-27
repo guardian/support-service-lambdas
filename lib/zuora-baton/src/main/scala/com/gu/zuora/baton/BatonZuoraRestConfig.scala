@@ -30,8 +30,8 @@ e.g.
 
  */
 case class BatonZuoraRestConfig(
-    baseUrl: String,
-    batonZuora: BatonZuoraConfig,
+  baseUrl: String,
+  batonZuora: BatonZuoraConfig
 )
 
 object BatonZuoraRestConfig {

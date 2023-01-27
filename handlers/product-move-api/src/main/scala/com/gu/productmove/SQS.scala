@@ -38,10 +38,7 @@ object SQSLive {
     ZLayer.scoped(for {
       stage <- ZIO.service[Stage]
       sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
-      emailQueueUrlResponse <- getQueue(
-        if (stage == Stage.PROD) "contributions-thanks" else "contributions-thanks-dev",
-        sqsClient,
-      )
+      emailQueueUrlResponse <- getQueue(if (stage == Stage.PROD) "contributions-thanks" else "contributions-thanks-dev", sqsClient)
       refundQueueUrlResponse <- getQueue(s"product-switch-refund-${stage.toString}", sqsClient)
       salesforceTrackingQueueUrlResponse <- getQueue(s"product-switch-salesforce-tracking-${stage.toString}", sqsClient)
     } yield new SQS {

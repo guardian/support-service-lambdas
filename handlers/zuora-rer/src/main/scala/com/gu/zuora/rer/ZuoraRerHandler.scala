@@ -1,17 +1,6 @@
 package com.gu.zuora.rer
 
-import BatonModels.{
-  Completed,
-  Failed,
-  Pending,
-  PerformRerRequest,
-  RerInitiateRequest,
-  RerInitiateResponse,
-  RerRequest,
-  RerResponse,
-  RerStatusRequest,
-  RerStatusResponse,
-}
+import BatonModels.{Completed, Failed, Pending, PerformRerRequest, RerInitiateRequest, RerInitiateResponse, RerRequest, RerResponse, RerStatusRequest, RerStatusResponse}
 import com.typesafe.scalalogging.LazyLogging
 
 import java.util.UUID.randomUUID
@@ -23,8 +12,8 @@ import com.gu.effects.InvokeLambda
 import scala.util.{Failure, Try}
 
 case class ZuoraRerHandler(s3Service: S3Service, zuoraRerConfig: ZuoraRerConfig)
-    extends LazyLogging
-    with ZuoraHandler[RerRequest, RerResponse] {
+  extends LazyLogging
+  with ZuoraHandler[RerRequest, RerResponse] {
 
   def initiate(initiateRequest: RerInitiateRequest): Try[RerInitiateResponse] = {
 
@@ -32,10 +21,9 @@ case class ZuoraRerHandler(s3Service: S3Service, zuoraRerConfig: ZuoraRerConfig)
 
     val performRerRequest = PerformRerRequest(
       initiationId,
-      initiateRequest.subjectEmail,
+      initiateRequest.subjectEmail
     )
-    InvokeLambda
-      .invokeLambda(zuoraRerConfig.performLambdaFunctionName, performRerRequest.asJson.toString)
+    InvokeLambda.invokeLambda(zuoraRerConfig.performLambdaFunctionName, performRerRequest.asJson.toString)
       .map(_ => RerInitiateResponse(initiationId, "PerformRerLambda invoked", Pending))
   }
 

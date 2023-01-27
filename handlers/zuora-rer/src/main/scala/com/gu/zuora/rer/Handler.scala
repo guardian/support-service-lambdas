@@ -21,14 +21,15 @@ trait ZuoraHandler[Req, Res] {
 
   val jsonPrinter: Printer = Printer.spaces2.copy(dropNullValues = true)
 
-  def handleRequest(input: InputStream, output: OutputStream)(implicit
-      decoder: Decoder[Req],
-      encoder: Encoder[Res],
+  def handleRequest(input: InputStream, output: OutputStream)(
+    implicit
+    decoder: Decoder[Req],
+    encoder: Encoder[Res]
   ): Unit = {
     try {
       val response = for {
         request <- IO.fromEither(
-          decode[Req](Source.fromInputStream(input).mkString),
+          decode[Req](Source.fromInputStream(input).mkString)
         )
         response <- handle(request)
       } yield response
@@ -50,8 +51,8 @@ object Handler {
   }
 
   def handlePerformRer(
-      input: InputStream,
-      output: OutputStream,
+    input: InputStream,
+    output: OutputStream
   ): Either[ConfigFailure, Unit] = {
     val loadZuoraRerConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)

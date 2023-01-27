@@ -7,11 +7,13 @@ import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.zuora.rer.BatonModels.{PerformRerRequest, RerInitiateRequest, RerRequest, RerStatusRequest}
 import io.circe.syntax._
 
-/** Run this app on your local dev machine to test the 'lambda' code against the Zuora DEV sandbox. Note that the code
-  * runs on your machine and not in Lambda; you will need to install keys for the `membership` AWS account from Janus.
-  *
-  * Uncomment the call that you want to make at the bottom of the file.
-  */
+/**
+ * Run this app on your local dev machine to test the 'lambda' code against the Zuora DEV sandbox.
+ * Note that the code runs on your machine and not in Lambda; you will need to install keys for the
+ * `membership` AWS account from Janus.
+ *
+ * Uncomment the call that you want to make at the bottom of the file.
+ */
 object ZuoraRerLocalRun extends App {
 
   case class InputOutputStreams(inputStream: ByteArrayInputStream, outputStream: ByteArrayOutputStream)
@@ -55,7 +57,7 @@ object ZuoraRerLocalRun extends App {
   val rerInitiateRequest = RerInitiateRequest(subjectEmail = "andytest@example.com")
   val performRerInitiateRequest = PerformRerRequest(
     initiationReference = "testSubjectId",
-    subjectEmail = "andytest@example.com",
+    subjectEmail = "andytest@example.com"
   )
 
   //  Uncomment one of the calls below that you want to test against the Zuora DEV environment
@@ -66,3 +68,4 @@ object ZuoraRerLocalRun extends App {
   // 3. emulate call to ZuoraPerformRerLambda with `initiate` request
   runTestPerformZuoraRer(performRerInitiateRequest)
 }
+

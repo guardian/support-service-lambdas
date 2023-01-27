@@ -6,8 +6,8 @@ import com.typesafe.scalalogging.LazyLogging
 import cats.syntax.traverse._
 
 case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, zuoraRerConfig: ZuoraRerConfig)
-    extends LazyLogging
-    with ZuoraHandler[RerRequest, RerResponse] {
+  extends LazyLogging
+  with ZuoraHandler[RerRequest, RerResponse] {
 
   def scrubAccounts(contacts: List[ZuoraContact]): Either[ZuoraRerError, List[Unit]] =
     contacts.traverse { contact =>
@@ -35,14 +35,13 @@ case class ZuoraPerformRerHandler(zuoraHelper: ZuoraRer, s3Service: S3Service, z
           _ <- verifyErasure(contactList)
           _ <- scrubAccounts(contactList)
           _ <- s3Service.copyResultsToCompleted(request.initiationReference, contactList, zuoraRerConfig)
-        } yield
-          if (contactList.length > 0) s"Successfully scrubbed account(s): $accountIds"
-          else "No accounts found with requested subject email"
+        } yield if (contactList.length > 0) s"Successfully scrubbed account(s): $accountIds"
+        else "No accounts found with requested subject email"
     }
   }
 
   override def handle(
-      request: RerRequest,
+    request: RerRequest
   ): IO[RerResponse] = {
     request match {
       case r: PerformRerRequest =>

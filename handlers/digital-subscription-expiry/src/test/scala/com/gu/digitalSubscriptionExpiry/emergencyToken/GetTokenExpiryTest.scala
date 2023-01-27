@@ -44,7 +44,7 @@ class GetTokenExpiryTest extends AnyFlatSpec with Matchers {
     val expectedResponse = expectedExpiryForDate(LocalDate.now().plusWeeks(51).plusDays(1))
     GetTokenExpiry(
       EmergencyTokens("G99", codec),
-      () => LocalDate.now(),
+      () => LocalDate.now()
     )(encoded).shouldBe(expectedResponse)
   }
 

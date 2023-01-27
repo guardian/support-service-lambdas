@@ -2,7 +2,7 @@
 import Dependencies._
 
 name := "support-service-lambdas"
-description := "Handles auto-cancellations for membership and subscriptions"
+description:= "Handles auto-cancellations for membership and subscriptions"
 
 assemblyJarName := "support-service-lambdas.jar"
 

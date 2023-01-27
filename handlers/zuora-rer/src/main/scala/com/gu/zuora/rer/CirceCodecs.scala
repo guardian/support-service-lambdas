@@ -1,19 +1,6 @@
 package com.gu.zuora.rer
 
-import BatonModels.{
-  BatonTaskStatus,
-  Completed,
-  Failed,
-  Pending,
-  PerformRerRequest,
-  PerformRerResponse,
-  RerInitiateRequest,
-  RerInitiateResponse,
-  RerRequest,
-  RerResponse,
-  RerStatusRequest,
-  RerStatusResponse,
-}
+import BatonModels.{BatonTaskStatus, Completed, Failed, Pending, PerformRerRequest, PerformRerResponse, RerInitiateRequest, RerInitiateResponse, RerRequest, RerResponse, RerStatusRequest, RerStatusResponse}
 import io.circe.{HCursor, Json}
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder}
@@ -38,8 +25,8 @@ object circeCodecs {
     }
 
   private def addAdditionalFields(
-      response: JsonObject,
-      action: String,
+    response: JsonObject,
+    action: String
   ): Json =
     response
       .add("action", action.asJson)

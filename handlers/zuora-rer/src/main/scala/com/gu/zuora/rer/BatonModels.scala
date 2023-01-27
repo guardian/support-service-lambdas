@@ -9,8 +9,8 @@ object BatonModels {
   case class RerStatusRequest(initiationReference: String) extends RerRequest
 
   case class PerformRerRequest(
-      initiationReference: String,
-      subjectEmail: String,
+    initiationReference: String,
+    subjectEmail: String
   ) extends RerRequest
 
   sealed trait BatonTaskStatus
@@ -23,20 +23,19 @@ object BatonModels {
 
   sealed trait RerResponse
 
-  case class RerInitiateResponse(initiationReference: String, message: String, status: BatonTaskStatus)
-      extends RerResponse
+  case class RerInitiateResponse(initiationReference: String, message: String, status: BatonTaskStatus) extends RerResponse
 
   case class RerStatusResponse(
-      initiationReference: String,
-      message: String,
-      status: BatonTaskStatus,
-      resultLocations: Option[List[String]] = None,
+    initiationReference: String,
+    message: String,
+    status: BatonTaskStatus,
+    resultLocations: Option[List[String]] = None
   ) extends RerResponse
 
   case class PerformRerResponse(
-      initiationReference: String,
-      message: String,
-      status: BatonTaskStatus,
-      subjectEmail: String,
+    initiationReference: String,
+    message: String,
+    status: BatonTaskStatus,
+    subjectEmail: String
   ) extends RerResponse
 }

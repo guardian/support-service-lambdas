@@ -35,11 +35,11 @@ class ZuoraRerHandlerSpec extends AnyFreeSpec with Matchers {
       lambda
         .handle(statusRequest)
         .unsafeRunSync() shouldBe RerStatusResponse(
-        initiationReference = "someRequestId",
-        message = "Success",
-        status = Completed,
-        resultLocations = Some(List("s3Location")),
-      )
+          initiationReference = "someRequestId",
+          message = "Success",
+          status = Completed,
+          resultLocations = Some(List("s3Location"))
+        )
     }
 
     "should return failed status upon unsuccessful completion" in {
@@ -49,10 +49,10 @@ class ZuoraRerHandlerSpec extends AnyFreeSpec with Matchers {
       lambda
         .handle(statusRequest)
         .unsafeRunSync() shouldBe RerStatusResponse(
-        initiationReference = "initiationReference",
-        message = "Failed path found",
-        status = Failed,
-      )
+          initiationReference = "initiationReference",
+          message = "Failed path found",
+          status = Failed
+        )
     }
 
     "should return pending status when found to be neither success nor failure" in {
@@ -61,15 +61,15 @@ class ZuoraRerHandlerSpec extends AnyFreeSpec with Matchers {
       lambda
         .handle(statusRequest)
         .unsafeRunSync() shouldBe RerStatusResponse(
-        initiationReference = "initiationReference",
-        message = "No results found",
-        status = Pending,
-      )
+          initiationReference = "initiationReference",
+          message = "No results found",
+          status = Pending
+        )
     }
 
     def invokeWithString(
-        lambda: ZuoraRerHandler,
-        request: String,
+      lambda: ZuoraRerHandler,
+      request: String
     ): String = {
       val testInputStream = new ByteArrayInputStream(request.getBytes)
       val testOutputStream = new ByteArrayOutputStream()
