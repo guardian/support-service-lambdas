@@ -241,6 +241,7 @@ object ProductMoveEndpoint {
         SalesforceRecordInput(
           subscriptionName,
           price,
+          currentRatePlan.productName,
           currentRatePlan.ratePlanName,
           "Supporter Plus",
           todaysDate,
