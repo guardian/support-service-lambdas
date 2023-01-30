@@ -17,6 +17,7 @@ import com.gu.productmove.zuora.{
 }
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
+import com.gu.supporterdata.model.SupporterRatePlanItem
 
 import java.time.LocalDate
 
@@ -133,6 +134,18 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
 val getAccountResponse = GetAccountResponse(
   BasicInfo(
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
+    Some("12345"),
+    "sfContactId",
+    balance = 0,
+    currency = Currency.GBP,
+  ),
+  BillToContact("John", "Hee", "example@gmail.com"),
+  List(AccountSubscription("subscriptionId")),
+)
+
+val getAccountResponse2 = GetAccountResponse(
+  BasicInfo(
+    DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     None,
     "sfContactId",
     balance = 0,
@@ -152,6 +165,21 @@ val directDebitGetAccountResponse = GetAccountResponse(
   ),
   BillToContact("John", "Hee", "example@gmail.com"),
   List(AccountSubscription("subscriptionId")),
+)
+
+//-----------------------------------------------------
+// Stubs for Dynamo service
+//-----------------------------------------------------
+
+val supporterRatePlanItem1 = SupporterRatePlanItem(
+  subscriptionName = "A-S00339056",
+  identityId = "12345",
+  gifteeIdentityId = None,
+  productRatePlanId = "8a12865b8219d9b401822106192b64dc",
+  productRatePlanName = "product-move-api added Supporter Plus Monthly",
+  termEndDate = LocalDate.of(2022, 5, 17),
+  contractEffectiveDate = LocalDate.of(2022, 5, 10),
+  contributionAmount = None,
 )
 
 //-----------------------------------------------------
@@ -176,7 +204,7 @@ val emailMessageBody = EmailMessage(
   ),
   "SV_RCtoDP_Switch",
   "sfContactId",
-  None,
+  Some("12345"),
 )
 
 val emailMessageBodyRefund = EmailMessage(
@@ -198,7 +226,7 @@ val emailMessageBodyRefund = EmailMessage(
   ),
   "SV_RCtoDP_Switch",
   "sfContactId",
-  None,
+  Some("12345"),
 )
 
 val refundInput1 = RefundInput(
@@ -207,8 +235,26 @@ val refundInput1 = RefundInput(
   refundAmount = 4,
 )
 
-val salesforceRecordInput1 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(4))
-val salesforceRecordInput2 = SalesforceRecordInput("A-S00339056", BigDecimal(50), "RP1", "Supporter Plus", LocalDate.of(2022, 5, 10), LocalDate.of(2022, 5, 10), BigDecimal(28))
+val salesforceRecordInput1 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(50),
+  "P1",
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2022, 5, 10),
+  LocalDate.of(2022, 5, 10),
+  BigDecimal(4),
+)
+val salesforceRecordInput2 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(50),
+  "P1",
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2022, 5, 10),
+  LocalDate.of(2022, 5, 10),
+  BigDecimal(28),
+)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
@@ -234,7 +280,8 @@ val sfSubscription1 = GetSfSubscriptionResponse(
 val createRecordRequest1 = CreateRecordRequest(
   SF_Subscription__c = "123456",
   Previous_Amount__c = BigDecimal(100),
-  Previous_Rate_Plan_Name__c = "prev rate plan",
+  Previous_Product_Name__c = "previous product name",
+  Previous_Rate_Plan_Name__c = "previous rate plan",
   New_Rate_Plan_Name__c = "new rate plan",
   Requested_Date__c = LocalDate.parse("2022-12-08"),
   Effective_Date__c = LocalDate.parse("2022-12-09"),
