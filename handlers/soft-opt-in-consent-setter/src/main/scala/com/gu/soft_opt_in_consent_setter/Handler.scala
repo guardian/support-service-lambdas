@@ -50,7 +50,7 @@ object Handler extends LazyLogging {
       productSwitchSubIdentityIds = productSwitchSubs.records.map(sub => sub.SF_Subscription__r.Buyer__r.IdentityID__c)
 
       _ = logger.info(s"About to fetch active subs from Salesforce")
-      activeSubs <- sfConnector.getActiveSubs(cancelledSubsIdentityIds ++ productSwitchSubIdentityIds)
+      activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
       _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
 
       _ <- processProductSwitchSubs(
