@@ -37,7 +37,7 @@ object SfQueries {
   }
 
   val getProductSwitchSubsToProcessQuery: String = {
-    val limit = 50
+    val limit = 200
 
     s"""
        |SELECT
@@ -47,15 +47,15 @@ object SfQueries {
        |    SF_Subscription__r.SF_Status__c,
        |    SF_Subscription__r.Soft_Opt_in_Status__c,
        |    SF_Subscription__r.Soft_Opt_in_Last_Stage_Processed__c,
-       |    SF_Subscription__r.Soft_Opt_in_Number_of_Attempts__c,
+       |    Soft_Opt_in_Number_of_Attempts__c,
+       |    Soft_Opt_in_Processed__c,
        |    Buyer__r.IdentityID__c
        |FROM
        |    Subscription_Rate_Plan_Update__c
        |WHERE
-       |    SF_Subscription__r.Soft_Opt_in_Number_of_Attempts__c < 5 AND
-       |    SF_Subscription__r.Soft_Opt_in_Eligible__c = true AND
-       |    SF_Subscription__r.SF_Status__c = 'Active' AND
-       |    SF_Subscription__r.Soft_Opt_in_Last_Stage_Processed__c = 'Acquisition'
+       |    Soft_Opt_in_Number_of_Attempts__c < 5 AND
+       |    Soft_Opt_in_Processed__c = false AND
+       |    SF_Subscription__r.SF_Status__c = 'Active'
        |LIMIT
        |	$limit
     """.stripMargin

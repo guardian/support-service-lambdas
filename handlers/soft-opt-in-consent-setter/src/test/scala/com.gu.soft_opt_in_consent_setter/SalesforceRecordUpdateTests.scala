@@ -1,11 +1,15 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{SFSubRecordUpdate, SoftOptInError}
-import com.gu.soft_opt_in_consent_setter.testData.SFSubscriptionTestData._
+import com.gu.soft_opt_in_consent_setter.models.{
+  SFSubRecordUpdate,
+  SoftOptInError,
+  UpdateSubscriptionRatePlanUpdateRecord,
+}
+import com.gu.soft_opt_in_consent_setter.testData.TestData._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
-class SFSubRecordUpdateTests extends AnyFlatSpec with should.Matchers {
+class SalesforceRecordUpdateTests extends AnyFlatSpec with should.Matchers {
 
   // UpdateRecord.successfulUpdate tests
   "SFSubRecordUpdate.successfulUpdate" should "set the id field correctly" in {
@@ -80,6 +84,60 @@ class SFSubRecordUpdateTests extends AnyFlatSpec with should.Matchers {
     result.Id shouldBe subId
     result.Soft_Opt_in_Last_Stage_Processed__c shouldBe Some(lastProcessedStage)
     result.Soft_Opt_in_Number_of_Attempts__c shouldBe numberOfAttempts + 1
+  }
+
+  "UpdateSubscriptionRatePlanUpdateRecord.successfulUpdate" should "set the id field correctly" in {
+    UpdateSubscriptionRatePlanUpdateRecord.successfulUpdate(subRecord.Id).Id shouldBe subId
+  }
+
+  "UpdateSubscriptionRatePlanUpdateRecord.successfulUpdate" should "update the Soft_Opt_in_Processed__c field correctly" in {
+    UpdateSubscriptionRatePlanUpdateRecord
+      .successfulUpdate(subRecord.Id)
+      .Soft_Opt_in_Processed__c shouldBe true
+  }
+
+  "UpdateSubscriptionRatePlanUpdateRecord.successfulUpdate" should "set number of attempts to 0" in {
+    UpdateSubscriptionRatePlanUpdateRecord.successfulUpdate(subRecord.Id).Soft_Opt_in_Number_of_Attempts__c shouldBe 0
+  }
+
+  // UpdateSubscriptionRatePlanUpdateRecord.failedUpdate tests
+  "UpdateSubscriptionRatePlanUpdateRecord.failedUpdate" should "set the id field correctly" in {
+    UpdateSubscriptionRatePlanUpdateRecord
+      .failedUpdate(
+        subRecord.Id,
+        subRecord.Soft_Opt_in_Number_of_Attempts__c,
+      )
+      .Id shouldBe subId
+  }
+
+  "UpdateSubscriptionRatePlanUpdateRecord.failedUpdate" should "not alter the last stage processed" in {
+    UpdateSubscriptionRatePlanUpdateRecord
+      .failedUpdate(
+        subRecord.Id,
+        subRecord.Soft_Opt_in_Number_of_Attempts__c,
+      )
+      .Soft_Opt_in_Processed__c shouldBe false
+  }
+
+  "UpdateSubscriptionRatePlanUpdateRecord.failedUpdate" should "increment the number of attempts by 1" in {
+    UpdateSubscriptionRatePlanUpdateRecord
+      .failedUpdate(
+        subRecord.Id,
+        subRecord.Soft_Opt_in_Number_of_Attempts__c,
+      )
+      .Soft_Opt_in_Number_of_Attempts__c shouldBe numberOfAttempts + 1
+  }
+
+  // UpdateSubscriptionRatePlanUpdateRecord.apply tests
+  "UpdateSubscriptionRatePlanUpdateRecord.apply" should "return a correctly formed UpdateRecord when a successful updateResult is passed in" in {
+    val result = UpdateSubscriptionRatePlanUpdateRecord(
+      subRecord.Id,
+      subRecord.Soft_Opt_in_Number_of_Attempts__c,
+      Right(()),
+    )
+
+    result.Id shouldBe subId
+    result.Soft_Opt_in_Number_of_Attempts__c shouldBe 0
   }
 
 }

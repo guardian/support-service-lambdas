@@ -49,3 +49,47 @@ object SFSubRecordUpdate {
   }
 
 }
+
+case class UpdateSubscriptionRatePlanUpdateRecord(
+    Id: String,
+    Soft_Opt_in_Number_of_Attempts__c: Int,
+    Soft_Opt_in_Processed__c: Boolean,
+    attributes: Attributes = Attributes(`type` = "Subscription_Rate_Plan_Update__c"),
+)
+
+case class UpdateSubscriptionRatePlanUpdateRecordRequest(records: Seq[UpdateSubscriptionRatePlanUpdateRecord]) {
+  def allOrNone = false
+}
+object UpdateSubscriptionRatePlanUpdateRecord {
+
+  def apply(
+      subId: String,
+      Soft_Opt_in_Number_of_Attempts__c: Option[Int],
+      updateResult: Either[SoftOptInError, Unit],
+  ): UpdateSubscriptionRatePlanUpdateRecord = {
+    updateResult match {
+      case Right(_) => successfulUpdate(subId)
+      case Left(_) => failedUpdate(subId, Soft_Opt_in_Number_of_Attempts__c)
+    }
+  }
+
+  def successfulUpdate(subId: String): UpdateSubscriptionRatePlanUpdateRecord = {
+    UpdateSubscriptionRatePlanUpdateRecord(
+      Id = subId,
+      Soft_Opt_in_Number_of_Attempts__c = 0,
+      Soft_Opt_in_Processed__c = true,
+    )
+  }
+
+  def failedUpdate(
+      subId: String,
+      Soft_Opt_in_Number_of_Attempts__c: Option[Int],
+  ): UpdateSubscriptionRatePlanUpdateRecord = {
+    UpdateSubscriptionRatePlanUpdateRecord(
+      Id = subId,
+      Soft_Opt_in_Number_of_Attempts__c = Soft_Opt_in_Number_of_Attempts__c.getOrElse(0) + 1,
+      Soft_Opt_in_Processed__c = false,
+    )
+  }
+
+}

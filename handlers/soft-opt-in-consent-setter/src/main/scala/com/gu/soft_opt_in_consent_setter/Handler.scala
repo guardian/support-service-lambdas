@@ -10,6 +10,8 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SoftOptInConfig,
   SoftOptInError,
   SubscriptionRatePlanUpdateRecord,
+  UpdateSubscriptionRatePlanUpdateRecord,
+  UpdateSubscriptionRatePlanUpdateRecordRequest,
 }
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
@@ -103,7 +105,10 @@ object Handler extends LazyLogging {
         )
       })
 
-    emitIdentityMetrics(recordsToUpdate)
+    emitIdentityMetrics(
+      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c == 0),
+      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c > 0),
+    )
 
     if (recordsToUpdate.isEmpty)
       Right(())
@@ -157,21 +162,22 @@ object Handler extends LazyLogging {
 
         logErrors(updateResult)
 
-        SFSubRecordUpdate(
+        UpdateSubscriptionRatePlanUpdateRecord(
           productSwitchSub.Id,
-          "Switch",
           productSwitchSub.SF_Subscription__r.Soft_Opt_in_Number_of_Attempts__c,
-          productSwitchSub.SF_Subscription__r.Soft_Opt_in_Last_Stage_Processed__c,
           updateResult,
         )
       })
 
-    emitIdentityMetrics(recordsToUpdate)
+    emitIdentityMetrics(
+      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c == 0),
+      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c > 0),
+    )
 
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
+      updateSubs(UpdateSubscriptionRatePlanUpdateRecordRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def processCancelledSubs(
@@ -218,7 +224,10 @@ object Handler extends LazyLogging {
         )
       })
 
-    emitIdentityMetrics(recordsToUpdate)
+    emitIdentityMetrics(
+      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c == 0),
+      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c > 0),
+    )
 
     if (recordsToUpdate.isEmpty)
       Right(())
@@ -230,10 +239,8 @@ object Handler extends LazyLogging {
     updateResults.left.foreach(error => logger.warn(s"${error.errorType}: ${error.errorDetails}"))
   }
 
-  def emitIdentityMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
+  def emitIdentityMetrics(successfullyUpdated: Int, unsuccessfullyUpdated: Int): Unit = {
     // Soft_Opt_in_Number_of_Attempts__c == 0 means the consents were set successfully
-    val successfullyUpdated = records.count(_.Soft_Opt_in_Number_of_Attempts__c == 0)
-    val unsuccessfullyUpdated = records.count(_.Soft_Opt_in_Number_of_Attempts__c > 0)
 
     Metrics.put(event = "successful_consents_updates", successfullyUpdated)
     Metrics.put(event = "failed_consents_updates", unsuccessfullyUpdated)
