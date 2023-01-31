@@ -166,14 +166,14 @@ object Handler extends LazyLogging {
 
         UpdateSubscriptionRatePlanUpdateRecord(
           productSwitchSub.Id,
-          productSwitchSub.Soft_Opt_in_Number_of_Attempts__c,
+          productSwitchSub.Soft_Opt_In_Number_of_Attempts__c,
           updateResult,
         )
       })
 
     emitIdentityMetrics(
-      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c == 0),
-      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c > 0),
+      recordsToUpdate.count(_.Soft_Opt_In_Number_of_Attempts__c == 0),
+      recordsToUpdate.count(_.Soft_Opt_In_Number_of_Attempts__c > 0),
     )
 
     if (recordsToUpdate.isEmpty)

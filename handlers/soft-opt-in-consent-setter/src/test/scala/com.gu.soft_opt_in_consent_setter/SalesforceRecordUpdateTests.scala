@@ -97,7 +97,7 @@ class SalesforceRecordUpdateTests extends AnyFlatSpec with should.Matchers {
   }
 
   "UpdateSubscriptionRatePlanUpdateRecord.successfulUpdate" should "set number of attempts to 0" in {
-    UpdateSubscriptionRatePlanUpdateRecord.successfulUpdate(subRecord.Id).Soft_Opt_in_Number_of_Attempts__c shouldBe 0
+    UpdateSubscriptionRatePlanUpdateRecord.successfulUpdate(subRecord.Id).Soft_Opt_In_Number_of_Attempts__c shouldBe 0
   }
 
   // UpdateSubscriptionRatePlanUpdateRecord.failedUpdate tests
@@ -105,7 +105,7 @@ class SalesforceRecordUpdateTests extends AnyFlatSpec with should.Matchers {
     UpdateSubscriptionRatePlanUpdateRecord
       .failedUpdate(
         subRecord.Id,
-        subRecord.Soft_Opt_in_Number_of_Attempts__c,
+        1,
       )
       .Id shouldBe subId
   }
@@ -114,7 +114,7 @@ class SalesforceRecordUpdateTests extends AnyFlatSpec with should.Matchers {
     UpdateSubscriptionRatePlanUpdateRecord
       .failedUpdate(
         subRecord.Id,
-        subRecord.Soft_Opt_in_Number_of_Attempts__c,
+        1,
       )
       .Soft_Opt_in_Processed__c shouldBe false
   }
@@ -123,21 +123,21 @@ class SalesforceRecordUpdateTests extends AnyFlatSpec with should.Matchers {
     UpdateSubscriptionRatePlanUpdateRecord
       .failedUpdate(
         subRecord.Id,
-        subRecord.Soft_Opt_in_Number_of_Attempts__c,
+        1,
       )
-      .Soft_Opt_in_Number_of_Attempts__c shouldBe numberOfAttempts + 1
+      .Soft_Opt_In_Number_of_Attempts__c shouldBe numberOfAttempts + 1
   }
 
   // UpdateSubscriptionRatePlanUpdateRecord.apply tests
   "UpdateSubscriptionRatePlanUpdateRecord.apply" should "return a correctly formed UpdateRecord when a successful updateResult is passed in" in {
     val result = UpdateSubscriptionRatePlanUpdateRecord(
       subRecord.Id,
-      subRecord.Soft_Opt_in_Number_of_Attempts__c,
+      1,
       Right(()),
     )
 
     result.Id shouldBe subId
-    result.Soft_Opt_in_Number_of_Attempts__c shouldBe 0
+    result.Soft_Opt_In_Number_of_Attempts__c shouldBe 0
   }
 
 }

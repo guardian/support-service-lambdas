@@ -52,7 +52,7 @@ object SFSubRecordUpdate {
 
 case class UpdateSubscriptionRatePlanUpdateRecord(
     Id: String,
-    Soft_Opt_in_Number_of_Attempts__c: Int,
+    Soft_Opt_In_Number_of_Attempts__c: Int,
     Soft_Opt_in_Processed__c: Boolean,
     attributes: Attributes = Attributes(`type` = "Subscription_Rate_Plan_Update__c"),
 )
@@ -64,30 +64,30 @@ object UpdateSubscriptionRatePlanUpdateRecord {
 
   def apply(
       subId: String,
-      Soft_Opt_in_Number_of_Attempts__c: Option[Int],
+      Soft_Opt_In_Number_of_Attempts__c: Int,
       updateResult: Either[SoftOptInError, Unit],
   ): UpdateSubscriptionRatePlanUpdateRecord = {
     updateResult match {
       case Right(_) => successfulUpdate(subId)
-      case Left(_) => failedUpdate(subId, Soft_Opt_in_Number_of_Attempts__c)
+      case Left(_) => failedUpdate(subId, Soft_Opt_In_Number_of_Attempts__c)
     }
   }
 
   def successfulUpdate(subId: String): UpdateSubscriptionRatePlanUpdateRecord = {
     UpdateSubscriptionRatePlanUpdateRecord(
       Id = subId,
-      Soft_Opt_in_Number_of_Attempts__c = 0,
+      Soft_Opt_In_Number_of_Attempts__c = 0,
       Soft_Opt_in_Processed__c = true,
     )
   }
 
   def failedUpdate(
       subId: String,
-      Soft_Opt_in_Number_of_Attempts__c: Option[Int],
+      Soft_Opt_in_Number_of_Attempts__c: Int,
   ): UpdateSubscriptionRatePlanUpdateRecord = {
     UpdateSubscriptionRatePlanUpdateRecord(
       Id = subId,
-      Soft_Opt_in_Number_of_Attempts__c = Soft_Opt_in_Number_of_Attempts__c.getOrElse(0) + 1,
+      Soft_Opt_In_Number_of_Attempts__c = Soft_Opt_in_Number_of_Attempts__c + 1,
       Soft_Opt_in_Processed__c = false,
     )
   }
