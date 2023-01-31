@@ -13,10 +13,10 @@ object EnhancedProductSwitchSub {
   ): EnhancedProductSwitchSub = {
     val associatedActiveNonGiftSubs =
       associatedSubs
-        .filter(_.IdentityID__c.equals(productSwitchSub.Buyer__r.IdentityID__c))
+        .filter(_.IdentityID__c.equals(productSwitchSub.SF_Subscription__r.Buyer__r.IdentityID__c))
 
     EnhancedProductSwitchSub(
-      identityId = productSwitchSub.Buyer__r.IdentityID__c,
+      identityId = productSwitchSub.SF_Subscription__r.Buyer__r.IdentityID__c,
       productSwitchSub = productSwitchSub,
       associatedActiveNonGiftSubs = associatedActiveNonGiftSubs,
     )

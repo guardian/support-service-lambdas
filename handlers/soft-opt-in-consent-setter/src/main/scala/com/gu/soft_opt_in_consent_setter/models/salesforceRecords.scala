@@ -16,6 +16,8 @@ case class SubscriptionRatePlanUpdateRecord(
     Name: String,
     Previous_Product_Name__c: String,
     SF_Subscription__r: SFSubscription__r,
+    Soft_Opt_in_Processed__c: Boolean,
+    Soft_Opt_in_Number_of_Attempts__c: Int,
 )
 
 case class SFSubscription__r(

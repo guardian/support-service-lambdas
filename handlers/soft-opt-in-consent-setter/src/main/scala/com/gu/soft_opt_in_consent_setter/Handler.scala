@@ -47,7 +47,7 @@ object Handler extends LazyLogging {
 
       cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
       cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
-      productSwitchSubIdentityIds = productSwitchSubs.records.map(sub => sub.Buyer__r.IdentityID__c)
+      productSwitchSubIdentityIds = productSwitchSubs.records.map(sub => sub.SF_Subscription__r.Buyer__r.IdentityID__c)
 
       _ = logger.info(s"About to fetch active subs from Salesforce")
       activeSubs <- sfConnector.getActiveSubs(cancelledSubsIdentityIds ++ productSwitchSubIdentityIds)
@@ -158,13 +158,15 @@ object Handler extends LazyLogging {
           productSwitchSub.SF_Subscription__r.Product__c,
           associatedActiveNonGiftSubs.map(_.Product__c).toSet,
           consentsCalculator,
-        ).flatMap(consentsBody => sendConsentsReq(productSwitchSub.Buyer__r.IdentityID__c, consentsBody))
+        ).flatMap(consentsBody =>
+          sendConsentsReq(productSwitchSub.SF_Subscription__r.Buyer__r.IdentityID__c, consentsBody),
+        )
 
         logErrors(updateResult)
 
         UpdateSubscriptionRatePlanUpdateRecord(
           productSwitchSub.Id,
-          productSwitchSub.SF_Subscription__r.Soft_Opt_in_Number_of_Attempts__c,
+          productSwitchSub.Soft_Opt_in_Number_of_Attempts__c,
           updateResult,
         )
       })

@@ -64,7 +64,7 @@ object UpdateSubscriptionRatePlanUpdateRecord {
 
   def apply(
       subId: String,
-      Soft_Opt_in_Number_of_Attempts__c: Option[Int],
+      Soft_Opt_in_Number_of_Attempts__c: Int,
       updateResult: Either[SoftOptInError, Unit],
   ): UpdateSubscriptionRatePlanUpdateRecord = {
     updateResult match {
@@ -83,11 +83,11 @@ object UpdateSubscriptionRatePlanUpdateRecord {
 
   def failedUpdate(
       subId: String,
-      Soft_Opt_in_Number_of_Attempts__c: Option[Int],
+      Soft_Opt_in_Number_of_Attempts__c: Int,
   ): UpdateSubscriptionRatePlanUpdateRecord = {
     UpdateSubscriptionRatePlanUpdateRecord(
       Id = subId,
-      Soft_Opt_in_Number_of_Attempts__c = Soft_Opt_in_Number_of_Attempts__c.getOrElse(0) + 1,
+      Soft_Opt_in_Number_of_Attempts__c = Soft_Opt_in_Number_of_Attempts__c + 1,
       Soft_Opt_in_Processed__c = false,
     )
   }
