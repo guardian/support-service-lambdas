@@ -16,14 +16,12 @@ case class SubscriptionRatePlanUpdateRecord(
     Name: String,
     Previous_Product_Name__c: String,
     SF_Subscription__r: SFSubscription__r,
-    Buyer__r: SFBuyer,
 )
 
 case class SFSubscription__r(
     Product__c: String,
     SF_Status__c: String,
-    Soft_Opt_in_Last_Stage_Processed__c: Option[String] = None,
-    Soft_Opt_in_Number_of_Attempts__c: Option[Int] = Some(0),
+    Buyer__r: SFBuyer,
 )
 
 case class SFBuyer(IdentityID__c: String)
