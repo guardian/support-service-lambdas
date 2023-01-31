@@ -43,13 +43,14 @@ object SfQueries {
        |SELECT
        |    Id,
        |    Name,
-       |    Product__c,
+       |    Previous_Product_Name__c,
+       |    SF_Subscription__r.Product__c,
        |    SF_Subscription__r.SF_Status__c,
        |    SF_Subscription__r.Soft_Opt_in_Status__c,
        |    SF_Subscription__r.Soft_Opt_in_Last_Stage_Processed__c,
        |    Soft_Opt_in_Number_of_Attempts__c,
        |    Soft_Opt_in_Processed__c,
-       |    Buyer__r.IdentityID__c
+       |    SF_Subscription__r.Buyer__r.IdentityID__c
        |FROM
        |    Subscription_Rate_Plan_Update__c
        |WHERE
