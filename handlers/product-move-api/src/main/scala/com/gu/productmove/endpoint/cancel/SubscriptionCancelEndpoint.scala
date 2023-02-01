@@ -172,11 +172,11 @@ object SubscriptionCancelEndpoint {
           ZIO.succeed(RefundResponse("Success", ""))
 
       _ <- ZIO.log(s"Attempting to cancel sub")
-      cancelFuture <- ZuoraCancel.cancel(subscriptionName, cancellationDate)
+      _ <- ZuoraCancel.cancel(subscriptionName, cancellationDate)
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
 
       _ <- ZIO.log(s"Attempting to update cancellation reason on Zuora subscription")
-      setCancellationReasonsFuture <- ZuoraSetCancellationReason
+      _ <- ZuoraSetCancellationReason
         .update(subscriptionName, subscription.version + 1, postData.reason)
       // Version +1 because the cancellation will have incremented the version
     } yield Success(s"Subscription was successfully cancelled${if (shouldBeRefunded) " and refunded" else ""}")
