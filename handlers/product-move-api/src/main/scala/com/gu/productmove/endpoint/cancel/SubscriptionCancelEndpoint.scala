@@ -167,10 +167,6 @@ object SubscriptionCancelEndpoint {
       _ <- ZIO.log(s"Cancellation date is $cancellationDate")
 
       _ <- ZIO.log(s"Attempting to cancel sub")
-<<<<<<< Updated upstream
-      _ <- ZuoraCancel.cancel(subscriptionName, cancellationDate)
-      _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
-=======
       cancellationResponse <- ZuoraCancel.cancel(subscriptionName, cancellationDate)
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
 
@@ -180,26 +176,10 @@ object SubscriptionCancelEndpoint {
           SQS
             .queueRefund(RefundInput(subscriptionName, cancellationResponse.invoiceId, charge.price))
         else ZIO.succeed(RefundResponse("Success", ""))
->>>>>>> Stashed changes
-
-      _ <- ZIO.log(s"Attempting to refund sub")
-      refundFuture <- (
-        if (shouldBeRefunded)
-          InvoicingApiRefund.refund(subscriptionName, charge.price)
-        else
-          ZIO.succeed(RefundResponse("Success", ""))
-      ).fork
 
       _ <- ZIO.log(s"Attempting to update cancellation reason on Zuora subscription")
       setCancellationReasonsFuture <- ZuoraSetCancellationReason
         .update(subscriptionName, subscription.version + 1, postData.reason)
-<<<<<<< Updated upstream
-        .fork // Version +1 because the cancellation will have incremented the version
-
-      _ <- refundFuture.zip(setCancellationReasonsFuture).join
-    } yield Success(s"Subscription was successfully cancelled${if (shouldBeRefunded) " and refunded" else ""}")
-=======
       // Version +1 because the cancellation will have incremented the version
     } yield Success(s"Subscription was successfully cancelled${if (shouldBeRefunded) "" else ""}")
->>>>>>> Stashed changes
 }
