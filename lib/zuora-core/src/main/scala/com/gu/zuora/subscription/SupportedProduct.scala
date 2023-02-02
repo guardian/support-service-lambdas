@@ -22,6 +22,7 @@ object SupportedProduct {
       productType = GuardianWeekly,
       annualIssueLimitPerEdition = 6,
       ratePlans = List(
+        // Old names for GW gift subs
         SupportedRatePlan(
           "GW Oct 18 - 1 Year - Domestic",
           List(SupportedRatePlanCharge("GW Oct 18 - 1 Year - Domestic", DayOfWeek.FRIDAY)),
@@ -29,6 +30,15 @@ object SupportedProduct {
         SupportedRatePlan(
           "GW Oct 18 - 3 Month - Domestic",
           List(SupportedRatePlanCharge("GW Oct 18 - 3 Month - Domestic", DayOfWeek.FRIDAY)),
+        ),
+        // New names for GW gift subs
+        SupportedRatePlan(
+          "GW GIFT Oct 18 - 1 Year - Domestic",
+          List(SupportedRatePlanCharge("GW GIFT Oct 18 - 1 Year - Domestic", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "GW GIFT Oct 18 - 3 Month - Domestic",
+          List(SupportedRatePlanCharge("GW GIFT Oct 18 - 3 Month - Domestic", DayOfWeek.FRIDAY)),
         ),
         SupportedRatePlan(
           "GW Oct 18 - Annual - Domestic",
@@ -53,6 +63,7 @@ object SupportedProduct {
       productType = GuardianWeekly,
       annualIssueLimitPerEdition = 6,
       ratePlans = List(
+        // Old names for GW Gift rate plans
         SupportedRatePlan(
           "GW Oct 18 - 1 Year - ROW",
           List(SupportedRatePlanCharge("GW Oct 18 - 1 Year - ROW", DayOfWeek.FRIDAY)),
@@ -60,6 +71,15 @@ object SupportedProduct {
         SupportedRatePlan(
           "GW Oct 18 - 3 Month - ROW",
           List(SupportedRatePlanCharge("GW Oct 18 - 3 Month - ROW", DayOfWeek.FRIDAY)),
+        ),
+        // New names for GW Gift rate plans
+        SupportedRatePlan(
+          "GW GIFT Oct 18 - 1 Year - ROW",
+          List(SupportedRatePlanCharge("GW GIFT Oct 18 - 1 Year - ROW", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "GW GIFT Oct 18 - 3 Month - ROW",
+          List(SupportedRatePlanCharge("GW GIFT Oct 18 - 3 Month - ROW", DayOfWeek.FRIDAY)),
         ),
         SupportedRatePlan(
           "GW Oct 18 - Annual - ROW",
