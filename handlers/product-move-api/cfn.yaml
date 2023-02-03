@@ -237,7 +237,7 @@ Resources:
       AlarmName: An error in the Refund lambda. Please check the logs to diagnose
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: FunctionName
+        - Name: !Sub product-switch-refund-lambda-alarm-${Stage}
           Value: !Ref RefundLambda
       EvaluationPeriods: 1
       MetricName: Errors
