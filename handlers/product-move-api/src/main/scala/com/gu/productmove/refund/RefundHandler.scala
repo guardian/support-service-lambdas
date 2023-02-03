@@ -46,7 +46,7 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
             CreditBalanceAdjustmentLive.layer,
           ),
       ) match
-        case Exit.Success(value) => value
+        case Exit.Success(value) => throw new RuntimeException("Refund failed with error: " + value.toString)
         case Exit.Failure(cause) =>
           context.getLogger.log("Failed with: " + cause.toString)
           throw new RuntimeException("Refund failed with error: " + cause.toString)
