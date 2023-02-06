@@ -150,8 +150,10 @@ object SubscriptionCancelEndpoint {
       charge <- asSingle(ratePlan.ratePlanCharges, "ratePlanCharge")
       _ <- checkProductIsSupporterPlus(charge, zuoraIds.supporterPlusZuoraIds)
 
+      today <- Clock.currentDateTime.map(_.toLocalDate)
+
       // check whether the sub is within the first 14 days of purchase - if it is then the subscriber is entitled to a refund
-      shouldBeRefunded = subIsWithinFirst14Days(LocalDate.now(), subscription.contractEffectiveDate)
+      shouldBeRefunded = subIsWithinFirst14Days(today, subscription.contractEffectiveDate)
       _ <- ZIO.log(s"Should be refunded is $shouldBeRefunded")
       cancellationDate <- ZIO
         .fromOption(
