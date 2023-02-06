@@ -1,11 +1,18 @@
 package com.gu.soft_opt_in_consent_setter.testData
 
-import com.gu.soft_opt_in_consent_setter.models.{SFBuyer, SFAssociatedSubRecord, SFSubRecord}
+import com.gu.soft_opt_in_consent_setter.models.{
+  SFAssociatedSubRecord,
+  SFBuyer,
+  SFSubRecord,
+  SubscriptionRatePlanUpdateRecord,
+  Subscription_Rate_Plan_Updates__r,
+}
 
-object TestData {
+object SFSubscriptionTestData {
   val softOptInStage = "New Stage"
 
   val subId = "001RM000003oCprYAE"
+  val subId2 = "a2F5I00000DgmrFPRE"
   val identityId = "12345678"
   val buyer = SFBuyer(identityId)
   val lastProcessedStage = "Last Stage"
@@ -18,19 +25,25 @@ object TestData {
     "Active",
     "Ready for Acquisition",
     buyer,
+    Subscription_Rate_Plan_Updates__r(0, true, Seq()), // check this is what is returned for an empty array
     Some(lastProcessedStage),
     Some(numberOfAttempts),
   )
 
   val subRecord2 = SFSubRecord(
-    subId,
-    "A-S123546",
-    "supporter plus",
+    subId2,
+    "A-S01799823",
+    "Supporter Plus",
     "Active",
     "Acquisition processed",
     buyer,
-    Some(lastProcessedStage),
-    Some(numberOfAttempts),
+    Subscription_Rate_Plan_Updates__r(
+      1,
+      true,
+      List(SubscriptionRatePlanUpdateRecord("a0t5I0000017Je6QBD", "Contribution")),
+    ),
+    Some("Acquisition"),
+    Some(0),
   )
 
   val overlappingAssociatedSub2 = SFAssociatedSubRecord("contribution", identityId)
@@ -45,9 +58,6 @@ object TestData {
 
   val Soft_Opt_in_Processed__c = true
 
-  val subId2 = "001RM000003oCprMAN"
-  val identityId2 = "12345"
-  val buyer2 = SFBuyer(identityId)
   val lastProcessedStage2 = "Acquisition"
   val numberOfAttempts2 = 3
 

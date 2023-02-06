@@ -8,7 +8,6 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SFResponse,
   SFSubRecordResponse,
   SoftOptInError,
-  SubscriptionRatePlanUpdateRecordResponse,
 }
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder
@@ -24,14 +23,6 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
     handleQueryResp[SFSubRecordResponse](
       sendQueryReq(SfQueries.getSubsToProcessQuery),
       errorDesc = "SalesforceConnector: Could not decode SFSubscription.Response",
-    )
-  }
-
-  def getProductSwitchSubsToProcess(): Either[SoftOptInError, SubscriptionRatePlanUpdateRecordResponse] = {
-    handleQueryResp[SubscriptionRatePlanUpdateRecordResponse](
-      sendQueryReq(SfQueries.getProductSwitchSubsToProcessQuery),
-      errorDesc =
-        "Could not decode Subscription_Rate_Plan_Update__c JSON records to SubscriptionRatePlanUpdateRecordResponse case class",
     )
   }
 

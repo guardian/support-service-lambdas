@@ -1,17 +1,13 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{
-  EnhancedCancelledSub,
-  EnhancedProductSwitchSub,
+  EnhancedSub,
   SFAssociatedSubResponse,
   SFSubRecord,
   SFSubRecordUpdate,
   SFSubRecordUpdateRequest,
   SoftOptInConfig,
   SoftOptInError,
-  SubscriptionRatePlanUpdateRecord,
-  UpdateSubscriptionRatePlanUpdateRecord,
-  UpdateSubscriptionRatePlanUpdateRecordRequest,
 }
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
@@ -21,6 +17,7 @@ object Handler extends LazyLogging {
 
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
+  val readyProcessSwitchStatus = "Ready to process switch"
 
   def main(args: Array[String]): Unit = {
     handleRequest()
@@ -34,9 +31,8 @@ object Handler extends LazyLogging {
 
       _ = logger.info(s"About to fetch subs to process from Salesforce")
       allSubs <- sfConnector.getSubsToProcess()
-      productSwitchSubs <- sfConnector.getProductSwitchSubsToProcess()
       _ = logger.info(
-        s"Successfully fetched ${allSubs.records.length + productSwitchSubs.records.length} subs from Salesforce",
+        s"Successfully fetched ${allSubs.records.length} subs from Salesforce",
       )
 
       identityConnector = new IdentityConnector(config.identityConfig)
@@ -47,14 +43,16 @@ object Handler extends LazyLogging {
 
       cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
       cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
-      productSwitchSubIdentityIds = productSwitchSubs.records.map(sub => sub.SF_Subscription__r.Buyer__r.IdentityID__c)
+
+      productSwitchSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyProcessSwitchStatus))
+      productSwitchSubIdentityIds = productSwitchSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
       _ = logger.info(s"About to fetch active subs from Salesforce")
       activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
       _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
 
       _ <- processProductSwitchSubs(
-        productSwitchSubs.records,
+        productSwitchSubs,
         activeSubs,
         identityConnector.sendConsentsReq,
         sfConnector.updateSubs,
@@ -97,18 +95,13 @@ object Handler extends LazyLogging {
         logErrors(updateResult)
 
         SFSubRecordUpdate(
-          sub.Id,
+          sub,
           "Acquisition",
-          sub.Soft_Opt_in_Number_of_Attempts__c,
-          sub.Soft_Opt_in_Last_Stage_Processed__c,
           updateResult,
         )
       })
 
-    emitIdentityMetrics(
-      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c == 0),
-      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c > 0),
-    )
+    emitIdentityMetrics(recordsToUpdate)
 
     if (recordsToUpdate.isEmpty)
       Right(())
@@ -140,7 +133,7 @@ object Handler extends LazyLogging {
   }
 
   def processProductSwitchSubs(
-      productSwitchSubs: Seq[SubscriptionRatePlanUpdateRecord],
+      productSwitchSubs: Seq[SFSubRecord],
       activeSubs: SFAssociatedSubResponse,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
@@ -149,37 +142,32 @@ object Handler extends LazyLogging {
     Metrics.put(event = "product_switches_to_process", productSwitchSubs.size)
 
     val recordsToUpdate = productSwitchSubs
-      .map(EnhancedProductSwitchSub(_, activeSubs.records))
-      .map(sub => {
-        import sub._
+      .map(EnhancedSub(_, activeSubs.records))
+      .map(rec => {
+        import rec._
 
         val updateResult = buildProductSwitchConsents(
-          productSwitchSub.Previous_Product_Name__c,
-          productSwitchSub.SF_Subscription__r.Product__c,
+          sub.Subscription_Rate_Plan_Updates__r.records.head.Previous_Product_Name__c,
+          sub.Product__c,
           associatedActiveNonGiftSubs.map(_.Product__c).toSet,
           consentsCalculator,
-        ).flatMap(consentsBody =>
-          sendConsentsReq(productSwitchSub.SF_Subscription__r.Buyer__r.IdentityID__c, consentsBody),
-        )
+        ).flatMap(consentsBody => sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody))
 
         logErrors(updateResult)
 
-        UpdateSubscriptionRatePlanUpdateRecord(
-          productSwitchSub.Id,
-          productSwitchSub.Soft_Opt_In_Number_of_Attempts__c,
+        SFSubRecordUpdate(
+          sub,
+          "Switch",
           updateResult,
         )
       })
 
-    emitIdentityMetrics(
-      recordsToUpdate.count(_.Soft_Opt_In_Number_of_Attempts__c == 0),
-      recordsToUpdate.count(_.Soft_Opt_In_Number_of_Attempts__c > 0),
-    )
+    emitIdentityMetrics(recordsToUpdate)
 
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      updateSubs(UpdateSubscriptionRatePlanUpdateRecordRequest(recordsToUpdate).asJson.spaces2)
+      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def processCancelledSubs(
@@ -202,34 +190,29 @@ object Handler extends LazyLogging {
     Metrics.put(event = "cancellations_to_process", cancelledSubs.size)
 
     val recordsToUpdate = cancelledSubs
-      .map(EnhancedCancelledSub(_, activeSubs.records))
-      .map(sub => {
-        import sub._
+      .map(EnhancedSub(_, activeSubs.records))
+      .map(rec => {
+        import rec._
 
         val updateResult =
           for {
             consents <- consentsCalculator.getCancellationConsents(
-              cancelledSub.Product__c,
+              sub.Product__c,
               associatedActiveNonGiftSubs.map(_.Product__c).toSet,
             )
-            _ <- sendCancellationConsents(sub.identityId, consents)
+            _ <- sendCancellationConsents(sub.Buyer__r.IdentityID__c, consents)
           } yield ()
 
         logErrors(updateResult)
 
         SFSubRecordUpdate(
-          cancelledSub.Id,
+          sub,
           "Cancellation",
-          cancelledSub.Soft_Opt_in_Number_of_Attempts__c,
-          cancelledSub.Soft_Opt_in_Last_Stage_Processed__c,
           updateResult,
         )
       })
 
-    emitIdentityMetrics(
-      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c == 0),
-      recordsToUpdate.count(_.Soft_Opt_in_Number_of_Attempts__c > 0),
-    )
+    emitIdentityMetrics(recordsToUpdate)
 
     if (recordsToUpdate.isEmpty)
       Right(())
@@ -241,8 +224,10 @@ object Handler extends LazyLogging {
     updateResults.left.foreach(error => logger.warn(s"${error.errorType}: ${error.errorDetails}"))
   }
 
-  def emitIdentityMetrics(successfullyUpdated: Int, unsuccessfullyUpdated: Int): Unit = {
+  def emitIdentityMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
     // Soft_Opt_in_Number_of_Attempts__c == 0 means the consents were set successfully
+    val successfullyUpdated = records.count(_.Soft_Opt_in_Number_of_Attempts__c == 0)
+    val unsuccessfullyUpdated = records.count(_.Soft_Opt_in_Number_of_Attempts__c > 0)
 
     Metrics.put(event = "successful_consents_updates", successfullyUpdated)
     Metrics.put(event = "failed_consents_updates", unsuccessfullyUpdated)
