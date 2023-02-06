@@ -175,8 +175,14 @@ object SubscriptionCancelEndpoint {
       _ <- ZIO.log(s"Attempting to refund sub")
       _ <-
         if (shouldBeRefunded)
-          SQS
-            .queueRefund(RefundInput(subscriptionName, cancellationResponse.invoiceId.get, charge.price))
+          for {
+            negativeInvoice <- ZIO
+              .fromOption(cancellationResponse.invoiceId)
+              .orElseFail(
+                s"URGENT: subscription $subscriptionName should be refunded but has no negative invoice attached.",
+              )
+            _ <- SQS.queueRefund(RefundInput(subscriptionName, negativeInvoice, charge.price))
+          } yield ()
         else ZIO.succeed(RefundResponse("Success", ""))
 
       _ <- ZIO.log(s"Attempting to update cancellation reason on Zuora subscription")
