@@ -50,4 +50,16 @@ class JsonCodecSpec extends AnyFlatSpec {
 
     assert(json.fromJson[GetSubscriptionResponse].getOrElse("") == getSubscriptionResponse2)
   }
+
+  it should "Correctly deocde PUT (/v1/subscriptions/$subscriptionNumber/cancel) response with a negative invoice attached" in {
+    val json = Source.fromResource("zuoraResponses/CancellationResponse1.json").mkString
+
+    assert(json.fromJson[CancellationResponse].getOrElse("") == cancellationResponse1)
+  }
+
+  it should "Correctly deocde PUT (/v1/subscriptions/$subscriptionNumber/cancel) response without a negative invoice attached" in {
+    val json = Source.fromResource("zuoraResponses/CancellationResponse2.json").mkString
+
+    assert(json.fromJson[CancellationResponse].getOrElse("") == cancellationResponse2)
+  }
 }

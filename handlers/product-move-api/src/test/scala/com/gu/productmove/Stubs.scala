@@ -8,13 +8,7 @@ import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
-import com.gu.productmove.zuora.{
-  DefaultPaymentMethod,
-  SubscriptionUpdateInvoice,
-  SubscriptionUpdateInvoiceItem,
-  SubscriptionUpdatePreviewResponse,
-  SubscriptionUpdateResponse,
-}
+import com.gu.productmove.zuora.{CancellationResponse, DefaultPaymentMethod, SubscriptionUpdateInvoice, SubscriptionUpdateInvoiceItem, SubscriptionUpdatePreviewResponse, SubscriptionUpdateResponse}
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.supporterdata.model.SupporterRatePlanItem
@@ -165,6 +159,22 @@ val directDebitGetAccountResponse = GetAccountResponse(
   ),
   BillToContact("John", "Hee", "example@gmail.com"),
   List(AccountSubscription("subscriptionId")),
+)
+
+//-----------------------------------------------------
+// Stubs for ZuoraCancel service
+//-----------------------------------------------------
+
+val cancellationResponse1 = CancellationResponse(
+  "8ad08d29860bd93e0186127£052a6414",
+  cancelledDate = LocalDate.of(2023, 02, 02),
+  Some("Sad08d29860bd93e0186127f060e6444")
+)
+
+val cancellationResponse2 = CancellationResponse(
+  "8a129cc3861a835d01862248d8ee5c9d",
+  cancelledDate = LocalDate.of(2023, 02, 19),
+  None
 )
 
 //-----------------------------------------------------
