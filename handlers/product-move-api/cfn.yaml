@@ -235,7 +235,7 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
-      AlarmName: An error in the Refund lambda. Please check the logs to diagnose
+      AlarmName: !Sub An error in the Refund lambda ${Stage}. Please check the logs to diagnose
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
