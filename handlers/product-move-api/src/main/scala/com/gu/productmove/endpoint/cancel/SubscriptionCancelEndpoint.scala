@@ -176,7 +176,7 @@ object SubscriptionCancelEndpoint {
       _ <-
         if (shouldBeRefunded)
           SQS
-            .queueRefund(RefundInput(subscriptionName, cancellationResponse.invoiceId, charge.price))
+            .queueRefund(RefundInput(subscriptionName, cancellationResponse.invoiceId.get, charge.price))
         else ZIO.succeed(RefundResponse("Success", ""))
 
       _ <- ZIO.log(s"Attempting to update cancellation reason on Zuora subscription")
