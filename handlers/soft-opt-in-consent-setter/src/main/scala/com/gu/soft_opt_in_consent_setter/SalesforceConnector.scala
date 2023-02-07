@@ -10,7 +10,7 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SoftOptInError,
 }
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.Decoder
+import io.circe.{Decoder, Json}
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import scalaj.http.{Http, HttpOptions, HttpRequest, HttpResponse}
@@ -36,15 +36,15 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
       Right(SFAssociatedSubResponse(0, done = true, Seq[SFAssociatedSubRecord]()))
   }
 
-  def updateSubs(body: String): Either[SoftOptInError, Unit] = {
-    logger.info(s"Making update request to Salesforce: $body")
+  def updateSubs(json: Json): Either[SoftOptInError, Unit] = {
+    logger.info(s"Making update request to Salesforce: $json")
     val result = handleCompositeUpdateResp(
-      sendCompositeUpdateReq(body),
+      sendCompositeUpdateReq(json.spaces2),
       Metrics.put,
     )
     result match {
-      case Left(e) => logger.error(s"Update request failed: $body: cause $e")
-      case Right(_) => println(s"Update request successful: $body")
+      case Left(e) => logger.error(s"Update request failed: $json: cause $e")
+      case Right(_) => println(s"Update request successful: $json")
     }
     result
   }

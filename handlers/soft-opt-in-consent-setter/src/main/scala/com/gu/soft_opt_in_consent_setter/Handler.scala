@@ -10,6 +10,7 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SoftOptInError,
 }
 import com.typesafe.scalalogging.LazyLogging
+import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
 
@@ -78,7 +79,7 @@ object Handler extends LazyLogging {
   def processAcquiredSubs(
       acquiredSubs: Seq[SFSubRecord],
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
-      updateSubs: String => Either[SoftOptInError, Unit],
+      updateSubs: Json => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] = {
     Metrics.put(event = "acquisitions_to_process", acquiredSubs.size)
@@ -106,7 +107,7 @@ object Handler extends LazyLogging {
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
+      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson)
   }
 
   def buildProductSwitchConsents(
@@ -136,7 +137,7 @@ object Handler extends LazyLogging {
       productSwitchSubs: Seq[SFSubRecord],
       activeSubs: SFAssociatedSubResponse,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
-      updateSubs: String => Either[SoftOptInError, Unit],
+      updateSubs: Json => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] = {
     Metrics.put(event = "product_switches_to_process", productSwitchSubs.size)
@@ -177,14 +178,14 @@ object Handler extends LazyLogging {
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
+      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson)
   }
 
   def processCancelledSubs(
       cancelledSubs: Seq[SFSubRecord],
       activeSubs: SFAssociatedSubResponse,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
-      updateSubs: String => Either[SoftOptInError, Unit],
+      updateSubs: Json => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
@@ -227,7 +228,7 @@ object Handler extends LazyLogging {
     if (recordsToUpdate.isEmpty)
       Right(())
     else
-      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
+      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson)
   }
 
   def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {
