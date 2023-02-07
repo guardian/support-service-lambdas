@@ -3,7 +3,7 @@ package com.gu.soft_opt_in_consent_setter
 object SfQueries {
 
   val getSubsToProcessQuery: String = {
-    val limit = 200
+    val limit = 10
 
     s"""
        |SELECT

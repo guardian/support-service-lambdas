@@ -44,7 +44,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
     )
     result match {
       case Left(e) => logger.error(s"Update request failed: $body: cause $e")
-      case Right(_) => logger.info(s"Update request successful: $body")
+      case Right(_) => println(s"Update request successful: $body")
     }
     result
   }
