@@ -25,7 +25,7 @@ object SFSubscriptionTestData {
     "Active",
     "Ready for Acquisition",
     buyer,
-    Subscription_Rate_Plan_Updates__r(0, true, Seq()), // check this is what is returned for an empty array
+    None,
     Some(lastProcessedStage),
     Some(numberOfAttempts),
   )
@@ -37,11 +37,25 @@ object SFSubscriptionTestData {
     "Active",
     "Acquisition processed",
     buyer,
-    Subscription_Rate_Plan_Updates__r(
-      1,
-      true,
-      List(SubscriptionRatePlanUpdateRecord("a0t5I0000017Je6QBD", "Contribution")),
+    Some(
+      Subscription_Rate_Plan_Updates__r(
+        1,
+        true,
+        List(SubscriptionRatePlanUpdateRecord("a0t5I0000017Je6QBD", "Contribution")),
+      ),
     ),
+    Some("Acquisition"),
+    Some(0),
+  )
+
+  val subRecord3 = SFSubRecord(
+    "a2F9E000007SHrqUAG",
+    "A-S00339155",
+    "Supporter Plus",
+    "Active",
+    "Ready to process switch",
+    SFBuyer("200000671"),
+    None,
     Some("Acquisition"),
     Some(0),
   )

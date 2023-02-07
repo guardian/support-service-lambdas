@@ -146,12 +146,22 @@ object Handler extends LazyLogging {
       .map(rec => {
         import rec._
 
-        val updateResult = buildProductSwitchConsents(
-          sub.Subscription_Rate_Plan_Updates__r.records.head.Previous_Product_Name__c,
-          sub.Product__c,
-          associatedActiveNonGiftSubs.map(_.Product__c).toSet,
-          consentsCalculator,
-        ).flatMap(consentsBody => sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody))
+        val updateResult = for {
+          ratePlanUpdates <- sub.Subscription_Rate_Plan_Updates__r
+            .toRight(
+              SoftOptInError(
+                "processProductSwitchSubs",
+                s"Subscription ${sub.Name} Subscription_Rate_Plan_Updates__r is null",
+              ),
+            )
+          consentsBody <- buildProductSwitchConsents(
+            ratePlanUpdates.records.head.Previous_Product_Name__c,
+            sub.Product__c,
+            associatedActiveNonGiftSubs.map(_.Product__c).toSet,
+            consentsCalculator,
+          )
+          res <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
+        } yield res
 
         logErrors(updateResult)
 
