@@ -63,19 +63,6 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
       price: BigDecimal,
       ratePlanIdToRemove: String,
   ): ZIO[Stage, String, PreviewResult] = {
-    def getPreviewResult(
-        invoice: SubscriptionUpdateInvoice,
-        ids: SupporterPlusRatePlanIds,
-    ): ZIO[Stage, String, PreviewResult] =
-      invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.ratePlanChargeId) match
-        case (supporterPlusInvoice :: Nil, contributionInvoice :: Nil) =>
-          ZIO.succeed(
-            PreviewResult(invoice.amount, contributionInvoice.totalAmount, supporterPlusInvoice.totalAmount),
-          )
-        case _ =>
-          ZIO.fail(
-            s"Unexpected invoice item structure was returned from a Zuora preview call. Invoice data was: $invoice",
-          )
 
     for {
       requestBody <- SubscriptionUpdatePreviewRequest(billingPeriod, ratePlanIdToRemove, price)
@@ -85,7 +72,7 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
       )
       stage <- ZIO.service[Stage]
       supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-      previewResult <- getPreviewResult(response.invoice, supporterPlusRatePlanIds)
+      previewResult <- BuildPreviewResult.getPreviewResult(response.invoice, supporterPlusRatePlanIds)
     } yield previewResult
 
   }
@@ -130,6 +117,7 @@ case class SubscriptionUpdatePreviewRequest(
 )
 case class SubscriptionUpdatePreviewResponse(invoice: SubscriptionUpdateInvoice)
 case class SubscriptionUpdateInvoiceItem(
+    serviceStartDate: LocalDate,
     chargeAmount: BigDecimal,
     taxAmount: BigDecimal,
     productRatePlanChargeId: String,
