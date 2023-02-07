@@ -6,6 +6,7 @@ import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{
   guWeeklyMapping,
   membershipMapping,
   newspaperMapping,
+  supporterPlusMapping,
   testConsentMappings,
 }
 import org.scalatest.EitherValues
@@ -17,13 +18,29 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   val calculator = new ConsentsCalculator(testConsentMappings)
 
   // getAcquisitionConsents success cases
-  "getAcquisitionConsents" should "correctly return the mapping when a known product is passed" in {
-    calculator.getAcquisitionConsents("membership") shouldBe Right(membershipMapping)
+  "getSoftOptInsByProduct" should "correctly return the mapping when a known product is passed" in {
+    calculator.getSoftOptInsByProduct("membership") shouldBe Right(membershipMapping)
   }
 
   // getAcquisitionConsents failure cases
-  "getAcquisitionConsents" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
-    val result = calculator.getAcquisitionConsents("nonexistentProduct")
+  "getSoftOptInsByProduct" should "correctly return a SoftOptInError when the product isn't present in the mappings" in {
+    val result = calculator.getSoftOptInsByProduct("nonexistentProduct")
+
+    result.isLeft shouldBe true
+    result.left.value shouldBe a[SoftOptInError]
+    result.left.value.errorType shouldBe "ConsentsCalculator"
+  }
+
+  // getSoftOptInsByProducts success cases
+  "getSoftOptInsByProducts" should "correctly return both mappings when two products are passed in" in {
+    calculator.getSoftOptInsByProducts(Set("contributions", "supporterPlus")) shouldBe Right(
+      contributionMapping ++ supporterPlusMapping,
+    )
+  }
+
+  // getSoftOptInsByProducts failure cases
+  "getSoftOptInsByProducts" should "correctly return a SoftOptInError when the products aren't present in the mappings" in {
+    val result = calculator.getSoftOptInsByProducts(Set("nonexistentProduct", "nonexistentProduct"))
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]

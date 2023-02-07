@@ -22,7 +22,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
   def getSubsToProcess(): Either[SoftOptInError, SFSubRecordResponse] = {
     handleQueryResp[SFSubRecordResponse](
       sendQueryReq(SfQueries.getSubsToProcessQuery),
-      errorDesc = "Could not decode SFSubscription.Response",
+      errorDesc = "SalesforceConnector: Could not decode SFSubscription.Response",
     )
   }
 
