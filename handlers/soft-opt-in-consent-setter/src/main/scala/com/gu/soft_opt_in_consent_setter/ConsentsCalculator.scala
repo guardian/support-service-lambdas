@@ -27,7 +27,7 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
           .toRight(
             SoftOptInError(
               "ConsentsCalculator",
-              s"getCancellationConsents couldn't find $ownedProductName in consentsMappings",
+              s"getSoftOptInsByProducts couldn't find $ownedProductName in consentsMappings",
             ),
           )
           .flatMap(productConsents => acc.map(_.union(productConsents)))
