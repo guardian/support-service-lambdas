@@ -1,9 +1,6 @@
 import sbt._
 import sbtassembly.AssemblyKeys.assembly
-import sbtassembly.AssemblyPlugin.autoImport.{
-  MergeStrategy,
-  assemblyMergeStrategy
-}
+import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
 import sbtassembly.PathList
 
 object Dependencies {
@@ -16,7 +13,7 @@ object Dependencies {
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.4.5",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
   // AWS
@@ -38,7 +35,7 @@ object Dependencies {
   // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
+  val circeConfig = "io.circe" %% "circe-config" % "0.9.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.9.3"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
@@ -89,25 +86,24 @@ object Dependencies {
    */
   val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
 
-  val jacksonVersion         = "2.13.2"
+  val jacksonVersion = "2.13.2"
   val jacksonDatabindVersion = "2.13.2.2"
 
   val jacksonDependencies = Seq(
-    "com.fasterxml.jackson.core"     % "jackson-core" %  jacksonVersion,
-    "com.fasterxml.jackson.core"     % "jackson-annotations" %  jacksonVersion,
-    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" %  jacksonVersion,
-    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" %  jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonDatabindVersion,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
-    "com.fasterxml.jackson.module"     % "jackson-module-parameter-names" % jacksonVersion,
-    "com.fasterxml.jackson.module"     %% "jackson-module-scala" % jacksonVersion,
+    "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonVersion,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   )
 
   /*
    * End of vulnerability fixes
    * ===============================================================================================
    */
-
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
@@ -128,6 +124,5 @@ object Dependencies {
       val oldStrategy = (assembly / assemblyMergeStrategy).value
       oldStrategy(x)
   }
-
 
 }
