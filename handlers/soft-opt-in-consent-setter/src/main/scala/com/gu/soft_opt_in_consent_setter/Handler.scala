@@ -22,7 +22,6 @@ object Handler extends LazyLogging {
   val readyProcessSwitchStatus = "Ready to process switch"
 
   def main(args: Array[String]): Unit = {
-    System.setProperty("log4j.configurationFile", "log4j2.xml")
     handleRequest()
   }
 
