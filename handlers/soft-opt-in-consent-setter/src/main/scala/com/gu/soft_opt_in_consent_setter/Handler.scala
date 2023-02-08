@@ -9,10 +9,11 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SoftOptInConfig,
   SoftOptInError,
 }
-import com.typesafe.scalalogging.LazyLogging
+import com.typesafe.scalalogging.{LazyLogging, Logger}
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
+import org.slf4j.LoggerFactory
 
 object Handler extends LazyLogging {
 
@@ -21,6 +22,7 @@ object Handler extends LazyLogging {
   val readyProcessSwitchStatus = "Ready to process switch"
 
   def main(args: Array[String]): Unit = {
+    System.setProperty("log4j.configurationFile", "log4j2.xml")
     handleRequest()
   }
 
