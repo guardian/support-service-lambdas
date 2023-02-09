@@ -229,7 +229,7 @@ object ProductMoveEndpoint {
               ),
             ),
           ),
-          "SV_RCtoDP_Switch",
+          "SV_RCtoSP_Switch",
           account.basicInfo.sfContactId__c,
           Some(identityId),
         ),

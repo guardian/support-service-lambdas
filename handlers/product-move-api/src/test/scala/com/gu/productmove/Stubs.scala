@@ -212,7 +212,7 @@ val emailMessageBody = EmailMessage(
       ),
     ),
   ),
-  "SV_RCtoDP_Switch",
+  "SV_RCtoSP_Switch",
   "sfContactId",
   Some("12345"),
 )
@@ -234,7 +234,7 @@ val emailMessageBodyRefund = EmailMessage(
       ),
     ),
   ),
-  "SV_RCtoDP_Switch",
+  "SV_RCtoSP_Switch",
   "sfContactId",
   Some("12345"),
 )
