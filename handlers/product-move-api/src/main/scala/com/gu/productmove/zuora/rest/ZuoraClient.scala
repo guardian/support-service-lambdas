@@ -79,11 +79,20 @@ object ZuoraRestBody {
   enum ZuoraSuccessCheck:
     case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised
 
-  case class ZuoraSuccessCapitalised(Success: Boolean)
-  case class ZuoraSuccessLowercase(success: Boolean)
+  case class Reason(
+      code: Int,
+      message: String,
+  )
+  given JsonDecoder[Reason] = DeriveJsonDecoder.gen
+
+  case class ZuoraSuccessCapitalised(Success: Boolean, reasons: Option[List[Reason]])
+  case class ZuoraSuccessLowercase(success: Boolean, reasons: Option[List[Reason]])
   case class ZuoraSuccessSize(size: Option[Int])
 
-  def parseIfSuccessful[A: JsonDecoder](body: String, zuoraSuccessCheck: ZuoraSuccessCheck): Either[String, A] = {
+  def parseIfSuccessful[A: JsonDecoder](
+      body: String,
+      zuoraSuccessCheck: ZuoraSuccessCheck,
+  ): Either[String, A] = {
     val isSuccessful: Either[String, Unit] = zuoraSuccessCheck match {
       case ZuoraSuccessCheck.SuccessCheckSize =>
         for {
@@ -95,13 +104,25 @@ object ZuoraRestBody {
       case ZuoraSuccessCheck.SuccessCheckLowercase =>
         for {
           zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessLowercase].decodeJson(body)
-          isSuccessful <- if (zuoraResponse.success) Right(()) else Left(s"success = false, body: $body")
+          isSuccessful <-
+            if (zuoraResponse.success) Right(())
+            else
+              zuoraResponse.reasons match {
+                case None => Left(s"success = false, body: $body")
+                case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
+              }
         } yield ()
 
       case ZuoraSuccessCheck.SuccessCheckCapitalised =>
         for {
           zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessCapitalised].decodeJson(body)
-          isSuccessful <- if (zuoraResponse.Success) Right(()) else Left(s"Success = false, body: $body")
+          isSuccessful <-
+            if (zuoraResponse.Success) Right(())
+            else
+              zuoraResponse.reasons match {
+                case None => Left(s"Success = false, body: $body")
+                case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
+              }
         } yield ()
     }
 
