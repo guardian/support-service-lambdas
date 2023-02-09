@@ -17,7 +17,7 @@ object BuildPreviewResult {
           date <- Clock.currentDateTime.map(_.toLocalDate)
           contributionRefundInvoice = contributionInvoices
             .filter(invoiceItem =>
-              invoiceItem.totalAmount < 0 &&
+              invoiceItem.totalAmount <= 0 &&
                 invoiceItem.serviceStartDate == date,
             )
             .head
