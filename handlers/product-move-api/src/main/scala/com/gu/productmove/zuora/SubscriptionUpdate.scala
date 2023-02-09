@@ -72,7 +72,7 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
       )
       stage <- ZIO.service[Stage]
       supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-      previewResult <- BuildPreviewResult.getPreviewResult(response.invoice, supporterPlusRatePlanIds)
+      previewResult <- BuildPreviewResult.getPreviewResult(response.invoice, supporterPlusRatePlanIds, billingPeriod)
     } yield previewResult
 
   }

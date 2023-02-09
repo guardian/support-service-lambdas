@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import zio.{IO, ZIO}
 import zio.*
 import zio.Clock
@@ -10,6 +11,7 @@ object BuildPreviewResult {
   def getPreviewResult(
       invoice: SubscriptionUpdateInvoice,
       ids: SupporterPlusRatePlanIds,
+      billingPeriod: BillingPeriod,
   ): ZIO[Stage, String, PreviewResult] =
     invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.ratePlanChargeId) match
       case (supporterPlusInvoice :: Nil, contributionInvoices) =>
@@ -21,10 +23,15 @@ object BuildPreviewResult {
                 invoiceItem.serviceStartDate == date,
             )
             .head
+          nextPaymentDate = billingPeriod match {
+            case Annual => date.plusYears(1)
+            case Monthly => date.plusMonths(1)
+          }
         } yield PreviewResult(
           supporterPlusInvoice.totalAmount - contributionRefundInvoice.totalAmount.abs,
           contributionRefundInvoice.totalAmount,
           supporterPlusInvoice.totalAmount,
+          nextPaymentDate,
         )
       case _ =>
         ZIO.fail(

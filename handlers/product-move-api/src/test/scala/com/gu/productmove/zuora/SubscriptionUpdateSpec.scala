@@ -92,6 +92,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           amountPayableToday = -6,
           contributionRefundAmount = -16,
           supporterPlusPurchaseAmount = 10,
+          LocalDate.of(2023, 02, 19)
         )
 
         for {
@@ -100,6 +101,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
             .getPreviewResult(
               invoiceWithMultipleInvoiceItems,
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6"),
+              Monthly,
             )
             .provideLayer(
               ZLayer.succeed(Stage.valueOf("DEV")),
@@ -113,6 +115,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           amountPayableToday = -10,
           contributionRefundAmount = -20,
           supporterPlusPurchaseAmount = 10,
+          LocalDate.of(2023, 03, 6)
         )
 
         for {
@@ -121,6 +124,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
             .getPreviewResult(
               invoiceWithTax,
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6"),
+              Monthly,
             )
             .provideLayer(
               ZLayer.succeed(Stage.valueOf("DEV")),

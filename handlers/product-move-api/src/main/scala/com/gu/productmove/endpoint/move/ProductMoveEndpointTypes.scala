@@ -9,6 +9,7 @@ import sttp.tapir.generic.{Configuration, Derived}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 import sttp.tapir.Schema
 
+import java.time.LocalDate
 import scala.deriving.Mirror
 
 //has to be a separate file due to https://github.com/lampepfl/dotty/issues/12498#issuecomment-973991160
@@ -32,6 +33,9 @@ object ProductMoveEndpointTypes {
       @description("The amount payable by the customer today") amountPayableToday: BigDecimal,
       @description("The amount refunded from the cancelled contribution") contributionRefundAmount: BigDecimal,
       @description("The cost of the new supporter plus subscription") supporterPlusPurchaseAmount: BigDecimal,
+      @description(
+        "The next payment date of the new supporter plus subscription (i.e.: the second payment date)",
+      ) nextPaymentDate: LocalDate,
   ) extends OutputBody
   case class InternalServerError(message: String) extends OutputBody
   given Schema[Success] = inlineSchema(Schema.derived)
