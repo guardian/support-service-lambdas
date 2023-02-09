@@ -103,8 +103,7 @@ object ProductMoveEndpoint {
             ),
             oneOfVariant(
               sttp.model.StatusCode.InternalServerError,
-              stringBody
-                .map(InternalServerError.apply)(_.message)
+              jsonBody[InternalServerError]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
             ),
           ),
@@ -122,19 +121,20 @@ object ProductMoveEndpoint {
   }
 
   private def run(subscriptionName: String, postData: ExpectedInput): TIO[OutputBody] =
-    productMove(subscriptionName, postData).provide(
-      GetSubscriptionLive.layer,
-      AwsS3Live.layer,
-      AwsCredentialsLive.layer,
-      SttpClientLive.layer,
-      ZuoraClientLive.layer,
-      ZuoraGetLive.layer,
-      SubscriptionUpdateLive.layer,
-      SQSLive.layer,
-      GetAccountLive.layer,
-      GuStageLive.layer,
-      DynamoLive.layer,
-    )
+    productMove(subscriptionName, postData)
+      .provide(
+        GetSubscriptionLive.layer,
+        AwsS3Live.layer,
+        AwsCredentialsLive.layer,
+        SttpClientLive.layer,
+        ZuoraClientLive.layer,
+        ZuoraGetLive.layer,
+        SubscriptionUpdateLive.layer,
+        SQSLive.layer,
+        GetAccountLive.layer,
+        GuStageLive.layer,
+        DynamoLive.layer,
+      )
 
   extension [R, E, A](zio: ZIO[R, E, A])
     def addLogMessage(message: String) = zio.catchAll { error =>
@@ -158,7 +158,7 @@ object ProductMoveEndpoint {
       subscriptionName: String,
       postData: ExpectedInput,
   ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
-    for {
+    (for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
       currentRatePlan <- getSingleOrNotEligible(
@@ -174,7 +174,7 @@ object ProductMoveEndpoint {
           doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currentRatePlan.id)
         else
           doUpdate(subscriptionName, ratePlanCharge, postData.price, currentRatePlan, subscription)
-    } yield result
+    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
 
   def doPreview(
       subscriptionId: String,
