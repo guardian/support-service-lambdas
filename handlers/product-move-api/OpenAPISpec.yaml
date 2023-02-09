@@ -59,29 +59,94 @@ paths:
           application/json:
             schema:
               required:
-                - targetProductId
+                - price
+                - preview
               type: object
               properties:
-                targetProductId:
-                  type: string
-                  description: ID of target product that new subscription will be
-                    for.
+                price:
+                  type: number
+                  description: Price of new Supporter Plus subscription
+                preview:
+                  type: boolean
+                  description: Whether to preview the move or to carry it out
         required: true
       responses:
         '200':
-          description: Success.
+          description: Update Success.
           content:
             application/json:
               schema:
                 required:
-                  - newSubscriptionName
+                  - amountPayableToday
+                  - contributionRefundAmount
+                  - supporterPlusPurchaseAmount
                 type: object
                 properties:
-                  newSubscriptionName:
+                  amountPayableToday:
+                    type: number
+                    description: The amount payable by the customer today
+                  contributionRefundAmount:
+                    type: number
+                    description: The amount refunded from the cancelled contribution
+                  supporterPlusPurchaseAmount:
+                    type: number
+                    description: The cost of the new supporter plus subscription
+        '500':
+          description: InternalServerError.
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: 'Invalid value for: body'
+          content:
+            text/plain:
+              schema:
+                type: string
+  /supporter-plus-cancel/{subscriptionName}:
+    post:
+      summary: Cancels the subscription at the soonest possible date based on the
+        subscription type.
+      description: |-
+        Cancels the existing subscription at the default/soonest date.
+        Also manages all the service comms associated with the cancellation.
+      operationId: postSupporter-plus-cancelSubscriptionname
+      parameters:
+        - name: subscriptionName
+          in: path
+          description: Name of subscription to cancel.
+          required: true
+          schema:
+            type: string
+          example: A-S000001
+      requestBody:
+        description: Information to describe the nature of the cancellation
+        content:
+          application/json:
+            schema:
+              required:
+                - reason
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: User cancellation reason - from a picklist.
+                  example: mma_other
+        required: true
+      responses:
+        '200':
+          description: Successfully cancelled the subscription.
+          content:
+            application/json:
+              schema:
+                required:
+                  - message
+                type: object
+                properties:
+                  message:
                     type: string
-                    description: Name of new subscription.
-        '404':
-          description: No such subscription.
+        '500':
+          description: InternalServerError.
           content:
             text/plain:
               schema:
