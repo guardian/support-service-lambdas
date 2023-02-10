@@ -101,7 +101,6 @@ case class SubscriptionUpdateRequest(
     remove: List[RemoveRatePlan],
     collect: Boolean = true,
     runBilling: Boolean = true,
-    targetDate: Option[LocalDate] = None,
 )
 case class AddRatePlan(
     contractEffectiveDate: LocalDate,
