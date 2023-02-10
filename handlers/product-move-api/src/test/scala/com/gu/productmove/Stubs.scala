@@ -35,8 +35,8 @@ val getSubscriptionResponse = GetSubscriptionResponse(
       ratePlanCharges = List(
         RatePlanCharge(
           productRatePlanChargeId = "PRPC1",
-          name = "Digital Pack Monthly",
-          price = 11.11,
+          name = "Contribution",
+          price = 5.000000000,
           currency = "GBP",
           number = "number",
           effectiveStartDate = LocalDate.of(2017, 12, 15),
@@ -203,8 +203,8 @@ val emailMessageBody = EmailMessage(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "20",
-        price = "50.0",
+        first_payment_amount = "20.00",
+        price = "15.00",
         payment_frequency = "month",
         date_of_first_payment = "10 May 2022",
         currency = "£",
@@ -225,8 +225,30 @@ val emailMessageBodyRefund = EmailMessage(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "-4",
-        price = "50.0",
+        first_payment_amount = "-4.00",
+        price = "50.00",
+        payment_frequency = "month",
+        date_of_first_payment = "10 May 2022",
+        currency = "£",
+        contribution_cancellation_date = "10 May 2022",
+      ),
+    ),
+  ),
+  "SV_RCtoSP_Switch",
+  "sfContactId",
+  Some("12345"),
+)
+
+val emailMessageBodyNoPaymentOrRefund = EmailMessage(
+  To = EmailPayload(
+    Address = Some("example@gmail.com"),
+    EmailPayloadContactAttributes(
+      EmailPayloadSubscriberAttributes(
+        subscription_id = "A-S00339056",
+        first_name = "John",
+        last_name = "Hee",
+        first_payment_amount = "0.00",
+        price = "15.00",
         payment_frequency = "month",
         date_of_first_payment = "10 May 2022",
         currency = "£",
@@ -258,8 +280,8 @@ val salesforceRecordInput1 = SalesforceRecordInput(
 )
 val salesforceRecordInput2 = SalesforceRecordInput(
   "A-S00339056",
-  BigDecimal(50),
-  BigDecimal(50),
+  BigDecimal(5),
+  BigDecimal(15),
   "P1",
   "RP1",
   "Supporter Plus",
@@ -267,17 +289,29 @@ val salesforceRecordInput2 = SalesforceRecordInput(
   LocalDate.of(2022, 5, 10),
   BigDecimal(20),
 )
+val salesforceRecordInput3 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(5),
+  BigDecimal(15),
+  "P1",
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2022, 5, 10),
+  LocalDate.of(2022, 5, 10),
+  BigDecimal(0),
+)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
-val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as", 20)
-val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2", 10)
+val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as", Some(20))
+val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2", Some(10))
+val subscriptionUpdateResponse3 = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as", None)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
 //-----------------------------------------------------
-val subscriptionUpdatePreviewResult = PreviewResult(40, -10, 50)
+val subscriptionUpdatePreviewResult = PreviewResult(10, 0, 15)
 
 //-----------------------------------------------------
 // Stubs for GetSfSubscription service
