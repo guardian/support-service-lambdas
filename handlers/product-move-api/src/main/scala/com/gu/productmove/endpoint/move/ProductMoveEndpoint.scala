@@ -209,6 +209,9 @@ object ProductMoveEndpoint {
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriod <- ratePlanCharge.billingPeriod.value
+
+    paidAmount = updateResponse.paidAmount.getOrElse(BigDecimal(0))
+
     emailFuture <- SQS
       .sendEmail(
         message = EmailMessage(
@@ -220,7 +223,7 @@ object ProductMoveEndpoint {
                 last_name = account.billToContact.lastName,
                 currency = account.basicInfo.currency.symbol,
                 price = price.toString,
-                first_payment_amount = updateResponse.paidAmount.toString,
+                first_payment_amount = paidAmount.toString,
                 date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                 payment_frequency = billingPeriod,
                 contribution_cancellation_date = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
@@ -246,7 +249,7 @@ object ProductMoveEndpoint {
           "Supporter Plus",
           todaysDate,
           todaysDate,
-          updateResponse.paidAmount,
+          paidAmount,
         ),
       )
       .fork

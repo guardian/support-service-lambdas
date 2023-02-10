@@ -113,7 +113,7 @@ case class SubscriptionUpdateResponse(
     subscriptionId: String,
     totalDeltaMrr: BigDecimal,
     invoiceId: String,
-    paidAmount: BigDecimal,
+    paidAmount: Option[BigDecimal],
 )
 case class SubscriptionUpdatePreviewRequest(
     add: List[AddRatePlan],
