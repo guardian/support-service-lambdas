@@ -67,7 +67,7 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
-      requestBody <- SubscriptionUpdatePreviewRequest(billingPeriod, ratePlanIdToRemove, price, today.plusMonths(14))
+      requestBody <- SubscriptionUpdatePreviewRequest(billingPeriod, ratePlanIdToRemove, price, today.plusMonths(13))
       response <- zuoraGet.put[SubscriptionUpdatePreviewRequest, SubscriptionUpdatePreviewResponse](
         uri"subscriptions/$subscriptionId",
         requestBody,
