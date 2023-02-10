@@ -275,7 +275,7 @@ val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
 //-----------------------------------------------------
-val subscriptionUpdatePreviewResult = PreviewResult(40, -10, 50)
+val subscriptionUpdatePreviewResult = PreviewResult(40, -10, 50, LocalDate.of(2023, 6, 10))
 
 //-----------------------------------------------------
 // Stubs for GetSfSubscription service
