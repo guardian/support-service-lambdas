@@ -129,6 +129,11 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
+
+      /*
+
+      *** Commented out until V2 ***
+
       test("productMove endpoint is successful for a refunded customer") {
         val endpointJsonInputBody = ExpectedInput(50.00, false)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
@@ -160,6 +165,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
+       */
+
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
         val endpointJsonInputBody = ExpectedInput(50.00, false)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)

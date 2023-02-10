@@ -10,12 +10,13 @@ object Salesforce {
   case class SalesforceRecordInput(
       subscriptionName: String,
       previousAmount: BigDecimal,
+      newAmount: BigDecimal,
       previousProductName: String,
       previousRatePlanName: String,
       newRatePlanName: String,
       requestedDate: LocalDate,
       effectiveDate: LocalDate,
-      refundAmount: BigDecimal,
+      paidAmount: BigDecimal,
   )
 
   given JsonDecoder[SalesforceRecordInput] = DeriveJsonDecoder.gen[SalesforceRecordInput]
@@ -31,12 +32,13 @@ object Salesforce {
       request = CreateRecordRequest(
         SF_Subscription__c = sfSub.Id,
         Previous_Amount__c = previousAmount,
+        New_Amount__c = newAmount,
         Previous_Product_Name__c = previousProductName,
         Previous_Rate_Plan_Name__c = previousRatePlanName,
         New_Rate_Plan_Name__c = newRatePlanName,
         Requested_Date__c = requestedDate,
         Effective_Date__c = effectiveDate,
-        Refund_Amount__c = refundAmount,
+        Paid_Amount__c = paidAmount,
       )
       _ <- CreateRecord.create(request)
     } yield ()

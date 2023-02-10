@@ -37,6 +37,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
               SalesforceRecordInput(
                 "A-S00102815",
                 10.0000000,
+                10.0000000,
                 "previous product name",
                 "previous rate plan",
                 "new rate plan",
@@ -64,6 +65,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
           output <- Salesforce.createSfRecord(
             SalesforceRecordInput(
               "A-S00102815",
+              BigDecimal(100),
               BigDecimal(100),
               "previous product name",
               "previous rate plan",

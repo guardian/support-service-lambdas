@@ -206,7 +206,6 @@ object ProductMoveEndpoint {
     updateResponse <- SubscriptionUpdate
       .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlan.id)
       .addLogMessage("SubscriptionUpdate")
-    totalDeltaMrr = updateResponse.totalDeltaMrr
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriod <- ratePlanCharge.billingPeriod.value
@@ -221,7 +220,7 @@ object ProductMoveEndpoint {
                 last_name = account.billToContact.lastName,
                 currency = account.basicInfo.currency.symbol,
                 price = price.toString,
-                first_payment_amount = totalDeltaMrr.toString,
+                first_payment_amount = updateResponse.paidAmount.toString,
                 date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                 payment_frequency = billingPeriod,
                 contribution_cancellation_date = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
@@ -241,16 +240,18 @@ object ProductMoveEndpoint {
         SalesforceRecordInput(
           subscriptionName,
           price,
+          price,
           currentRatePlan.productName,
           currentRatePlan.ratePlanName,
           "Supporter Plus",
           todaysDate,
           todaysDate,
-          updateResponse.totalDeltaMrr.abs,
+          updateResponse.paidAmount,
         ),
       )
       .fork
 
+    /*
     refundFuture <-
       if (updateResponse.totalDeltaMrr < 0)
         SQS
@@ -258,6 +259,7 @@ object ProductMoveEndpoint {
           .fork
       else
         ZIO.succeed(()).fork
+     */
 
     supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, ratePlanCharge.billingPeriod))
     amendSupporterProductDynamoTableFuture <- Dynamo
@@ -275,7 +277,7 @@ object ProductMoveEndpoint {
       )
       .fork
 
-    requests = emailFuture.zip(refundFuture).zip(salesforceTrackingFuture).zip(amendSupporterProductDynamoTableFuture)
+    requests = emailFuture.zip(salesforceTrackingFuture).zip(amendSupporterProductDynamoTableFuture)
     _ <- requests.join
 
   } yield Success("Product move completed successfully")

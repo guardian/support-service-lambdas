@@ -203,7 +203,7 @@ val emailMessageBody = EmailMessage(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "28",
+        first_payment_amount = "20",
         price = "50.0",
         payment_frequency = "month",
         date_of_first_payment = "10 May 2022",
@@ -248,6 +248,7 @@ val refundInput1 = RefundInput(
 val salesforceRecordInput1 = SalesforceRecordInput(
   "A-S00339056",
   BigDecimal(50),
+  BigDecimal(50),
   "P1",
   "RP1",
   "Supporter Plus",
@@ -258,19 +259,20 @@ val salesforceRecordInput1 = SalesforceRecordInput(
 val salesforceRecordInput2 = SalesforceRecordInput(
   "A-S00339056",
   BigDecimal(50),
+  BigDecimal(50),
   "P1",
   "RP1",
   "Supporter Plus",
   LocalDate.of(2022, 5, 10),
   LocalDate.of(2022, 5, 10),
-  BigDecimal(28),
+  BigDecimal(20),
 )
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
-val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as")
-val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2")
+val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as", 20)
+val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2", 10)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
@@ -290,10 +292,11 @@ val sfSubscription1 = GetSfSubscriptionResponse(
 val createRecordRequest1 = CreateRecordRequest(
   SF_Subscription__c = "123456",
   Previous_Amount__c = BigDecimal(100),
+  New_Amount__c = BigDecimal(100),
   Previous_Product_Name__c = "previous product name",
   Previous_Rate_Plan_Name__c = "previous rate plan",
   New_Rate_Plan_Name__c = "new rate plan",
   Requested_Date__c = LocalDate.parse("2022-12-08"),
   Effective_Date__c = LocalDate.parse("2022-12-09"),
-  Refund_Amount__c = BigDecimal(50),
+  Paid_Amount__c = BigDecimal(50),
 )
