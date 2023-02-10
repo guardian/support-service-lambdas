@@ -221,7 +221,7 @@ object ProductMoveEndpoint {
                 last_name = account.billToContact.lastName,
                 currency = account.basicInfo.currency.symbol,
                 price = price.toString,
-                first_payment_amount = totalDeltaMrr.toString,
+                first_payment_amount = totalDeltaMrr.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                 date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                 payment_frequency = billingPeriod,
                 contribution_cancellation_date = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
