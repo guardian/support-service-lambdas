@@ -15,11 +15,7 @@ object BuildPreviewResult {
       invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.ratePlanChargeId)
 
     (supporterPlusInvoices.length, contributionInvoices.length) match {
-      case (0, _) =>
-        ZIO.fail(
-          s"Unexpected invoice item structure was returned from a Zuora preview call. Invoice data was: $invoice",
-        )
-      case (n1, _) if n1 > 1 =>
+      case (n1, n2) if n1 > 1 && n2 >= 1 =>
         for {
           date <- Clock.currentDateTime.map(_.toLocalDate)
           contributionRefundInvoice = contributionInvoices
@@ -36,6 +32,10 @@ object BuildPreviewResult {
           contributionRefundInvoice.totalAmount,
           supporterPlusInvoiceItems.head.totalAmount,
           supporterPlusInvoiceItems(1).serviceStartDate,
+        )
+      case (_, _) =>
+        ZIO.fail(
+          s"Unexpected invoice item structure was returned from a Zuora preview call. Invoice data was: $invoice",
         )
     }
   }
