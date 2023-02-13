@@ -65,7 +65,9 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
   ): ZIO[Stage, String, PreviewResult] = {
 
     for {
-      requestBody <- SubscriptionUpdatePreviewRequest(billingPeriod, ratePlanIdToRemove, price)
+      today <- Clock.currentDateTime.map(_.toLocalDate)
+
+      requestBody <- SubscriptionUpdatePreviewRequest(billingPeriod, ratePlanIdToRemove, price, today.plusMonths(13))
       response <- zuoraGet.put[SubscriptionUpdatePreviewRequest, SubscriptionUpdatePreviewResponse](
         uri"subscriptions/$subscriptionId",
         requestBody,
@@ -119,6 +121,7 @@ case class SubscriptionUpdatePreviewRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],
     preview: Boolean = true,
+    targetDate: LocalDate,
 )
 case class SubscriptionUpdatePreviewResponse(invoice: SubscriptionUpdateInvoice)
 case class SubscriptionUpdateInvoiceItem(
@@ -153,9 +156,10 @@ object SubscriptionUpdatePreviewRequest {
       billingPeriod: BillingPeriod,
       ratePlanIdToRemove: String,
       price: BigDecimal,
+      targetDate: LocalDate,
   ): ZIO[Stage, String, SubscriptionUpdatePreviewRequest] =
     getRatePlans(billingPeriod, ratePlanIdToRemove, price).map { case (addRatePlan, removeRatePlan) =>
-      SubscriptionUpdatePreviewRequest(addRatePlan, removeRatePlan)
+      SubscriptionUpdatePreviewRequest(add = addRatePlan, remove = removeRatePlan, targetDate = targetDate)
     }
 }
 

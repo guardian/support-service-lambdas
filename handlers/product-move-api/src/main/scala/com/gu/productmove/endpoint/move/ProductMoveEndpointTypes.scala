@@ -3,6 +3,7 @@ package com.gu.productmove.endpoint.move
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.OutputBody
 import com.gu.productmove.framework.InlineSchema.inlineSchema
 import com.gu.productmove.endpoint.available.{Currency, MoveToProduct}
+import java.time.LocalDate
 import sttp.tapir.Schema
 import sttp.tapir.Schema.annotations.{description, encodedName}
 import sttp.tapir.generic.{Configuration, Derived}
@@ -32,14 +33,20 @@ object ProductMoveEndpointTypes {
       @description("The amount payable by the customer today") amountPayableToday: BigDecimal,
       @description("The amount refunded from the cancelled contribution") contributionRefundAmount: BigDecimal,
       @description("The cost of the new supporter plus subscription") supporterPlusPurchaseAmount: BigDecimal,
+      @description(
+        "The next payment date of the new supporter plus subscription, i.e.: the second payment date",
+      ) nextPaymentDate: LocalDate,
   ) extends OutputBody
-  case class InternalServerError(message: String) extends OutputBody
+  case class InternalServerError(@description("Error message.") message: String) extends OutputBody
   given Schema[Success] = inlineSchema(Schema.derived)
   given Schema[PreviewResult] = inlineSchema(Schema.derived)
+  given Schema[InternalServerError] = inlineSchema(Schema.derived)
   given JsonEncoder[Success] = DeriveJsonEncoder.gen[Success]
   given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
   given JsonEncoder[PreviewResult] = DeriveJsonEncoder.gen[PreviewResult]
   given JsonDecoder[PreviewResult] = DeriveJsonDecoder.gen // needed to keep tapir happy
   given JsonEncoder[OutputBody] = DeriveJsonEncoder.gen[OutputBody]
   given JsonDecoder[OutputBody] = DeriveJsonDecoder.gen[OutputBody] // needed to keep tapir happy
+  given JsonEncoder[InternalServerError] = DeriveJsonEncoder.gen[InternalServerError]
+  given JsonDecoder[InternalServerError] = DeriveJsonDecoder.gen[InternalServerError] // needed to keep tapir happy
 }

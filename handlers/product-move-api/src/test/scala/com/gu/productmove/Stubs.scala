@@ -313,7 +313,7 @@ val subscriptionUpdateResponse5 = SubscriptionUpdateResponse("8ad08ccf8442718001
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
 //-----------------------------------------------------
-val subscriptionUpdatePreviewResult = PreviewResult(10, 0, 15)
+val subscriptionUpdatePreviewResult = PreviewResult(40, -10, 50, LocalDate.of(2023, 6, 10))
 
 //-----------------------------------------------------
 // Stubs for GetSfSubscription service
