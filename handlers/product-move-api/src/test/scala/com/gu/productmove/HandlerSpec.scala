@@ -14,7 +14,7 @@ import com.gu.productmove.endpoint.available.{
   Trial,
 }
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, InternalServerError, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
 import com.gu.productmove.refund.RefundInput
@@ -104,17 +104,17 @@ object HandlerSpec extends ZIOSpecDefault {
         val endpointJsonInputBody = ExpectedInput(50.00, false)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
-        val expectedOutput = "identityId is null for subscription name A-S00339056"
+        val expectedOutput = InternalServerError("identityId is null for subscription name A-S00339056")
         (for {
           _ <- TestClock.setTime(time)
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody).exit
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
           sqsRequests <- MockSQS.requests
           dynamoRequests <- MockDynamo.requests
         } yield {
-          assert(output)(fails(equalTo(expectedOutput))) &&
+          assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List("A-S00339056"))) &&
           assert(subUpdateRequests)(equalTo(Nil)) &&
           assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
@@ -164,16 +164,16 @@ object HandlerSpec extends ZIOSpecDefault {
         val endpointJsonInputBody = ExpectedInput(50.00, false)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
-        val expectedOutput = "Subscription: A-S00339056 has more than one ratePlan"
+        val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
         (for {
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody).exit
+          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
           sqsRequests <- MockSQS.requests
           dynamoRequests <- MockDynamo.requests
         } yield {
-          assert(output)(fails(equalTo(expectedOutput))) &&
+          assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
           assert(subUpdateRequests)(equalTo(Nil)) &&
           assert(getAccountRequests)(equalTo(Nil)) &&

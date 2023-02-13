@@ -33,13 +33,16 @@ object ProductMoveEndpointTypes {
       @description("The amount refunded from the cancelled contribution") contributionRefundAmount: BigDecimal,
       @description("The cost of the new supporter plus subscription") supporterPlusPurchaseAmount: BigDecimal,
   ) extends OutputBody
-  case class InternalServerError(message: String) extends OutputBody
+  case class InternalServerError(@description("Error message.") message: String) extends OutputBody
   given Schema[Success] = inlineSchema(Schema.derived)
   given Schema[PreviewResult] = inlineSchema(Schema.derived)
+  given Schema[InternalServerError] = inlineSchema(Schema.derived)
   given JsonEncoder[Success] = DeriveJsonEncoder.gen[Success]
   given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
   given JsonEncoder[PreviewResult] = DeriveJsonEncoder.gen[PreviewResult]
   given JsonDecoder[PreviewResult] = DeriveJsonDecoder.gen // needed to keep tapir happy
   given JsonEncoder[OutputBody] = DeriveJsonEncoder.gen[OutputBody]
   given JsonDecoder[OutputBody] = DeriveJsonDecoder.gen[OutputBody] // needed to keep tapir happy
+  given JsonEncoder[InternalServerError] = DeriveJsonEncoder.gen[InternalServerError]
+  given JsonDecoder[InternalServerError] = DeriveJsonDecoder.gen[InternalServerError] // needed to keep tapir happy
 }
