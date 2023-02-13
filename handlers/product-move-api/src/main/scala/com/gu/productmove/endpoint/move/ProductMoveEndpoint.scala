@@ -254,16 +254,6 @@ object ProductMoveEndpoint {
       )
       .fork
 
-    /*
-    refundFuture <-
-      if (updateResponse.totalDeltaMrr < 0)
-        SQS
-          .queueRefund(RefundInput(subscriptionName, updateResponse.invoiceId, updateResponse.totalDeltaMrr.abs))
-          .fork
-      else
-        ZIO.succeed(()).fork
-     */
-
     supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, ratePlanCharge.billingPeriod))
     amendSupporterProductDynamoTableFuture <- Dynamo
       .writeItem(
