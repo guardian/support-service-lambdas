@@ -164,44 +164,6 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
-
-      /*
-
-      *** Commented out until V2 ***
-
-      test("productMove endpoint is successful for a refunded customer") {
-        val endpointJsonInputBody = ExpectedInput(50.00, false)
-        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
-        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse2)
-        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
-        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
-          Map(emailMessageBodyRefund -> (), refundInput1 -> (), salesforceRecordInput1 -> ())
-        (for {
-          _ <- TestClock.setTime(time)
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          getAccountRequests <- MockGetAccount.requests
-          sqsRequests <- MockSQS.requests
-          dynamoRequests <- MockDynamo.requests
-        } yield {
-          assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-          assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
-          assert(sqsRequests)(hasSameElements(List(emailMessageBodyRefund, refundInput1, salesforceRecordInput1))) &&
-          assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(Stage.valueOf("PROD")),
-        )
-      },
-       */
-
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
         val endpointJsonInputBody = ExpectedInput(50.00, false)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
