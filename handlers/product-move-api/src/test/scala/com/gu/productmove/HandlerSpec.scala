@@ -107,8 +107,19 @@ object HandlerSpec extends ZIOSpecDefault {
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
         val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
+        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+          Map(emailMessageBodyNoPaymentOrRefund -> (), salesforceRecordInput3 -> ())
+
+        val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)) ++
+          ZLayer.succeed(new MockSQS(sqsStubs)) ++
+          ZLayer.succeed(new MockDynamo(dynamoStubs)) ++
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
+          ZLayer.succeed(Stage.valueOf("PROD"))
+
         (for {
           _ <- TestClock.setTime(time)
+
           output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
@@ -122,14 +133,7 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
           assert(sqsRequests)(hasSameElements(List(emailMessageBodyNoPaymentOrRefund, salesforceRecordInput3))) &&
           assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(Stage.valueOf("PROD")),
-        )
+        }).provide(layers)
       },
       test("productMove endpoint returns 500 error if identityId does not exist") {
         val endpointJsonInputBody = ExpectedInput(50.00, false)

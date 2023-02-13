@@ -304,9 +304,11 @@ val salesforceRecordInput3 = SalesforceRecordInput(
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
-val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as", Some(20))
-val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2", Some(10))
-val subscriptionUpdateResponse3 = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as", None)
+val subscriptionUpdateResponse = SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57mkd", 28, "89ad8casd9c0asdcaj89sdc98as", Some(20))
+val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57osi", -4, "80a23d9sdf9a89fs8cjjk2", Some(10))
+val subscriptionUpdateResponse3 = SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57jsd", 28, "89ad8casd9c0asdcaj89sdc98as", None)
+val subscriptionUpdateResponse4 = SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f6d070b8", BigDecimal(25), "8ad0823f841cf4e601841e61f7b570e8", Some(25))
+val subscriptionUpdateResponse5 = SubscriptionUpdateResponse("8ad08ccf844271800184528017044b36", -4, "8ad08ccf844271800184528017b24b4b", None)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
