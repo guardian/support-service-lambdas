@@ -25,8 +25,26 @@ object Fixtures {
         0,
         contributionRatePlanChargeId,
       ),
-      SubscriptionUpdateInvoiceItem( //Supporter plus
+      SubscriptionUpdateInvoiceItem( // Supporter plus
         LocalDate.parse("2023-01-19"),
+        10,
+        0,
+        supporterPlusRatePlanChargeId,
+      ),
+      SubscriptionUpdateInvoiceItem( // Supporter plus
+        LocalDate.parse("2023-02-19"),
+        10,
+        0,
+        supporterPlusRatePlanChargeId,
+      ),
+      SubscriptionUpdateInvoiceItem( // Supporter plus
+        LocalDate.parse("2023-03-19"),
+        10,
+        0,
+        supporterPlusRatePlanChargeId,
+      ),
+      SubscriptionUpdateInvoiceItem( // Supporter plus
+        LocalDate.parse("2023-04-19"),
         10,
         0,
         supporterPlusRatePlanChargeId,
@@ -58,12 +76,18 @@ object Fixtures {
         productRatePlanChargeId = contributionRatePlanChargeId,
       ),
       SubscriptionUpdateInvoiceItem(
+        serviceStartDate = LocalDate.parse("2023-03-06"),
+        chargeAmount = 20,
+        taxAmount = 0,
+        productRatePlanChargeId = supporterPlusRatePlanChargeId,
+      ),
+      SubscriptionUpdateInvoiceItem(
         serviceStartDate = LocalDate.parse("2023-02-06"),
         chargeAmount = 9.09,
         taxAmount = 0.91,
         productRatePlanChargeId = supporterPlusRatePlanChargeId,
       ),
-    )
+    ),
   )
 
 }

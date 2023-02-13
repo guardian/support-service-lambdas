@@ -196,6 +196,7 @@ object HandlerSpec extends ZIOSpecDefault {
           amountPayableToday = 40,
           contributionRefundAmount = -10,
           supporterPlusPurchaseAmount = 50,
+          LocalDate.of(2023, 6, 10),
         )
         (for {
           _ <- TestClock.setTime(time)
