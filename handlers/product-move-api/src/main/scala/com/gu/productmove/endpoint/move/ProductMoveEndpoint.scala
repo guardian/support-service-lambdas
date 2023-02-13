@@ -270,7 +270,10 @@ object ProductMoveEndpoint {
       )
       .fork
 
-    requests = emailFuture.zip(salesforceTrackingFuture).zip(amendSupporterProductDynamoTableFuture)
+    requests = emailFuture
+      .zip(salesforceTrackingFuture)
+      .zip(amendSupporterProductDynamoTableFuture)
+
     _ <- requests.join
 
   } yield Success("Product move completed successfully")
