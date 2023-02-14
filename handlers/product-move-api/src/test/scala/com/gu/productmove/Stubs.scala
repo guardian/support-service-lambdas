@@ -35,8 +35,8 @@ val getSubscriptionResponse = GetSubscriptionResponse(
       ratePlanCharges = List(
         RatePlanCharge(
           productRatePlanChargeId = "PRPC1",
-          name = "Digital Pack Monthly",
-          price = 11.11,
+          name = "Contribution",
+          price = 5.000000000,
           currency = "GBP",
           number = "number",
           effectiveStartDate = LocalDate.of(2017, 12, 15),
@@ -203,8 +203,8 @@ val emailMessageBody = EmailMessage(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "28",
-        price = "50.0",
+        first_payment_amount = "20.00",
+        price = "15.00",
         payment_frequency = "month",
         date_of_first_payment = "10 May 2022",
         currency = "£",
@@ -225,8 +225,30 @@ val emailMessageBodyRefund = EmailMessage(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "-4",
-        price = "50.0",
+        first_payment_amount = "-4.00",
+        price = "50.00",
+        payment_frequency = "month",
+        date_of_first_payment = "10 May 2022",
+        currency = "£",
+        contribution_cancellation_date = "10 May 2022",
+      ),
+    ),
+  ),
+  "SV_RCtoSP_Switch",
+  "sfContactId",
+  Some("12345"),
+)
+
+val emailMessageBodyNoPaymentOrRefund = EmailMessage(
+  To = EmailPayload(
+    Address = Some("example@gmail.com"),
+    EmailPayloadContactAttributes(
+      EmailPayloadSubscriberAttributes(
+        subscription_id = "A-S00339056",
+        first_name = "John",
+        last_name = "Hee",
+        first_payment_amount = "0.00",
+        price = "15.00",
         payment_frequency = "month",
         date_of_first_payment = "10 May 2022",
         currency = "£",
@@ -248,6 +270,7 @@ val refundInput1 = RefundInput(
 val salesforceRecordInput1 = SalesforceRecordInput(
   "A-S00339056",
   BigDecimal(50),
+  BigDecimal(50),
   "P1",
   "RP1",
   "Supporter Plus",
@@ -257,20 +280,35 @@ val salesforceRecordInput1 = SalesforceRecordInput(
 )
 val salesforceRecordInput2 = SalesforceRecordInput(
   "A-S00339056",
-  BigDecimal(50),
+  BigDecimal(5),
+  BigDecimal(15),
   "P1",
   "RP1",
   "Supporter Plus",
   LocalDate.of(2022, 5, 10),
   LocalDate.of(2022, 5, 10),
-  BigDecimal(28),
+  BigDecimal(20),
+)
+val salesforceRecordInput3 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(5),
+  BigDecimal(15),
+  "P1",
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2022, 5, 10),
+  LocalDate.of(2022, 5, 10),
+  BigDecimal(0),
 )
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
-val subscriptionUpdateResponse = SubscriptionUpdateResponse("A-S00339056", 28, "89ad8casd9c0asdcaj89sdc98as")
-val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("A-S00339056", -4, "80a23d9sdf9a89fs8cjjk2")
+val subscriptionUpdateResponse = SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57mkd", 28, "89ad8casd9c0asdcaj89sdc98as", Some(20))
+val subscriptionUpdateResponse2 = SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57osi", -4, "80a23d9sdf9a89fs8cjjk2", Some(10))
+val subscriptionUpdateResponse3 = SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57jsd", 28, "89ad8casd9c0asdcaj89sdc98as", None)
+val subscriptionUpdateResponse4 = SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f6d070b8", BigDecimal(25), "8ad0823f841cf4e601841e61f7b570e8", Some(25))
+val subscriptionUpdateResponse5 = SubscriptionUpdateResponse("8ad08ccf844271800184528017044b36", -4, "8ad08ccf844271800184528017b24b4b", None)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
@@ -290,10 +328,11 @@ val sfSubscription1 = GetSfSubscriptionResponse(
 val createRecordRequest1 = CreateRecordRequest(
   SF_Subscription__c = "123456",
   Previous_Amount__c = BigDecimal(100),
+  New_Amount__c = BigDecimal(100),
   Previous_Product_Name__c = "previous product name",
   Previous_Rate_Plan_Name__c = "previous rate plan",
   New_Rate_Plan_Name__c = "new rate plan",
   Requested_Date__c = LocalDate.parse("2022-12-08"),
   Effective_Date__c = LocalDate.parse("2022-12-09"),
-  Refund_Amount__c = BigDecimal(50),
+  Paid_Amount__c = BigDecimal(50),
 )

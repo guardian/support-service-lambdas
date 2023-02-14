@@ -36,12 +36,13 @@ object CreateRecord {
       Type__c: String = "Product Switch",
       Source__c: String = "MMA",
       Previous_Amount__c: BigDecimal,
+      New_Amount__c: BigDecimal,
       Previous_Product_Name__c: String,
       Previous_Rate_Plan_Name__c: String,
       New_Rate_Plan_Name__c: String,
       Requested_Date__c: LocalDate,
       Effective_Date__c: LocalDate,
-      Refund_Amount__c: BigDecimal,
+      Paid_Amount__c: BigDecimal,
   )
   given JsonEncoder[CreateRecordRequest] = DeriveJsonEncoder.gen[CreateRecordRequest]
 

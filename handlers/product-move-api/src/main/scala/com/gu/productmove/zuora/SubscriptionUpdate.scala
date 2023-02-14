@@ -111,7 +111,12 @@ case class RemoveRatePlan(
     contractEffectiveDate: LocalDate,
     ratePlanId: String,
 )
-case class SubscriptionUpdateResponse(subscriptionId: String, totalDeltaMrr: BigDecimal, invoiceId: String)
+case class SubscriptionUpdateResponse(
+    subscriptionId: String,
+    totalDeltaMrr: BigDecimal,
+    invoiceId: String,
+    paidAmount: Option[BigDecimal],
+)
 case class SubscriptionUpdatePreviewRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],

@@ -206,10 +206,12 @@ object ProductMoveEndpoint {
     updateResponse <- SubscriptionUpdate
       .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlan.id)
       .addLogMessage("SubscriptionUpdate")
-    totalDeltaMrr = updateResponse.totalDeltaMrr
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriod <- ratePlanCharge.billingPeriod.value
+
+    paidAmount = updateResponse.paidAmount.getOrElse(BigDecimal(0))
+
     emailFuture <- SQS
       .sendEmail(
         message = EmailMessage(
@@ -220,8 +222,8 @@ object ProductMoveEndpoint {
                 first_name = account.billToContact.firstName,
                 last_name = account.billToContact.lastName,
                 currency = account.basicInfo.currency.symbol,
-                price = price.toString,
-                first_payment_amount = totalDeltaMrr.toString,
+                price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                 date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                 payment_frequency = billingPeriod,
                 contribution_cancellation_date = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
@@ -240,24 +242,17 @@ object ProductMoveEndpoint {
       .queueSalesforceTracking(
         SalesforceRecordInput(
           subscriptionName,
+          BigDecimal(ratePlanCharge.price),
           price,
           currentRatePlan.productName,
           currentRatePlan.ratePlanName,
           "Supporter Plus",
           todaysDate,
           todaysDate,
-          updateResponse.totalDeltaMrr.abs,
+          paidAmount,
         ),
       )
       .fork
-
-    refundFuture <-
-      if (updateResponse.totalDeltaMrr < 0)
-        SQS
-          .queueRefund(RefundInput(subscriptionName, updateResponse.invoiceId, updateResponse.totalDeltaMrr.abs))
-          .fork
-      else
-        ZIO.succeed(()).fork
 
     supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, ratePlanCharge.billingPeriod))
     amendSupporterProductDynamoTableFuture <- Dynamo
@@ -275,7 +270,10 @@ object ProductMoveEndpoint {
       )
       .fork
 
-    requests = emailFuture.zip(refundFuture).zip(salesforceTrackingFuture).zip(amendSupporterProductDynamoTableFuture)
+    requests = emailFuture
+      .zip(salesforceTrackingFuture)
+      .zip(amendSupporterProductDynamoTableFuture)
+
     _ <- requests.join
 
   } yield Success("Product move completed successfully")
