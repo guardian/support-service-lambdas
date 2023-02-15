@@ -197,27 +197,27 @@ Resources:
           Stage: !Ref Stage
           salesforceUrl:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:url}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:url}}'
             - { Stage: !Ref Stage }
           salesforceClientId:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:client_id}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:client_id}}'
             - { Stage: !Ref Stage }
           salesforceClientSecret:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:client_secret}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:client_secret}}'
             - { Stage: !Ref Stage }
           salesforceUsername:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:username}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:username}}'
             - { Stage: !Ref Stage }
           salesforcePassword:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:password}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:password}}'
             - { Stage: !Ref Stage }
           salesforceToken:
             !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:token}}'
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:token}}'
             - { Stage: !Ref Stage }
       CodeUri:
         Bucket: !Ref DeployBucket
