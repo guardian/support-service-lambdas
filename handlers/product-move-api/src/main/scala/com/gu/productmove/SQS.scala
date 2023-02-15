@@ -132,7 +132,6 @@ case class EmailPayloadSubscriberAttributes(
     date_of_first_payment: String,
     price: String,
     payment_frequency: String,
-    contribution_cancellation_date: String,
     currency: String,
     subscription_id: String,
 )
