@@ -55,12 +55,15 @@ Resources:
           zuoraBaseUrl:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:baseUrl}}'
+            - { Stage: !Ref Stage }
           zuoraUsername:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:username}}'
+            - { Stage: !Ref Stage }
           zuoraPassword:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:password}}'
+            - { Stage: !Ref Stage }
       CodeUri:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar

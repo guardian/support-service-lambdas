@@ -37,6 +37,9 @@ object ZuoraClientLive {
 
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/"))
 
+        _ <- ZIO.log("zuoraBaseUrl :" + baseUrl.toString)
+        _ <- ZIO.log("zuoraUsername :" + zuoraUsername)
+
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield ZuoraClientLive(baseUrl, sttpClient, ZuoraRestConfig(zuoraBaseUrl, zuoraUsername, zuoraPassword))
     }
