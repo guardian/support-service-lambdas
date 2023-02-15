@@ -24,7 +24,7 @@ object InvoicingApiRefundLive {
   val layer: ZLayer[SttpBackend[Task, Any] with AwsS3, String, InvoicingApiRefundLive] =
     ZLayer {
       for {
-        invoicingApiUrl <- ZIO.fromEither(getFromEnv("InvoicingApiUrl"))
+        invoicingApiUrl <- ZIO.fromEither(getFromEnv("InvoicingApiUrl")).map(_ + "/refund")
         invoicingApiKey <- ZIO.fromEither(getFromEnv("InvoicingApiKey"))
 
         invoicingApiConfig = InvoicingApiConfig(invoicingApiUrl, invoicingApiKey)
