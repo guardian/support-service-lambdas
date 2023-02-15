@@ -25,20 +25,21 @@ object ZuoraClientLive {
   object ZuoraRestConfig {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
+  def getFromEnv(prop: String): Either[String, String] =
+    sys.env.get(prop).toRight(s"Could not obtain $prop")
 
-  val layer: ZLayer[AwsS3 with Stage with SttpBackend[Task, Any], String, ZuoraClient] =
+  val layer: ZLayer[SttpBackend[Task, Any], String, ZuoraClient] =
     ZLayer {
       for {
-        stage <- ZIO.service[Stage]
-        fileContent <- AwsS3.getObject(bucket, key("zuoraRest", stage)).mapError(_.toString)
-        zuoraRestConfig <- ZIO.fromEither(summon[JsonDecoder[ZuoraRestConfig]].decodeJson(fileContent))
-        baseUrl <- ZIO.fromEither(Uri.parse(zuoraRestConfig.baseUrl + "/"))
-        _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
-        _ <- ZIO.log("baseUrl: " + baseUrl.toString)
-        sttpClient <- ZIO.service[SttpBackend[Task, Any]]
-      } yield ZuoraClientLive(baseUrl, sttpClient, zuoraRestConfig)
-    }
+        zuoraBaseUrl <- ZIO.fromEither(getFromEnv("zuoraBaseUrl"))
+        zuoraUsername <- ZIO.fromEither(getFromEnv("zuoraUsername"))
+        zuoraPassword <- ZIO.fromEither(getFromEnv("zuoraPassword"))
 
+        baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/"))
+
+        sttpClient <- ZIO.service[SttpBackend[Task, Any]]
+      } yield ZuoraClientLive(baseUrl, sttpClient, ZuoraRestConfig(zuoraBaseUrl, zuoraUsername, zuoraPassword))
+    }
 }
 
 private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], zuoraRestConfig: ZuoraRestConfig)

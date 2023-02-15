@@ -52,6 +52,15 @@ Resources:
           App: product-move-api
           Stack: !Ref Stack
           Stage: !Ref Stage
+          zuoraBaseUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:baseUrl}}'
+          zuoraUsername:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:username}}'
+          zuoraPassword:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:password}}'
       CodeUri:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
@@ -71,7 +80,6 @@ Resources:
           Effect: Allow
           Action: s3:GetObject
           Resource:
-            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/invoicingApi-${Stage}*.json
       - Statement:
         - Effect: Allow
