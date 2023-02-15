@@ -3,6 +3,7 @@ package com.gu.productmove.zuora.rest
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.Util.getFromEnv
 import com.gu.productmove.zuora.rest.ZuoraClient
 import com.gu.productmove.zuora.rest.ZuoraClientLive.ZuoraRestConfig
 import sttp.capabilities.zio.ZioStreams
@@ -25,8 +26,6 @@ object ZuoraClientLive {
   object ZuoraRestConfig {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
-  def getFromEnv(prop: String): Either[String, String] =
-    sys.env.get(prop).toRight(s"Could not obtain $prop")
 
   val layer: ZLayer[SttpBackend[Task, Any], String, ZuoraClient] =
     ZLayer {
@@ -37,8 +36,7 @@ object ZuoraClientLive {
 
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/"))
 
-        _ <- ZIO.log("zuoraBaseUrl :" + baseUrl.toString)
-        _ <- ZIO.log("zuoraUsername :" + zuoraUsername)
+        _ <- ZIO.log("zuoraBaseUrl:   " + baseUrl.toString)
 
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield ZuoraClientLive(baseUrl, sttpClient, ZuoraRestConfig(zuoraBaseUrl, zuoraUsername, zuoraPassword))
