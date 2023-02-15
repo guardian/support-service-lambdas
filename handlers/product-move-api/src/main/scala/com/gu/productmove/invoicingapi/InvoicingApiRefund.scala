@@ -3,6 +3,7 @@ package com.gu.productmove.invoicingapi
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.Util.getFromEnv
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.{RefundRequest, RefundResponse}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive.InvoicingApiConfig
 import sttp.client3.Response.ExampleGet.uri
@@ -20,12 +21,14 @@ object InvoicingApiRefundLive {
     given JsonDecoder[InvoicingApiConfig] = DeriveJsonDecoder.gen[InvoicingApiConfig]
   }
 
-  val layer: ZLayer[Stage with SttpBackend[Task, Any] with AwsS3, String, InvoicingApiRefundLive] =
+  val layer: ZLayer[SttpBackend[Task, Any] with AwsS3, String, InvoicingApiRefundLive] =
     ZLayer {
       for {
-        stage <- ZIO.service[Stage]
-        fileContent <- AwsS3.getObject(bucket, key("invoicingApi", stage)).mapError(_.toString)
-        invoicingApiConfig <- ZIO.fromEither(summon[JsonDecoder[InvoicingApiConfig]].decodeJson(fileContent))
+        invoicingApiUrl <- ZIO.fromEither(getFromEnv("InvoicingApiUrl"))
+        invoicingApiKey <- ZIO.fromEither(getFromEnv("InvoicingApiKey"))
+
+        invoicingApiConfig = InvoicingApiConfig(invoicingApiUrl, invoicingApiKey)
+
         _ <- ZIO.logInfo(s"Invoice API url is ${invoicingApiConfig.url}")
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield InvoicingApiRefundLive(invoicingApiConfig, sttpClient)
