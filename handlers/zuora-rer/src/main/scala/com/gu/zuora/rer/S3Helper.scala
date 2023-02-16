@@ -2,7 +2,7 @@ package com.gu.zuora.rer
 
 import java.util.UUID.randomUUID
 import com.typesafe.scalalogging.LazyLogging
-import com.gu.effects.{BucketName, CopyS3Objects, Key, ListS3Objects, S3Location, S3Path, UploadToS3}
+import com.gu.effects.{BucketName, CopyS3Objects, GetFromS3, Key, ListS3Objects, S3Location, S3Path, UploadToS3}
 import cats.syntax.traverse._
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL
 
@@ -15,7 +15,7 @@ sealed trait S3StatusResponse
 case class S3CompletedPathFound(resultLocations: List[String])
   extends S3StatusResponse
 
-case class S3FailedPathFound() extends S3StatusResponse
+case class S3FailedPathFound(message: String) extends S3StatusResponse
 
 case class S3NoResultsFound() extends S3StatusResponse
 
@@ -45,7 +45,9 @@ object S3Helper extends S3Service with LazyLogging {
       completedFileExists = completedResults.exists(k => k.value.contains("ErasureCompleted") | k.value.contains("NoResultsFoundForUser"))
     } yield {
       if (failedRerExists) {
-        S3FailedPathFound()
+        val failureLocation = S3Location(config.resultsBucket, failedResults.head.value)
+        val message = GetFromS3.fetchString(failureLocation).getOrElse("Unknown failure")
+        S3FailedPathFound(message)
       } else if (completedFileExists) {
         S3CompletedPathFound(completedResults
           .map(keyPath => s"s3://${config.resultsBucket}/${keyPath.value}"))

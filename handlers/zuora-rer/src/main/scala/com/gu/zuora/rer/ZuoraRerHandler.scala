@@ -31,7 +31,7 @@ case class ZuoraRerHandler(s3Service: S3Service, zuoraRerConfig: ZuoraRerConfig)
     s3Service.checkForResults(requestIdValue, zuoraRerConfig).map {
       case S3CompletedPathFound(resultLocations) =>
         RerStatusResponse(requestIdValue, "Success", Completed, Some(resultLocations))
-      case S3FailedPathFound() => RerStatusResponse(requestIdValue, "Failed path found", Failed)
+      case S3FailedPathFound(message) => RerStatusResponse(requestIdValue, message, Failed)
       case S3NoResultsFound() => RerStatusResponse(requestIdValue, "No results found", Pending)
     }
   }
