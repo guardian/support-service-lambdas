@@ -124,7 +124,6 @@ object ProductMoveEndpoint {
     productMove(subscriptionName, postData)
       .provide(
         GetSubscriptionLive.layer,
-        AwsS3Live.layer,
         AwsCredentialsLive.layer,
         SttpClientLive.layer,
         ZuoraClientLive.layer,
