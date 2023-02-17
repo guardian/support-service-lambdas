@@ -95,13 +95,11 @@ object SubscriptionCancelEndpoint {
       .provide(
         GetSubscriptionLive.layer,
         ZuoraCancelLive.layer,
-        AwsS3Live.layer,
         AwsCredentialsLive.layer,
         SttpClientLive.layer,
         ZuoraClientLive.layer,
         ZuoraGetLive.layer,
         GuStageLive.layer,
-        InvoicingApiRefundLive.layer,
         ZuoraSetCancellationReasonLive.layer,
         SQSLive.layer,
       )
@@ -131,7 +129,7 @@ object SubscriptionCancelEndpoint {
     now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 
   private[productmove] def subscriptionCancel(subscriptionName: String, postData: ExpectedInput): ZIO[
-    GetSubscription with ZuoraCancel with InvoicingApiRefund with SQS with Stage with ZuoraSetCancellationReason,
+    GetSubscription with ZuoraCancel with SQS with Stage with ZuoraSetCancellationReason,
     String,
     OutputBody,
   ] =

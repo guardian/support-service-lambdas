@@ -34,10 +34,7 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
       runtime.unsafe.run(
         createSfRecord(salesforceRecordInput)
           .provide(
-            AwsS3Live.layer,
-            AwsCredentialsLive.layer,
             SttpClientLive.layer,
-            GuStageLive.layer,
             GetSfSubscriptionLive.layer,
             SalesforceClientLive.layer,
             CreateRecordLive.layer,
