@@ -306,7 +306,7 @@ Resources:
       EvaluationPeriods: 1
       MetricName: NumberOfMessagesReceived
       Namespace: AWS/SQS
-      Statistic: Minimum
+      Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
 
