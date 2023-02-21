@@ -271,6 +271,7 @@ Resources:
       EventSourceArn: !GetAtt SalesforceTrackingQueue.Arn
       FunctionName: !Ref SalesforceTrackingLambda
 
+
   # alarms
   ProductMovementFailureAlarm:
     Type: AWS::CloudWatch::Alarm
