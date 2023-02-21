@@ -200,7 +200,7 @@ object HandlerSpec extends ZIOSpecDefault {
           amountPayableToday = 40,
           contributionRefundAmount = -10,
           supporterPlusPurchaseAmount = 50,
-          LocalDate.of(2023, 6, 10),
+          LocalDate.of(2023, 1, 10),
         )
         (for {
           _ <- TestClock.setTime(time)
@@ -217,7 +217,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(Stage.valueOf("PROD")),
+          ZLayer.succeed(Stage.valueOf("DEV")),
         )
       },
       test("available-product-moves endpoint") {
