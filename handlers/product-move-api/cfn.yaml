@@ -183,7 +183,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       VisibilityTimeout: 3000
-      QueueName: !Sub product-switch-refund-${Stage}
+      QueueName: !Sub product-switch-refund-queue-${Stage}
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt RefundDeadLetterQueue.Arn
         maxReceiveCount: 2
@@ -191,7 +191,7 @@ Resources:
   RefundDeadLetterQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub product-switch-refund-dead-letter-${Stage}
+      QueueName: !Sub product-switch-refund-dead-letter-queue-${Stage}
 
   SQSTrigger:
     Type: AWS::Lambda::EventSourceMapping
@@ -293,11 +293,11 @@ Resources:
 
   RefundLambdaFailureAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsProd
+    # Condition: IsProd
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
-      AlarmName: !Sub An error in the Refund lambda ${Stage} - Dead Letter Queue. Please check the logs to diagnose
+      AlarmName: !Sub An error in the refund lambda. Please check the logs to diagnose and redrive the product-switch-refund-dead-letter-${Stage} SQS queue when ready.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: QueueName
