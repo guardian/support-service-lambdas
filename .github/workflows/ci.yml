@@ -30,6 +30,6 @@ jobs:
           key: sbt
       - name: CI
         run: |
-          LAST_TEAMCITY_BUILD=6409
+          LAST_TEAMCITY_BUILD=6410
           export GITHUB_RUN_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD ))
           sbt riffRaffUpload
