@@ -184,6 +184,14 @@ Resources:
     Properties:
       VisibilityTimeout: 3000
       QueueName: !Sub product-switch-refund-${Stage}
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt RefundDeadLetterQueue.Arn
+        maxReceiveCount: 2
+
+  RefundDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub product-switch-refund-dead-letter-${Stage}
 
   SQSTrigger:
     Type: AWS::Lambda::EventSourceMapping
@@ -263,6 +271,7 @@ Resources:
       EventSourceArn: !GetAtt SalesforceTrackingQueue.Arn
       FunctionName: !Ref SalesforceTrackingLambda
 
+
   # alarms
   ProductMovementFailureAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -289,15 +298,15 @@ Resources:
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
-      AlarmName: !Sub An error in the Refund lambda ${Stage}. Please check the logs to diagnose
+      AlarmName: !Sub An error in the refund lambda ${Stage}. Please check the logs to diagnose and redrive the product-switch-refund-dead-letter-${Stage} SQS queue when ready.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: FunctionName
-          Value: !Ref RefundLambda
-      EvaluationPeriods: 1
-      MetricName: Errors
-      Namespace: AWS/Lambda
+        - Name: QueueName
+          Value: !GetAtt RefundDeadLetterQueue.QueueName
       Period: 300
+      EvaluationPeriods: 1
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
