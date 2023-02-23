@@ -63,59 +63,57 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
         "crmId" -> "",
         "sfContactId__c" -> "",
         "IdentityId__c" -> "",
-        "autoPay" -> false
+        "autoPay" -> false,
       ),
-      RelativePath(s"accounts/$accountId")
+      RelativePath(s"accounts/$accountId"),
     )
     zuoraClient.put[JsValue](putReq).toDisjunction.map(_.bodyAsJson)
   }
 
   private def scrubPaymentMethods(paymentMethodIds: Set[String]): Either[ClientFailure, Unit] = {
     val initialValue: Either[ClientFailure, Unit] = Right(())
-    paymentMethodIds.foldLeft(initialValue) {
-      (lastResult, paymentMethodId) =>
-        if (lastResult.isRight) {
-          val putReq = PutRequest(Json.obj(), RelativePath(s"payment-methods/$paymentMethodId/scrub"))
-          zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
-        } else // fail on first error
-          lastResult
+    paymentMethodIds.foldLeft(initialValue) { (lastResult, paymentMethodId) =>
+      if (lastResult.isRight) {
+        val putReq = PutRequest(Json.obj(), RelativePath(s"payment-methods/$paymentMethodId/scrub"))
+        zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
+      } else // fail on first error
+        lastResult
     }
   }
 
   private def scrubContacts(contactIds: Set[String]): Either[ClientFailure, Unit] = {
     val initialValue: Either[ClientFailure, Unit] = Right(())
-    contactIds.foldLeft(initialValue) {
-      (lastResult, contactId) =>
-        if (lastResult.isRight) {
-          val putReq = PutRequest(
-            // N.B. leave Country and State unchanged as both are needed for tax assignment
-            Json.obj(
-              "Address1" -> "",
-              "Address2" -> "",
-              "City" -> "",
-              "County" -> "",
-              "Description" -> "",
-              "Fax" -> "",
-              "FirstName" -> ".",
-              "HomePhone" -> "",
-              "LastName" -> ".",
-              "MobilePhone" -> "",
-              "NickName" -> "",
-              "OtherPhone" -> "",
-              "OtherPhoneType" -> "Other",
-              "PersonalEmail" -> "",
-              "PostalCode" -> "",
-              "SpecialDeliveryInstructions__c" -> "",
-              "TaxRegion" -> "",
-              "Title__c" -> "Other",
-              "WorkEmail" -> "",
-              "WorkPhone" -> ""
-            ),
-            RelativePath(s"object/contact/$contactId")
-          )
-          zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
-        } else // fail on first error
-          lastResult
+    contactIds.foldLeft(initialValue) { (lastResult, contactId) =>
+      if (lastResult.isRight) {
+        val putReq = PutRequest(
+          // N.B. leave Country and State unchanged as both are needed for tax assignment
+          Json.obj(
+            "Address1" -> "",
+            "Address2" -> "",
+            "City" -> "",
+            "County" -> "",
+            "Description" -> "",
+            "Fax" -> "",
+            "FirstName" -> ".",
+            "HomePhone" -> "",
+            "LastName" -> ".",
+            "MobilePhone" -> "",
+            "NickName" -> "",
+            "OtherPhone" -> "",
+            "OtherPhoneType" -> "Other",
+            "PersonalEmail" -> "",
+            "PostalCode" -> "",
+            "SpecialDeliveryInstructions__c" -> "",
+            "TaxRegion" -> "",
+            "Title__c" -> "Other",
+            "WorkEmail" -> "",
+            "WorkPhone" -> "",
+          ),
+          RelativePath(s"object/contact/$contactId"),
+        )
+        zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
+      } else // fail on first error
+        lastResult
     }
   }
 
@@ -123,32 +121,38 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
 
   private def deleteBillingDocuments(accountId: String): Either[ClientFailure, BillingDeletionResult] = {
     val jsn = Json.obj(
-      "accountIds" -> List(accountId)
+      "accountIds" -> List(accountId),
     )
     val outcome = for {
-      result <- zuoraClient.post[JsValue, BillingDeletionResult](jsn, "accounts/billing-documents/files/deletion-jobs").toDisjunction
+      result <- zuoraClient
+        .post[JsValue, BillingDeletionResult](jsn, "accounts/billing-documents/files/deletion-jobs")
+        .toDisjunction
       jobId = result.id
       jobStatus <- checkBillingDeletionSuccess(jobId)
     } yield jobStatus
 
     outcome match {
-      case Right(BillingDeletionResult(_, "Pending", _)) |
-        Right(BillingDeletionResult(_, "Processing", _)) |
-        Right(BillingDeletionResult(_, "Error", _)) =>
+      case Right(BillingDeletionResult(_, "Pending", _)) | Right(BillingDeletionResult(_, "Processing", _)) | Right(
+            BillingDeletionResult(_, "Error", _),
+          ) =>
         Left(GenericError("Billing Deletion processing issue"))
 
       case _ => outcome
     }
   }
 
-  private def checkBillingDeletionSuccess(jobId: String, counter: Int = 0): Either[ClientFailure, BillingDeletionResult] = {
+  private def checkBillingDeletionSuccess(
+      jobId: String,
+      counter: Int = 0,
+  ): Either[ClientFailure, BillingDeletionResult] = {
     val sleepMs = 5000L
     val maxTries = 12
-    val jobStatus = zuoraClient.get[BillingDeletionResult](s"accounts/billing-documents/files/deletion-jobs/$jobId").toDisjunction
+    val jobStatus =
+      zuoraClient.get[BillingDeletionResult](s"accounts/billing-documents/files/deletion-jobs/$jobId").toDisjunction
     logger.info(s"$jobStatus job deletion")
     jobStatus match {
-      case Right(BillingDeletionResult(_, "Pending", _)) |
-        Right(BillingDeletionResult(_, "Processing", _)) if counter < maxTries =>
+      case Right(BillingDeletionResult(_, "Pending", _)) | Right(BillingDeletionResult(_, "Processing", _))
+          if counter < maxTries =>
         Thread.sleep(sleepMs)
         checkBillingDeletionSuccess(jobId, counter + 1)
 
@@ -165,7 +169,9 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
   }
 
   def checkAccountBalances(customer: CustomerAccount): Either[ZuoraRerError, Unit] = {
-    if (customer.metrics.balance == 0.0 && customer.metrics.creditBalance == 0.0 && customer.metrics.totalInvoiceBalance == 0.0)
+    if (
+      customer.metrics.balance == 0.0 && customer.metrics.creditBalance == 0.0 && customer.metrics.totalInvoiceBalance == 0.0
+    )
       Right(())
     else
       Left(PreconditionCheckError("Account balances are not zero"))
