@@ -9,13 +9,31 @@ object ZuoraIds {
 
   case class ProductRatePlanChargeId(value: String) extends AnyVal
 
-  case class PlanAndCharge(productRatePlanId: ProductRatePlanId, productRatePlanChargeId: ProductRatePlanChargeId)
+  trait HasPlanAndChargeIds {
+    val productRatePlanId: ProductRatePlanId
+    val productRatePlanChargeId: ProductRatePlanChargeId
+  }
 
-  case class SupporterPlusZuoraIds(monthly: PlanAndCharge, monthlyV2: PlanAndCharge, annual: PlanAndCharge) {
-    val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharge] = Map(
+  case class PlanAndCharge(productRatePlanId: ProductRatePlanId, productRatePlanChargeId: ProductRatePlanChargeId)
+      extends HasPlanAndChargeIds
+
+  case class PlanAndCharges(
+      productRatePlanId: ProductRatePlanId,
+      productRatePlanChargeId: ProductRatePlanChargeId,
+      contributionProductRatePlanChargeId: ProductRatePlanChargeId,
+  ) extends HasPlanAndChargeIds
+
+  case class SupporterPlusZuoraIds(
+      monthly: PlanAndCharge,
+      monthlyV2: PlanAndCharges,
+      annual: PlanAndCharge,
+      annualV2: PlanAndCharges,
+  ) {
+    val planAndChargeByApiPlanId: Map[PlanId, HasPlanAndChargeIds] = Map(
       MonthlySupporterPlus -> monthly,
       MonthlySupporterPlusV2 -> monthlyV2,
       AnnualSupporterPlus -> annual,
+      AnnualSupporterPlusV2 -> annualV2,
     )
   }
 
@@ -200,7 +218,7 @@ object ZuoraIds {
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 
-    def apiIdToPlanAndCharge: Map[PlanId, PlanAndCharge] =
+    def apiIdToPlanAndCharge: Map[PlanId, HasPlanAndChargeIds] =
       supporterPlusZuoraIds.planAndChargeByApiPlanId ++
         contributionsZuoraIds.planAndChargeByApiPlanId ++
         guardianWeeklyDomestic.planAndChargeByApiPlanId ++
@@ -215,17 +233,21 @@ object ZuoraIds {
         SupporterPlusZuoraIds(
           monthly = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("8a12865b8219d9b401822106192b64dc"),
-            productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b401822106194e64e3")
+            productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b401822106194e64e3"),
           ),
-          // TODO these ids are wrong (just copied from monthly)
-          // TODO annualV2
-          monthlyV2 = PlanAndCharge(
-            productRatePlanId = ProductRatePlanId("8a12865b8219d9b401822106192b64dc"),
-            productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b401822106194e64e3")
+          monthlyV2 = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("8a128ed885fc6ded018602296ace3eb8"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a128ed885fc6ded018602296af13eba"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("8a128d7085fc6dec01860234cd075270"),
           ),
           annual = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("8a12865b8219d9b40182210618a464ba"),
             productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b40182210618c664c1"),
+          ),
+          annualV2 = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("8a128ed885fc6ded01860228f77e3d5a"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a128ed885fc6ded01860228f7cb3d5f"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("8a12892d85fc6df4018602451322287f"),
           ),
         ),
         ContributionsZuoraIds(
@@ -299,17 +321,21 @@ object ZuoraIds {
         SupporterPlusZuoraIds(
           monthly = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("8ad088718219a6b601822036a6c91f5c"),
-            productRatePlanChargeId = ProductRatePlanChargeId("8ad088718219a6b601822036a6e21f5e")
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad088718219a6b601822036a6e21f5e"),
           ),
-          // TODO these ids are wrong (just copied from monthly)
-          // TODO annualV2
-          monthlyV2 = PlanAndCharge(
-            productRatePlanId = ProductRatePlanId("8ad088718219a6b601822036a6c91f5c"),
-            productRatePlanChargeId = ProductRatePlanChargeId("8ad088718219a6b601822036a6e21f5e")
+          monthlyV2 = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("8ad0940885f8901f0186024838f844a1"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad0940885f8901f01860248397b44d7"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("8ad08e1a86023f520186024dd62d4aa2"),
           ),
           annual = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("8ad088718219a6b601822036a5801f34"),
             productRatePlanChargeId = ProductRatePlanChargeId("8ad088718219a6b601822036a5c21f39"),
+          ),
+          annualV2 = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("8ad094b985f8901601860248d751315c"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad094b985f8901601860248d7ba3176"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("8ad08e1a86023f520186024d08801ad6"),
           ),
         ),
         ContributionsZuoraIds(
@@ -385,14 +411,19 @@ object ZuoraIds {
             productRatePlanId = ProductRatePlanId("8ad09fc281de1ce70181de3b251736a4"),
             productRatePlanChargeId = ProductRatePlanChargeId("8ad09fc281de1ce70181de3b253e36a6"),
           ),
-          // TODO annualV2
-          monthlyV2 = PlanAndCharge(
-            productRatePlanId = ProductRatePlanId("8ad08e018499b108018499f163ac32e3"),
-            productRatePlanChargeId = ProductRatePlanChargeId("8ad08e018499b108018499f163e132ef")
+          monthlyV2 = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("8ad08cbd8586721c01858804e3275376"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad08cbd8586721c01858804e3715378"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("8ad09ea0858682bb0185880ac57f4c4c"),
           ),
           annual = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("8ad09fc281de1ce70181de3b28ee3783"),
             productRatePlanChargeId = ProductRatePlanChargeId("8ad09fc281de1ce70181de3b29223787"),
+          ),
+          annualV2 = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("8ad08e1a8586721801858805663f6fab"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8ad08e1a858672180185880566606fad"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("8ad096ca858682bb0185881568385d73"),
           ),
         ),
         ContributionsZuoraIds(

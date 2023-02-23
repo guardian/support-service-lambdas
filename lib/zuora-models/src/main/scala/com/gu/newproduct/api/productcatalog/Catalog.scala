@@ -108,6 +108,8 @@ sealed abstract class PlanId(val name: String)
 object PlanId {
   case object AnnualSupporterPlus extends PlanId("annual_supporter_plus") with SupporterPlusPlanId
 
+  case object AnnualSupporterPlusV2 extends PlanId("annual_supporter_plus_v2") with SupporterPlusPlanId
+
   case object MonthlySupporterPlus extends PlanId("monthly_supporter_plus") with SupporterPlusPlanId
 
   case object MonthlySupporterPlusV2 extends PlanId("monthly_supporter_plus_v2") with SupporterPlusPlanId
