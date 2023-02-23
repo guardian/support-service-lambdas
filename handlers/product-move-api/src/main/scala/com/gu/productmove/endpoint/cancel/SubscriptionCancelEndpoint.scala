@@ -19,7 +19,7 @@ import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
 import InvoicingApiRefund.RefundResponse
-import com.gu.productmove.refund.RefundInput
+import cats.data.NonEmptyList
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.*
 import sttp.tapir.json.zio.jsonBody
@@ -115,11 +115,19 @@ object SubscriptionCancelEndpoint {
         )
     }
 
-  private def checkProductIsSupporterPlus(charge: RatePlanCharge, ids: SupporterPlusZuoraIds) = {
-    if (
+  def asNonEmptyList[A](list: List[A], message: String): IO[String, NonEmptyList[A]] =
+    NonEmptyList.fromList(list) match {
+      case Some(nel) => ZIO.succeed(nel)
+      case None => ZIO.fail(s"Subscription can't be cancelled as the charge list is empty")
+    }
+
+  private def checkProductIsSupporterPlus(charges: NonEmptyList[RatePlanCharge], ids: SupporterPlusZuoraIds) = {
+    val hasSupporterPlusCharge = charges.exists(charge =>
       charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
-      charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value
+      charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value ||
+      charge.productRatePlanChargeId == ids.monthlyV2.productRatePlanChargeId.value
     )
+    if (hasSupporterPlusCharge)
       ZIO.succeed(())
     else
       ZIO.fail("Subscription cannot be cancelled as it was not a Supporter Plus subscription")
@@ -145,8 +153,8 @@ object SubscriptionCancelEndpoint {
       // initially this will only apply to new prop which won't have multiple plans or charges.
       zuoraIds <- ZIO.fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)))
       ratePlan <- asSingle(subscription.ratePlans, "ratePlan")
-      charge <- asSingle(ratePlan.ratePlanCharges, "ratePlanCharge")
-      _ <- checkProductIsSupporterPlus(charge, zuoraIds.supporterPlusZuoraIds)
+      charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
+      _ <- checkProductIsSupporterPlus(charges, zuoraIds.supporterPlusZuoraIds)
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
@@ -159,7 +167,7 @@ object SubscriptionCancelEndpoint {
           if (shouldBeRefunded)
             Some(subscription.contractEffectiveDate)
           else
-            charge.chargedThroughDate,
+            charges.head.chargedThroughDate,
         )
         .orElseFail(
           s"Subscription charged through date is null is for supporter plus subscription $subscriptionName.\n" +

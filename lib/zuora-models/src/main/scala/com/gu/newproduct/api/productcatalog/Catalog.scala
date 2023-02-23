@@ -110,6 +110,8 @@ object PlanId {
 
   case object MonthlySupporterPlus extends PlanId("monthly_supporter_plus") with SupporterPlusPlanId
 
+  case object MonthlySupporterPlusV2 extends PlanId("monthly_supporter_plus_v2") with SupporterPlusPlanId
+
   case object AnnualContribution extends PlanId("annual_contribution") with ContributionPlanId
 
   case object MonthlyContribution extends PlanId("monthly_contribution") with ContributionPlanId
