@@ -50,7 +50,7 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
       val jsonRequest =
         """{
           |"initiationReference": "someRequestId",
-          |"dataProvider" : "zuora",
+          |"dataProvider" : "zuorarer",
           |"requestType": "RER",
           |"action" : "status"
           |}
