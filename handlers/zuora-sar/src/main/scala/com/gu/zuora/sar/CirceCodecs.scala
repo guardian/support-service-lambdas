@@ -27,7 +27,7 @@ object circeCodecs {
       def dataProviderIsZuora(cursor: HCursor): Boolean =
         cursor.downField("dataProvider").as[String] match {
           case Left(_) => false
-          case Right(dataProvider) => dataProvider == "zuora"
+          case Right(dataProvider) => dataProvider == "zuorasar"
         }
 
       cursor.downField("action").as[String].flatMap {
@@ -44,7 +44,7 @@ object circeCodecs {
     response
       .add("action", action.asJson)
       .add("requestType", "SAR".asJson)
-      .add("dataProvider", "zuora".asJson)
+      .add("dataProvider", "zuorasar".asJson)
       .asJson
 
   implicit val batonTaskStatusEncoder: Encoder[BatonTaskStatus] =
