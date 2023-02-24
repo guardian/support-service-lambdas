@@ -122,6 +122,8 @@ case class SubscriptionUpdatePreviewRequest(
     remove: List[RemoveRatePlan],
     preview: Boolean = true,
     targetDate: LocalDate,
+    currentTerm: String = "24",
+    currentTermPeriodType: String = "Month",
 )
 case class SubscriptionUpdatePreviewResponse(invoice: SubscriptionUpdateInvoice)
 case class SubscriptionUpdateInvoiceItem(
