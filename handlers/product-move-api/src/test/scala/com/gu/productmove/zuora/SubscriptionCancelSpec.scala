@@ -22,7 +22,7 @@ object SubscriptionCancelSpec extends ZIOSpecDefault{
        */
 
       for {
-        _ <- SubscriptionCancelEndpoint.subscriptionCancel("A-S00496717", ExpectedInput("mma_other"))
+        _ <- SubscriptionCancelEndpoint.subscriptionCancel("A-S00497184", ExpectedInput("mma_other"))
           .provide(
             GetSubscriptionLive.layer,
             ZuoraCancelLive.layer,
@@ -35,6 +35,6 @@ object SubscriptionCancelSpec extends ZIOSpecDefault{
             GuStageLive.layer,
           )
       } yield assert(true)(equalTo(true))
-    }) // @@ TestAspect.ignore)
+    } @@ TestAspect.ignore)
 
 }
