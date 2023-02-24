@@ -63,7 +63,9 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
         "crmId" -> "",
         "sfContactId__c" -> "",
         "IdentityId__c" -> "",
-        "autoPay" -> false
+        "autoPay" -> false,
+        "invoiceDeliveryPrefsEmail" -> false,
+        "invoiceDeliveryPrefsPrint" -> false,
       ),
       RelativePath(s"accounts/$accountId")
     )
