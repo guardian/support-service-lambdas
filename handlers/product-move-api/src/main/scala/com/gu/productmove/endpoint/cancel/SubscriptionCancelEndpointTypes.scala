@@ -28,6 +28,8 @@ object SubscriptionCancelEndpointTypes {
 
   given Schema[Success] = inlineSchema(Schema.derived)
 
+  given Schema[InternalServerError] = inlineSchema(Schema.derived)
+
   given JsonCodec[Success] = DeriveJsonCodec.gen[Success]
   given JsonCodec[InternalServerError] = DeriveJsonCodec.gen[InternalServerError]
   given JsonCodec[OutputBody] = DeriveJsonCodec.gen[OutputBody]
