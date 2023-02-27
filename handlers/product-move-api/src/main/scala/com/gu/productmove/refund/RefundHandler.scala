@@ -47,6 +47,8 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
           ),
       ) match
         case Exit.Success(value) => value
-        case Exit.Failure(cause) => context.getLogger.log("Failed with: " + cause.toString)
+        case Exit.Failure(cause) =>
+          context.getLogger.log("Failed with: " + cause.toString)
+          throw new RuntimeException("Refund failed with error: " + cause.toString)
     }
 }

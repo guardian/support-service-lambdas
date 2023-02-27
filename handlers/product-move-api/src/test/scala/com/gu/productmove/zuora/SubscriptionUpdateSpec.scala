@@ -12,6 +12,8 @@ import zio.{IO, ZIO}
 import zio.*
 import zio.test.Assertion.*
 import zio.test.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
+import Fixtures.*
 
 import java.time.*
 
@@ -82,6 +84,50 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
             ZLayer.succeed(Stage.valueOf("PROD")),
           )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
+      },
+      test("SubscriptionUpdateRequest preview response is correct for invoice with multiple invoice items") {
+        val time = LocalDateTime.parse("2023-01-19T00:00:00").toInstant(ZoneOffset.ofHours(0))
+
+        val expectedResponse = PreviewResult(
+          amountPayableToday = -6,
+          contributionRefundAmount = -16,
+          supporterPlusPurchaseAmount = 10,
+          LocalDate.of(2023, 2, 19)
+        )
+
+        for {
+          _ <- TestClock.setTime(time)
+          response <- BuildPreviewResult
+            .getPreviewResult(
+              invoiceWithMultipleInvoiceItems,
+              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6"),
+            )
+            .provideLayer(
+              ZLayer.succeed(Stage.valueOf("DEV")),
+            )
+        } yield assert(response)(equalTo(expectedResponse))
+      },
+      test("SubscriptionUpdateRequest preview response is correct for invoice with tax") {
+        val time = LocalDateTime.parse("2023-02-06T00:00:00").toInstant(ZoneOffset.ofHours(0))
+
+        val expectedResponse = PreviewResult(
+          amountPayableToday = -10,
+          contributionRefundAmount = -20,
+          supporterPlusPurchaseAmount = 10,
+          LocalDate.of(2023, 3, 06)
+        )
+
+        for {
+          _ <- TestClock.setTime(time)
+          response <- BuildPreviewResult
+            .getPreviewResult(
+              invoiceWithTax,
+              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6"),
+            )
+            .provideLayer(
+              ZLayer.succeed(Stage.valueOf("DEV")),
+            )
+        } yield assert(response)(equalTo(expectedResponse))
       },
     )
 

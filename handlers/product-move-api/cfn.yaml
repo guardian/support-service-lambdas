@@ -52,6 +52,18 @@ Resources:
           App: product-move-api
           Stack: !Ref Stack
           Stage: !Ref Stage
+          zuoraBaseUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:baseUrl}}'
+            - { Stage: !Ref Stage }
+          zuoraUsername:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:username}}'
+            - { Stage: !Ref Stage }
+          zuoraPassword:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:password}}'
+            - { Stage: !Ref Stage }
       CodeUri:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
@@ -71,7 +83,6 @@ Resources:
           Effect: Allow
           Action: s3:GetObject
           Resource:
-            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/invoicingApi-${Stage}*.json
       - Statement:
         - Effect: Allow
@@ -128,6 +139,26 @@ Resources:
           App: product-move-api
           Stack: !Ref Stack
           Stage: !Ref Stage
+          invoicingApiUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiUrl}}'
+            - { Stage: !Ref Stage }
+          invoicingApiKey:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiKey}}'
+            - { Stage: !Ref Stage }
+          zuoraBaseUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:baseUrl}}'
+            - { Stage: !Ref Stage }
+          zuoraUsername:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:username}}'
+            - { Stage: !Ref Stage }
+          zuoraPassword:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:password}}'
+            - { Stage: !Ref Stage }
       CodeUri:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
@@ -153,6 +184,14 @@ Resources:
     Properties:
       VisibilityTimeout: 3000
       QueueName: !Sub product-switch-refund-${Stage}
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt RefundDeadLetterQueue.Arn
+        maxReceiveCount: 2
+
+  RefundDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub product-switch-refund-dead-letter-${Stage}
 
   SQSTrigger:
     Type: AWS::Lambda::EventSourceMapping
@@ -176,6 +215,30 @@ Resources:
           App: product-move-api
           Stack: !Ref Stack
           Stage: !Ref Stage
+          salesforceUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:url}}'
+            - { Stage: !Ref Stage }
+          salesforceClientId:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:client_id}}'
+            - { Stage: !Ref Stage }
+          salesforceClientSecret:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:client_secret}}'
+            - { Stage: !Ref Stage }
+          salesforceUsername:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:username}}'
+            - { Stage: !Ref Stage }
+          salesforcePassword:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:password}}'
+            - { Stage: !Ref Stage }
+          salesforceToken:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:token}}'
+            - { Stage: !Ref Stage }
       CodeUri:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
@@ -185,7 +248,6 @@ Resources:
             Effect: Allow
             Action: s3:GetObject
             Resource:
-              - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json
               - arn:aws:s3::*:membership-dist/*
         - Statement:
             Effect: Allow
@@ -209,13 +271,14 @@ Resources:
       EventSourceArn: !GetAtt SalesforceTrackingQueue.Arn
       FunctionName: !Ref SalesforceTrackingLambda
 
+
   # alarms
   ProductMovementFailureAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: An error in the Product Move lambda. Please check the logs to diagnose
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
@@ -234,16 +297,16 @@ Resources:
     Condition: IsProd
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
-      AlarmName: An error in the Refund lambda. Please check the logs to diagnose
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: !Sub An error in the refund lambda ${Stage}. Please check the logs to diagnose and redrive the product-switch-refund-dead-letter-${Stage} SQS queue when ready.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: FunctionName
-          Value: !Ref RefundLambda
-      EvaluationPeriods: 1
-      MetricName: Errors
-      Namespace: AWS/Lambda
+        - Name: QueueName
+          Value: !GetAtt RefundDeadLetterQueue.QueueName
       Period: 300
+      EvaluationPeriods: 1
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching

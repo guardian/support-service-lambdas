@@ -1,6 +1,17 @@
 package com.gu.zuora.rer
 
-import BatonModels.{Completed, Failed, Pending, PerformRerRequest, RerInitiateRequest, RerInitiateResponse, RerRequest, RerResponse, RerStatusRequest, RerStatusResponse}
+import BatonModels.{
+  Completed,
+  Failed,
+  Pending,
+  PerformRerRequest,
+  RerInitiateRequest,
+  RerInitiateResponse,
+  RerRequest,
+  RerResponse,
+  RerStatusRequest,
+  RerStatusResponse,
+}
 import io.circe.parser._
 import io.circe.syntax._
 import circeCodecs._
@@ -50,7 +61,7 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
       val jsonRequest =
         """{
           |"initiationReference": "someRequestId",
-          |"dataProvider" : "zuora",
+          |"dataProvider" : "zuorarer",
           |"requestType": "RER",
           |"action" : "status"
           |}
@@ -78,7 +89,9 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
 
     "should encode RerInitiateResponse correctly" in {
       val response: RerResponse = RerInitiateResponse("someRequestId", "the request is pending", Pending)
-      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","message":"the request is pending","status":"pending","action":"initiate","requestType":"RER","dataProvider":"zuorarer"}"""
+      response.asJson.printWith(
+        jsonPrinter,
+      ) shouldBe """{"initiationReference":"someRequestId","message":"the request is pending","status":"pending","action":"initiate","requestType":"RER","dataProvider":"zuorarer"}"""
     }
 
     "should encode completed RerStatusResponse correctly" in {
@@ -86,19 +99,31 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
         initiationReference = "someRequestId",
         message = "test message",
         status = Completed,
-        resultLocations = Some(List("locationValue"))
+        resultLocations = Some(List("locationValue")),
       )
-      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","message":"test message","status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
+      response.asJson.printWith(
+        jsonPrinter,
+      ) shouldBe """{"initiationReference":"someRequestId","message":"test message","status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
     }
 
     "should encode pending RerStatusResponse correctly" in {
-      val response: RerResponse = RerStatusResponse(initiationReference = "someRequestId", message = "test message", status = Pending)
-      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","message":"test message","status":"pending","action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
+      val response: RerResponse =
+        RerStatusResponse(initiationReference = "someRequestId", message = "test message", status = Pending)
+      response.asJson.printWith(
+        jsonPrinter,
+      ) shouldBe """{"initiationReference":"someRequestId","message":"test message","status":"pending","action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
     }
 
     "should encode failed RerStatusResponse correctly" in {
-      val response: RerResponse = RerStatusResponse(initiationReference = "someRequestId", message = "error making request", status = Failed, None)
-      response.asJson.printWith(jsonPrinter) shouldBe """{"initiationReference":"someRequestId","message":"error making request","status":"failed","action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
+      val response: RerResponse = RerStatusResponse(
+        initiationReference = "someRequestId",
+        message = "error making request",
+        status = Failed,
+        None,
+      )
+      response.asJson.printWith(
+        jsonPrinter,
+      ) shouldBe """{"initiationReference":"someRequestId","message":"error making request","status":"failed","action":"status","requestType":"RER","dataProvider":"zuorarer"}"""
     }
   }
 }

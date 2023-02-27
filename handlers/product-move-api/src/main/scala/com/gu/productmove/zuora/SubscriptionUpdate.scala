@@ -63,29 +63,18 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
       price: BigDecimal,
       ratePlanIdToRemove: String,
   ): ZIO[Stage, String, PreviewResult] = {
-    def getPreviewResult(
-        invoice: SubscriptionUpdateInvoice,
-        ids: SupporterPlusRatePlanIds,
-    ): ZIO[Stage, String, PreviewResult] =
-      invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.ratePlanChargeId) match
-        case (supporterPlusInvoice :: Nil, contributionInvoice :: Nil) =>
-          ZIO.succeed(
-            PreviewResult(invoice.amount, contributionInvoice.totalAmount, supporterPlusInvoice.totalAmount),
-          )
-        case _ =>
-          ZIO.fail(
-            s"Unexpected invoice item structure was returned from a Zuora preview call. Invoice data was: $invoice",
-          )
 
     for {
-      requestBody <- SubscriptionUpdatePreviewRequest(billingPeriod, ratePlanIdToRemove, price)
+      today <- Clock.currentDateTime.map(_.toLocalDate)
+
+      requestBody <- SubscriptionUpdatePreviewRequest(billingPeriod, ratePlanIdToRemove, price, today.plusMonths(13))
       response <- zuoraGet.put[SubscriptionUpdatePreviewRequest, SubscriptionUpdatePreviewResponse](
         uri"subscriptions/$subscriptionId",
         requestBody,
       )
       stage <- ZIO.service[Stage]
       supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-      previewResult <- getPreviewResult(response.invoice, supporterPlusRatePlanIds)
+      previewResult <- BuildPreviewResult.getPreviewResult(response.invoice, supporterPlusRatePlanIds)
     } yield previewResult
 
   }
@@ -122,14 +111,23 @@ case class RemoveRatePlan(
     contractEffectiveDate: LocalDate,
     ratePlanId: String,
 )
-case class SubscriptionUpdateResponse(subscriptionId: String, totalDeltaMrr: BigDecimal, invoiceId: String)
+case class SubscriptionUpdateResponse(
+    subscriptionId: String,
+    totalDeltaMrr: BigDecimal,
+    invoiceId: String,
+    paidAmount: Option[BigDecimal],
+)
 case class SubscriptionUpdatePreviewRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],
     preview: Boolean = true,
+    targetDate: LocalDate,
+    currentTerm: String = "24",
+    currentTermPeriodType: String = "Month",
 )
 case class SubscriptionUpdatePreviewResponse(invoice: SubscriptionUpdateInvoice)
 case class SubscriptionUpdateInvoiceItem(
+    serviceStartDate: LocalDate,
     chargeAmount: BigDecimal,
     taxAmount: BigDecimal,
     productRatePlanChargeId: String,
@@ -160,9 +158,10 @@ object SubscriptionUpdatePreviewRequest {
       billingPeriod: BillingPeriod,
       ratePlanIdToRemove: String,
       price: BigDecimal,
+      targetDate: LocalDate,
   ): ZIO[Stage, String, SubscriptionUpdatePreviewRequest] =
     getRatePlans(billingPeriod, ratePlanIdToRemove, price).map { case (addRatePlan, removeRatePlan) =>
-      SubscriptionUpdatePreviewRequest(addRatePlan, removeRatePlan)
+      SubscriptionUpdatePreviewRequest(add = addRatePlan, remove = removeRatePlan, targetDate = targetDate)
     }
 }
 

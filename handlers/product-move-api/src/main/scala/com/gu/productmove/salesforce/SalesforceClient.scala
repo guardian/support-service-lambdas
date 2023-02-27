@@ -4,6 +4,7 @@ import sttp.client3.quick.basicRequest
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.Util.getFromEnv
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
@@ -48,28 +49,32 @@ object SalesforceClient {
 
 object SalesforceClientLive {
 
-  val layer: ZLayer[AwsS3 with Stage with SttpBackend[Task, Any], String, SalesforceClient] =
+  val layer: ZLayer[SttpBackend[Task, Any], String, SalesforceClient] =
     ZLayer.fromZIO(
       for {
-        stage <- ZIO.service[Stage]
-        fileContent <- AwsS3.getObject(bucket, key("sfAuth", stage)).mapError(_.toString)
-        SalesforceRestConfig <- ZIO.fromEither(summon[JsonDecoder[SalesforceConfig]].decodeJson(fileContent))
-        baseUrl <- ZIO.fromEither(Uri.parse(SalesforceRestConfig.url + "/"))
-        _ <- ZIO.log("ZuoraConfig: " + SalesforceRestConfig.toString)
-        _ <- ZIO.log("baseUrl: " + baseUrl.toString)
+        url <- ZIO.fromEither(getFromEnv("salesforceUrl"))
+        clientId <- ZIO.fromEither(getFromEnv("salesforceClientId"))
+        clientSecret <- ZIO.fromEither(getFromEnv("salesforceClientSecret"))
+        username <- ZIO.fromEither(getFromEnv("salesforceUsername"))
+        password <- ZIO.fromEither(getFromEnv("salesforcePassword"))
+        token <- ZIO.fromEither(getFromEnv("salesforceToken"))
+
+        _ <- ZIO.log("salesforceUrl: " + url)
+        _ <- ZIO.log("salesforceUsername: " + username)
+
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
         auth <- basicRequest
           .contentType("application/x-www-form-urlencoded")
           .body(
             Map(
               "grant_type" -> "password",
-              "client_id" -> SalesforceRestConfig.client_id,
-              "client_secret" -> SalesforceRestConfig.client_secret,
-              "username" -> SalesforceRestConfig.username,
-              "password" -> s"${SalesforceRestConfig.password}${SalesforceRestConfig.token}",
+              "client_id" -> clientId,
+              "client_secret" -> clientSecret,
+              "username" -> username,
+              "password" -> s"${password}${token}",
             ),
           )
-          .post(uri"${SalesforceRestConfig.url}/services/oauth2/token")
+          .post(uri"${url}/services/oauth2/token")
           .response(asJson[SalesforceAuthDetails])
           .send(sttpClient)
           .map { response =>

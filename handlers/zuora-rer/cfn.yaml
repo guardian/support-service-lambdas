@@ -55,6 +55,13 @@ Resources:
                             Action:
                             - s3:ListBucket
                             Resource: !Sub arn:aws:s3:::${RerResultsBucket}
+                - PolicyName: S3GettPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                              - s3:GetObject
+                            Resource: !Sub arn:aws:s3:::${RerResultsBucket}/zuora-results/${Stage}/*
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:

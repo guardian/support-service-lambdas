@@ -3,6 +3,7 @@ package com.gu.productmove.zuora.rest
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.Util.getFromEnv
 import com.gu.productmove.zuora.rest.ZuoraClient
 import com.gu.productmove.zuora.rest.ZuoraClientLive.ZuoraRestConfig
 import sttp.capabilities.zio.ZioStreams
@@ -26,19 +27,20 @@ object ZuoraClientLive {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
 
-  val layer: ZLayer[AwsS3 with Stage with SttpBackend[Task, Any], String, ZuoraClient] =
+  val layer: ZLayer[SttpBackend[Task, Any], String, ZuoraClient] =
     ZLayer {
       for {
-        stage <- ZIO.service[Stage]
-        fileContent <- AwsS3.getObject(bucket, key("zuoraRest", stage)).mapError(_.toString)
-        zuoraRestConfig <- ZIO.fromEither(summon[JsonDecoder[ZuoraRestConfig]].decodeJson(fileContent))
-        baseUrl <- ZIO.fromEither(Uri.parse(zuoraRestConfig.baseUrl + "/"))
-        _ <- ZIO.log("ZuoraConfig: " + zuoraRestConfig.toString)
-        _ <- ZIO.log("baseUrl: " + baseUrl.toString)
-        sttpClient <- ZIO.service[SttpBackend[Task, Any]]
-      } yield ZuoraClientLive(baseUrl, sttpClient, zuoraRestConfig)
-    }
+        zuoraBaseUrl <- ZIO.fromEither(getFromEnv("zuoraBaseUrl"))
+        zuoraUsername <- ZIO.fromEither(getFromEnv("zuoraUsername"))
+        zuoraPassword <- ZIO.fromEither(getFromEnv("zuoraPassword"))
 
+        baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/"))
+
+        _ <- ZIO.log("zuoraBaseUrl:   " + baseUrl.toString)
+
+        sttpClient <- ZIO.service[SttpBackend[Task, Any]]
+      } yield ZuoraClientLive(baseUrl, sttpClient, ZuoraRestConfig(zuoraBaseUrl, zuoraUsername, zuoraPassword))
+    }
 }
 
 private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], zuoraRestConfig: ZuoraRestConfig)
@@ -79,11 +81,20 @@ object ZuoraRestBody {
   enum ZuoraSuccessCheck:
     case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised
 
-  case class ZuoraSuccessCapitalised(Success: Boolean)
-  case class ZuoraSuccessLowercase(success: Boolean)
+  case class Reason(
+      code: Int,
+      message: String,
+  )
+  given JsonDecoder[Reason] = DeriveJsonDecoder.gen
+
+  case class ZuoraSuccessCapitalised(Success: Boolean, reasons: Option[List[Reason]])
+  case class ZuoraSuccessLowercase(success: Boolean, reasons: Option[List[Reason]])
   case class ZuoraSuccessSize(size: Option[Int])
 
-  def parseIfSuccessful[A: JsonDecoder](body: String, zuoraSuccessCheck: ZuoraSuccessCheck): Either[String, A] = {
+  def parseIfSuccessful[A: JsonDecoder](
+      body: String,
+      zuoraSuccessCheck: ZuoraSuccessCheck,
+  ): Either[String, A] = {
     val isSuccessful: Either[String, Unit] = zuoraSuccessCheck match {
       case ZuoraSuccessCheck.SuccessCheckSize =>
         for {
@@ -95,13 +106,25 @@ object ZuoraRestBody {
       case ZuoraSuccessCheck.SuccessCheckLowercase =>
         for {
           zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessLowercase].decodeJson(body)
-          isSuccessful <- if (zuoraResponse.success) Right(()) else Left(s"success = false, body: $body")
+          isSuccessful <-
+            if (zuoraResponse.success) Right(())
+            else
+              zuoraResponse.reasons match {
+                case None => Left(s"success = false, body: $body")
+                case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
+              }
         } yield ()
 
       case ZuoraSuccessCheck.SuccessCheckCapitalised =>
         for {
           zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessCapitalised].decodeJson(body)
-          isSuccessful <- if (zuoraResponse.Success) Right(()) else Left(s"Success = false, body: $body")
+          isSuccessful <-
+            if (zuoraResponse.Success) Right(())
+            else
+              zuoraResponse.reasons match {
+                case None => Left(s"Success = false, body: $body")
+                case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
+              }
         } yield ()
     }
 

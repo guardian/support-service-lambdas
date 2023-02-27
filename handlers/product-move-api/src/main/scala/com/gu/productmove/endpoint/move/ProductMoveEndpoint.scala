@@ -103,8 +103,7 @@ object ProductMoveEndpoint {
             ),
             oneOfVariant(
               sttp.model.StatusCode.InternalServerError,
-              stringBody
-                .map(InternalServerError.apply)(_.message)
+              jsonBody[InternalServerError]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
             ),
           ),
@@ -122,19 +121,19 @@ object ProductMoveEndpoint {
   }
 
   private def run(subscriptionName: String, postData: ExpectedInput): TIO[OutputBody] =
-    productMove(subscriptionName, postData).provide(
-      GetSubscriptionLive.layer,
-      AwsS3Live.layer,
-      AwsCredentialsLive.layer,
-      SttpClientLive.layer,
-      ZuoraClientLive.layer,
-      ZuoraGetLive.layer,
-      SubscriptionUpdateLive.layer,
-      SQSLive.layer,
-      GetAccountLive.layer,
-      GuStageLive.layer,
-      DynamoLive.layer,
-    )
+    productMove(subscriptionName, postData)
+      .provide(
+        GetSubscriptionLive.layer,
+        AwsCredentialsLive.layer,
+        SttpClientLive.layer,
+        ZuoraClientLive.layer,
+        ZuoraGetLive.layer,
+        SubscriptionUpdateLive.layer,
+        SQSLive.layer,
+        GetAccountLive.layer,
+        GuStageLive.layer,
+        DynamoLive.layer,
+      )
 
   extension [R, E, A](zio: ZIO[R, E, A])
     def addLogMessage(message: String) = zio.catchAll { error =>
@@ -158,7 +157,7 @@ object ProductMoveEndpoint {
       subscriptionName: String,
       postData: ExpectedInput,
   ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
-    for {
+    (for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
       currentRatePlan <- getSingleOrNotEligible(
@@ -174,7 +173,7 @@ object ProductMoveEndpoint {
           doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currentRatePlan.id)
         else
           doUpdate(subscriptionName, ratePlanCharge, postData.price, currentRatePlan, subscription)
-    } yield result
+    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
 
   def doPreview(
       subscriptionId: String,
@@ -206,10 +205,12 @@ object ProductMoveEndpoint {
     updateResponse <- SubscriptionUpdate
       .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlan.id)
       .addLogMessage("SubscriptionUpdate")
-    totalDeltaMrr = updateResponse.totalDeltaMrr
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriod <- ratePlanCharge.billingPeriod.value
+
+    paidAmount = updateResponse.paidAmount.getOrElse(BigDecimal(0))
+
     emailFuture <- SQS
       .sendEmail(
         message = EmailMessage(
@@ -220,16 +221,15 @@ object ProductMoveEndpoint {
                 first_name = account.billToContact.firstName,
                 last_name = account.billToContact.lastName,
                 currency = account.basicInfo.currency.symbol,
-                price = price.toString,
-                first_payment_amount = totalDeltaMrr.toString,
+                price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                 date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = billingPeriod,
-                contribution_cancellation_date = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                payment_frequency = billingPeriod + "ly",
                 subscription_id = subscriptionName,
               ),
             ),
           ),
-          "SV_RCtoDP_Switch",
+          "SV_RCtoSP_Switch",
           account.basicInfo.sfContactId__c,
           Some(identityId),
         ),
@@ -240,23 +240,17 @@ object ProductMoveEndpoint {
       .queueSalesforceTracking(
         SalesforceRecordInput(
           subscriptionName,
+          BigDecimal(ratePlanCharge.price),
           price,
+          currentRatePlan.productName,
           currentRatePlan.ratePlanName,
           "Supporter Plus",
           todaysDate,
           todaysDate,
-          updateResponse.totalDeltaMrr.abs,
+          paidAmount,
         ),
       )
       .fork
-
-    refundFuture <-
-      if (updateResponse.totalDeltaMrr < 0)
-        SQS
-          .queueRefund(RefundInput(subscriptionName, updateResponse.invoiceId, updateResponse.totalDeltaMrr.abs))
-          .fork
-      else
-        ZIO.succeed(()).fork
 
     supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, ratePlanCharge.billingPeriod))
     amendSupporterProductDynamoTableFuture <- Dynamo
@@ -274,7 +268,10 @@ object ProductMoveEndpoint {
       )
       .fork
 
-    requests = emailFuture.zip(refundFuture).zip(salesforceTrackingFuture).zip(amendSupporterProductDynamoTableFuture)
+    requests = emailFuture
+      .zip(salesforceTrackingFuture)
+      .zip(amendSupporterProductDynamoTableFuture)
+
     _ <- requests.join
 
   } yield Success("Product move completed successfully")

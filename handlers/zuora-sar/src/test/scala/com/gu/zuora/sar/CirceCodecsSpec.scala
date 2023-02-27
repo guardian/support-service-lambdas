@@ -30,7 +30,7 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
         """{
           |"subjectId": "",
           |"subjectEmail" : "testSubjectEmail",
-          |"dataProvider" : "zuora",
+          |"dataProvider" : "zuorasar",
           |"requestType": "SAR",
           |"action" : "initiate"
           |}
@@ -61,7 +61,7 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
       val jsonRequest =
         """{
           |"initiationReference": "someRequestId",
-          |"dataProvider" : "zuora",
+          |"dataProvider" : "zuorasar",
           |"requestType": "SAR",
           |"action" : "status"
           |}
@@ -78,7 +78,7 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
         """{
           |"initiationReference": "someRequestId",
           |"subjectEmail": "testSubjectEmail",
-          |"dataProvider" : "zuora",
+          |"dataProvider" : "zuorasar",
           |"requestType" : "SAR",
           |"action" : "perform"
           |}
@@ -91,7 +91,7 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
       val response: SarResponse = SarInitiateResponse("someRequestId")
       response.asJson.printWith(
         jsonPrinter,
-      ) shouldBe """{"initiationReference":"someRequestId","action":"initiate","requestType":"SAR","dataProvider":"zuora"}"""
+      ) shouldBe """{"initiationReference":"someRequestId","action":"initiate","requestType":"SAR","dataProvider":"zuorasar"}"""
     }
 
     "should encode completed SarStatusResponse correctly" in {
@@ -101,21 +101,21 @@ class CirceCodecsSpec extends AnyFreeSpec with Matchers {
       )
       response.asJson.printWith(
         jsonPrinter,
-      ) shouldBe """{"status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"SAR","dataProvider":"zuora"}"""
+      ) shouldBe """{"status":"completed","resultLocations":["locationValue"],"action":"status","requestType":"SAR","dataProvider":"zuorasar"}"""
     }
 
     "should encode pending SarStatusResponse correctly" in {
       val response: SarResponse = SarStatusResponse(status = Pending)
       response.asJson.printWith(
         jsonPrinter,
-      ) shouldBe """{"status":"pending","action":"status","requestType":"SAR","dataProvider":"zuora"}"""
+      ) shouldBe """{"status":"pending","action":"status","requestType":"SAR","dataProvider":"zuorasar"}"""
     }
 
     "should encode failed SarStatusResponse correctly" in {
       val response: SarResponse = SarStatusResponse(status = Failed, None, Some("error making request"))
       response.asJson.printWith(
         jsonPrinter,
-      ) shouldBe """{"status":"failed","message":"error making request","action":"status","requestType":"SAR","dataProvider":"zuora"}"""
+      ) shouldBe """{"status":"failed","message":"error making request","action":"status","requestType":"SAR","dataProvider":"zuorasar"}"""
     }
   }
 }

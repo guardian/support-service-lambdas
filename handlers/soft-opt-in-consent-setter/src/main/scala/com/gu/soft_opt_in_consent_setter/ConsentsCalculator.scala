@@ -6,17 +6,32 @@ import io.circe.syntax.EncoderOps
 
 class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
 
-  private case class ConsentsObject(id: String, consented: Boolean)
+  case class ConsentsObject(id: String, consented: Boolean)
 
-  def getAcquisitionConsents(productName: String): Either[SoftOptInError, Set[String]] = {
+  def getSoftOptInsByProduct(productName: String): Either[SoftOptInError, Set[String]] = {
     consentsMappings
       .get(productName)
       .toRight(
         SoftOptInError(
           "ConsentsCalculator",
-          s"getAcquisitionConsents couldn't find $productName in consentsMappings",
+          s"getSoftOptInsByProduct couldn't find $productName in consentsMappings",
         ),
       )
+  }
+
+  def getSoftOptInsByProducts(productNames: Set[String]): Either[SoftOptInError, Set[String]] = {
+    productNames
+      .foldLeft[Either[SoftOptInError, Set[String]]](Right(Set())) { (acc, ownedProductName) =>
+        consentsMappings
+          .get(ownedProductName)
+          .toRight(
+            SoftOptInError(
+              "ConsentsCalculator",
+              s"getSoftOptInsByProducts couldn't find $ownedProductName in consentsMappings",
+            ),
+          )
+          .flatMap(productConsents => acc.map(_.union(productConsents)))
+      }
   }
 
   def getCancellationConsents(
