@@ -33,6 +33,7 @@ Mappings:
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
+  IsDev: !Equals [ !Ref Stage, DEV ]
 
 Resources:
   LambdaFunction:
@@ -112,6 +113,109 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+
+  LambdaFunctionIAP:
+    Type: AWS::Serverless::Function
+    Condition: IsDev
+    Properties:
+      Description: Updates Identity Soft Opt-In Consents upon Acquisition and Cancellation of Subscriptions in Salesforce
+      FunctionName: !Sub soft-opt-in-consent-setter-IAP-${Stage}
+      Handler: com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest
+      CodeUri:
+        Bucket: support-service-lambdas-dist
+        Key: !Sub membership/${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar
+      MemorySize: 512
+      Runtime: java11
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          sfApiVersion: v46.0
+          sfAuthUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:authUrl}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+          sfClientId:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+          sfClientSecret:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
+          sfPassword:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfPassword}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
+          sfToken:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfToken}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
+          sfUsername:
+            !Sub
+            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/${SalesforceUsername}:SecretString:sfUsername}}'
+            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
+              SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
+          identityUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityUrl}}'
+            - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
+          identityToken:
+            !Sub
+            - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken}}'
+            - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
+      Events:
+        ScheduledRun:
+          Type: Schedule
+          Properties:
+            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule ]
+            Description: Runs Soft Opt-In Consent Setter
+            Enabled: True
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - !Sub arn:aws:s3:::soft-opt-in-consent-setter/${Stage}/ConsentsByProductMapping.json
+        - Statement:
+            - Effect: Allow
+              Action: cloudwatch:PutMetricData
+              Resource: "*"
+        - Statement:
+            - Sid: readDeployedArtefact
+              Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
+
+  SoftOptInsQueue:
+    Type: AWS::SQS::Queue
+    Condition: IsDev
+    Properties:
+      VisibilityTimeout: 3000
+      QueueName: !Sub soft-opt-in-consent-setter-queue-${Stage}
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt SoftOptInsDeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  SoftOptInsDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Condition: IsDev
+    Properties:
+      QueueName: !Sub soft-opt-in-consent-setter-dead-letter-queue-${Stage}
+
+  SQSTrigger:
+    Type: AWS::Lambda::EventSourceMapping
+    Condition: IsDev
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn: !GetAtt SoftOptInsQueue.Arn
+      FunctionName: !Ref LambdaFunctionIAP
 
   failedRunAlarm:
     Type: AWS::CloudWatch::Alarm
