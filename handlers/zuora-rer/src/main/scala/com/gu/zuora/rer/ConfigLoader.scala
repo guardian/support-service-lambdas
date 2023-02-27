@@ -4,13 +4,14 @@ import com.gu.util.config.ConfigLocation
 import play.api.libs.json.{Json, Reads}
 
 case class ZuoraRerConfig(
-  resultsBucket: String,
-  resultsPath: String,
-  performLambdaFunctionName: String
+    resultsBucket: String,
+    resultsPath: String,
+    performLambdaFunctionName: String,
 )
 
 object ConfigLoader {
-  def getRerLambdaConfigTemp: ZuoraRerConfig = ZuoraRerConfig("baton-results", "zuora-results/DEV", "performRerLambdaFunctionName")
+  def getRerLambdaConfigTemp: ZuoraRerConfig =
+    ZuoraRerConfig("baton-results", "zuora-results/DEV", "performRerLambdaFunctionName")
 }
 
 object ZuoraRerConfig {

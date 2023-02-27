@@ -75,8 +75,7 @@ object SubscriptionCancelEndpoint {
             ),
             oneOfVariant(
               sttp.model.StatusCode.InternalServerError,
-              stringBody
-                .map(InternalServerError.apply)(_.message)
+              jsonBody[InternalServerError]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
             ),
           ),
@@ -133,7 +132,7 @@ object SubscriptionCancelEndpoint {
     String,
     OutputBody,
   ] =
-    for {
+    (for {
       _ <- ZIO.log(s"PostData: ${postData.toString}")
       stage <- ZIO.service[Stage]
       _ <- ZIO.log(s"Stage is $stage")
@@ -162,7 +161,7 @@ object SubscriptionCancelEndpoint {
             charge.chargedThroughDate,
         )
         .orElseFail(
-          s"Subscription charged through date is null is for supporter plus subscription $subscriptionName.\n" +
+          s"Subscription charged through date is null is for supporter plus subscription $subscriptionName. " +
             s"This is an error because we expect to be able to use the charged through date to work out the effective cancellation date",
         )
       _ <- ZIO.log(s"Cancellation date is $cancellationDate")
@@ -188,5 +187,8 @@ object SubscriptionCancelEndpoint {
       _ <- ZuoraSetCancellationReason
         .update(subscriptionName, subscription.version + 1, postData.reason)
       // Version +1 because the cancellation will have incremented the version
-    } yield Success(s"Subscription was successfully cancelled${if (shouldBeRefunded) "" else ""}")
+    } yield ()).fold(
+      errorMessage => InternalServerError(errorMessage),
+      _ => Success("Subscription was successfully cancelled"),
+    )
 }
