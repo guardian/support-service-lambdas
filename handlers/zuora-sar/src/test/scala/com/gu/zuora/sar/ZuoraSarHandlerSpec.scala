@@ -3,13 +3,7 @@ package com.gu.zuora.sar
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import circeCodecs._
-import com.gu.zuora.sar.BatonModels.{
-  Completed,
-  Failed,
-  Pending,
-  SarStatusRequest,
-  SarStatusResponse,
-}
+import com.gu.zuora.sar.BatonModels.{Completed, Failed, Pending, SarStatusRequest, SarStatusResponse}
 import io.circe.ParsingFailure
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
