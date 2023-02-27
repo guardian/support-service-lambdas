@@ -2,8 +2,7 @@ package com.gu.zuora.rer
 
 import java.util.UUID.randomUUID
 import com.typesafe.scalalogging.LazyLogging
-import com.gu.effects.{BucketName, CopyS3Objects, GetFromS3, Key, ListS3Objects, S3Location, S3Path, UploadToS3}
-import cats.syntax.traverse._
+import com.gu.effects.{BucketName, GetFromS3, Key, ListS3Objects, S3Location, S3Path, UploadToS3}
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL
 
 import scala.util.{Failure, Success, Try}
