@@ -191,6 +191,13 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+        - Statement:
+            Effect: Allow
+            Action:
+              - sqs:DeleteMessage
+              - sqs:GetQueueAttributes
+              - sqs:ReceiveMessage
+            Resource: "*"
 
   SoftOptInsQueue:
     Type: AWS::SQS::Queue
