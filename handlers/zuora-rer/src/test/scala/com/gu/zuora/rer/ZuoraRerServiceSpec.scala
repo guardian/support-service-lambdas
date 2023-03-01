@@ -48,8 +48,10 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
   val accountResponseZeroBalances = "/accounts/1234567" -> HTTPResponse(
     200,
     """{"success": true,
-      | "basicInfo": {"accountNumber": "abc-123"},
-      | "metrics": {"balance": "0.00", "creditBalance": "0.00", "totalInvoiceBalance": "0.00"}
+      | "basicInfo": {"accountNumber": "abc-123", "status": "Active", "id": "1234567"},
+      | "metrics": {"balance": "0.00", "creditBalance": "0.00", "totalInvoiceBalance": "0.00"},
+      | "billToContact": {"id": "2345678"},
+      | "soldToContact": {"id": "3456789"}
       |}""".stripMargin,
   )
 
@@ -66,8 +68,10 @@ class ZuoraRerServiceSpec extends AnyFlatSpec with Matchers {
   val accountResponseOutstandingBalances = "/accounts/1234567" -> HTTPResponse(
     200,
     """{"success": true,
-      | "basicInfo": {"accountNumber": "abc-123"},
-      | "metrics": {"balance": "10.37", "creditBalance": "0.00", "totalInvoiceBalance": "-3.45"}
+      | "basicInfo": {"accountNumber": "abc-123", "status": "Active", "id": "1234567"},
+      | "metrics": {"balance": "10.37", "creditBalance": "0.00", "totalInvoiceBalance": "-3.45"},
+      | "billToContact": {"id": "2345678"},
+      | "soldToContact": {"id": "3456789"}
       |}""".stripMargin,
   )
 
