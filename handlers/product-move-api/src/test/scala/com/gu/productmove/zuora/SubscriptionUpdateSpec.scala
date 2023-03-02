@@ -16,6 +16,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import Fixtures.*
 
 import java.time.*
+import scala.None
 
 object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
@@ -100,7 +101,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           response <- BuildPreviewResult
             .getPreviewResult(
               invoiceWithMultipleInvoiceItems,
-              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6"),
+              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
               ZLayer.succeed(Stage.valueOf("DEV")),
@@ -122,7 +123,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           response <- BuildPreviewResult
             .getPreviewResult(
               invoiceWithTax,
-              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6"),
+              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
               ZLayer.succeed(Stage.valueOf("DEV")),

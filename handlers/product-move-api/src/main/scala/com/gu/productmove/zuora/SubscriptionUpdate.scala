@@ -140,7 +140,11 @@ case class SubscriptionUpdateInvoice(
     taxAmount: BigDecimal,
     invoiceItems: List[SubscriptionUpdateInvoiceItem],
 )
-case class SupporterPlusRatePlanIds(ratePlanId: String, ratePlanChargeId: String)
+case class SupporterPlusRatePlanIds(
+    ratePlanId: String,
+    subscriptionRatePlanChargeId: String,
+    contributionRatePlanChargeId: Option[String],
+)
 
 object SubscriptionUpdateRequest {
   def apply(
@@ -165,6 +169,8 @@ object SubscriptionUpdatePreviewRequest {
     }
 }
 
+val SwitchToV2SupporterPlus = true
+
 private def getRatePlans(
     billingPeriod: BillingPeriod,
     ratePlanIdToRemove: String,
@@ -176,7 +182,9 @@ private def getRatePlans(
     supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
     chargeOverride = ChargeOverrides(
       price = Some(price),
-      productRatePlanChargeId = supporterPlusRatePlanIds.ratePlanChargeId,
+      productRatePlanChargeId = supporterPlusRatePlanIds.contributionRatePlanChargeId.getOrElse(
+        supporterPlusRatePlanIds.subscriptionRatePlanChargeId,
+      ),
     )
     addRatePlan = AddRatePlan(date, supporterPlusRatePlanIds.ratePlanId, chargeOverrides = List(chargeOverride))
     removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
@@ -186,13 +194,29 @@ def getSupporterPlusRatePlanIds(
     billingPeriod: BillingPeriod,
 ): Either[String, SupporterPlusRatePlanIds] = {
   zuoraIdsForStage(config.Stage(stage.toString)).flatMap { zuoraIds =>
-    import zuoraIds.supporterPlusZuoraIds.{monthly, annual}
+    import zuoraIds.supporterPlusZuoraIds.{monthly, monthlyV2, annual, annualV2}
 
     billingPeriod match {
+      case Monthly if SwitchToV2SupporterPlus =>
+        Right(
+          SupporterPlusRatePlanIds(
+            monthlyV2.productRatePlanId.value,
+            monthlyV2.productRatePlanChargeId.value,
+            Some(monthlyV2.contributionProductRatePlanChargeId.value),
+          ),
+        )
       case Monthly =>
-        Right(SupporterPlusRatePlanIds(monthly.productRatePlanId.value, monthly.productRatePlanChargeId.value))
+        Right(SupporterPlusRatePlanIds(monthly.productRatePlanId.value, monthly.productRatePlanChargeId.value, None))
+      case Annual if SwitchToV2SupporterPlus =>
+        Right(
+          SupporterPlusRatePlanIds(
+            annualV2.productRatePlanId.value,
+            annualV2.productRatePlanChargeId.value,
+            Some(annualV2.contributionProductRatePlanChargeId.value),
+          ),
+        )
       case Annual =>
-        Right(SupporterPlusRatePlanIds(annual.productRatePlanId.value, annual.productRatePlanChargeId.value))
+        Right(SupporterPlusRatePlanIds(annual.productRatePlanId.value, annual.productRatePlanChargeId.value, None))
       case _ => Left(s"error when matching on billingPeriod ${billingPeriod}")
     }
   }
