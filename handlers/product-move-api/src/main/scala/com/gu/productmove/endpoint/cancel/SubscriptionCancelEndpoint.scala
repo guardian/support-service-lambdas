@@ -153,7 +153,7 @@ object SubscriptionCancelEndpoint {
       // should look at the relevant charge, members data api looks for the Paid Plan.
       // initially this will only apply to new prop which won't have multiple plans or charges.
       zuoraIds <- ZIO.fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)))
-      ratePlan <- asSingle(subscription.ratePlans, "ratePlan")
+      ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
       _ <- checkProductIsSupporterPlus(charges, zuoraIds.supporterPlusZuoraIds)
 
