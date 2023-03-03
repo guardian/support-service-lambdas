@@ -25,6 +25,7 @@ object ZuoraAquaRequestMaker extends LazyLogging {
     new RestRequestMaker.Requests(
       headers = Map(
         "Authorization" -> s"Basic $encodedCredentials",
+        "Accept-Encoding" -> "identity",
       ),
       baseUrl = config.baseUrl + "/",
       getResponse = response,
