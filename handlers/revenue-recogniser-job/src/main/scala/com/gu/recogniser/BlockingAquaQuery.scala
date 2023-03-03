@@ -65,6 +65,7 @@ class BlockingAquaQueryImpl(
             log(s"still pending: $pending")
             waitForResult(jobId, getJobResult)
           case c: Completed =>
+            log(s"Completed: $c")
             ClientSuccess(c.batches)
         }
       case fail: ClientFailure => fail
