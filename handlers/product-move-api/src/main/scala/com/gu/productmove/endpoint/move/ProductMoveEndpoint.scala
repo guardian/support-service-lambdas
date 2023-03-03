@@ -1,6 +1,6 @@
 package com.gu.productmove.endpoint.move
 
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 
 import java.time.LocalDate
@@ -14,33 +14,9 @@ import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{
-  GetAccount,
-  GetAccountLive,
-  GetSubscription,
-  GetSubscriptionLive,
-  Subscribe,
-  SubscribeLive,
-  SubscriptionUpdate,
-  getSupporterPlusRatePlanIds,
-  SubscriptionUpdateLive,
-  ZuoraCancel,
-  ZuoraCancelLive,
-}
-import com.gu.productmove.{
-  AwsCredentialsLive,
-  AwsS3Live,
-  Dynamo,
-  DynamoLive,
-  EmailMessage,
-  EmailPayload,
-  EmailPayloadContactAttributes,
-  EmailPayloadSubscriberAttributes,
-  GuStageLive,
-  SQS,
-  SQSLive,
-  SttpClientLive,
-}
+import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive, getSupporterPlusRatePlanIds}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, Dynamo, DynamoLive, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
+import com.gu.util.config.ZuoraEnvironment
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -167,6 +143,12 @@ object ProductMoveEndpoint {
       ratePlanCharge <- getSingleOrNotEligible(
         currentRatePlan.ratePlanCharges,
         s"Subscription: $subscriptionName has more than one ratePlanCharge",
+      )
+      // TODO: Make this work
+      response <- PricesFromZuoraCatalog(
+        ZuoraEnvironment("DEV"),
+        GetFromS3.fetchString,
+        zuoraIds.rateplanIdToApiId.get,
       )
       result <-
         if (postData.preview)
