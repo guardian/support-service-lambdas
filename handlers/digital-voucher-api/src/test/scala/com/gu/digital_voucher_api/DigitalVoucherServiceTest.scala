@@ -10,11 +10,7 @@ import org.scalatest.OneInstancePerTest
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class DigitalVoucherServiceTest
-  extends AnyFlatSpec
-  with Matchers
-  with MockFactory
-  with OneInstancePerTest {
+class DigitalVoucherServiceTest extends AnyFlatSpec with Matchers with MockFactory with OneInstancePerTest {
 
   private val sfSubId = SfSubscriptionId("fogishgrihrogh")
   private val startDate = LocalDate.parse("2020-08-17")

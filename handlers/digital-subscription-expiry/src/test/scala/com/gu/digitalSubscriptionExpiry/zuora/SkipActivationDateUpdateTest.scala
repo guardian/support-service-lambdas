@@ -20,7 +20,7 @@ class SkipActivationDateUpdateTest extends AnyFlatSpec {
     customerAcceptanceDate = testDate,
     startDate = testDate,
     endDate = testDate,
-    ratePlans = Nil
+    ratePlans = Nil,
   )
 
   val subWithActivationDateNotSet = testSubscriptionResult(None)

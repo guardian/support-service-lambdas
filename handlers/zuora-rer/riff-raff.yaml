@@ -1,0 +1,20 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: zuora-rer
+    parameters:
+      templatePath: cfn.yaml
+
+  zuora-rer:
+    type: aws-lambda
+    parameters:
+      fileName: zuora-rer.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames: [zuora-baton-rer-lambda-, zuora-baton-perform-rer-lambda-]
+    dependencies: [cfn]

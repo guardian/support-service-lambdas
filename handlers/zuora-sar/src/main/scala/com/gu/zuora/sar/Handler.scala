@@ -1,13 +1,14 @@
 package com.gu.zuora.sar
 
 import java.io.{InputStream, OutputStream}
-
 import cats.effect.IO
 import circeCodecs._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.LoadConfigModule
-import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{ZuoraQuery, ZuoraRestRequestMaker}
+import com.gu.zuora.baton.BatonZuoraRestConfig
+import com.gu.zuora.baton.BatonZuoraRestConfig._
 import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import io.circe.parser.decode
 import io.circe.syntax._
@@ -21,15 +22,14 @@ trait ZuoraHandler[Req, Res] {
 
   val jsonPrinter: Printer = Printer.spaces2.copy(dropNullValues = true)
 
-  def handleRequest(input: InputStream, output: OutputStream)(
-    implicit
-    decoder: Decoder[Req],
-    encoder: Encoder[Res]
+  def handleRequest(input: InputStream, output: OutputStream)(implicit
+      decoder: Decoder[Req],
+      encoder: Encoder[Res],
   ): Unit = {
     try {
       val response = for {
         request <- IO.fromEither(
-          decode[Req](Source.fromInputStream(input).mkString)
+          decode[Req](Source.fromInputStream(input).mkString),
         )
         response <- handle(request)
       } yield response
@@ -51,8 +51,8 @@ object Handler {
   }
 
   def handlePerformSar(
-    input: InputStream,
-    output: OutputStream
+      input: InputStream,
+      output: OutputStream,
   ): Either[ConfigFailure, Unit] = {
     val loadZuoraSarConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
@@ -60,7 +60,8 @@ object Handler {
     val downloadResponse = RawEffects.downloadResponse
     for {
       zuoraSarConfig <- loadZuoraSarConfig[ZuoraSarConfig]
-      zuoraRestConfig <- loadZuoraRestConfig[ZuoraRestConfig]
+      batonZuoraRestConfig <- loadZuoraRestConfig[BatonZuoraRestConfig]
+      zuoraRestConfig = toZuoraRestConfig(batonZuoraRestConfig)
       requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)

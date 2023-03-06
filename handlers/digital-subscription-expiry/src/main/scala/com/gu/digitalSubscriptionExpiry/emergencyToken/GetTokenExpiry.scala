@@ -30,7 +30,7 @@ object GetTokenExpiry extends LazyLogging {
             expiryDate = payload.jExpiryDate(today()),
             expiryType = ExpiryType.SUB,
             subscriptionCode = Some(payload.subscriptionCode),
-            provider = Some(emergencyTokens.prefix)
+            provider = Some(emergencyTokens.prefix),
           )
           ReturnWithResponse(ApiGatewayResponse("200", SuccessResponse(expiry)))
 

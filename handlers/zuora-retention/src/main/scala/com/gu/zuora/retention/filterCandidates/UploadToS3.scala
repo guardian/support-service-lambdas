@@ -11,8 +11,8 @@ import scala.util.Try
 object UploadToS3 extends LazyLogging {
 
   def apply(
-    s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse],
-    bucket: String
+      s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse],
+      bucket: String,
   )(filteredCandidates: Iterator[String], key: String): Try[String] = {
     val uploadLocation = s"s3://$bucket/$key"
     logger.info(s"uploading do do not process list to $uploadLocation")

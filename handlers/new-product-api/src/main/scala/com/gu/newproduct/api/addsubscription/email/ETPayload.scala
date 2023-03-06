@@ -24,7 +24,7 @@ object ETPayload {
     ETPayload(
       To = CTo(email, email, CContactAttributes(fields)),
       DataExtensionName = name.value,
-      SfContactId = sfContactId
+      SfContactId = sfContactId,
     )
 }
 

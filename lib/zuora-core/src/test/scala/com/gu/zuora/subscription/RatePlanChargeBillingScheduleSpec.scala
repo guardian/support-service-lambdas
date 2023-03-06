@@ -9,14 +9,18 @@ import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
+class RatePlanChargeBillingScheduleSpec
+    extends AnyFlatSpec
+    with Matchers
+    with EitherValues
+    with TypeCheckedTripleEquals {
   "BillingSchedule" should "calculate fixed monthly period valid date range" in {
     testFixedBillingPeriod(
       billingPeriodName = "Month",
       optionalSpecificBillingPeriod = None,
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
-      expectedEndDate = LocalDate.of(2019, 11, 30)
+      expectedEndDate = LocalDate.of(2019, 11, 30),
     )
   }
   it should "calculate fixed annual period valid date range" in {
@@ -25,7 +29,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       optionalSpecificBillingPeriod = None,
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
-      expectedEndDate = LocalDate.of(2021, 9, 30)
+      expectedEndDate = LocalDate.of(2021, 9, 30),
     )
   }
   it should "calculate fixed semi annual period valid date range" in {
@@ -34,7 +38,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       optionalSpecificBillingPeriod = None,
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
-      expectedEndDate = LocalDate.of(2020, 9, 30)
+      expectedEndDate = LocalDate.of(2020, 9, 30),
     )
   }
   it should "calculate fixed quarterly period valid date range" in {
@@ -43,7 +47,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       optionalSpecificBillingPeriod = None,
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
-      expectedEndDate = LocalDate.of(2020, 3, 31)
+      expectedEndDate = LocalDate.of(2020, 3, 31),
     )
   }
   it should "calculate fixed specific number of weeks period valid date range" in {
@@ -52,7 +56,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       optionalSpecificBillingPeriod = Some(3),
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
-      expectedEndDate = LocalDate.of(2019, 11, 11)
+      expectedEndDate = LocalDate.of(2019, 11, 11),
     )
   }
   it should "calculate open ended valid date range" in {
@@ -72,16 +76,15 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
           triggerEvent = Some("SpecificDate"),
           triggerDate = Some(effectiveStartDate),
           chargedThroughDate = None,
-          processedThroughDate = None
+          processedThroughDate = None,
         ),
-        Fixtures.mkAccount()
-      )
-    ) {
-        case Right(billingSchedule) =>
-          billingSchedule.isDateCoveredBySchedule(effectiveStartDate.minusDays(1)) should equal(false)
-          billingSchedule.isDateCoveredBySchedule(effectiveStartDate) should equal(true)
-          billingSchedule.isDateCoveredBySchedule(LocalDate.MAX) should equal(true)
-      }
+        Fixtures.mkAccount(),
+      ),
+    ) { case Right(billingSchedule) =>
+      billingSchedule.isDateCoveredBySchedule(effectiveStartDate.minusDays(1)) should equal(false)
+      billingSchedule.isDateCoveredBySchedule(effectiveStartDate) should equal(true)
+      billingSchedule.isDateCoveredBySchedule(LocalDate.MAX) should equal(true)
+    }
   }
   it should "calculate monthly billing periods" in {
     testFixedBillingSchedule(
@@ -89,7 +92,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       None,
       LocalDate.of(2019, 10, 1),
       BillDates(LocalDate.of(2019, 10, 1), LocalDate.of(2019, 10, 31)),
-      BillDates(LocalDate.of(2019, 11, 1), LocalDate.of(2019, 11, 30))
+      BillDates(LocalDate.of(2019, 11, 1), LocalDate.of(2019, 11, 30)),
     )
   }
   it should "calculate annual billing periods" in {
@@ -98,7 +101,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       None,
       LocalDate.of(2019, 10, 1),
       BillDates(LocalDate.of(2019, 10, 1), LocalDate.of(2020, 9, 30)),
-      BillDates(LocalDate.of(2020, 10, 1), LocalDate.of(2021, 9, 30))
+      BillDates(LocalDate.of(2020, 10, 1), LocalDate.of(2021, 9, 30)),
     )
   }
   it should "calculate Semi_Annual billing periods" in {
@@ -107,7 +110,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       None,
       LocalDate.of(2019, 10, 1),
       BillDates(LocalDate.of(2019, 10, 1), LocalDate.of(2020, 3, 31)),
-      BillDates(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 9, 30))
+      BillDates(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 9, 30)),
     )
   }
   it should "calculate Quarter billing periods" in {
@@ -116,7 +119,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       None,
       LocalDate.of(2019, 10, 1),
       BillDates(LocalDate.of(2019, 10, 1), LocalDate.of(2019, 12, 31)),
-      BillDates(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 3, 31))
+      BillDates(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 3, 31)),
     )
   }
   it should "calculate specific weeks billing periods" in {
@@ -125,7 +128,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       Some(3),
       LocalDate.of(2019, 10, 1),
       BillDates(LocalDate.of(2019, 10, 1), LocalDate.of(2019, 10, 21)),
-      BillDates(LocalDate.of(2019, 10, 22), LocalDate.of(2019, 11, 11))
+      BillDates(LocalDate.of(2019, 10, 22), LocalDate.of(2019, 11, 11)),
     )
   }
   it should "calculate quarterly billing period when period starts at end of month" in {
@@ -134,7 +137,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       None,
       LocalDate.of(2019, 8, 31),
       BillDates(LocalDate.of(2019, 8, 31), LocalDate.of(2019, 11, 29)),
-      BillDates(LocalDate.of(2019, 11, 30), LocalDate.of(2020, 2, 28))
+      BillDates(LocalDate.of(2019, 11, 30), LocalDate.of(2020, 2, 28)),
     )
   }
   it should "calculate start date from customer acceptance date" in {
@@ -142,7 +145,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
     testBillingScheduleStartDate(
       "CustomerAcceptance",
       expectedDate,
-      customerAcceptanceDate = expectedDate
+      customerAcceptanceDate = expectedDate,
     )
   }
   it should "calculate start date from contract effective date" in {
@@ -150,7 +153,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
     testBillingScheduleStartDate(
       "ContractEffective",
       expectedDate,
-      contractEffectiveDate = expectedDate
+      contractEffectiveDate = expectedDate,
     )
   }
   it should "calculate start date from specific trigger date" in {
@@ -158,7 +161,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
     testBillingScheduleStartDate(
       "SpecificDate",
       expectedDate,
-      triggerDate = Some(expectedDate)
+      triggerDate = Some(expectedDate),
     )
   }
   it should "use effective start date if matches charged through date" in {
@@ -169,7 +172,7 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       effectiveStartDate,
       triggerDate = Some(calculatedDate),
       effectiveStartDate = effectiveStartDate,
-      processedThroughDate = Some(effectiveStartDate)
+      processedThroughDate = Some(effectiveStartDate),
     )
   }
   it should "adjust billing day to bill cycle day" in {
@@ -182,16 +185,16 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
       expectedSecondBillDate,
       triggerDate = Some(startDate),
       billCycleDay = billCycleDay,
-      billingDay = Some("DefaultFromCustomer")
+      billingDay = Some("DefaultFromCustomer"),
     )
   }
 
   private def testFixedBillingPeriod(
-    billingPeriodName: String,
-    optionalSpecificBillingPeriod: Option[Int],
-    billingPeriodsRatePlanIsValidFor: Int,
-    effectiveStartDate: LocalDate,
-    expectedEndDate: LocalDate
+      billingPeriodName: String,
+      optionalSpecificBillingPeriod: Option[Int],
+      billingPeriodsRatePlanIsValidFor: Int,
+      effectiveStartDate: LocalDate,
+      expectedEndDate: LocalDate,
   ) = {
     inside(
       RatePlanChargeBillingSchedule(
@@ -209,33 +212,32 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
           triggerEvent = Some("SpecificDate"),
           triggerDate = Some(effectiveStartDate),
           chargedThroughDate = None,
-          processedThroughDate = None
+          processedThroughDate = None,
         ),
-        Fixtures.mkAccount()
+        Fixtures.mkAccount(),
+      ),
+    ) { case Right(billingSchedule) =>
+      val dateBeforeSchedule = effectiveStartDate.minusDays(1)
+      billingSchedule.isDateCoveredBySchedule(dateBeforeSchedule) should equal(false)
+      billingSchedule.billDatesCoveringDate(dateBeforeSchedule) should equal(
+        Left(ZuoraApiFailure(s"Billing schedule does not cover date $dateBeforeSchedule")),
       )
-    ) {
-        case Right(billingSchedule) =>
-          val dateBeforeSchedule = effectiveStartDate.minusDays(1)
-          billingSchedule.isDateCoveredBySchedule(dateBeforeSchedule) should equal(false)
-          billingSchedule.billDatesCoveringDate(dateBeforeSchedule) should equal(
-            Left(ZuoraApiFailure(s"Billing schedule does not cover date $dateBeforeSchedule"))
-          )
-          billingSchedule.isDateCoveredBySchedule(effectiveStartDate) should equal(true)
-          billingSchedule.isDateCoveredBySchedule(expectedEndDate) should equal(true)
-          val dateAfterSchedule = expectedEndDate.plusDays(1)
-          billingSchedule.isDateCoveredBySchedule(dateAfterSchedule) should equal(false)
-          billingSchedule.billDatesCoveringDate(dateAfterSchedule) should equal(
-            Left(ZuoraApiFailure(s"Billing schedule does not cover date $dateAfterSchedule"))
-          )
-      }
+      billingSchedule.isDateCoveredBySchedule(effectiveStartDate) should equal(true)
+      billingSchedule.isDateCoveredBySchedule(expectedEndDate) should equal(true)
+      val dateAfterSchedule = expectedEndDate.plusDays(1)
+      billingSchedule.isDateCoveredBySchedule(dateAfterSchedule) should equal(false)
+      billingSchedule.billDatesCoveringDate(dateAfterSchedule) should equal(
+        Left(ZuoraApiFailure(s"Billing schedule does not cover date $dateAfterSchedule")),
+      )
+    }
   }
 
   private def testFixedBillingSchedule(
-    billingPeriodName: String,
-    optionalSpecificBillingPeriod: Option[Int],
-    effectiveStartDate: LocalDate,
-    expectedBillDates1: BillDates,
-    expectedBillDates2: BillDates
+      billingPeriodName: String,
+      optionalSpecificBillingPeriod: Option[Int],
+      effectiveStartDate: LocalDate,
+      expectedBillDates1: BillDates,
+      expectedBillDates2: BillDates,
   ) = {
     inside(
       RatePlanChargeBillingSchedule(
@@ -252,35 +254,40 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
           triggerEvent = Some("SpecificDate"),
           triggerDate = Some(effectiveStartDate),
           chargedThroughDate = None,
-          processedThroughDate = None
+          processedThroughDate = None,
         ),
-        Fixtures.mkAccount()
+        Fixtures.mkAccount(),
+      ),
+    ) { case Right(billingSchedule) =>
+      datesBetweenDates(expectedBillDates1.startDate, expectedBillDates1.endDate).foreach(date =>
+        withClue(s"For date: $date") {
+          billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates1))
+        },
       )
-    ) {
-        case Right(billingSchedule) =>
-          datesBetweenDates(expectedBillDates1.startDate, expectedBillDates1.endDate).foreach(date =>
-            withClue(s"For date: $date") { billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates1)) })
-          datesBetweenDates(expectedBillDates2.startDate, expectedBillDates2.endDate).foreach(date =>
-            withClue(s"For date: $date") { billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates2)) })
-      }
+      datesBetweenDates(expectedBillDates2.startDate, expectedBillDates2.endDate).foreach(date =>
+        withClue(s"For date: $date") {
+          billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates2))
+        },
+      )
+    }
   }
 
   private def testBillingScheduleStartDate(
-    triggerEvent: String,
-    expectedDate: LocalDate,
-    customerAcceptanceDate: LocalDate = LocalDate.of(2020, 6, 6),
-    contractEffectiveDate: LocalDate = LocalDate.of(2020, 6, 6),
-    triggerDate: Option[LocalDate] = None,
-    effectiveStartDate: LocalDate = LocalDate.of(2020, 6, 6),
-    processedThroughDate: Option[LocalDate] = None,
-    billCycleDay: Int = 1,
-    billingDay: Option[String] = Some("ChargeTriggerDay")
+      triggerEvent: String,
+      expectedDate: LocalDate,
+      customerAcceptanceDate: LocalDate = LocalDate.of(2020, 6, 6),
+      contractEffectiveDate: LocalDate = LocalDate.of(2020, 6, 6),
+      triggerDate: Option[LocalDate] = None,
+      effectiveStartDate: LocalDate = LocalDate.of(2020, 6, 6),
+      processedThroughDate: Option[LocalDate] = None,
+      billCycleDay: Int = 1,
+      billingDay: Option[String] = Some("ChargeTriggerDay"),
   ) = {
     inside(
       RatePlanChargeBillingSchedule(
         Fixtures.mkGuardianWeeklySubscription(
           customerAcceptanceDate = customerAcceptanceDate,
-          contractEffectiveDate = contractEffectiveDate
+          contractEffectiveDate = contractEffectiveDate,
         ),
         Fixtures.mkRatePlanCharge(
           name = "GW Oct 18 - Quarterly - Domestic",
@@ -294,19 +301,17 @@ class RatePlanChargeBillingScheduleSpec extends AnyFlatSpec with Matchers with E
           triggerEvent = Some(triggerEvent),
           triggerDate = triggerDate,
           processedThroughDate = processedThroughDate,
-          effectiveStartDate = effectiveStartDate
+          effectiveStartDate = effectiveStartDate,
         ),
         Fixtures.mkAccount(
-          billCycleDay = billCycleDay
-        )
-      )
-    ) {
-        case Right(billingSchedule) =>
-          inside(billingSchedule.billDatesCoveringDate(expectedDate)) {
-            case Right(billDates: BillDates) =>
-              billDates.startDate should equal(expectedDate)
-          }
+          billCycleDay = billCycleDay,
+        ),
+      ),
+    ) { case Right(billingSchedule) =>
+      inside(billingSchedule.billDatesCoveringDate(expectedDate)) { case Right(billDates: BillDates) =>
+        billDates.startDate should equal(expectedDate)
       }
+    }
   }
 
   def datesBetweenDates(date1: LocalDate, date2: LocalDate) = {

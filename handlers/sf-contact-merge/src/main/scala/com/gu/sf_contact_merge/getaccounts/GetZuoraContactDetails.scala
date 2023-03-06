@@ -20,10 +20,10 @@ object GetZuoraContactDetails {
   case class ZuoraContactDetails(emailAddress: Option[EmailAddress], firstName: Option[FirstName], lastName: LastName)
 
   case class WireContact(
-    Id: String,
-    WorkEmail: Option[String],
-    FirstName: String,
-    LastName: String
+      Id: String,
+      WorkEmail: Option[String],
+      FirstName: String,
+      LastName: String,
   )
 
   implicit val readWireContact = Json.reads[WireContact]
@@ -42,8 +42,8 @@ object GetZuoraContactDetails {
         ZuoraContactDetails(
           contact.WorkEmail.map(EmailAddress.apply),
           Some(FirstName(contact.FirstName)).filter(_.value != "."),
-          LastName(contact.LastName)
-        )
+          LastName(contact.LastName),
+        ),
       )
     }.toMap
 
@@ -51,6 +51,6 @@ object GetZuoraContactDetails {
 
 trait GetZuoraContactDetails {
   def apply(
-    contactIds: NonEmptyList[GetZuoraContactDetails.ContactId]
+      contactIds: NonEmptyList[GetZuoraContactDetails.ContactId],
   ): ClientFailableOp[Map[GetZuoraContactDetails.ContactId, GetZuoraContactDetails.ZuoraContactDetails]]
 }

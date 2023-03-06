@@ -11,7 +11,7 @@ object ZuoraUpdateCancellationReason extends LazyLogging {
 
   implicit val subscriptionUpdateWrites = new Writes[SubscriptionUpdate] {
     def writes(subscriptionUpdate: SubscriptionUpdate) = Json.obj(
-      "CancellationReason__c" -> subscriptionUpdate.cancellationReason
+      "CancellationReason__c" -> subscriptionUpdate.cancellationReason,
     )
   }
 

@@ -1,7 +1,5 @@
-.*
-!/.gitignore
-!/.github
-!/.scala-steward.conf
+.bsp/
+.idea/
 target/
 cdk-cfn.yaml
 metals.sbt

@@ -27,16 +27,17 @@ class ReportsLambdaEndToEndTest extends AnyFlatSpec with Matchers {
     queries = List(
       AquaQuery(
         name = "query1",
-        query = "select something from somethingElse"
-      )
-    )
+        query = "select something from somethingElse",
+      ),
+    ),
   )
 
   it should "handle query request" in {
 
     val postResponses1 = Map(POSTRequest("/batch-query/", aquaQueryRequest) -> HTTPResponse(200, aquaQueryResponse))
 
-    def handlerToTest(requests: Requests)(querierRequest: FakeQueryRequest) = Querier(generateAquaQuery, requests)(querierRequest)
+    def handlerToTest(requests: Requests)(querierRequest: FakeQueryRequest) =
+      Querier(generateAquaQuery, requests)(querierRequest)
 
     val inputJson =
       """
@@ -49,7 +50,7 @@ class ReportsLambdaEndToEndTest extends AnyFlatSpec with Matchers {
     val (response, bla) = getResultAndRequests[FakeQueryRequest, QuerierResponse](
       input = inputJson,
       postResponses = postResponses1,
-      handlerToTest = handlerToTest
+      handlerToTest = handlerToTest,
     )
 
     val expectedResponse =
@@ -77,7 +78,7 @@ class ReportsLambdaEndToEndTest extends AnyFlatSpec with Matchers {
     val (response, bla) = getResultAndRequests[JobResultRequest, JobResult](
       input = jobInput,
       responses = responses,
-      handlerToTest = getJobResultAdapter
+      handlerToTest = getJobResultAdapter,
     )
 
     val expected =
@@ -102,23 +103,25 @@ class ReportsLambdaEndToEndTest extends AnyFlatSpec with Matchers {
 object Runner {
 
   def getResultAndRequests[REQUEST, RESPONSE](
-    input: String,
-    responses: Map[String, HTTPResponse] = Map(),
-    postResponses: Map[POSTRequest, HTTPResponse] = Map(),
-    handlerToTest: Requests => REQUEST => ClientFailableOp[RESPONSE]
+      input: String,
+      responses: Map[String, HTTPResponse] = Map(),
+      postResponses: Map[POSTRequest, HTTPResponse] = Map(),
+      handlerToTest: Requests => REQUEST => ClientFailableOp[RESPONSE],
   )(implicit r: Reads[REQUEST], w: Writes[RESPONSE]): (String, List[TestingRawEffects.BasicRequest]) = {
     val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
 
     val rawEffects = new TestingRawEffects(defaultCode = 200, responses = responses, postResponses = postResponses)
 
-    def wire(zuoraRestConfig: ZuoraRestConfig) = handlerToTest(ZuoraAquaRequestMaker(rawEffects.response, zuoraRestConfig))
-    //execute
+    def wire(zuoraRestConfig: ZuoraRestConfig) = handlerToTest(
+      ZuoraAquaRequestMaker(rawEffects.response, zuoraRestConfig),
+    )
+    // execute
     ReportsLambda[REQUEST, RESPONSE](
       Stage("DEV"),
       FakeFetchString.fetchString,
       LambdaIO(stream, os, null),
-      wire
+      wire,
     )
 
     val responseString = new String(os.toByteArray, "UTF-8")
@@ -167,7 +170,7 @@ object EndToEndData {
       |}
     """.stripMargin
 
-  //this has to be all in the same line otherwise it would not match the expected request and the test would fail
+  // this has to be all in the same line otherwise it would not match the expected request and the test would fail
   val aquaQueryRequest =
     """{"format":"csv","version":"1.0","name":"testJob","encrypted":"none","useQueryLabels":"true","dateTimeUtc":"true","queries":[{"name":"query1","query":"select something from somethingElse","type":"zoqlexport"}]}"""
 

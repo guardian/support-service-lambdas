@@ -19,7 +19,8 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
 
     def validatingStringFromS3(s3Location: S3Location): Try[String] = Try {
       val zuoraLocation = ZuoraRestConfig.location
-      val uatlocation = s"membership/support-service-lambdas/CODE/${zuoraLocation.path}-CODE.v${zuoraLocation.version}.json"
+      val uatlocation =
+        s"membership/support-service-lambdas/CODE/${zuoraLocation.path}-CODE.v${zuoraLocation.version}.json"
       val expectedS3Location = S3Location("gu-reader-revenue-private", uatlocation)
       if (s3Location != expectedS3Location)
         throw new RuntimeException(s"test failure : unexpected s3Location $s3Location expected $expectedS3Location")
@@ -40,7 +41,7 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
         Stage("DEV"),
         ZuoraEnvironment("UAT"),
         validatingStringFromS3,
-        TestingRawEffects.successfulS3Upload
+        TestingRawEffects.successfulS3Upload,
       )
     }
   }
@@ -51,7 +52,7 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
         Stage("DEV"),
         ZuoraEnvironment("DEV"),
         _ => Failure(new RuntimeException("broken config load")),
-        TestingRawEffects.successfulS3Upload
+        TestingRawEffects.successfulS3Upload,
       )
     }
   }
@@ -63,7 +64,7 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
         Stage("DEV"),
         ZuoraEnvironment("DEV"),
         FakeFetchString.fetchString,
-        TestingRawEffects.successfulS3Upload
+        TestingRawEffects.successfulS3Upload,
       )
     }
   }
@@ -75,7 +76,7 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
         Stage("DEV"),
         ZuoraEnvironment("DEV"),
         FakeFetchString.fetchString,
-        TestingRawEffects.failedS3Upload
+        TestingRawEffects.failedS3Upload,
       )
     }
   }

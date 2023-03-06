@@ -8,22 +8,22 @@ import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, SendMessag
 
 import scala.util.{Failure, Success, Try}
 
-/**
- * Manages synchronous access to SQS queues.
- */
+/** Manages synchronous access to SQS queues.
+  */
 object SqsSync extends LazyLogging {
 
-  def buildClient: SqsClient = SqsClient
-    .builder
+  def buildClient: SqsClient = SqsClient.builder
     .region(EU_WEST_1)
     .credentialsProvider(AwsSQSSend.CredentialsProvider)
     .build()
 
   def send(client: SqsClient)(queueName: QueueName)(payload: Payload): Try[Unit] = {
 
-    val queueUrl = client.getQueueUrl(
-      GetQueueUrlRequest.builder.queueName(queueName.value).build()
-    ).queueUrl
+    val queueUrl = client
+      .getQueueUrl(
+        GetQueueUrlRequest.builder.queueName(queueName.value).build(),
+      )
+      .queueUrl
 
     logger.info(s"Sending message to SQS queue $queueUrl")
 

@@ -4,7 +4,13 @@ import java.time.LocalDate
 
 import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
-import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionId, SubscriptionName, SubscriptionResult}
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{
+  RatePlan,
+  RatePlanCharge,
+  SubscriptionId,
+  SubscriptionName,
+  SubscriptionResult,
+}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -16,7 +22,8 @@ import org.scalatest.matchers.should.Matchers
 class GetSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
 
   private def actual(testSubscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] = for {
-    zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("couldn't load config")
+    zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      .toApiGatewayOp("couldn't load config")
     zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
     subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
   } yield {
@@ -45,21 +52,25 @@ class GetSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
       List(
         RatePlan(
           "Promotions",
-          List(RatePlanCharge(
-            name = "Discount template",
-            effectiveStartDate = LocalDate.of(2017, 12, 15),
-            effectiveEndDate = LocalDate.of(2018, 3, 15)
-          ))
+          List(
+            RatePlanCharge(
+              name = "Discount template",
+              effectiveStartDate = LocalDate.of(2017, 12, 15),
+              effectiveEndDate = LocalDate.of(2018, 3, 15),
+            ),
+          ),
         ),
         RatePlan(
           "Digital Pack",
-          List(RatePlanCharge(
-            name = "Digital Pack Monthly",
-            effectiveStartDate = LocalDate.of(2017, 12, 15),
-            effectiveEndDate = LocalDate.of(2020, 11, 29)
-          ))
-        )
-      )
+          List(
+            RatePlanCharge(
+              name = "Digital Pack Monthly",
+              effectiveStartDate = LocalDate.of(2017, 12, 15),
+              effectiveEndDate = LocalDate.of(2020, 11, 29),
+            ),
+          ),
+        ),
+      ),
     )
 
     actual(testSubscriptionId).toDisjunction should be(Right(expected))

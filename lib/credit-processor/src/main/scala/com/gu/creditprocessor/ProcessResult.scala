@@ -4,10 +4,10 @@ import com.gu.zuora.subscription.{CreditRequest, OverallFailure, ZuoraApiFailure
 import com.typesafe.scalalogging.LazyLogging
 
 case class ProcessResult[ResultType <: ZuoraCreditAddResult](
-  creditsToApply: List[CreditRequest],
-  creditResults: List[Either[ZuoraApiFailure, ResultType]],
-  resultsToExport: List[ResultType],
-  overallFailure: Option[OverallFailure]
+    creditsToApply: List[CreditRequest],
+    creditResults: List[Either[ZuoraApiFailure, ResultType]],
+    resultsToExport: List[ResultType],
+    overallFailure: Option[OverallFailure],
 )
 
 object ProcessResult extends LazyLogging {

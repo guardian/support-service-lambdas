@@ -43,7 +43,7 @@ object ZuoraSarLocalRun extends App {
       zuoraHelper = ZuoraSarService(requests, downloadRequests, zuoraQuerier)
     } yield {
       ZuoraPerformSarHandler(zuoraHelper, S3Helper, zuoraSarConfig)
-      }.handleRequest(streams.inputStream, streams.outputStream)
+    }.handleRequest(streams.inputStream, streams.outputStream)
 
     val responseString = new String(streams.outputStream.toByteArray)
     println("lambda output was:" + responseString)
@@ -52,9 +52,8 @@ object ZuoraSarLocalRun extends App {
   val sarStatusRequest = SarStatusRequest(initiationReference = "testSubjectId")
   val performSarInitiateRequest = PerformSarRequest(
     initiationReference = "testSubjectId",
-    subjectEmail = "test@testco.uk"
+    subjectEmail = "test@testco.uk",
   )
 
   runTestZuoraSar(sarStatusRequest)
 }
-

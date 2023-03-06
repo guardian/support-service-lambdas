@@ -1,6 +1,11 @@
 package com.gu.effects.sqs
 
-import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider, SystemPropertyCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProviderChain,
+  EnvironmentVariableCredentialsProvider,
+  ProfileCredentialsProvider,
+  SystemPropertyCredentialsProvider,
+}
 
 object AwsSQSSend {
 
@@ -10,12 +15,11 @@ object AwsSQSSend {
 
   val ProfileName = "membership"
 
-  lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain
-    .builder
+  lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain.builder
     .credentialsProviders(
       EnvironmentVariableCredentialsProvider.create(),
       SystemPropertyCredentialsProvider.create(),
-      ProfileCredentialsProvider.builder.profileName(ProfileName).build()
+      ProfileCredentialsProvider.builder.profileName(ProfileName).build(),
     )
     .build()
 }

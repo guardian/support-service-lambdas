@@ -1,7 +1,12 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
-import com.gu.soft_opt_in_consent_setter.testData.IdentityTestData.{failedResponse, fakeIdentityConfig, successfulResponse, thrownResponse}
+import com.gu.soft_opt_in_consent_setter.testData.IdentityTestData.{
+  failedResponse,
+  fakeIdentityConfig,
+  successfulResponse,
+  thrownResponse,
+}
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should

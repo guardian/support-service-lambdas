@@ -27,24 +27,31 @@ class UpdateAccountSFLinksEffectsTest extends AnyFlatSpec with Matchers {
     val unique = s"${Random.nextInt(10000)}"
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load config")
+      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+        .toApiGatewayOp("load config")
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       update = UpdateAccountSFLinks(zuoraDeps.put)
-      updateAccount = update(ZuoraFieldUpdates(
-        WinningSFContact(SFContactId(s"cont$unique")),
-        CRMAccountId(s"acc$unique"),
-        ReplaceZuoraIdentityId(IdentityId(s"ident$unique")),
-        Some(EmailAddress(s"fulfilment.dev+$unique@guardian.co.uk"))
-      ), _: AccountId)
+      updateAccount = update(
+        ZuoraFieldUpdates(
+          WinningSFContact(SFContactId(s"cont$unique")),
+          CRMAccountId(s"acc$unique"),
+          ReplaceZuoraIdentityId(IdentityId(s"ident$unique")),
+          Some(EmailAddress(s"fulfilment.dev+$unique@guardian.co.uk")),
+        ),
+        _: AccountId,
+      )
       _ <- updateAccount(DevZuora.accountWithRandomLinks).toApiGatewayOp("AddIdentityIdToAccount")
       basicInfo <- GetZuoraAccount(zuoraDeps)(DevZuora.accountWithRandomLinks).toApiGatewayOp("GetIdentityIdForAccount")
     } yield basicInfo
-    actual.toDisjunction should be(Right(ZuoraAccount(
-      BasicInfo(s"cont$unique", s"acc$unique", Some(s"ident$unique")),
-      ZContact(s"fulfilment.dev+$unique@guardian.co.uk")
-    )))
+    actual.toDisjunction should be(
+      Right(
+        ZuoraAccount(
+          BasicInfo(s"cont$unique", s"acc$unique", Some(s"ident$unique")),
+          ZContact(s"fulfilment.dev+$unique@guardian.co.uk"),
+        ),
+      ),
+    )
 
   }
 
 }
-

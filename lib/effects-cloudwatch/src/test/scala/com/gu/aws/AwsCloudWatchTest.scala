@@ -8,14 +8,16 @@ import software.amazon.awssdk.services.cloudwatch.model.StandardUnit.COUNT
 class AwsCloudWatchTest extends AnyFlatSpec with Matchers {
 
   "buildMetricDatum" should "build correct datum" in {
-    val datum = AwsCloudWatch.buildMetricDatum(MetricRequest(
-      MetricNamespace("support-service-lambdas"),
-      MetricName("cleanup-succeeded"),
-      Map(
-        MetricDimensionName("Stage") -> MetricDimensionValue("CODE"),
-        MetricDimensionName("app") -> MetricDimensionValue("dev-env-cleaner")
-      )
-    ))
+    val datum = AwsCloudWatch.buildMetricDatum(
+      MetricRequest(
+        MetricNamespace("support-service-lambdas"),
+        MetricName("cleanup-succeeded"),
+        Map(
+          MetricDimensionName("Stage") -> MetricDimensionValue("CODE"),
+          MetricDimensionName("app") -> MetricDimensionValue("dev-env-cleaner"),
+        ),
+      ),
+    )
     datum.metricName shouldBe "cleanup-succeeded"
     datum.dimensions.size shouldBe 2
     datum.dimensions.get(0).name shouldBe "Stage"

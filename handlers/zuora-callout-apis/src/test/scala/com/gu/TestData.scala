@@ -3,7 +3,6 @@ package com.gu
 import java.time.LocalDate
 
 import com.gu.effects.TestingRawEffects
-import com.gu.stripeCustomerSourceUpdated.{StripeDeps, StripeSignatureChecker}
 import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
@@ -15,18 +14,21 @@ object TestData extends Matchers {
 
   val today = LocalDate.of(2016, 11, 21)
   val accountId = "accountId"
-  val invoiceItemA = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49.21, "Non founder - annual", "Supporter")
+  val invoiceItemA =
+    InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49.21, "Non founder - annual", "Supporter")
   val invoiceItemB = InvoiceItem("invitem122", "A-S123", today, today.plusMonths(1), 0, "Friends", "Friend")
   val invoiceItemC = InvoiceItem("invitem121", "A-S123", today, today.plusMonths(1), -4.90, "Percentage", "Discount")
 
-  def itemisedInvoice(balance: Double, invoiceItems: List[InvoiceItem]) = ItemisedInvoice("invoice123", today, 49, balance, "Posted", List(invoiceItemA))
+  def itemisedInvoice(balance: Double, invoiceItems: List[InvoiceItem]) =
+    ItemisedInvoice("invoice123", today, 49, balance, "Posted", List(invoiceItemA))
 
   val basicInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(49, List(invoiceItemA))))
-  val weirdInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(0, List(invoiceItemA)), itemisedInvoice(49, List(invoiceItemB, invoiceItemA, invoiceItemC))))
+  val weirdInvoiceTransactionSummary = InvoiceTransactionSummary(
+    List(itemisedInvoice(0, List(invoiceItemA)), itemisedInvoice(49, List(invoiceItemB, invoiceItemA, invoiceItemC))),
+  )
 
   val fakeApiConfig = TrustedApiConfig("validApiToken", "testEnvTenantId")
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
-  val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")), true)
 
   val missingCredentialsResponse =
     """{
@@ -53,6 +55,5 @@ object TestData extends Matchers {
   }
 
   def zuoraDeps(effects: TestingRawEffects) = ZuoraRestRequestMaker(effects.response, TestData.fakeZuoraConfig)
-  val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
 
 }

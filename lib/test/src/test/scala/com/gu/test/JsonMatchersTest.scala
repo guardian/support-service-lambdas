@@ -28,7 +28,8 @@ class JSComparisonTest extends AnyFlatSpec with Matchers {
     val testData = """{"key":"test", "extra": "bad"}"""
     val actual = Json.parse(testData).validate[WithoutExtras[Simple]]
     JsonValidationError
-    val expectedError = """List((,List(JsonValidationError(List(extra fields, {"key":"test"} == {"key":"test","extra":"bad"}),List()))))"""
+    val expectedError =
+      """List((,List(JsonValidationError(List(extra fields, {"key":"test"} == {"key":"test","extra":"bad"}),List()))))"""
     actual.asEither.left.map(_.toString) should be(Left(expectedError))
   }
 
@@ -66,9 +67,9 @@ class JSComparisonEmdeddedTest extends AnyFlatSpec with Matchers {
   it should "fail for extra fields in the nested class" in {
     val testData = """{"embed":"{\"key\":\"test\",  \"extra\":\"bad\"}"}"""
     val actual = Json.parse(testData).validate[WithoutExtras[WithEmbed]]
-    val expectedError = "List((/embed,List(JsonValidationError(List(extra fields, {\"key\":\"test\"} == {\"key\":\"test\",\"extra\":\"bad\"}),List()))))"
+    val expectedError =
+      "List((/embed,List(JsonValidationError(List(extra fields, {\"key\":\"test\"} == {\"key\":\"test\",\"extra\":\"bad\"}),List()))))"
     actual.asEither.left.map(_.toString) should be(Left(expectedError))
   }
 
 }
-

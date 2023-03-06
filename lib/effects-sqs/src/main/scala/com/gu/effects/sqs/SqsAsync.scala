@@ -11,13 +11,11 @@ import scala.concurrent.Future
 import scala.jdk.FutureConverters._
 import scala.util.{Failure, Success}
 
-/**
- * Manages asynchronous access to SQS queues.
- */
+/** Manages asynchronous access to SQS queues.
+  */
 object SqsAsync extends LazyLogging {
 
-  def buildClient: SqsAsyncClient = SqsAsyncClient
-    .builder
+  def buildClient: SqsAsyncClient = SqsAsyncClient.builder
     .region(EU_WEST_1)
     .credentialsProvider(AwsSQSSend.CredentialsProvider)
     .build()
@@ -25,9 +23,12 @@ object SqsAsync extends LazyLogging {
   def send(client: SqsAsyncClient)(queueName: QueueName)(payload: Payload): Future[Unit] = {
 
     val futureQueueUrl =
-      client.getQueueUrl(
-        GetQueueUrlRequest.builder.queueName(queueName.value).build()
-      ).asScala.map(_.queueUrl)
+      client
+        .getQueueUrl(
+          GetQueueUrlRequest.builder.queueName(queueName.value).build(),
+        )
+        .asScala
+        .map(_.queueUrl)
 
     for {
       queueUrl <- futureQueueUrl

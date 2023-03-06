@@ -12,14 +12,16 @@ class GetFirstNameToUseFirstNameForSFContactTest extends AnyFlatSpec with Matche
 
   it should "abort if the winning contact isn't in any zuora account" in {
     val contactIdsFromZuora = List(NameForContactId(SFContactId("wrong"), None))
-    val actual = GetFirstNameToUse.firstNameForSFContact(WinningSFContact(SFContactId("winningSfContact")), contactIdsFromZuora)
+    val actual =
+      GetFirstNameToUse.firstNameForSFContact(WinningSFContact(SFContactId("winningSfContact")), contactIdsFromZuora)
     actual.toDisjunction.left.map(_.statusCode) should be(Left("404"))
   }
 
   it should "be happy if the winning contact is in a zuora account" in {
     val someFirstName = Some(FirstName("hi"))
     val contactIdsFromZuora = List(NameForContactId(SFContactId("winningSfContact"), someFirstName))
-    val actual = GetFirstNameToUse.firstNameForSFContact(WinningSFContact(SFContactId("winningSfContact")), contactIdsFromZuora)
+    val actual =
+      GetFirstNameToUse.firstNameForSFContact(WinningSFContact(SFContactId("winningSfContact")), contactIdsFromZuora)
     actual should be(ContinueProcessing(someFirstName))
   }
 
@@ -27,9 +29,10 @@ class GetFirstNameToUseFirstNameForSFContactTest extends AnyFlatSpec with Matche
     val someFirstName = Some(FirstName("hi"))
     val contactIdsFromZuora = List(
       NameForContactId(SFContactId("wrong"), None),
-      NameForContactId(SFContactId("winningSfContact"), someFirstName)
+      NameForContactId(SFContactId("winningSfContact"), someFirstName),
     )
-    val actual = GetFirstNameToUse.firstNameForSFContact(WinningSFContact(SFContactId("winningSfContact")), contactIdsFromZuora)
+    val actual =
+      GetFirstNameToUse.firstNameForSFContact(WinningSFContact(SFContactId("winningSfContact")), contactIdsFromZuora)
     actual should be(ContinueProcessing(someFirstName))
   }
 

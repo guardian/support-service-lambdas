@@ -13,10 +13,10 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
       jobId = "someJobId",
       batches = List(
         Batch("fileId1", "batch1"),
-        Batch("fileId2", "batch2")
+        Batch("fileId2", "batch2"),
       ),
       true,
-      13
+      13,
     )
 
     val expected =

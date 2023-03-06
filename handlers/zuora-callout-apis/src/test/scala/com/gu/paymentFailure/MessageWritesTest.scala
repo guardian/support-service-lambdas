@@ -23,12 +23,12 @@ class MessageWritesTest extends AnyFlatSpec with EmailSqsSerialisation {
             last_name = "lastNameValue",
             primaryKey = PaymentId("paymentId"),
             serviceStartDate = "31 January 2016",
-            serviceEndDate = "31 January 2017"
-          )
-        )
+            serviceEndDate = "31 January 2017",
+          ),
+        ),
       ),
       DataExtensionName = "extensionName",
-      SfContactId = "1000000"
+      SfContactId = "1000000",
     )
 
     val expectedJson =
@@ -76,12 +76,12 @@ class MessageWritesTest extends AnyFlatSpec with EmailSqsSerialisation {
             last_name = "lastNameValue",
             primaryKey = InvoiceId("paymentId"),
             serviceStartDate = "31 January 2016",
-            serviceEndDate = "31 January 2017"
-          )
-        )
+            serviceEndDate = "31 January 2017",
+          ),
+        ),
       ),
       DataExtensionName = "extensionName",
-      SfContactId = "1000000"
+      SfContactId = "1000000",
     )
 
     val expectedJson =

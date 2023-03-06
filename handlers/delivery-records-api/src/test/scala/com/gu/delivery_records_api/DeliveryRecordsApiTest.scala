@@ -24,7 +24,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
 
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
-  val config = SFAuthConfig("https://salesforceAuthUrl", "sfClientId", "sfClientSecret", "sfUsername", "sfPassword", "sfToken")
+  val config =
+    SFAuthConfig("https://salesforceAuthUrl", "sfClientId", "sfClientSecret", "sfUsername", "sfPassword", "sfToken")
   val auth = SalesforceAuth("salesforce-access-token", "https://salesforceInstanceUrl")
   val subscriptionNumber = "A-213123"
   val identityId = "identity id"
@@ -49,7 +50,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     CaseNumber = "123456",
     Subject = Some("subject"),
     Description = Some("blah blah"),
-    Case_Closure_Reason__c = Some("Paper Damaged")
+    Case_Closure_Reason__c = Some("Paper Damaged"),
   )
   val creditAmount = 1.23
   val invoiceDate = LocalDate.of(2019, 12, 10)
@@ -59,7 +60,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     Phone = Some("+447654321234"),
     HomePhone = Some("+441234567890"),
     MobilePhone = Some("garbage"),
-    OtherPhone = None
+    OtherPhone = None,
   )
 
   val sfDeliveryRecordA = SFApiDeliveryRecord(
@@ -78,19 +79,19 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     Case__r = Some(sfProblemCase),
     Credit_Amount__c = Some(creditAmount),
     Invoice_Date__c = Some(invoiceDate),
-    Is_Actioned__c = isActioned
+    Is_Actioned__c = isActioned,
   )
 
   val sfDeliveryRecordWithHolidayStop: SFApiDeliveryRecord = sfDeliveryRecordA.copy(
     Has_Holiday_Stop__c = Some(hasHolidayStop),
     Holiday_Stop_Request_Detail__r = Some(HolidayStopRequestDetail(HolidayStopRequest(Some(bulkSuspensionReason)))),
     Delivery_Address__c = None,
-    Delivery_Instructions__c = None
+    Delivery_Instructions__c = None,
   )
 
   val sfDeliveryRecordB: SFApiDeliveryRecord = sfDeliveryRecordA.copy(
     Delivery_Address__c = Some(deliveryAddress2),
-    Delivery_Instructions__c = Some(deliveryInstruction2)
+    Delivery_Instructions__c = Some(deliveryInstruction2),
   )
 
   val validSalesforceResponseBody = RecordsWrapperCaseClass(
@@ -104,12 +105,12 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
               sfDeliveryRecordB,
               sfDeliveryRecordWithHolidayStop,
               sfDeliveryRecordA,
-              sfDeliveryRecordWithHolidayStop
-            )
-          )
-        )
-      )
-    )
+              sfDeliveryRecordWithHolidayStop,
+            ),
+          ),
+        ),
+      ),
+    ),
   )
 
   val expectedDeliveryRecordA = DeliveryRecord(
@@ -128,11 +129,13 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     problemCaseId = Some(sfProblemCase.Id),
     isChangedAddress = Some(false),
     isChangedDeliveryInstruction = Some(false),
-    credit = Some(DeliveryProblemCredit(
-      isActioned = isActioned,
-      amount = creditAmount,
-      invoiceDate = Some(invoiceDate)
-    ))
+    credit = Some(
+      DeliveryProblemCredit(
+        isActioned = isActioned,
+        amount = creditAmount,
+        invoiceDate = Some(invoiceDate),
+      ),
+    ),
   )
 
   val expectedDeliveryRecordWithHolidayStop: DeliveryRecord = expectedDeliveryRecordA.copy(
@@ -141,12 +144,12 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     hasHolidayStop = Some(true),
     bulkSuspensionReason = Some(bulkSuspensionReason),
     isChangedAddress = None,
-    isChangedDeliveryInstruction = None
+    isChangedDeliveryInstruction = None,
   )
 
   val expectedDeliveryRecordB: DeliveryRecord = expectedDeliveryRecordA.copy(
     deliveryInstruction = Some(deliveryInstruction2),
-    deliveryAddress = Some(deliveryAddress2)
+    deliveryAddress = Some(deliveryAddress2),
   )
 
   val expectedValidDeliveryApiResponse = DeliveryRecordsApiResponse(
@@ -154,11 +157,11 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       expectedDeliveryRecordB,
       expectedDeliveryRecordB.copy(
         isChangedAddress = Some(true),
-        isChangedDeliveryInstruction = Some(true)
+        isChangedDeliveryInstruction = Some(true),
       ),
       expectedDeliveryRecordWithHolidayStop,
       expectedDeliveryRecordA,
-      expectedDeliveryRecordWithHolidayStop
+      expectedDeliveryRecordWithHolidayStop,
     ),
     Map(
       sfProblemCase.Id -> DeliveryProblemCase(
@@ -166,38 +169,50 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
         ref = sfProblemCase.CaseNumber,
         subject = sfProblemCase.Subject,
         description = sfProblemCase.Description,
-        problemType = sfProblemCase.Case_Closure_Reason__c
-      )
+        problemType = sfProblemCase.Case_Closure_Reason__c,
+      ),
     ),
-    contactNumbers.copy(MobilePhone = None)
+    contactNumbers.copy(MobilePhone = None),
   )
 
-  val validCompositeResponse = SFApiCompositeResponse(List(
-    SFApiCompositeResponsePart(200, "CaseCreation"),
-    SFApiCompositeResponsePart(200, "LinkDeliveryRecord-deliveryRecordID"),
-    SFApiCompositeResponsePart(200, "UpdateContactPhoneNumbers"),
-  ))
+  val validCompositeResponse = SFApiCompositeResponse(
+    List(
+      SFApiCompositeResponsePart(200, "CaseCreation"),
+      SFApiCompositeResponsePart(200, "LinkDeliveryRecord-deliveryRecordID"),
+      SFApiCompositeResponsePart(200, "UpdateContactPhoneNumbers"),
+    ),
+  )
 
-  val failedCompositeResponse = SFApiCompositeResponse(List(
-    SFApiCompositeResponsePart(400, "CaseCreation"),
-    SFApiCompositeResponsePart(400, "LinkDeliveryRecord-deliveryRecordID"),
-    SFApiCompositeResponsePart(400, "UpdateContactPhoneNumbers"),
-  ))
+  val failedCompositeResponse = SFApiCompositeResponse(
+    List(
+      SFApiCompositeResponsePart(400, "CaseCreation"),
+      SFApiCompositeResponsePart(400, "LinkDeliveryRecord-deliveryRecordID"),
+      SFApiCompositeResponsePart(400, "UpdateContactPhoneNumbers"),
+    ),
+  )
 
   "DeliveryRecordsApp" should "lookup subscription with identity id" in {
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
-        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
+        .stubQuery(
+          auth,
+          deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None),
+          validSalesforceResponseBody,
+        )
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.GET,
-        Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-identity-id", identityId))
+    val response = app
+      .run(
+        Request(
+          method = Method.GET,
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
+          headers = Headers.of(Header("x-identity-id", identityId)),
+        ),
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
@@ -207,16 +222,24 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
-        .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
+        .stubQuery(
+          auth,
+          deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None),
+          validSalesforceResponseBody,
+        )
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.GET,
-        Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+    val response = app
+      .run(
+        Request(
+          method = Method.GET,
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
+          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+        ),
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
@@ -235,22 +258,26 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
             subscriptionNumber,
             Some(startDate),
             Some(endDate),
-            None
+            None,
           ),
-          validSalesforceResponseBody
+          validSalesforceResponseBody,
         )
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.GET,
-        Uri(
-          path = s"/delivery-records/${subscriptionNumber}",
-          query = Query("startDate" -> Some(startDate.toString), "endDate" -> Some(endDate.toString))
+    val response = app
+      .run(
+        Request(
+          method = Method.GET,
+          Uri(
+            path = s"/delivery-records/${subscriptionNumber}",
+            query = Query("startDate" -> Some(startDate.toString), "endDate" -> Some(endDate.toString)),
+          ),
+          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
         ),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
@@ -262,17 +289,21 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
         .stubQuery(
           auth,
           deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None),
-          RecordsWrapperCaseClass[SFApiSubscription](Nil)
+          RecordsWrapperCaseClass[SFApiSubscription](Nil),
         )
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.GET,
-        Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+    val response = app
+      .run(
+        Request(
+          method = Method.GET,
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
+          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+        ),
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     response.status.code should equal(404)
   }
@@ -281,34 +312,47 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     productName = "Guardian Weekly",
     description = Some("String"),
     problemType = "No Delivery",
-    deliveryRecords = List(DeliveryRecordToLink(
-      id = "deliveryRecordID",
-      creditAmount = Some(1.23),
-      invoiceDate = Some(LocalDate.of(2000, 1, 1))
-    )),
+    deliveryRecords = List(
+      DeliveryRecordToLink(
+        id = "deliveryRecordID",
+        creditAmount = Some(1.23),
+        invoiceDate = Some(LocalDate.of(2000, 1, 1)),
+      ),
+    ),
     repeatDeliveryProblem = Some(true),
-    newContactPhoneNumbers = Some(SFApiContactPhoneNumbers(
-      Id = Some("contactID"),
-      Phone = Some("1234567890")
-    ))).asJson
+    newContactPhoneNumbers = Some(
+      SFApiContactPhoneNumbers(
+        Id = Some("contactID"),
+        Phone = Some("1234567890"),
+      ),
+    ),
+  ).asJson
 
   it should "create a delivery problem case and update contact with identity id" in {
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, validCompositeResponse)
-        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
+        .stubQuery(
+          auth,
+          deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None),
+          validSalesforceResponseBody,
+        )
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.POST,
-        Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-identity-id", identityId)),
-      ).withEntity(
-        createDeliveryProblemBody
+    val response = app
+      .run(
+        Request(
+          method = Method.POST,
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
+          headers = Headers.of(Header("x-identity-id", identityId)),
+        ).withEntity(
+          createDeliveryProblemBody,
+        ),
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
@@ -319,18 +363,26 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, validCompositeResponse)
-        .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
+        .stubQuery(
+          auth,
+          deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None),
+          validSalesforceResponseBody,
+        )
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.GET,
-        Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
-      ).withEntity(
-        createDeliveryProblemBody
+    val response = app
+      .run(
+        Request(
+          method = Method.GET,
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
+          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+        ).withEntity(
+          createDeliveryProblemBody,
+        ),
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
@@ -341,18 +393,26 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, failedCompositeResponse)
-        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
+        .stubQuery(
+          auth,
+          deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None),
+          validSalesforceResponseBody,
+        )
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.POST,
-        Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-identity-id", identityId)),
-      ).withEntity(
-        createDeliveryProblemBody
+    val response = app
+      .run(
+        Request(
+          method = Method.POST,
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
+          headers = Headers.of(Header("x-identity-id", identityId)),
+        ).withEntity(
+          createDeliveryProblemBody,
+        ),
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     response.status.code should equal(500)
   }
@@ -363,13 +423,17 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .stubFailingQuery
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.GET,
-        Uri(path = s"/delivery-records/${subscriptionNumber}"),
-        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+    val response = app
+      .run(
+        Request(
+          method = Method.GET,
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
+          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+        ),
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     response.status.code should equal(500)
   }
@@ -380,39 +444,40 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
         .stubAuth(config, auth)
 
     val app = createApp(salesforceBackendStub)
-    val response = app.run(
-      Request(
-        method = Method.GET,
-        Uri(path = s"/delivery-records/${subscriptionNumber}")
+    val response = app
+      .run(
+        Request(
+          method = Method.GET,
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
+        ),
       )
-    ).value.unsafeRunSync().get
+      .value
+      .unsafeRunSync()
+      .get
 
     response.status.code should equal(400)
   }
 
   it should "fail to initialise if salesforce auth fails" in {
     val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
-        .stubFailingAuth
+      SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO]).stubFailingAuth
 
     DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(true)
   }
 
   private def getBody[A: Decoder](response: Response[IO]) = {
     parse(
-      response
-        .bodyText
-        .compile
-        .toList
+      response.bodyText.compile.toList
         .unsafeRunSync()
-        .mkString("")
+        .mkString(""),
     ).value
-      .as[A].value
+      .as[A]
+      .value
   }
 
   private def createApp(salesforceBackendStub: SttpBackendStub[IO, Nothing]) = {
-    Inside.inside(DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync()) {
-      case Right(value) => value
+    Inside.inside(DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync()) { case Right(value) =>
+      value
     }
   }
 }

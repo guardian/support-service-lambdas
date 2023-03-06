@@ -16,21 +16,21 @@ object WireContactToSfContact {
     case class SFCountry(value: String) extends AnyVal
     case class SFPhone(value: String) extends AnyVal
 
-    case class SFAddress( //minimal useful address needs the street and country
-      OtherStreet: SFStreet,
-      OtherCity: Option[SFCity],
-      OtherState: Option[SFState],
-      OtherPostalCode: Option[SFPostalCode],
-      OtherCountry: SFCountry,
-      Phone: Option[SFPhone]
+    case class SFAddress( // minimal useful address needs the street and country
+        OtherStreet: SFStreet,
+        OtherCity: Option[SFCity],
+        OtherState: Option[SFState],
+        OtherPostalCode: Option[SFPostalCode],
+        OtherCountry: SFCountry,
+        Phone: Option[SFPhone],
     )
 
     case class EmailIdentity(address: EmailAddress, identityId: Option[IdentityId])
 
     case class SFContact(
-      SFMaybeAddress: SFMaybeAddress,
-      isDigitalVoucherUser: IsDigitalVoucherUser,
-      emailIdentity: EmailIdentity
+        SFMaybeAddress: SFMaybeAddress,
+        isDigitalVoucherUser: IsDigitalVoucherUser,
+        emailIdentity: EmailIdentity,
     )
 
     case class IsDigitalVoucherUser(value: Boolean) extends AnyVal
@@ -45,7 +45,7 @@ object WireContactToSfContact {
     SFContact(
       toMaybeAddress(wireResult),
       IsDigitalVoucherUser(wireResult.Digital_Voucher_User__c),
-      EmailIdentity(EmailAddress(wireResult.Email), wireResult.IdentityID__c.map(IdentityId))
+      EmailIdentity(EmailAddress(wireResult.Email), wireResult.IdentityID__c.map(IdentityId)),
     )
 
   def toMaybeAddress(wireResult: WireResult): SFMaybeAddress = {
@@ -59,7 +59,7 @@ object WireContactToSfContact {
       OtherState.map(SFState),
       OtherPostalCode.map(SFPostalCode),
       SFCountry(country),
-      Phone.map(SFPhone)
+      Phone.map(SFPhone),
     )
     maybeAddress match {
       case Some(address) => UsableContactAddress(address)

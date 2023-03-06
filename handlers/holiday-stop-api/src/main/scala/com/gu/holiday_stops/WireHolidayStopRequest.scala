@@ -13,7 +13,8 @@ object WireHolidayStopRequest {
 
   def apply(firstAvailableDate: LocalDate)(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = {
     val publicationsImpacted = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r
-      .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List())
+      .map(_.records.map(toHolidayStopRequestDetail))
+      .getOrElse(List())
 
     HolidayStopRequestFull(
       id = sfHolidayStopRequest.Id.value,
@@ -27,8 +28,8 @@ object WireHolidayStopRequest {
         isNotWithdrawn = !sfHolidayStopRequest.Is_Withdrawn__c.value,
         firstAvailableDate = firstAvailableDate,
         actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
-        details = publicationsImpacted
-      )
+        details = publicationsImpacted,
+      ),
     )
   }
 
@@ -38,29 +39,31 @@ object WireHolidayStopRequest {
       estimatedPrice = detail.Estimated_Price__c.map(_.value),
       actualPrice = detail.Actual_Price__c.map(_.value),
       invoiceDate = detail.Expected_Invoice_Date__c.map(_.value),
-      isActioned = detail.Is_Actioned__c
+      isActioned = detail.Is_Actioned__c,
     )
   }
 
   def calculateMutabilityFlags(
-    isNotWithdrawn: Boolean,
-    firstAvailableDate: LocalDate,
-    actionedCount: Int,
-    details: List[HolidayStopRequestsDetail]
+      isNotWithdrawn: Boolean,
+      firstAvailableDate: LocalDate,
+      actionedCount: Int,
+      details: List[HolidayStopRequestsDetail],
   ): MutabilityFlags = {
     val publicationsOnOrAfterFirstAvailableDate = details.filterNot(_.publicationDate isBefore firstAvailableDate)
     MutabilityFlags(
-      isFullyMutable = isNotWithdrawn && actionedCount == 0 && publicationsOnOrAfterFirstAvailableDate.length == details.length,
+      isFullyMutable =
+        isNotWithdrawn && actionedCount == 0 && publicationsOnOrAfterFirstAvailableDate.length == details.length,
       isEndDateEditable =
-        isNotWithdrawn && publicationsOnOrAfterFirstAvailableDate.nonEmpty && !publicationsOnOrAfterFirstAvailableDate.exists(_.isActioned)
+        isNotWithdrawn && publicationsOnOrAfterFirstAvailableDate.nonEmpty && !publicationsOnOrAfterFirstAvailableDate
+          .exists(_.isActioned),
     )
   }
 
 }
 
 case class MutabilityFlags(
-  isFullyMutable: Boolean,
-  isEndDateEditable: Boolean
+    isFullyMutable: Boolean,
+    isEndDateEditable: Boolean,
 )
 
 object MutabilityFlags {
@@ -68,11 +71,11 @@ object MutabilityFlags {
 }
 
 case class HolidayStopRequestsDetail(
-  publicationDate: LocalDate,
-  estimatedPrice: Option[Double],
-  actualPrice: Option[Double],
-  invoiceDate: Option[LocalDate],
-  isActioned: Boolean
+    publicationDate: LocalDate,
+    estimatedPrice: Option[Double],
+    actualPrice: Option[Double],
+    invoiceDate: Option[LocalDate],
+    isActioned: Boolean,
 )
 
 object HolidayStopRequestsDetail {
@@ -87,9 +90,9 @@ trait HolidayStopRequestPartialTrait {
 }
 
 case class HolidayStopRequestPartial(
-  startDate: LocalDate,
-  endDate: LocalDate,
-  subscriptionName: SubscriptionName
+    startDate: LocalDate,
+    endDate: LocalDate,
+    subscriptionName: SubscriptionName,
 ) extends HolidayStopRequestPartialTrait {
   val bulkSuspensionReason = None
 }
@@ -99,10 +102,10 @@ object HolidayStopRequestPartial {
 }
 
 case class BulkHolidayStopRequestPartial(
-  startDate: LocalDate,
-  endDate: LocalDate,
-  subscriptionName: SubscriptionName,
-  reason: BulkSuspensionReason
+    startDate: LocalDate,
+    endDate: LocalDate,
+    subscriptionName: SubscriptionName,
+    reason: BulkSuspensionReason,
 ) extends HolidayStopRequestPartialTrait {
   val bulkSuspensionReason = Some(reason)
 }
@@ -112,14 +115,14 @@ object BulkHolidayStopRequestPartial {
 }
 
 case class HolidayStopRequestFull(
-  id: String,
-  startDate: LocalDate,
-  endDate: LocalDate,
-  subscriptionName: SubscriptionName,
-  publicationsImpacted: List[HolidayStopRequestsDetail],
-  withdrawnTime: Option[ZonedDateTime],
-  bulkSuspensionReason: Option[BulkSuspensionReason],
-  mutabilityFlags: MutabilityFlags
+    id: String,
+    startDate: LocalDate,
+    endDate: LocalDate,
+    subscriptionName: SubscriptionName,
+    publicationsImpacted: List[HolidayStopRequestsDetail],
+    withdrawnTime: Option[ZonedDateTime],
+    bulkSuspensionReason: Option[BulkSuspensionReason],
+    mutabilityFlags: MutabilityFlags,
 )
 
 object HolidayStopRequestFull {
@@ -127,21 +130,20 @@ object HolidayStopRequestFull {
 }
 
 case class GetHolidayStopRequests(
-  existing: List[HolidayStopRequestFull],
-  issueSpecifics: List[IssueSpecifics],
-  annualIssueLimit: Int,
-  firstAvailableDate: LocalDate
+    existing: List[HolidayStopRequestFull],
+    issueSpecifics: List[IssueSpecifics],
+    annualIssueLimit: Int,
+    firstAvailableDate: LocalDate,
 )
 
 object GetHolidayStopRequests {
   def apply(
-    holidayStopRequests: List[HolidayStopRequest],
-    subscriptionData: SubscriptionData,
-    fulfilmentDates: Map[DayOfWeek, FulfilmentDates],
-    fulfilmentStartDate: LocalDate
+      holidayStopRequests: List[HolidayStopRequest],
+      subscriptionData: SubscriptionData,
+      fulfilmentDates: Map[DayOfWeek, FulfilmentDates],
+      fulfilmentStartDate: LocalDate,
   ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
-    subscriptionData
-      .editionDaysOfWeek
+    subscriptionData.editionDaysOfWeek
       .traverse { editionDayOfWeek =>
         createIssueSpecificsForDayOfWeek(fulfilmentDates, editionDayOfWeek, fulfilmentStartDate)
       }
@@ -151,21 +153,22 @@ object GetHolidayStopRequests {
           existing = holidayStopRequests.map(WireHolidayStopRequest.apply(firstAvailableDate)),
           issueSpecifics = issueSpecifics,
           annualIssueLimit = subscriptionData.subscriptionAnnualIssueLimit,
-          firstAvailableDate
+          firstAvailableDate,
         )
       }
   }
 
   private def createIssueSpecificsForDayOfWeek(
-    fulfilmentDates: Map[DayOfWeek, FulfilmentDates],
-    editionDayOfWeek: DayOfWeek,
-    fulfilmentStartDate: LocalDate
+      fulfilmentDates: Map[DayOfWeek, FulfilmentDates],
+      editionDayOfWeek: DayOfWeek,
+      fulfilmentStartDate: LocalDate,
   ) = {
     fulfilmentDates
       .get(editionDayOfWeek)
       .toRight(GetHolidayStopRequestsError(s"Could not find fulfilment dates for day $editionDayOfWeek"))
       .map { fulfilmentDatesForDayOfWeek =>
-        val firstAvailableDate = latestOf(fulfilmentStartDate, fulfilmentDatesForDayOfWeek.holidayStopFirstAvailableDate)
+        val firstAvailableDate =
+          latestOf(fulfilmentStartDate, fulfilmentDatesForDayOfWeek.holidayStopFirstAvailableDate)
         IssueSpecifics(firstAvailableDate, editionDayOfWeek.getValue)
       }
   }

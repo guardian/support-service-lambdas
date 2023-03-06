@@ -20,31 +20,32 @@ object CleanBucketHandler extends Logging {
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
-    val wiredOperation: WireState => Try[WireState] = wireOperation(RawEffects.stage, ListS3Objects.listObjectsWithPrefix _, DeleteS3Objects.deleteObjects _)
+    val wiredOperation: WireState => Try[WireState] =
+      wireOperation(RawEffects.stage, ListS3Objects.listObjectsWithPrefix _, DeleteS3Objects.deleteObjects _)
 
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = wiredOperation
+      operation = wiredOperation,
     )
   }
 
   def wireOperation(
-    stage: Stage,
-    listS3ForPrefix: S3Path => Try[List[Key]],
-    deleteS3Objects: (BucketName, List[Key]) => Try[Unit]
+      stage: Stage,
+      listS3ForPrefix: S3Path => Try[List[Key]],
+      deleteS3Objects: (BucketName, List[Key]) => Try[Unit],
   )(state: WireState): Try[WireState] = {
 
     val wiredCleanBucket = cleanBucket(
       ExportS3Path(stage) _,
       listS3ForPrefix,
-      deleteS3Objects
+      deleteS3Objects,
     ) _
 
     handleCleanBucket(wiredCleanBucket)(state)
   }
 
   def handleCleanBucket(
-    cleanBucketOp: (ObjectName, JobName, ShouldUploadToDataLake) => Try[Unit]
+      cleanBucketOp: (ObjectName, JobName, ShouldUploadToDataLake) => Try[Unit],
   )(state: WireState): Try[WireState] = {
     val objectName = ObjectName(state.objectName)
     val jobName = JobName(state.jobName)
@@ -52,18 +53,18 @@ object CleanBucketHandler extends Logging {
     cleanBucketOp(
       objectName,
       jobName,
-      shouldUploadToDataLake
+      shouldUploadToDataLake,
     ) map (_ => state)
   }
 
   def cleanBucket(
-    basePathFor: (ObjectName, ShouldUploadToDataLake) => S3Path,
-    listObjectsWithPrefix: S3Path => Try[List[Key]],
-    deleteObjects: (BucketName, List[Key]) => Try[Unit]
+      basePathFor: (ObjectName, ShouldUploadToDataLake) => S3Path,
+      listObjectsWithPrefix: S3Path => Try[List[Key]],
+      deleteObjects: (BucketName, List[Key]) => Try[Unit],
   )(
-    objectName: ObjectName,
-    jobName: JobName,
-    shouldUploadToDataLake: ShouldUploadToDataLake
+      objectName: ObjectName,
+      jobName: JobName,
+      shouldUploadToDataLake: ShouldUploadToDataLake,
   ): Try[Unit] = {
     val basePath = basePathFor(objectName, shouldUploadToDataLake)
     logger.info(s"cleaning ${basePath}")

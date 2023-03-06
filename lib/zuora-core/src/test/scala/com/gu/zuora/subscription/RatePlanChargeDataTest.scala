@@ -36,15 +36,15 @@ class RatePlanChargeDataTest extends AnyFlatSpec with Matchers with EitherValues
       chargeForPeriod = 6,
       period = "Specific_Weeks",
       specificBillingPeriod = Some(6),
-      expectedCredit = -1
+      expectedCredit = -1,
     )
   }
 
   private def testCreditCaluculation(
-    chargeForPeriod: Int,
-    expectedCredit: Double,
-    period: String,
-    specificBillingPeriod: Option[Int] = None
+      chargeForPeriod: Int,
+      expectedCredit: Double,
+      period: String,
+      specificBillingPeriod: Option[Int] = None,
   ) = {
     val subscription = Fixtures.mkGuardianWeeklySubscription()
 
@@ -54,13 +54,12 @@ class RatePlanChargeDataTest extends AnyFlatSpec with Matchers with EitherValues
       billingPeriod = period,
       specificBillingPeriod = specificBillingPeriod,
       chargedThroughDate = None,
-      processedThroughDate = None
+      processedThroughDate = None,
     )
 
     val ratePlanChargeData = RatePlanChargeData(subscription, charge, Fixtures.mkAccount(), DayOfWeek.FRIDAY)
-    inside(ratePlanChargeData) {
-      case Right(credit) =>
-        credit.issueCreditAmount shouldBe expectedCredit
+    inside(ratePlanChargeData) { case Right(credit) =>
+      credit.issueCreditAmount shouldBe expectedCredit
     }
   }
 }

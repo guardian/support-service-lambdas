@@ -13,15 +13,20 @@ import play.api.libs.json.Reads
 object QueryHandler {
 
   def apply[REQ <: QuerierRequest](
-    reportsBucketPrefix: String,
-    toQueryRequest: REQ => AquaQueryRequest,
-    queryReads: Reads[REQ]
+      reportsBucketPrefix: String,
+      toQueryRequest: REQ => AquaQueryRequest,
+      queryReads: Reads[REQ],
   )(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
 
     def wireQuerier(zuoraRestConfig: ZuoraRestConfig) = {
       Querier(toQueryRequest, ZuoraAquaRequestMaker(RawEffects.response, zuoraRestConfig)) _
     }
 
-    ReportsLambda[REQ, QuerierResponse](RawEffects.stage, GetFromS3.fetchString, LambdaIO(inputStream, outputStream, context), wireQuerier)(queryReads, QuerierResponse.writes)
+    ReportsLambda[REQ, QuerierResponse](
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      LambdaIO(inputStream, outputStream, context),
+      wireQuerier,
+    )(queryReads, QuerierResponse.writes)
   }
 }

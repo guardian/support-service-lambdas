@@ -18,45 +18,56 @@ sealed trait EmailData {
 }
 
 case class PaperEmailData(
-  plan: Plan,
-  firstPaymentDate: LocalDate,
-  firstPaperDate: LocalDate,
-  subscriptionName: SubscriptionName,
-  contacts: Contacts,
-  paymentMethod: PaymentMethod,
-  currency: Currency
+    plan: Plan,
+    firstPaymentDate: LocalDate,
+    firstPaperDate: LocalDate,
+    subscriptionName: SubscriptionName,
+    contacts: Contacts,
+    paymentMethod: PaymentMethod,
+    currency: Currency,
 ) extends EmailData
 
 case class TrialPeriod(days: Int)
 
 case class DigipackEmailData(
-  plan: Plan,
-  firstPaymentDate: LocalDate,
-  subscriptionName: SubscriptionName,
-  contacts: Contacts,
-  paymentMethod: PaymentMethod,
-  currency: Currency,
-  trialPeriod: TrialPeriod
+    plan: Plan,
+    firstPaymentDate: LocalDate,
+    subscriptionName: SubscriptionName,
+    contacts: Contacts,
+    paymentMethod: PaymentMethod,
+    currency: Currency,
+    trialPeriod: TrialPeriod,
+) extends EmailData
+
+case class SupporterPlusEmailData(
+    accountId: ZuoraAccountId,
+    currency: Currency,
+    paymentMethod: PaymentMethod,
+    amountMinorUnits: AmountMinorUnits,
+    firstPaymentDate: LocalDate,
+    plan: Plan,
+    contacts: Contacts,
+    created: LocalDate,
 ) extends EmailData
 
 case class ContributionsEmailData(
-  accountId: ZuoraAccountId,
-  currency: Currency,
-  paymentMethod: PaymentMethod,
-  amountMinorUnits: AmountMinorUnits,
-  firstPaymentDate: LocalDate,
-  plan: Plan,
-  contacts: Contacts,
-  created: LocalDate
+    accountId: ZuoraAccountId,
+    currency: Currency,
+    paymentMethod: PaymentMethod,
+    amountMinorUnits: AmountMinorUnits,
+    firstPaymentDate: LocalDate,
+    plan: Plan,
+    contacts: Contacts,
+    created: LocalDate,
 ) extends EmailData
 
 case class GuardianWeeklyEmailData(
-  currency: Currency,
-  paymentMethod: PaymentMethod,
-  firstPaymentDate: LocalDate,
-  plan: Plan,
-  contacts: Contacts,
-  subscriptionName: SubscriptionName
+    currency: Currency,
+    paymentMethod: PaymentMethod,
+    firstPaymentDate: LocalDate,
+    plan: Plan,
+    contacts: Contacts,
+    subscriptionName: SubscriptionName,
 ) extends EmailData
 
 object EmailData {
@@ -64,19 +75,21 @@ object EmailData {
     case CreditCardReferenceTransaction | CreditCard => "Credit/Debit Card"
     case BankTransfer => "Direct Debit"
     case PayPal => "PayPal"
-    case Other => "" //should not happen
+    case Other => "" // should not happen
   }
 
   def paymentMethodFields(paymentMethod: PaymentMethod) = paymentMethod match {
-    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) => Map(
-      "bank_account_no" -> accountNumberMask.value,
-      "bank_sort_code" -> sortCode.hyphenated,
-      "account_holder" -> accountName.value,
-      "mandate_id" -> mandateId.value,
-      "payment_method" -> toDescription(BankTransfer)
-    )
-    case NonDirectDebitMethod(_, paymentMethodType) => Map(
-      "payment_method" -> toDescription(paymentMethodType)
-    )
+    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) =>
+      Map(
+        "bank_account_no" -> accountNumberMask.value,
+        "bank_sort_code" -> sortCode.hyphenated,
+        "account_holder" -> accountName.value,
+        "mandate_id" -> mandateId.value,
+        "payment_method" -> toDescription(BankTransfer),
+      )
+    case NonDirectDebitMethod(_, paymentMethodType) =>
+      Map(
+        "payment_method" -> toDescription(paymentMethodType),
+      )
   }
 }

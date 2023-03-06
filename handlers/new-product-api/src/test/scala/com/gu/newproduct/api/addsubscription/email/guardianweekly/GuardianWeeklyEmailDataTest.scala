@@ -7,7 +7,14 @@ import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.{GuardianWeeklyEmailData, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  NonDirectDebitMethod,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.PlanId._
@@ -30,8 +37,8 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
       Some(City("billToCity")),
       Some(State("billToState")),
       Some(Country.UK),
-      Some(Postcode("billToPostcode"))
-    )
+      Some(Postcode("billToPostcode")),
+    ),
   )
 
   val soldto = SoldToContact(
@@ -45,8 +52,8 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
       Some(City("soldToCity")),
       Some(State("soldToState")),
       Country.US,
-      Some(Postcode("soldToPostcode"))
-    )
+      Some(Postcode("soldToPostcode")),
+    ),
   )
   val contacts = Contacts(billto, soldto)
 
@@ -55,7 +62,7 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
       id = VoucherEveryDayPlus,
       description = PlanDescription("GW Oct 18 - 1 Year - Domestic"),
       testStartDateRules,
-      paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month"))
+      paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month")),
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
@@ -65,9 +72,9 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
       BankAccountName("someAccountName"),
       BankAccountNumberMask("*****mask"),
       SortCode("123456"),
-      MandateId("MandateId")
+      MandateId("MandateId"),
     ),
-    currency = GBP
+    currency = GBP,
   )
   it should "generate email fields with direct debit fields" in {
     GuardianWeeklyFields(directDebitEmailData) should equal(
@@ -89,13 +96,14 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
         "delivery_address_line_2" -> "soldToAddress2",
         "delivery_address_town" -> "soldToCity",
         "delivery_postcode" -> "soldToPostcode",
-        "delivery_country" -> "United States"
-      )
+        "delivery_country" -> "United States",
+      ),
     )
   }
 
   it should "not include direct debit fields if payment method is not direct debit" in {
-    val cardVoucherData = directDebitEmailData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
+    val cardVoucherData =
+      directDebitEmailData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
     val directDebitFieldNames = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
     GuardianWeeklyFields(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
   }

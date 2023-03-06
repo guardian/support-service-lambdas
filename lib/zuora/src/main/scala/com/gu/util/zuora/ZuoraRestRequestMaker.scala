@@ -14,11 +14,11 @@ object ZuoraRestRequestMaker extends LazyLogging {
     new RestRequestMaker.Requests(
       headers = Map(
         "apiSecretAccessKey" -> config.password,
-        "apiAccessKeyId" -> config.username
+        "apiAccessKeyId" -> config.username,
       ),
-      baseUrl = config.baseUrl + "/", //TODO shouldn't have to add it
+      baseUrl = config.baseUrl + "/", // TODO shouldn't have to add it
       getResponse = response,
-      jsonIsSuccessful = zuoraIsSuccessful
+      jsonIsSuccessful = zuoraIsSuccessful,
     )
   }
 
@@ -44,4 +44,3 @@ object ZuoraRestRequestMaker extends LazyLogging {
   }
 
 }
-

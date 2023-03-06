@@ -22,7 +22,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
       expiryDate = LocalDate.of(1985, 10, 26),
       expiryType = ExpiryType.SUB,
       subscriptionCode = Some(SevenDay),
-      provider = Some("G99")
+      provider = Some("G99"),
     )
     ApiGatewayResponse("200", SuccessResponse(expiry))
   }
@@ -39,7 +39,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
         customerAcceptanceDate = LocalDate.of(2015, 10, 21),
         startDate = LocalDate.of(2015, 10, 21),
         endDate = LocalDate.of(2015, 10, 26),
-        ratePlans = Nil
+        ratePlans = Nil,
       )
       ContinueProcessing(response)
     } else
@@ -55,15 +55,15 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
         billToPostcode = Some("someBilltoPostCode"),
         soldToLastName = "someSoldToLastName",
         soldToPostcode = Some("someSoldtoPostCode"),
-        identityId = Some("12344")
+        identityId = Some("12344"),
       )
       ContinueProcessing(summary)
     }
   }
   def getSubExpiry(
-    password: String,
-    subscriptionResult: SubscriptionResult,
-    accountSummaryResult: AccountSummaryResult
+      password: String,
+      subscriptionResult: SubscriptionResult,
+      accountSummaryResult: AccountSummaryResult,
   ): ApiResponse =
     successfulResponseFromZuora
 
@@ -82,7 +82,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
       setActivationDate = setActivationDate,
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
-      skipActivationDateUpdate = skipActivationDateUpdate
+      skipActivationDateUpdate = skipActivationDateUpdate,
     )
   }
 
@@ -113,7 +113,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
     verifyResponse(
       actualResponse = actual,
       expectedBody = expectedNotFoundResponseBody,
-      expectedStatus = "404"
+      expectedStatus = "404",
     )
   }
 
@@ -143,7 +143,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
     verifyResponse(
       actualResponse = actual,
       expectedBody = expectedResponseBody,
-      expectedStatus = "200"
+      expectedStatus = "200",
     )
   }
 
@@ -161,7 +161,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
     verifyResponse(
       actualResponse = actual,
       expectedBody = expectedBadRequestResponseBody,
-      expectedStatus = "400"
+      expectedStatus = "400",
     )
   }
 
@@ -174,7 +174,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
     verifyResponse(
       actualResponse = actual,
       expectedBody = expectedBadRequestResponseBody,
-      expectedStatus = "400"
+      expectedStatus = "400",
     )
   }
 
@@ -201,7 +201,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
     verifyResponse(
       actualResponse = actual,
       expectedBody = expectedResponseBody,
-      expectedStatus = "404"
+      expectedStatus = "404",
     )
   }
 

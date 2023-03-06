@@ -23,7 +23,7 @@ class GetContactsTest extends AnyFlatSpec with Matchers {
       city = Some("Hill Valley"),
       state = Some("California"),
       zipCode = Some("95420"),
-      country = "United States"
+      country = "United States",
     )
     val billToZuoraContact = ZuoraBillTo(
       Title__c = Some("Mr"),
@@ -35,7 +35,7 @@ class GetContactsTest extends AnyFlatSpec with Matchers {
       city = Some("Hill Valley"),
       state = Some("California"),
       zipCode = Some("95423"),
-      country = Some("USA")
+      country = Some("USA"),
     )
 
     val zuoraGet: RequestsGet[GetContactsResponse] = (path, isCheckNeeded) => {
@@ -55,8 +55,8 @@ class GetContactsTest extends AnyFlatSpec with Matchers {
           Some(City("Hill Valley")),
           Some(State("California")),
           Country.US,
-          Some(Postcode("95420"))
-        )
+          Some(Postcode("95420")),
+        ),
       ),
       billTo = BillToContact(
         Some(Title("Mr")),
@@ -69,12 +69,11 @@ class GetContactsTest extends AnyFlatSpec with Matchers {
           Some(City("Hill Valley")),
           Some(State("California")),
           Some(Country.US),
-          Some(Postcode("95423"))
-        )
-      )
+          Some(Postcode("95423")),
+        ),
+      ),
     )
 
     GetContacts(zuoraGet)(ZuoraAccountId("accountId")) shouldBe ClientSuccess(expected)
   }
 }
-

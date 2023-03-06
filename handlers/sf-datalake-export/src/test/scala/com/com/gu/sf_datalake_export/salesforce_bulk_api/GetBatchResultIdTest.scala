@@ -20,7 +20,6 @@ class GetBatchResultIdTest extends AnyFlatSpec with Matchers {
       requestMethod = GetMethod,
       relativePath = RelativePath("/services/async/44.0/job/someJobId/batch/someBatchId/result"),
       urlParams = UrlParams.empty,
-
     )
 
     actual should be(expected)

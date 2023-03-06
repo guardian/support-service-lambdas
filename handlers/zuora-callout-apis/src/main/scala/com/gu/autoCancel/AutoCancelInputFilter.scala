@@ -9,7 +9,8 @@ object AutoCancelInputFilter extends Logging {
   def apply(callout: AutoCancelCallout, onlyCancelDirectDebit: Boolean): ApiGatewayOp[Unit] = {
     for {
       _ <- filterAutoPay(callout).withLogging("filter on auto pay")
-      _ <- filterDirectDebit(onlyCancelDirectDebit = onlyCancelDirectDebit, nonDirectDebit = callout.nonDirectDebit).withLogging("filter on direct debit")
+      _ <- filterDirectDebit(onlyCancelDirectDebit = onlyCancelDirectDebit, nonDirectDebit = callout.nonDirectDebit)
+        .withLogging("filter on direct debit")
     } yield ()
   }
 

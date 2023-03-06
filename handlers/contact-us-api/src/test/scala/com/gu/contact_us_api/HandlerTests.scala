@@ -34,28 +34,19 @@ class HandlerTests extends AnyFlatSpec with should.Matchers {
   private val successfulHandleResponse = new APIGatewayProxyResponseEvent()
     .withStatusCode(201)
     .withBody(
-      ContactUsResponse(success = true)
-        .asJson
-        .dropNullValues
-        .toString
+      ContactUsResponse(success = true).asJson.dropNullValues.toString,
     )
 
   private val inputFailureHandleResponse = new APIGatewayProxyResponseEvent()
     .withStatusCode(400)
     .withBody(
-      ContactUsResponse(success = false, Some("Invalid input"))
-        .asJson
-        .dropNullValues
-        .toString
+      ContactUsResponse(success = false, Some("Invalid input")).asJson.dropNullValues.toString,
     )
 
   private val internalFailureHandleResponse = new APIGatewayProxyResponseEvent()
     .withStatusCode(500)
     .withBody(
-      ContactUsResponse(success = false, Some("Internal server error"))
-        .asJson
-        .dropNullValues
-        .toString
+      ContactUsResponse(success = false, Some("Internal server error")).asJson.dropNullValues.toString,
     )
 
   private def successfulHandle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {

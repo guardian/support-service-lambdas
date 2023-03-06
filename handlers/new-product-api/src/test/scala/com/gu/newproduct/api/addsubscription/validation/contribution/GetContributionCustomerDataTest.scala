@@ -17,22 +17,24 @@ class GetContributionCustomerDataTest extends AnyFlatSpec with Matchers {
 
   "GetContributionCustomerData" should "return data succesfully" in {
     val actual = getContributionCustomerData(
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
 
-    actual shouldBe ContinueProcessing(ContributionCustomerData(
-      TestData.validatedAccount,
-      TestData.directDebitPaymentMethod,
-      TestData.subscriptionList,
-      TestData.contacts
-    ))
+    actual shouldBe ContinueProcessing(
+      ContributionCustomerData(
+        TestData.validatedAccount,
+        TestData.directDebitPaymentMethod,
+        TestData.subscriptionList,
+        TestData.contacts,
+      ),
+    )
   }
 
   it should "return error if get account fails" in {
 
     val actual = getContributionCustomerData(
       getAccount = failedCall,
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
     actual shouldBe errorResponse
   }
@@ -41,7 +43,7 @@ class GetContributionCustomerDataTest extends AnyFlatSpec with Matchers {
 
     val actual = getContributionCustomerData(
       getPaymentMethod = failedPaymentMethodCall,
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
     actual shouldBe errorResponse
   }
@@ -50,7 +52,7 @@ class GetContributionCustomerDataTest extends AnyFlatSpec with Matchers {
 
     val actual = getContributionCustomerData(
       getAccountSubscriptions = failedCall,
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
     actual shouldBe errorResponse
   }
@@ -59,7 +61,7 @@ class GetContributionCustomerDataTest extends AnyFlatSpec with Matchers {
 
     val actual = getContributionCustomerData(
       getContacts = failedCall,
-      accountId = ZuoraAccountId("TestAccountId")
+      accountId = ZuoraAccountId("TestAccountId"),
     )
     actual shouldBe errorResponse
   }
@@ -89,16 +91,16 @@ class GetContributionCustomerDataTest extends AnyFlatSpec with Matchers {
   }
 
   def getContributionCustomerData(
-    getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = getAccountSuccess,
-    getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod] = getPaymentMethodSuccess,
-    getContacts: ZuoraAccountId => ApiGatewayOp[Contacts] = getContactsSuccess,
-    getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]] = getAccountSubscriptionsSuccess,
-    accountId: ZuoraAccountId
+      getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = getAccountSuccess,
+      getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod] = getPaymentMethodSuccess,
+      getContacts: ZuoraAccountId => ApiGatewayOp[Contacts] = getContactsSuccess,
+      getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]] = getAccountSubscriptionsSuccess,
+      accountId: ZuoraAccountId,
   ) = GetContributionCustomerData(
     getAccount,
     getPaymentMethod,
     getContacts,
     getAccountSubscriptions,
-    accountId
+    accountId,
   )
 }

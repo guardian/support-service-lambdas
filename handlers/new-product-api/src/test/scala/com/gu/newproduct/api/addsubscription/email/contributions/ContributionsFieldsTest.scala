@@ -7,7 +7,15 @@ import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.email.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, PaymentMethod, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  NonDirectDebitMethod,
+  PaymentMethod,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog._
@@ -30,8 +38,8 @@ class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
       Some(City("billToCity")),
       Some(State("billToState")),
       Some(Country.UK),
-      Some(Postcode("billToPostcode"))
-    )
+      Some(Postcode("billToPostcode")),
+    ),
   )
 
   val soldto = SoldToContact(
@@ -45,8 +53,8 @@ class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
       Some(City("soldToCity")),
       Some(State("soldToState")),
       Country.US,
-      Some(Postcode("soldToPostcode"))
-    )
+      Some(Postcode("soldToPostcode")),
+    ),
   )
   val testContacts = Contacts(billto, soldto)
 
@@ -58,14 +66,13 @@ class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
       BankAccountName("someAccountName"),
       BankAccountNumberMask("*****mask"),
       SortCode("123456"),
-      MandateId("mandateId")
+      MandateId("mandateId"),
     ),
     amountMinorUnits = AmountMinorUnits(1212),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
-
     plan = Plan(id = MonthlyContribution, description = PlanDescription("monthly"), testStartDateRules),
     contacts = testContacts,
-    created = LocalDate.of(2018, 11, 1)
+    created = LocalDate.of(2018, 11, 1),
   )
 
   it should "serialise  direct debit contributions Email to json" in {
@@ -94,7 +101,8 @@ class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
 
   it should "serialise non direct debit contributions Email to json" in {
 
-    val nonDirectDebitData = directDebitContributionsData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
+    val nonDirectDebitData =
+      directDebitContributionsData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
 
     val expected =
       """

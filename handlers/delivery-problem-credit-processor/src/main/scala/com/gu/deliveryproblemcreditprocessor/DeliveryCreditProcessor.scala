@@ -38,13 +38,13 @@ object DeliveryCreditProcessor extends Logging {
   private lazy val sfConfig: Task[SFAuthConfig] =
     config(
       LoadConfigModule(stage, GetFromS3.fetchString)
-        .apply[SFAuthConfig](ConfigLocation("sfAuth", 1), SFAuthConfig.reads)
+        .apply[SFAuthConfig](ConfigLocation("sfAuth", 1), SFAuthConfig.reads),
     )
 
   private lazy val zuoraConfig: Task[HolidayStopProcessorZuoraConfig] =
     config(
       LoadConfigModule(stage, GetFromS3.fetchString)
-        .apply[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads)
+        .apply[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads),
     )
 
   private def config[A](a: Either[ConfigFailure, A]): Task[A] = {
@@ -55,7 +55,8 @@ object DeliveryCreditProcessor extends Logging {
   }
 
   private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): RIO[Clock, AccessToken] =
-    ZIO.absolve(ZIO.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend)))
+    ZIO
+      .absolve(ZIO.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend)))
       .retry(exponential(1.second) && recurs(5))
       .mapError {
         case e: ZuoraApiFailure => new RuntimeException(e.reason)
@@ -86,9 +87,9 @@ object DeliveryCreditProcessor extends Logging {
     } yield results
 
   def processProduct(
-    sfAuthConfig: SFAuthConfig,
-    zuoraConfig: HolidayStopProcessorZuoraConfig,
-    zuoraAccessToken: AccessToken
+      sfAuthConfig: SFAuthConfig,
+      zuoraConfig: HolidayStopProcessorZuoraConfig,
+      zuoraAccessToken: AccessToken,
   )(productType: ZuoraProductType): Task[ProcessResult[DeliveryCreditResult]] =
     for {
       processResult <- Task.effect(
@@ -105,8 +106,8 @@ object DeliveryCreditProcessor extends Logging {
             updateToApply,
             resultOfZuoraCreditAdd,
             writeCreditResultsToSalesforce(sfAuthConfig),
-            Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend)
-          )
+            Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend),
+          ),
       )
     } yield processResult
 
@@ -119,48 +120,48 @@ object DeliveryCreditProcessor extends Logging {
       holidayStopFirstAvailableDate = tomorrow,
       holidayStopProcessorTargetDate = Some(tomorrow),
       finalFulfilmentFileGenerationDate = None,
-      newSubscriptionEarliestStartDate = None
+      newSubscriptionEarliestStartDate = None,
     )
     Right(
       DayOfWeek
         .values()
         .map { _ -> fulfilmentDates }
-        .toMap
+        .toMap,
     )
   }
 
   def updateToApply(
-    creditProduct: CreditProductForSubscription,
-    subscription: Subscription,
-    account: ZuoraAccount,
-    request: DeliveryCreditRequest
+      creditProduct: CreditProductForSubscription,
+      subscription: Subscription,
+      account: ZuoraAccount,
+      request: DeliveryCreditRequest,
   ): ZuoraApiResponse[SubscriptionUpdate] =
     SubscriptionUpdate(
       creditProduct(subscription),
       subscription,
       account,
       AffectedPublicationDate(request.Delivery_Date__c),
-      request.Invoice_Date__c.map(InvoiceDate)
+      request.Invoice_Date__c.map(InvoiceDate),
     )
 
   def resultOfZuoraCreditAdd(
-    request: DeliveryCreditRequest,
-    addedCharge: RatePlanCharge
+      request: DeliveryCreditRequest,
+      addedCharge: RatePlanCharge,
   ): DeliveryCreditResult = DeliveryCreditResult(
     deliveryId = request.Id,
     chargeCode = RatePlanChargeCode(addedCharge.number),
     amountCredited = Price(addedCharge.price),
-    invoiceDate = InvoiceDate(addedCharge.effectiveStartDate)
+    invoiceDate = InvoiceDate(addedCharge.effectiveStartDate),
   )
 
   def getCreditRequestsFromSalesforce(sfAuthConfig: SFAuthConfig)(
-    productType: ZuoraProductType,
-    unused: List[LocalDate]
+      productType: ZuoraProductType,
+      unused: List[LocalDate],
   ): SalesforceApiResponse[List[DeliveryCreditRequest]] = {
 
     def queryForDeliveryRecords(
-      salesforceClient: SalesforceClient[IO],
-      productType: ZuoraProductType
+        salesforceClient: SalesforceClient[IO],
+        productType: ZuoraProductType,
     ): EitherT[IO, SalesforceApiFailure, RecordsWrapperCaseClass[DeliveryCreditRequest]] = {
       val qry = deliveryRecordsQuery(productType)
       logger.info(s"Running SF query:\n$qry")
@@ -171,7 +172,7 @@ object DeliveryCreditProcessor extends Logging {
         }
     }
 
-    // limited to 300 because each record takes ~ 2s to process and lambda has 15 min to run
+    // limited to 150 because each record takes ~ 4s to process and lambda has 15 min to run
     def deliveryRecordsQuery(productType: ZuoraProductType) =
       s"""
          |SELECT Id, SF_Subscription__r.Name, Delivery_Date__c, Charge_Code__c, Invoice_Date__c
@@ -180,7 +181,7 @@ object DeliveryCreditProcessor extends Logging {
          |AND Credit_Requested__c = true
          |AND Is_Actioned__c = false
          |ORDER BY SF_Subscription__r.Name, Delivery_Date__c
-         |LIMIT 300
+         |LIMIT 150
          |""".stripMargin
 
     val results = for {
@@ -200,37 +201,41 @@ object DeliveryCreditProcessor extends Logging {
   }
 
   case class DeliveryCreditActioned(
-    Charge_Code__c: String,
-    Credit_Amount__c: Double,
-    Actioned_On__c: LocalDateTime,
-    Invoice_Date__c: LocalDate
+      Charge_Code__c: String,
+      Credit_Amount__c: Double,
+      Actioned_On__c: LocalDateTime,
+      Invoice_Date__c: LocalDate,
   )
 
   def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
-    results: List[DeliveryCreditResult]
+      results: List[DeliveryCreditResult],
   ): SalesforceApiResponse[_] = {
 
     val deliveryObject = "Delivery__c"
 
-    val responses = SalesforceClient(sfSttpBackend, sfAuthConfig).leftMap { e =>
-      SalesforceApiFailure(e.message)
-    }.flatMap { salesforceClient =>
-      results.map { result =>
-        val actioned = DeliveryCreditActioned(
-          Charge_Code__c = result.chargeCode.value,
-          Credit_Amount__c = result.amountCredited.value,
-          Actioned_On__c = LocalDateTime.now,
-          Invoice_Date__c = result.invoiceDate.value
-        )
-        salesforceClient.patch(
-          deliveryObject,
-          objectId = result.deliveryId,
-          body = actioned
-        ).leftMap { e =>
-          SalesforceApiFailure(e.message)
-        }
-      }.sequence
-    }
+    val responses = SalesforceClient(sfSttpBackend, sfAuthConfig)
+      .leftMap { e =>
+        SalesforceApiFailure(e.message)
+      }
+      .flatMap { salesforceClient =>
+        results.map { result =>
+          val actioned = DeliveryCreditActioned(
+            Charge_Code__c = result.chargeCode.value,
+            Credit_Amount__c = result.amountCredited.value,
+            Actioned_On__c = LocalDateTime.now,
+            Invoice_Date__c = result.invoiceDate.value,
+          )
+          salesforceClient
+            .patch(
+              deliveryObject,
+              objectId = result.deliveryId,
+              body = actioned,
+            )
+            .leftMap { e =>
+              SalesforceApiFailure(e.message)
+            }
+        }.sequence
+      }
 
     /*
      * TODO: doing this at this level to avoid having to rewrite holiday-stop credit query as well.

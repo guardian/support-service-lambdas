@@ -8,13 +8,16 @@ import com.gu.zuora.subscription.OverallFailure
 import play.api.libs.json.Reads
 
 case class Config(
-  zuoraConfig: HolidayStopProcessorZuoraConfig,
-  sfConfig: SFAuthConfig
+    zuoraConfig: HolidayStopProcessorZuoraConfig,
+    sfConfig: SFAuthConfig,
 )
 
 object Config {
 
-  private def zuoraCredentials(stage: String, fetchString: StringFromS3): Either[OverallFailure, HolidayStopProcessorZuoraConfig] = {
+  private def zuoraCredentials(
+      stage: String,
+      fetchString: StringFromS3,
+  ): Either[OverallFailure, HolidayStopProcessorZuoraConfig] = {
     credentials[HolidayStopProcessorZuoraConfig](stage, "zuoraRest", fetchString)
   }
 
@@ -22,11 +25,14 @@ object Config {
     credentials[SFAuthConfig](stage, "sfAuth", fetchString)
   }
 
-  private def credentials[T](stage: String, filePrefix: String, fetchString: StringFromS3)(implicit reads: Reads[T]): Either[OverallFailure, T] = {
+  private def credentials[T](stage: String, filePrefix: String, fetchString: StringFromS3)(implicit
+      reads: Reads[T],
+  ): Either[OverallFailure, T] = {
     val loadConfigModule = LoadConfigModule(Stage(stage), fetchString)
     loadConfigModule
       .apply[T](ConfigLocation(filePrefix, 1), reads)
-      .left.map(failure => OverallFailure(failure.error))
+      .left
+      .map(failure => OverallFailure(failure.error))
   }
 
   def fromS3(fetchString: StringFromS3): Either[OverallFailure, Config] = {
@@ -39,17 +45,17 @@ object Config {
         case "PROD" =>
           Config(
             zuoraConfig,
-            sfConfig
+            sfConfig,
           )
         case "CODE" =>
           Config(
             zuoraConfig,
-            sfConfig
+            sfConfig,
           )
         case "DEV" =>
           Config(
             zuoraConfig,
-            sfConfig
+            sfConfig,
           )
       }
     }
