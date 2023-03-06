@@ -508,7 +508,7 @@ lazy val `product-move-api` = lambdaProject(
   "moves a supporter from one product to another.",
   Seq(
     zio2,
-    ("com.gu" %% "support-product-data-dynamo" % "0.2").cross(
+    ("com.gu" %% "support-product-data-dynamo" % "0.4").cross(
       CrossVersion.for3Use2_13,
     ) exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
     awsEvents,
