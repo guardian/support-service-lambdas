@@ -24,7 +24,6 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
           .get("A-S00492211")
           .provide(
             GetInvoiceToBeRefundedLive.layer,
-            SttpClientLive.layer,
             ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.switchedResponse)),
             ZuoraGetLive.layer,
           )
@@ -40,7 +39,6 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
             .get("A-S00502641")
             .provide(
               GetInvoiceToBeRefundedLive.layer,
-              SttpClientLive.layer,
               ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.standardSubResponse)),
               ZuoraGetLive.layer,
             )
