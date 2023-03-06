@@ -22,7 +22,8 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
 
   it should "manage an end to end call in dry run mode" in {
 
-    val (responseString, requests): (String, List[TestingRawEffects.BasicRequest]) = getResultAndRequests(identityBackfillRequest(true))
+    val (responseString, requests): (String, List[TestingRawEffects.BasicRequest]) =
+      getResultAndRequests(identityBackfillRequest(true))
 
     val expectedResponse =
       """{
@@ -34,22 +35,44 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
 
     responseString jsonMatches expectedResponse
 
-    requests should be(List(
-      BasicRequest("GET", (s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
-        "WHERE AccountId = %27crmId%27").replace(" ", "%20"), ""),
-      BasicRequest("POST", "/services/oauth2/token", "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
-        "&password=passSFpasswordtokentokenSFtoken&grant_type=password"),
-      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
-      BasicRequest("POST", "/action/query",
-        """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
-      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
-      BasicRequest("GET", "/user?emailAddress=email%40address", "")
-    ))
+    requests should be(
+      List(
+        BasicRequest(
+          "GET",
+          (s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+            "WHERE AccountId = %27crmId%27").replace(" ", "%20"),
+          "",
+        ),
+        BasicRequest(
+          "POST",
+          "/services/oauth2/token",
+          "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
+            "&password=passSFpasswordtokentokenSFtoken&grant_type=password",
+        ),
+        BasicRequest(
+          "POST",
+          "/action/query",
+          """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}""",
+        ),
+        BasicRequest(
+          "POST",
+          "/action/query",
+          """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}""",
+        ),
+        BasicRequest(
+          "POST",
+          "/action/query",
+          """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}""",
+        ),
+        BasicRequest("GET", "/user?emailAddress=email%40address", ""),
+      ),
+    )
   }
 
   it should "manage an end to end call" in {
 
-    val (responseString, requests): (String, List[TestingRawEffects.BasicRequest]) = getResultAndRequests(identityBackfillRequest(false))
+    val (responseString, requests): (String, List[TestingRawEffects.BasicRequest]) =
+      getResultAndRequests(identityBackfillRequest(false))
 
     val expectedResponse =
       """{
@@ -61,19 +84,44 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
 
     responseString jsonMatches expectedResponse
 
-    requests should be(List(
-      BasicRequest("PATCH", s"/services/data/v$salesforceApiVersion/sobjects/Contact/00110000011AABBAAB", """{"IdentityID__c":"1234"}"""),
-      BasicRequest("PUT", "/accounts/2c92a0fb4a38064e014a3f48f1663ad8", """{"IdentityId__c":"1234"}"""),
-      BasicRequest("GET", (s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
-        "WHERE AccountId = %27crmId%27").replace(" ", "%20"), ""),
-      BasicRequest("POST", "/services/oauth2/token", "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
-        "&password=passSFpasswordtokentokenSFtoken&grant_type=password"),
-      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
-      BasicRequest("POST", "/action/query",
-        """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
-      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
-      BasicRequest("GET", "/user?emailAddress=email%40address", "")
-    ))
+    requests should be(
+      List(
+        BasicRequest(
+          "PATCH",
+          s"/services/data/v$salesforceApiVersion/sobjects/Contact/00110000011AABBAAB",
+          """{"IdentityID__c":"1234"}""",
+        ),
+        BasicRequest("PUT", "/accounts/2c92a0fb4a38064e014a3f48f1663ad8", """{"IdentityId__c":"1234"}"""),
+        BasicRequest(
+          "GET",
+          (s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+            "WHERE AccountId = %27crmId%27").replace(" ", "%20"),
+          "",
+        ),
+        BasicRequest(
+          "POST",
+          "/services/oauth2/token",
+          "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
+            "&password=passSFpasswordtokentokenSFtoken&grant_type=password",
+        ),
+        BasicRequest(
+          "POST",
+          "/action/query",
+          """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}""",
+        ),
+        BasicRequest(
+          "POST",
+          "/action/query",
+          """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}""",
+        ),
+        BasicRequest(
+          "POST",
+          "/action/query",
+          """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}""",
+        ),
+        BasicRequest("GET", "/user?emailAddress=email%40address", ""),
+      ),
+    )
   }
 
 }
@@ -85,12 +133,12 @@ object Runner {
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(200, responses, postResponses)
 
-    //execute
+    // execute
     Handler.runForLegacyTestsSeeTestingMd(
       Stage("DEV"),
       FakeFetchString.fetchString,
       config.response,
-      LambdaIO(stream, os, null)
+      LambdaIO(stream, os, null),
     )
 
     val responseString = new String(os.toByteArray, "UTF-8")
@@ -115,12 +163,12 @@ object EndToEndData {
     Map(
       (s"/services/data/v$salesforceApiVersion/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
         "WHERE AccountId = %27crmId%27").replace(" ", "%20") ->
-        HTTPResponse(200, GetSFContactSyncCheckFieldsTest.dummyContact)
+        HTTPResponse(200, GetSFContactSyncCheckFieldsTest.dummyContact),
     )
   }
 
   def GetByEmailTestresponses: Map[String, HTTPResponse] = Map(
-    "/user?emailAddress=email%40address" -> HTTPResponse(200, dummyIdentityResponse)
+    "/user?emailAddress=email%40address" -> HTTPResponse(200, dummyIdentityResponse),
   )
 
   def responses: Map[String, HTTPResponse] =

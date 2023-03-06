@@ -1,0 +1,159 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Performs Right to Erasure Requests against Zuora
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+    RerResultsBucket:
+        Description: Bucket where success/failure messages are uploaded to
+        Type: String
+        Default: gu-baton-results
+    BatonAccountId:
+      Description: Account Id for Baton AWS account
+      Type: String
+
+Resources:
+
+    ZuoraBatonRerLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LogPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-baton-rer-lambda-${Stage}:log-stream:*"
+                - PolicyName: InvokeLambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - lambda:InvokeFunction
+                            Resource: !GetAtt PerformZuoraRerLambda.Arn
+                - PolicyName: S3ListPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - s3:ListBucket
+                            Resource: !Sub arn:aws:s3:::${RerResultsBucket}
+                - PolicyName: S3GettPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                              - s3:GetObject
+                            Resource: !Sub arn:aws:s3:::${RerResultsBucket}/zuora-results/${Stage}/*
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRer-${Stage}.*.json
+
+    PerformZuoraRerLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LogPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-baton-perform-rer-lambda-${Stage}:log-stream:*"
+                - PolicyName: S3ListPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - s3:ListBucket
+                            Resource: !Sub arn:aws:s3:::${RerResultsBucket}
+                - PolicyName: S3PutPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - s3:PutObject
+                            - s3:PutObjectAcl
+                            - s3:GetObject
+                            Resource: !Sub arn:aws:s3:::${RerResultsBucket}/zuora-results/${Stage}/*
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRer-${Stage}.*.json
+
+    ZuoraBatonRerLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Initiates the PerformZuoraRerLambda and checks the status of Zuora RERs via S3
+            FunctionName:
+                !Sub zuora-baton-rer-lambda-${Stage}
+            Code:
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/zuora-rer/zuora-rer.jar
+            Handler: com.gu.zuora.rer.Handler::handleRer
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            MemorySize: 1024
+            Runtime: java11
+            Timeout: 120
+            Role:
+              !GetAtt ZuoraBatonRerLambdaRole.Arn
+
+    PerformZuoraRerLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Performs RER to Zuora, writing success/fail status to S3
+            FunctionName:
+              !Sub zuora-baton-perform-rer-lambda-${Stage}
+            Code:
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/zuora-rer/zuora-rer.jar
+            Handler: com.gu.zuora.rer.Handler::handlePerformRer
+            Environment:
+                Variables:
+                    Stage: !Ref Stage
+            MemorySize: 1024
+            Runtime: java11
+            Timeout: 900
+            Role:
+              !GetAtt PerformZuoraRerLambdaRole.Arn
+        DependsOn:
+        - PerformZuoraRerLambdaRole

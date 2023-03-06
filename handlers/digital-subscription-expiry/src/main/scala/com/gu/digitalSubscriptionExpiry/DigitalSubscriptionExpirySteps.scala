@@ -23,25 +23,28 @@ object UrlParams {
 object DigitalSubscriptionExpirySteps extends Logging {
 
   def apply(
-    getEmergencyTokenExpiry: String => ApiGatewayOp[Unit],
-    getSubscription: SubscriptionId => ApiGatewayOp[SubscriptionResult],
-    getAccountSummary: AccountId => ApiGatewayOp[AccountSummaryResult],
-    getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult) => ApiResponse,
-    skipActivationDateUpdate: (UrlParams, SubscriptionResult) => Boolean,
-    setActivationDate: SubscriptionId => ApiGatewayOp[Unit]
+      getEmergencyTokenExpiry: String => ApiGatewayOp[Unit],
+      getSubscription: SubscriptionId => ApiGatewayOp[SubscriptionResult],
+      getAccountSummary: AccountId => ApiGatewayOp[AccountSummaryResult],
+      getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult) => ApiResponse,
+      skipActivationDateUpdate: (UrlParams, SubscriptionResult) => Boolean,
+      setActivationDate: SubscriptionId => ApiGatewayOp[Unit],
   ): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
       (for {
-        expiryRequest <- apiGatewayRequest.bodyAsCaseClass[DigitalSubscriptionExpiryRequest](Some(DigitalSubscriptionApiResponses.badRequest))
+        expiryRequest <- apiGatewayRequest.bodyAsCaseClass[DigitalSubscriptionExpiryRequest](
+          Some(DigitalSubscriptionApiResponses.badRequest),
+        )
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
         subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
         subscriptionResult <- getSubscription(subscriptionId)
         queryStringParameters <- apiGatewayRequest.queryParamsAsCaseClass[UrlParams]()
-        _ <- if (skipActivationDateUpdate(queryStringParameters, subscriptionResult))
-          ContinueProcessing(())
-        else
-          setActivationDate(subscriptionResult.id)
+        _ <-
+          if (skipActivationDateUpdate(queryStringParameters, subscriptionResult))
+            ContinueProcessing(())
+          else
+            setActivationDate(subscriptionResult.id)
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
         _ = {
           if (accountSummary.identityId.isDefined) {
@@ -50,7 +53,9 @@ object DigitalSubscriptionExpirySteps extends Logging {
             logger.info("User doesn't have a linked identityId")
           }
         }
-        password <- expiryRequest.password.toApiGatewayContinueProcessing(DigitalSubscriptionApiResponses.notFoundResponse)
+        password <- expiryRequest.password.toApiGatewayContinueProcessing(
+          DigitalSubscriptionApiResponses.notFoundResponse,
+        )
         subscriptionEndDate = getSubscriptionExpiry(password, subscriptionResult, accountSummary)
       } yield subscriptionEndDate).apiResponse
 
@@ -60,4 +65,3 @@ object DigitalSubscriptionExpirySteps extends Logging {
   }
 
 }
-

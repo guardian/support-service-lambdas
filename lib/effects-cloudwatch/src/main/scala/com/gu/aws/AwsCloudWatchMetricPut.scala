@@ -1,6 +1,11 @@
 package com.gu.aws
 
-import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, ProfileCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProviderChain,
+  EnvironmentVariableCredentialsProvider,
+  InstanceProfileCredentialsProvider,
+  ProfileCredentialsProvider,
+}
 import software.amazon.awssdk.regions.Region.EU_WEST_1
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import software.amazon.awssdk.services.cloudwatch.model.{Dimension, MetricDatum, PutMetricDataRequest, StandardUnit}
@@ -11,19 +16,17 @@ import scala.util.Try
 object Aws {
   val ProfileName = "membership"
 
-  lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain
-    .builder
+  lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain.builder
     .credentialsProviders(
       ProfileCredentialsProvider.builder.profileName(ProfileName).build(),
-      EnvironmentVariableCredentialsProvider.create()
+      EnvironmentVariableCredentialsProvider.create(),
     )
     .build()
 
 }
 
 object AwsCloudWatch {
-  val client: CloudWatchClient = CloudWatchClient
-    .builder
+  val client: CloudWatchClient = CloudWatchClient.builder
     .region(EU_WEST_1)
     .credentialsProvider(Aws.CredentialsProvider)
     .build()
@@ -37,16 +40,15 @@ object AwsCloudWatch {
   case class MetricDimensionValue(value: String) extends AnyVal
 
   case class MetricRequest(
-    namespace: MetricNamespace,
-    name: MetricName,
-    dimensions: Map[MetricDimensionName, MetricDimensionValue],
-    value: Double = 1.0
+      namespace: MetricNamespace,
+      name: MetricName,
+      dimensions: Map[MetricDimensionName, MetricDimensionValue],
+      value: Double = 1.0,
   )
 
   def metricPut(request: MetricRequest): Try[Unit] = {
 
-    val putMetricDataRequest = PutMetricDataRequest
-      .builder
+    val putMetricDataRequest = PutMetricDataRequest.builder
       .namespace(request.namespace.value)
       .metricData(buildMetricDatum(request))
       .build()
@@ -55,10 +57,12 @@ object AwsCloudWatch {
   }
 
   private[aws] def buildMetricDatum(request: MetricRequest) = {
-    val dimensions = request.dimensions.map {
-      case (name, value) =>
+    val dimensions = request.dimensions
+      .map { case (name, value) =>
         Dimension.builder.name(name.value).value(value.value).build()
-    }.toList.asJava
+      }
+      .toList
+      .asJava
     MetricDatum.builder
       .metricName(request.name.value)
       .dimensions(dimensions)

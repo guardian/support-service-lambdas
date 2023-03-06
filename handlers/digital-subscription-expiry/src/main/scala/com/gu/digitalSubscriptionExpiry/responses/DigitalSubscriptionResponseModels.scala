@@ -4,11 +4,11 @@ import com.gu.cas.SubscriptionCode
 import java.time.LocalDate
 import play.api.libs.json.{JsString, Json, Writes}
 case class Expiry(
-  expiryDate: LocalDate,
-  expiryType: String,
-  content: String = "SevenDay",
-  subscriptionCode: Option[SubscriptionCode] = None,
-  provider: Option[String] = None
+    expiryDate: LocalDate,
+    expiryType: String,
+    content: String = "SevenDay",
+    subscriptionCode: Option[SubscriptionCode] = None,
+    provider: Option[String] = None,
 )
 
 object Expiry {
@@ -60,4 +60,3 @@ object DigitalSubscriptionExpiryResponse {
     }
   }
 }
-

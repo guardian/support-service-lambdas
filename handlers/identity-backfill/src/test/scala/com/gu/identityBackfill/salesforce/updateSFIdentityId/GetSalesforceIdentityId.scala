@@ -18,6 +18,8 @@ object GetSalesforceIdentityId {
   def apply(getOp: HttpOp[GetRequest, JsValue]): SFContactId => LazyClientFailableOp[IdentityId] =
     getOp.setupRequest(toRequest).parse[WireResult].map(_.IdentityID__c).map(IdentityId.apply).runRequestLazy
 
-  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sfContactId.value}"))
+  def toRequest(sfContactId: SFContactId) = GetRequest(
+    RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sfContactId.value}"),
+  )
 
 }

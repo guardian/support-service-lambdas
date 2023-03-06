@@ -10,23 +10,25 @@ import org.scalatest.flatspec.AsyncFlatSpec
 
 class GetJobResultTest extends AsyncFlatSpec {
 
-  def ZuoraResponseWithStatus(status: String) = ClientSuccess(AquaJobResponse(
-    id = None,
-    status = status,
-    name = "testResponse",
-    batches = List(
-      aqua.Batch(
-        status = "completed",
-        name = "batch1",
-        fileId = Some("fileId1")
+  def ZuoraResponseWithStatus(status: String) = ClientSuccess(
+    AquaJobResponse(
+      id = None,
+      status = status,
+      name = "testResponse",
+      batches = List(
+        aqua.Batch(
+          status = "completed",
+          name = "batch1",
+          fileId = Some("fileId1"),
+        ),
+        aqua.Batch(
+          status = "completed",
+          name = "batch2",
+          fileId = Some("fileId2"),
+        ),
       ),
-      aqua.Batch(
-        status = "completed",
-        name = "batch2",
-        fileId = Some("fileId2")
-      )
-    )
-  ))
+    ),
+  )
 
   it should "decrease the amount of tries left on each execution" in {
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("pending") }
@@ -63,10 +65,10 @@ class GetJobResultTest extends AsyncFlatSpec {
       jobId = "someJobId",
       batches = List(
         Batch("fileId1", "batch1"),
-        Batch("fileId2", "batch2")
+        Batch("fileId2", "batch2"),
       ),
       false,
-      9
+      9,
     )
 
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("completed") }
@@ -76,28 +78,32 @@ class GetJobResultTest extends AsyncFlatSpec {
   }
   it should "return error if zuora response status is completed but the response is missing fileIds" in {
 
-    val responseWithMissingFileId = ClientSuccess(AquaJobResponse(
-      id = None,
-      status = "completed",
-      name = "testResponse",
-      batches = List(
-        aqua.Batch(
-          status = "completed",
-          name = "batch1",
-          fileId = Some("fileId1")
+    val responseWithMissingFileId = ClientSuccess(
+      AquaJobResponse(
+        id = None,
+        status = "completed",
+        name = "testResponse",
+        batches = List(
+          aqua.Batch(
+            status = "completed",
+            name = "batch1",
+            fileId = Some("fileId1"),
+          ),
+          aqua.Batch(
+            status = "completed",
+            name = "batch2",
+            fileId = None,
+          ),
         ),
-        aqua.Batch(
-          status = "completed",
-          name = "batch2",
-          fileId = None
-        )
-      )
-    ))
+      ),
+    )
 
     def get: RequestsGet[AquaJobResponse] = { case notTested => responseWithMissingFileId }
     val jobResultRequest = JobResultRequest("someJobId", false, None)
 
     // test is too specific, shoudlnt' check so much detail
-    GetJobResult(get)(jobResultRequest) shouldBe GenericError("file Id missing from response : ClientSuccess(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))")
+    GetJobResult(get)(jobResultRequest) shouldBe GenericError(
+      "file Id missing from response : ClientSuccess(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))",
+    )
   }
 }

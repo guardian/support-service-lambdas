@@ -1,22 +1,22 @@
 package com.gu.sf_emails_to_s3_exporter
 
 case class Config(
-  sfConfig: SalesforceConfig,
-  s3Config: S3Config
+    sfConfig: SalesforceConfig,
+    s3Config: S3Config,
 )
 
 case class SalesforceConfig(
-  authUrl: String,
-  clientId: String,
-  clientSecret: String,
-  userName: String,
-  password: String,
-  token: String,
-  apiVersion: String
+    authUrl: String,
+    clientId: String,
+    clientSecret: String,
+    userName: String,
+    password: String,
+    token: String,
+    apiVersion: String,
 )
 
 case class S3Config(
-  bucketName: String
+    bucketName: String,
 )
 
 object Config {
@@ -38,12 +38,11 @@ object Config {
         password = sfPassword,
         token = sfToken,
         authUrl = sfAuthUrl,
-        apiVersion = sfApiVersion
+        apiVersion = sfApiVersion,
       ),
       S3Config(
-        bucketName = s3BucketName.toLowerCase()
-      )
+        bucketName = s3BucketName.toLowerCase(),
+      ),
     )
   }
 }
-

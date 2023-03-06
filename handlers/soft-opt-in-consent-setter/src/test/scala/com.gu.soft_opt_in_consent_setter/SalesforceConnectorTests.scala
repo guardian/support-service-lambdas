@@ -1,7 +1,15 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{SFSubRecordResponse, SoftOptInError}
-import com.gu.soft_opt_in_consent_setter.testData.SalesforceTestData.{authDetails, failedResponse, subsToProcess, successfulAuthResponse, successfulCompositeUpdateResponse, successfulQueryResponse, thrownResponse}
+import com.gu.soft_opt_in_consent_setter.testData.SalesforceTestData.{
+  authDetails,
+  failedResponse,
+  subsToProcess,
+  successfulAuthResponse,
+  successfulCompositeUpdateResponse,
+  successfulQueryResponse,
+  thrownResponse,
+}
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should

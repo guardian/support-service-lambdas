@@ -10,16 +10,17 @@ class ValidateSubscriptionsTest extends AnyFlatSpec with Matchers {
 
   def sub(active: Boolean, rateplans: Set[String]) = Subscription(
     status = if (active) GetAccountSubscriptions.Active else GetAccountSubscriptions.NotActive,
-    productRateplanIds = rateplans.map(ProductRatePlanId)
+    productRateplanIds = rateplans.map(ProductRatePlanId.apply),
   )
 
-  private val contributionRateplans = List("monthyContributionRateplanId", "annualContributionRateplanId").map(ProductRatePlanId)
+  private val contributionRateplans =
+    List("monthyContributionRateplanId", "annualContributionRateplanId").map(ProductRatePlanId.apply)
   private val validationFailedMsg = "validation Failed!"
 
   it should "fail if account already has an active recurring contribution subscription" in {
     val subs = List(
       sub(active = true, rateplans = Set("somePlan", "someOtherPlan")),
-      sub(active = true, rateplans = Set("monthyContributionRateplanId", "someOtherPlan"))
+      sub(active = true, rateplans = Set("monthyContributionRateplanId", "someOtherPlan")),
     )
 
     val actual = ValidateSubscriptions(contributionRateplans, validationFailedMsg)(subs)
@@ -30,7 +31,7 @@ class ValidateSubscriptionsTest extends AnyFlatSpec with Matchers {
 
     val subs = List(
       sub(active = true, rateplans = Set("somePlan", "someOtherPlan")),
-      sub(active = false, rateplans = Set("monthyContributionRateplanId", "someOtherPlan"))
+      sub(active = false, rateplans = Set("monthyContributionRateplanId", "someOtherPlan")),
     )
 
     ValidateSubscriptions(contributionRateplans, validationFailedMsg)(subs) shouldBe Passed(subs)
@@ -39,7 +40,7 @@ class ValidateSubscriptionsTest extends AnyFlatSpec with Matchers {
 
     val subs = List(
       sub(active = true, rateplans = Set("somePlan", "someOtherPlan")),
-      sub(active = true, rateplans = Set("yetAnotherplan", "somePlan"))
+      sub(active = true, rateplans = Set("yetAnotherplan", "somePlan")),
     )
 
     ValidateSubscriptions(contributionRateplans, validationFailedMsg)(subs) shouldBe Passed(subs)

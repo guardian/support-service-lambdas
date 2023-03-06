@@ -9,20 +9,24 @@ import io.circe.parser.decode
 
 object DigitalVoucher {
 
-  def suspend[F[_]: Sync](imovo: ImovoClient[F], suspension: Suspension): EitherT[F, DigitalVoucherSuspendFailure, Unit] =
-    imovo.suspendSubscriptionVoucher(
-      subscriptionId = SfSubscriptionId(suspension.Holiday_Stop_Request__r.SF_Subscription__c),
-      startDate = suspension.Stopped_Publication_Date__c,
-      endDateExclusive = suspension.Stopped_Publication_Date__c.plusDays(1)
-    )
+  def suspend[F[_]: Sync](
+      imovo: ImovoClient[F],
+      suspension: Suspension,
+  ): EitherT[F, DigitalVoucherSuspendFailure, Unit] =
+    imovo
+      .suspendSubscriptionVoucher(
+        subscriptionId = SfSubscriptionId(suspension.Holiday_Stop_Request__r.SF_Subscription__c),
+        startDate = suspension.Stopped_Publication_Date__c,
+        endDateExclusive = suspension.Stopped_Publication_Date__c.plusDays(1),
+      )
       .leftFlatMap {
         case e @ ImovoClientException(_, _) if isExistingSuspension(e) =>
           EitherT.fromEither(
-            Right[DigitalVoucherSuspendFailure, Unit](())
+            Right[DigitalVoucherSuspendFailure, Unit](()),
           )
         case e =>
           EitherT.fromEither(
-            Left[DigitalVoucherSuspendFailure, Unit](DigitalVoucherSuspendFailure(e.message))
+            Left[DigitalVoucherSuspendFailure, Unit](DigitalVoucherSuspendFailure(e.message)),
           )
       }
 

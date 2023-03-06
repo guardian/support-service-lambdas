@@ -11,7 +11,13 @@ import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, S
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDayPlus
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
@@ -38,8 +44,8 @@ object SendVoucherEmailsManualTest {
           Some(City("billToCity")),
           Some(State("billToState")),
           Some(Country.UK),
-          Some(Postcode("billToPostcode"))
-        )
+          Some(Postcode("billToPostcode")),
+        ),
       ),
       soldTo = SoldToContact(
         Some(Title("soldToTitle")),
@@ -52,15 +58,20 @@ object SendVoucherEmailsManualTest {
           Some(City("soldToCity")),
           Some(State("soldToState")),
           Country.US,
-          Some(Postcode("soldToPostcode"))
-        )
-      )
+          Some(Postcode("soldToPostcode")),
+        ),
+      ),
     )
 
     val randomSubName = "T-" + Random.alphanumeric.take(10).mkString
 
     PaperEmailData(
-      plan = Plan(VoucherEveryDayPlus, PlanDescription("Everyday+"), testStartDateRules, Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(3112), Monthly, "GBP 32.12 every month"))),
+      plan = Plan(
+        VoucherEveryDayPlus,
+        PlanDescription("Everyday+"),
+        testStartDateRules,
+        Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(3112), Monthly, "GBP 32.12 every month")),
+      ),
       firstPaymentDate = LocalDate.of(2018, 12, 12),
       firstPaperDate = LocalDate.of(2018, 11, 12),
       subscriptionName = SubscriptionName(randomSubName),
@@ -70,9 +81,9 @@ object SendVoucherEmailsManualTest {
         BankAccountName("bankAccountName"),
         BankAccountNumberMask("********1234"),
         SortCode("123456"),
-        MandateId("MandateId")
+        MandateId("MandateId"),
       ),
-      currency = GBP
+      currency = GBP,
     )
   }
 

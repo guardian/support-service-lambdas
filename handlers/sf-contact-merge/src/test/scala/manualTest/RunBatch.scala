@@ -48,7 +48,7 @@ object RunBatch {
   def post(apiKey: ApiKey)(postBody: BodyAsString): Request = {
     val headers = Map(
       "x-api-key" -> apiKey.value,
-      "content-type" -> "application/json"
+      "content-type" -> "application/json",
     )
     val prodContactMergeUrl = "https://sf-contact-merge-PROD.membership.guardianapis.com/sf-contact-merge"
     RestRequestMaker.buildRequest(headers, prodContactMergeUrl, _.post(createBodyFromString(postBody)))

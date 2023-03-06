@@ -4,12 +4,12 @@ import com.gu.util.config.ConfigLocation
 import play.api.libs.json.{Json, Reads}
 
 case class SFAuthConfig(
-  url: String,
-  client_id: String,
-  client_secret: String,
-  username: String,
-  password: String,
-  token: String
+    url: String,
+    client_id: String,
+    client_secret: String,
+    username: String,
+    password: String,
+    token: String,
 )
 
 object SFAuthConfig {

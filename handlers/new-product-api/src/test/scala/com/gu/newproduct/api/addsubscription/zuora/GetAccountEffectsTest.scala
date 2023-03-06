@@ -17,15 +17,15 @@ class GetAccountEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      res <- GetAccount(zuoraDeps.get[ZuoraAccount])(ZuoraAccountId("2c92c0f860017cd501600893130317a7")).toDisjunction
+      res <- GetAccount(zuoraDeps.get[ZuoraAccount])(ZuoraAccountId("8ad095dd82f7aaa50182f96de24d3ddb")).toDisjunction
     } yield res
     val expected = Account(
-      identityId = Some(IdentityId("30000549")),
-      sfContactId = Some(SfContactId("003g000001W5FCeAAN")),
-      paymentMethodId = Some(PaymentMethodId("2c92c0f860017cd501600893132117ae")),
+      identityId = Some(IdentityId("200045767")),
+      sfContactId = Some(SfContactId("0039E00001cEWmcQAG")),
+      paymentMethodId = Some(PaymentMethodId("8ad095dd82f7aaa50182f96de2883de1")),
       autoPay = AutoPay(true),
       accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
-      currency = GBP
+      currency = GBP,
     )
     actual shouldBe Right(expected)
   }

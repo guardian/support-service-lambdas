@@ -1,7 +1,11 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.{ZuoraRatePlan, ZuoraSubscription, ZuoraSubscriptionsResponse}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.{
+  ZuoraRatePlan,
+  ZuoraSubscription,
+  ZuoraSubscriptionsResponse,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, NotActive, Subscription}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.EffectsTest
@@ -16,24 +20,25 @@ class GetAccountSubscriptionsTest extends AnyFlatSpec with Matchers {
     ZuoraSubscription(
       subscriptionNumber = number,
       status = status,
-      ratePlans = rateplans.map(ZuoraRatePlan)
+      ratePlans = rateplans.map(ZuoraRatePlan),
     )
   }
 
   val fakeResponses = Map(
-    "subscriptions/accounts/account1" -> ZuoraSubscriptionsResponse(List(
-      subWith(
-        number = "subNumber",
-        status = "Active",
-        rateplans = List("plan1", "plan2")
+    "subscriptions/accounts/account1" -> ZuoraSubscriptionsResponse(
+      List(
+        subWith(
+          number = "subNumber",
+          status = "Active",
+          rateplans = List("plan1", "plan2"),
+        ),
+        subWith(
+          number = "subNumber2",
+          status = "Cancelled",
+          rateplans = List("plan3", "plan2", "plan2"),
+        ),
       ),
-      subWith(
-        number = "subNumber2",
-        status = "Cancelled",
-        rateplans = List("plan3", "plan2", "plan2")
-      )
-    ))
-
+    ),
   )
 
   def fakeGet(path: String, skipCheck: IsCheckNeeded) = ClientSuccess(fakeResponses(path))
@@ -45,15 +50,14 @@ class GetAccountSubscriptionsTest extends AnyFlatSpec with Matchers {
     val expected = List(
       Subscription(
         status = Active,
-        productRateplanIds = Set(ProductRatePlanId("plan1"), ProductRatePlanId("plan2"))
+        productRateplanIds = Set(ProductRatePlanId("plan1"), ProductRatePlanId("plan2")),
       ),
       Subscription(
         status = NotActive,
-        productRateplanIds = Set(ProductRatePlanId("plan3"), ProductRatePlanId("plan2"))
-      )
+        productRateplanIds = Set(ProductRatePlanId("plan3"), ProductRatePlanId("plan2")),
+      ),
     )
     actual shouldBe ClientSuccess(expected)
   }
 
 }
-

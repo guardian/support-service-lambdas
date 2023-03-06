@@ -13,11 +13,7 @@ import org.scalatest.OneInstancePerTest
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class DigitalVoucherApiRoutesTest
-  extends AnyFlatSpec
-  with Matchers
-  with MockFactory
-  with OneInstancePerTest {
+class DigitalVoucherApiRoutesTest extends AnyFlatSpec with Matchers with MockFactory with OneInstancePerTest {
 
   private val sfSubId = "xae45thglojjfe3"
   private val startDate = "2020-09-18"
@@ -28,12 +24,12 @@ class DigitalVoucherApiRoutesTest
 
   private def requestWithBody(body: String) = Request[IO](
     method = PUT,
-    uri = uri"/digital-voucher/suspend"
+    uri = uri"/digital-voucher/suspend",
   ).withEntity(body)
 
   "Put /digital-voucher/suspend" should "return HTTP 200 if suspend succeeds" in {
     val request = requestWithBody(
-      s"""{"subscriptionId": "$sfSubId", "startDate": "$startDate", "endDateExclusive": "$endDateExclusive"}"""
+      s"""{"subscriptionId": "$sfSubId", "startDate": "$startDate", "endDateExclusive": "$endDateExclusive"}""",
     )
 
     val response = routes.orNotFound.run(request)
@@ -71,7 +67,7 @@ class DigitalVoucherApiRoutesTest
 
   it should "return HTTP 500 if suspend fails" in {
     val request = requestWithBody(
-      s"""{"subscriptionId": "$sfSubId", "startDate": "$startDate", "endDateExclusive": "$endDateExclusive"}"""
+      s"""{"subscriptionId": "$sfSubId", "startDate": "$startDate", "endDateExclusive": "$endDateExclusive"}""",
     )
 
     val response = routes.orNotFound.run(request)
@@ -85,7 +81,7 @@ class DigitalVoucherApiRoutesTest
 
   it should "return HTTP 502 if suspend fails because of upstream service failure" in {
     val request = requestWithBody(
-      s"""{"subscriptionId": "$sfSubId", "startDate": "$startDate", "endDateExclusive": "$endDateExclusive"}"""
+      s"""{"subscriptionId": "$sfSubId", "startDate": "$startDate", "endDateExclusive": "$endDateExclusive"}""",
     )
 
     val response = routes.orNotFound.run(request)

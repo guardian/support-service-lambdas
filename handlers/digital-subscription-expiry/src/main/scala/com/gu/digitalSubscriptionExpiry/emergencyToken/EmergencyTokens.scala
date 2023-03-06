@@ -15,7 +15,7 @@ object EmergencyTokens {
   def apply(emergencyTokensConfig: EmergencyTokensConfig): EmergencyTokens = {
     val codec = PrefixedTokens(
       secretKey = emergencyTokensConfig.secret,
-      emergencySubscriberAuthPrefix = emergencyTokensConfig.prefix
+      emergencySubscriberAuthPrefix = emergencyTokensConfig.prefix,
     )
     EmergencyTokens(emergencyTokensConfig.prefix, codec)
   }

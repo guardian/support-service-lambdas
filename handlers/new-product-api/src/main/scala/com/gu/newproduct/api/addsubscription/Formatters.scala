@@ -10,7 +10,8 @@ object Formatters {
   }
 
   implicit class SortCodeOps(sortCode: SortCode) {
-    def hyphenated = s"${sortCode.value.substring(0, 2)}-${sortCode.value.substring(2, 4)}-${sortCode.value.substring(4, 6)}"
+    def hyphenated =
+      s"${sortCode.value.substring(0, 2)}-${sortCode.value.substring(2, 4)}-${sortCode.value.substring(4, 6)}"
   }
 
 }

@@ -25,7 +25,8 @@ class GetSfContactsTest extends AnyFlatSpec with Matchers {
 
   "getSfContacts" should "remove duplicates from the list" in {
 
-    val actual = DedupSfContacts.apply(SFContactsForMerge(SFContactId("a1"), List(SFContactId("a2"), SFContactId("a2"))))
+    val actual =
+      DedupSfContacts.apply(SFContactsForMerge(SFContactId("a1"), List(SFContactId("a2"), SFContactId("a2"))))
 
     actual should be(SFContactsForMerge(SFContactId("a1"), List(SFContactId("a2"))))
 

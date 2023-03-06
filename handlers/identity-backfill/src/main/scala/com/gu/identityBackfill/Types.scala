@@ -13,10 +13,10 @@ object Types {
   }
 
   case class ZuoraAccountIdentitySFContact(
-    accountId: AccountId, // One of the buyer's Zuora Billing Accounts
-    identityId: Option[IdentityId], // The buyer's GNM Identity account, if they have one
-    sfContactId: SFContactId, // One of the buyer's CRM Contacts (most usually their own, but could be a gift recipient)
-    crmId: CrmId // The buyer's main CRM Account (which we're trying to link to their Identity account)
+      accountId: AccountId, // One of the buyer's Zuora Billing Accounts
+      identityId: Option[IdentityId], // The buyer's GNM Identity account, if they have one
+      sfContactId: SFContactId, // One of the buyer's CRM Contacts (most usually their own, but could be a gift recipient)
+      crmId: CrmId, // The buyer's main CRM Account (which we're trying to link to their Identity account)
   )
 
 }

@@ -7,31 +7,37 @@ object SfQueries {
 
     s"""
        |SELECT
-       |    Id,
-       |    Name,
-       |    Product__c,
-       |    SF_Status__c,
-       |    Soft_Opt_in_Status__c,
-       |    Soft_Opt_in_Last_Stage_Processed__c,
-       |    Soft_Opt_in_Number_of_Attempts__c,
-       |    Buyer__r.IdentityID__c
-       |FROM
-       |    SF_Subscription__c
-       |WHERE
-       |    Soft_Opt_in_Number_of_Attempts__c < 5 AND
-       |    Soft_Opt_in_Eligible__c = true AND
-       |    (
-       |        (
-       |            SF_Status__c = 'Active' AND
-       |            Soft_Opt_in_Last_Stage_Processed__c != 'Acquisition'
-       |        )
-       |        OR
-       |        (
-       |            SF_Status__c = 'Cancelled' AND
-       |            Soft_Opt_in_Last_Stage_Processed__c = 'Acquisition'
-       |        )
-       |    )
-       |LIMIT
+       |       Id,
+       |       Name,
+       |       Product__c,
+       |       SF_Status__c,
+       |       Soft_Opt_in_Status__c,
+       |       Soft_Opt_in_Last_Stage_Processed__c,
+       |       Soft_Opt_in_Number_of_Attempts__c,
+       |       Buyer__r.IdentityID__c,
+       |       (
+       |              SELECT Id, Previous_Product_Name__c 
+       |              FROM Subscription_Rate_Plan_Updates__r
+       |              ORDER BY CreatedDate desc
+       |              LIMIT 1
+       |       )
+       |       FROM
+       |           SF_Subscription__c
+       |       WHERE
+       |           Soft_Opt_in_Number_of_Attempts__c < 5 AND
+       |           Soft_Opt_in_Eligible__c = true AND
+       |           (
+       |               (
+       |                   SF_Status__c = 'Active' AND
+       |                   Soft_Opt_in_Last_Stage_Processed__c NOT IN ('Acquisition','Switch')
+       |               )
+       |               OR
+       |               (
+       |                   SF_Status__c = 'Cancelled' AND
+       |                   Soft_Opt_in_Last_Stage_Processed__c != 'Cancellation'
+       |               )
+       |           )
+       |       LIMIT
        |	$limit
     """.stripMargin
   }

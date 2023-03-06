@@ -13,32 +13,32 @@ object AmountLimits {
 
   val gbp = ContributionLimits(
     monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000)
+    annual = AmountLimits(min = 1000, max = 200000),
   )
 
   val aud = ContributionLimits(
     monthly = AmountLimits(min = 1000, max = 20000),
-    annual = AmountLimits(min = 1000, max = 200000)
+    annual = AmountLimits(min = 1000, max = 200000),
   )
 
   val usd = ContributionLimits(
     monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000)
+    annual = AmountLimits(min = 1000, max = 200000),
   )
 
   val nzd = ContributionLimits(
     monthly = AmountLimits(min = 1000, max = 20000),
-    annual = AmountLimits(min = 1000, max = 200000)
+    annual = AmountLimits(min = 1000, max = 200000),
   )
 
   val cad = ContributionLimits(
     monthly = AmountLimits(min = 500, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000)
+    annual = AmountLimits(min = 1000, max = 200000),
   )
 
   val eur = ContributionLimits(
     monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000)
+    annual = AmountLimits(min = 1000, max = 200000),
   )
 
   def limitsFor(planId: PlanId, currency: Currency): AmountLimits = {

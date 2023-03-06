@@ -28,16 +28,16 @@ object Handler {
   type GetRemainingTime = () => Int
 
   def getZuoraRequestMaker(
-    response: Request => Response,
-    stage: Stage,
-    fetchString: StringFromS3
+      response: Request => Response,
+      stage: Stage,
+      fetchString: StringFromS3,
   ): Try[Requests] = for {
     zuoraRestConfig <- toTry(LoadConfigModule(stage, fetchString)[ZuoraRestConfig])
   } yield ZuoraRestRequestMaker(response, zuoraRestConfig)
 
   def operation(
-    s3Iterator: String => Try[Iterator[String]],
-    updateAccounts: (String, AccountIdIterator) => Try[UpdateAccountsResponse]
+      s3Iterator: String => Try[Iterator[String]],
+      updateAccounts: (String, AccountIdIterator) => Try[UpdateAccountsResponse],
   )(request: UpdateAccountsRequest): Try[UpdateAccountsResponse] = for {
     linesIterator <- s3Iterator(request.uri)
     accountIdsIterator <- AccountIdIterator(linesIterator, request.nextIndex.getOrElse(0))
@@ -51,7 +51,9 @@ object Handler {
   }
 
   def failIfNoProgress(request: UpdateAccountsRequest, response: UpdateAccountsResponse): Try[Unit] =
-    if (!response.done && request.nextIndex == response.nextIndex) Failure(LambdaException("no accounts processed in execution!")) else Success(())
+    if (!response.done && request.nextIndex == response.nextIndex)
+      Failure(LambdaException("no accounts processed in execution!"))
+    else Success(())
 
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
@@ -67,14 +69,13 @@ object Handler {
       setDoNotProcess = SetDoNotProcess(zuoraRequests.put[UpdateRequestBody, Unit]) _
       operation <- operation(
         s3Iterator,
-        UpdateAccounts(setDoNotProcess, getRemainingTime) _
+        UpdateAccounts(setDoNotProcess, getRemainingTime) _,
       )(updateAccountsRequest)
     } yield operation
 
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = wiredOperation
+      operation = wiredOperation,
     )
   }
 }
-

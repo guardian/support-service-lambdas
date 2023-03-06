@@ -23,7 +23,9 @@ object AsyncTypes extends Logging {
       }
     }
 
-    def replace(replacement: ApiGatewayOp[A]): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(underlying.map(_ => replacement))
+    def replace(replacement: ApiGatewayOp[A]): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(
+      underlying.map(_ => replacement),
+    )
   }
 
   implicit class UnitAsyncApiGatewayOps(asyncApiGatewayOp: AsyncApiGatewayOp[Unit]) extends Logging {
@@ -33,7 +35,7 @@ object AsyncTypes extends Logging {
           logger.warn(s"ignoring error while $action, original response was :$response")
           ContinueProcessing(())
         case continue => continue
-      }
+      },
     )
   }
   implicit class AsyncApiResponseOps(apiGatewayOp: AsyncApiGatewayOp[ApiResponse]) {
@@ -42,10 +44,9 @@ object AsyncTypes extends Logging {
 
   object AsyncApiGatewayOp {
     def apply[A](possiblyFailedFuture: Future[ApiGatewayOp[A]]): AsyncApiGatewayOp[A] = {
-      val successfulFuture = possiblyFailedFuture recover {
-        case err =>
-          logger.error(s"future failed in AsyncApiGatewayOp: ${err.getMessage}", err)
-          ReturnWithResponse(ApiGatewayResponse.internalServerError(err.getMessage))
+      val successfulFuture = possiblyFailedFuture recover { case err =>
+        logger.error(s"future failed in AsyncApiGatewayOp: ${err.getMessage}", err)
+        ReturnWithResponse(ApiGatewayResponse.internalServerError(err.getMessage))
       }
       new AsyncApiGatewayOp(successfulFuture)
     }
@@ -53,7 +54,7 @@ object AsyncTypes extends Logging {
   }
 
   implicit class FutureToAsyncOp[A](future: Future[A]) {
-    //todo remove the action param since it's not used for anything anymore
+    // todo remove the action param since it's not used for anything anymore
     def toAsyncApiGatewayOp(action: String): AsyncApiGatewayOp[A] = {
       val apiGatewayOp = future.map(ContinueProcessing(_))
       AsyncApiGatewayOp(apiGatewayOp)

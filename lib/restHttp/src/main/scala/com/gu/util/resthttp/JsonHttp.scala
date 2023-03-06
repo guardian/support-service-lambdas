@@ -26,64 +26,72 @@ object JsonHttp {
     override def builder: Request.Builder = new Request.Builder().delete()
   }
 
-  case class StringHttpRequest(requestMethod: RequestMethod, relativePath: RelativePath, urlParams: UrlParams, headers: List[Header] = List.empty)
+  case class StringHttpRequest(
+      requestMethod: RequestMethod,
+      relativePath: RelativePath,
+      urlParams: UrlParams,
+      headers: List[Header] = List.empty,
+  )
 
   val patch =
     HttpOpWrapper[PatchRequest, StringHttpRequest, BodyAsString, Unit](
       (patchRequest: PatchRequest) =>
-        StringHttpRequest(PatchMethod(BodyAsString(Json.stringify(patchRequest.body))), patchRequest.path, UrlParams.empty),
-
-      _ => ClientSuccess(())
+        StringHttpRequest(
+          PatchMethod(BodyAsString(Json.stringify(patchRequest.body))),
+          patchRequest.path,
+          UrlParams.empty,
+        ),
+      _ => ClientSuccess(()),
     )
 
   val post =
     HttpOpWrapper[PostRequest, StringHttpRequest, BodyAsString, JsValue](
       (postRequest: PostRequest) =>
-        StringHttpRequest(PostMethod(BodyAsString(Json.stringify(postRequest.body))), postRequest.path, UrlParams.empty),
-
-      deserialiseJsonResponse
+        StringHttpRequest(
+          PostMethod(BodyAsString(Json.stringify(postRequest.body))),
+          postRequest.path,
+          UrlParams.empty,
+        ),
+      deserialiseJsonResponse,
     )
 
   val postWithHeaders =
     HttpOpWrapper[PostRequestWithHeaders, StringHttpRequest, BodyAsString, JsValue](
       (postRequest: PostRequestWithHeaders) =>
-        StringHttpRequest(PostMethod(BodyAsString(Json.stringify(postRequest.body))), postRequest.path, UrlParams.empty, postRequest.headers),
-      deserialiseJsonResponse
+        StringHttpRequest(
+          PostMethod(BodyAsString(Json.stringify(postRequest.body))),
+          postRequest.path,
+          UrlParams.empty,
+          postRequest.headers,
+        ),
+      deserialiseJsonResponse,
     )
 
   def get = {
     HttpOpWrapper[GetRequest, StringHttpRequest, BodyAsString, JsValue](
-      (getRequest: GetRequest) =>
-        StringHttpRequest(GetMethod, getRequest.path, UrlParams.empty),
-
-      deserialiseJsonResponse
+      (getRequest: GetRequest) => StringHttpRequest(GetMethod, getRequest.path, UrlParams.empty),
+      deserialiseJsonResponse,
     )
   }
 
   def getWithParams = {
     HttpOpWrapper[GetRequestWithParams, StringHttpRequest, BodyAsString, JsValue](
-      (getRequest: GetRequestWithParams) =>
-        StringHttpRequest(GetMethod, getRequest.path, getRequest.urlParams),
-
-      deserialiseJsonResponse
+      (getRequest: GetRequestWithParams) => StringHttpRequest(GetMethod, getRequest.path, getRequest.urlParams),
+      deserialiseJsonResponse,
     )
   }
 
   val delete = {
     HttpOpWrapper[DeleteRequest, StringHttpRequest, BodyAsString, JsValue](
-      (deleteRequest: DeleteRequest) =>
-        StringHttpRequest(DeleteMethod, deleteRequest.path, UrlParams.empty),
-
-      deserialiseJsonResponse
+      (deleteRequest: DeleteRequest) => StringHttpRequest(DeleteMethod, deleteRequest.path, UrlParams.empty),
+      deserialiseJsonResponse,
     )
   }
 
   val deleteWithStringResponse = {
     HttpOpWrapper[DeleteRequest, StringHttpRequest, BodyAsString, String](
-      (deleteRequest: DeleteRequest) =>
-        StringHttpRequest(DeleteMethod, deleteRequest.path, UrlParams.empty),
-
-      (response: BodyAsString) => ClientSuccess(response.value)
+      (deleteRequest: DeleteRequest) => StringHttpRequest(DeleteMethod, deleteRequest.path, UrlParams.empty),
+      (response: BodyAsString) => ClientSuccess(response.value),
     )
   }
 

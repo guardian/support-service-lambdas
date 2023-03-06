@@ -15,10 +15,10 @@ object ZuoraCreditTransfer extends LazyLogging {
   }
 
   case class CreditTransfer(
-    invoiceId: String,
-    amount: BigDecimal,
-    adjustmentType: AdjustmentType,
-    comment: String
+      invoiceId: String,
+      amount: BigDecimal,
+      adjustmentType: AdjustmentType,
+      comment: String,
   )
 
   implicit val transferWrites = new Writes[CreditTransfer] {
@@ -26,7 +26,7 @@ object ZuoraCreditTransfer extends LazyLogging {
       "SourceTransactionId" -> transfer.invoiceId,
       "Amount" -> transfer.amount,
       "Type" -> transfer.adjustmentType.value,
-      "Comment" -> transfer.comment
+      "Comment" -> transfer.comment,
     )
   }
 

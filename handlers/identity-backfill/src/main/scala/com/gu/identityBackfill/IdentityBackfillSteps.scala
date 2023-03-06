@@ -15,15 +15,15 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSucces
 object IdentityBackfillSteps extends Logging {
 
   case class DomainRequest(
-    emailAddress: EmailAddress,
-    dryRun: Boolean
+      emailAddress: EmailAddress,
+      dryRun: Boolean,
   )
 
   def apply(
-    preReqCheck: EmailAddress => ApiGatewayOp[PreReqResult],
-    createGuestAccount: EmailAddress => ClientFailableOp[IdentityId],
-    updateZuoraAccounts: (Set[AccountId], IdentityId) => ApiGatewayOp[Unit],
-    updateSalesforceAccount: (Option[SFContactId], IdentityId) => ApiGatewayOp[Unit]
+      preReqCheck: EmailAddress => ApiGatewayOp[PreReqResult],
+      createGuestAccount: EmailAddress => ClientFailableOp[IdentityId],
+      updateZuoraAccounts: (Set[AccountId], IdentityId) => ApiGatewayOp[Unit],
+      updateSalesforceAccount: (Option[SFContactId], IdentityId) => ApiGatewayOp[Unit],
   )(request: DomainRequest): ApiResponse = {
 
     (for {
@@ -47,39 +47,47 @@ object IdentityBackfillSteps extends Logging {
       ContinueProcessing(())
 
   def updateBuyersIdentityId(
-    updateSalesforceContactIdentityId: (SFContactId, IdentityId) => ClientFailableOp[Unit]
+      updateSalesforceContactIdentityId: (SFContactId, IdentityId) => ClientFailableOp[Unit],
   )(maybeBuyerContactId: Option[SFContactId], identityId: IdentityId): ApiGatewayOp[Unit] = {
 
     val failures = maybeBuyerContactId
       .map(updateSalesforceContactIdentityId(_, identityId))
       .zip(maybeBuyerContactId)
-      .collect {
-        case (clientFailure: ClientFailure, id) => (id.value -> clientFailure.message).toString
+      .collect { case (clientFailure: ClientFailure, id) =>
+        (id.value -> clientFailure.message).toString
       }
 
     if (failures.isEmpty)
       ContinueProcessing(())
     else
-      ReturnWithResponse(ApiGatewayResponse.badRequest(s"updateBuyersIdentityId multiple errors updating ${identityId.value}: ${failures.mkString(", ")}"))
+      ReturnWithResponse(
+        ApiGatewayResponse.badRequest(
+          s"updateBuyersIdentityId multiple errors updating ${identityId.value}: ${failures.mkString(", ")}",
+        ),
+      )
 
   }
 
   def updateZuoraBillingAccountsIdentityId(
-    updateAccountsWithIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit]
+      updateAccountsWithIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit],
   )(ids: Set[AccountId], identityId: IdentityId): ApiGatewayOp[Unit] = {
 
     val idsOrdered = ids.toSeq
     val failures = idsOrdered
       .map(updateAccountsWithIdentityId(_, identityId))
       .zip(idsOrdered)
-      .collect {
-        case (clientFailure: ClientFailure, id) => (id.value -> clientFailure.message).toString
+      .collect { case (clientFailure: ClientFailure, id) =>
+        (id.value -> clientFailure.message).toString
       }
 
     if (failures.isEmpty)
       ContinueProcessing(())
     else
-      ReturnWithResponse(ApiGatewayResponse.badRequest(s"updateZuoraBillingAccountsIdentityId multiple errors updating ${identityId.value}: ${failures.mkString(", ")}"))
+      ReturnWithResponse(
+        ApiGatewayResponse.badRequest(
+          s"updateZuoraBillingAccountsIdentityId multiple errors updating ${identityId.value}: ${failures.mkString(", ")}",
+        ),
+      )
 
   }
 

@@ -30,6 +30,7 @@ object GetBatchResultId {
     }
   }
 
-  val wrapper = HttpOpWrapper[GetBatchResultRequest, StringHttpRequest, BodyAsString, BatchResultId](toRequest, toResponse)
+  val wrapper =
+    HttpOpWrapper[GetBatchResultRequest, StringHttpRequest, BodyAsString, BatchResultId](toRequest, toResponse)
 
 }

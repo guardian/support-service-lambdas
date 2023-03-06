@@ -25,13 +25,15 @@ class DigitalSubscriptionExpiryResponseTest extends AnyFlatSpec {
     val expectedJson = Json.parse(expectedstr)
 
     val expiryValue = LocalDate.of(1985, 10, 26)
-    val res = SuccessResponse(Expiry(
-      expiryDate = expiryValue,
-      expiryType = "ExpiryTypeValue",
-      content = "ContentValue",
-      subscriptionCode = Some(SevenDay),
-      provider = Some("ProviderValue")
-    ))
+    val res = SuccessResponse(
+      Expiry(
+        expiryDate = expiryValue,
+        expiryType = "ExpiryTypeValue",
+        content = "ContentValue",
+        subscriptionCode = Some(SevenDay),
+        provider = Some("ProviderValue"),
+      ),
+    )
 
     val jsonRes = Json.toJson(res)
     jsonRes should be(expectedJson)
@@ -50,7 +52,7 @@ class DigitalSubscriptionExpiryResponseTest extends AnyFlatSpec {
 
     val res = ErrorResponse(
       message = "some error message",
-      code = -789
+      code = -789,
     )
 
     val jsonRes = Json.toJson(res)

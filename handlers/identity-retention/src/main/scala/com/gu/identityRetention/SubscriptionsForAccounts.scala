@@ -15,9 +15,9 @@ import TypeConvert._
 object SubscriptionsForAccounts {
 
   case class SubscriptionsQueryResponse(
-    Id: String,
-    Status: String,
-    TermEndDate: LocalDate
+      Id: String,
+      Status: String,
+      TermEndDate: LocalDate,
   )
 
   implicit val reads = Json.reads[SubscriptionsQueryResponse]
@@ -40,7 +40,9 @@ object SubscriptionsForAccounts {
         """
     } yield subscriptionsQuery
 
-  def apply(zuoraQuerier: ZuoraQuerier)(activeAccounts: NonEmptyList[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
+  def apply(
+      zuoraQuerier: ZuoraQuerier,
+  )(activeAccounts: NonEmptyList[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
 
     def searchForSubscriptions =
       for {

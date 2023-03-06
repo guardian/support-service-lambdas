@@ -69,19 +69,19 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
     val actual = PricesFromZuoraCatalog(
       ZuoraEnvironment("DEV"),
       fakeGetStringFromS3,
-      rateplanToPlanId.get
+      rateplanToPlanId.get,
     )
     actual shouldBe ClientSuccess(
       Map(
         VoucherSaturdayPlus -> Map(
           GBP -> AmountMinorUnits(2162),
           USD -> AmountMinorUnits(2192),
-          EUR -> AmountMinorUnits(2152)
+          EUR -> AmountMinorUnits(2152),
         ),
         VoucherSundayPlus -> Map(
-          GBP -> AmountMinorUnits(2206)
-        )
-      )
+          GBP -> AmountMinorUnits(2206),
+        ),
+      ),
     )
   }
 }

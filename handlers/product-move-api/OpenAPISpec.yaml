@@ -1,0 +1,269 @@
+openapi: 3.0.3
+info:
+  title: Product Movement API
+  version: 0.0.1
+  description: |-
+    API to facilitate replacing an existing subscription
+    with another subscription for a different type of product.
+paths:
+  /available-product-moves/{subscriptionName}:
+    get:
+      summary: Gets available products that can be moved to from the given subscription.
+      description: |
+        Returns an array of eligible products that the given subscription could be moved to,
+        which will be empty if there aren't any for the given subscription.
+      operationId: getAvailable-product-movesSubscriptionname
+      parameters:
+        - name: subscriptionName
+          in: path
+          description: Name of subscription whose eligibility for movement is to be
+            checked.
+          required: true
+          schema:
+            type: string
+          example: A-S000001
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/product'
+        '404':
+          description: No such subscription.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /product-move/{subscriptionName}:
+    post:
+      summary: Replaces the existing subscription with a new one.
+      description: |-
+        Cancels the existing subscription and replaces it with a new subscription
+        to a different type of product.
+        Also manages all the service comms associated with the movement.
+      operationId: postProduct-moveSubscriptionname
+      parameters:
+        - name: subscriptionName
+          in: path
+          description: Name of subscription to be moved to a different product.
+          required: true
+          schema:
+            type: string
+          example: A-S000001
+      requestBody:
+        description: Definition of required movement.
+        content:
+          application/json:
+            schema:
+              required:
+                - price
+                - preview
+              type: object
+              properties:
+                price:
+                  type: number
+                  description: Price of new Supporter Plus subscription
+                preview:
+                  type: boolean
+                  description: Whether to preview the move or to carry it out
+        required: true
+      responses:
+        '200':
+          description: Update Success.
+          content:
+            application/json:
+              schema:
+                required:
+                  - amountPayableToday
+                  - contributionRefundAmount
+                  - supporterPlusPurchaseAmount
+                type: object
+                properties:
+                  amountPayableToday:
+                    type: number
+                    description: The amount payable by the customer today
+                  contributionRefundAmount:
+                    type: number
+                    description: The amount refunded from the cancelled contribution
+                  supporterPlusPurchaseAmount:
+                    type: number
+                    description: The cost of the new supporter plus subscription
+        '500':
+          description: InternalServerError.
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: 'Invalid value for: body'
+          content:
+            text/plain:
+              schema:
+                type: string
+  /supporter-plus-cancel/{subscriptionName}:
+    post:
+      summary: Cancels the subscription at the soonest possible date based on the
+        subscription type.
+      description: |-
+        Cancels the existing subscription at the default/soonest date.
+        Also manages all the service comms associated with the cancellation.
+      operationId: postSupporter-plus-cancelSubscriptionname
+      parameters:
+        - name: subscriptionName
+          in: path
+          description: Name of subscription to cancel.
+          required: true
+          schema:
+            type: string
+          example: A-S000001
+      requestBody:
+        description: Information to describe the nature of the cancellation
+        content:
+          application/json:
+            schema:
+              required:
+                - reason
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: User cancellation reason - from a picklist.
+                  example: mma_other
+        required: true
+      responses:
+        '200':
+          description: Successfully cancelled the subscription.
+          content:
+            application/json:
+              schema:
+                required:
+                  - message
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: InternalServerError.
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: 'Invalid value for: body'
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    billing:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: |-
+            Absolute amount that will be billed in pence or cents etc.
+            Either this field or the percentage field will be populated.
+          format: int32
+          example: 1199
+        percentage:
+          type: integer
+          description: |-
+            Percentage of standard amount that will be billed.
+            This field only makes sense if the billing object is attached to an introductory offer.
+            Either this field or the amount field will be populated.
+          format: int32
+          example: 50
+        currency:
+          required:
+            - code
+            - symbol
+          type: object
+          properties:
+            code:
+              type: string
+              description: ISO 4217 alphabetic currency code.
+              example: GBP
+            symbol:
+              type: string
+              description: ISO 4217 currency symbol.
+              example: £
+        frequency:
+          $ref: '#/components/schemas/timePeriod'
+        startDate:
+          type: string
+          description: |-
+            Date on which first service period for product subscription begins.
+            This probably won't be known reliably before a subscription has actually been set up,
+            so it's an optional field.
+            In ISO 8601 format.
+          example: '2022-06-21'
+      description: Amount and frequency of billing.
+    offer:
+      required:
+        - billing
+        - duration
+      type: object
+      properties:
+        billing:
+          $ref: '#/components/schemas/billing'
+        duration:
+          $ref: '#/components/schemas/timePeriod'
+      description: |-
+        An optional special offer that begins either when a subscription begins
+        or at the end of a free trial
+        and lasts for a given period of time.
+    product:
+      required:
+        - id
+        - name
+        - billing
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of product in Zuora product catalogue.
+        name:
+          type: string
+          description: Name of product in Zuora product catalogue.
+          example: Digital Pack
+        billing:
+          $ref: '#/components/schemas/billing'
+        trial:
+          $ref: '#/components/schemas/trial'
+        introOffer:
+          $ref: '#/components/schemas/offer'
+      description: A product that's available for subscription.
+    timePeriod:
+      required:
+        - name
+        - count
+      type: object
+      properties:
+        name:
+          type: string
+          description: Time unit.
+          example: month
+          enum:
+            - month
+            - year
+        count:
+          type: integer
+          description: Number of time units in this time period.
+          format: int32
+    trial:
+      required:
+        - dayCount
+      type: object
+      properties:
+        dayCount:
+          type: integer
+          description: Number of days that free trial lasts.
+          format: int32
+          example: 14
+      description: |-
+        An optional free trial that begins when a subscription begins
+        and lasts for a given number of days.

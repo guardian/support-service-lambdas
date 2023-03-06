@@ -38,7 +38,11 @@ object Handler {
       operationForEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response)
     }
 
-  def operationForEffects(stage: Stage, fetchString: StringFromS3, getResponse: Request => Response): ApiGatewayOp[Operation] = {
+  def operationForEffects(
+      stage: Stage,
+      fetchString: StringFromS3,
+      getResponse: Request => Response,
+  ): ApiGatewayOp[Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
 
@@ -52,12 +56,13 @@ object Handler {
     } yield Operation.noHealthcheck {
       WireRequestToDomainObject {
         val sfGet = sfAuth.wrapWith(JsonHttp.get)
-        val getSfContact = GetSfContact(sfGet.setupRequest(ToSfContactRequest.apply).parse[WireResult].map(WireContactToSfContact.apply))
+        val getSfContact =
+          GetSfContact(sfGet.setupRequest(ToSfContactRequest.apply).parse[WireResult].map(WireContactToSfContact.apply))
         DomainSteps(
           ZuoraSteps(GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier)),
           UpdateSFContacts(UpdateSalesforceIdentityId(sfAuth.wrapWith(JsonHttp.patch))),
           UpdateAccountSFLinks(requests.put),
-          SFSteps(getSfContact)
+          SFSteps(getSfContact),
         )
       }
     }
@@ -70,13 +75,13 @@ object WireRequestToDomainObject {
   implicit val readWireSfContactRequest = Json.reads[WireSfContactRequest]
 
   case class WireSfContactRequest(
-    fullContactId: String,
-    billingAccountZuoraIds: List[String],
-    accountId: String
+      fullContactId: String,
+      billingAccountZuoraIds: List[String],
+      accountId: String,
   )
 
   def apply(
-    steps: MergeRequest => ResponseModels.ApiResponse
+      steps: MergeRequest => ResponseModels.ApiResponse,
   ): ApiGatewayRequest => ResponseModels.ApiResponse = req =>
     (for {
       wireInput <- req.bodyAsCaseClass[WireSfContactRequest]()
@@ -89,7 +94,7 @@ object WireRequestToDomainObject {
       MergeRequest(
         WinningSFContact(SFContactId(request.fullContactId)),
         CRMAccountId(request.accountId),
-        accountIds
+        accountIds,
       )
     }
 

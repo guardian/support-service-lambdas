@@ -3,7 +3,12 @@ package com.gu.effects
 import java.nio.charset.StandardCharsets.UTF_8
 
 import com.typesafe.scalalogging.LazyLogging
-import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider, SystemPropertyCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProviderChain,
+  EnvironmentVariableCredentialsProvider,
+  ProfileCredentialsProvider,
+  SystemPropertyCredentialsProvider,
+}
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.regions.Region.EU_WEST_1
 import software.amazon.awssdk.services.lambda.LambdaClient
@@ -21,8 +26,8 @@ object InvokeLambda extends LazyLogging {
           .functionName(functionName)
           .payload(SdkBytes.fromString(lambdaPayload, UTF_8))
           .invocationType(EVENT)
-          .build()
-      )
+          .build(),
+      ),
     )
 }
 
@@ -41,7 +46,7 @@ object awsCredentials {
     .credentialsProviders(
       EnvironmentVariableCredentialsProvider.create(),
       SystemPropertyCredentialsProvider.create(),
-      ProfileCredentialsProvider.create(ProfileName)
+      ProfileCredentialsProvider.create(ProfileName),
     )
     .build()
 }

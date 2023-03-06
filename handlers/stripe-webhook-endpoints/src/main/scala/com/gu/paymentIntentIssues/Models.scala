@@ -16,11 +16,11 @@ case class Config(endpointSecret: String, zuoraBaseUrl: String, zuoraClientId: S
 case class PaymentIntentMetaData(zpayment_number: Option[String])
 
 case class PaymentIntentObject(
-  id: String,
-  metadata: PaymentIntentMetaData,
-  payment_method_types: List[String],
-  status: String,
-  created: Long
+    id: String,
+    metadata: PaymentIntentMetaData,
+    payment_method_types: List[String],
+    status: String,
+    created: Long,
 )
 
 case class PaymentIntentData(`object`: PaymentIntentObject)
@@ -99,7 +99,7 @@ object ZuoraRejectPaymentBody {
   def fromStripePaymentIntentObject(paymentIntentObject: PaymentIntentObject) = ZuoraRejectPaymentBody(
     gatewayResponse = paymentIntentObject.status,
     referenceId = paymentIntentObject.id,
-    settledOn = zuoraTimestampFromSecondsSinceEpoch(paymentIntentObject.created)
+    settledOn = zuoraTimestampFromSecondsSinceEpoch(paymentIntentObject.created),
   )
 }
 

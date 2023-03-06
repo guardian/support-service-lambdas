@@ -13,17 +13,18 @@ import cats.data.NonEmptyList
 object GetIdentityAndZuoraEmailsForAccountsSteps {
 
   case class IdentityAndSFContactAndEmail(
-    identityId: Option[IdentityId],
-    sfContactId: SFContactId,
-    emailAddress: Option[EmailAddress],
-    firstName: Option[FirstName],
-    lastName: LastName
+      identityId: Option[IdentityId],
+      sfContactId: SFContactId,
+      emailAddress: Option[EmailAddress],
+      firstName: Option[FirstName],
+      lastName: LastName,
   )
 
   def apply(zuoraQuerier: ZuoraQuerier): GetIdentityAndZuoraEmailsForAccountsSteps = { accountIds =>
-
     val getZuoraContactDetails: GetZuoraContactDetails = GetZuoraContactDetails(zuoraQuerier)
-    val getContacts: NonEmptyList[AccountId] => ClientFailableOp[Map[GetZuoraContactDetails.ContactId, GetContacts.IdentityAndSFContact]] =
+    val getContacts: NonEmptyList[AccountId] => ClientFailableOp[
+      Map[GetZuoraContactDetails.ContactId, GetContacts.IdentityAndSFContact],
+    ] =
       GetContacts(zuoraQuerier, _)
 
     for {
@@ -33,16 +34,15 @@ object GetIdentityAndZuoraEmailsForAccountsSteps {
         case None => ClientSuccess(Map.empty[Any, Nothing])
       }
     } yield {
-      identityForBillingContact.map {
-        case (contact, account) =>
-          val contactDetails = contactDetailsForBillingContact(contact)
-          IdentityAndSFContactAndEmail(
-            account.identityId,
-            account.sfContactId,
-            contactDetails.emailAddress,
-            contactDetails.firstName,
-            contactDetails.lastName
-          )
+      identityForBillingContact.map { case (contact, account) =>
+        val contactDetails = contactDetailsForBillingContact(contact)
+        IdentityAndSFContactAndEmail(
+          account.identityId,
+          account.sfContactId,
+          contactDetails.emailAddress,
+          contactDetails.firstName,
+          contactDetails.lastName,
+        )
       }.toList
     }
   }

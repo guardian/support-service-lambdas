@@ -39,7 +39,7 @@ object TypeConvert {
   }
 
   implicit class EitherToApiGatewayOp[A, B](either: Either[A, B]) {
-    def toApiGatewayOp: ApiGatewayOp[B] = either match {
+    def toApiGatewayOpOr422: ApiGatewayOp[B] = either match {
       case Right(value) => ContinueProcessing(value)
       case Left(failure) => ReturnWithResponse(ApiValidationErrorResponse(failure.toString))
     }
@@ -50,10 +50,11 @@ object TypeConvert {
   }
 
   implicit class ClientFailableOpToApiResponse[A](clientFailableOp: ClientFailableOp[A]) {
-    def toApiResponseCheckingNotFound(action: String, ifNotFoundReturn: String): ApiGatewayOp[A] = clientFailableOp match {
-      case NotFound(_) => ReturnWithResponse(ApiValidationErrorResponse(ifNotFoundReturn))
-      case anyOtherResponse => anyOtherResponse.toDisjunction.toApiGatewayOp(action)
-    }
+    def toApiResponseCheckingNotFound(action: String, ifNotFoundReturn: String): ApiGatewayOp[A] =
+      clientFailableOp match {
+        case NotFound(_) => ReturnWithResponse(ApiValidationErrorResponse(ifNotFoundReturn))
+        case anyOtherResponse => anyOtherResponse.toDisjunction.toApiGatewayOp(action)
+      }
   }
 
   implicit class OptionToClientFailableOp[A](option: Option[A]) {

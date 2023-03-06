@@ -27,18 +27,18 @@ object EmailSendTest extends App with Logging {
           last_name = "lastNameValue",
           primaryKey = PaymentId(UUID.randomUUID().toString),
           serviceStartDate = "31 January 2016",
-          serviceEndDate = "31 January 2017"
-        )
-      )
+          serviceEndDate = "31 January 2017",
+        ),
+      ),
     ),
     DataExtensionName = dataExtensionName,
-    SfContactId = "18328400"
+    SfContactId = "18328400",
   )
 
   val emailNames: Seq[EmailId] = (1 to 4)
     .map(EmailId.paymentFailureId)
-    .collect {
-      case Right(emailName) => emailName
+    .collect { case Right(emailName) =>
+      emailName
     }
     .:+(EmailId.cancelledId)
 
@@ -50,14 +50,16 @@ object EmailSendTest extends App with Logging {
     "Guardian Weekly Zone C",
     "Contributor",
     "Newspaper Voucher",
-    "Newspaper Delivery"
+    "Newspaper Delivery",
   )
 
   for {
     emailName <- emailNames
     product <- products
   } {
-    val result = EmailSendSteps(SqsSync.send(SqsSync.buildClient)(QueueName("contributions-thanks")))(createMessage(product, emailName.id))
+    val result = EmailSendSteps(SqsSync.send(SqsSync.buildClient)(QueueName("contributions-thanks")))(
+      createMessage(product, emailName.id),
+    )
     println(s"result for $emailName $product is $result")
   }
 

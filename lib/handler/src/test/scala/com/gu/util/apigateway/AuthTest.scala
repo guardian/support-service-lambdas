@@ -12,17 +12,17 @@ class AuthTest extends AnyFlatSpec {
 
     def constructQueryStrings(apiClientId: String, apiToken: String) = Json.obj(
       "apiClientId" -> apiClientId,
-      "apiToken" -> apiToken
+      "apiToken" -> apiToken,
     )
     val headers = Json.obj(
-      "Content-Type" -> "text/xml"
+      "Content-Type" -> "text/xml",
     )
     val sampleJson = Json.obj(
       "resource" -> "test-resource",
       "path" -> "/test-path",
       "httpMethod" -> "POST",
       "headers" -> headers,
-      "queryStringParameters" -> constructQueryStrings(apiClientId, apiToken)
+      "queryStringParameters" -> constructQueryStrings(apiClientId, apiToken),
     )
     sampleJson
   }

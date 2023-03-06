@@ -1,14 +1,14 @@
 package com.gu.newproduct.api.productcatalog
 
+import java.time.DayOfWeek._
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
-import play.api.libs.json.Json
-import java.time.DayOfWeek._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.Json
 
 class CatalogWireTest extends AnyFlatSpec with Matchers {
   it should "serialise catalog" in {
@@ -16,6 +16,32 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
       """
         |{
         |  "products": [
+        |  {
+        |    "label" : "Supporter Plus",
+        |    "plans" : [ {
+        |      "id" : "monthly_supporter_plus",
+        |      "label" : "Monthly",
+        |      "startDateRules" : {
+        |        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        |        "selectableWindow" : {
+        |          "startDate" : "2019-12-01",
+        |          "sizeInDays" : 1
+        |        }
+        |      },
+        |      "paymentPlans": []
+        |    }, {
+        |      "id" : "annual_supporter_plus",
+        |      "label" : "Annual",
+        |      "startDateRules" : {
+        |        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        |        "selectableWindow" : {
+        |          "startDate" : "2019-12-01",
+        |          "sizeInDays" : 1
+        |        }
+        |      },
+        |      "paymentPlans": []
+        |    } ]
+        |  },
         |    {
         |      "label": "Contribution",
         |      "plans": [
@@ -993,7 +1019,7 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
       """.stripMargin
 
     def gbpPrice(amount: Int): Map[Currency, AmountMinorUnits] = Map(
-      Currency.GBP -> AmountMinorUnits(amount)
+      Currency.GBP -> AmountMinorUnits(amount),
     )
     def fakePricesFor(planId: PlanId): Map[Currency, AmountMinorUnits] = planId match {
       case VoucherWeekendPlus => gbpPrice(2942)
@@ -1006,6 +1032,8 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
       case VoucherEveryDayPlus => gbpPrice(5196)
       case VoucherSixDay => gbpPrice(4112)
       case VoucherSixDayPlus => gbpPrice(4762)
+      case MonthlySupporterPlus => Map.empty
+      case AnnualSupporterPlus => Map.empty
       case MonthlyContribution => Map.empty
       case AnnualContribution => Map.empty
       case HomeDeliveryEveryDay => gbpPrice(123)
@@ -1018,38 +1046,46 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
       case HomeDeliverySundayPlus => gbpPrice(1010)
       case HomeDeliverySixDayPlus => gbpPrice(1111)
       case HomeDeliveryWeekendPlus => gbpPrice(2222)
-      case DigipackMonthly => Map(
-        Currency.GBP -> AmountMinorUnits(5555),
-        Currency.USD -> AmountMinorUnits(5554)
-      )
-      case DigipackAnnual => Map(
-        Currency.GBP -> AmountMinorUnits(66666),
-        Currency.USD -> AmountMinorUnits(66665),
-      )
-      case GuardianWeeklyDomestic6for6 => Map(
-        Currency.GBP -> AmountMinorUnits(1111111),
-        Currency.USD -> AmountMinorUnits(11111111),
-      )
-      case GuardianWeeklyDomesticQuarterly => Map(
-        Currency.GBP -> AmountMinorUnits(2222222),
-        Currency.USD -> AmountMinorUnits(22222222),
-      )
-      case GuardianWeeklyDomesticAnnual => Map(
-        Currency.GBP -> AmountMinorUnits(3333333),
-        Currency.USD -> AmountMinorUnits(33333333),
-      )
-      case GuardianWeeklyROW6for6 => Map(
-        Currency.GBP -> AmountMinorUnits(4444444),
-        Currency.USD -> AmountMinorUnits(44444444),
-      )
-      case GuardianWeeklyROWQuarterly => Map(
-        Currency.GBP -> AmountMinorUnits(5555555),
-        Currency.USD -> AmountMinorUnits(55555555),
-      )
-      case GuardianWeeklyROWAnnual => Map(
-        Currency.GBP -> AmountMinorUnits(6666666),
-        Currency.USD -> AmountMinorUnits(66666666),
-      )
+      case DigipackMonthly =>
+        Map(
+          Currency.GBP -> AmountMinorUnits(5555),
+          Currency.USD -> AmountMinorUnits(5554),
+        )
+      case DigipackAnnual =>
+        Map(
+          Currency.GBP -> AmountMinorUnits(66666),
+          Currency.USD -> AmountMinorUnits(66665),
+        )
+      case GuardianWeeklyDomestic6for6 =>
+        Map(
+          Currency.GBP -> AmountMinorUnits(1111111),
+          Currency.USD -> AmountMinorUnits(11111111),
+        )
+      case GuardianWeeklyDomesticQuarterly =>
+        Map(
+          Currency.GBP -> AmountMinorUnits(2222222),
+          Currency.USD -> AmountMinorUnits(22222222),
+        )
+      case GuardianWeeklyDomesticAnnual =>
+        Map(
+          Currency.GBP -> AmountMinorUnits(3333333),
+          Currency.USD -> AmountMinorUnits(33333333),
+        )
+      case GuardianWeeklyROW6for6 =>
+        Map(
+          Currency.GBP -> AmountMinorUnits(4444444),
+          Currency.USD -> AmountMinorUnits(44444444),
+        )
+      case GuardianWeeklyROWQuarterly =>
+        Map(
+          Currency.GBP -> AmountMinorUnits(5555555),
+          Currency.USD -> AmountMinorUnits(55555555),
+        )
+      case GuardianWeeklyROWAnnual =>
+        Map(
+          Currency.GBP -> AmountMinorUnits(6666666),
+          Currency.USD -> AmountMinorUnits(66666666),
+        )
       case DigitalVoucherEveryday => gbpPrice(7001)
       case DigitalVoucherEverydayPlus => gbpPrice(7002)
       case DigitalVoucherSixday => gbpPrice(7003)
@@ -1064,44 +1100,49 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
 
     def stubGetFirstAvailableStartDate(productType: ProductType, daysOfWeek: List[DayOfWeek]) = {
       (productType, daysOfWeek) match {
-        case (ProductType.GuardianWeekly, List(FRIDAY) ) =>
+        case (ProductType.GuardianWeekly, List(FRIDAY)) =>
           LocalDate.of(2020, 1, 1)
-        case (ProductType.NewspaperHomeDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY) ) =>
+        case (
+              ProductType.NewspaperHomeDelivery,
+              List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
+            ) =>
           LocalDate.of(2020, 2, 1)
-        case (ProductType.NewspaperHomeDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY) ) =>
+        case (ProductType.NewspaperHomeDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY)) =>
           LocalDate.of(2020, 2, 2)
-        case (ProductType.NewspaperHomeDelivery, List(SATURDAY) ) =>
+        case (ProductType.NewspaperHomeDelivery, List(SATURDAY)) =>
           LocalDate.of(2020, 2, 3)
-        case (ProductType.NewspaperHomeDelivery, List(SUNDAY) ) =>
+        case (ProductType.NewspaperHomeDelivery, List(SUNDAY)) =>
           LocalDate.of(2020, 2, 4)
-        case (ProductType.NewspaperHomeDelivery, List(SATURDAY, SUNDAY) ) =>
+        case (ProductType.NewspaperHomeDelivery, List(SATURDAY, SUNDAY)) =>
           LocalDate.of(2020, 2, 5)
-        case (ProductType.NewspaperVoucherBook, List(MONDAY) ) =>
+        case (ProductType.NewspaperVoucherBook, List(MONDAY)) =>
           LocalDate.of(2020, 3, 1)
-        case (ProductType.NewspaperVoucherBook, List(SATURDAY) ) =>
+        case (ProductType.NewspaperVoucherBook, List(SATURDAY)) =>
           LocalDate.of(2020, 3, 2)
-        case (ProductType.NewspaperVoucherBook, List(SUNDAY) ) =>
+        case (ProductType.NewspaperVoucherBook, List(SUNDAY)) =>
           LocalDate.of(2020, 3, 3)
-        case (ProductType.NewspaperDigitalVoucher, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY) ) =>
+        case (
+              ProductType.NewspaperDigitalVoucher,
+              List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
+            ) =>
           LocalDate.of(2020, 4, 1)
-        case (ProductType.NewspaperDigitalVoucher, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY) ) =>
+        case (ProductType.NewspaperDigitalVoucher, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY)) =>
           LocalDate.of(2020, 4, 2)
-        case (ProductType.NewspaperDigitalVoucher, List(SATURDAY, SUNDAY) ) =>
+        case (ProductType.NewspaperDigitalVoucher, List(SATURDAY, SUNDAY)) =>
           LocalDate.of(2020, 4, 3)
-        case (ProductType.NewspaperDigitalVoucher, List(SATURDAY) ) =>
+        case (ProductType.NewspaperDigitalVoucher, List(SATURDAY)) =>
           LocalDate.of(2020, 4, 4)
-        case (ProductType.NewspaperDigitalVoucher, List(SUNDAY) ) =>
+        case (ProductType.NewspaperDigitalVoucher, List(SUNDAY)) =>
           LocalDate.of(2020, 4, 5)
       }
     }
 
-    val today = LocalDate.of(2019,12,1)
+    val today = LocalDate.of(2019, 12, 1)
 
     val wireCatalog = WireCatalog.fromCatalog(
-      NewProductApi.catalog(fakePricesFor, stubGetFirstAvailableStartDate, today)
+      NewProductApi.catalog(fakePricesFor, stubGetFirstAvailableStartDate, today),
     )
 
     Json.toJson(wireCatalog) shouldBe Json.parse(expected)
   }
 }
-

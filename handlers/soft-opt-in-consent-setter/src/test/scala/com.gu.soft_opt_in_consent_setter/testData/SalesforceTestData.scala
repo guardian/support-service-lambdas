@@ -7,7 +7,9 @@ import scalaj.http.HttpResponse
 object SalesforceTestData {
 
   val thrownResponse: Either[Throwable, HttpResponse[String]] = Left(new Throwable())
-  val failedResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse("unexpected body", 200, Map.empty[String, IndexedSeq[String]]))
+  val failedResponse: Either[Throwable, HttpResponse[String]] = Right(
+    HttpResponse("unexpected body", 200, Map.empty[String, IndexedSeq[String]]),
+  )
 
   val accessToken = "access_token"
   val instanceUrl = "url.com"
@@ -17,7 +19,9 @@ object SalesforceTestData {
        | "instance_url": "$instanceUrl"
        |}""".stripMargin
   val authDetails: SalesforceAuth = SalesforceAuth(accessToken, instanceUrl)
-  val successfulAuthResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse(validAuthResponse, 200, Map.empty[String, IndexedSeq[String]]))
+  val successfulAuthResponse: Either[Throwable, HttpResponse[String]] = Right(
+    HttpResponse(validAuthResponse, 200, Map.empty[String, IndexedSeq[String]]),
+  )
 
   val validSubsToProcessResponse =
     s"""{
@@ -26,7 +30,9 @@ object SalesforceTestData {
        | "records": []
        |}""".stripMargin
   val subsToProcess = SFSubRecordResponse(0, true, Seq())
-  val successfulQueryResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse(validSubsToProcessResponse, 200, Map.empty[String, IndexedSeq[String]]))
+  val successfulQueryResponse: Either[Throwable, HttpResponse[String]] = Right(
+    HttpResponse(validSubsToProcessResponse, 200, Map.empty[String, IndexedSeq[String]]),
+  )
 
   val validCompositeUpdateResponse =
     s"""[{
@@ -34,6 +40,8 @@ object SalesforceTestData {
        | "success" : true,
        | "errors" : [ ]
    }]""".stripMargin
-  val successfulCompositeUpdateResponse: Either[Throwable, HttpResponse[String]] = Right(HttpResponse(validCompositeUpdateResponse, 200, Map.empty[String, IndexedSeq[String]]))
+  val successfulCompositeUpdateResponse: Either[Throwable, HttpResponse[String]] = Right(
+    HttpResponse(validCompositeUpdateResponse, 200, Map.empty[String, IndexedSeq[String]]),
+  )
 
 }

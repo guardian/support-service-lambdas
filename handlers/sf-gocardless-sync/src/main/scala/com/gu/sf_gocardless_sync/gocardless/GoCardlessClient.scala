@@ -8,14 +8,16 @@ import okhttp3.{Request, Response}
 object GoCardlessClient {
 
   def apply(
-    response: Request => Response,
-    config: GoCardlessConfig
+      response: Request => Response,
+      config: GoCardlessConfig,
   ): HttpOp[StringHttpRequest, BodyAsString] =
-    HttpOp(response).flatMap {
-      toClientFailableOp
-    }.setupRequest[StringHttpRequest] {
-      withAuthAndHeaders(config)
-    }
+    HttpOp(response)
+      .flatMap {
+        toClientFailableOp
+      }
+      .setupRequest[StringHttpRequest] {
+        withAuthAndHeaders(config)
+      }
 
   def withAuthAndHeaders(config: GoCardlessConfig)(requestInfo: StringHttpRequest): Request =
     requestInfo.requestMethod.builder

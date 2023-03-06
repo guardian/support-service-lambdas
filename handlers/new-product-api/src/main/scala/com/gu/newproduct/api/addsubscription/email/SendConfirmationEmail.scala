@@ -13,10 +13,10 @@ import scala.concurrent.Future
 object SendConfirmationEmail extends Logging {
 
   def apply[DATA <: EmailData](
-    etSqsSend: ETPayload[DATA] => Future[Unit]
+      etSqsSend: ETPayload[DATA] => Future[Unit],
   )(
-    sfContactId: Option[SfContactId],
-    data: DATA
+      sfContactId: Option[SfContactId],
+      data: DATA,
   ): AsyncApiGatewayOp[Unit] = for {
     etPayload <- toPayload(sfContactId, data).toAsync
     sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending email sqs message")
@@ -29,7 +29,7 @@ object SendConfirmationEmail extends Logging {
           email = email.value,
           fields = emailData,
           dataExtensionFor(emailData.plan),
-          sfContactId.map(_.value)
+          sfContactId.map(_.value),
         )
         ContinueProcessing(payload)
       case None =>
@@ -44,10 +44,11 @@ object SendConfirmationEmail extends Logging {
       case _: DigitalVoucherPlanId => "paper-subscription-card" // SV_SC_WelcomeDay0
       case _: VoucherPlanId => "paper-voucher"
       case _: DigipackPlanId => "digipack"
+      case _: SupporterPlusPlanId => "supporter-plus"
       case _: ContributionPlanId => "regular-contribution-thank-you"
       case _: HomeDeliveryPlanId => "paper-delivery"
       case _: GuardianWeeklyDomestic => "guardian-weekly"
       case _: GuardianWeeklyRow => "guardian-weekly"
-    }
+    },
   )
 }

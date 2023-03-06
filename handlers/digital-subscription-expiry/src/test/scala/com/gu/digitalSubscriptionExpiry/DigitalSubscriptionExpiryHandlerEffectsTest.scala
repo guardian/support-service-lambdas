@@ -71,8 +71,14 @@ object Runner {
     val stream = new ByteArrayInputStream(request.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
 
-    //execute
-    Handler.runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, now, LambdaIO(stream, os, null))
+    // execute
+    Handler.runForLegacyTestsSeeTestingMd(
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      RawEffects.response,
+      now,
+      LambdaIO(stream, os, null),
+    )
 
     val responseString = new String(os.toByteArray, "UTF-8")
     responseString

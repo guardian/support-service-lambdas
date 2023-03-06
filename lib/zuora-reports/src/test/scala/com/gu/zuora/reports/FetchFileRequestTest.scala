@@ -11,7 +11,7 @@ class FetchFileRequestTest extends AsyncFlatSpec {
 
   val batches = List(
     Batch("candidatesFileId", "candidatesQuery"),
-    Batch("exclusionFileId", "exclusionQuery")
+    Batch("exclusionFileId", "exclusionQuery"),
   )
 
   it should "deserialise successfully with no already fetched files in request  " in {
@@ -31,7 +31,7 @@ class FetchFileRequestTest extends AsyncFlatSpec {
       |    }
       |  ],
       |  "dryRun": false
-      |}""".stripMargin
+      |}""".stripMargin,
     )
 
     val actual = fetcFileRequest.as[FetchFileRequest]
@@ -61,10 +61,10 @@ class FetchFileRequestTest extends AsyncFlatSpec {
         |  }
         |  ],
         |  "dryRun" : true
-        |}""".stripMargin
+        |}""".stripMargin,
     )
     val fetchedFiles = List(
-      FetchedFile("someOtherFileId", "someOtherQuery", "s3://someBucket/someOtherFile.csv")
+      FetchedFile("someOtherFileId", "someOtherQuery", "s3://someBucket/someOtherFile.csv"),
     )
     val actual = fetcFileRequest.as[FetchFileRequest]
     actual shouldBe FetchFileRequest("someJobId", fetchedFiles, batches, true)

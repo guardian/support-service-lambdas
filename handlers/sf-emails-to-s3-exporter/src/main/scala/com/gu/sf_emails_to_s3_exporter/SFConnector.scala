@@ -15,7 +15,12 @@ object SFConnector extends LazyLogging {
 
   case class SfAuthDetails(access_token: String, instance_url: String)
 
-  def getRecordsFromSF[A: Decoder](sfAuthDetails: SfAuthDetails, sfApiVersion: String, query: String, batchSize: Integer): Either[Error, A] = {
+  def getRecordsFromSF[A: Decoder](
+      sfAuthDetails: SfAuthDetails,
+      sfApiVersion: String,
+      query: String,
+      batchSize: Integer,
+  ): Either[Error, A] = {
     logger.info("Getting records from sf...")
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
@@ -30,34 +35,34 @@ object SFConnector extends LazyLogging {
     decode[A](responseBody)
   }
 
-  def writebackSuccessesToSf(sfAuthDetails: SfAuthDetails, successIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
+  def writebackSuccessesToSf(
+      sfAuthDetails: SfAuthDetails,
+      successIds: Seq[String],
+  ): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
     logger.info("Writing successes back to Salesforce...")
 
     doSfCompositeRequest(
       sfAuthDetails,
       EmailMessagesToUpdate(
         false,
-        successIds.map(
-          sfEmailId => EmailMessageToUpdate(sfEmailId)
-        )
+        successIds.map(sfEmailId => EmailMessageToUpdate(sfEmailId)),
       ).asJson.toString(),
-      "PATCH"
+      "PATCH",
     ) match {
-        case Left(ex) => {
-          logger.error(ex.toString)
-          Left(ex)
-        }
-        case Right(value) => {
-          Right(value)
-        }
+      case Left(ex) => {
+        logger.error(ex.toString)
+        Left(ex)
       }
+      case Right(value) => {
+        Right(value)
+      }
+    }
   }
 
   def auth(salesforceConfig: SalesforceConfig): Either[CustomFailure, String] = {
     logger.info("Authenticating with Salesforce...")
 
     safely(
-
       Http(s"${salesforceConfig.authUrl}/services/oauth2/token")
         .postForm(
           Seq(
@@ -65,15 +70,18 @@ object SFConnector extends LazyLogging {
             "client_id" -> salesforceConfig.clientId,
             "client_secret" -> salesforceConfig.clientSecret,
             "username" -> salesforceConfig.userName,
-            "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
-          )
+            "password" -> s"${salesforceConfig.password}${salesforceConfig.token}",
+          ),
         )
         .asString
-        .body
+        .body,
     )
   }
 
-  def deleteQueueItemsInSf(sfAuthDetails: SfAuthDetails, recordIds: Seq[String]): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
+  def deleteQueueItemsInSf(
+      sfAuthDetails: SfAuthDetails,
+      recordIds: Seq[String],
+  ): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
     logger.info("Deleting async process records from sf...")
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/composite/sobjects")
@@ -89,9 +97,9 @@ object SFConnector extends LazyLogging {
   }
 
   def doSfCompositeRequest(
-    sfAuthDetails: SfAuthDetails,
-    jsonBody: String,
-    requestType: String
+      sfAuthDetails: SfAuthDetails,
+      jsonBody: String,
+      requestType: String,
   ): Either[Error, Seq[WritebackToSFResponse.WritebackResponse]] = {
 
     val responseBody = Http(s"${sfAuthDetails.instance_url}/services/data/v$salesforceApiVersion/composite/sobjects")

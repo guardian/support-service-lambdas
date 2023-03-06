@@ -22,8 +22,14 @@ class DeliveryCreditProductTest extends AnyFlatSpec with Matchers {
 
   it should "throw an exception when subscription has no applicable rate plan" in {
     val subscription = TestFixtures.subscriptionFromJson("AlternativeSubscription.json")
-    the[IllegalArgumentException] thrownBy DeliveryCreditProduct.forStage(Dev)(subscription) should have message "No delivery credit product available for subscription A-S00051570"
-    the[IllegalArgumentException] thrownBy DeliveryCreditProduct.forStage(Code)(subscription) should have message "No delivery credit product available for subscription A-S00051570"
-    the[IllegalArgumentException] thrownBy DeliveryCreditProduct.forStage(Prod)(subscription) should have message "No delivery credit product available for subscription A-S00051570"
+    the[IllegalArgumentException] thrownBy DeliveryCreditProduct.forStage(Dev)(
+      subscription,
+    ) should have message "No delivery credit product available for subscription A-S00051570"
+    the[IllegalArgumentException] thrownBy DeliveryCreditProduct.forStage(Code)(
+      subscription,
+    ) should have message "No delivery credit product available for subscription A-S00051570"
+    the[IllegalArgumentException] thrownBy DeliveryCreditProduct.forStage(Prod)(
+      subscription,
+    ) should have message "No delivery credit product available for subscription A-S00051570"
   }
 }

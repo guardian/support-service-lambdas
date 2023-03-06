@@ -6,7 +6,9 @@ deployments:
     type: aws-lambda
     parameters:
       bucket: membership-dist
-      functionNames: [payment-intent-issues-]
+      functionNames:
+      - stripe-payment-intent-issues-
+      - stripe-customer-updated-
       fileName: stripe-webhook-endpoints.jar
       prefixStack: false
     dependencies: [ cfn ]

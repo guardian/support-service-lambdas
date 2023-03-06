@@ -19,12 +19,11 @@ class ETPayloadTest extends AnyFlatSpec with Matchers {
         Address = "some@address.com",
         SubscriberKey = "someKey",
         ContactAttributes = CContactAttributes(
-          SubscriberAttributes = TestPayload("hello")
-        )
-
+          SubscriberAttributes = TestPayload("hello"),
+        ),
       ),
       DataExtensionName = "someDataExtension",
-      SfContactId = Some("sfContactId")
+      SfContactId = Some("sfContactId"),
     )
 
     val expected =

@@ -26,11 +26,11 @@ object WireModel {
   case object Sunday extends WireDayOfWeek
 
   case class WirePlanInfo(
-    id: String,
-    label: String,
-    startDateRules: WireStartDateRules,
-    paymentPlans: List[WirePaymentPlan],
-    paymentPlan: Option[String] //todo legacy field, remove once salesforce is reading from paymentPlans
+      id: String,
+      label: String,
+      startDateRules: WireStartDateRules,
+      paymentPlans: List[WirePaymentPlan],
+      paymentPlan: Option[String], // todo legacy field, remove once salesforce is reading from paymentPlans
   )
 
   case class WirePaymentPlan(currencyCode: String, description: String)
@@ -40,19 +40,19 @@ object WireModel {
   }
 
   case class WireSelectableWindow(
-    startDate: LocalDate,
-    sizeInDays: Option[Int] = None
+      startDate: LocalDate,
+      sizeInDays: Option[Int] = None,
   )
 
   case class WireStartDateRules(
-    daysOfWeek: List[WireDayOfWeek],
-    selectableWindow: WireSelectableWindow
+      daysOfWeek: List[WireDayOfWeek],
+      selectableWindow: WireSelectableWindow,
   )
 
   case class WireProduct(
-    label: String,
-    plans: List[WirePlanInfo],
-    enabledForDeliveryCountries: Option[List[String]]
+      label: String,
+      plans: List[WirePlanInfo],
+      enabledForDeliveryCountries: Option[List[String]],
   )
 
   case class WireCatalog(products: List[WireProduct])
@@ -97,8 +97,8 @@ object WireModel {
 
     def fromPlan(plan: Plan) = {
 
-      val paymentPlans = plan.paymentPlans.map {
-        case (currency: Currency, paymentPlan: PaymentPlan) => WirePaymentPlan(currency.iso, paymentPlan.description)
+      val paymentPlans = plan.paymentPlans.map { case (currency: Currency, paymentPlan: PaymentPlan) =>
+        WirePaymentPlan(currency.iso, paymentPlan.description)
       }
 
       val legacyPaymentPlan = plan.paymentPlans.get(GBP).map(_.description)
@@ -108,7 +108,7 @@ object WireModel {
         label = plan.description.value,
         startDateRules = toWireRules(plan.startDateRules),
         paymentPlans = paymentPlans.toList,
-        paymentPlan = legacyPaymentPlan
+        paymentPlan = legacyPaymentPlan,
       )
     }
   }
@@ -121,7 +121,7 @@ object WireModel {
     implicit val writes = Json.writes[WireCatalog]
 
     def fromCatalog(
-      catalog: Catalog
+        catalog: Catalog,
     ) = {
 
       def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
@@ -132,48 +132,60 @@ object WireModel {
       val voucherProduct = WireProduct(
         label = "Voucher",
         plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None
+        enabledForDeliveryCountries = None,
+      )
+
+      val supporterPlusProduct = WireProduct(
+        label = "Supporter Plus",
+        plans = PlanId.enabledSupporterPlusPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None,
       )
 
       val contributionProduct = WireProduct(
         label = "Contribution",
         plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None
+        enabledForDeliveryCountries = None,
       )
 
       val homeDeliveryProduct = WireProduct(
         label = "Home Delivery",
         plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None
+        enabledForDeliveryCountries = None,
       )
 
       val digipackProduct = WireProduct(
         label = "Digital Pack",
         plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None
+        enabledForDeliveryCountries = None,
       )
 
       val guardianWeeklyDomestic = WireProduct(
         label = "Guardian Weekly - Domestic",
         plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name))
+        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name)),
       )
 
       val guardianWeeklyROW = WireProduct(
         label = "Guardian Weekly - ROW",
         plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name))
+        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name)),
       )
 
       val digitalVoucher = WireProduct(
         label = "Subscription Card",
         plans = PlanId.enabledDigitalVoucherPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(List(Country.UK.name))
+        enabledForDeliveryCountries = Some(List(Country.UK.name)),
       )
 
       val availableProductsAndPlans = List(
-        contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct, guardianWeeklyDomestic,
-        guardianWeeklyROW, digitalVoucher
+        supporterPlusProduct,
+        contributionProduct,
+        voucherProduct,
+        homeDeliveryProduct,
+        digipackProduct,
+        guardianWeeklyDomestic,
+        guardianWeeklyROW,
+        digitalVoucher,
       ).filterNot(_.plans.isEmpty)
 
       WireCatalog(availableProductsAndPlans)

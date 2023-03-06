@@ -23,4 +23,3 @@ object SalesforceQueryConstants {
 
   def formatDate(date: LocalDate): String = DateTimeFormatter.ISO_DATE.format(date)
 }
-

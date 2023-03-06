@@ -9,7 +9,7 @@ import play.api.libs.json.{JsValue, Json}
 object CloseJob {
 
   case class WireSfCloseJobRequest(
-    state: String = "Closed"
+      state: String = "Closed",
   )
 
   object WireSfCloseJobRequest {

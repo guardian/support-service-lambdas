@@ -37,7 +37,7 @@ class AutoCancelCalloutTest extends AnyFlatSpec with Matchers {
       creditCardExpirationYear = "2022",
       invoiceId = "someInvoiceId",
       currency = "gbp",
-      sfContactId = "someContactId"
+      sfContactId = "someContactId",
     )
 
     Json.parse(calloutJson).as[AutoCancelCallout] shouldBe expectedCallout
@@ -55,7 +55,7 @@ class AutoCancelCalloutTest extends AnyFlatSpec with Matchers {
     creditCardExpirationYear = "2022",
     invoiceId = "someInvoiceId",
     currency = "gbp",
-    sfContactId = "someContactId"
+    sfContactId = "someContactId",
   )
 
   it should "deserialise callout with no email address correctly" in {

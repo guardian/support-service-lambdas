@@ -42,29 +42,32 @@ object Handler extends Logging {
 
   def handle(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(
-      LambdaIO(inputStream, outputStream, context)
+      LambdaIO(inputStream, outputStream, context),
     )(
-        operationForEffects(
-          router,
-          RawEffects.response,
-          RawEffects.stage,
-          GetFromS3.fetchString
-        )
-      )
+      operationForEffects(
+        router,
+        RawEffects.response,
+        RawEffects.stage,
+        GetFromS3.fetchString,
+      ),
+    )
 
   def operationForEffects(
-    steps: SfClient => ApiGatewayRequest => ApiResponse,
-    response: Request => Response,
-    stage: Stage,
-    fetchString: StringFromS3
+      steps: SfClient => ApiGatewayRequest => ApiResponse,
+      response: Request => Response,
+      stage: Stage,
+      fetchString: StringFromS3,
   ): ApiGatewayOp[Operation] = {
 
     for {
-      sfConfig <- LoadConfigModule(stage, fetchString)(SFAuthConfig.location, sfAuthConfigReads).toApiGatewayOp("load SF config")
+      sfConfig <- LoadConfigModule(stage, fetchString)(SFAuthConfig.location, sfAuthConfigReads).toApiGatewayOp(
+        "load SF config",
+      )
       sfClient <- SalesforceClient(response, sfConfig).value.toApiGatewayOp("Failed to authenticate with Salesforce")
-    } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
-      steps(sfClient)
-    )
+    } yield Operation
+      .noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
+        steps(sfClient),
+      )
 
   }
 }

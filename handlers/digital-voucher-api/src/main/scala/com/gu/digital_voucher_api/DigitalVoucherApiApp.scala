@@ -21,12 +21,15 @@ object DigitalVoucherApiApp extends LazyLogging {
 
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
-  def apply[S](appIdentity: AppIdentity, backend: SttpBackend[IO, S]): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
+  def apply[S](
+      appIdentity: AppIdentity,
+      backend: SttpBackend[IO, S],
+  ): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
     for {
       imovoConfig <- ConfigLoader
         .loadConfig[IO, ImovoConfig](
           sharedConfigName = "support-service-lambdas-shared-imovo",
-          appIdentity = appIdentity
+          appIdentity = appIdentity,
         )
         .leftMap(error => DigitalVoucherApiError(error.toString))
       imovoClient <- ImovoClient(backend, imovoConfig)
@@ -42,7 +45,7 @@ object DigitalVoucherApiApp extends LazyLogging {
       logHeaders = true,
       logBody = true,
       redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey.value == "x-api-key" },
-      logAction = Some({ message: String => IO.delay(logger.info(message)) })
+      logAction = Some({ message: String => IO.delay(logger.info(message)) }),
     )
   }
 }

@@ -4,12 +4,11 @@ import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.util.config.Stage
 import com.gu.zuora.subscription.{CreditProduct, RatePlan}
 
-/**
- * Same Discount holiday stop product is reused for all products, namely:
- * 'DO NOT USE MANUALLY: Holiday Credit - automated'
- *
- * https://www.zuora.com/apps/Product.do?method=view&id=2c92a0ff5345f9200153559c6d2a3385#ST_DO%20NOT%20USE%20MANUALLY:%20Holiday%20Credit%20-%20automated
- */
+/** Same Discount holiday stop product is reused for all products, namely: 'DO NOT USE MANUALLY: Holiday Credit -
+  * automated'
+  *
+  * https://www.zuora.com/apps/Product.do?method=view&id=2c92a0ff5345f9200153559c6d2a3385#ST_DO%20NOT%20USE%20MANUALLY:%20Holiday%20Credit%20-%20automated
+  */
 object HolidayCreditProduct {
 
   final val ProductRatePlanChargeName: String = "Holiday Credit"
@@ -19,25 +18,25 @@ object HolidayCreditProduct {
     val GuardianWeekly: CreditProduct = CreditProduct(
       productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
       productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val Voucher: CreditProduct = CreditProduct(
       productRatePlanId = "2c92a0117468816901748bdb3a8c1ac4",
       productRatePlanChargeId = "2c92a0117468816901748bdb3aab1ac6",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val DigitalVoucher: CreditProduct = CreditProduct(
       productRatePlanId = "2c92a0fe750b35d001750d4522f43817",
       productRatePlanChargeId = "2c92a0fe750b35d001750d4523103819",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val HomeDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "2c92a00f7468817d01748bd88f0d1d6c",
       productRatePlanChargeId = "2c92a00f7468817d01748bd88f2e1d6e",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
   }
 
@@ -46,25 +45,25 @@ object HolidayCreditProduct {
     val GuardianWeekly: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
       productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val Voucher: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f87466eaa2017467be65222246",
       productRatePlanChargeId = "2c92c0f87466eaa2017467be659e2248",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val DigitalVoucher: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f87506696a01750d7946807e17",
       productRatePlanChargeId = "2c92c0f87506696a01750d7946ae7e19",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val HomeDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f97466f60b017467c6e02707b0",
       productRatePlanChargeId = "2c92c0f97466f60b017467c6e04407b3",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
   }
 
@@ -73,43 +72,42 @@ object HolidayCreditProduct {
     val GuardianWeekly: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
       productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val Voucher: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f8736c34b901737160f7df3a97",
       productRatePlanChargeId = "2c92c0f8736c34b901737160f7f63a99",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val DigitalVoucher: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f9750689ea01750d7cabf44c38",
       productRatePlanChargeId = "2c92c0f9750689ea01750d7cac184c3b",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
 
     val HomeDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f8736c34cb01737160e5e469de",
       productRatePlanChargeId = "2c92c0f8736c34cb01737160e5fa69e0",
-      ProductRatePlanChargeName
+      ProductRatePlanChargeName,
     )
   }
 
-  /**
-   * <p>Determines which CreditProduct is applicable for the given subscription
-   * in the given deployment stage.</p>
-   *
-   * <p>This method works on the assumption that a subscription can only ever be
-   * for a single type of product.
-   * So a Guardian Weekly sub can't be converted to a Voucher sub for instance.
-   * Then it doesn't matter how often a sub is renewed or discounts added to it, there will only
-   * ever be one holiday credit product that can be applied to it.</p>
-   *
-   * @param stage Dev, Code or Prod; any other value is taken to be Dev
-   * @return Subscription => CreditProduct, which is resolved to a CreditProduct later
-   *         when the subscription is available
-   * @throws IllegalArgumentException when the given subscription has no applicable credit product
-   */
+  /** <p>Determines which CreditProduct is applicable for the given subscription in the given deployment stage.</p>
+    *
+    * <p>This method works on the assumption that a subscription can only ever be for a single type of product. So a
+    * Guardian Weekly sub can't be converted to a Voucher sub for instance. Then it doesn't matter how often a sub is
+    * renewed or discounts added to it, there will only ever be one holiday credit product that can be applied to
+    * it.</p>
+    *
+    * @param stage
+    *   Dev, Code or Prod; any other value is taken to be Dev
+    * @return
+    *   Subscription => CreditProduct, which is resolved to a CreditProduct later when the subscription is available
+    * @throws IllegalArgumentException
+    *   when the given subscription has no applicable credit product
+    */
   def forStage(stage: Stage): CreditProductForSubscription = {
 
     def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
@@ -129,14 +127,13 @@ object HolidayCreditProduct {
     }
 
     subscription =>
-      subscription
-        .ratePlans
+      subscription.ratePlans
         .flatMap(creditProduct(stage))
         .headOption
         .getOrElse(
           throw new IllegalArgumentException(
-            s"No holiday credit product available for subscription ${subscription.subscriptionNumber}"
-          )
+            s"No holiday credit product available for subscription ${subscription.subscriptionNumber}",
+          ),
         )
   }
 }

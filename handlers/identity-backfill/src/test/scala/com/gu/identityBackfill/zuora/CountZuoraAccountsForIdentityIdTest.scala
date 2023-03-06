@@ -44,7 +44,7 @@ object CountZuoraAccountsForIdentityIdData {
 
     Map(
       POSTRequest("/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}""")
-        -> HTTPResponse(200, accountQueryResponse)
+        -> HTTPResponse(200, accountQueryResponse),
     )
   }
 

@@ -5,12 +5,12 @@ import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 
 case class ValidatedAccount(
-  identityId: Option[IdentityId],
-  sfContactId: Option[SfContactId],
-  paymentMethodId: PaymentMethodId,
-  autoPay: AutoPay,
-  accountBalanceMinorUnits: AccountBalanceMinorUnits,
-  currency: Currency
+    identityId: Option[IdentityId],
+    sfContactId: Option[SfContactId],
+    paymentMethodId: PaymentMethodId,
+    autoPay: AutoPay,
+    accountBalanceMinorUnits: AccountBalanceMinorUnits,
+    currency: Currency,
 )
 
 object ValidateAccount {
@@ -24,8 +24,7 @@ object ValidateAccount {
       paymentMethodId,
       account.autoPay,
       account.accountBalanceMinorUnits,
-      account.currency
+      account.currency,
     )
   }
 }
-

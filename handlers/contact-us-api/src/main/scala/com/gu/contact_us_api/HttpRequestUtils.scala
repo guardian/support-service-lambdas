@@ -7,9 +7,7 @@ import scala.util.Try
 
 object HttpRequestUtils {
   def runSafeRequest(http: HttpRequest): Either[ContactUsError, HttpResponse[String]] = {
-    Try(http.asString)
-      .toEither
-      .left
+    Try(http.asString).toEither.left
       .map(i => ContactUsError("Fatal", s"Salesforce request failed: $i"))
   }
 }

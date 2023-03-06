@@ -16,11 +16,11 @@ import java.time.LocalDate
 
 object Handler extends RequestStreamHandler {
 
-  //referenced in cloudformation, change with care
+  // referenced in cloudformation, change with care
   def handleRequest(
-    input: InputStream,
-    output: OutputStream,
-    context: Context
+      input: InputStream,
+      output: OutputStream,
+      context: Context,
   ): Unit = {
     def log(message: String) = context.getLogger.log(message)
 
@@ -30,7 +30,14 @@ object Handler extends RequestStreamHandler {
     val loadConfig = LoadConfigModule(stage, GetFromS3.fetchString)
     val maybeSuccess = for {
       zuoraRestConfig <- loadConfig[ZuoraRestConfig]
-      steps = Steps(log, error(stage, _), RawEffects.downloadResponse, RawEffects.response, zuoraRestConfig, () => RawEffects.now().toLocalDate)
+      steps = Steps(
+        log,
+        error(stage, _),
+        RawEffects.downloadResponse,
+        RawEffects.response,
+        zuoraRestConfig,
+        () => RawEffects.now().toLocalDate,
+      )
       _ <- steps.execute().leftMap(failure => new RuntimeException(s"execution has failed: $failure"))
     } yield ()
     val _ = maybeSuccess.toTry.get // throws exception if something failed
@@ -43,40 +50,48 @@ object Handler extends RequestStreamHandler {
    */
   def error(stage: Stage, message: String) = {
     println(s"ERROR recognising revenue: $message")
-    AwsCloudWatch.metricPut(MetricRequest(
-      MetricNamespace("support-service-lambdas"),
-      MetricName("could-not-recognise-revenue"),
-      Map(
-        MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
-        MetricDimensionName("app") -> MetricDimensionValue("revenue-recogniser-job")
+    AwsCloudWatch
+      .metricPut(
+        MetricRequest(
+          MetricNamespace("support-service-lambdas"),
+          MetricName("could-not-recognise-revenue"),
+          Map(
+            MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
+            MetricDimensionName("app") -> MetricDimensionValue("revenue-recogniser-job"),
+          ),
+        ),
       )
-    )).get // rethrow errors
+      .get // rethrow errors
   }
 
   /*
   this is alarmed in the cfn
    */
   def putMetric(stage: Stage): Unit = {
-    AwsCloudWatch.metricPut(MetricRequest(
-      MetricNamespace("support-service-lambdas"),
-      MetricName("job-succeeded"),
-      Map(
-        MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
-        MetricDimensionName("app") -> MetricDimensionValue("revenue-recogniser-job")
+    AwsCloudWatch
+      .metricPut(
+        MetricRequest(
+          MetricNamespace("support-service-lambdas"),
+          MetricName("job-succeeded"),
+          Map(
+            MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
+            MetricDimensionName("app") -> MetricDimensionValue("revenue-recogniser-job"),
+          ),
+        ),
       )
-    )).get // rethrow errors
+      .get // rethrow errors
   }
 
 }
 
 object Steps {
   def apply(
-    log: String => Unit,
-    error: String => Unit,
-    downloadResponse: Request => Response,
-    response: Request => Response,
-    zuoraRestConfig: ZuoraRestConfig,
-    today: () => LocalDate
+      log: String => Unit,
+      error: String => Unit,
+      downloadResponse: Request => Response,
+      response: Request => Response,
+      zuoraRestConfig: ZuoraRestConfig,
+      today: () => LocalDate,
   ): Steps = {
     val requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
     val downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
@@ -88,21 +103,21 @@ object Steps {
       new RevenueSchedulesQuerier(
         log,
         new BlockingAquaQueryImpl(aquaQuerier, downloadRequests, log),
-        GetSubscription(requests)
+        GetSubscription(requests),
       ),
       DistributeRevenueOnSpecificDate(requests),
-      DistributeRevenueWithDateRange(requests)
+      DistributeRevenueWithDateRange(requests),
     )
   }
 }
 
 class Steps(
-  log: String => Unit,
-  today: () => LocalDate,
-  error: String => Unit,
-  revenueSchedulesQuerier: RevenueSchedulesQuerier,
-  distributeRevenueOnSpecificDate: DistributeRevenueOnSpecificDate,
-  distributeRevenueWithDateRange: DistributeRevenueWithDateRange,
+    log: String => Unit,
+    today: () => LocalDate,
+    error: String => Unit,
+    revenueSchedulesQuerier: RevenueSchedulesQuerier,
+    distributeRevenueOnSpecificDate: DistributeRevenueOnSpecificDate,
+    distributeRevenueWithDateRange: DistributeRevenueWithDateRange,
 ) {
   val partitionSchedules: PartitionSchedules = new PartitionSchedules(today, log, error)
 
@@ -110,14 +125,19 @@ class Steps(
 
     for {
       undistributedScheduled <- revenueSchedulesQuerier.execute()
-      (revenueSchedulesToDistributeToday, revenueSchedulesToDistributeRange) = partitionSchedules.partition(undistributedScheduled)
+      (revenueSchedulesToDistributeToday, revenueSchedulesToDistributeRange) = partitionSchedules.partition(
+        undistributedScheduled,
+      )
       _ <- distributeForQueryRow(revenueSchedulesToDistributeToday, revenueSchedulesToDistributeRange)
       // would be nice to confirm success by querying zuora again, or cross check against the number of unredeemed subs
     } yield ()
 
   }
 
-  private def distributeForQueryRow(revenueSchedulesToDistributeToday: List[DistributeToday], revenueSchedulesToDistributeRange: List[DistributeRange]): Either[String, Unit] = {
+  private def distributeForQueryRow(
+      revenueSchedulesToDistributeToday: List[DistributeToday],
+      revenueSchedulesToDistributeRange: List[DistributeRange],
+  ): Either[String, Unit] = {
     for {
       _ <- revenueSchedulesToDistributeToday.traverse { distributeToday =>
         import distributeToday._
@@ -129,7 +149,10 @@ class Steps(
         import distributeRange._
         // Find all undistributed rev sch on redeemed subs and distribute across the redemptiondate->termenddate
         log(s"sub is redeemed then refunded, so recognise over the same period it was purchased: $distributeRange")
-        distributeRevenueWithDateRange.distribute(refundSchedule, recognitionStart, recognitionEnd).toDisjunction.leftMap(_.toString)
+        distributeRevenueWithDateRange
+          .distribute(refundSchedule, recognitionStart, recognitionEnd)
+          .toDisjunction
+          .leftMap(_.toString)
       }
     } yield ()
   }

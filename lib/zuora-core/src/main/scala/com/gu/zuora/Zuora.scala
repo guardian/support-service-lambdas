@@ -9,40 +9,39 @@ import sttp.client3.circe._
 import scala.annotation.tailrec
 
 case class ZuoraAccountMoveSubscriptionCommand(
-  crmId: String,
-  sfContactId__c: String,
-  IdentityId__c: String
+    crmId: String,
+    sfContactId__c: String,
+    IdentityId__c: String,
 )
 
 case class MoveSubscriptionAtZuoraAccountResponse(message: String)
 
 object Zuora {
 
-  /**
-   * for legacy calls when Oauth is hardcoded to holidayStopProcessor
-   * and read from S3 file where holidayStopProcessor is a field in json config
-   * *
-   */
+  /** for legacy calls when Oauth is hardcoded to holidayStopProcessor and read from S3 file where holidayStopProcessor
+    * is a field in json config *
+    */
   def accessTokenGetResponse(
-    config: HolidayStopProcessorZuoraConfig,
-    backend: SttpBackend[Identity, Any]
+      config: HolidayStopProcessorZuoraConfig,
+      backend: SttpBackend[Identity, Any],
   ): ZuoraApiResponse[AccessToken] = {
     val genericConfig = ZuoraRestOauthConfig(
       baseUrl = config.baseUrl,
-      oauth = config.holidayStopProcessor.oauth
+      oauth = config.holidayStopProcessor.oauth,
     )
     accessTokenGetResponseV2(genericConfig, backend)
   }
 
   def accessTokenGetResponseV2(
-    config: ZuoraRestOauthConfig,
-    backend: SttpBackend[Identity, Any]
+      config: ZuoraRestOauthConfig,
+      backend: SttpBackend[Identity, Any],
   ): ZuoraApiResponse[AccessToken] = {
-    basicRequest.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
+    basicRequest
+      .post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
         "grant_type" -> "client_credentials",
         "client_id" -> s"${config.oauth.clientId}",
-        "client_secret" -> s"${config.oauth.clientSecret}"
+        "client_secret" -> s"${config.oauth.clientSecret}",
       )
       .response(asJson[AccessToken])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
@@ -50,8 +49,11 @@ object Zuora {
       .body
   }
 
-  def subscriptionGetResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Identity, Any])(subscriptionName: SubscriptionName): ZuoraApiResponse[Subscription] = {
-    basicRequest.get(uri"${config.baseUrl}/subscriptions/${subscriptionName.value}")
+  def subscriptionGetResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Identity, Any])(
+      subscriptionName: SubscriptionName,
+  ): ZuoraApiResponse[Subscription] = {
+    basicRequest
+      .get(uri"${config.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[Subscription])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
@@ -59,9 +61,14 @@ object Zuora {
       .body
   }
 
-  def subscriptionUpdateResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Identity, Any])(subscription: Subscription, update: SubscriptionUpdate): ZuoraApiResponse[Unit] = {
-    val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
-    basicRequest.put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
+  def subscriptionUpdateResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Identity, Any])(
+      subscription: Subscription,
+      update: SubscriptionUpdate,
+  ): ZuoraApiResponse[Unit] = {
+    val errMsg = (reason: String) =>
+      s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
+    basicRequest
+      .put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(update)
       .response(asJson[ZuoraStatusResponse])
@@ -74,17 +81,20 @@ object Zuora {
           else Left(ZuoraApiFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
       .send(backend)
-      .body.left.map(failure => ZuoraApiFailure(errMsg(failure.reason)))
+      .body
+      .left
+      .map(failure => ZuoraApiFailure(errMsg(failure.reason)))
   }
 
   def accountGetResponse(
-    config: ZuoraConfig,
-    accessToken: AccessToken,
-    backend: SttpBackend[Identity, Any]
+      config: ZuoraConfig,
+      accessToken: AccessToken,
+      backend: SttpBackend[Identity, Any],
   )(
-    accountNumber: String
+      accountNumber: String,
   ): ZuoraApiResponse[ZuoraAccount] = {
-    basicRequest.get(uri"${config.baseUrl}/accounts/$accountNumber")
+    basicRequest
+      .get(uri"${config.baseUrl}/accounts/$accountNumber")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[ZuoraAccount])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
@@ -93,16 +103,18 @@ object Zuora {
   }
 
   def updateAccountByMovingSubscription(
-    config: ZuoraConfig,
-    accessToken: AccessToken,
-    backend: SttpBackend[Identity, Any]
+      config: ZuoraConfig,
+      accessToken: AccessToken,
+      backend: SttpBackend[Identity, Any],
   )(
-    subscription: Subscription,
-    updateCommandData: ZuoraAccountMoveSubscriptionCommand
+      subscription: Subscription,
+      updateCommandData: ZuoraAccountMoveSubscriptionCommand,
   ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
-    val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' " +
-      s"with $updateCommandData. Reason: $reason"
-    basicRequest.put(uri"${config.baseUrl}/accounts/${subscription.accountNumber}")
+    val errMsg = (reason: String) =>
+      s"Failed to update subscription '${subscription.subscriptionNumber}' " +
+        s"with $updateCommandData. Reason: $reason"
+    basicRequest
+      .put(uri"${config.baseUrl}/accounts/${subscription.accountNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(updateCommandData)
       .response(asJson[ZuoraStatusResponse])
@@ -120,19 +132,18 @@ object Zuora {
 }
 
 object ZuoraLockingContention extends LazyLogging {
-  /**
-   * Failed to update subscription object due to locking contention
-   * https://community.zuora.com/t5/Zuora-CPQ/Large-Renewal-Quote-preview-failed-with-optimistic-locking-error/td-p/28721
-   *
-   *   535000 - resource code of update operation on subscription object
-   *   50     - Locking contention
-   */
+
+  /** Failed to update subscription object due to locking contention
+    * https://community.zuora.com/t5/Zuora-CPQ/Large-Renewal-Quote-preview-failed-with-optimistic-locking-error/td-p/28721
+    *
+    * 535000 - resource code of update operation on subscription object 50 - Locking contention
+    */
   val LockingContentionCode: Long = 53500050L // StaleObjectStateException
 
   // this retry is only intended for 535000, namely subscription update object
   @tailrec def retryLockingContention(
-    n: Int,
-    subName: String /* FIXME: temporary to follow up if retry was safe */
+      n: Int,
+      subName: String, /* FIXME: temporary to follow up if retry was safe */
   )(call: => ZuoraApiResponse[Unit]): ZuoraApiResponse[Unit] = {
     val LockingContentionCodeStr = LockingContentionCode.toString
     call match {

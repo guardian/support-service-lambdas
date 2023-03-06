@@ -1,22 +1,19 @@
 import sbt._
 import sbtassembly.AssemblyKeys.assembly
-import sbtassembly.AssemblyPlugin.autoImport.{
-  MergeStrategy,
-  assemblyMergeStrategy
-}
+import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.17.210"
+  val awsSdkVersion = "2.18.28"
   val circeVersion = "0.13.0"
-  val sttpVersion = "3.6.2"
+  val sttpVersion = "3.7.2"
   val http4sVersion = "0.21.33"
-  val catsVersion = "2.8.0"
+  val catsVersion = "2.9.0"
   val catsEffectVersion = "2.5.5"
 
   val logging = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.2.11",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
+    "ch.qos.logback" % "logback-classic" % "1.4.5",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
   // AWS
@@ -26,7 +23,7 @@ object Dependencies {
   val awsSQS = "software.amazon.awssdk" % "sqs" % awsSdkVersion
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
-  val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
+  val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.2"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.0"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
@@ -39,7 +36,7 @@ object Dependencies {
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
-  val playJson = "com.typesafe.play" %% "play-json" % "2.9.2"
+  val playJson = "com.typesafe.play" %% "play-json" % "2.9.3"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
   // HTTP clients
@@ -65,18 +62,18 @@ object Dependencies {
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.15"
-  val zio2Version = "2.0.0-RC6+28-22f0d8c2-SNAPSHOT" // snapshot until https://github.com/zio/zio/pull/6775 is out
+  val zio = "dev.zio" %% "zio" % "1.0.17"
+  val zio2Version = "2.0.0"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.0.1"
+  val tapirVersion = "1.0.6"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
-  val stripe = "com.stripe" % "stripe-java" % "20.128.0"
+  val stripe = "com.stripe" % "stripe-java" % "22.1.0"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.7.1" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.12" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.16.0" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.2" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.14" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
 
   /*
@@ -89,18 +86,18 @@ object Dependencies {
    */
   val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
 
-  val jacksonVersion         = "2.13.2"
+  val jacksonVersion = "2.13.2"
   val jacksonDatabindVersion = "2.13.2.2"
 
   val jacksonDependencies = Seq(
-    "com.fasterxml.jackson.core"     % "jackson-core" %  jacksonVersion,
-    "com.fasterxml.jackson.core"     % "jackson-annotations" %  jacksonVersion,
-    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" %  jacksonVersion,
-    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" %  jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonDatabindVersion,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
-    "com.fasterxml.jackson.module"     % "jackson-module-parameter-names" % jacksonVersion,
-    "com.fasterxml.jackson.module"     %% "jackson-module-scala" % jacksonVersion,
+    "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonVersion,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   )
 
   /*
@@ -108,13 +105,13 @@ object Dependencies {
    * ===============================================================================================
    */
 
-
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
   val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
     case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
       MergeStrategy.singleOrError
     case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
+    case PathList(ps @ _*) if ps.last == "deriving.conf" => MergeStrategy.filterDistinctLines
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
     /*
@@ -127,6 +124,5 @@ object Dependencies {
       val oldStrategy = (assembly / assemblyMergeStrategy).value
       oldStrategy(x)
   }
-
 
 }

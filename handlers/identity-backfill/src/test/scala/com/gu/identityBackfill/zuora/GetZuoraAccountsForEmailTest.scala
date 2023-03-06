@@ -16,14 +16,16 @@ class GetZuoraAccountsForEmailTest extends AnyFlatSpec with Matchers {
     val effects = new TestingRawEffects(postResponses = GetZuoraAccountsForEmailData.postResponses(true))
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val contacts = GetZuoraAccountsForEmail(ZuoraQuery(requestMaker))(EmailAddress("email@address"))
-    val expected = ClientSuccess(List(
-      ZuoraAccountIdentitySFContact(
-        AccountId("2c92a0fb4a38064e014a3f48f1663ad8"),
-        Some(IdentityId("10101010")),
-        SFContactId("00110000011AABBAAB"),
-        CrmId("crmId")
-      )
-    ))
+    val expected = ClientSuccess(
+      List(
+        ZuoraAccountIdentitySFContact(
+          AccountId("2c92a0fb4a38064e014a3f48f1663ad8"),
+          Some(IdentityId("10101010")),
+          SFContactId("00110000011AABBAAB"),
+          CrmId("crmId"),
+        ),
+      ),
+    )
     contacts should be(expected)
   }
 
@@ -31,9 +33,16 @@ class GetZuoraAccountsForEmailTest extends AnyFlatSpec with Matchers {
     val effects = new TestingRawEffects(postResponses = GetZuoraAccountsForEmailData.postResponses(false))
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val contacts = GetZuoraAccountsForEmail(ZuoraQuery(requestMaker))(EmailAddress("email@address"))
-    val expected = ClientSuccess(List(
-      ZuoraAccountIdentitySFContact(AccountId("2c92a0fb4a38064e014a3f48f1663ad8"), None, SFContactId("00110000011AABBAAB"), CrmId("crmId"))
-    ))
+    val expected = ClientSuccess(
+      List(
+        ZuoraAccountIdentitySFContact(
+          AccountId("2c92a0fb4a38064e014a3f48f1663ad8"),
+          None,
+          SFContactId("00110000011AABBAAB"),
+          CrmId("crmId"),
+        ),
+      ),
+    )
     contacts should be(expected)
   }
 
@@ -44,19 +53,20 @@ object GetZuoraAccountsForEmailData {
   def postResponses(withIdentity: Boolean): Map[POSTRequest, HTTPResponse] = Map(
     POSTRequest("/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}""")
       -> HTTPResponse(200, contactQueryResponse),
-    POSTRequest("/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}""")
-      -> HTTPResponse(200, accountQueryResponse(withIdentity))
+    POSTRequest(
+      "/action/query",
+      """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}""",
+    )
+      -> HTTPResponse(200, accountQueryResponse(withIdentity)),
   )
 
   def accountQueryResponse(withIdentity: Boolean): String =
     s"""
        |{
        |    "records": [
-       |        {${
-      if (withIdentity) """
+       |        {${if (withIdentity) """
        |            "IdentityId__c": "10101010","""
-      else ""
-    }
+      else ""}
        |            "sfContactId__c": "00110000011AABBAAB",
        |            "CrmId": "crmId",
        |            "Id": "2c92a0fb4a38064e014a3f48f1663ad8"

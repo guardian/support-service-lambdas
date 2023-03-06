@@ -14,15 +14,15 @@ import play.api.libs.json.Json
 object UpdateSalesforceIdentityId {
 
   case class WireRequest(
-    IdentityID__c: String,
-    FirstName: Option[String],
-    OtherStreet: Option[String], // billing
-    OtherCity: Option[String],
-    OtherState: Option[String],
-    OtherPostalCode: Option[String],
-    OtherCountry: Option[String],
-    Phone: Option[String],
-    Email: Option[String]
+      IdentityID__c: String,
+      FirstName: Option[String],
+      OtherStreet: Option[String], // billing
+      OtherCity: Option[String],
+      OtherState: Option[String],
+      OtherPostalCode: Option[String],
+      OtherCountry: Option[String],
+      Phone: Option[String],
+      Email: Option[String],
   )
   implicit val writes = Json.writes[WireRequest]
 
@@ -31,10 +31,10 @@ object UpdateSalesforceIdentityId {
   case object DummyFirstName extends UpdateFirstName
   case object DontChangeFirstName extends UpdateFirstName
   case class SFContactUpdate(
-    identityId: Option[IdentityId],
-    firstName: UpdateFirstName,
-    maybeNewAddress: SFAddressOverride,
-    maybeOverwriteEmailAddress: Option[EmailAddress]
+      identityId: Option[IdentityId],
+      firstName: UpdateFirstName,
+      maybeNewAddress: SFAddressOverride,
+      maybeOverwriteEmailAddress: Option[EmailAddress],
   )
 
   def apply(patchOp: HttpOp[PatchRequest, Unit]): SetOrClearIdentityId =
@@ -57,7 +57,7 @@ object UpdateSalesforceIdentityId {
       contactUpdate.maybeNewAddress.toOption.flatMap(_.OtherPostalCode.map(_.value)),
       contactUpdate.maybeNewAddress.toOption.map(_.OtherCountry.value),
       contactUpdate.maybeNewAddress.toOption.flatMap(_.Phone.map(_.value)),
-      contactUpdate.maybeOverwriteEmailAddress.map(_.value)
+      contactUpdate.maybeOverwriteEmailAddress.map(_.value),
     )
 
     val relativePath = RelativePath(s"/services/data/v$salesforceApiVersion/sobjects/Contact/${sFContactId.value}")

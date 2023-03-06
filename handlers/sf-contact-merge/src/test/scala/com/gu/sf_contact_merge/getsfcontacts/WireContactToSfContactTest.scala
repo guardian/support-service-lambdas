@@ -19,7 +19,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Phone = Some("phone1"),
       Digital_Voucher_User__c = false,
       Email = "a@b.com",
-      IdentityID__c = None
+      IdentityID__c = None,
     )
     val actual: SFMaybeAddress = WireContactToSfContact.toMaybeAddress(wireResult)
 
@@ -29,7 +29,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Some(SFState("state1")),
       Some(SFPostalCode("postalcode1")),
       SFCountry("country1"),
-      Some(SFPhone("phone1"))
+      Some(SFPhone("phone1")),
     )
 
     actual should be(UsableContactAddress(expected))
@@ -45,7 +45,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Phone = None,
       Digital_Voucher_User__c = false,
       Email = "a@b.com",
-      IdentityID__c = None
+      IdentityID__c = None,
     )
     val actual: SFMaybeAddress = WireContactToSfContact.toMaybeAddress(wireResult)
 
@@ -55,7 +55,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       None,
       None,
       SFCountry("country1"),
-      None
+      None,
     )
 
     actual should be(UsableContactAddress(expected))
@@ -71,7 +71,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Phone = Some("phone1"),
       Digital_Voucher_User__c = false,
       Email = "a@b.com",
-      IdentityID__c = None
+      IdentityID__c = None,
     )
     val actual: SFMaybeAddress = WireContactToSfContact.toMaybeAddress(wireResult)
 
@@ -88,7 +88,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Phone = Some("phone1"),
       Digital_Voucher_User__c = false,
       Email = "a@b.com",
-      IdentityID__c = None
+      IdentityID__c = None,
     )
     val actual: SFMaybeAddress = WireContactToSfContact.toMaybeAddress(wireResult)
 
@@ -105,7 +105,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Phone = Some("phone1"),
       Digital_Voucher_User__c = false,
       Email = "a@b.com",
-      IdentityID__c = None
+      IdentityID__c = None,
     )
     val actual: SFMaybeAddress = WireContactToSfContact.toMaybeAddress(wireResult)
 
@@ -122,7 +122,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Phone = Some("phone1"),
       Digital_Voucher_User__c = false,
       Email = "a@b.com",
-      IdentityID__c = None
+      IdentityID__c = None,
     )
     val actual: SFMaybeAddress = WireContactToSfContact.toMaybeAddress(wireResult)
 
@@ -139,7 +139,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Phone = None,
       Digital_Voucher_User__c = false,
       Email = "a@b.com",
-      IdentityID__c = Some("1234")
+      IdentityID__c = Some("1234"),
     )
     val actual: IsDigitalVoucherUser = WireContactToSfContact(wireResult).isDigitalVoucherUser
 
@@ -160,7 +160,7 @@ class WireContactToSfContactTest extends AnyFlatSpec with Matchers {
       Phone = None,
       Digital_Voucher_User__c = true,
       Email = "a@b.com",
-      IdentityID__c = None
+      IdentityID__c = None,
     )
     val actual: IsDigitalVoucherUser = WireContactToSfContact(wireResult).isDigitalVoucherUser
 
