@@ -157,7 +157,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       hasMobileSub = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
         .headOption
-        .map(_ => "Recurring Support")
+        .map(_ => "InAppPurchase")
       productTypes = activeSubs.records.map(_.Product__c) ++ hasMobileSub
 
       consentsBody <- buildProductSwitchConsents(
@@ -202,7 +202,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       hasMobileSub = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
         .headOption
-        .map(_ => "Recurring Support")
+        .map(_ => "InAppPurchase")
       productTypes = activeSubs.records.map(_.Product__c) ++ hasMobileSub
 
       consents <- consentsCalculator.getCancellationConsents(
