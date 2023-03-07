@@ -57,7 +57,6 @@ object BillingAccountRemover extends App with LazyLogging {
   // Zuora
   case class BillingAccountsForRemoval(
       CrmId: String = "",
-      Status: String = "Canceled",
   )
   case class Errors(Code: String, Message: String)
   case class ZuoraResponse(Success: Boolean, Errors: Seq[Errors])

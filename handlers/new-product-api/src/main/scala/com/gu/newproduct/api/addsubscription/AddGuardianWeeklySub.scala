@@ -1,7 +1,6 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
-
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.EmailQueueNames
@@ -27,7 +26,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, S
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetContacts, GetPaymentMethod}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, ZuoraIds}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, PlanAndCharge, ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{Catalog, Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
@@ -41,7 +40,7 @@ object AddGuardianWeeklySub {
   def steps(
       getPlan: PlanId => Plan,
       getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-      getPlanAndCharge: PlanId => Option[PlanAndCharge],
+      getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
       getCustomerData: ZuoraAccountId => ApiGatewayOp[GuardianWeeklyCustomerData],
       validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
       validateAddress: (BillToAddress, SoldToAddress) => ValidationResult[Unit],
@@ -133,7 +132,7 @@ object AddGuardianWeeklySub {
       sixForSixPlanId: PlanId,
       quarterlyPlanId: PlanId,
       getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-      getPlanAndCharge: PlanId => Option[PlanAndCharge],
+      getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
   ): ApiGatewayOp[ZuoraCreateSubRequest] = {
     if (request.planId == sixForSixPlanId) {
       for {

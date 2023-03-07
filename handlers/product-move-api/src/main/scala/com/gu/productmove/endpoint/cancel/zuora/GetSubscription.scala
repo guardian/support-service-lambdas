@@ -38,6 +38,7 @@ object GetSubscription {
   case class RatePlan(
       productName: String,
       ratePlanName: String,
+      lastChangeType: Option[String],
       ratePlanCharges: List[RatePlanCharge],
       productRatePlanId: String,
       id: String,

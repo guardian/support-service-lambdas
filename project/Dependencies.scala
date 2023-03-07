@@ -1,13 +1,10 @@
 import sbt._
 import sbtassembly.AssemblyKeys.assembly
-import sbtassembly.AssemblyPlugin.autoImport.{
-  MergeStrategy,
-  assemblyMergeStrategy
-}
+import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.18.28"
+  val awsSdkVersion = "2.18.30"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.7.2"
   val http4sVersion = "0.21.33"
@@ -16,7 +13,7 @@ object Dependencies {
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.4.5",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
   // AWS
@@ -69,9 +66,9 @@ object Dependencies {
   val zio2Version = "2.0.0"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion = "1.0.6"
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.0"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.2"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
-  val stripe = "com.stripe" % "stripe-java" % "22.1.0"
+  val stripe = "com.stripe" % "stripe-java" % "22.11.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.2" % Test
@@ -89,25 +86,24 @@ object Dependencies {
    */
   val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
 
-  val jacksonVersion         = "2.13.2"
+  val jacksonVersion = "2.13.2"
   val jacksonDatabindVersion = "2.13.2.2"
 
   val jacksonDependencies = Seq(
-    "com.fasterxml.jackson.core"     % "jackson-core" %  jacksonVersion,
-    "com.fasterxml.jackson.core"     % "jackson-annotations" %  jacksonVersion,
-    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" %  jacksonVersion,
-    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" %  jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonDatabindVersion,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
-    "com.fasterxml.jackson.module"     % "jackson-module-parameter-names" % jacksonVersion,
-    "com.fasterxml.jackson.module"     %% "jackson-module-scala" % jacksonVersion,
+    "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonVersion,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   )
 
   /*
    * End of vulnerability fixes
    * ===============================================================================================
    */
-
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
@@ -128,6 +124,5 @@ object Dependencies {
       val oldStrategy = (assembly / assemblyMergeStrategy).value
       oldStrategy(x)
   }
-
 
 }

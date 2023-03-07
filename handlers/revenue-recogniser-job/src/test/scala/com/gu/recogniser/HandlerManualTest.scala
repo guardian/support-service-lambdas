@@ -63,7 +63,7 @@ object RunQueryManualTest {
   def main(args: Array[String]): Unit = {
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("PROD"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       downloadRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
       aquaQuerier = Querier.lowLevel(downloadRequests) _
       schedules <- new RevenueSchedulesQuerier(
