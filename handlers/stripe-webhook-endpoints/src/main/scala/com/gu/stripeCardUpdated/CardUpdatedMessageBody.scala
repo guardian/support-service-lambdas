@@ -80,7 +80,7 @@ object CardUpdatedMessageBody {
       (
         (JsPath \ "exp_month").read[Int] and
           (JsPath \ "exp_year").read[Int],
-      ) (StripeExpiry.apply _) and
+      )(StripeExpiry.apply _) and
       (JsPath \ "last4").read[String].map(StripeLast4.apply)
   )(EventDataObject.apply _)
 

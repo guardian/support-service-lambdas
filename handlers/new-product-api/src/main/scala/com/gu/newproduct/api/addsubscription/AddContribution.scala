@@ -1,7 +1,6 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
-
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.i18n.Currency
@@ -31,7 +30,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetCont
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetContacts, GetPaymentMethod}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, ZuoraIds}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, PlanAndCharge, ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Catalog, Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
@@ -46,7 +45,7 @@ object AddContribution {
   def steps(
       getPlan: PlanId => Plan,
       getCurrentDate: () => LocalDate,
-      getPlanAndCharge: PlanId => Option[PlanAndCharge],
+      getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
       getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
       contributionValidations: (ValidatableFields, PlanId, Currency) => ValidationResult[AmountMinorUnits],
       createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],

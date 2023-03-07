@@ -47,10 +47,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
               ),
             )
             .provide(
-              AwsS3Live.layer,
-              AwsCredentialsLive.layer,
               SttpClientLive.layer,
-              ZLayer.succeed(Stage.valueOf("DEV")),
               CreateRecordLive.layer,
               GetSfSubscriptionLive.layer,
               SalesforceClientLive.layer,

@@ -10,9 +10,10 @@ import play.api.libs.json.{JsValue, Json, Reads}
 // For Zuora response deserialisation
 case class ZuoraContact(AccountId: String, WorkEmail: String)
 case class AccountContact(Id: String, WorkEmail: Option[String])
-case class AccountBasicInfo(accountNumber: String)
+case class AccountBasicInfo(id: String, accountNumber: String, status: String)
 case class AccountMetrics(balance: BigDecimal, creditBalance: BigDecimal, totalInvoiceBalance: BigDecimal)
-case class CustomerAccount(basicInfo: AccountBasicInfo, metrics: AccountMetrics)
+case class AccountContactId(id: String)
+case class CustomerAccount(basicInfo: AccountBasicInfo, metrics: AccountMetrics, billToContact: AccountContactId, soldToContact: AccountContactId)
 case class BillingDeletionResult(id: String, status: String, success: Boolean)
 case class ZuoraSubscription(id: String, status: String)
 
@@ -56,66 +57,88 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
   private def accountPaymentMethods(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"accounts/$accountId/payment-methods").toDisjunction
 
-  private def scrubAccountObject(accountId: String, newName: String): Either[ClientFailure, JsValue] = {
+  private def scrubAccountObject(account: CustomerAccount): Either[ClientFailure, JsValue] = {
+    val newName = account.basicInfo.accountNumber
     val putReq = PutRequest(
       Json.obj(
         "name" -> newName,
         "crmId" -> "",
         "sfContactId__c" -> "",
         "IdentityId__c" -> "",
-        "autoPay" -> false
+        "autoPay" -> false,
+        "invoiceDeliveryPrefsEmail" -> false,
+        "invoiceDeliveryPrefsPrint" -> false,
       ),
-      RelativePath(s"accounts/$accountId")
+      RelativePath(s"accounts/${account.basicInfo.id}"),
     )
     zuoraClient.put[JsValue](putReq).toDisjunction.map(_.bodyAsJson)
   }
 
+  private def ensureAccountIsActive(account: CustomerAccount): Either[ClientFailure, Unit] = {
+    // ensure account is Active (not cancelled)
+    // because account updates will fail if not Active
+    if (account.basicInfo.status != "Active") {
+      // Use old CRUD update to re-activate
+      //  https://www.zuora.com/developer/api-references/older-api/operation/Object_PUTAccount/#!path=Status&t=request
+      //  Include contact IDs in the BillToId and SoldToId fields when you change the Status field value to Active.
+      val putReq = PutRequest(
+        Json.obj(
+          "Status" -> "Active",
+          "BillToId" -> account.billToContact.id,
+          "SoldToId" -> account.soldToContact.id
+        ),
+        RelativePath(s"object/account/${account.basicInfo.id}")
+      )
+      zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
+    } else {
+      Right(())
+    }
+  }
+
   private def scrubPaymentMethods(paymentMethodIds: Set[String]): Either[ClientFailure, Unit] = {
     val initialValue: Either[ClientFailure, Unit] = Right(())
-    paymentMethodIds.foldLeft(initialValue) {
-      (lastResult, paymentMethodId) =>
-        if (lastResult.isRight) {
-          val putReq = PutRequest(Json.obj(), RelativePath(s"payment-methods/$paymentMethodId/scrub"))
-          zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
-        } else // fail on first error
-          lastResult
+    paymentMethodIds.foldLeft(initialValue) { (lastResult, paymentMethodId) =>
+      if (lastResult.isRight) {
+        val putReq = PutRequest(Json.obj(), RelativePath(s"payment-methods/$paymentMethodId/scrub"))
+        zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
+      } else // fail on first error
+        lastResult
     }
   }
 
   private def scrubContacts(contactIds: Set[String]): Either[ClientFailure, Unit] = {
     val initialValue: Either[ClientFailure, Unit] = Right(())
-    contactIds.foldLeft(initialValue) {
-      (lastResult, contactId) =>
-        if (lastResult.isRight) {
-          val putReq = PutRequest(
-            // N.B. leave Country and State unchanged as both are needed for tax assignment
-            Json.obj(
-              "Address1" -> "",
-              "Address2" -> "",
-              "City" -> "",
-              "County" -> "",
-              "Description" -> "",
-              "Fax" -> "",
-              "FirstName" -> ".",
-              "HomePhone" -> "",
-              "LastName" -> ".",
-              "MobilePhone" -> "",
-              "NickName" -> "",
-              "OtherPhone" -> "",
-              "OtherPhoneType" -> "Other",
-              "PersonalEmail" -> "",
-              "PostalCode" -> "",
-              "SpecialDeliveryInstructions__c" -> "",
-              "TaxRegion" -> "",
-              "Title__c" -> "Other",
-              "WorkEmail" -> "",
-              "WorkPhone" -> ""
-            ),
-            RelativePath(s"object/contact/$contactId")
-          )
-          zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
-        } else // fail on first error
-          lastResult
+    contactIds.foldLeft(initialValue) { (lastResult, contactId) =>
+      if (lastResult.isRight) {
+        val putReq = PutRequest(
+          // N.B. leave Country and State unchanged as both are needed for tax assignment
+          Json.obj(
+            "Address1" -> "",
+            "Address2" -> "",
+            "City" -> "",
+            "County" -> "",
+            "Description" -> "",
+            "Fax" -> "",
+            "FirstName" -> ".",
+            "HomePhone" -> "",
+            "LastName" -> ".",
+            "MobilePhone" -> "",
+            "NickName" -> "",
+            "OtherPhone" -> "",
+            "OtherPhoneType" -> "Other",
+            "PersonalEmail" -> "",
+            "PostalCode" -> "",
+            "SpecialDeliveryInstructions__c" -> "",
+            "TaxRegion" -> "",
+            "Title__c" -> "Other",
+            "WorkEmail" -> "",
+            "WorkPhone" -> "",
+          ),
+          RelativePath(s"object/contact/$contactId"),
+        )
+        zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
+      } else // fail on first error
+        lastResult
     }
   }
 
@@ -123,32 +146,38 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
 
   private def deleteBillingDocuments(accountId: String): Either[ClientFailure, BillingDeletionResult] = {
     val jsn = Json.obj(
-      "accountIds" -> List(accountId)
+      "accountIds" -> List(accountId),
     )
     val outcome = for {
-      result <- zuoraClient.post[JsValue, BillingDeletionResult](jsn, "accounts/billing-documents/files/deletion-jobs").toDisjunction
+      result <- zuoraClient
+        .post[JsValue, BillingDeletionResult](jsn, "accounts/billing-documents/files/deletion-jobs")
+        .toDisjunction
       jobId = result.id
       jobStatus <- checkBillingDeletionSuccess(jobId)
     } yield jobStatus
 
     outcome match {
-      case Right(BillingDeletionResult(_, "Pending", _)) |
-        Right(BillingDeletionResult(_, "Processing", _)) |
-        Right(BillingDeletionResult(_, "Error", _)) =>
+      case Right(BillingDeletionResult(_, "Pending", _)) | Right(BillingDeletionResult(_, "Processing", _)) | Right(
+            BillingDeletionResult(_, "Error", _),
+          ) =>
         Left(GenericError("Billing Deletion processing issue"))
 
       case _ => outcome
     }
   }
 
-  private def checkBillingDeletionSuccess(jobId: String, counter: Int = 0): Either[ClientFailure, BillingDeletionResult] = {
+  private def checkBillingDeletionSuccess(
+      jobId: String,
+      counter: Int = 0,
+  ): Either[ClientFailure, BillingDeletionResult] = {
     val sleepMs = 5000L
     val maxTries = 12
-    val jobStatus = zuoraClient.get[BillingDeletionResult](s"accounts/billing-documents/files/deletion-jobs/$jobId").toDisjunction
+    val jobStatus =
+      zuoraClient.get[BillingDeletionResult](s"accounts/billing-documents/files/deletion-jobs/$jobId").toDisjunction
     logger.info(s"$jobStatus job deletion")
     jobStatus match {
-      case Right(BillingDeletionResult(_, "Pending", _)) |
-        Right(BillingDeletionResult(_, "Processing", _)) if counter < maxTries =>
+      case Right(BillingDeletionResult(_, "Pending", _)) | Right(BillingDeletionResult(_, "Processing", _))
+          if counter < maxTries =>
         Thread.sleep(sleepMs)
         checkBillingDeletionSuccess(jobId, counter + 1)
 
@@ -165,7 +194,9 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
   }
 
   def checkAccountBalances(customer: CustomerAccount): Either[ZuoraRerError, Unit] = {
-    if (customer.metrics.balance == 0.0 && customer.metrics.creditBalance == 0.0 && customer.metrics.totalInvoiceBalance == 0.0)
+    if (
+      customer.metrics.balance == 0.0 && customer.metrics.creditBalance == 0.0 && customer.metrics.totalInvoiceBalance == 0.0
+    )
       Right(())
     else
       Left(PreconditionCheckError("Account balances are not zero"))
@@ -175,6 +206,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
 
   implicit val readsAccountBasicInfo: Reads[AccountBasicInfo] = Json.reads[AccountBasicInfo]
   implicit val readsAccountMetrics: Reads[AccountMetrics] = Json.reads[AccountMetrics]
+  implicit val readsAccountContactId: Reads[AccountContactId] = Json.reads[AccountContactId]
   implicit val readsAccount: Reads[CustomerAccount] = Json.reads[CustomerAccount]
   implicit val readsSub: Reads[ZuoraSubscription] = Json.reads[ZuoraSubscription]
 
@@ -184,20 +216,22 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
       subscriptions <- accountSubscriptions(contact.AccountId).left.map(toZuoraClientError)
       subscriptionStatuses = (subscriptions \ "subscriptions").as[List[ZuoraSubscription]].map(_.status).toSet
       _ <- checkSubscriptionStatus(subscriptionStatuses)
-      accountObj <- retrieveAccount(contact.AccountId).left.map(toZuoraClientError)
-      _ <- checkAccountBalances(accountObj.as[CustomerAccount])
+      accountJs <- retrieveAccount(contact.AccountId).left.map(toZuoraClientError)
+      _ <- checkAccountBalances(accountJs.as[CustomerAccount])
     } yield ()
   }
 
   override def scrubAccount(contact: ZuoraContact): Either[ZuoraRerError, Unit] = {
     logger.info("Updating account to remove personal data for contact.")
     val scrubOperations = for {
-      accountObj <- retrieveAccount(contact.AccountId)
-      accountNumber = accountObj.as[CustomerAccount].basicInfo.accountNumber
-      _ = logger.debug(s"retrieveAccount: $accountObj")
+      accountJs <- retrieveAccount(contact.AccountId)
+      account = accountJs.as[CustomerAccount]
+      accountNumber = account.basicInfo.accountNumber
+      _ = logger.debug(s"retrieveAccount: $accountJs")
       _ = logger.debug(s"account number = $accountNumber")
       _ = logger.info(s"scrubbing account object")
-      _ <- scrubAccountObject(contact.AccountId, accountNumber)
+      _ <- ensureAccountIsActive(account)
+      _ <- scrubAccountObject(account)
 
       paymentMethods <- accountPaymentMethods(contact.AccountId)
       paymentMethodIds = (paymentMethods \\ "id").map(jsId => jsId.as[String]).toSet
