@@ -30,7 +30,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.getMessage shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector: Salesforce authentication failed: java.lang.Throwable"
   }
 
   "auth" should "returns a SoftOptInError if an unexpected body is found" in {
@@ -38,7 +38,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.getMessage shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector: Could not decode SfAuthDetails: io.circe.ParsingFailure: expected json value got 'unexpe...' (line 1, column 1). String to decode: unexpected body"
   }
 
   // handleQueryResp success cases
@@ -52,7 +52,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.getMessage shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector: Salesforce query request failed: java.lang.Throwable"
   }
 
   "handleQueryResp" should "return a SoftOptInError if an unexpected body is found" in {
@@ -60,7 +60,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.getMessage shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector: Decode error:io.circe.ParsingFailure: expected json value got 'unexpe...' (line 1, column 1). String to decode unexpected body"
   }
 
   // handleCompositeUpdateResp success cases
@@ -74,7 +74,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.getMessage shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector: Salesforce composite request failed: java.lang.Throwable"
   }
 
   "handleCompositeUpdateResp" should "return a SoftOptInError if an unexpected body is found" in {
@@ -82,7 +82,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.getMessage shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector: Could not decode SfCompositeRequest.Response: io.circe.ParsingFailure: expected json value got 'unexpe...' (line 1, column 1). String to decode: unexpected body"
   }
 
 }
