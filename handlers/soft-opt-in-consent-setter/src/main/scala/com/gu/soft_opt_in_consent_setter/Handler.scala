@@ -70,8 +70,8 @@ object Handler extends LazyLogging {
     } yield ()).flatten.left
       .foreach(error => {
         Metrics.put(event = "failed_run")
-        logger.error(s"${error.errorType}: ${error.errorDetails}")
-        throw new Exception(s"Run failed due to ${error.errorType}: ${error.errorDetails}")
+        logger.error(s"${error.getMessage}")
+        throw new Exception(s"Run failed due to ${error.getMessage}")
       })
   }
 
@@ -150,8 +150,7 @@ object Handler extends LazyLogging {
           ratePlanUpdates <- sub.Subscription_Rate_Plan_Updates__r
             .toRight(
               SoftOptInError(
-                "processProductSwitchSubs",
-                s"Subscription ${sub.Name} Subscription_Rate_Plan_Updates__r is null",
+                s"processProductSwitchSubs: Subscription ${sub.Name} Subscription_Rate_Plan_Updates__r is null",
               ),
             )
           consentsBody <- buildProductSwitchConsents(
@@ -231,7 +230,7 @@ object Handler extends LazyLogging {
   }
 
   def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {
-    updateResults.left.foreach(error => logger.warn(s"${error.errorType}: ${error.errorDetails}"))
+    updateResults.left.foreach(error => logger.warn(s"${error.getMessage}"))
   }
 
   def emitIdentityMetrics(records: Seq[SFSubRecordUpdate]): Unit = {

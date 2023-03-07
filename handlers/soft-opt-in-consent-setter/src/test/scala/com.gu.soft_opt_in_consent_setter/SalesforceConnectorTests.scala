@@ -30,7 +30,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector"
   }
 
   "auth" should "returns a SoftOptInError if an unexpected body is found" in {
@@ -38,7 +38,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector"
   }
 
   // handleQueryResp success cases
@@ -52,7 +52,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector"
   }
 
   "handleQueryResp" should "return a SoftOptInError if an unexpected body is found" in {
@@ -60,7 +60,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector"
   }
 
   // handleCompositeUpdateResp success cases
@@ -74,7 +74,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector"
   }
 
   "handleCompositeUpdateResp" should "return a SoftOptInError if an unexpected body is found" in {
@@ -82,7 +82,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "SalesforceConnector"
+    result.left.value.getMessage shouldBe "SalesforceConnector"
   }
 
 }

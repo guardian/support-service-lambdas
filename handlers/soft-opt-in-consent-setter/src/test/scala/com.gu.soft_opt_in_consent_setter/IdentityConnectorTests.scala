@@ -24,7 +24,6 @@ class IdentityConnectorTests extends AnyFlatSpec with should.Matchers with Eithe
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "IdentityConnector"
   }
 
   "handleConsentsResp" should "return a SoftOptInError if the the request was successful but a failure code was received" in {
@@ -32,6 +31,5 @@ class IdentityConnectorTests extends AnyFlatSpec with should.Matchers with Eithe
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "IdentityConnector"
   }
 }

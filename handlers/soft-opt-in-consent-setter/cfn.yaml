@@ -16,18 +16,21 @@ Mappings:
       Schedule: 'rate(30 minutes)'
       SalesforceStage: PROD
       IdentityStage: PROD
+      MpapiStage: PROD
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: TouchpointUpdate
     CODE:
       Schedule: 'rate(365 days)'
       SalesforceStage: CODE
       IdentityStage: CODE
+      MpapiStage: CODE
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: AwsConnectorSandbox
     DEV:
       Schedule: 'rate(365 days)'
       SalesforceStage: DEV
       IdentityStage: CODE
+      MpapiStage: CODE
       SalesforceUsername: SoftOptInConsentSetterAPIUser
       AppName: AwsConnectorSandbox
 
@@ -90,6 +93,14 @@ Resources:
             !Sub
             - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken}}'
             - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
+          mpapiUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${MpapiStage}/MobilePurchasesAPI/User/asdfasdfa:SecretString:mpapiUrl}}'
+            - MpapiStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
+          mpapiToken:
+            !Sub
+            - '{{resolve:secretsmanager:${MpapiStage}/MobilePurchasesAPI/User/asdfasdf:SecretString:mpapiToken}}'
+            - MpapiStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
       Events:
         ScheduledRun:
           Type: Schedule
@@ -234,13 +245,38 @@ Resources:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to run
       AlarmDescription: >
-        Two or more runs found an error and were unable to complete.
+        Five or more runs found an error and were unable to complete.
         See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedRunAlarm
         for possible causes, impacts and fixes.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
           Value: !Ref LambdaFunction
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 3600
+      Statistic: Sum
+      Threshold: 5
+      TreatMissingData: notBreaching
+
+  failedRunAlarmIAP:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: !Sub soft-opt-in-consent-setter-IAP-${Stage} failed to run
+      AlarmDescription: >
+        Five or more runs found an error and were unable to complete.
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedRunAlarm
+        for possible causes, impacts and fixes.
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunctionIAP
       EvaluationPeriods: 2
       MetricName: Errors
       Namespace: AWS/Lambda

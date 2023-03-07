@@ -13,8 +13,7 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
       .get(productName)
       .toRight(
         SoftOptInError(
-          "ConsentsCalculator",
-          s"getSoftOptInsByProduct couldn't find $productName in consentsMappings",
+          s"ConsentsCalculator: getSoftOptInsByProduct couldn't find $productName in consentsMappings",
         ),
       )
   }
@@ -26,8 +25,7 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
           .get(ownedProductName)
           .toRight(
             SoftOptInError(
-              "ConsentsCalculator",
-              s"getSoftOptInsByProducts couldn't find $ownedProductName in consentsMappings",
+              s"ConsentsCalculator: getSoftOptInsByProducts couldn't find $ownedProductName in consentsMappings",
             ),
           )
           .flatMap(productConsents => acc.map(_.union(productConsents)))
@@ -44,8 +42,7 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
           .get(ownedProductName)
           .toRight(
             SoftOptInError(
-              "ConsentsCalculator",
-              s"getCancellationConsents couldn't find $ownedProductName in consentsMappings",
+              s"ConsentsCalculator: getCancellationConsents couldn't find $ownedProductName in consentsMappings",
             ),
           )
           .flatMap(productConsents => acc.map(_.union(productConsents)))
@@ -55,8 +52,7 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
           .get(cancelledProductName)
           .toRight(
             SoftOptInError(
-              "ConsentsCalculator",
-              s"getCancellationConsents couldn't find $cancelledProductName in consentsMappings",
+              s"ConsentsCalculator: getCancellationConsents couldn't find $cancelledProductName in consentsMappings",
             ),
           )
           .flatMap(cancelledProductConsents => Right(cancelledProductConsents.diff(ownedProductConsents)))

@@ -106,4 +106,22 @@ class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {
         |  }
         |]""".stripMargin)
   }
+
+  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
+    Handler.buildProductSwitchConsents(
+      "guardianweekly",
+      "newspaper",
+      Set("newspaper", "mobilesubscription"),
+      calculator,
+    ) shouldBe Right("""[
+        |  {
+        |    "id" : "guardian_weekly_newsletter",
+        |    "consented" : false
+        |  },
+        |  {
+        |    "id" : "subscriber_preview",
+        |    "consented" : true
+        |  }
+        |]""".stripMargin)
+  }
 }

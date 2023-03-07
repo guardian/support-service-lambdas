@@ -28,7 +28,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "ConsentsCalculator"
+    result.left.value.getMessage shouldBe "ConsentsCalculator: getSoftOptInsByProduct couldn't find nonexistentProduct in consentsMappings"
   }
 
   // getSoftOptInsByProducts success cases
@@ -44,7 +44,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "ConsentsCalculator"
+    result.left.value.getMessage shouldBe "ConsentsCalculator: getSoftOptInsByProducts couldn't find nonexistentProduct in consentsMappings"
   }
 
   // getCancellationConsents success cases
@@ -86,7 +86,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "ConsentsCalculator"
+    result.left.value.getMessage shouldBe "ConsentsCalculator: getCancellationConsents couldn't find nonexistentProduct in consentsMappings"
   }
 
   "getCancellationConsents" should "correctly return a SoftOptInError when a known product is passed and an unknown product is present in the owned products" in {
@@ -94,7 +94,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
-    result.left.value.errorType shouldBe "ConsentsCalculator"
+    result.left.value.getMessage shouldBe "ConsentsCalculator: getCancellationConsents couldn't find nonexistentProduct in consentsMappings"
   }
 
   // buildConsentsBody success cases
