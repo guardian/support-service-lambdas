@@ -121,7 +121,7 @@ Resources:
     Type: AWS::Serverless::Function
     Condition: IsDev
     Properties:
-      Description: Updates Identity Soft Opt-In Consents upon Acquisition and Cancellation of Subscriptions in Salesforce
+      Description: Updates Identity Soft Opt-In Consents upon Acquisition and Cancellation of Subscriptions based on a queue populated by Salesforce and the Mobile Purchases API
       FunctionName: !Sub soft-opt-in-consent-setter-IAP-${Stage}
       Handler: com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest
       CodeUri:
