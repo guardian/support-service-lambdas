@@ -12,8 +12,7 @@ import zio.Scope
 import zio.test.Assertion.equalTo
 import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assert}
 
-
-object SubscriptionCancelSpec extends ZIOSpecDefault{
+object SubscriptionCancelSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Cancel")(test("Run cancellation lambda locally") {
@@ -22,7 +21,8 @@ object SubscriptionCancelSpec extends ZIOSpecDefault{
        */
 
       for {
-        _ <- SubscriptionCancelEndpoint.subscriptionCancel("A-S00497184", ExpectedInput("mma_other"))
+        _ <- SubscriptionCancelEndpoint
+          .subscriptionCancel("A-S00503171", ExpectedInput("mma_other"), doSynchronousRefund = true)
           .provide(
             GetSubscriptionLive.layer,
             ZuoraCancelLive.layer,
@@ -33,8 +33,12 @@ object SubscriptionCancelSpec extends ZIOSpecDefault{
             ZuoraClientLive.layer,
             ZuoraGetLive.layer,
             GuStageLive.layer,
+            InvoicingApiRefundLive.layer,
+            CreditBalanceAdjustmentLive.layer,
+            AwsS3Live.layer,
+            GetInvoiceToBeRefundedLive.layer,
           )
       } yield assert(true)(equalTo(true))
-    } @@ TestAspect.ignore)
+    })
 
 }

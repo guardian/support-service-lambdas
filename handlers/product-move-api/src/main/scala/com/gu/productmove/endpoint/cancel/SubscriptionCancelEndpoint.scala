@@ -6,7 +6,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.*
 import com.gu.productmove.endpoint.cancel.zuora.GetSubscription.{GetSubscriptionResponse, RatePlanCharge}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SQS, SQSLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQS, SQSLive, SttpClientLive}
 import com.gu.productmove.endpoint.cancel.zuora.{GetSubscription, GetSubscriptionLive}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -14,6 +14,10 @@ import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
 import com.gu.productmove.zuora.rest.*
 import com.gu.productmove.zuora.{
+  CreditBalanceAdjustment,
+  CreditBalanceAdjustmentLive,
+  GetInvoiceToBeRefunded,
+  GetInvoiceToBeRefundedLive,
   ZuoraCancel,
   ZuoraCancelLive,
   ZuoraSetCancellationReason,
@@ -24,8 +28,9 @@ import com.gu.util.config
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.json.zio.jsonBody
-import zio.{Clock, IO, ZIO}
-import com.gu.productmove.refund.RefundInput
+import sttp.client3.SttpBackend
+import zio.{Clock, IO, ZIO, Task}
+import com.gu.productmove.refund.*
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -102,6 +107,10 @@ object SubscriptionCancelEndpoint {
         GuStageLive.layer,
         ZuoraSetCancellationReasonLive.layer,
         SQSLive.layer,
+        AwsS3Live.layer,
+        InvoicingApiRefundLive.layer,
+        CreditBalanceAdjustmentLive.layer,
+        GetInvoiceToBeRefundedLive.layer,
       )
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res)
@@ -134,11 +143,48 @@ object SubscriptionCancelEndpoint {
       ZIO.fail("Subscription cannot be cancelled as it was not a Supporter Plus subscription")
   }
 
+  def doRefund(doSynchronousRefund: Boolean, refundInput: RefundInput) =
+    if (doSynchronousRefund)
+      runSynchronousRefund(refundInput)
+    else
+      SQS.queueRefund(refundInput)
+  def runSynchronousRefund(refundInput: RefundInput): ZIO[
+    InvoicingApiRefund
+      with CreditBalanceAdjustment
+      with Stage
+      with SttpBackend[Task, Any]
+      with AwsS3
+      with GetInvoiceToBeRefunded,
+    String,
+    Unit,
+  ] = for {
+    _ <- ZIO.log(
+      s"Attempting to synchronously refund ${refundInput.refundAmount} " +
+        s"to subscription ${refundInput.subscriptionName} " +
+        s"with negative invoiceId ${refundInput.invoiceId}",
+    )
+    _ <- Refund.applyRefund(refundInput)
+  } yield ()
+
   private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
     now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 
-  private[productmove] def subscriptionCancel(subscriptionName: String, postData: ExpectedInput): ZIO[
-    GetSubscription with ZuoraCancel with SQS with Stage with ZuoraSetCancellationReason,
+  private[productmove] def subscriptionCancel(
+      subscriptionName: String,
+      postData: ExpectedInput,
+      doSynchronousRefund: Boolean = false, // Used to test running cancel and refund locally
+  ): ZIO[
+    GetSubscription
+      with ZuoraCancel
+      with SQS
+      with Stage
+      with ZuoraSetCancellationReason
+      with InvoicingApiRefund
+      with CreditBalanceAdjustment
+      with Stage
+      with SttpBackend[Task, Any]
+      with AwsS3
+      with GetInvoiceToBeRefunded,
     String,
     OutputBody,
   ] =
@@ -190,7 +236,8 @@ object SubscriptionCancelEndpoint {
               .orElseFail(
                 s"URGENT: subscription $subscriptionName should be refunded but has no negative invoice attached.",
               )
-            _ <- SQS.queueRefund(RefundInput(subscriptionName, negativeInvoice, refundAmount))
+            _ <- ZIO.log(s"Negative invoice id is $negativeInvoice, refund amount is $refundAmount")
+            _ <- doRefund(doSynchronousRefund, RefundInput(subscriptionName, negativeInvoice, refundAmount))
           } yield ()
         else ZIO.succeed(RefundResponse("Success", ""))
 

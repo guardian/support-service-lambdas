@@ -27,7 +27,7 @@ object RefundSpec extends ZIOSpecDefault {
 
       for {
         _ <- Refund
-          .applyRefund(RefundInput("A-S00446886", "8ad09c4b8455ccff018462254418702f", 4))
+          .applyRefund(RefundInput("A-S00503171", "8ad0889d86bb645e0186bce2e9f86afb", 20))
           .provide(
             AwsS3Live.layer,
             AwsCredentialsLive.layer,
@@ -37,7 +37,8 @@ object RefundSpec extends ZIOSpecDefault {
             GuStageLive.layer,
             InvoicingApiRefundLive.layer,
             CreditBalanceAdjustmentLive.layer,
+            GetInvoiceToBeRefundedLive.layer,
           )
       } yield assert(true)(equalTo(true))
-    } @@ TestAspect.ignore)
+    })
 }
