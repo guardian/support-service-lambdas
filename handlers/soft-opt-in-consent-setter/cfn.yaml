@@ -179,13 +179,6 @@ Resources:
             !Sub
             - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken}}'
             - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
-      Events:
-        ScheduledRun:
-          Type: Schedule
-          Properties:
-            Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule ]
-            Description: Runs Soft Opt-In Consent Setter
-            Enabled: True
       Policies:
         - Statement:
             - Effect: Allow
