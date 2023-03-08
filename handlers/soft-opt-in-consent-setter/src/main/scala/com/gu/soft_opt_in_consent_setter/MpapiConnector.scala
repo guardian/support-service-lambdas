@@ -18,7 +18,7 @@ class MpapiConnector(config: MpapiConfig) {
       errorDesc: String = "Decode error",
   ): Either[SoftOptInError, T] = {
     response.left
-      .map(error => SoftOptInError(s"MpapiConnector: Salesforce query request failed: $error"))
+      .map(error => SoftOptInError(s"MpapiConnector: Mobile purchases API (MPAPI) query request failed: $error"))
       .flatMap { result =>
         decode[T](result.body).left.map(decodeError =>
           SoftOptInError(s"MpapiConnector: $errorDesc:$decodeError. String to decode ${result.body}"),
