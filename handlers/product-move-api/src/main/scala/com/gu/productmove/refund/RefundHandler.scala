@@ -5,7 +5,15 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
-import com.gu.productmove.zuora.{CreditBalanceAdjustmentLive, GetInvoiceToBeRefunded, GetInvoiceToBeRefundedLive}
+import com.gu.productmove.zuora.{
+  CreditBalanceAdjustmentLive,
+  GetInvoiceItemsLive,
+  GetInvoiceLive,
+  GetInvoiceToBeRefunded,
+  GetInvoiceToBeRefundedLive,
+  InvoiceItemAdjustment,
+  InvoiceItemAdjustmentLive,
+}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import zio.json.*
@@ -45,6 +53,9 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
             InvoicingApiRefundLive.layer,
             CreditBalanceAdjustmentLive.layer,
             GetInvoiceToBeRefundedLive.layer,
+            GetInvoiceLive.layer,
+            GetInvoiceItemsLive.layer,
+            InvoiceItemAdjustmentLive.layer,
           ),
       ) match
         case Exit.Success(value) => value

@@ -30,10 +30,10 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               SttpClientLive.layer,
             )
         } yield assert(true)(equalTo(true))
-      },
+      } @@ TestAspect.ignore,
       test("Run CreditBalanceAdjustment decrease locally") {
-        val amount = 20
-        val invoiceId = "8ad09b2186bb70ab0186bcde997f4e0b"
+        val amount = 8.57
+        val invoiceId = "8ad08dc986bfcd320186c1bf1ed53879"
         for {
           _ <- CreditBalanceAdjustment
             .adjust(
@@ -49,6 +49,6 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               SttpClientLive.layer,
             )
         } yield assert(true)(equalTo(true))
-      } @@ TestAspect.ignore,
+      }  @@ TestAspect.ignore,
     )
 }
