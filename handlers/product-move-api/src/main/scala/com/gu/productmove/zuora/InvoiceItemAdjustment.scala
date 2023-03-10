@@ -34,7 +34,7 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
       response <- zuoraGet.post[PostBody, InvoiceItemAdjustmentResponse](
         uri"object/invoice-item-adjustment",
         PostBody(today, amount, invoiceId, invoiceItemId),
-        ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckCapitalised,
+        ZuoraRestBody.ZuoraSuccessCheck.None,
       )
     } yield response
 
