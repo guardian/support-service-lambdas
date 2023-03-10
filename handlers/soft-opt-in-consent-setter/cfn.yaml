@@ -256,8 +256,6 @@ Resources:
   failedRunAlarmIAP:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
-    DependsOn:
-      - LambdaFunction
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
@@ -268,12 +266,12 @@ Resources:
         for possible causes, impacts and fixes.
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: FunctionName
-          Value: !Ref LambdaFunctionIAP
-      EvaluationPeriods: 2
-      MetricName: Errors
-      Namespace: AWS/Lambda
-      Period: 3600
+        - Name: QueueName
+          Value: !GetAtt SoftOptInsDeadLetterQueue.QueueName
+      Period: 300
+      EvaluationPeriods: 1
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
       Statistic: Sum
       Threshold: 5
       TreatMissingData: notBreaching
