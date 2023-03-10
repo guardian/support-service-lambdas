@@ -10,13 +10,14 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput,
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.zuora.GetInvoiceItems.GetInvoiceItemsResponse
+import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemsForSubscription
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
   GetAccountLive,
   GetInvoice,
   GetInvoiceItems,
-  GetInvoiceToBeRefunded,
+  GetInvoiceItemsForSubscription,
   GetSubscriptionLive,
   InvoiceItemAdjustment,
   SubscribeLive,
@@ -30,7 +31,7 @@ import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 import java.time.LocalDateTime
 
-case class RefundInput(subscriptionName: String, invoiceId: String, refundAmount: BigDecimal)
+case class RefundInput(subscriptionName: String)
 
 object RefundInput {
   given JsonDecoder[RefundInput] = DeriveJsonDecoder.gen[RefundInput]
@@ -45,7 +46,7 @@ object Refund {
       with Stage
       with SttpBackend[Task, Any]
       with AwsS3
-      with GetInvoiceToBeRefunded
+      with GetInvoiceItemsForSubscription
       with GetInvoice
       with GetInvoiceItems
       with InvoiceItemAdjustment,
@@ -54,54 +55,50 @@ object Refund {
   ] = {
 
     for {
-      invoicesForSub <- GetInvoiceToBeRefunded.get(refundInput.subscriptionName)
-      amount = invoicesForSub.getLastPaidInvoiceAmount
-      negativeInvoiceId = invoicesForSub.getNegativeInvoiceId
-
+      _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
+      invoicesItemsForSub <- GetInvoiceItemsForSubscription.get(refundInput.subscriptionName)
+      amount <- invoicesItemsForSub.lastPaidInvoiceAmount
+      _ <- ZIO.log(s"Amount to refund is $amount")
       _ <- InvoicingApiRefund.refund(
         refundInput.subscriptionName,
         amount,
       )
-      _ <- ensureThatNegativeInvoiceBalanceIsZero(negativeInvoiceId)
+      _ <- ensureThatNegativeInvoiceBalanceIsZero(invoicesItemsForSub)
     } yield ()
   }
 
   def ensureThatNegativeInvoiceBalanceIsZero(
-      negativeInvoiceId: String,
+      invoiceItemsForSub: InvoiceItemsForSubscription,
   ): ZIO[GetInvoice with GetInvoiceItems with InvoiceItemAdjustment, String, Unit] = for {
-    invoiceResponse <- GetInvoice.get(negativeInvoiceId)
+    negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
+    // unfortunately we can't get an invoice balance from the invoice items, it needs another request
+    negativeInvoice <- GetInvoice.get(
+      negativeInvoiceId,
+    )
     _ <-
-      if (invoiceResponse.balance < 0) {
-        adjustInvoiceBalanceToZero(negativeInvoiceId, invoiceResponse.balance)
+      if (negativeInvoice.balance < 0) {
+        adjustInvoiceBalanceToZero(invoiceItemsForSub, negativeInvoice.balance)
       } else {
         ZIO.log(s"Invoice with id $negativeInvoiceId has zero balance")
       }
   } yield ()
 
-  def getInvoiceItemId(invoiceItemsResponse: GetInvoiceItemsResponse) =
-    invoiceItemsResponse.invoiceItems.headOption
-      .map(_.id)
-      .map(ZIO.succeed(_))
-      .getOrElse(
-        ZIO.fail(
-          s"Empty list of invoice items in response $invoiceItemsResponse this is an error " +
-            s"as we need the invoice item id in order to balance the negative (cancellation) invoice",
-        ),
-      )
-
   def adjustInvoiceBalanceToZero(
-      invoiceId: String,
+      invoiceItemsForSub: InvoiceItemsForSubscription,
       balance: BigDecimal,
   ): ZIO[GetInvoiceItems with InvoiceItemAdjustment, String, Unit] =
     for {
-      _ <- ZIO.log(s"Invoice with id $invoiceId still has balance of $balance")
-      invoiceItems <- GetInvoiceItems.get(invoiceId)
-      invoiceItemId <- getInvoiceItemId(invoiceItems)
-      _ <- InvoiceItemAdjustment.update(invoiceId, balance.abs, invoiceItemId)
+      negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
+      invoiceItemId <- invoiceItemsForSub.negativeInvoiceItemId
+      _ <- ZIO.log(s"Invoice with id $negativeInvoiceId still has balance of $balance")
+      _ <- InvoiceItemAdjustment.update(
+        negativeInvoiceId,
+        balance.abs,
+        invoiceItemId,
+      )
       _ <- ZIO.log(
         s"Successfully applied invoice item adjustment of $balance" +
-          s" to invoice item $invoiceItemId of invoice $invoiceId",
+          s" to invoice item $invoiceItemId of invoice $negativeInvoiceId",
       )
     } yield ()
-
 }

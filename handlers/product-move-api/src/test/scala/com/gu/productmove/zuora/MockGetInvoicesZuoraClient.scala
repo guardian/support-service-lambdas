@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.zuora.GetInvoiceToBeRefunded.{GetInvoiceItemsResponse, PostBody, getZuoraQuery}
+import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{InvoiceItemsForSubscription, PostBody, getZuoraQuery}
 import com.gu.productmove.zuora.rest.ZuoraRestBody
 import sttp.client3.Request
 import sttp.model.Uri

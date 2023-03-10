@@ -20,32 +20,38 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
     suite("GetSwitchInvoice")(test("finds the right amount for a switched sub") {
 
       for {
-        result <- GetInvoiceToBeRefunded
+        result <- GetInvoiceItemsForSubscription
           .get("A-S00492211")
           .provide(
-            GetInvoiceToBeRefundedLive.layer,
+            GetInvoiceItemsForSubscriptionLive.layer,
             ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.switchedResponse)),
             ZuoraGetLive.layer,
           )
+        negativeInvoiceId <- result.negativeInvoiceId
+        lastPaidInvoiceId <- result.lastPaidInvoiceId
+        lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
       } yield {
-        assert(result.getNegativeInvoice._1)(equalTo("8ad0934e86a19cca0186a817d551251e"))
-        assert(result.getLastPaidInvoice._1)(equalTo("8ad08d2986a18ded0186a811f7e56e01"))
-        assert(result.getLastPaidInvoiceAmount)(equalTo(12.14))
+        assert(negativeInvoiceId)(equalTo("8ad0934e86a19cca0186a817d551251e"))
+        assert(lastPaidInvoiceId)(equalTo("8ad08d2986a18ded0186a811f7e56e01"))
+        assert(lastPaidInvoiceAmount)(equalTo(12.14))
       }
     },
       test("finds the right amount for a regular cancelled sub") {
         for {
-          result <- GetInvoiceToBeRefunded
+          result <- GetInvoiceItemsForSubscription
             .get("A-S00502641")
             .provide(
-              GetInvoiceToBeRefundedLive.layer,
+              GetInvoiceItemsForSubscriptionLive.layer,
               ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.standardSubResponse)),
               ZuoraGetLive.layer,
             )
+          negativeInvoiceId <- result.negativeInvoiceId
+          lastPaidInvoiceId <- result.lastPaidInvoiceId
+          lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
         } yield {
-          assert(result.getNegativeInvoice._1)(equalTo("8ad09b2186b5fdb50186b708669f2114"))
-          assert(result.getLastPaidInvoice._1)(equalTo("8ad08c8486b5ec340186b70539871852"))
-          assert(result.getLastPaidInvoiceAmount)(equalTo(20))
+          assert(negativeInvoiceId)(equalTo("8ad09b2186b5fdb50186b708669f2114"))
+          assert(lastPaidInvoiceId)(equalTo("8ad08c8486b5ec340186b70539871852"))
+          assert(lastPaidInvoiceAmount)(equalTo(20))
         }
       }
     )

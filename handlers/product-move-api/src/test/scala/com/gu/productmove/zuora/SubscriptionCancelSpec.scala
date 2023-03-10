@@ -26,7 +26,7 @@ object SubscriptionCancelSpec extends ZIOSpecDefault {
       for {
         _ <- TestClock.setTime(LocalDateTime.now.toInstant(ZoneOffset.UTC))
         _ <- SubscriptionCancelEndpoint
-          .subscriptionCancel("A-S00497710", ExpectedInput("mma_other"), refundType = Synchronous)
+          .subscriptionCancel("A-S00501468", ExpectedInput("mma_other"), refundType = Synchronous)
           .provide(
             GetSubscriptionLive.layer,
             ZuoraCancelLive.layer,
@@ -40,12 +40,12 @@ object SubscriptionCancelSpec extends ZIOSpecDefault {
             InvoicingApiRefundLive.layer,
             CreditBalanceAdjustmentLive.layer,
             AwsS3Live.layer,
-            GetInvoiceToBeRefundedLive.layer,
+            GetInvoiceItemsForSubscriptionLive.layer,
             GetInvoiceLive.layer,
             GetInvoiceItemsLive.layer,
             InvoiceItemAdjustmentLive.layer,
           )
       } yield assert(true)(equalTo(true))
-    }  @@ TestAspect.ignore)
+    } @@ TestAspect.ignore)
 
 }

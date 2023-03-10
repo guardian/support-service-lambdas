@@ -20,8 +20,8 @@ import com.gu.productmove.zuora.{
   GetInvoiceItems,
   GetInvoiceItemsLive,
   GetInvoiceLive,
-  GetInvoiceToBeRefunded,
-  GetInvoiceToBeRefundedLive,
+  GetInvoiceItemsForSubscription,
+  GetInvoiceItemsForSubscriptionLive,
   InvoiceItemAdjustment,
   InvoiceItemAdjustmentLive,
   ZuoraCancel,
@@ -117,7 +117,7 @@ object SubscriptionCancelEndpoint {
         AwsS3Live.layer,
         InvoicingApiRefundLive.layer,
         CreditBalanceAdjustmentLive.layer,
-        GetInvoiceToBeRefundedLive.layer,
+        GetInvoiceItemsForSubscriptionLive.layer,
         GetInvoiceLive.layer,
         GetInvoiceItemsLive.layer,
         InvoiceItemAdjustmentLive.layer,
@@ -167,18 +167,14 @@ object SubscriptionCancelEndpoint {
       with Stage
       with SttpBackend[Task, Any]
       with AwsS3
-      with GetInvoiceToBeRefunded
+      with GetInvoiceItemsForSubscription
       with GetInvoice
       with GetInvoiceItems
       with InvoiceItemAdjustment,
     String,
     Unit,
   ] = for {
-    _ <- ZIO.log(
-      s"Attempting to synchronously refund ${refundInput.refundAmount} " +
-        s"to subscription ${refundInput.subscriptionName} " +
-        s"with negative invoiceId ${refundInput.invoiceId}",
-    )
+    _ <- ZIO.log(s"Attempting to synchronously refund subscription ${refundInput.subscriptionName}")
     _ <- Refund.applyRefund(refundInput)
   } yield ()
 
@@ -200,7 +196,7 @@ object SubscriptionCancelEndpoint {
       with Stage
       with SttpBackend[Task, Any]
       with AwsS3
-      with GetInvoiceToBeRefunded
+      with GetInvoiceItemsForSubscription
       with GetInvoice
       with GetInvoiceItems
       with InvoiceItemAdjustment,
@@ -249,14 +245,13 @@ object SubscriptionCancelEndpoint {
         if (shouldBeRefunded)
           for {
             _ <- ZIO.log(s"Attempting to refund sub")
-            refundAmount = charges.foldLeft(BigDecimal(0))(_ + _.price)
             negativeInvoice <- ZIO
               .fromOption(cancellationResponse.invoiceId)
               .orElseFail(
                 s"URGENT: subscription $subscriptionName should be refunded but has no negative invoice attached.",
               )
-            _ <- ZIO.log(s"Negative invoice id is $negativeInvoice, refund amount is $refundAmount")
-            _ <- doRefund(refundType, RefundInput(subscriptionName, negativeInvoice, refundAmount))
+            _ <- ZIO.log(s"Negative invoice id is $negativeInvoice")
+            _ <- doRefund(refundType, RefundInput(subscriptionName))
           } yield ()
         else ZIO.succeed(RefundResponse("Success", ""))
 

@@ -24,10 +24,9 @@ object RefundSpec extends ZIOSpecDefault {
       /*
            Test suite used to run the refund lambda locally
        */
-
       for {
         _ <- Refund
-          .applyRefund(RefundInput("A-S00497072", "8ad0889d86bb645e0186bce2e9f86afb", 20))
+          .applyRefund(RefundInput("A-S00497072"))
           .provide(
             AwsS3Live.layer,
             AwsCredentialsLive.layer,
@@ -37,7 +36,7 @@ object RefundSpec extends ZIOSpecDefault {
             GuStageLive.layer,
             InvoicingApiRefundLive.layer,
             CreditBalanceAdjustmentLive.layer,
-            GetInvoiceToBeRefundedLive.layer,
+            GetInvoiceItemsForSubscriptionLive.layer,
             GetInvoiceLive.layer,
             GetInvoiceItemsLive.layer,
             InvoiceItemAdjustmentLive.layer,

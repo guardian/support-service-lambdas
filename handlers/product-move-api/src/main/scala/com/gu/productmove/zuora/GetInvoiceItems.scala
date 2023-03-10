@@ -5,7 +5,7 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck.None
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
-import GetInvoiceToBeRefunded.InvoiceItem
+import GetInvoiceItemsForSubscription.InvoiceItem
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
