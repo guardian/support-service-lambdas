@@ -18,14 +18,14 @@ import zio.test.*
 
 import java.time.*
 
-object RefundSpec extends ZIOSpecDefault {
+object RefundSupporterPlusSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("Refund")(test("Run refund lambda locally") {
+    suite("RefundSupporterPlus")(test("Run refund lambda locally") {
       /*
-           Test suite used to run the refund lambda locally
+           Test suite used to run the RefundSupporterPlus lambda locally
        */
       for {
-        _ <- Refund
+        _ <- RefundSupporterPlus
           .applyRefund(RefundInput("A-S00497072"))
           .provide(
             AwsS3Live.layer,
@@ -38,7 +38,6 @@ object RefundSpec extends ZIOSpecDefault {
             CreditBalanceAdjustmentLive.layer,
             GetInvoiceItemsForSubscriptionLive.layer,
             GetInvoiceLive.layer,
-            GetInvoiceItemsLive.layer,
             InvoiceItemAdjustmentLive.layer,
           )
       } yield assert(true)(equalTo(true))

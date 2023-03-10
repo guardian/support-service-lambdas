@@ -9,14 +9,12 @@ import com.gu.productmove.endpoint.cancel.zuora.GetSubscription
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
-import com.gu.productmove.zuora.GetInvoiceItems.GetInvoiceItemsResponse
 import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemsForSubscription
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
   GetAccountLive,
   GetInvoice,
-  GetInvoiceItems,
   GetInvoiceItemsForSubscription,
   GetSubscriptionLive,
   InvoiceItemAdjustment,
@@ -39,7 +37,7 @@ object RefundInput {
   given JsonEncoder[RefundInput] = DeriveJsonEncoder.gen[RefundInput]
 }
 
-object Refund {
+object RefundSupporterPlus {
   def applyRefund(refundInput: RefundInput): ZIO[
     InvoicingApiRefund
       with CreditBalanceAdjustment
@@ -48,7 +46,6 @@ object Refund {
       with AwsS3
       with GetInvoiceItemsForSubscription
       with GetInvoice
-      with GetInvoiceItems
       with InvoiceItemAdjustment,
     String,
     Unit,
@@ -69,7 +66,7 @@ object Refund {
 
   def ensureThatNegativeInvoiceBalanceIsZero(
       invoiceItemsForSub: InvoiceItemsForSubscription,
-  ): ZIO[GetInvoice with GetInvoiceItems with InvoiceItemAdjustment, String, Unit] = for {
+  ): ZIO[GetInvoice  with InvoiceItemAdjustment, String, Unit] = for {
     negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(
@@ -86,7 +83,7 @@ object Refund {
   def adjustInvoiceBalanceToZero(
       invoiceItemsForSub: InvoiceItemsForSubscription,
       balance: BigDecimal,
-  ): ZIO[GetInvoiceItems with InvoiceItemAdjustment, String, Unit] =
+  ): ZIO[InvoiceItemAdjustment, String, Unit] =
     for {
       negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
       invoiceItemId <- invoiceItemsForSub.negativeInvoiceItemId

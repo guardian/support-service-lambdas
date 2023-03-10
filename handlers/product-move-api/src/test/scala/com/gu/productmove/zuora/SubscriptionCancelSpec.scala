@@ -5,8 +5,8 @@ import com.gu.productmove.endpoint.cancel.zuora.GetSubscriptionLive
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.ExpectedInput
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
-import com.gu.productmove.refund.{Refund, RefundInput}
-import com.gu.productmove.zuora.RefundSpec.{suite, test}
+import com.gu.productmove.refund.{RefundSupporterPlus, RefundInput}
+import com.gu.productmove.zuora.RefundSupporterPlusSpec.{suite, test}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.RefundType.*
 import zio.Scope
@@ -42,7 +42,6 @@ object SubscriptionCancelSpec extends ZIOSpecDefault {
             AwsS3Live.layer,
             GetInvoiceItemsForSubscriptionLive.layer,
             GetInvoiceLive.layer,
-            GetInvoiceItemsLive.layer,
             InvoiceItemAdjustmentLive.layer,
           )
       } yield assert(true)(equalTo(true))

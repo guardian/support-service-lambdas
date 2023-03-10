@@ -2,8 +2,8 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
-import com.gu.productmove.refund.{Refund, RefundInput}
-import com.gu.productmove.zuora.RefundSpec.{suite, test}
+import com.gu.productmove.refund.{RefundSupporterPlus, RefundInput}
+import com.gu.productmove.zuora.RefundSupporterPlusSpec.{suite, test}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import zio.Scope
 import zio.test.Assertion.equalTo

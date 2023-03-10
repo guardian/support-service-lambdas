@@ -7,7 +7,6 @@ import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustmentLive,
-  GetInvoiceItemsLive,
   GetInvoiceLive,
   GetInvoiceItemsForSubscription,
   GetInvoiceItemsForSubscriptionLive,
@@ -41,7 +40,7 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
     val runtime = Runtime.default
     Unsafe.unsafe {
       runtime.unsafe.run(
-        Refund
+        RefundSupporterPlus
           .applyRefund(refundInput)
           .provide(
             AwsS3Live.layer,
@@ -54,7 +53,6 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
             CreditBalanceAdjustmentLive.layer,
             GetInvoiceItemsForSubscriptionLive.layer,
             GetInvoiceLive.layer,
-            GetInvoiceItemsLive.layer,
             InvoiceItemAdjustmentLive.layer,
           ),
       ) match

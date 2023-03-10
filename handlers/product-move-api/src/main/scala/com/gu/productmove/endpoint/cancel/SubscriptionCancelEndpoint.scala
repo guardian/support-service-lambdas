@@ -17,8 +17,6 @@ import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
   CreditBalanceAdjustmentLive,
   GetInvoice,
-  GetInvoiceItems,
-  GetInvoiceItemsLive,
   GetInvoiceLive,
   GetInvoiceItemsForSubscription,
   GetInvoiceItemsForSubscriptionLive,
@@ -119,7 +117,6 @@ object SubscriptionCancelEndpoint {
         CreditBalanceAdjustmentLive.layer,
         GetInvoiceItemsForSubscriptionLive.layer,
         GetInvoiceLive.layer,
-        GetInvoiceItemsLive.layer,
         InvoiceItemAdjustmentLive.layer,
       )
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
@@ -169,13 +166,12 @@ object SubscriptionCancelEndpoint {
       with AwsS3
       with GetInvoiceItemsForSubscription
       with GetInvoice
-      with GetInvoiceItems
       with InvoiceItemAdjustment,
     String,
     Unit,
   ] = for {
     _ <- ZIO.log(s"Attempting to synchronously refund subscription ${refundInput.subscriptionName}")
-    _ <- Refund.applyRefund(refundInput)
+    _ <- RefundSupporterPlus.applyRefund(refundInput)
   } yield ()
 
   private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
@@ -198,7 +194,6 @@ object SubscriptionCancelEndpoint {
       with AwsS3
       with GetInvoiceItemsForSubscription
       with GetInvoice
-      with GetInvoiceItems
       with InvoiceItemAdjustment,
     String,
     OutputBody,
