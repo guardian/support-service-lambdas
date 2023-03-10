@@ -186,7 +186,7 @@ Resources:
       QueueName: !Sub product-switch-refund-${Stage}
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt RefundDeadLetterQueue.Arn
-        maxReceiveCount: 2
+        maxReceiveCount: 1
 
   RefundDeadLetterQueue:
     Type: AWS::SQS::Queue
