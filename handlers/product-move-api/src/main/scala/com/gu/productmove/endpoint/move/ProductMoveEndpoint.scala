@@ -201,7 +201,7 @@ object ProductMoveEndpoint {
       price: BigDecimal,
       currentRatePlan: GetSubscription.RatePlan,
       subscription: GetSubscription.GetSubscriptionResponse,
-      csrId: Option[String],
+      csrUserId: Option[String],
       caseId: Option[String],
   ) = for {
     _ <- ZIO.log("Performing product move update")
@@ -258,7 +258,7 @@ object ProductMoveEndpoint {
           todaysDate,
           todaysDate,
           paidAmount,
-          csrId,
+          csrUserId,
           caseId,
         ),
       )
