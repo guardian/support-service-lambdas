@@ -20,7 +20,7 @@ object ProductMoveEndpointTypes {
       @description("Whether to preview the move or to carry it out") preview: Boolean,
       @description(
         "The User Id of the CSR performing the Switch. Populated only if the request comes from Salesforce",
-      ) csrId: Option[String],
+      ) csrUserId: Option[String],
       @description(
         "The Case Id of the Salesforce Case related to the Switch. Populated only if the request comes from Salesforce",
       ) caseId: Option[String],

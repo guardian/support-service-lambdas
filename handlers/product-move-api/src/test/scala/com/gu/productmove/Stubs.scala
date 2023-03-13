@@ -272,7 +272,7 @@ val salesforceRecordInput1 = SalesforceRecordInput(
   LocalDate.of(2022, 5, 10),
   LocalDate.of(2022, 5, 10),
   BigDecimal(4),
-  csrId = None,
+  csrUserId = None,
   caseId = None,
 )
 val salesforceRecordInput2 = SalesforceRecordInput(
@@ -285,7 +285,7 @@ val salesforceRecordInput2 = SalesforceRecordInput(
   LocalDate.of(2022, 5, 10),
   LocalDate.of(2022, 5, 10),
   BigDecimal(20),
-  csrId = None,
+  csrUserId = None,
   caseId = None,
 )
 val salesforceRecordInput3 = SalesforceRecordInput(
@@ -298,7 +298,7 @@ val salesforceRecordInput3 = SalesforceRecordInput(
   LocalDate.of(2022, 5, 10),
   LocalDate.of(2022, 5, 10),
   BigDecimal(0),
-  csrId = None,
+  csrUserId = None,
   caseId = None,
 )
 

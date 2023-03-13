@@ -44,8 +44,8 @@ object CreateRecordSpec extends ZIOSpecDefault {
                 requestedDate = LocalDate.now(),
                 effectiveDate = LocalDate.now(),
                 paidAmount = 12.000000,
-                csrId = Some("a_csr_id"),
-                caseId = Some("a_case_id"),
+                csrUserId = Some("0050J000005ZDPfQAO"),
+                caseId = Some("5009E00000Mph1qQAB"),
               ),
             )
             .provide(
@@ -72,7 +72,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
               requestedDate = LocalDate.parse("2022-12-08"),
               effectiveDate = LocalDate.parse("2022-12-09"),
               paidAmount = BigDecimal(50),
-              csrId = Some("a_csr_id"),
+              csrUserId = Some("a_csr_id"),
               caseId = Some("a_case_id"),
             ),
           )

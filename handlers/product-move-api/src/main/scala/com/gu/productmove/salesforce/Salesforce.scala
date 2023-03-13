@@ -17,7 +17,7 @@ object Salesforce {
       requestedDate: LocalDate,
       effectiveDate: LocalDate,
       paidAmount: BigDecimal,
-      csrId: Option[String],
+      csrUserId: Option[String],
       caseId: Option[String],
   )
 
@@ -41,7 +41,7 @@ object Salesforce {
         Requested_Date__c = requestedDate,
         Effective_Date__c = effectiveDate,
         Paid_Amount__c = paidAmount,
-        CSR__c = csrId,
+        CSR__c = csrUserId,
         Case__c = caseId,
       )
       _ <- CreateRecord.create(request)

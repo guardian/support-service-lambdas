@@ -178,7 +178,7 @@ object ProductMoveEndpoint {
             postData.price,
             currentRatePlan,
             subscription,
-            postData.csrId,
+            postData.csrUserId,
             postData.caseId,
           )
     } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
