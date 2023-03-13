@@ -18,6 +18,8 @@ object ProductMoveEndpointTypes {
   case class ExpectedInput(
       @description("Price of new Supporter Plus subscription") price: BigDecimal,
       @description("Whether to preview the move or to carry it out") preview: Boolean,
+      @description("The User Id of the CSR performing the Switch. Populated only if the request comes from Salesforce") userId: String,
+      @description("The Case Id of the Salesforce Case related to the Switch. Populated only if the request comes from Salesforce") caseId: String,
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
