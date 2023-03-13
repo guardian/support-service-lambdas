@@ -72,8 +72,8 @@ object CreateRecordSpec extends ZIOSpecDefault {
               requestedDate = LocalDate.parse("2022-12-08"),
               effectiveDate = LocalDate.parse("2022-12-09"),
               paidAmount = BigDecimal(50),
-              csrUserId = Some("a_csr_id"),
-              caseId = Some("a_case_id"),
+              csrUserId = None,
+              caseId = None,
             ),
           )
 
@@ -83,6 +83,38 @@ object CreateRecordSpec extends ZIOSpecDefault {
           assert(output)(equalTo(())) &&
           assert(getSubRequests)(equalTo(List("A-S00102815"))) &&
           assert(subUpdateRequests)(equalTo(List(createRecordRequest1)))
+        }).provide(
+          ZLayer.succeed(new MockGetSfSubscription(getSfSubscriptionStubs)),
+          ZLayer.succeed(new MockCreateRecord(createRecordStubs)),
+        )
+      },
+      test("Source is set correctly for CSR switches") {
+        val getSfSubscriptionStubs = Map("A-S00102815" -> sfSubscription1)
+        val createRecordStubs = Map(createRecordRequest2 -> CreateRecordResponse("a0s9E00000ehvxUQAQ"))
+
+        (for {
+          output <- Salesforce.createSfRecord(
+            SalesforceRecordInput(
+              subscriptionName = "A-S00102815",
+              previousAmount = BigDecimal(100),
+              newAmount = BigDecimal(100),
+              previousProductName = "previous product name",
+              previousRatePlanName = "previous rate plan",
+              newRatePlanName = "new rate plan",
+              requestedDate = LocalDate.parse("2022-12-08"),
+              effectiveDate = LocalDate.parse("2022-12-09"),
+              paidAmount = BigDecimal(50),
+              csrUserId = Some("a_csr_id"),
+              caseId = Some("a_case_id"),
+            ),
+          )
+
+          getSubRequests <- MockGetSfSubscription.requests
+          subUpdateRequests <- MockCreateRecord.requests
+        } yield {
+          assert(output)(equalTo(())) &&
+            assert(getSubRequests)(equalTo(List("A-S00102815"))) &&
+            assert(subUpdateRequests)(equalTo(List(createRecordRequest2)))
         }).provide(
           ZLayer.succeed(new MockGetSfSubscription(getSfSubscriptionStubs)),
           ZLayer.succeed(new MockCreateRecord(createRecordStubs)),

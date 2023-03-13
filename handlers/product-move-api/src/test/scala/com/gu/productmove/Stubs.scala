@@ -337,6 +337,21 @@ val createRecordRequest1 = CreateRecordRequest(
   Requested_Date__c = LocalDate.parse("2022-12-08"),
   Effective_Date__c = LocalDate.parse("2022-12-09"),
   Paid_Amount__c = BigDecimal(50),
+  CSR__c = None,
+  Case__c = None,
+)
+
+val createRecordRequest2 = CreateRecordRequest(
+  SF_Subscription__c = "123456",
+  Previous_Amount__c = BigDecimal(100),
+  New_Amount__c = BigDecimal(100),
+  Previous_Product_Name__c = "previous product name",
+  Previous_Rate_Plan_Name__c = "previous rate plan",
+  New_Rate_Plan_Name__c = "new rate plan",
+  Requested_Date__c = LocalDate.parse("2022-12-08"),
+  Effective_Date__c = LocalDate.parse("2022-12-09"),
+  Paid_Amount__c = BigDecimal(50),
   CSR__c = Some("a_csr_id"),
   Case__c = Some("a_case_id"),
+  Source__c = "CSR",
 )
