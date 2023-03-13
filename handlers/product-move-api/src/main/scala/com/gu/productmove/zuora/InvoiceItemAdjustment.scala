@@ -34,7 +34,7 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
       response <- zuoraGet.post[PostBody, InvoiceItemAdjustmentResponse](
         uri"object/invoice-item-adjustment",
         PostBody(today, amount, invoiceId, invoiceItemId),
-        ZuoraRestBody.ZuoraSuccessCheck.None,
+        ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckCapitalised,
       )
     } yield response
 
@@ -53,7 +53,7 @@ object InvoiceItemAdjustment {
       Comment: String = "Created by the product-move-api refund process to balance a cancelled invoice",
   )
 
-  case class InvoiceItemAdjustmentResponse(Success: String)
+  case class InvoiceItemAdjustmentResponse(Success: Boolean)
 
   given JsonDecoder[InvoiceItemAdjustmentResponse] = DeriveJsonDecoder.gen[InvoiceItemAdjustmentResponse]
   given JsonEncoder[PostBody] = DeriveJsonEncoder.gen[PostBody]

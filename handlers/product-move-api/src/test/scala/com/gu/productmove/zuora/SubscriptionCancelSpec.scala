@@ -22,11 +22,10 @@ object SubscriptionCancelSpec extends ZIOSpecDefault {
       /*
            Test suite used to run the cancellation lambda locally
        */
-
       for {
         _ <- TestClock.setTime(LocalDateTime.now.toInstant(ZoneOffset.UTC))
         _ <- SubscriptionCancelEndpoint
-          .subscriptionCancel("A-S00501468", ExpectedInput("mma_other"), refundType = Synchronous)
+          .subscriptionCancel("A-S00499867", ExpectedInput("mma_other"), refundType = Synchronous)
           .provide(
             GetSubscriptionLive.layer,
             ZuoraCancelLive.layer,
