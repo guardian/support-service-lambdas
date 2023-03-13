@@ -201,7 +201,7 @@ Resources:
               - sqs:DeleteMessage
               - sqs:GetQueueAttributes
               - sqs:ReceiveMessage
-            Resource: "*"
+            Resource: !GetAtt SoftOptInsQueue.Arn
 
   SoftOptInsQueue:
     Type: AWS::SQS::Queue
