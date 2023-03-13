@@ -35,15 +35,17 @@ object CreateRecordSpec extends ZIOSpecDefault {
           _ <- Salesforce
             .createSfRecord(
               SalesforceRecordInput(
-                "A-S00102815",
-                10.0000000,
-                10.0000000,
-                "previous product name",
-                "previous rate plan",
-                "new rate plan",
-                LocalDate.now(),
-                LocalDate.now(),
-                12.000000,
+                subscriptionName = "A-S00102815",
+                previousAmount = 10.0000000,
+                newAmount = 10.0000000,
+                previousProductName = "previous product name",
+                previousRatePlanName = "previous rate plan",
+                newRatePlanName = "new rate plan",
+                requestedDate = LocalDate.now(),
+                effectiveDate = LocalDate.now(),
+                paidAmount = 12.000000,
+                csrId = Some("a_csr_id"),
+                caseId = Some("a_case_id"),
               ),
             )
             .provide(
@@ -61,15 +63,17 @@ object CreateRecordSpec extends ZIOSpecDefault {
         (for {
           output <- Salesforce.createSfRecord(
             SalesforceRecordInput(
-              "A-S00102815",
-              BigDecimal(100),
-              BigDecimal(100),
-              "previous product name",
-              "previous rate plan",
-              "new rate plan",
-              LocalDate.parse("2022-12-08"),
-              LocalDate.parse("2022-12-09"),
-              BigDecimal(50),
+              subscriptionName = "A-S00102815",
+              previousAmount = BigDecimal(100),
+              newAmount = BigDecimal(100),
+              previousProductName = "previous product name",
+              previousRatePlanName = "previous rate plan",
+              newRatePlanName = "new rate plan",
+              requestedDate = LocalDate.parse("2022-12-08"),
+              effectiveDate = LocalDate.parse("2022-12-09"),
+              paidAmount = BigDecimal(50),
+              csrId = Some("a_csr_id"),
+              caseId = Some("a_case_id"),
             ),
           )
 

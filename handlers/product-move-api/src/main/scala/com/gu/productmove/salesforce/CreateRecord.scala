@@ -43,6 +43,8 @@ object CreateRecord {
       Requested_Date__c: LocalDate,
       Effective_Date__c: LocalDate,
       Paid_Amount__c: BigDecimal,
+      CSR__c: Option[String],
+      Case__c: Option[String],
   )
   given JsonEncoder[CreateRecordRequest] = DeriveJsonEncoder.gen[CreateRecordRequest]
 

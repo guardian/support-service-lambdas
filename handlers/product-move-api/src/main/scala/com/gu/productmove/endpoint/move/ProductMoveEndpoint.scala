@@ -56,7 +56,7 @@ object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00448793", ExpectedInput(1, false)),
+    run("A-S00448793", ExpectedInput(1, false, None, None)),
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[
@@ -172,7 +172,15 @@ object ProductMoveEndpoint {
         if (postData.preview)
           doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currentRatePlan.id)
         else
-          doUpdate(subscriptionName, ratePlanCharge, postData.price, currentRatePlan, subscription)
+          doUpdate(
+            subscriptionName,
+            ratePlanCharge,
+            postData.price,
+            currentRatePlan,
+            subscription,
+            postData.csrId,
+            postData.caseId,
+          )
     } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
 
   def doPreview(
@@ -193,6 +201,8 @@ object ProductMoveEndpoint {
       price: BigDecimal,
       currentRatePlan: GetSubscription.RatePlan,
       subscription: GetSubscription.GetSubscriptionResponse,
+      csrId: Option[String],
+      caseId: Option[String],
   ) = for {
     _ <- ZIO.log("Performing product move update")
     stage <- ZIO.service[Stage]
@@ -248,6 +258,8 @@ object ProductMoveEndpoint {
           todaysDate,
           todaysDate,
           paidAmount,
+          csrId,
+          caseId,
         ),
       )
       .fork

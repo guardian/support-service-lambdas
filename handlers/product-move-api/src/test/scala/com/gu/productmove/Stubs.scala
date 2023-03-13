@@ -272,6 +272,8 @@ val salesforceRecordInput1 = SalesforceRecordInput(
   LocalDate.of(2022, 5, 10),
   LocalDate.of(2022, 5, 10),
   BigDecimal(4),
+  csrId = None,
+  caseId = None,
 )
 val salesforceRecordInput2 = SalesforceRecordInput(
   "A-S00339056",
@@ -283,6 +285,8 @@ val salesforceRecordInput2 = SalesforceRecordInput(
   LocalDate.of(2022, 5, 10),
   LocalDate.of(2022, 5, 10),
   BigDecimal(20),
+  csrId = None,
+  caseId = None,
 )
 val salesforceRecordInput3 = SalesforceRecordInput(
   "A-S00339056",
@@ -294,7 +298,10 @@ val salesforceRecordInput3 = SalesforceRecordInput(
   LocalDate.of(2022, 5, 10),
   LocalDate.of(2022, 5, 10),
   BigDecimal(0),
+  csrId = None,
+  caseId = None,
 )
+
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
@@ -330,4 +337,6 @@ val createRecordRequest1 = CreateRecordRequest(
   Requested_Date__c = LocalDate.parse("2022-12-08"),
   Effective_Date__c = LocalDate.parse("2022-12-09"),
   Paid_Amount__c = BigDecimal(50),
+  CSR__c = Some("a_csr_id"),
+  Case__c = Some("a_case_id"),
 )

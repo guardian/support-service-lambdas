@@ -17,6 +17,8 @@ object Salesforce {
       requestedDate: LocalDate,
       effectiveDate: LocalDate,
       paidAmount: BigDecimal,
+      csrId: Option[String],
+      caseId: Option[String],
   )
 
   given JsonDecoder[SalesforceRecordInput] = DeriveJsonDecoder.gen[SalesforceRecordInput]
@@ -39,6 +41,8 @@ object Salesforce {
         Requested_Date__c = requestedDate,
         Effective_Date__c = effectiveDate,
         Paid_Amount__c = paidAmount,
+        CSR__c = csrId,
+        Case__c = caseId,
       )
       _ <- CreateRecord.create(request)
     } yield ()
