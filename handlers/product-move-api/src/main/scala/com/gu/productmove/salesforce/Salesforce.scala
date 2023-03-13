@@ -43,6 +43,7 @@ object Salesforce {
         Paid_Amount__c = paidAmount,
         CSR__c = csrUserId,
         Case__c = caseId,
+        Source__c = csrUserId.map(_ => "CSR").getOrElse("MMA")
       )
       _ <- CreateRecord.create(request)
     } yield ()
