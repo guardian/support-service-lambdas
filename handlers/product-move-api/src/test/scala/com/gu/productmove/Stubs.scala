@@ -260,8 +260,6 @@ val emailMessageBodyNoPaymentOrRefund = EmailMessage(
 
 val refundInput1 = RefundInput(
   subscriptionName = "A-S00339056",
-  invoiceId = "80a23d9sdf9a89fs8cjjk2",
-  refundAmount = 4,
 )
 
 val salesforceRecordInput1 = SalesforceRecordInput(

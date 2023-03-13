@@ -79,7 +79,7 @@ object ZuoraRestBody {
   // the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success property, and instead returns `size: "0"` if nothing was found
   // Zuora either returns a "success" property with a lower or upper case starting letter, hence the need for SuccessCheckLowercase and SuccessCheckCapitalised enums
   enum ZuoraSuccessCheck:
-    case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised
+    case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised, None
 
   case class Reason(
       code: Int,
@@ -126,6 +126,7 @@ object ZuoraRestBody {
                 case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
               }
         } yield ()
+      case ZuoraSuccessCheck.None => Right(())
     }
 
     isSuccessful.flatMap(_ => body.fromJson[A])

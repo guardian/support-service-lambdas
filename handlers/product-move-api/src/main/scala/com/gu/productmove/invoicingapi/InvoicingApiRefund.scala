@@ -40,10 +40,9 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
   override def refund(
       subscriptionName: String,
       amount: BigDecimal,
-      adjustInvoices: Boolean,
   ): ZIO[Any, String, RefundResponse] = {
 
-    val requestBody = RefundRequest(subscriptionName, amount, adjustInvoices)
+    val requestBody = RefundRequest(subscriptionName, amount)
     basicRequest
       .contentType("application/json")
       .header("x-api-key", config.apiKey)
@@ -64,18 +63,17 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
 }
 
 trait InvoicingApiRefund {
-  def refund(subscriptionName: String, amount: BigDecimal, adjustInvoices: Boolean): ZIO[Any, String, RefundResponse]
+  def refund(subscriptionName: String, amount: BigDecimal): ZIO[Any, String, RefundResponse]
 }
 
 object InvoicingApiRefund {
   def refund(
       subscriptionName: String,
       amount: BigDecimal,
-      adjustInvoices: Boolean = true,
   ): ZIO[InvoicingApiRefund, String, RefundResponse] =
-    ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount, adjustInvoices))
+    ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount))
 
-  case class RefundRequest(subscriptionName: String, refund: BigDecimal, adjustInvoices: Boolean)
+  case class RefundRequest(subscriptionName: String, refund: BigDecimal)
   /* Full response from Invoicing api is as follows:
   {
     "subscriptionName": "A-S00427546",
