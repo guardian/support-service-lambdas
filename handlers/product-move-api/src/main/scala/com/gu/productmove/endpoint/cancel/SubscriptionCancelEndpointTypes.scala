@@ -10,7 +10,7 @@ object SubscriptionCancelEndpointTypes {
 
   enum RefundType:
     case Asynchronous, Synchronous, NoRefund
-    
+
   case class ExpectedInput(
       @description("User cancellation reason - from a picklist.")
       @encodedExample(

@@ -62,7 +62,7 @@ object Handler extends Logging {
 
   private def send(brazeMessages: List[BrazeSqsMessage]): List[Either[String, String]] = {
     val queueName =
-      if (RawEffects.stage.isProd) QueueName("contributions-thanks") else QueueName("contributions-thanks-dev")
+      if (RawEffects.stage.isProd) QueueName("braze-emails-PROD") else QueueName("braze-emails-CODE")
     val send = SqsSync.send(SqsSync.buildClient)(queueName) _
     brazeMessages.map { msg =>
       val payloadString = Json.prettyPrint(Json.toJson(msg))

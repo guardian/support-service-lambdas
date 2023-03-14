@@ -85,11 +85,11 @@ object AddGuardianWeeklySub {
       isValidAddressForPlan: (BillToAddress, SoldToAddress) => ValidationResult[Unit],
       createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-      emailQueueNames: EmailQueueNames,
+      emailQueueName: QueueName,
       sixForSixPlanId: PlanId,
       quarterlyPlanId: PlanId,
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
-    val guardianWeeklySqsQueueSend = awsSQSSend(emailQueueNames.guardianWeekly)
+    val guardianWeeklySqsQueueSend = awsSQSSend(emailQueueName)
     val guardianWeeklyBrazeConfirmationSqsSend = EtSqsSend[GuardianWeeklyEmailData](guardianWeeklySqsQueueSend) _
     val sendConfirmationEmail = SendConfirmationEmail(guardianWeeklyBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)

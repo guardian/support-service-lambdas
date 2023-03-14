@@ -64,7 +64,7 @@ case class DigitalVoucher(barcode_url: String)
 case class EmailPayloadContactAttributes(SubscriberAttributes: BrazeApiTriggerProperties)
 case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
 
-// Message put on the SQS contributions-thanks queue for pickup by membership-workflow
+// Message put on the SQS braze-emails-$stage queue for pickup by membership-workflow
 case class BrazeSqsMessage(
     To: EmailPayloadTo,
     DataExtensionName: String,

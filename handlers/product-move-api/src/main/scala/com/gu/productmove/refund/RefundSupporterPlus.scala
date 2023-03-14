@@ -66,7 +66,7 @@ object RefundSupporterPlus {
 
   def ensureThatNegativeInvoiceBalanceIsZero(
       invoiceItemsForSub: InvoiceItemsForSubscription,
-  ): ZIO[GetInvoice  with InvoiceItemAdjustment, String, Unit] = for {
+  ): ZIO[GetInvoice with InvoiceItemAdjustment, String, Unit] = for {
     negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(

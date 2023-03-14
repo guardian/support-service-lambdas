@@ -19,13 +19,6 @@ Parameters:
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
 
-Mappings:
-  StageConstants:
-    PROD:
-      EmailQueue: contributions-thanks
-    CODE:
-      EmailQueue: contributions-thanks-dev
-
 Resources:
     ZuoraAutoCancelRole:
         Type: AWS::IAM::Role
@@ -59,7 +52,9 @@ Resources:
                             Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email
                           - Effect: Allow
                             Action: sqs:*
-                            Resource: !Sub ["arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${EmailQueue}", {EmailQueue: !FindInMap ["StageConstants", !Ref Stage, "EmailQueue"]}]
+                            Resource:
+                              - Fn::ImportValue:
+                                  !Sub "comms-${Stage}-EmailQueueArn"
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:

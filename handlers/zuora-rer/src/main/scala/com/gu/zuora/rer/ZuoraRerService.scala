@@ -13,7 +13,12 @@ case class AccountContact(Id: String, WorkEmail: Option[String])
 case class AccountBasicInfo(id: String, accountNumber: String, status: String)
 case class AccountMetrics(balance: BigDecimal, creditBalance: BigDecimal, totalInvoiceBalance: BigDecimal)
 case class AccountContactId(id: String)
-case class CustomerAccount(basicInfo: AccountBasicInfo, metrics: AccountMetrics, billToContact: AccountContactId, soldToContact: AccountContactId)
+case class CustomerAccount(
+    basicInfo: AccountBasicInfo,
+    metrics: AccountMetrics,
+    billToContact: AccountContactId,
+    soldToContact: AccountContactId,
+)
 case class BillingDeletionResult(id: String, status: String, success: Boolean)
 case class ZuoraSubscription(id: String, status: String)
 
@@ -85,9 +90,9 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
         Json.obj(
           "Status" -> "Active",
           "BillToId" -> account.billToContact.id,
-          "SoldToId" -> account.soldToContact.id
+          "SoldToId" -> account.soldToContact.id,
         ),
-        RelativePath(s"object/account/${account.basicInfo.id}")
+        RelativePath(s"object/account/${account.basicInfo.id}"),
       )
       zuoraClient.put[JsValue](putReq).toDisjunction.map(_ => ())
     } else {
