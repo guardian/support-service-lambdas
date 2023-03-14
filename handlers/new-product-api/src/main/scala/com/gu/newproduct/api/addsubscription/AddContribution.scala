@@ -99,7 +99,7 @@ object AddContribution {
       isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
       createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-      emailQueueNames: EmailQueueNames,
+      emailQueueName: QueueName,
       currentDate: () => LocalDate,
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
@@ -111,9 +111,8 @@ object AddContribution {
     val getCustomerData = getValidatedContributionCustomerData(zuoraClient, contributionIds)
     val isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)
     val validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
-    val contributionSqsSend = awsSQSSend(emailQueueNames.contributions)
+    val contributionSqsSend = awsSQSSend(emailQueueName)
 
-    val contributionsSqsSend = awsSQSSend(emailQueueNames.contributions)
     val contributionsBrazeConfirmationSqsSend = EtSqsSend[ContributionsEmailData](contributionSqsSend) _
     val sendConfirmationEmail = SendConfirmationEmail(contributionsBrazeConfirmationSqsSend) _
 

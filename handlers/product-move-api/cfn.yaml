@@ -82,8 +82,8 @@ Resources:
             - sqs:GetQueueUrl
             - sqs:SendMessage
           Resource:
-            - arn:aws:sqs:eu-west-1:865473395570:contributions-thanks
-            - arn:aws:sqs:eu-west-1:865473395570:contributions-thanks-dev
+            - Fn::ImportValue:
+                !Sub "comms-${Stage}-EmailQueueArn"
             - !GetAtt RefundQueue.Arn
             - !GetAtt SalesforceTrackingQueue.Arn
       - AWSLambdaBasicExecutionRole

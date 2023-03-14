@@ -69,8 +69,8 @@ object AutoCancelHandler extends App with Logging {
     }
 
   def emailQueueFor(stage: Stage): QueueName = stage match {
-    case Stage("PROD") => QueueName("contributions-thanks")
-    case _ => QueueName("contributions-thanks-dev")
+    case Stage("PROD") => QueueName("braze-emails-PROD")
+    case _ => QueueName("braze-emails-CODE")
   }
 
 }

@@ -39,7 +39,7 @@ object SQSLive {
       stage <- ZIO.service[Stage]
       sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
       emailQueueUrlResponse <- getQueue(
-        if (stage == Stage.PROD) "contributions-thanks" else "contributions-thanks-dev",
+        if (stage == Stage.PROD) "braze-emails-PROD" else "braze-emails-CODE",
         sqsClient,
       )
       refundQueueUrlResponse <- getQueue(s"product-switch-refund-${stage.toString}", sqsClient)

@@ -97,12 +97,12 @@ object AddDigipackSub {
       isValidAddress: BillToAddress => ValidationResult[ValidatedAddress],
       createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-      emailQueueNames: EmailQueueNames,
+      emailQueueName: QueueName,
       currentDate: () => LocalDate,
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
     val digipackPlanIds = zuoraIds.digitalPackIds.byApiPlanId.values.toList
-    val digipackSqsSend = awsSQSSend(emailQueueNames.digipack)
+    val digipackSqsSend = awsSQSSend(emailQueueName)
     val digiPackBrazeConfirmationSqsSend = EtSqsSend[DigipackEmailData](digipackSqsSend) _
     val sendConfirmationEmail = SendConfirmationEmail(digiPackBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient, digipackPlanIds)

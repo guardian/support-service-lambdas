@@ -105,7 +105,7 @@ object AddSupporterPlus {
       isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
       createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-      emailQueueNames: EmailQueueNames,
+      emailQueueName: QueueName,
       currentDate: () => LocalDate,
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
@@ -118,7 +118,7 @@ object AddSupporterPlus {
     val isValidSupporterPlusStartDate = isValidStartDateForPlan(MonthlySupporterPlus, _: LocalDate)
     val validateRequest = SupporterPlusValidations(isValidSupporterPlusStartDate, AmountLimits.limitsFor) _
 
-    val supporterPlusSqsSend = awsSQSSend(emailQueueNames.supporterPlus)
+    val supporterPlusSqsSend = awsSQSSend(emailQueueName)
     val supporterPlusBrazeConfirmationSqsSend = EtSqsSend[SupporterPlusEmailData](supporterPlusSqsSend) _
     val sendConfirmationEmail = SendConfirmationEmail(supporterPlusBrazeConfirmationSqsSend) _
 

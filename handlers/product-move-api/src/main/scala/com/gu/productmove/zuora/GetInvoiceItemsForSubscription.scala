@@ -68,7 +68,7 @@ object GetInvoiceItemsForSubscription {
       )
 
     def lastPaidInvoiceAmount = getLastPaidInvoice.map(_._2.map(_.ChargeAmount).sum)
-      
+
     def lastPaidInvoiceId = getLastPaidInvoice.map(_._1)
 
     private def getInvoicesSortedByDate: Map[String, List[InvoiceItem]] = {
