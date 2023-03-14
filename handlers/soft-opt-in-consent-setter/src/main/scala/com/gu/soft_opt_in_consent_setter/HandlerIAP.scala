@@ -10,7 +10,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 
 import scala.jdk.CollectionConverters._
-class HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
+object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
 
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
