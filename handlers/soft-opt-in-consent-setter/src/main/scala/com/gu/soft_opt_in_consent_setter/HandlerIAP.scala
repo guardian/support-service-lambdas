@@ -227,5 +227,4 @@ class HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       case Right(_) => Metrics.put(event = "successful_consents_updates", 1)
     }
   }
-
 }
