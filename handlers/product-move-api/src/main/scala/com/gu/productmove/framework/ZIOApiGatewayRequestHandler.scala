@@ -113,7 +113,7 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
     val route: Route[TIO] = TIOInterpreter().toRoute(server ++ swaggerEndpoints)
     val routedTask: TIO[AwsResponse] = route(awsRequest)
     val runtime = Runtime.default
-    Unsafe.unsafe {
+    Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
         routedTask
           .catchAll { error =>

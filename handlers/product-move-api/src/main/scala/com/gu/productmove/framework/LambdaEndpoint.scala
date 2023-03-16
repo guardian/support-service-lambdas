@@ -6,7 +6,7 @@ object LambdaEndpoint {
 
   // for testing
   def runTest[OUT](response: IO[Any, OUT]): Unit = {
-    val result = Unsafe.unsafe {
+    val result = Unsafe.unsafe { implicit u =>
       val result = Runtime.default.unsafe.run(
         response
           .tapError { error =>

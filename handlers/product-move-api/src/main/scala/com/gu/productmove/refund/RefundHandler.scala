@@ -38,7 +38,7 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
 
   def runZio(refundInput: RefundInput, context: Context) =
     val runtime = Runtime.default
-    Unsafe.unsafe {
+    Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
         RefundSupporterPlus
           .applyRefund(refundInput)
