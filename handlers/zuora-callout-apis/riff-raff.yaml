@@ -19,6 +19,5 @@ deployments:
       prefixStack: false
       functionNames:
       - zuora-auto-cancel-
-      - payment-failure-
     dependencies: [cfn]
     
