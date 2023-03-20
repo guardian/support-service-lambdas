@@ -21,7 +21,7 @@ object ProductMoveSpec extends ZIOSpecDefault {
 
       for {
         _ <- TestClock.setTime(Instant.now())
-        result <- ProductMoveEndpoint.productMove("A-S00500486", ExpectedInput(20, false))
+        result <- ProductMoveEndpoint.productMove("A-S00500486", ExpectedInput(20, false, None, None))
           .provide(
             GetSubscriptionLive.layer,
             AwsCredentialsLive.layer,
