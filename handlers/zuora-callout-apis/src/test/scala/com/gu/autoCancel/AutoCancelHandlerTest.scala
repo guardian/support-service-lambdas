@@ -1,7 +1,6 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
-import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

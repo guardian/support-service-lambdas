@@ -1,9 +1,9 @@
-package com.gu.paymentFailure
-
-import java.time.LocalDate
+package com.gu.autoCancel
 
 import com.gu.util.Logging
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
+
+import java.time.LocalDate
 
 object GetPaymentData extends Logging {
 

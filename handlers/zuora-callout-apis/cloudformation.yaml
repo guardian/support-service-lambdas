@@ -85,29 +85,6 @@ Resources:
         DependsOn:
         - ZuoraAutoCancelRole
 
-    PaymentFailureLambda:
-        Type: AWS::Lambda::Function
-        Properties:
-            Description: handles zuora payment failure callouts
-            FunctionName:
-                !Sub payment-failure-${Stage}
-            Code:
-                S3Bucket: support-service-lambdas-dist
-                S3Key: !Sub membership/${Stage}/support-service-lambdas/support-service-lambdas.jar
-            Environment:
-                Variables:
-                  Stage: !Ref Stage
-            Handler: com.gu.paymentFailure.Lambda::handleRequest
-            Role:
-                Fn::GetAtt:
-                - ZuoraAutoCancelRole
-                - Arn
-            MemorySize: 1536
-            Runtime: java11
-            Timeout: 300
-        DependsOn:
-        - ZuoraAutoCancelRole
-
     ZuoraAutoCancelAPIPermission:
         Type: AWS::Lambda::Permission
         Properties:
@@ -115,14 +92,6 @@ Resources:
             FunctionName: !Sub zuora-auto-cancel-${Stage}
             Principal: apigateway.amazonaws.com
         DependsOn: ZuoraAutoCancelLambda
-
-    PaymentFailureAPIPermission:
-        Type: AWS::Lambda::Permission
-        Properties:
-            Action: lambda:invokeFunction
-            FunctionName: !Sub payment-failure-${Stage}
-            Principal: apigateway.amazonaws.com
-        DependsOn: PaymentFailureLambda
 
     ZuoraAutoCancelProxyResource:
         Type: AWS::ApiGateway::Resource

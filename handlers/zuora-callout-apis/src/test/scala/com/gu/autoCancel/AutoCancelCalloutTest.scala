@@ -1,6 +1,5 @@
 package com.gu.autoCancel
 
-import org.scalatest._
 import play.api.libs.json.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
