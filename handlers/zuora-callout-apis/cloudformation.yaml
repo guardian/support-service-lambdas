@@ -49,9 +49,6 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: sqs:*
-                            Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email
-                          - Effect: Allow
-                            Action: sqs:*
                             Resource:
                               - Fn::ImportValue:
                                   !Sub "comms-${Stage}-EmailQueueArn"
