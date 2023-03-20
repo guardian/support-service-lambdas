@@ -101,14 +101,6 @@ Resources:
             PathPart: auto-cancel
         DependsOn: ZuoraAutoCancelAPI
 
-    PaymentFailureProxyResource:
-        Type: AWS::ApiGateway::Resource
-        Properties:
-            RestApiId: !Ref ZuoraAutoCancelAPI
-            ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
-            PathPart: payment-failure
-        DependsOn: ZuoraAutoCancelAPI
-
     ZuoraAutoCancelMethod:
         Type: AWS::ApiGateway::Method
         Properties:
@@ -123,25 +115,6 @@ Resources:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
               Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZuoraAutoCancelLambda.Arn}/invocations
-        DependsOn:
-        - ZuoraAutoCancelAPI
-        - ZuoraAutoCancelLambda
-        - ZuoraAutoCancelProxyResource
-
-    PaymentFailureMethod:
-        Type: AWS::ApiGateway::Method
-        Properties:
-            AuthorizationType: NONE
-            RestApiId: !Ref ZuoraAutoCancelAPI
-            ResourceId: !Ref PaymentFailureProxyResource
-            HttpMethod: POST
-            RequestParameters:
-              method.request.querystring.apiClientId: true
-              method.request.querystring.apiToken: true
-            Integration:
-              Type: AWS_PROXY
-              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
-              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PaymentFailureLambda.Arn}/invocations
         DependsOn:
         - ZuoraAutoCancelAPI
         - ZuoraAutoCancelLambda
