@@ -1,15 +1,16 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
-import com.gu.paymentFailure.ToMessage
+import com.gu.autoCancel.GetPaymentData.PaymentFailureInformation
 import com.gu.util.Logging
+import com.gu.util.TypeConvert.TypeConvertClientOp
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.email.{EmailId, EmailMessage}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError}
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import play.api.libs.json._
 
 object AutoCancelSteps extends Logging {
@@ -85,4 +86,23 @@ object AutoCancelSteps extends Logging {
         ContinueProcessing(())
       case ClientSuccess(()) => ContinueProcessing(())
     }
+}
+
+object ZuoraEmailSteps {
+
+  def sendEmailRegardingAccount(
+      sendEmail: EmailMessage => ClientFailableOp[Unit],
+      getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary],
+  )(accountId: String, toMessage: PaymentFailureInformation => Either[String, EmailMessage]): ClientFailableOp[Unit] = {
+    for {
+      invoiceTransactionSummary <- getInvoiceTransactions(accountId)
+      paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary).left
+        .map(GenericError(_))
+        .toClientFailableOp
+      message <- toMessage(paymentInformation).left.map(GenericError(_)).toClientFailableOp
+      _ <- sendEmail(message).withAmendedError(oldError =>
+        GenericError(s"email not sent for account ${accountId}, error: ${oldError.message}"),
+      )
+    } yield ()
+  }
 }

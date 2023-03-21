@@ -1,14 +1,11 @@
-package com.gu.paymentFailure
+package com.gu.autoCancel
+
+import com.gu.autoCancel.GetPaymentData.PaymentFailureInformation
+import com.gu.util.email._
 
 import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-import com.gu.autoCancel.AutoCancelCallout
-import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
-import com.gu.util.email._
-
-import scala.math.BigDecimal.decimal
 
 object ToMessage {
 
