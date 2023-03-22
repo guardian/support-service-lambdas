@@ -1,11 +1,11 @@
 package com.gu.productmove.endpoint.move
 
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
+import com.gu.productmove.endpoint.available.{Billing, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
@@ -14,18 +14,49 @@ import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive, getSupporterPlusRatePlanIds}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, Dynamo, DynamoLive, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
-import com.gu.util.config.ZuoraEnvironment
+import com.gu.productmove.zuora.{
+  GetAccount,
+  GetAccountLive,
+  GetSubscription,
+  GetSubscriptionLive,
+  Subscribe,
+  SubscribeLive,
+  SubscriptionUpdate,
+  SubscriptionUpdateLive,
+  ZuoraCancel,
+  ZuoraCancelLive,
+  getSupporterPlusRatePlanIds,
+}
+import com.gu.productmove.{
+  AwsCredentialsLive,
+  AwsS3Live,
+  Dynamo,
+  DynamoLive,
+  EmailMessage,
+  EmailPayload,
+  EmailPayloadContactAttributes,
+  EmailPayloadSubscriberAttributes,
+  GuStageLive,
+  SQS,
+  SQSLive,
+  SttpClientLive,
+}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
 import zio.{Clock, IO, URIO, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
+import zio.ThreadLocalBridge.trace
+
+import com.gu.newproduct.api.productcatalog.PricesFromZuoraCatalog
+import com.gu.util.config.ZuoraEnvironment
+import com.gu.effects.GetFromS3
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ZuoraIds
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.gu.i18n.Currency
 
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
@@ -144,20 +175,21 @@ object ProductMoveEndpoint {
         currentRatePlan.ratePlanCharges,
         s"Subscription: $subscriptionName has more than one ratePlanCharge",
       )
-      // TODO: Make this work
-      response <- PricesFromZuoraCatalog(
-        ZuoraEnvironment("DEV"),
-        GetFromS3.fetchString,
-        zuoraIds.rateplanIdToApiId.get,
-      )
+      currency <- ZIO
+        .fromOption(ratePlanCharge.currencyObject)
+        .orElseFail(
+          s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
+        )
       result <-
         if (postData.preview)
-          doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currentRatePlan.id)
+          doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currency, currentRatePlan.id)
         else
           doUpdate(
             subscriptionName,
-            ratePlanCharge,
             postData.price,
+            BigDecimal(ratePlanCharge.price),
+            ratePlanCharge.billingPeriod,
+            currency,
             currentRatePlan,
             subscription,
             postData.csrUserId,
@@ -169,18 +201,21 @@ object ProductMoveEndpoint {
       subscriptionId: String,
       price: BigDecimal,
       billingPeriod: BillingPeriod,
+      currency: Currency,
       currentRatePlanId: String,
   ): ZIO[SubscriptionUpdate with Stage, String, OutputBody] = for {
     _ <- ZIO.log("Fetching Preview from Zuora")
     previewResponse <- SubscriptionUpdate
-      .preview(subscriptionId, billingPeriod, price, currentRatePlanId)
+      .preview(subscriptionId, billingPeriod, price, currency, currentRatePlanId)
       .addLogMessage("SubscriptionUpdate")
   } yield previewResponse
 
   def doUpdate(
       subscriptionName: String,
-      ratePlanCharge: RatePlanCharge,
       price: BigDecimal,
+      previousAmount: BigDecimal,
+      billingPeriod: BillingPeriod,
+      currency: Currency,
       currentRatePlan: GetSubscription.RatePlan,
       subscription: GetSubscription.GetSubscriptionResponse,
       csrUserId: Option[String],
@@ -195,11 +230,11 @@ object ProductMoveEndpoint {
       .orElseFail(s"identityId is null for subscription name $subscriptionName")
 
     updateResponse <- SubscriptionUpdate
-      .update(subscription.id, ratePlanCharge.billingPeriod, price, currentRatePlan.id)
+      .update(subscription.id, billingPeriod, price, currency, currentRatePlan.id)
       .addLogMessage("SubscriptionUpdate")
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
-    billingPeriod <- ratePlanCharge.billingPeriod.value
+    billingPeriodValue <- billingPeriod.value
 
     paidAmount = updateResponse.paidAmount.getOrElse(BigDecimal(0))
 
@@ -216,7 +251,7 @@ object ProductMoveEndpoint {
                 price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                 first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                 date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = billingPeriod + "ly",
+                payment_frequency = billingPeriodValue + "ly",
                 subscription_id = subscriptionName,
               ),
             ),
@@ -232,7 +267,7 @@ object ProductMoveEndpoint {
       .queueSalesforceTracking(
         SalesforceRecordInput(
           subscriptionName,
-          BigDecimal(ratePlanCharge.price),
+          previousAmount,
           price,
           currentRatePlan.productName,
           currentRatePlan.ratePlanName,
@@ -246,7 +281,7 @@ object ProductMoveEndpoint {
       )
       .fork
 
-    supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, ratePlanCharge.billingPeriod))
+    supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
     amendSupporterProductDynamoTableFuture <- Dynamo
       .writeItem(
         SupporterRatePlanItem(

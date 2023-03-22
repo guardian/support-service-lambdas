@@ -1,6 +1,7 @@
 package com.gu.productmove.zuora
 
-import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly, Annual}
+import com.gu.i18n.Currency
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
@@ -51,18 +52,18 @@ object GetSubscription {
       billingPeriod: BillingPeriod,
       effectiveStartDate: LocalDate,
       chargedThroughDate: Option[LocalDate],
-  )
+  ){
+    def currencyObject = Currency.fromString(currency)
+  }
   object RatePlanCharge {
     given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen
   }
 
-  given JsonDecoder[BillingPeriod] = JsonDecoder[String].mapOrFail(x =>
-    x match {
-      case "Month" => Right(Monthly)
-      case "Annual" => Right(Annual)
-      case _ => Left(s"No such billing period ${x.toString}")
-    },
-  )
+  given JsonDecoder[BillingPeriod] = JsonDecoder[String].mapOrFail {
+    case "Month" => Right(Monthly)
+    case "Annual" => Right(Annual)
+    case x => Left(s"No such billing period $x")
+  }
 
   given JsonDecoder[GetSubscriptionResponse] = DeriveJsonDecoder.gen[GetSubscriptionResponse]
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
