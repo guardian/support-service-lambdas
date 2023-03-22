@@ -92,6 +92,14 @@ Resources:
             !Sub
             - '{{resolve:secretsmanager:${IdentityStage}/Identity/SoftOptInConsentAPI:SecretString:identityToken}}'
             - IdentityStage: !FindInMap [ StageMap, !Ref Stage, IdentityStage ]
+          mpapiUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${MpapiStage}/MobilePurchasesAPI/User/GetSubscriptions:SecretString:mpapiUrl}}'
+            - MpapiStage: !FindInMap [ StageMap, !Ref Stage, MpapiStage ]
+          mpapiToken:
+            !Sub
+            - '{{resolve:secretsmanager:${MpapiStage}/MobilePurchasesAPI/User/GetSubscriptions:SecretString:mpapiToken}}'
+            - MpapiStage: !FindInMap [ StageMap, !Ref Stage, MpapiStage ]
       Events:
         ScheduledRun:
           Type: Schedule
