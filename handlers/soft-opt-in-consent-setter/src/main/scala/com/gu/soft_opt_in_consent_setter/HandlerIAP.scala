@@ -131,7 +131,6 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       toAdd = newProductSoftOptIns
         .filter(option => !oldProductSoftOptIns.contains(option) && !allOtherProductSoftOptIns.contains(option))
         .map(ConsentsObject(_, true))
-
       consentsBody = (toRemove ++ toAdd).asJson.toString()
     } yield consentsBody
   }

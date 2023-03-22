@@ -36,7 +36,6 @@ Mappings:
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
-  IsDev: !Equals [ !Ref Stage, DEV ]
 
 Resources:
   LambdaFunction:
@@ -119,7 +118,6 @@ Resources:
 
   LambdaFunctionIAP:
     Type: AWS::Serverless::Function
-    Condition: IsDev
     Properties:
       Description: Updates Identity Soft Opt-In Consents upon Acquisition and Cancellation of Subscriptions based on a queue populated by Salesforce and the Mobile Purchases API
       FunctionName: !Sub soft-opt-in-consent-setter-IAP-${Stage}
@@ -205,7 +203,6 @@ Resources:
 
   SoftOptInsQueue:
     Type: AWS::SQS::Queue
-    Condition: IsDev
     Properties:
       VisibilityTimeout: 3000
       QueueName: !Sub soft-opt-in-consent-setter-queue-${Stage}
@@ -215,13 +212,11 @@ Resources:
 
   SoftOptInsDeadLetterQueue:
     Type: AWS::SQS::Queue
-    Condition: IsDev
     Properties:
       QueueName: !Sub soft-opt-in-consent-setter-dead-letter-queue-${Stage}
 
   SQSTrigger:
     Type: AWS::Lambda::EventSourceMapping
-    Condition: IsDev
     Properties:
       BatchSize: 1
       Enabled: true
