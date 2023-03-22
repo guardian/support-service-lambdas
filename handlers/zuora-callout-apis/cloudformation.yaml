@@ -19,13 +19,6 @@ Parameters:
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
 
-Mappings:
-  StageConstants:
-    PROD:
-      EmailQueue: contributions-thanks
-    CODE:
-      EmailQueue: contributions-thanks-dev
-
 Resources:
     ZuoraAutoCancelRole:
         Type: AWS::IAM::Role
@@ -56,10 +49,9 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: sqs:*
-                            Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email
-                          - Effect: Allow
-                            Action: sqs:*
-                            Resource: !Sub ["arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${EmailQueue}", {EmailQueue: !FindInMap ["StageConstants", !Ref Stage, "EmailQueue"]}]
+                            Resource:
+                              - Fn::ImportValue:
+                                  !Sub "comms-${Stage}-EmailQueueArn"
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
@@ -93,29 +85,6 @@ Resources:
         DependsOn:
         - ZuoraAutoCancelRole
 
-    PaymentFailureLambda:
-        Type: AWS::Lambda::Function
-        Properties:
-            Description: handles zuora payment failure callouts
-            FunctionName:
-                !Sub payment-failure-${Stage}
-            Code:
-                S3Bucket: support-service-lambdas-dist
-                S3Key: !Sub membership/${Stage}/support-service-lambdas/support-service-lambdas.jar
-            Environment:
-                Variables:
-                  Stage: !Ref Stage
-            Handler: com.gu.paymentFailure.Lambda::handleRequest
-            Role:
-                Fn::GetAtt:
-                - ZuoraAutoCancelRole
-                - Arn
-            MemorySize: 1536
-            Runtime: java11
-            Timeout: 300
-        DependsOn:
-        - ZuoraAutoCancelRole
-
     ZuoraAutoCancelAPIPermission:
         Type: AWS::Lambda::Permission
         Properties:
@@ -124,28 +93,12 @@ Resources:
             Principal: apigateway.amazonaws.com
         DependsOn: ZuoraAutoCancelLambda
 
-    PaymentFailureAPIPermission:
-        Type: AWS::Lambda::Permission
-        Properties:
-            Action: lambda:invokeFunction
-            FunctionName: !Sub payment-failure-${Stage}
-            Principal: apigateway.amazonaws.com
-        DependsOn: PaymentFailureLambda
-
     ZuoraAutoCancelProxyResource:
         Type: AWS::ApiGateway::Resource
         Properties:
             RestApiId: !Ref ZuoraAutoCancelAPI
             ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
             PathPart: auto-cancel
-        DependsOn: ZuoraAutoCancelAPI
-
-    PaymentFailureProxyResource:
-        Type: AWS::ApiGateway::Resource
-        Properties:
-            RestApiId: !Ref ZuoraAutoCancelAPI
-            ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
-            PathPart: payment-failure
         DependsOn: ZuoraAutoCancelAPI
 
     ZuoraAutoCancelMethod:
@@ -162,25 +115,6 @@ Resources:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
               Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZuoraAutoCancelLambda.Arn}/invocations
-        DependsOn:
-        - ZuoraAutoCancelAPI
-        - ZuoraAutoCancelLambda
-        - ZuoraAutoCancelProxyResource
-
-    PaymentFailureMethod:
-        Type: AWS::ApiGateway::Method
-        Properties:
-            AuthorizationType: NONE
-            RestApiId: !Ref ZuoraAutoCancelAPI
-            ResourceId: !Ref PaymentFailureProxyResource
-            HttpMethod: POST
-            RequestParameters:
-              method.request.querystring.apiClientId: true
-              method.request.querystring.apiToken: true
-            Integration:
-              Type: AWS_PROXY
-              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
-              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PaymentFailureLambda.Arn}/invocations
         DependsOn:
         - ZuoraAutoCancelAPI
         - ZuoraAutoCancelLambda

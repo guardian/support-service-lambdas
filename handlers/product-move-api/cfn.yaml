@@ -52,6 +52,14 @@ Resources:
           App: product-move-api
           Stack: !Ref Stack
           Stage: !Ref Stage
+          invoicingApiUrl:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiUrl}}'
+            - { Stage: !Ref Stage }
+          invoicingApiKey:
+            !Sub
+            - '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiKey}}'
+            - { Stage: !Ref Stage }
           zuoraBaseUrl:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:baseUrl}}'
@@ -74,8 +82,8 @@ Resources:
             - sqs:GetQueueUrl
             - sqs:SendMessage
           Resource:
-            - arn:aws:sqs:eu-west-1:865473395570:contributions-thanks
-            - arn:aws:sqs:eu-west-1:865473395570:contributions-thanks-dev
+            - Fn::ImportValue:
+                !Sub "comms-${Stage}-EmailQueueArn"
             - !GetAtt RefundQueue.Arn
             - !GetAtt SalesforceTrackingQueue.Arn
       - AWSLambdaBasicExecutionRole
@@ -186,7 +194,7 @@ Resources:
       QueueName: !Sub product-switch-refund-${Stage}
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt RefundDeadLetterQueue.Arn
-        maxReceiveCount: 2
+        maxReceiveCount: 1
 
   RefundDeadLetterQueue:
     Type: AWS::SQS::Queue

@@ -7,7 +7,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.{AwsSQSSend, SqsAsync}
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
+import com.gu.newproduct.api.EmailQueueNames.emailQueueFor
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.digipack.DigipackAddressValidator
 import com.gu.newproduct.api.addsubscription.validation._
@@ -26,7 +26,7 @@ import com.gu.newproduct.api.productcatalog.PlanId.{
   GuardianWeeklyROW6for6,
   GuardianWeeklyROWQuarterly,
 }
-import com.gu.newproduct.api.productcatalog.{ContributionPlanId, _}
+import com.gu.newproduct.api.productcatalog._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -92,7 +92,7 @@ object Steps {
         loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       }
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
-      queueNames = emailQueuesFor(stage)
+      queueName = emailQueueFor(stage)
       currentDate = () => currentDatetime().toLocalDate
 
       validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
@@ -118,7 +118,7 @@ object Steps {
         isValidStartDateForPlan,
         createSubscription,
         awsSQSSend,
-        queueNames,
+        queueName,
         currentDate,
       )
 
@@ -129,7 +129,7 @@ object Steps {
         isValidStartDateForPlan,
         createSubscription,
         awsSQSSend,
-        queueNames,
+        queueName,
         currentDate,
       )
 
@@ -141,7 +141,7 @@ object Steps {
         PaperAddressValidator.apply,
         createSubscription,
         awsSQSSend,
-        queueNames,
+        queueName,
       )
 
       digipackSteps = AddDigipackSub.wireSteps(
@@ -152,7 +152,7 @@ object Steps {
         DigipackAddressValidator.apply,
         createSubscription,
         awsSQSSend,
-        queueNames,
+        queueName,
         currentDate,
       )
 
@@ -164,7 +164,7 @@ object Steps {
         GuardianWeeklyDomesticAddressValidator.apply,
         createSubscription,
         awsSQSSend,
-        queueNames,
+        queueName,
         GuardianWeeklyDomestic6for6,
         GuardianWeeklyDomesticQuarterly,
       )
@@ -177,7 +177,7 @@ object Steps {
         GuardianWeeklyROWAddressValidator.apply,
         createSubscription,
         awsSQSSend,
-        queueNames,
+        queueName,
         GuardianWeeklyROW6for6,
         GuardianWeeklyROWQuarterly,
       )

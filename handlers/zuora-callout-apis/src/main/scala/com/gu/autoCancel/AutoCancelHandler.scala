@@ -7,7 +7,6 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.effects.sqs.SqsSync
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.paymentFailure.ZuoraEmailSteps
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.Auth.TrustedApiConfig
@@ -69,8 +68,8 @@ object AutoCancelHandler extends App with Logging {
     }
 
   def emailQueueFor(stage: Stage): QueueName = stage match {
-    case Stage("PROD") => QueueName("contributions-thanks")
-    case _ => QueueName("contributions-thanks-dev")
+    case Stage("PROD") => QueueName("braze-emails-PROD")
+    case _ => QueueName("braze-emails-CODE")
   }
 
 }

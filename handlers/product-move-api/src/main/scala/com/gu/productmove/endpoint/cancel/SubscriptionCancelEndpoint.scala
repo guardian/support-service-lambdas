@@ -6,7 +6,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.*
 import com.gu.productmove.endpoint.cancel.zuora.GetSubscription.{GetSubscriptionResponse, RatePlanCharge}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SQS, SQSLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQS, SQSLive, SttpClientLive}
 import com.gu.productmove.endpoint.cancel.zuora.{GetSubscription, GetSubscriptionLive}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -14,6 +14,14 @@ import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
 import com.gu.productmove.zuora.rest.*
 import com.gu.productmove.zuora.{
+  CreditBalanceAdjustment,
+  CreditBalanceAdjustmentLive,
+  GetInvoice,
+  GetInvoiceLive,
+  GetInvoiceItemsForSubscription,
+  GetInvoiceItemsForSubscriptionLive,
+  InvoiceItemAdjustment,
+  InvoiceItemAdjustmentLive,
   ZuoraCancel,
   ZuoraCancelLive,
   ZuoraSetCancellationReason,
@@ -24,8 +32,10 @@ import com.gu.util.config
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.json.zio.jsonBody
-import zio.{Clock, IO, ZIO}
-import com.gu.productmove.refund.RefundInput
+import sttp.client3.SttpBackend
+import zio.{Clock, IO, Task, ZIO}
+import com.gu.productmove.refund.*
+import RefundType.*
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -102,6 +112,12 @@ object SubscriptionCancelEndpoint {
         GuStageLive.layer,
         ZuoraSetCancellationReasonLive.layer,
         SQSLive.layer,
+        AwsS3Live.layer,
+        InvoicingApiRefundLive.layer,
+        CreditBalanceAdjustmentLive.layer,
+        GetInvoiceItemsForSubscriptionLive.layer,
+        GetInvoiceLive.layer,
+        InvoiceItemAdjustmentLive.layer,
       )
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res)
@@ -121,24 +137,64 @@ object SubscriptionCancelEndpoint {
       case None => ZIO.fail(s"Subscription can't be cancelled as the charge list is empty")
     }
 
-  private def checkProductIsSupporterPlus(charges: NonEmptyList[RatePlanCharge], ids: SupporterPlusZuoraIds) = {
-    val hasSupporterPlusCharge = charges.exists(charge =>
+  private def getSupporterPlusCharge(charges: NonEmptyList[RatePlanCharge], ids: SupporterPlusZuoraIds) = {
+    val supporterPlusCharge = charges.find(charge =>
       charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
         charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value ||
         charge.productRatePlanChargeId == ids.monthlyV2.productRatePlanChargeId.value ||
         charge.productRatePlanChargeId == ids.annualV2.productRatePlanChargeId.value,
     )
-    if (hasSupporterPlusCharge)
-      ZIO.succeed(())
-    else
-      ZIO.fail("Subscription cannot be cancelled as it was not a Supporter Plus subscription")
+    supporterPlusCharge
+      .map(ZIO.succeed(_))
+      .getOrElse(ZIO.fail("Subscription cannot be cancelled as it was not a Supporter Plus subscription"))
   }
+
+  def doRefund(refundType: RefundType, refundInput: RefundInput) =
+    refundType match {
+      case Asynchronous =>
+        SQS.queueRefund(refundInput)
+      case Synchronous => runSynchronousRefund(refundInput)
+      case NoRefund =>
+        ZIO.succeed(())
+    }
+
+  def runSynchronousRefund(refundInput: RefundInput): ZIO[
+    InvoicingApiRefund
+      with CreditBalanceAdjustment
+      with Stage
+      with SttpBackend[Task, Any]
+      with AwsS3
+      with GetInvoiceItemsForSubscription
+      with GetInvoice
+      with InvoiceItemAdjustment,
+    String,
+    Unit,
+  ] = for {
+    _ <- ZIO.log(s"Attempting to synchronously refund subscription ${refundInput.subscriptionName}")
+    _ <- RefundSupporterPlus.applyRefund(refundInput)
+  } yield ()
 
   private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
     now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 
-  private[productmove] def subscriptionCancel(subscriptionName: String, postData: ExpectedInput): ZIO[
-    GetSubscription with ZuoraCancel with SQS with Stage with ZuoraSetCancellationReason,
+  private[productmove] def subscriptionCancel(
+      subscriptionName: String,
+      postData: ExpectedInput,
+      refundType: RefundType = Asynchronous, // Used to test running cancel and refund locally
+  ): ZIO[
+    GetSubscription
+      with ZuoraCancel
+      with SQS
+      with Stage
+      with ZuoraSetCancellationReason
+      with InvoicingApiRefund
+      with CreditBalanceAdjustment
+      with Stage
+      with SttpBackend[Task, Any]
+      with AwsS3
+      with GetInvoiceItemsForSubscription
+      with GetInvoice
+      with InvoiceItemAdjustment,
     String,
     OutputBody,
   ] =
@@ -155,20 +211,20 @@ object SubscriptionCancelEndpoint {
       zuoraIds <- ZIO.fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)))
       ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
-      _ <- checkProductIsSupporterPlus(charges, zuoraIds.supporterPlusZuoraIds)
+      supporterPlusCharge <- getSupporterPlusCharge(charges, zuoraIds.supporterPlusZuoraIds)
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
       // check whether the sub is within the first 14 days of purchase - if it is then the subscriber is entitled to a refund
-      shouldBeRefunded = subIsWithinFirst14Days(today, subscription.contractEffectiveDate)
+      shouldBeRefunded = subIsWithinFirst14Days(today, supporterPlusCharge.effectiveStartDate)
       _ <- ZIO.log(s"Should be refunded is $shouldBeRefunded")
 
       cancellationDate <- ZIO
         .fromOption(
           if (shouldBeRefunded)
-            Some(subscription.contractEffectiveDate)
+            Some(supporterPlusCharge.effectiveStartDate)
           else
-            charges.head.chargedThroughDate,
+            supporterPlusCharge.chargedThroughDate,
         )
         .orElseFail(
           s"Subscription charged through date is null is for supporter plus subscription $subscriptionName. " +
@@ -184,13 +240,13 @@ object SubscriptionCancelEndpoint {
         if (shouldBeRefunded)
           for {
             _ <- ZIO.log(s"Attempting to refund sub")
-            refundAmount = charges.foldLeft(BigDecimal(0))(_ + _.price)
             negativeInvoice <- ZIO
               .fromOption(cancellationResponse.invoiceId)
               .orElseFail(
                 s"URGENT: subscription $subscriptionName should be refunded but has no negative invoice attached.",
               )
-            _ <- SQS.queueRefund(RefundInput(subscriptionName, negativeInvoice, refundAmount))
+            _ <- ZIO.log(s"Negative invoice id is $negativeInvoice")
+            _ <- doRefund(refundType, RefundInput(subscriptionName))
           } yield ()
         else ZIO.succeed(RefundResponse("Success", ""))
 

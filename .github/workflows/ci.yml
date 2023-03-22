@@ -6,7 +6,44 @@ on:
     branches:
       - main
 jobs:
-  CI:
+  build:
+    strategy:
+      matrix:
+        subproject:
+          - batch-email-sender
+          - cancellation-sf-cases-api
+          - catalog-service
+          - contact-us-api
+          - delivery-problem-credit-processor
+          - delivery-records-api
+          - dev-env-cleaner
+          - digital-subscription-expiry
+          - digital-voucher-api
+          - digital-voucher-cancellation-processor
+          - digital-voucher-suspension-processor
+          - fulfilment-date-calculator
+          - holiday-stop-api
+          - holiday-stop-processor
+          - identity-backfill
+          - identity-retention
+          - metric-push-api
+          - new-product-api
+          - product-move-api
+          - revenue-recogniser-job
+          - sf-api-user-credentials-setter
+          - sf-billing-account-remover
+          - sf-contact-merge
+          - sf-datalake-export
+          - sf-emails-to-s3-exporter
+          - sf-gocardless-sync
+          - sf-move-subscriptions-api
+          - soft-opt-in-consent-setter
+          - stripe-webhook-endpoints
+          - zuora-callout-apis
+          - zuora-datalake-export
+          - zuora-rer
+          - zuora-retention
+          - zuora-sar
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -21,15 +58,9 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '11'
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-            ~/.coursier
-          key: sbt
-      - name: CI
+          cache: 'sbt'
+      - name: Build
         run: |
           LAST_TEAMCITY_BUILD=6410
           export GITHUB_RUN_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD ))
-          sbt riffRaffUpload
+          sbt "project ${{ matrix.subproject }}" riffRaffUpload

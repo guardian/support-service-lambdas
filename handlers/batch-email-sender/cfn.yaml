@@ -10,13 +10,6 @@ Parameters:
       - CODE
     Default: CODE
 
-Mappings:
-    StageMap:
-        CODE:
-            EmailSendingQueueName: contributions-thanks-dev
-        PROD:
-            EmailSendingQueueName: contributions-thanks
-
 Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
 
@@ -52,9 +45,9 @@ Resources:
                 Action:
                 - sqs:GetQueueUrl
                 - sqs:SendMessage
-                Resource: !Sub
-                  - "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${QueueName}"
-                  - { QueueName: !FindInMap [ StageMap, !Ref Stage, EmailSendingQueueName ]}
+                Resource:
+                  Fn::ImportValue:
+                    !Sub "comms-${Stage}-EmailQueueArn"
 
   FailedEmailApiAlarm:
     Type: AWS::CloudWatch::Alarm

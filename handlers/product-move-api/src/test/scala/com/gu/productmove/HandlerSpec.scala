@@ -72,7 +72,7 @@ object HandlerSpec extends ZIOSpecDefault {
 
     suite("HandlerSpec")(
       test("productMove endpoint is successful for monthly sub (upsell)") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
@@ -103,7 +103,7 @@ object HandlerSpec extends ZIOSpecDefault {
       test(
         "productMove endpoint is successful if customer neither pays nor is refunded on switch (monthly sub, upsell)",
       ) {
-        val endpointJsonInputBody = ExpectedInput(15.00, false)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
         val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
@@ -136,7 +136,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(layers)
       },
       test("productMove endpoint returns 500 error if identityId does not exist") {
-        val endpointJsonInputBody = ExpectedInput(50.00, false)
+        val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("identityId is null for subscription name A-S00339056")
@@ -165,7 +165,7 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       },
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
-        val endpointJsonInputBody = ExpectedInput(50.00, false)
+        val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
@@ -193,7 +193,7 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       },
       test("preview endpoint is successful (monthly sub, upsell)") {
-        val endpointJsonInputBody = ExpectedInput(15.00, true)
+        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = ProductMoveEndpointTypes.PreviewResult(

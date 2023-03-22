@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
+import com.gu.newproduct.api.EmailQueueNames.emailQueueFor
 import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
@@ -90,7 +90,7 @@ object SendVoucherEmailsManualTest {
   def main(args: Array[String]): Unit = {
     val result = for {
       email <- args.headOption.map(Email.apply)
-      queueName = emailQueuesFor(Stage("PROD")).paper
+      queueName = emailQueueFor(Stage("PROD"))
       sqsSend = SqsAsync.send(SqsAsync.buildClient)(queueName) _
       voucherSqsSend = EtSqsSend[PaperEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmail(voucherSqsSend) _

@@ -86,9 +86,9 @@ object AddPaperSub {
       isValidAddressForPlan: (PlanId, SoldToAddress) => ValidationResult[Unit],
       createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-      emailQueueNames: EmailQueueNames,
+      emailQueueName: QueueName,
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
-    val paperSqsQueueSend = awsSQSSend(emailQueueNames.paper)
+    val paperSqsQueueSend = awsSQSSend(emailQueueName)
     val paperBrazeConfirmationSqsSend = EtSqsSend[PaperEmailData](paperSqsQueueSend) _
     val sendConfirmationEmail = SendConfirmationEmail(paperBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)

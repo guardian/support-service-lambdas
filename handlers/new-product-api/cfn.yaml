@@ -21,24 +21,18 @@ Mappings:
             DomainName: new-product-api-dev.membership.guardianapis.com
             ApiGatewayTargetDomainName: d-papcvkgmc9.execute-api.eu-west-1.amazonaws.com
             ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-DEV/catalog.json
-            ContributionThanksEmailQueue: contributions-thanks-dev
-            SubsWelcomeEmailQueue: subs-welcome-email-dev
             FulfilmentDateCalculatorS3Resource: arn:aws:s3:::fulfilment-date-calculator-dev/*
         CODE:
             ApiName: new-product-api-CODE
             DomainName: new-product-api-code.membership.guardianapis.com
             ApiGatewayTargetDomainName: d-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com
             ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-UAT/catalog.json
-            ContributionThanksEmailQueue: contributions-thanks-dev
-            SubsWelcomeEmailQueue: subs-welcome-email-dev
             FulfilmentDateCalculatorS3Resource: arn:aws:s3:::fulfilment-date-calculator-code/*
         PROD:
             ApiName: new-product-api-PROD
             DomainName: new-product-api-prod.membership.guardianapis.com
             ApiGatewayTargetDomainName: d-yyh9pmqphi.execute-api.eu-west-1.amazonaws.com
             ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/catalog.json
-            ContributionThanksEmailQueue: contributions-thanks
-            SubsWelcomeEmailQueue: subs-welcome-email
             FulfilmentDateCalculatorS3Resource: arn:aws:s3:::fulfilment-date-calculator-prod/*
 
 Resources:
@@ -81,12 +75,8 @@ Resources:
                         - sqs:GetQueueUrl
                         - sqs:SendMessage
                         Resource:
-                          - !Sub
-                            - "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${QueueName}"
-                            - QueueName: !FindInMap [ StageMap, !Ref Stage, ContributionThanksEmailQueue ]
-                          - !Sub
-                            - "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${QueueName}"
-                            - QueueName: !FindInMap [ StageMap, !Ref Stage, SubsWelcomeEmailQueue ]
+                          - Fn::ImportValue:
+                              !Sub "comms-${Stage}-EmailQueueArn"
                 - PolicyName: ReadZuoraCatalog
                   PolicyDocument:
                     Statement:

@@ -386,7 +386,7 @@ Resources:
                   "Next": "CheckPendingDownloads",
                   "Retry": [{
                               "ErrorEquals": ["States.ALL"],
-                              "IntervalSeconds": 30,
+                              "IntervalSeconds": 300,
                               "MaxAttempts": 3
                             }]
                 },

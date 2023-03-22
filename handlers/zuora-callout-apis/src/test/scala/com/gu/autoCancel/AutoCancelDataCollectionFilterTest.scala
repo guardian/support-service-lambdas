@@ -12,7 +12,6 @@ import com.gu.util.zuora.ZuoraGetAccountSummary.{
   SubscriptionId,
   SubscriptionSummary,
 }
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 
 class AutoCancelDataCollectionFilterTest extends AnyFlatSpec {
