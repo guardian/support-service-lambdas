@@ -45,7 +45,7 @@ class SFSubRecordUpdateTests extends AnyFlatSpec with should.Matchers {
   }
 
   "UpdateRecord.apply" should "return a correctly formed UpdateRecord when a failed updateResult is passed in" in {
-    val result = SFSubRecordUpdate(subRecord, softOptInStage, Left(SoftOptInError("", "")))
+    val result = SFSubRecordUpdate(subRecord, softOptInStage, Left(SoftOptInError("")))
 
     result.Id shouldBe subId
     result.Soft_Opt_in_Last_Stage_Processed__c shouldBe Some(lastProcessedStage)

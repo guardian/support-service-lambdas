@@ -17,4 +17,12 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers {
 
     record shouldBe Right(SFSubRecordResponse(2, true, records = Seq(subRecord2, subRecord3)))
   }
+
+  it should "JSON Decoding: decodes Mobile Purchases API (MPAPI) response correctly" in {
+    val json = Source.fromResource("mobileSubscriptions.json").mkString
+
+    val record = decode[MobileSubscriptions](json)
+
+    record shouldBe Right(MobileSubscriptions(List(MobileSubscription(false))))
+  }
 }

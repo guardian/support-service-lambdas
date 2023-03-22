@@ -1,0 +1,13 @@
+{
+  "subscriptions": [
+    {
+      "subscriptionId": "2000000247265063",
+      "from": "2023-01-11T11:05:20.000Z",
+      "to": "2023-01-11T12:08:02.000Z",
+      "valid": false,
+      "gracePeriod": false,
+      "autoRenewing": false,
+      "productId": "uk.co.guardian.gla.1month.2018May.withFreeTrial"
+    }
+  ]
+}

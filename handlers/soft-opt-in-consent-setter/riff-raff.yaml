@@ -18,4 +18,5 @@ deployments:
       prefixStack: false
       functionNames:
         - soft-opt-in-consent-setter-
+        - soft-opt-in-consent-setter-IAP-
     dependencies: [ cfn ]
