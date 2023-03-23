@@ -14,14 +14,14 @@ import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault}
 object ProductMoveSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("Cancel")(test("Run cancellation lambda locally") {
+    suite("Switch")(test("Run product switch lambda locally") {
       /*
            Test suite used to run the cancellation lambda locally
        */
 
       for {
         _ <- TestClock.setTime(Instant.now())
-        result <- ProductMoveEndpoint.productMove("A-S00500486", ExpectedInput(20, false, None, None))
+        _ <- ProductMoveEndpoint.productMove("A-S00487531", ExpectedInput(20, false, None, None))
           .provide(
             GetSubscriptionLive.layer,
             AwsCredentialsLive.layer,

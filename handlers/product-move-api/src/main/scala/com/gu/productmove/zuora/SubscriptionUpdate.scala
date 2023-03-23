@@ -1,24 +1,17 @@
 package com.gu.productmove.zuora
 
+import com.gu.effects.GetFromS3
+import com.gu.i18n.Currency
+import com.gu.newproduct.api.productcatalog.*
+import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, AnnualSupporterPlusV2, MonthlySupporterPlus, MonthlySupporterPlusV2}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, SupporterPlusZuoraIds, ZuoraIds, zuoraIdsForStage}
 import com.gu.productmove.AwsS3
-import com.gu.newproduct.api.productcatalog.{
-  AmountMinorUnits,
-  Annual,
-  BillingPeriod,
-  Monthly,
-  PlanId,
-  PricesFromZuoraCatalog,
-}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{
-  ProductRatePlanId,
-  SupporterPlusZuoraIds,
-  ZuoraIds,
-  zuoraIdsForStage,
-}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.rest.ZuoraGet
+import com.gu.util.config
+import com.gu.util.config.ZuoraEnvironment
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
@@ -27,18 +20,10 @@ import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
 import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
-import com.gu.util.config
-import com.gu.util.config.ZuoraEnvironment
-import com.gu.effects.GetFromS3
-import com.gu.newproduct.api.productcatalog.PlanId.{
-  AnnualSupporterPlus,
-  AnnualSupporterPlusV2,
-  MonthlySupporterPlus,
-  MonthlySupporterPlusV2,
-}
-import com.gu.i18n.Currency
 
 import java.time.LocalDate
+
+val SwitchToV2SupporterPlus = false
 trait SubscriptionUpdate:
   def update(
       subscriptionId: String,
@@ -171,7 +156,6 @@ case class SubscriptionUpdateInvoice(
     invoiceItems: List[SubscriptionUpdateInvoiceItem],
 )
 case class SupporterPlusRatePlanIds(
-    catalogPlanId: PlanId,
     ratePlanId: String,
     subscriptionRatePlanChargeId: String,
     contributionRatePlanChargeId: Option[String],
@@ -202,8 +186,6 @@ object SubscriptionUpdatePreviewRequest {
     }
 }
 
-val SwitchToV2SupporterPlus = true
-
 private def getRatePlans(
     billingPeriod: BillingPeriod,
     currency: Currency,
@@ -214,7 +196,7 @@ private def getRatePlans(
     date <- Clock.currentDateTime.map(_.toLocalDate)
     stage <- ZIO.service[Stage]
     supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-    overrideAmount <- getContributionAmount(stage, supporterPlusRatePlanIds.catalogPlanId, price, currency)
+    overrideAmount <- getContributionAmount(stage, price, currency, billingPeriod)
     chargeOverride = ChargeOverrides(
       price = Some(overrideAmount),
       productRatePlanChargeId = supporterPlusRatePlanIds.contributionRatePlanChargeId.getOrElse(
@@ -227,19 +209,23 @@ private def getRatePlans(
 
 def getContributionAmount(
     stage: Stage,
-    catalogPlanId: PlanId,
     price: BigDecimal,
     currency: Currency,
+    billingPeriod: BillingPeriod,
 ): IO[String, BigDecimal] =
   if (SwitchToV2SupporterPlus)
     // work out how much of what the user is paying can be treated as a contribution (total amount - cost of sub)
+    val catalogPlanId =
+      if (billingPeriod == Monthly)
+        MonthlySupporterPlusV2
+      else
+        AnnualSupporterPlusV2
     ZIO.fromEither(
       getSubscriptionPriceInMinorUnits(stage, catalogPlanId, currency).map(subscriptionChargePrice =>
         price - (subscriptionChargePrice.value / 100),
       ),
     )
-  else
-    ZIO.succeed(price)
+  else ZIO.succeed(price)
 
 def getSubscriptionPriceInMinorUnits(
     stage: Stage,
@@ -249,7 +235,7 @@ def getSubscriptionPriceInMinorUnits(
   for {
     ratePlanToApiId <- zuoraIdsForStage(config.Stage(stage.toString)).map(_.rateplanIdToApiId)
     prices <- PricesFromZuoraCatalog(
-      ZuoraEnvironment(stage.toString), // TODO: is this safe?
+      ZuoraEnvironment(stage.toString),
       GetFromS3.fetchString,
       ratePlanToApiId.get,
     ).toDisjunction.left.map(_.message)
@@ -260,13 +246,12 @@ def getSupporterPlusRatePlanIds(
     billingPeriod: BillingPeriod,
 ): Either[String, SupporterPlusRatePlanIds] = {
   zuoraIdsForStage(config.Stage(stage.toString)).flatMap { zuoraIds =>
-    import zuoraIds.supporterPlusZuoraIds.{monthly, monthlyV2, annual, annualV2}
+    import zuoraIds.supporterPlusZuoraIds.{annual, annualV2, monthly, monthlyV2}
 
     billingPeriod match {
       case Monthly if SwitchToV2SupporterPlus =>
         Right(
           SupporterPlusRatePlanIds(
-            MonthlySupporterPlusV2,
             monthlyV2.productRatePlanId.value,
             monthlyV2.productRatePlanChargeId.value,
             Some(monthlyV2.contributionProductRatePlanChargeId.value),
@@ -275,7 +260,6 @@ def getSupporterPlusRatePlanIds(
       case Monthly =>
         Right(
           SupporterPlusRatePlanIds(
-            MonthlySupporterPlus,
             monthly.productRatePlanId.value,
             monthly.productRatePlanChargeId.value,
             None,
@@ -284,7 +268,6 @@ def getSupporterPlusRatePlanIds(
       case Annual if SwitchToV2SupporterPlus =>
         Right(
           SupporterPlusRatePlanIds(
-            AnnualSupporterPlusV2,
             annualV2.productRatePlanId.value,
             annualV2.productRatePlanChargeId.value,
             Some(annualV2.contributionProductRatePlanChargeId.value),
@@ -293,7 +276,6 @@ def getSupporterPlusRatePlanIds(
       case Annual =>
         Right(
           SupporterPlusRatePlanIds(
-            AnnualSupporterPlus,
             annual.productRatePlanId.value,
             annual.productRatePlanChargeId.value,
             None,
