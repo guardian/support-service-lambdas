@@ -423,7 +423,19 @@ lazy val `sf-billing-account-remover` = lambdaProject(
 lazy val `soft-opt-in-consent-setter` = lambdaProject(
   "soft-opt-in-consent-setter",
   "sets or unsets soft opt in consents dependent on subscription product",
-  Seq(awsSecretsManager, circe, circeParser, scalatest, scalajHttp, awsS3, simpleConfig, awsLambda, awsSQS, awsEvents) ++ logging
+  Seq(
+    awsSecretsManager,
+    circe,
+    circeParser,
+    scalatest,
+    scalajHttp,
+    awsS3,
+    simpleConfig,
+    awsLambda,
+    awsSQS,
+    awsEvents,
+    scalaMock,
+  ) ++ logging,
 ).dependsOn(`effects-s3`, `effects-cloudwatch`, `salesforce-core`)
 
 lazy val `sf-emails-to-s3-exporter` = lambdaProject(
