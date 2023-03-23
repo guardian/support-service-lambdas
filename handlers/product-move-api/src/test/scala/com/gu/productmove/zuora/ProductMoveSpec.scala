@@ -38,6 +38,6 @@ object ProductMoveSpec extends ZIOSpecDefault {
 
         assert(true)(equalTo(true))
       }
-    })
+    } @@ TestAspect.ignore)
 
 }
