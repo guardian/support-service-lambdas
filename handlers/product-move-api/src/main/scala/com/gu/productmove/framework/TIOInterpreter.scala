@@ -83,14 +83,12 @@ abstract class AwsServerInterpreter[F[_]: MonadError] {
       interpreter.apply(serverRequest).map {
         case RequestResult.Failure(_) =>
           AwsResponse(
-            Nil,
             isBase64Encoded = awsServerOptions.encodeResponseBody,
             StatusCode.NotFound.code,
             Map.empty,
             "",
           )
         case RequestResult.Response(res) =>
-          val cookies = res.cookies.collect { case Right(cookie) => cookie.value }.toList
           val baseHeaders = res.headers.groupBy(_.name).map { case (n, v) => n -> v.map(_.value).mkString(",") }
           val allHeaders = res.body match {
             case Some((_, Some(contentLength))) if res.contentLength.isEmpty =>
@@ -98,7 +96,6 @@ abstract class AwsServerInterpreter[F[_]: MonadError] {
             case _ => baseHeaders
           }
           AwsResponse(
-            cookies,
             isBase64Encoded = awsServerOptions.encodeResponseBody,
             res.code.code,
             allHeaders,

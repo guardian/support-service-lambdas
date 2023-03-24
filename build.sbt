@@ -189,8 +189,8 @@ lazy val handler = library(project in file("lib/handler"))
 lazy val effects = library(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging,
   )
 lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
@@ -212,6 +212,7 @@ lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
   .dependsOn(testDep)
   .settings(
     libraryDependencies ++= Seq(awsSdkLambda) ++ logging,
+    dependencyOverrides ++= jacksonDependencies,
   )
 
 lazy val `config-core` = library(project in file("lib/config-core"))
@@ -344,6 +345,9 @@ lazy val `catalog-service` = lambdaProject(
   "catalog-service",
   "Download the Zuora Catalog and store the JSON in S3",
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .settings(
+    dependencyOverrides ++= jacksonDependencies,
+  )
 
 lazy val `identity-retention` = lambdaProject(
   "identity-retention",
@@ -423,7 +427,18 @@ lazy val `sf-billing-account-remover` = lambdaProject(
 lazy val `soft-opt-in-consent-setter` = lambdaProject(
   "soft-opt-in-consent-setter",
   "sets or unsets soft opt in consents dependent on subscription product",
-  Seq(awsSecretsManager, circe, circeParser, scalatest, scalajHttp, awsS3, simpleConfig, awsLambda, awsSQS, awsEvents) ++ logging
+  Seq(
+    awsSecretsManager,
+    circe,
+    circeParser,
+    scalatest,
+    scalajHttp,
+    awsS3,
+    simpleConfig,
+    awsLambda,
+    awsSQS,
+    awsEvents,
+  ) ++ logging,
 ).dependsOn(`effects-s3`, `effects-cloudwatch`, `salesforce-core`)
 
 lazy val `sf-emails-to-s3-exporter` = lambdaProject(
@@ -619,6 +634,8 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   `salesforce-sttp-test-stub` % Test,
   `imovo-sttp-client`,
   `imovo-sttp-test-stub` % Test,
+).settings(
+  dependencyOverrides += netty4168Codec,
 )
 
 lazy val `digital-voucher-suspension-processor` = lambdaProject(
@@ -663,6 +680,7 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     sttpCirce,
   ),
 ).settings {
+  dependencyOverrides ++= jacksonDependencies
   lazy val deployTo =
     inputKey[Unit](
       "Command to directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop",
