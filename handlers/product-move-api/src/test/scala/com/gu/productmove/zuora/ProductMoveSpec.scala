@@ -15,10 +15,6 @@ object ProductMoveSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Switch")(test("Run product switch lambda locally") {
-      /*
-           Test suite used to run the cancellation lambda locally
-       */
-
       for {
         _ <- TestClock.setTime(Instant.now())
         _ <- ProductMoveEndpoint.productMove("A-S00487531", ExpectedInput(20, false, None, None))

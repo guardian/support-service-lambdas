@@ -530,8 +530,8 @@ lazy val `product-move-api` = lambdaProject(
     excludeDependencies ++= Seq(
       ExclusionRule("org.typelevel", "cats-kernel_2.13"),
       ExclusionRule("org.typelevel", "cats-core_2.13"),
-      ExclusionRule("com.typesafe.scala-logging", "scala-logging_2.13")
-    )
+      ExclusionRule("com.typesafe.scala-logging", "scala-logging_2.13"),
+    ),
   ),
 )
   .settings {
@@ -553,13 +553,13 @@ lazy val `product-move-api` = lambdaProject(
       val s3Bucket = "support-service-lambdas-dist"
       val s3Path = s"membership/$stage/product-move-api/product-move-api.jar"
 
-        s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
-        s"aws lambda update-function-code --function-name move-product-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
-        s"aws lambda update-function-code --function-name product-switch-refund-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
-        s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
-      }
+      s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name move-product-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name product-switch-refund-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
+      s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
-    .dependsOn(`zuora-models`, `new-product-api`)
+  }
+  .dependsOn(`zuora-models`, `new-product-api`)
 
 lazy val `metric-push-api` =
   lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")
