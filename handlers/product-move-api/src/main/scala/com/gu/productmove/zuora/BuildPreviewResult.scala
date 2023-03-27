@@ -12,7 +12,7 @@ object BuildPreviewResult {
       ids: SupporterPlusRatePlanIds,
   ): ZIO[Stage, String, PreviewResult] = {
     val (supporterPlusInvoices, contributionInvoices) =
-      invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.ratePlanChargeId)
+      invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.subscriptionRatePlanChargeId)
 
     (supporterPlusInvoices.length, contributionInvoices.length) match {
       case (n1, n2) if n1 > 1 && n2 >= 1 =>

@@ -50,8 +50,8 @@ lazy val scalafmtSettings = Seq(
 
 // fixme this whole file needs splitting down appropriately
 
-lazy val EffectsTest = config("effectsTest") extend (Test) describedAs ("run the edge tests")
-lazy val HealthCheckTest = config("healthCheck") extend (Test) describedAs ("run the health checks against prod/code")
+lazy val EffectsTest = config("effectsTest") extend Test describedAs "run the edge tests"
+lazy val HealthCheckTest = config("healthCheck") extend Test describedAs "run the health checks against prod/code"
 val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthCheckTest)(Defaults.testTasks) ++ Seq(
   Test / testOptions += Tests.Argument("-l", "com.gu.test.EffectsTest"),
   Test / testOptions += Tests.Argument("-l", "com.gu.test.HealthCheck"),
@@ -541,7 +541,13 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
   ),
-  scala3Settings,
+  scala3Settings ++ Seq(
+    excludeDependencies ++= Seq(
+      ExclusionRule("org.typelevel", "cats-kernel_2.13"),
+      ExclusionRule("org.typelevel", "cats-core_2.13"),
+      ExclusionRule("com.typesafe.scala-logging", "scala-logging_2.13"),
+    ),
+  ),
 )
   .settings {
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
@@ -568,7 +574,7 @@ lazy val `product-move-api` = lambdaProject(
       s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
-  .dependsOn(`zuora-models`)
+  .dependsOn(`zuora-models`, `new-product-api`)
 
 lazy val `metric-push-api` =
   lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")

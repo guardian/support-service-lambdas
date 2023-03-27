@@ -114,6 +114,7 @@ object Dependencies {
     case PathList(ps @ _*) if ps.last == "deriving.conf" => MergeStrategy.filterDistinctLines
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
+    case PathList("logback.xml") => MergeStrategy.preferProject
     /*
      * AWS SDK v2 includes a codegen-resources directory in each jar, with conflicting names.
      * This appears to be for generating clients from HTTP services.

@@ -7,6 +7,7 @@ import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
 import zio.{IO, ZIO}
+import com.gu.i18n.Currency
 
 class MockSubscriptionUpdate(
     previewResponse: Map[(String, BillingPeriod, BigDecimal, String), PreviewResult],
@@ -22,6 +23,7 @@ class MockSubscriptionUpdate(
       subscriptionId: String,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
+      currency: Currency,
       ratePlanIdToRemove: String,
   ): ZIO[Any, String, SubscriptionUpdateResponse] = {
     mutableStore = (subscriptionId, billingPeriod, price, ratePlanIdToRemove) :: mutableStore
@@ -35,6 +37,7 @@ class MockSubscriptionUpdate(
       subscriptionId: String,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
+      currency: Currency,
       ratePlanIdToRemove: String,
   ): ZIO[GuStageLive.Stage, String, PreviewResult] = {
     mutableStore = (subscriptionId, billingPeriod, price, ratePlanIdToRemove) :: mutableStore
