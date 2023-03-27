@@ -113,13 +113,12 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
     val route: Route[TIO] = TIOInterpreter().toRoute(server ++ swaggerEndpoints)
     val routedTask: TIO[AwsResponse] = route(awsRequest)
     val runtime = Runtime.default
-    Unsafe.unsafe {
+    Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
         routedTask
           .catchAll { error =>
             ZIO
-              .log(error.toString)
-              .map(_ => AwsResponse(Nil, false, 500, Map.empty, ""))
+              .log(error.toString).as(AwsResponse(false, 500, Map.empty, ""))
           }
           .provideLayer(Runtime.removeDefaultLoggers)
           .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger))),
@@ -127,7 +126,7 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
         case Exit.Success(value) => value
         case Exit.Failure(cause) =>
           context.getLogger.log("Failed with: " + cause.toString)
-          AwsResponse(Nil, false, 500, Map.empty, "")
+          AwsResponse(false, 500, Map.empty, "")
     }
   }
 
