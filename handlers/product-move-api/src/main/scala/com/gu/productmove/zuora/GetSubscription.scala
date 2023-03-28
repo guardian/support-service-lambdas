@@ -52,7 +52,7 @@ object GetSubscription {
       billingPeriod: BillingPeriod,
       effectiveStartDate: LocalDate,
       chargedThroughDate: Option[LocalDate],
-  ){
+  ) {
     def currencyObject = Currency.fromString(currency)
   }
   object RatePlanCharge {

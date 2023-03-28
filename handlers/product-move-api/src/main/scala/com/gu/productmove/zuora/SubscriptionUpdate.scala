@@ -3,8 +3,18 @@ package com.gu.productmove.zuora
 import com.gu.effects.GetFromS3
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.*
-import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, AnnualSupporterPlusV2, MonthlySupporterPlus, MonthlySupporterPlusV2}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, SupporterPlusZuoraIds, ZuoraIds, zuoraIdsForStage}
+import com.gu.newproduct.api.productcatalog.PlanId.{
+  AnnualSupporterPlus,
+  AnnualSupporterPlusV2,
+  MonthlySupporterPlus,
+  MonthlySupporterPlusV2,
+}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{
+  ProductRatePlanId,
+  SupporterPlusZuoraIds,
+  ZuoraIds,
+  zuoraIdsForStage,
+}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
