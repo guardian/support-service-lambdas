@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.1.2",
+  scalaVersion := "3.2.2",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -50,8 +50,8 @@ lazy val scalafmtSettings = Seq(
 
 // fixme this whole file needs splitting down appropriately
 
-lazy val EffectsTest = config("effectsTest") extend (Test) describedAs ("run the edge tests")
-lazy val HealthCheckTest = config("healthCheck") extend (Test) describedAs ("run the health checks against prod/code")
+lazy val EffectsTest = config("effectsTest") extend Test describedAs "run the edge tests"
+lazy val HealthCheckTest = config("healthCheck") extend Test describedAs "run the health checks against prod/code"
 val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthCheckTest)(Defaults.testTasks) ++ Seq(
   Test / testOptions += Tests.Argument("-l", "com.gu.test.EffectsTest"),
   Test / testOptions += Tests.Argument("-l", "com.gu.test.HealthCheck"),
@@ -189,8 +189,8 @@ lazy val handler = library(project in file("lib/handler"))
 lazy val effects = library(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging,
   )
 lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
@@ -212,6 +212,7 @@ lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
   .dependsOn(testDep)
   .settings(
     libraryDependencies ++= Seq(awsSdkLambda) ++ logging,
+    dependencyOverrides ++= jacksonDependencies,
   )
 
 lazy val `config-core` = library(project in file("lib/config-core"))
@@ -344,6 +345,9 @@ lazy val `catalog-service` = lambdaProject(
   "catalog-service",
   "Download the Zuora Catalog and store the JSON in S3",
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .settings(
+    dependencyOverrides ++= jacksonDependencies,
+  )
 
 lazy val `identity-retention` = lambdaProject(
   "identity-retention",
@@ -538,7 +542,13 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
   ),
-  scala3Settings,
+  scala3Settings ++ Seq(
+    excludeDependencies ++= Seq(
+      ExclusionRule("org.typelevel", "cats-kernel_2.13"),
+      ExclusionRule("org.typelevel", "cats-core_2.13"),
+      ExclusionRule("com.typesafe.scala-logging", "scala-logging_2.13"),
+    ),
+  ),
 )
   .settings {
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
@@ -565,7 +575,7 @@ lazy val `product-move-api` = lambdaProject(
       s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
-  .dependsOn(`zuora-models`)
+  .dependsOn(`zuora-models`, `new-product-api`)
 
 lazy val `metric-push-api` =
   lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")
@@ -631,6 +641,8 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   `salesforce-sttp-test-stub` % Test,
   `imovo-sttp-client`,
   `imovo-sttp-test-stub` % Test,
+).settings(
+  dependencyOverrides += netty4168Codec,
 )
 
 lazy val `digital-voucher-suspension-processor` = lambdaProject(
@@ -675,6 +687,7 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     sttpCirce,
   ),
 ).settings {
+  dependencyOverrides ++= jacksonDependencies
   lazy val deployTo =
     inputKey[Unit](
       "Command to directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop",

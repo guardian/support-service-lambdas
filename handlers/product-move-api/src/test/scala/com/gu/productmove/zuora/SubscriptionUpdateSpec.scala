@@ -14,8 +14,11 @@ import zio.test.Assertion.*
 import zio.test.*
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import Fixtures.*
+import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
+import com.gu.i18n.Currency.GBP
 
 import java.time.*
+import scala.None
 
 object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
@@ -48,7 +51,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
         for {
           _ <- TestClock.setTime(time)
-          createRequestBody <- SubscriptionUpdateRequest(Monthly, "8ad03sdfa1312f3123", 50.00).provideLayer(
+          createRequestBody <- SubscriptionUpdateRequest(Monthly, GBP, "8ad03sdfa1312f3123", 50.00).provideLayer(
             ZLayer.succeed(Stage.valueOf("DEV")),
           )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
@@ -80,7 +83,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
         for {
           _ <- TestClock.setTime(time)
-          createRequestBody <- SubscriptionUpdateRequest(Monthly, "8ad03sdfa1312f3123", 50.00).provideLayer(
+          createRequestBody <- SubscriptionUpdateRequest(Monthly, GBP, "8ad03sdfa1312f3123", 50.00).provideLayer(
             ZLayer.succeed(Stage.valueOf("PROD")),
           )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
@@ -100,7 +103,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           response <- BuildPreviewResult
             .getPreviewResult(
               invoiceWithMultipleInvoiceItems,
-              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6"),
+              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
               ZLayer.succeed(Stage.valueOf("DEV")),
@@ -122,7 +125,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           response <- BuildPreviewResult
             .getPreviewResult(
               invoiceWithTax,
-              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6"),
+              SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
               ZLayer.succeed(Stage.valueOf("DEV")),

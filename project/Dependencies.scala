@@ -6,8 +6,8 @@ import sbtassembly.PathList
 object Dependencies {
   val awsSdkVersion = "2.18.30"
   val circeVersion = "0.13.0"
-  val sttpVersion = "3.7.2"
-  val http4sVersion = "0.21.33"
+  val sttpVersion = "3.8.13"
+  val http4sVersion = "0.21.34"
   val catsVersion = "2.9.0"
   val catsEffectVersion = "2.5.5"
 
@@ -36,7 +36,7 @@ object Dependencies {
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
-  val playJson = "com.typesafe.play" %% "play-json" % "2.9.3"
+  val playJson = "com.typesafe.play" %% "play-json" % "2.9.4"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
   // HTTP clients
@@ -63,12 +63,12 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.17"
-  val zio2Version = "2.0.0"
+  val zio2Version = "2.0.10"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.0.6"
+  val tapirVersion = "1.2.11"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.2"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
-  val stripe = "com.stripe" % "stripe-java" % "22.12.0"
+  val stripe = "com.stripe" % "stripe-java" % "22.14.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.2" % Test
@@ -85,7 +85,7 @@ object Dependencies {
    * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
    */
   val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
-
+  val netty4168Codec = "io.netty" % "netty-codec" % "4.1.68.Final"
   val jacksonVersion = "2.13.2"
   val jacksonDatabindVersion = "2.13.2.2"
 
@@ -114,6 +114,7 @@ object Dependencies {
     case PathList(ps @ _*) if ps.last == "deriving.conf" => MergeStrategy.filterDistinctLines
     case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
     case PathList("mime.types") => MergeStrategy.filterDistinctLines
+    case PathList("logback.xml") => MergeStrategy.preferProject
     /*
      * AWS SDK v2 includes a codegen-resources directory in each jar, with conflicting names.
      * This appears to be for generating clients from HTTP services.

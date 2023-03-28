@@ -30,7 +30,7 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
 
   def runZio(salesforceRecordInput: SalesforceRecordInput, context: Context) =
     val runtime = Runtime.default
-    Unsafe.unsafe {
+    Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
         createSfRecord(salesforceRecordInput)
           .provide(
