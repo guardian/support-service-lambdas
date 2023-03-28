@@ -62,12 +62,16 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     messages.foreach { message =>
       val result = message.eventType match {
         case "Acquisition" =>
+          Metrics.put(event = "acquisitions_to_process", 1)
+
           processAcquiredSub(
             message,
             identityConnector.sendConsentsReq,
             consentsCalculator,
           )
         case "Cancellation" =>
+          Metrics.put(event = "cancellations_to_process", 1)
+
           processCancelledSub(
             message,
             identityConnector.sendConsentsReq,
@@ -76,6 +80,8 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             sfConnector,
           )
         case "Switch" =>
+          Metrics.put(event = "product_switches_to_process", 1)
+
           processProductSwitchSub(
             message,
             identityConnector.sendConsentsReq,
@@ -84,6 +90,9 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             sfConnector,
           )
       }
+
+      logErrors(result)
+      emitIdentityMetrics(result)
 
       result match {
         case Left(error) => handleError(error)
@@ -97,21 +106,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       message: MessageBody,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-  ): Either[SoftOptInError, Unit] = {
-    Metrics.put(event = "acquisitions_to_process", 1)
-
-    val updateResult =
-      for {
-        consents <- consentsCalculator.getSoftOptInsByProduct(message.productType)
-        consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
-        _ <- sendConsentsReq(message.identityId, consentsBody)
-      } yield ()
-
-    logErrors(updateResult)
-    emitIdentityMetrics(updateResult)
-
-    updateResult
-  }
+  ): Either[SoftOptInError, Unit] =
+    for {
+      consents <- consentsCalculator.getSoftOptInsByProduct(message.productType)
+      consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
+      _ <- sendConsentsReq(message.identityId, consentsBody)
+    } yield ()
 
   def buildProductSwitchConsents(
       oldProductName: String,
@@ -141,10 +141,8 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
-  ): Either[SoftOptInError, Unit] = {
-    Metrics.put(event = "product_switches_to_process", 1)
-
-    val updateResult = for {
+  ): Either[SoftOptInError, Unit] =
+    for {
       previousProductType <- messageBody.previousProductType.toRight(
         SoftOptInError("Missing data: Product switch event is missing previousProductType property"),
       )
@@ -168,12 +166,6 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       res <- sendConsentsReq(messageBody.identityId, consentsBody)
     } yield res
 
-    logErrors(updateResult)
-    emitIdentityMetrics(updateResult)
-
-    updateResult
-  }
-
   def processCancelledSub(
       messageBody: MessageBody,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
@@ -191,9 +183,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
         Right(())
     }
 
-    Metrics.put(event = "cancellations_to_process", 1)
-
-    val updateResult = for {
+    for {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
 
@@ -209,11 +199,6 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       )
       _ <- sendCancellationConsents(messageBody.identityId, consents)
     } yield ()
-
-    logErrors(updateResult)
-    emitIdentityMetrics(updateResult)
-
-    updateResult
   }
 
   def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {

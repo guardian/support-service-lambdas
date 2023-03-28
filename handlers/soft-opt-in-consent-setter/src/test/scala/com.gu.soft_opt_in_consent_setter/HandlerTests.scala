@@ -1,145 +1,178 @@
-package com.gu.soft_opt_in_consent_setter
+import com.gu.soft_opt_in_consent_setter.{
+  ConsentsCalculator,
+  MobileSubscription,
+  MobileSubscriptions,
+  SalesforceConnector,
+}
+import com.gu.soft_opt_in_consent_setter.HandlerIAP.{
+  MessageBody,
+  processAcquiredSub,
+  processCancelledSub,
+  processProductSwitchSub,
+}
+import com.gu.soft_opt_in_consent_setter.models.{SFAssociatedSubRecord, SFAssociatedSubResponse, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.testConsentMappings
+import org.scalamock.scalatest.MockFactory
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
-import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{testConsentMappings}
-import org.scalatest.EitherValues
+// higher level tests on the 'processProductSwitch', 'processAcquisition' and 'processCancellation' functions.
 
-class HandlerTests extends AnyFlatSpec with should.Matchers with EitherValues {
-
-  def removeWhitespace(stringToRemoveWhitespaceFrom: String): String = {
-    stringToRemoveWhitespaceFrom.replaceAll("\\s", "")
-  }
+class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
   val calculator = new ConsentsCalculator(testConsentMappings)
+  val mockSendConsentsReq = mockFunction[String, String, Either[SoftOptInError, Unit]]
+  val mockGetMobileSubscriptions = mockFunction[String, Either[SoftOptInError, MobileSubscriptions]]
+  val mockSfConnector = mock[SalesforceConnector]
 
-  "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to Guardian Weekly subscription" in {
-    Handler.buildProductSwitchConsents(
-      "contributions",
-      "guardianweekly",
-      Set("guardianweekly"),
+  test(testName = "processProductSwitchSub should handle product switch event correctly") {
+    val mobileSubscriptions = MobileSubscriptions(
+      List(
+        MobileSubscription(true),
+      ),
+    )
+
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        "[\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : true\n  }\n]",
+      )
+      .returning(Right(()))
+    mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
+    mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
+      SFAssociatedSubResponse(
+        1,
+        true,
+        records = Seq(
+          SFAssociatedSubRecord(
+            "contributions",
+            "someIdentityId",
+          ),
+        ),
+      ),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productType = "supporterPlus",
+      previousProductType = Some("contributions"),
+      eventType = "Switch",
+    )
+
+    val result = processProductSwitchSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
       calculator,
-    ) shouldBe Right("""[
-        |  {
-        |    "id" : "similar_guardian_products",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "supporter_newsletter",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : true
-        |  }
-        |]""".stripMargin)
+      mockSfConnector,
+    )
+
+    result shouldBe Right(())
   }
 
-  "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to a Guardian Weekly subscription whilst the user also owns a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
-      "contributions",
-      "guardianweekly",
-      Set("guardianweekly", "newspaper"),
+  test(testName = "processAcquiredSub should handle acquisition event correctly") {
+    val mobileSubscriptions = MobileSubscriptions(
+      List(
+        MobileSubscription(true),
+      ),
+    )
+
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        "[\n  {\n    \"id\" : \"your_support_onboarding\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"similar_guardian_products\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : true\n  }\n]",
+      )
+      .returning(Right(()))
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productType = "supporterPlus",
+      previousProductType = None,
+      eventType = "Acquisition",
+    )
+
+    val result = processAcquiredSub(
+      testMessageBody,
+      mockSendConsentsReq,
       calculator,
-    ) shouldBe Right("""[
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : true
-        |  }
-        |]""".stripMargin)
+    )
+
+    result shouldBe Right(())
   }
 
-  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
-      "guardianweekly",
-      "newspaper",
-      Set("newspaper"),
+  test(testName = "processCancellation should handle supporter plus cancellation while owning an IAP") {
+    val mobileSubscriptions = MobileSubscriptions(
+      List(
+        MobileSubscription(true),
+      ),
+    )
+
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        "[\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
+      )
+      .returning(Right(()))
+    mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
+    mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
+      SFAssociatedSubResponse(
+        0,
+        true,
+        records = Seq(),
+      ),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productType = "supporterPlus",
+      previousProductType = None,
+      eventType = "Cancellation",
+    )
+
+    val result = processCancelledSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
       calculator,
-    ) shouldBe Right("""[
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "similar_guardian_products",
-        |    "consented" : true
-        |  },
-        |  {
-        |    "id" : "subscriber_preview",
-        |    "consented" : true
-        |  },
-        |  {
-        |    "id" : "supporter_newsletter",
-        |    "consented" : true
-        |  }
-        |]""".stripMargin)
+      mockSfConnector,
+    )
+
+    result shouldBe Right(())
   }
 
-  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
-      "guardianweekly",
-      "contributions",
-      Set("newspaper", "contributions"),
-      calculator,
-    ) shouldBe Right("""[
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : false
-        |  }
-        |]""".stripMargin)
-  }
+  test(testName = "processCancellation should handle supporter plus cancellation while owning no other products") {
+    val mobileSubscriptions = MobileSubscriptions(List())
 
-  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Recurring Contribution" in {
-    Handler.buildProductSwitchConsents(
-      "guardianweekly",
-      "newspaper",
-      Set("newspaper", "contributions"),
-      calculator,
-    ) shouldBe Right("""[
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "subscriber_preview",
-        |    "consented" : true
-        |  }
-        |]""".stripMargin)
-  }
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        "[\n  {\n    \"id\" : \"your_support_onboarding\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"similar_guardian_products\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
+      )
+      .returning(Right(()))
+    mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
+    mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
+      SFAssociatedSubResponse(
+        0,
+        true,
+        records = Seq(),
+      ),
+    )
 
-  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
-    Handler.buildProductSwitchConsents(
-      "guardianweekly",
-      "newspaper",
-      Set("newspaper", "mobilesubscription"),
-      calculator,
-    ) shouldBe Right("""[
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "subscriber_preview",
-        |    "consented" : true
-        |  }
-        |]""".stripMargin)
-  }
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productType = "supporterPlus",
+      previousProductType = None,
+      eventType = "Cancellation",
+    )
 
-  "buildProductSwitchConsents - HandlerIAP" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
-    HandlerIAP.buildProductSwitchConsents(
-      "guardianweekly",
-      "newspaper",
-      Set("newspaper", "mobilesubscription"),
+    val result = processCancelledSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
       calculator,
-    ) shouldBe Right("""[
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "subscriber_preview",
-        |    "consented" : true
-        |  }
-        |]""".stripMargin)
+      mockSfConnector,
+    )
+
+    result shouldBe Right(())
   }
 }

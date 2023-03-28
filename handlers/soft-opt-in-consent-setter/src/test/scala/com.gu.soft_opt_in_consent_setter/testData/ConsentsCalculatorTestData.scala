@@ -15,6 +15,7 @@ object ConsentsCalculatorTestData {
   val testConsentMappings = Map(
     "membership" -> membershipMapping,
     "contributions" -> contributionMapping,
+    "InAppPurchase" -> contributionMapping,
     "supporterPlus" -> supporterPlusMapping,
     "newspaper" -> newspaperMapping,
     "guardianweekly" -> guWeeklyMapping,

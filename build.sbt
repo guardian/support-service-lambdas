@@ -438,6 +438,7 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     awsLambda,
     awsSQS,
     awsEvents,
+    scalaMock,
   ) ++ logging,
 ).dependsOn(`effects-s3`, `effects-cloudwatch`, `salesforce-core`)
 
