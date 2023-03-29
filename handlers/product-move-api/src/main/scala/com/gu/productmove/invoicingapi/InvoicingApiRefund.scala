@@ -6,6 +6,7 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.Util.getFromEnv
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.{RefundRequest, RefundResponse}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive.InvoicingApiConfig
+import com.gu.productmove.zuora.model.SubscriptionName
 import sttp.client3.Response.ExampleGet.uri
 import sttp.client3.quick.basicRequest
 import sttp.client3.ziojson.*
@@ -38,7 +39,7 @@ object InvoicingApiRefundLive {
 private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: SttpBackend[Task, Any])
     extends InvoicingApiRefund {
   override def refund(
-      subscriptionName: String,
+      subscriptionName: SubscriptionName,
       amount: BigDecimal,
   ): ZIO[Any, String, RefundResponse] = {
 
@@ -63,17 +64,17 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
 }
 
 trait InvoicingApiRefund {
-  def refund(subscriptionName: String, amount: BigDecimal): ZIO[Any, String, RefundResponse]
+  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): ZIO[Any, String, RefundResponse]
 }
 
 object InvoicingApiRefund {
   def refund(
-      subscriptionName: String,
+      subscriptionName: SubscriptionName,
       amount: BigDecimal,
   ): ZIO[InvoicingApiRefund, String, RefundResponse] =
     ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount))
 
-  case class RefundRequest(subscriptionName: String, refund: BigDecimal)
+  case class RefundRequest(subscriptionName: SubscriptionName, refund: BigDecimal)
   /* Full response from Invoicing api is as follows:
   {
     "subscriptionName": "A-S00427546",
