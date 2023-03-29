@@ -2,7 +2,7 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.refund.*
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, SQSLive, GuStageLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
@@ -10,6 +10,7 @@ import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import zio.{IO, ZIO}
 import zio.*
@@ -26,7 +27,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
        */
       for {
         _ <- RefundSupporterPlus
-          .applyRefund(RefundInput("A-S00497072"))
+          .applyRefund(RefundInput(SubscriptionName("A-S00497072")))
           .provide(
             AwsS3Live.layer,
             AwsCredentialsLive.layer,
@@ -41,5 +42,5 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
             InvoiceItemAdjustmentLive.layer,
           )
       } yield assert(true)(equalTo(true))
-    }  @@ TestAspect.ignore)
+    } @@ TestAspect.ignore)
 }

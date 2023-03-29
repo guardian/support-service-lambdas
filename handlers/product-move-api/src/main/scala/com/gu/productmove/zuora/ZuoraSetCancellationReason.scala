@@ -12,6 +12,7 @@ import com.gu.productmove.zuora.{
   ZuoraAccountId,
 }
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
@@ -26,7 +27,7 @@ import java.time.LocalDate
 
 trait ZuoraSetCancellationReason:
   def update(
-      subscriptionNumber: String,
+      subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
       userCancellationReason: String,
   ): ZIO[Any, String, UpdateResponse]
@@ -36,26 +37,26 @@ object ZuoraSetCancellationReasonLive:
 
 private class ZuoraSetCancellationReasonLive(zuoraGet: ZuoraGet) extends ZuoraSetCancellationReason:
   override def update(
-      subscriptionNumber: String,
+      subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
       userCancellationReason: String,
   ): ZIO[Any, String, UpdateResponse] = {
     val updateRequest = UpdateRequest(CustomFields(userCancellationReason))
 
     zuoraGet.put[UpdateRequest, UpdateResponse](
-      uri"subscriptions/$subscriptionNumber/versions/$subscriptionVersion/customFields",
+      uri"subscriptions/${subscriptionName.value}/versions/$subscriptionVersion/customFields",
       updateRequest,
     )
   }
 
 object ZuoraSetCancellationReason {
   def update(
-      subscriptionNumber: String,
+      subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
       userCancellationReason: String,
   ): ZIO[ZuoraSetCancellationReason, String, UpdateResponse] =
     ZIO.serviceWithZIO[ZuoraSetCancellationReason](
-      _.update(subscriptionNumber, subscriptionVersion, userCancellationReason),
+      _.update(subscriptionName, subscriptionVersion, userCancellationReason),
     )
 }
 

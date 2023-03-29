@@ -5,11 +5,11 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.{ExpectedInput, OutputBody, Success}
-import com.gu.productmove.endpoint.cancel.zuora.GetSubscription
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, OutputBody}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemsForSubscription
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
@@ -29,9 +29,11 @@ import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 import java.time.LocalDateTime
 
-case class RefundInput(subscriptionName: String)
+case class RefundInput(subscriptionName: SubscriptionName)
 
 object RefundInput {
+  import SubscriptionName.*
+
   given JsonDecoder[RefundInput] = DeriveJsonDecoder.gen[RefundInput]
 
   given JsonEncoder[RefundInput] = DeriveJsonEncoder.gen[RefundInput]

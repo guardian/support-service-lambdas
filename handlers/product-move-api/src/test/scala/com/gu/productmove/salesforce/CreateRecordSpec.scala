@@ -113,8 +113,8 @@ object CreateRecordSpec extends ZIOSpecDefault {
           subUpdateRequests <- MockCreateRecord.requests
         } yield {
           assert(output)(equalTo(())) &&
-            assert(getSubRequests)(equalTo(List("A-S00102815"))) &&
-            assert(subUpdateRequests)(equalTo(List(createRecordRequest2)))
+          assert(getSubRequests)(equalTo(List("A-S00102815"))) &&
+          assert(subUpdateRequests)(equalTo(List(createRecordRequest2)))
         }).provide(
           ZLayer.succeed(new MockGetSfSubscription(getSfSubscriptionStubs)),
           ZLayer.succeed(new MockCreateRecord(createRecordStubs)),

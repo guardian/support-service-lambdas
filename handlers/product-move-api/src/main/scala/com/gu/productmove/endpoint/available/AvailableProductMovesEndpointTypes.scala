@@ -6,6 +6,7 @@ import com.gu.productmove.endpoint.available.Currency.GBP
 import com.gu.productmove.endpoint.available.TimeUnit.*
 import com.gu.productmove.framework.InlineSchema.inlineSchema
 import com.gu.productmove.zuora.ZuoraProductRatePlan
+import com.gu.productmove.zuora.model.SubscriptionName
 import sttp.tapir.Schema.*
 import sttp.tapir.Schema.annotations.*
 import sttp.tapir.SchemaType.{SProductField, SString}
@@ -22,14 +23,16 @@ import scala.util.Try
 object AvailableProductMovesEndpointTypes {
 
   sealed trait OutputBody
+
   case class AvailableMoves(body: List[MoveToProduct]) extends OutputBody
+
   case class NotFound(textResponse: String) extends OutputBody
+
   case object InternalServerError extends OutputBody
 
   given JsonCodec[AvailableMoves] = DeriveJsonCodec.gen[AvailableMoves]
   given JsonCodec[NotFound] = DeriveJsonCodec.gen[NotFound]
   given JsonCodec[OutputBody] = DeriveJsonCodec.gen[OutputBody]
-
 }
 
 given JsonCodec[Option[String]] = JsonCodec.string.transform(
@@ -42,7 +45,6 @@ given JsonCodec[Option[String]] = JsonCodec.string.transform(
 )
 
 object MoveToProduct {
-
   given JsonCodec[MoveToProduct] = DeriveJsonCodec.gen[MoveToProduct]
   given Schema[MoveToProduct] = Schema.derived
 
@@ -59,7 +61,7 @@ object MoveToProduct {
   given Schema[TimePeriod] = Schema.derived
 
   def buildResponseFromRatePlan(
-      subscriptionName: String,
+      subscriptionName: SubscriptionName,
       productRatePlan: ZuoraProductRatePlan,
       chargedThroughDate: LocalDate,
   ): IO[OutputBody, MoveToProduct] =
@@ -68,7 +70,7 @@ object MoveToProduct {
         .fromOption(productRatePlan.productRatePlanCharges.head.billingPeriod)
         .orElse(
           ZIO
-            .log(s"billingPeriod is null for subscription: $subscriptionName")
+            .log(s"billingPeriod is null for subscription: ${subscriptionName.value}")
             .flatMap(_ => ZIO.fail(AvailableMoves(List()))),
         )
       pricing <- ZIO

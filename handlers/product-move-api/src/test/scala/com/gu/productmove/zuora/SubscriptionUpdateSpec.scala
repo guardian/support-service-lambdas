@@ -95,7 +95,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           amountPayableToday = -6,
           contributionRefundAmount = -16,
           supporterPlusPurchaseAmount = 10,
-          LocalDate.of(2023, 2, 19)
+          LocalDate.of(2023, 2, 19),
         )
 
         for {
@@ -117,7 +117,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           amountPayableToday = -10,
           contributionRefundAmount = -20,
           supporterPlusPurchaseAmount = 10,
-          LocalDate.of(2023, 3, 06)
+          LocalDate.of(2023, 3, 6),
         )
 
         for {
