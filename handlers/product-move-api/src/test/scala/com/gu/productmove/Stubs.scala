@@ -4,15 +4,16 @@ import com.gu.newproduct.api.productcatalog.{Monthly, ZuoraIds}
 import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel
+import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.productmove.zuora.*
-import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadSubscriberAttributes}
+import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
 
@@ -28,7 +29,7 @@ import java.time.LocalDate
 val getSubscriptionResponse = GetSubscriptionResponse(
   "A-S00339056",
   "zuoraAccountId",
-  "accountNumber",
+  AccountNumber("accountNumber"),
   ratePlans = List(
     RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",
@@ -52,11 +53,12 @@ val getSubscriptionResponse = GetSubscriptionResponse(
   ),
 )
 
-val getSubscriptionForCancelResponse = GetSubscriptionToCancel.Response(
+val getSubscriptionForCancelResponse = GetSubscriptionToCancelResponse(
   id = "A-S00339056",
   version = 1,
   contractEffectiveDate = LocalDate.of(2020, 11, 29),
   accountId = "zuoraAccountId",
+  accountNumber = AccountNumber("anAccountNumber"),
   ratePlans = List(
     GetSubscriptionToCancel.RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",
@@ -89,7 +91,7 @@ val getSubscriptionForCancelResponse = GetSubscriptionToCancel.Response(
 
 val getSubscriptionResponse2 = GetSubscriptionResponse(
   id = "8ad0823f841cf4e601841e61f6aa8923",
-  accountNumber = "A00433231",
+  accountNumber = AccountNumber("A00433231"),
   accountId = "8ad0823f841cf4e601841e61f6aads87",
   ratePlans = List(
     RatePlan(
@@ -136,7 +138,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
 val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
   "subscriptionName",
   "zuoraAccountId",
-  "accountNumber",
+  AccountNumber("accountNumber"),
   ratePlans = List(
     RatePlan(
       id = "R1",
@@ -237,7 +239,7 @@ val emailMessageBody = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
-      EmailPayloadSubscriberAttributes(
+      EmailPayloadProductSwitchAttributes(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
@@ -258,7 +260,7 @@ val emailMessageBodyRefund = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
-      EmailPayloadSubscriberAttributes(
+      EmailPayloadProductSwitchAttributes(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
@@ -279,7 +281,7 @@ val emailMessageBodyNoPaymentOrRefund = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
-      EmailPayloadSubscriberAttributes(
+      EmailPayloadProductSwitchAttributes(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",

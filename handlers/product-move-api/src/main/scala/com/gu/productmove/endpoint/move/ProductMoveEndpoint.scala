@@ -35,7 +35,7 @@ import com.gu.productmove.{
   EmailMessage,
   EmailPayload,
   EmailPayloadContactAttributes,
-  EmailPayloadSubscriberAttributes,
+  EmailPayloadProductSwitchAttributes,
   GuStageLive,
   SQS,
   SQSLive,
@@ -253,7 +253,7 @@ object ProductMoveEndpoint {
           EmailPayload(
             Address = Some(account.billToContact.workEmail),
             ContactAttributes = EmailPayloadContactAttributes(
-              SubscriberAttributes = EmailPayloadSubscriberAttributes(
+              SubscriberAttributes = EmailPayloadProductSwitchAttributes(
                 first_name = account.billToContact.firstName,
                 last_name = account.billToContact.lastName,
                 currency = account.basicInfo.currency.symbol,

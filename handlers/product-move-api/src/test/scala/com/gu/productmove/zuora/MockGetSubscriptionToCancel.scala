@@ -1,16 +1,17 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel
+import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
 import com.gu.productmove.zuora.model.SubscriptionName
 import zio.{IO, ZIO}
 
 import scala.collection.mutable.ArrayBuffer
 
-class MockGetSubscriptionToCancel(responses: Map[SubscriptionName, GetSubscriptionToCancel.Response])
+class MockGetSubscriptionToCancel(responses: Map[SubscriptionName, GetSubscriptionToCancelResponse])
     extends GetSubscriptionToCancel {
   val requests: ArrayBuffer[SubscriptionName] = ArrayBuffer.empty
 
-  override def get(subscriptionName: SubscriptionName): IO[String, GetSubscriptionToCancel.Response] = {
+  override def get(subscriptionName: SubscriptionName): IO[String, GetSubscriptionToCancelResponse] = {
     requests += subscriptionName
 
     responses.get(subscriptionName) match

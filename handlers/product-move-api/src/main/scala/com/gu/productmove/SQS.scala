@@ -4,6 +4,8 @@ import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
+import com.gu.productmove.zuora.GetAccount.{BillToContact, GetAccountResponse}
+import org.joda.time.format.DateTimeFormat
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 import software.amazon.awssdk.regions.Region
@@ -11,6 +13,10 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, GetQueueUrlResponse, SendMessageRequest}
 import zio.*
 import zio.json.*
+import zio.json.internal.Write
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 trait SQS {
   def sendEmail(message: EmailMessage): ZIO[Any, String, Unit]
@@ -56,10 +62,20 @@ object SQSLive {
               )
             }
             .mapError { ex =>
-              s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName"
+              message.To.ContactAttributes.SubscriberAttributes match {
+                case attributes: EmailPayloadProductSwitchAttributes =>
+                  s"Failed to send product switch email message to SQS for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName"
+                case attributes: EmailPayloadCancellationAttributes =>
+                  s"Failed to send subscription cancellation email message to SQS for sfContactId: ${message.SfContactId} with error: ${ex.toString} to SQS queue $emailQueueName"
+              }
             }
           _ <- ZIO.log(
-            s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id} to SQS queue $emailQueueName",
+            message.To.ContactAttributes.SubscriberAttributes match {
+              case attributes: EmailPayloadProductSwitchAttributes =>
+                s"Successfully sent product switch email for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} to SQS queue $emailQueueName"
+              case _: EmailPayloadCancellationAttributes =>
+                s"Successfully sent subscription cancellation email for sfContactId: ${message.SfContactId} to SQS queue $emailQueueName"
+            },
           )
         } yield ()
 
@@ -124,7 +140,9 @@ object SQSLive {
       .build()
 }
 
-case class EmailPayloadSubscriberAttributes(
+sealed trait EmailPayloadAttributes
+
+case class EmailPayloadProductSwitchAttributes(
     first_name: String,
     last_name: String,
     first_payment_amount: String,
@@ -133,9 +151,16 @@ case class EmailPayloadSubscriberAttributes(
     payment_frequency: String,
     currency: String,
     subscription_id: String,
-)
+) extends EmailPayloadAttributes
 
-case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
+case class EmailPayloadCancellationAttributes(
+    first_name: String,
+    last_name: String,
+    product_type: String,
+    cancellation_effective_date: Option[String],
+) extends EmailPayloadAttributes
+
+case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadAttributes)
 
 case class EmailPayload(Address: Option[String], ContactAttributes: EmailPayloadContactAttributes)
 
@@ -146,7 +171,40 @@ case class EmailMessage(
     IdentityUserId: Option[String],
 )
 
-given JsonEncoder[EmailPayloadSubscriberAttributes] = DeriveJsonEncoder.gen[EmailPayloadSubscriberAttributes]
+object EmailMessage {
+  private val emailDateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
+  def cancellationEmail(account: GetAccountResponse, cancellationDate: LocalDate) = {
+    val contact = account.billToContact
+    EmailMessage(
+      EmailPayload(
+        Address = Some(contact.workEmail),
+        ContactAttributes = EmailPayloadContactAttributes(
+          SubscriberAttributes = EmailPayloadCancellationAttributes(
+            first_name = contact.firstName,
+            last_name = contact.lastName,
+            product_type = "Supporter Plus",
+            cancellation_effective_date = Some(emailDateFormat.format(cancellationDate)),
+          ),
+        ),
+      ),
+      DataExtensionName = "subscription-cancelled-email",
+      SfContactId = account.basicInfo.sfContactId__c,
+      IdentityUserId = account.basicInfo.IdentityId__c,
+    )
+  }
+}
+
+given JsonEncoder[EmailPayloadProductSwitchAttributes] = DeriveJsonEncoder.gen[EmailPayloadProductSwitchAttributes]
+given JsonEncoder[EmailPayloadCancellationAttributes] = DeriveJsonEncoder.gen[EmailPayloadCancellationAttributes]
+given JsonEncoder[EmailPayloadAttributes] =
+  (attributes: EmailPayloadAttributes, indent: Option[RuntimeFlags], out: Write) =>
+    attributes match {
+      case attributes: EmailPayloadProductSwitchAttributes =>
+        implicitly[JsonEncoder[EmailPayloadProductSwitchAttributes]].unsafeEncode(attributes, indent, out)
+      case attributes: EmailPayloadCancellationAttributes =>
+        implicitly[JsonEncoder[EmailPayloadCancellationAttributes]].unsafeEncode(attributes, indent, out)
+    }
 given JsonEncoder[EmailPayloadContactAttributes] = DeriveJsonEncoder.gen[EmailPayloadContactAttributes]
 given JsonEncoder[EmailPayload] = DeriveJsonEncoder.gen[EmailPayload]
 given JsonEncoder[EmailMessage] = DeriveJsonEncoder.gen[EmailMessage]

@@ -5,27 +5,13 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.*
-import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQS, SQSLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, EmailMessage, EmailPayload, EmailPayloadCancellationAttributes, EmailPayloadContactAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
 import com.gu.productmove.zuora.rest.*
-import com.gu.productmove.zuora.{
-  CreditBalanceAdjustment,
-  CreditBalanceAdjustmentLive,
-  GetInvoice,
-  GetInvoiceItemsForSubscription,
-  GetInvoiceItemsForSubscriptionLive,
-  GetInvoiceLive,
-  InvoiceItemAdjustment,
-  InvoiceItemAdjustmentLive,
-  ZuoraCancel,
-  ZuoraCancelLive,
-  ZuoraSetCancellationReason,
-  ZuoraSetCancellationReasonLive,
-}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
+import com.gu.productmove.zuora.{CreditBalanceAdjustment, CreditBalanceAdjustmentLive, GetAccount, GetAccountLive, GetInvoice, GetInvoiceItemsForSubscription, GetInvoiceItemsForSubscriptionLive, GetInvoiceLive, InvoiceItemAdjustment, InvoiceItemAdjustmentLive, ZuoraCancel, ZuoraCancelLive, ZuoraSetCancellationReason, ZuoraSetCancellationReasonLive}
 import com.gu.util.config
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
@@ -35,8 +21,9 @@ import zio.{Clock, IO, Task, ZIO}
 import com.gu.productmove.refund.*
 import RefundType.*
 import com.gu.productmove.endpoint.zuora.{GetSubscriptionToCancel, GetSubscriptionToCancelLive}
-import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.RatePlanCharge
+import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.{GetSubscriptionToCancelResponse, RatePlanCharge}
 import com.gu.productmove.zuora.model.SubscriptionName
+import org.joda.time.format.DateTimeFormat
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -112,6 +99,7 @@ object SubscriptionCancelEndpoint {
         ZuoraGetLive.layer,
         GuStageLive.layer,
         ZuoraSetCancellationReasonLive.layer,
+        GetAccountLive.layer,
         SQSLive.layer,
       )
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
@@ -147,11 +135,11 @@ object SubscriptionCancelEndpoint {
   private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
     now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 
-  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
-    GetSubscriptionToCancel with ZuoraCancel with SQS with Stage with ZuoraSetCancellationReason,
+  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput, sendingEmail: Boolean = false): ZIO[
+    GetSubscriptionToCancel with ZuoraCancel with GetAccount with SQS with Stage with ZuoraSetCancellationReason,
     String,
     OutputBody,
-  ] =
+  ] = {
     (for {
       _ <- ZIO.log(s"PostData: ${postData.toString}")
       stage <- ZIO.service[Stage]
@@ -206,10 +194,21 @@ object SubscriptionCancelEndpoint {
 
       _ <- ZIO.log(s"Attempting to update cancellation reason on Zuora subscription")
       _ <- ZuoraSetCancellationReason
-        .update(subscriptionName, subscription.version + 1, postData.reason)
-      // Version +1 because the cancellation will have incremented the version
+        .update(
+          subscriptionName,
+          subscription.version + 1,
+          postData.reason,
+        ) // Version +1 because the cancellation will have incremented the version
+      _ <- if (sendingEmail) sendEmail(subscription, cancellationDate) else ZIO.unit
     } yield ()).fold(
       errorMessage => InternalServerError(errorMessage),
       _ => Success("Subscription was successfully cancelled"),
     )
+  }
+
+  private def sendEmail(subscription: GetSubscriptionToCancelResponse, cancellationDate: LocalDate) =
+    for {
+      account <- GetAccount.get(subscription.accountNumber)
+      _ <- SQS.sendEmail(EmailMessage.cancellationEmail(account, cancellationDate))
+    } yield ()
 }

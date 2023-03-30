@@ -52,7 +52,7 @@ import com.gu.productmove.zuora.{
   UpdateResponse,
 }
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
@@ -71,8 +71,8 @@ object HandlerSpec extends ZIOSpecDefault {
 
     val subscriptionUpdateInputsShouldBe: (SubscriptionName, BillingPeriod, BigDecimal, String) =
       (subscriptionName, Monthly, BigDecimal(15), "89ad8casd9c0asdcaj89sdc98as")
-    val getAccountStubs = Map("accountNumber" -> getAccountResponse)
-    val getAccountStubs2 = Map("accountNumber" -> getAccountResponse2)
+    val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)
+    val getAccountStubs2 = Map(AccountNumber("accountNumber") -> getAccountResponse2)
     val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
       Map(emailMessageBody -> (), salesforceRecordInput2 -> ())
     val dynamoStubs = Map(supporterRatePlanItem1 -> ())
@@ -99,7 +99,7 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-          assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
+          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
           assert(sqsRequests)(hasSameElements(List(emailMessageBody, salesforceRecordInput2))) &&
           assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
         }).provide(
@@ -141,7 +141,7 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-          assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
+          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
           assert(sqsRequests)(hasSameElements(List(emailMessageBodyNoPaymentOrRefund, salesforceRecordInput3))) &&
           assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
         }).provide(layers)
@@ -163,7 +163,7 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(SubscriptionName("A-S00339056")))) &&
           assert(subUpdateRequests)(equalTo(Nil)) &&
-          assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
+          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
           assert(sqsRequests)(equalTo(Nil)) &&
           assert(dynamoRequests)(equalTo(Nil))
         }).provide(
@@ -268,7 +268,7 @@ object HandlerSpec extends ZIOSpecDefault {
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(accountRequests)(equalTo(List("accountNumber", "paymentMethodId")))
+          assert(accountRequests)(equalTo(List(AccountNumber("accountNumber"), "paymentMethodId")))
         }).provide(
           ZLayer.succeed(new MockCatalogue),
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
@@ -290,7 +290,7 @@ object HandlerSpec extends ZIOSpecDefault {
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(accountRequests)(equalTo(List("accountNumber", "paymentMethodId")))
+          assert(accountRequests)(equalTo(List(AccountNumber("accountNumber"), "paymentMethodId")))
         }).provide(
           ZLayer.succeed(new MockCatalogue),
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
@@ -299,7 +299,7 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       },
       test("available-product-moves endpoint returns empty response when user does not have a card payment method") {
-        val getAccountStubs = Map("accountNumber" -> directDebitGetAccountResponse)
+        val getAccountStubs = Map(AccountNumber("accountNumber") -> directDebitGetAccountResponse)
         val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(body = List())
         (for {
           _ <- TestClock.setTime(time)
@@ -309,7 +309,7 @@ object HandlerSpec extends ZIOSpecDefault {
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(accountRequests)(equalTo(List("accountNumber")))
+          assert(accountRequests)(equalTo(List(AccountNumber("accountNumber"))))
         }).provide(
           ZLayer.succeed(new MockCatalogue),
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
@@ -318,18 +318,36 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       },
       test("cancel endpoint successfully cancels a subscription") {
+        val emailMessage = EmailMessage(
+          EmailPayload(
+            Address = Some("example@gmail.com"),
+            ContactAttributes = EmailPayloadContactAttributes(
+              SubscriberAttributes = EmailPayloadCancellationAttributes(
+                first_name = "John",
+                last_name = "Hee",
+                product_type = "Supporter Plus",
+                cancellation_effective_date = Some("29 September 2022"),
+              ),
+            ),
+          ),
+          DataExtensionName = "subscription-cancelled-email",
+          SfContactId = "sfContactId",
+          IdentityUserId = Some("12345"),
+        )
         (for {
           _ <- TestClock.setTime(time)
           input = SubscriptionCancelEndpointTypes.ExpectedInput("mma_other")
-          output <- SubscriptionCancelEndpoint.subscriptionCancel(subscriptionName, input)
+          output <- SubscriptionCancelEndpoint.subscriptionCancel(subscriptionName, input, sendingEmail = true)
           getSubscriptionToCancelRequests <- MockGetSubscriptionToCancel.requests
           zuoraCancelRequests <- MockZuoraCancel.requests
           sqsRequests <- MockSQS.requests
+          getAccountRequests <- MockGetAccount.requests
         } yield {
           assert(output)(equalTo(SubscriptionCancelEndpointTypes.Success("Subscription was successfully cancelled"))) &&
           assert(getSubscriptionToCancelRequests)(equalTo(List(subscriptionName))) &&
           assert(zuoraCancelRequests)(equalTo(List((subscriptionName, LocalDate.of(2022, 9, 29))))) &&
-          assert(sqsRequests)(hasSameElements(List()))
+          assert(getAccountRequests)(hasSameElements(List(AccountNumber("anAccountNumber"))))
+          assert(sqsRequests)(hasSameElements(List(emailMessage)))
         }).provide(
           ZLayer.succeed(new MockGetSubscriptionToCancel(Map(subscriptionName -> getSubscriptionForCancelResponse))),
           ZLayer.succeed(
@@ -340,7 +358,8 @@ object HandlerSpec extends ZIOSpecDefault {
               ),
             ),
           ),
-          ZLayer.succeed(new MockSQS(Map())),
+          ZLayer.succeed(new MockGetAccount(Map(AccountNumber("anAccountNumber") -> getAccountResponse), Map.empty)),
+          ZLayer.succeed(new MockSQS(Map(emailMessage -> ()))),
           ZLayer.succeed(
             new MockZuoraSetCancellationReason(
               Map((SubscriptionName("A-S00339056"), 2, "mma_other") -> UpdateResponse(true)),
