@@ -5,7 +5,7 @@ import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
@@ -30,7 +30,12 @@ trait GetSubscription:
 
 object GetSubscription {
 
-  case class GetSubscriptionResponse(id: String, accountId: String, accountNumber: String, ratePlans: List[RatePlan])
+  case class GetSubscriptionResponse(
+      id: String,
+      accountId: String,
+      accountNumber: AccountNumber,
+      ratePlans: List[RatePlan],
+  )
 
   case class RatePlan(
       productName: String,

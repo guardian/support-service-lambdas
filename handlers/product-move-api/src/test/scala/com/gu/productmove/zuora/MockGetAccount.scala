@@ -1,18 +1,19 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.zuora.GetAccount.PaymentMethodResponse
+import com.gu.productmove.zuora.model.AccountNumber
 import zio.{IO, ZIO}
 
 class MockGetAccount(
-    accountResponse: Map[String, GetAccount.GetAccountResponse],
+    accountResponse: Map[AccountNumber, GetAccount.GetAccountResponse],
     paymentResponse: Map[String, PaymentMethodResponse],
 ) extends GetAccount {
 
-  private var mutableStore: List[String] = Nil // we need to remember the side effects
+  private var mutableStore: List[String | AccountNumber] = Nil // we need to remember the side effects
 
   def requests = mutableStore.reverse
 
-  override def get(accountNumber: String): IO[String, GetAccount.GetAccountResponse] = {
+  override def get(accountNumber: AccountNumber): IO[String, GetAccount.GetAccountResponse] = {
     mutableStore = accountNumber :: mutableStore
 
     accountResponse.get(accountNumber) match
@@ -30,5 +31,5 @@ class MockGetAccount(
 }
 
 object MockGetAccount {
-  def requests: ZIO[MockGetAccount, Nothing, List[String]] = ZIO.serviceWith[MockGetAccount](_.requests)
+  def requests: ZIO[MockGetAccount, Nothing, List[String | AccountNumber]] = ZIO.serviceWith[MockGetAccount](_.requests)
 }
