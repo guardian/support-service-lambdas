@@ -17,8 +17,7 @@ object ProductMoveSpec extends ZIOSpecDefault {
     suite("Switch")(test("Run product switch lambda locally") {
       for {
         _ <- TestClock.setTime(Instant.now())
-        _ <- ProductMoveEndpoint
-          .productMove("A-S00487531", ExpectedInput(20, false, None, None))
+        _ <- ProductMoveEndpoint.productMove("A-S00487531", ExpectedInput(20, false, None, None))
           .provide(
             GetSubscriptionLive.layer,
             AwsCredentialsLive.layer,

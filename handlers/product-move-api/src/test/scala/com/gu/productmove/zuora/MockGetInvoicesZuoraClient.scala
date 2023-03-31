@@ -135,7 +135,10 @@ object MockGetInvoicesZuoraClient {
 
 class MockGetInvoicesZuoraClient(response: MockGetInvoicesZuoraClient.ClientResponse) extends ZuoraClient {
 
+
   override def send(request: Request[Either[String, String], Any]): IO[String, String] =
     ZIO.succeed(response);
+
+
 
 }

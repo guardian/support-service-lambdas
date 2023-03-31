@@ -49,6 +49,6 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               SttpClientLive.layer,
             )
         } yield assert(true)(equalTo(true))
-      } @@ TestAspect.ignore,
+      }  @@ TestAspect.ignore,
     )
 }
