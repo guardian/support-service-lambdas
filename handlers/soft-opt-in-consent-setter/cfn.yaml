@@ -209,7 +209,7 @@ Resources:
               - sqs:ReceiveMessage
             Resource: !GetAtt SoftOptInsQueue.Arn
 
-  CrossAccountRole:
+  SoftOptInsQueueCrossAccountRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
