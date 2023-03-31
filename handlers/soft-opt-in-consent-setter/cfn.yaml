@@ -209,6 +209,29 @@ Resources:
               - sqs:ReceiveMessage
             Resource: !GetAtt SoftOptInsQueue.Arn
 
+  CrossAccountRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::2013-5905-4765:root"
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SQSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt SoftOptInsQueue.Arn
+
   SoftOptInsQueue:
     Type: AWS::SQS::Queue
     Properties:
