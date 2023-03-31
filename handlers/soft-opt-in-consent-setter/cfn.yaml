@@ -9,6 +9,9 @@ Parameters:
       - CODE
       - DEV
     Default: CODE
+  MembershipAccountId:
+    Description: The AWS Account ID of the membership account
+    Type: String
 
 Mappings:
   StageMap:
@@ -208,6 +211,29 @@ Resources:
               - sqs:GetQueueAttributes
               - sqs:ReceiveMessage
             Resource: !GetAtt SoftOptInsQueue.Arn
+
+  SoftOptInsQueueCrossAccountRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${MembershipAccountId}:root"
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SQSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt SoftOptInsQueue.Arn
 
   SoftOptInsQueue:
     Type: AWS::SQS::Queue
