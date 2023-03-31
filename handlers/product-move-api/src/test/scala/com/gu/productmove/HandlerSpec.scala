@@ -17,6 +17,10 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, InternalServerError, OutputBody}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
+import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, SubscriptionCancelEndpointTypes}
+import com.gu.productmove.invoicingapi.InvoicingApiRefund
+import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
+import com.gu.productmove.mocks.MockInvoicingApiRefund
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetAccount.{
@@ -32,18 +36,23 @@ import com.gu.productmove.zuora.{
   CreateSubscriptionResponse,
   DefaultPaymentMethod,
   GetAccount,
+  GetCatalogue,
   GetSubscription,
-  MockCancelZuora,
   MockCatalogue,
   MockDynamo,
   MockGetAccount,
   MockGetSubscription,
+  MockGetSubscriptionToCancel,
   MockSQS,
   MockSubscribe,
   MockSubscriptionUpdate,
+  MockZuoraCancel,
+  MockZuoraSetCancellationReason,
   SubscriptionUpdateResponse,
+  UpdateResponse,
 }
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
+import com.gu.productmove.zuora.model.SubscriptionName
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
@@ -54,12 +63,14 @@ import scala.language.postfixOps
 object HandlerSpec extends ZIOSpecDefault {
   def spec = {
     val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
-    val expectedSubNameInput = "A-S00339056"
+    val subscriptionName = SubscriptionName("A-S00339056")
+
     def getSubscriptionStubs(subscriptionResponse: GetSubscriptionResponse = getSubscriptionResponse) = {
-      Map(expectedSubNameInput -> subscriptionResponse)
+      Map(subscriptionName -> subscriptionResponse)
     }
-    val subscriptionUpdateInputsShouldBe: (String, BillingPeriod, BigDecimal, String) =
-      (expectedSubNameInput, Monthly, BigDecimal(15), "89ad8casd9c0asdcaj89sdc98as")
+
+    val subscriptionUpdateInputsShouldBe: (SubscriptionName, BillingPeriod, BigDecimal, String) =
+      (subscriptionName, Monthly, BigDecimal(15), "89ad8casd9c0asdcaj89sdc98as")
     val getAccountStubs = Map("accountNumber" -> getAccountResponse)
     val getAccountStubs2 = Map("accountNumber" -> getAccountResponse2)
     val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
@@ -78,7 +89,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
         (for {
           _ <- TestClock.setTime(time)
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
+          output <- ProductMoveEndpoint.productMove(subscriptionName, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
@@ -86,7 +97,7 @@ object HandlerSpec extends ZIOSpecDefault {
           dynamoRequests <- MockDynamo.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
           assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
           assert(sqsRequests)(hasSameElements(List(emailMessageBody, salesforceRecordInput2))) &&
@@ -120,7 +131,7 @@ object HandlerSpec extends ZIOSpecDefault {
         (for {
           _ <- TestClock.setTime(time)
 
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
+          output <- ProductMoveEndpoint.productMove(subscriptionName, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
@@ -128,7 +139,7 @@ object HandlerSpec extends ZIOSpecDefault {
           dynamoRequests <- MockDynamo.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
           assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
           assert(sqsRequests)(hasSameElements(List(emailMessageBodyNoPaymentOrRefund, salesforceRecordInput3))) &&
@@ -142,7 +153,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val expectedOutput = InternalServerError("identityId is null for subscription name A-S00339056")
         (for {
           _ <- TestClock.setTime(time)
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
+          output <- ProductMoveEndpoint.productMove(subscriptionName, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
@@ -150,7 +161,7 @@ object HandlerSpec extends ZIOSpecDefault {
           dynamoRequests <- MockDynamo.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List("A-S00339056"))) &&
+          assert(getSubRequests)(equalTo(List(SubscriptionName("A-S00339056")))) &&
           assert(subUpdateRequests)(equalTo(Nil)) &&
           assert(getAccountRequests)(equalTo(List("accountNumber"))) &&
           assert(sqsRequests)(equalTo(Nil)) &&
@@ -170,7 +181,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
         (for {
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
+          output <- ProductMoveEndpoint.productMove(subscriptionName, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
@@ -178,7 +189,7 @@ object HandlerSpec extends ZIOSpecDefault {
           dynamoRequests <- MockDynamo.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(subUpdateRequests)(equalTo(Nil)) &&
           assert(getAccountRequests)(equalTo(Nil)) &&
           assert(sqsRequests)(equalTo(Nil)) &&
@@ -204,12 +215,12 @@ object HandlerSpec extends ZIOSpecDefault {
         )
         (for {
           _ <- TestClock.setTime(time)
-          output <- ProductMoveEndpoint.productMove(expectedSubNameInput, endpointJsonInputBody)
+          output <- ProductMoveEndpoint.productMove(subscriptionName, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdatePreviewRequests <- MockSubscriptionUpdate.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(subUpdatePreviewRequests)(equalTo(List(subscriptionUpdateInputsShouldBe)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
@@ -251,12 +262,12 @@ object HandlerSpec extends ZIOSpecDefault {
         )
         (for {
           _ <- TestClock.setTime(time)
-          output <- AvailableProductMovesEndpoint.runWithEnvironment(expectedSubNameInput)
+          output <- AvailableProductMovesEndpoint.runWithEnvironment(subscriptionName)
           getSubRequests <- MockGetSubscription.requests
           accountRequests <- MockGetAccount.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(accountRequests)(equalTo(List("accountNumber", "paymentMethodId")))
         }).provide(
           ZLayer.succeed(new MockCatalogue),
@@ -273,12 +284,12 @@ object HandlerSpec extends ZIOSpecDefault {
         val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(body = List())
         (for {
           _ <- TestClock.setTime(time)
-          output <- AvailableProductMovesEndpoint.runWithEnvironment(expectedSubNameInput)
+          output <- AvailableProductMovesEndpoint.runWithEnvironment(subscriptionName)
           getSubRequests <- MockGetSubscription.requests
           accountRequests <- MockGetAccount.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(accountRequests)(equalTo(List("accountNumber", "paymentMethodId")))
         }).provide(
           ZLayer.succeed(new MockCatalogue),
@@ -292,17 +303,49 @@ object HandlerSpec extends ZIOSpecDefault {
         val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(body = List())
         (for {
           _ <- TestClock.setTime(time)
-          output <- AvailableProductMovesEndpoint.runWithEnvironment(expectedSubNameInput)
+          output <- AvailableProductMovesEndpoint.runWithEnvironment(subscriptionName)
           getSubRequests <- MockGetSubscription.requests
           accountRequests <- MockGetAccount.requests
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(expectedSubNameInput))) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(accountRequests)(equalTo(List("accountNumber")))
         }).provide(
           ZLayer.succeed(new MockCatalogue),
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD")),
+        )
+      },
+      test("cancel endpoint successfully cancels a subscription") {
+        (for {
+          _ <- TestClock.setTime(time)
+          input = SubscriptionCancelEndpointTypes.ExpectedInput("mma_other")
+          output <- SubscriptionCancelEndpoint.subscriptionCancel(subscriptionName, input)
+          getSubscriptionToCancelRequests <- MockGetSubscriptionToCancel.requests
+          zuoraCancelRequests <- MockZuoraCancel.requests
+          sqsRequests <- MockSQS.requests
+        } yield {
+          assert(output)(equalTo(SubscriptionCancelEndpointTypes.Success("Subscription was successfully cancelled"))) &&
+          assert(getSubscriptionToCancelRequests)(equalTo(List(subscriptionName))) &&
+          assert(zuoraCancelRequests)(equalTo(List((subscriptionName, LocalDate.of(2022, 9, 29))))) &&
+          assert(sqsRequests)(hasSameElements(List()))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscriptionToCancel(Map(subscriptionName -> getSubscriptionForCancelResponse))),
+          ZLayer.succeed(
+            new MockZuoraCancel(
+              Map(
+                (subscriptionName, LocalDate.of(2022, 9, 29)) ->
+                  CancellationResponse(subscriptionName.value, LocalDate.of(2022, 9, 29), None),
+              ),
+            ),
+          ),
+          ZLayer.succeed(new MockSQS(Map())),
+          ZLayer.succeed(
+            new MockZuoraSetCancellationReason(
+              Map((SubscriptionName("A-S00339056"), 2, "mma_other") -> UpdateResponse(true)),
+            ),
+          ),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },

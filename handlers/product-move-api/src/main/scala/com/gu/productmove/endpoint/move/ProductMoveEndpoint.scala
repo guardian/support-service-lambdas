@@ -14,33 +14,8 @@ import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{
-  GetAccount,
-  GetAccountLive,
-  GetSubscription,
-  GetSubscriptionLive,
-  Subscribe,
-  SubscribeLive,
-  SubscriptionUpdate,
-  SubscriptionUpdateLive,
-  ZuoraCancel,
-  ZuoraCancelLive,
-  getSupporterPlusRatePlanIds,
-}
-import com.gu.productmove.{
-  AwsCredentialsLive,
-  AwsS3Live,
-  Dynamo,
-  DynamoLive,
-  EmailMessage,
-  EmailPayload,
-  EmailPayloadContactAttributes,
-  EmailPayloadSubscriberAttributes,
-  GuStageLive,
-  SQS,
-  SQSLive,
-  SttpClientLive,
-}
+import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive, getSupporterPlusRatePlanIds}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, Dynamo, DynamoLive, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadSubscriberAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -48,7 +23,6 @@ import sttp.tapir.json.zio.jsonBody
 import zio.{Clock, IO, URIO, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 import zio.ThreadLocalBridge.trace
-
 import com.gu.newproduct.api.productcatalog.PricesFromZuoraCatalog
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.effects.GetFromS3
@@ -57,13 +31,14 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.ZuoraIds
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.gu.i18n.Currency
+import com.gu.productmove.zuora.model.SubscriptionName
 
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00448793", ExpectedInput(1, false, None, None)),
+    run(SubscriptionName("A-S00448793"), ExpectedInput(1, false, None, None)),
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[
@@ -123,11 +98,13 @@ object ProductMoveEndpoint {
         )
     endpointDescription
       .serverLogic[TIO] { (subscriptionName, postData) =>
-        run(subscriptionName, postData).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply)
+        run(SubscriptionName(subscriptionName), postData)
+          .tapEither(result => ZIO.log("result tapped: " + result))
+          .map(Right.apply)
       }
   }
 
-  private def run(subscriptionName: String, postData: ExpectedInput): TIO[OutputBody] =
+  private def run(subscriptionName: SubscriptionName, postData: ExpectedInput): TIO[OutputBody] =
     productMove(subscriptionName, postData)
       .provide(
         GetSubscriptionLive.layer,
@@ -160,8 +137,9 @@ object ProductMoveEndpoint {
       case 1 => ZIO.succeed(list.head)
       case _ => ZIO.fail(message)
     }
+
   private[productmove] def productMove(
-      subscriptionName: String,
+      subscriptionName: SubscriptionName,
       postData: ExpectedInput,
   ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
     (for {
@@ -169,11 +147,11 @@ object ProductMoveEndpoint {
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
       currentRatePlan <- getSingleOrNotEligible(
         subscription.ratePlans,
-        s"Subscription: $subscriptionName has more than one ratePlan",
+        s"Subscription: ${subscriptionName.value} has more than one ratePlan",
       )
       ratePlanCharge <- getSingleOrNotEligible(
         currentRatePlan.ratePlanCharges,
-        s"Subscription: $subscriptionName has more than one ratePlanCharge",
+        s"Subscription: ${subscriptionName.value} has more than one ratePlanCharge",
       )
       currency <- ZIO
         .fromOption(ratePlanCharge.currencyObject)
@@ -182,7 +160,13 @@ object ProductMoveEndpoint {
         )
       result <-
         if (postData.preview)
-          doPreview(subscription.id, postData.price, ratePlanCharge.billingPeriod, currency, currentRatePlan.id)
+          doPreview(
+            SubscriptionName(subscription.id),
+            postData.price,
+            ratePlanCharge.billingPeriod,
+            currency,
+            currentRatePlan.id,
+          )
         else
           doUpdate(
             subscriptionName,
@@ -198,7 +182,7 @@ object ProductMoveEndpoint {
     } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
 
   def doPreview(
-      subscriptionId: String,
+      subscriptionName: SubscriptionName,
       price: BigDecimal,
       billingPeriod: BillingPeriod,
       currency: Currency,
@@ -206,12 +190,12 @@ object ProductMoveEndpoint {
   ): ZIO[SubscriptionUpdate with Stage, String, OutputBody] = for {
     _ <- ZIO.log("Fetching Preview from Zuora")
     previewResponse <- SubscriptionUpdate
-      .preview(subscriptionId, billingPeriod, price, currency, currentRatePlanId)
+      .preview(subscriptionName, billingPeriod, price, currency, currentRatePlanId)
       .addLogMessage("SubscriptionUpdate")
   } yield previewResponse
 
   def doUpdate(
-      subscriptionName: String,
+      subscriptionName: SubscriptionName,
       price: BigDecimal,
       previousAmount: BigDecimal,
       billingPeriod: BillingPeriod,
@@ -227,10 +211,10 @@ object ProductMoveEndpoint {
 
     identityId <- ZIO
       .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(s"identityId is null for subscription name $subscriptionName")
+      .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
 
     updateResponse <- SubscriptionUpdate
-      .update(subscription.id, billingPeriod, price, currency, currentRatePlan.id)
+      .update(SubscriptionName(subscription.id), billingPeriod, price, currency, currentRatePlan.id)
       .addLogMessage("SubscriptionUpdate")
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
@@ -252,7 +236,7 @@ object ProductMoveEndpoint {
                 first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                 date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                 payment_frequency = billingPeriodValue + "ly",
-                subscription_id = subscriptionName,
+                subscription_id = subscriptionName.value,
               ),
             ),
           ),
@@ -266,7 +250,7 @@ object ProductMoveEndpoint {
     salesforceTrackingFuture <- SQS
       .queueSalesforceTracking(
         SalesforceRecordInput(
-          subscriptionName,
+          subscriptionName.value,
           previousAmount,
           price,
           currentRatePlan.productName,
@@ -285,7 +269,7 @@ object ProductMoveEndpoint {
     amendSupporterProductDynamoTableFuture <- Dynamo
       .writeItem(
         SupporterRatePlanItem(
-          subscriptionName,
+          subscriptionName.value,
           identityId = identityId,
           gifteeIdentityId = None,
           productRatePlanId = supporterPlusRatePlanIds.ratePlanId,

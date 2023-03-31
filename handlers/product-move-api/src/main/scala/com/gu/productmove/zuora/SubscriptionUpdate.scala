@@ -3,12 +3,30 @@ package com.gu.productmove.zuora
 import com.gu.effects.GetFromS3
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.*
-import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, AnnualSupporterPlusV2, MonthlySupporterPlus, MonthlySupporterPlusV2}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, SupporterPlusZuoraIds, ZuoraIds, zuoraIdsForStage}
+import com.gu.newproduct.api.productcatalog.PlanId.{
+  AnnualSupporterPlus,
+  AnnualSupporterPlusV2,
+  MonthlySupporterPlus,
+  MonthlySupporterPlusV2,
+}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{
+  ProductRatePlanId,
+  SupporterPlusZuoraIds,
+  ZuoraIds,
+  zuoraIdsForStage,
+}
 import com.gu.productmove.AwsS3
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{
+  ProductRatePlanId,
+  SupporterPlusZuoraIds,
+  ZuoraIds,
+  zuoraIdsForStage,
+}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
 import com.gu.util.config
 import com.gu.util.config.ZuoraEnvironment
@@ -24,9 +42,10 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 import java.time.LocalDate
 
 val SwitchToV2SupporterPlus = false
+
 trait SubscriptionUpdate:
   def update(
-      subscriptionId: String,
+      subscriptionName: SubscriptionName,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
       currency: Currency,
@@ -34,7 +53,7 @@ trait SubscriptionUpdate:
   ): ZIO[Stage, String, SubscriptionUpdateResponse]
 
   def preview(
-      subscriptionId: String,
+      subscriptionName: SubscriptionName,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
       currency: Currency,
@@ -46,7 +65,7 @@ object SubscriptionUpdateLive:
 
 private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpdate:
   override def update(
-      subscriptionId: String,
+      subscriptionName: SubscriptionName,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
       currency: Currency,
@@ -55,20 +74,19 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
     for {
       requestBody <- SubscriptionUpdateRequest(billingPeriod, currency, ratePlanIdToRemove, price)
       response <- zuoraGet.put[SubscriptionUpdateRequest, SubscriptionUpdateResponse](
-        uri"subscriptions/$subscriptionId",
+        uri"subscriptions/${subscriptionName.value}",
         requestBody,
       )
     } yield response
   }
 
   override def preview(
-      subscriptionId: String,
+      subscriptionName: SubscriptionName,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
       currency: Currency,
       ratePlanIdToRemove: String,
   ): ZIO[Stage, String, PreviewResult] = {
-
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
@@ -80,7 +98,7 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
         today.plusMonths(13),
       )
       response <- zuoraGet.put[SubscriptionUpdatePreviewRequest, SubscriptionUpdatePreviewResponse](
-        uri"subscriptions/$subscriptionId",
+        uri"subscriptions/${subscriptionName.value}",
         requestBody,
       )
       stage <- ZIO.service[Stage]
@@ -92,46 +110,53 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
 
 object SubscriptionUpdate {
   def update(
-      subscriptionId: String,
+      subscriptionName: SubscriptionName,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
       currency: Currency,
       ratePlanIdToRemove: String,
   ): ZIO[SubscriptionUpdate with Stage, String, SubscriptionUpdateResponse] =
-    ZIO.serviceWithZIO[SubscriptionUpdate](_.update(subscriptionId, billingPeriod, price, currency, ratePlanIdToRemove))
+    ZIO.serviceWithZIO[SubscriptionUpdate](
+      _.update(subscriptionName, billingPeriod, price, currency, ratePlanIdToRemove),
+    )
 
   def preview(
-      subscriptionId: String,
+      subscriptionName: SubscriptionName,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
       currency: Currency,
       ratePlanIdToRemove: String,
   ): ZIO[SubscriptionUpdate with Stage, String, PreviewResult] =
     ZIO.serviceWithZIO[SubscriptionUpdate](
-      _.preview(subscriptionId, billingPeriod, price, currency, ratePlanIdToRemove),
+      _.preview(subscriptionName, billingPeriod, price, currency, ratePlanIdToRemove),
     )
 }
+
 case class SubscriptionUpdateRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],
     collect: Boolean = true,
     runBilling: Boolean = true,
 )
+
 case class AddRatePlan(
     contractEffectiveDate: LocalDate,
     productRatePlanId: String,
     chargeOverrides: List[ChargeOverrides],
 )
+
 case class RemoveRatePlan(
     contractEffectiveDate: LocalDate,
     ratePlanId: String,
 )
+
 case class SubscriptionUpdateResponse(
     subscriptionId: String,
     totalDeltaMrr: BigDecimal,
     invoiceId: String,
     paidAmount: Option[BigDecimal],
 )
+
 case class SubscriptionUpdatePreviewRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],
@@ -140,7 +165,9 @@ case class SubscriptionUpdatePreviewRequest(
     currentTerm: String = "24",
     currentTermPeriodType: String = "Month",
 )
+
 case class SubscriptionUpdatePreviewResponse(invoice: SubscriptionUpdateInvoice)
+
 case class SubscriptionUpdateInvoiceItem(
     serviceStartDate: LocalDate,
     chargeAmount: BigDecimal,
@@ -149,12 +176,14 @@ case class SubscriptionUpdateInvoiceItem(
 ) {
   val totalAmount = chargeAmount + taxAmount
 }
+
 case class SubscriptionUpdateInvoice(
     amount: BigDecimal,
     amountWithoutTax: BigDecimal,
     taxAmount: BigDecimal,
     invoiceItems: List[SubscriptionUpdateInvoiceItem],
 )
+
 case class SupporterPlusRatePlanIds(
     ratePlanId: String,
     subscriptionRatePlanChargeId: String,

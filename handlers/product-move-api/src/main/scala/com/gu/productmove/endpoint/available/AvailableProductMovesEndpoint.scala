@@ -9,6 +9,7 @@ import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler
 import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.*
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import sttp.tapir.*
@@ -79,7 +80,7 @@ object AvailableProductMovesEndpoint {
 
   // sub to test on: "A-S00334930"
   private def run(subscriptionName: String): TIO[OutputBody] =
-    runWithEnvironment("A-S00334930").provide(
+    runWithEnvironment(SubscriptionName("A-S00334930")).provide(
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
@@ -133,7 +134,7 @@ object AvailableProductMovesEndpoint {
     }
 
   private[productmove] def runWithEnvironment(
-      subscriptionName: String,
+      subscriptionName: SubscriptionName,
   ): URIO[GetSubscription with GetCatalogue with GetAccount with Stage, OutputBody] = {
     val output = for {
       stage <- ZIO.service[Stage]
@@ -148,20 +149,20 @@ object AvailableProductMovesEndpoint {
         .get(subscriptionName)
         .mapErrorTo500("GetSubscription") // TODO add code to return 404 rather than 500 if it's not found
 
-      ratePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: $subscriptionName , ratePlan")
+      ratePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: ${subscriptionName.value} , ratePlan")
       _ <- succeedIfEligible(
         ratePlan.productRatePlanId == monthlyContributionRatePlanId,
-        s"Subscription: $subscriptionName is not a monthly contribution",
+        s"Subscription: ${subscriptionName.value} is not a monthly contribution",
       )
       charge <- getSingleOrNotEligible(
         ratePlan.ratePlanCharges,
-        s"Subscription: $subscriptionName , ratePlan charge for ratePlan $ratePlan",
+        s"Subscription: ${subscriptionName.value} , ratePlan charge for ratePlan $ratePlan",
       )
 
       // Next payment date
       chargedThroughDate <- ZIO.fromOption(charge.chargedThroughDate).orElse {
         for {
-          _ <- ZIO.log(s"chargedThroughDate is null for subscription $subscriptionName.")
+          _ <- ZIO.log(s"chargedThroughDate is null for subscription ${subscriptionName.value}.")
           resp <- ZIO.fail(AvailableMoves(List()))
         } yield resp
       }
@@ -172,7 +173,7 @@ object AvailableProductMovesEndpoint {
         .fromOption(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate)
         .orElse {
           ZIO
-            .log(s"Payment method is not a card for subscription $subscriptionName.")
+            .log(s"Payment method is not a card for subscription ${subscriptionName.value}.")
             .flatMap(_ => ZIO.fail(AvailableMoves(List())))
         }
 
@@ -194,23 +195,23 @@ object AvailableProductMovesEndpoint {
         (for {
           _ <- succeedIfEligible(
             account.subscriptions.length == 1,
-            s"More than one subscription for account for subscription: $subscriptionName",
+            s"More than one subscription for account for subscription: ${subscriptionName.value}",
           )
           _ <- succeedIfEligible(
             account.basicInfo.currency == Currency.GBP,
-            s"Subscription: $subscriptionName not in GBP",
+            s"Subscription: ${subscriptionName.value} not in GBP",
           )
           _ <- succeedIfEligible(
             paymentMethod.NumConsecutiveFailures == 0,
-            s"User is in payment failure with subscription: $subscriptionName",
+            s"User is in payment failure with subscription: ${subscriptionName.value}",
           )
           _ <- succeedIfEligible(
             creditCardExpirationDate.isAfter(today),
-            s"card expired for subscription: $subscriptionName",
+            s"card expired for subscription: ${subscriptionName.value}",
           )
           _ <- succeedIfEligible(
             account.basicInfo.balance == 0,
-            s"Account balance is not zero for subscription: $subscriptionName",
+            s"Account balance is not zero for subscription: ${subscriptionName.value}",
           )
         } yield ()).isSuccess
 

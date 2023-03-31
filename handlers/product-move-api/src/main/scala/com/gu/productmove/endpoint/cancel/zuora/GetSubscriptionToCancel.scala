@@ -1,8 +1,9 @@
-package com.gu.productmove.endpoint.cancel.zuora
+package com.gu.productmove.endpoint.zuora
 
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.cancel.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.Response
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
@@ -15,19 +16,21 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-object GetSubscriptionLive:
-  val layer: URLayer[ZuoraGet, GetSubscription] = ZLayer.fromFunction(GetSubscriptionLive(_))
+object GetSubscriptionToCancelLive:
+  val layer: URLayer[ZuoraGet, GetSubscriptionToCancel] = ZLayer.fromFunction(GetSubscriptionToCancelLive(_))
 
-private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription:
-  override def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse] =
-    zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/$subscriptionNumber?charge-detail=current-segment")
+private class GetSubscriptionToCancelLive(zuoraGet: ZuoraGet) extends GetSubscriptionToCancel:
+  override def get(subscriptionName: SubscriptionName): IO[String, GetSubscriptionToCancel.Response] =
+    zuoraGet.get[GetSubscriptionToCancel.Response](
+      uri"subscriptions/${subscriptionName.value}?charge-detail=current-segment",
+    )
 
-trait GetSubscription:
-  def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse]
+trait GetSubscriptionToCancel:
+  def get(subscriptionName: SubscriptionName): IO[String, GetSubscriptionToCancel.Response]
 
-object GetSubscription {
+object GetSubscriptionToCancel {
 
-  case class GetSubscriptionResponse(
+  case class Response(
       id: String,
       version: Int,
       contractEffectiveDate: LocalDate,
@@ -55,11 +58,11 @@ object GetSubscription {
       effectiveEndDate: LocalDate,
   )
 
-  given JsonDecoder[GetSubscriptionResponse] = DeriveJsonDecoder.gen[GetSubscriptionResponse]
+  given JsonDecoder[Response] = DeriveJsonDecoder.gen[GetSubscriptionToCancel.Response]
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
   given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen[RatePlanCharge]
 
-  def get(subscriptionNumber: String): ZIO[GetSubscription, String, GetSubscriptionResponse] =
-    ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionNumber))
+  def get(subscriptionName: SubscriptionName): ZIO[GetSubscriptionToCancel, String, GetSubscriptionToCancel.Response] =
+    ZIO.serviceWithZIO[GetSubscriptionToCancel](_.get(subscriptionName))
 
 }

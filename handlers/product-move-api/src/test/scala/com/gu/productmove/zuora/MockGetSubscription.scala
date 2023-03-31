@@ -1,24 +1,24 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.zuora.GetSubscription
-import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.model.SubscriptionName
 import zio.{IO, ZIO}
 
-class MockGetSubscription(responses: Map[String, GetSubscription.GetSubscriptionResponse]) extends GetSubscription {
+import scala.collection.mutable.ArrayBuffer
 
-  private var mutableStore: List[String] = Nil // we need to remember the side effects
+class MockGetSubscription(responses: Map[SubscriptionName, GetSubscription.GetSubscriptionResponse])
+    extends GetSubscription {
+  private val requests: ArrayBuffer[SubscriptionName] = ArrayBuffer.empty
 
-  def requests = mutableStore.reverse
+  override def get(subscriptionName: SubscriptionName): IO[String, GetSubscription.GetSubscriptionResponse] = {
+    requests += subscriptionName
 
-  override def get(subscriptionNumber: String): IO[String, GetSubscription.GetSubscriptionResponse] = {
-    mutableStore = subscriptionNumber :: mutableStore
-
-    responses.get(subscriptionNumber) match
+    responses.get(subscriptionName) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"success = false, subscription not found: $subscriptionNumber")
+      case None => ZIO.fail(s"success = false, subscription not found: ${subscriptionName.value}")
   }
 }
 
 object MockGetSubscription {
-  def requests: ZIO[MockGetSubscription, Nothing, List[String]] = ZIO.serviceWith[MockGetSubscription](_.requests)
+  def requests: ZIO[MockGetSubscription, Nothing, List[SubscriptionName]] =
+    ZIO.serviceWith[MockGetSubscription](_.requests.toList)
 }

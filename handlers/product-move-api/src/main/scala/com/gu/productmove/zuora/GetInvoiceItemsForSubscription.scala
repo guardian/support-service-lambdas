@@ -4,6 +4,7 @@ import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{InvoiceItemsForSubscription, PostBody, getZuoraQuery}
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
@@ -25,20 +26,20 @@ object GetInvoiceItemsForSubscriptionLive:
     ZLayer.fromFunction(GetInvoiceItemsForSubscriptionLive(_))
 
 private class GetInvoiceItemsForSubscriptionLive(zuoraGet: ZuoraGet) extends GetInvoiceItemsForSubscription:
-  override def get(subscriptionNumber: String): IO[String, InvoiceItemsForSubscription] =
+  override def get(subscriptionName: SubscriptionName): IO[String, InvoiceItemsForSubscription] =
     zuoraGet.post[PostBody, InvoiceItemsForSubscription](
       uri"action/query",
-      PostBody(getZuoraQuery(subscriptionNumber)),
+      PostBody(getZuoraQuery(subscriptionName)),
       ZuoraRestBody.ZuoraSuccessCheck.None,
     )
 
 trait GetInvoiceItemsForSubscription:
-  def get(subscriptionNumber: String): IO[String, InvoiceItemsForSubscription]
+  def get(subscriptionName: SubscriptionName): IO[String, InvoiceItemsForSubscription]
 
 object GetInvoiceItemsForSubscription {
 
-  def getZuoraQuery(subscriptionNumber: String) =
-    s"select Id, ChargeAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '$subscriptionNumber'"
+  def getZuoraQuery(subscriptionName: SubscriptionName) =
+    s"select Id, ChargeAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
 
   case class PostBody(queryString: String)
 
@@ -93,6 +94,8 @@ object GetInvoiceItemsForSubscription {
   given JsonDecoder[InvoiceItem] = DeriveJsonDecoder.gen[InvoiceItem]
   given JsonEncoder[PostBody] = DeriveJsonEncoder.gen[PostBody]
 
-  def get(subscriptionNumber: String): ZIO[GetInvoiceItemsForSubscription, String, InvoiceItemsForSubscription] =
-    ZIO.serviceWithZIO[GetInvoiceItemsForSubscription](_.get(subscriptionNumber))
+  def get(
+      subscriptionName: SubscriptionName,
+  ): ZIO[GetInvoiceItemsForSubscription, String, InvoiceItemsForSubscription] =
+    ZIO.serviceWithZIO[GetInvoiceItemsForSubscription](_.get(subscriptionName))
 }

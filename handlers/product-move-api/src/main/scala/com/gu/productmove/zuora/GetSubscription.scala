@@ -5,6 +5,7 @@ import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
@@ -21,11 +22,11 @@ object GetSubscriptionLive:
   val layer: URLayer[ZuoraGet, GetSubscription] = ZLayer.fromFunction(GetSubscriptionLive(_))
 
 private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription:
-  override def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse] =
-    zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/$subscriptionNumber")
+  override def get(subscriptionName: SubscriptionName): IO[String, GetSubscriptionResponse] =
+    zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/${subscriptionName.value}")
 
 trait GetSubscription:
-  def get(subscriptionNumber: String): IO[String, GetSubscriptionResponse]
+  def get(subscriptionName: SubscriptionName): IO[String, GetSubscriptionResponse]
 
 object GetSubscription {
 
@@ -52,7 +53,7 @@ object GetSubscription {
       billingPeriod: BillingPeriod,
       effectiveStartDate: LocalDate,
       chargedThroughDate: Option[LocalDate],
-  ){
+  ) {
     def currencyObject = Currency.fromString(currency)
   }
   object RatePlanCharge {
@@ -62,13 +63,13 @@ object GetSubscription {
   given JsonDecoder[BillingPeriod] = JsonDecoder[String].mapOrFail {
     case "Month" => Right(Monthly)
     case "Annual" => Right(Annual)
-    case x => Left(s"No such billing period $x")
+    case other => Left(s"No such billing period $other")
   }
 
   given JsonDecoder[GetSubscriptionResponse] = DeriveJsonDecoder.gen[GetSubscriptionResponse]
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
   given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen[RatePlanCharge]
 
-  def get(subscriptionNumber: String): ZIO[GetSubscription, String, GetSubscriptionResponse] =
-    ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionNumber))
+  def get(subscriptionName: SubscriptionName): ZIO[GetSubscription, String, GetSubscriptionResponse] =
+    ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionName))
 }
