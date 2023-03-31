@@ -217,7 +217,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws::2013-5905-4765:root"
+              AWS: !Sub "arn:aws:::root"
             Action: sts:AssumeRole
       Policies:
         - PolicyName: SQSAccess
