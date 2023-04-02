@@ -1,12 +1,9 @@
 package com.gu.batchemailsender.api.batchemail
 
-import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.batchemailsender.api.batchemail.SalesforceMessage.SalesforceBatchWithExceptions
-import com.gu.effects.RawEffects
-import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
-import com.gu.effects.sqs.SqsSync
+import com.gu.effects.sqs.AwsSQSSend.{EmailQueueName, Payload, QueueName}
+import com.gu.effects.sqs.{AwsSQSSend, SqsSync}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -15,6 +12,7 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import play.api.libs.json.Json
 
+import java.io.{InputStream, OutputStream}
 import scala.util.{Failure, Success}
 
 case class OldPartialSendSuccess(message: String, code: Int, failed_item_ids: List[String])
@@ -31,8 +29,7 @@ object PartialSendSuccess {
 
 // FIXME: What should be the behaviour with some/all items having parsing errors?
 object Handler extends Logging {
-  lazy val isProd = RawEffects.stage.isProd
-  lazy val queueName = QueueName(if (isProd) "braze-emails-PROD" else "braze-emails-CODE")
+  lazy val queueName = EmailQueueName
   lazy val sqsClient = SqsSync.buildClient
   lazy val sendBatch = new SendEmailBatchToSqs(queueName, sqsClient)
   lazy val handleEmailBatchRequest = new HandleEmailBatchRequest(sendBatch)
