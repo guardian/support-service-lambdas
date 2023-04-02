@@ -18,7 +18,6 @@ object SqsSync extends LazyLogging {
     .build()
 
   def send(client: SqsClient)(queueName: QueueName)(payload: Payload): Try[Unit] = {
-
     val queueUrl = client
       .getQueueUrl(
         GetQueueUrlRequest.builder.queueName(queueName.value).build(),

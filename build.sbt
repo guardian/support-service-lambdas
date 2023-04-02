@@ -493,7 +493,7 @@ lazy val `zuora-datalake-export` = lambdaProject(
 lazy val `batch-email-sender` = lambdaProject(
   "batch-email-sender",
   "Receive batches of emails to be sent, munge them into an appropriate format and put them on the email sending queue.",
-  Seq(playJsonExtensions, supportInternationalisation, diffx),
+  Seq(playJsonExtensions, supportInternationalisation, diffx, parallelCollections, mockito),
 ).dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 lazy val `holiday-stop-processor` = lambdaProject(
