@@ -1,10 +1,10 @@
 package manualTest
 
-import java.time.LocalDate
+import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
 
+import java.time.LocalDate
 import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.{Country, Currency}
-import com.gu.newproduct.api.EmailQueueNames.emailQueueFor
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{ContributionsEmailData, EtSqsSend, SendConfirmationEmail}
@@ -71,8 +71,7 @@ object SendConfirmationEmailsManualTest {
   def main(args: Array[String]): Unit = {
     val result = for {
       email <- args.headOption.map(Email.apply)
-      queueName = emailQueueFor(Stage("DEV"))
-      sqsSend = SqsAsync.send(SqsAsync.buildClient)(queueName) _
+      sqsSend = SqsAsync.send(SqsAsync.buildClient)(EmailQueueName) _
       contributionsSqsSend = EtSqsSend[ContributionsEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmail[ContributionsEmailData](contributionsSqsSend) _
       sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), contributionsEmailData(fakeContacts(email)))

@@ -14,6 +14,7 @@ object AwsSQSSend {
   case class Payload(value: String) extends AnyVal
 
   val ProfileName = "membership"
+  lazy val EmailQueueName = QueueName(System.getenv("EmailQueueName"))
 
   lazy val CredentialsProvider: AwsCredentialsProviderChain = AwsCredentialsProviderChain.builder
     .credentialsProviders(

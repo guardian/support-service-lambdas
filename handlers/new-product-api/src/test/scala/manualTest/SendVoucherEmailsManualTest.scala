@@ -1,11 +1,9 @@
 package manualTest
 
-import java.time.LocalDate
-
+import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
 import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.EmailQueueNames.emailQueueFor
 import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
@@ -24,6 +22,7 @@ import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog._
 import com.gu.util.config.Stage
 
+import java.time.LocalDate
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.Random
@@ -90,8 +89,7 @@ object SendVoucherEmailsManualTest {
   def main(args: Array[String]): Unit = {
     val result = for {
       email <- args.headOption.map(Email.apply)
-      queueName = emailQueueFor(Stage("PROD"))
-      sqsSend = SqsAsync.send(SqsAsync.buildClient)(queueName) _
+      sqsSend = SqsAsync.send(SqsAsync.buildClient)(EmailQueueName) _
       voucherSqsSend = EtSqsSend[PaperEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmail(voucherSqsSend) _
       data = fakeVoucherEmailData(email)

@@ -3,7 +3,6 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
-import com.gu.newproduct.api.EmailQueueNames
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.guardianweekly.GuardianWeeklyEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, GuardianWeeklyEmailData, SendConfirmationEmail}
