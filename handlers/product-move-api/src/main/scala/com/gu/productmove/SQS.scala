@@ -1,5 +1,6 @@
 package com.gu.productmove
 
+import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
@@ -38,10 +39,8 @@ object SQSLive {
     ZLayer.scoped(for {
       stage <- ZIO.service[Stage]
       sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
-      emailQueueUrlResponse <- getQueue(
-        if (stage == Stage.PROD) "braze-emails-PROD" else "braze-emails-CODE",
-        sqsClient,
-      )
+      emailQueueName = EmailQueueName.value
+      emailQueueUrlResponse <- getQueue(emailQueueName, sqsClient)
       refundQueueUrlResponse <- getQueue(s"product-switch-refund-${stage.toString}", sqsClient)
       salesforceTrackingQueueUrlResponse <- getQueue(s"product-switch-salesforce-tracking-${stage.toString}", sqsClient)
     } yield new SQS {
@@ -57,10 +56,10 @@ object SQSLive {
               )
             }
             .mapError { ex =>
-              s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id} with error: ${ex.toString}"
+              s"Failed to send sqs email message for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName"
             }
           _ <- ZIO.log(
-            s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id}",
+            s"Successfully sent email for sfContactId: ${message.SfContactId} with subscription Number: ${message.To.ContactAttributes.SubscriberAttributes.subscription_id} to SQS queue $emailQueueName",
           )
         } yield ()
 

@@ -3,7 +3,6 @@ package com.gu.newproduct.api.addsubscription
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.EmailQueueNames
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.{SupporterPlusEmailData, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._

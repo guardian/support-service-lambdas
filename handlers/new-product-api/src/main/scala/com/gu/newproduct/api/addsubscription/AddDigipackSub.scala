@@ -5,7 +5,6 @@ import java.time.temporal.ChronoUnit.DAYS
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
-import com.gu.newproduct.api.EmailQueueNames
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.digipack.DigipackEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.digipack.ValidatedAddress

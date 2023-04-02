@@ -2,9 +2,8 @@ package com.gu.autoCancel
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
-
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
+import com.gu.effects.sqs.AwsSQSSend.{EmailQueueName, Payload, QueueName}
 import com.gu.effects.sqs.SqsSync
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.Logging
@@ -46,7 +45,7 @@ object AutoCancelHandler extends App with Logging {
         AutoCancel.apply(zuoraRequest),
         cancelRequestsProducer,
         ZuoraEmailSteps.sendEmailRegardingAccount(
-          EmailSendSteps(awsSQSSend(emailQueueFor(stage))),
+          EmailSendSteps(awsSQSSend(EmailQueueName)),
           ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig)),
         ),
       ).prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
@@ -66,10 +65,4 @@ object AutoCancelHandler extends App with Logging {
         SqsSync.send(SqsSync.buildClient),
       )
     }
-
-  def emailQueueFor(stage: Stage): QueueName = stage match {
-    case Stage("PROD") => QueueName("braze-emails-PROD")
-    case _ => QueueName("braze-emails-CODE")
-  }
-
 }

@@ -12,7 +12,6 @@ Parameters:
     Type: String
     AllowedValues:
       - DEV
-      - CODE
       - PROD
   DeployBucket:
     Description: Bucket to copy files to
@@ -72,6 +71,9 @@ Resources:
             !Sub
             - '{{resolve:secretsmanager:${Stage}/Zuora/User/ZuoraApiUser:SecretString:password}}'
             - { Stage: !Ref Stage }
+          EmailQueueName:
+            Fn::ImportValue:
+              !Sub "comms-${Stage}-EmailQueueName"
       CodeUri:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
