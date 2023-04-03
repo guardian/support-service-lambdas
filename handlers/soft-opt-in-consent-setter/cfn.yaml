@@ -10,6 +10,10 @@ Parameters:
       - DEV
     Default: CODE
 
+  MobileAccountId:
+    Description: The AWS Account ID of the mobile account
+    Type: String
+
 Mappings:
   StageMap:
     PROD:
@@ -217,7 +221,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam:::root"
+              AWS: !Sub "arn:aws:iam::${MobileAccountId}:root"
             Action: sts:AssumeRole
       Policies:
         - PolicyName: SQSAccess
