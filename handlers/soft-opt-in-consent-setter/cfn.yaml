@@ -12,7 +12,8 @@ Parameters:
 
   MobileAccountId:
     Description: The AWS Account ID of the mobile account
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: 'mobileAccountId'
 
 Mappings:
   StageMap:
