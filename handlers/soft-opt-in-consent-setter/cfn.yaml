@@ -222,7 +222,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${MobileAccountID}:root"
+              AWS: !Sub ${MobileAccountID}
             Action: sts:AssumeRole
       Policies:
         - PolicyName: SQSAccess
