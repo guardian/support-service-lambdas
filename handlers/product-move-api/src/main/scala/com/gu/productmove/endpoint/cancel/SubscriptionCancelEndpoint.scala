@@ -135,7 +135,7 @@ object SubscriptionCancelEndpoint {
   private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
     now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 
-  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput, sendingEmail: Boolean = false): ZIO[
+  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
     GetSubscriptionToCancel with ZuoraCancel with GetAccount with SQS with Stage with ZuoraSetCancellationReason,
     String,
     OutputBody,
@@ -199,16 +199,11 @@ object SubscriptionCancelEndpoint {
           subscription.version + 1,
           postData.reason,
         ) // Version +1 because the cancellation will have incremented the version
-      _ <- if (sendingEmail) sendEmail(subscription, cancellationDate) else ZIO.unit
+      account <- GetAccount.get(subscription.accountNumber)
+      _ <- SQS.sendEmail(EmailMessage.cancellationEmail(account, cancellationDate))
     } yield ()).fold(
       errorMessage => InternalServerError(errorMessage),
       _ => Success("Subscription was successfully cancelled"),
     )
   }
-
-  private def sendEmail(subscription: GetSubscriptionToCancelResponse, cancellationDate: LocalDate) =
-    for {
-      account <- GetAccount.get(subscription.accountNumber)
-      _ <- SQS.sendEmail(EmailMessage.cancellationEmail(account, cancellationDate))
-    } yield ()
 }
