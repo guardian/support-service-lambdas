@@ -337,7 +337,7 @@ object HandlerSpec extends ZIOSpecDefault {
         (for {
           _ <- TestClock.setTime(time)
           input = SubscriptionCancelEndpointTypes.ExpectedInput("mma_other")
-          output <- SubscriptionCancelEndpoint.subscriptionCancel(subscriptionName, input, sendingEmail = true)
+          output <- SubscriptionCancelEndpoint.subscriptionCancel(subscriptionName, input)
           getSubscriptionToCancelRequests <- MockGetSubscriptionToCancel.requests
           zuoraCancelRequests <- MockZuoraCancel.requests
           sqsRequests <- MockSQS.requests
