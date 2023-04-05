@@ -217,6 +217,7 @@ Resources:
   SoftOptInsQueueCrossAccountRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub "${AWS::StackName}-SoftOptInsQueueCrossAccountRole"
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
