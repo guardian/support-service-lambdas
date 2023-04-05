@@ -10,7 +10,7 @@ Parameters:
       - DEV
     Default: CODE
 
-  MobileAccountID:
+  MobileAccountId:
     Description: The AWS Account ID of the mobile account
     Type: AWS::SSM::Parameter::Value<String>
     Default: 'mobileAccountId'
@@ -223,7 +223,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub ${MobileAccountID}
+              AWS: !Sub ${MobileAccountId}
             Action: sts:AssumeRole
       Policies:
         - PolicyName: SQSAccess
