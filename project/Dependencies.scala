@@ -12,7 +12,7 @@ object Dependencies {
   val catsEffectVersion = "2.5.5"
 
   val logging = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.4.5",
+    "ch.qos.logback" % "logback-classic" % "1.4.6",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -63,12 +63,12 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.17"
-  val zio2Version = "2.0.10"
+  val zio2Version = "2.0.11"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.2.11"
+  val tapirVersion = "1.2.12"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.2"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
-  val stripe = "com.stripe" % "stripe-java" % "22.15.0"
+  val stripe = "com.stripe" % "stripe-java" % "22.16.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
 
   // Testing
