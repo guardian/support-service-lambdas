@@ -72,7 +72,7 @@ object Dependencies {
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.2" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.3" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.14" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
