@@ -10,6 +10,11 @@ Parameters:
       - DEV
     Default: CODE
 
+  MobileAccountId:
+    Description: The AWS Account ID of the mobile account
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: 'mobileAccountId'
+
 Mappings:
   StageMap:
     PROD:
@@ -208,6 +213,30 @@ Resources:
               - sqs:GetQueueAttributes
               - sqs:ReceiveMessage
             Resource: !GetAtt SoftOptInsQueue.Arn
+
+  SoftOptInsQueueCrossAccountRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-QueueCrossAccountRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub ${MobileAccountId}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SQSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt SoftOptInsQueue.Arn
 
   SoftOptInsQueue:
     Type: AWS::SQS::Queue
