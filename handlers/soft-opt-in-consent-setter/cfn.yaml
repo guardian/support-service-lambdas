@@ -135,6 +135,7 @@ Resources:
         Key: !Sub membership/${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar
       MemorySize: 512
       Runtime: java11
+      Timeout: 300
       Environment:
         Variables:
           Stage: !Ref Stage
