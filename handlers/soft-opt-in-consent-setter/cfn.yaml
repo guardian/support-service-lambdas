@@ -186,6 +186,7 @@ Resources:
             - '{{resolve:secretsmanager:${MpapiStage}/MobilePurchasesAPI/User/GetSubscriptions:SecretString:mpapiToken}}'
             - MpapiStage: !FindInMap [ StageMap, !Ref Stage, MpapiStage ]
       Policies:
+        - AWSLambdaBasicExecutionRole
         - Statement:
             - Effect: Allow
               Action: s3:GetObject
