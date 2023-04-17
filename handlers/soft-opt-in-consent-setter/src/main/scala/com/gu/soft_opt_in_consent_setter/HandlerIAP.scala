@@ -29,6 +29,8 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   }
 
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
+    logger.info("dfasdfasdf")
+
     val messages =
       input.getRecords.asScala.toList.map(message =>
         circeDecode[MessageBody](message.getBody) match {
