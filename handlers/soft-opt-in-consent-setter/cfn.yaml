@@ -133,7 +133,7 @@ Resources:
       CodeUri:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar
-      MemorySize: 512
+      MemorySize: 1024
       Runtime: java11
       Environment:
         Variables:
