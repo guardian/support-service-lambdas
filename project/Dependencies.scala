@@ -9,7 +9,7 @@ object Dependencies {
   val sttpVersion = "3.8.13"
   val http4sVersion = "0.21.34"
   val catsVersion = "2.9.0"
-  val catsEffectVersion = "2.5.5"
+  val catsEffectVersion = "3.4.9"
 
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.4.6",
