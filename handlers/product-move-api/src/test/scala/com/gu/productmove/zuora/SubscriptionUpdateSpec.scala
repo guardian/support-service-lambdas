@@ -88,11 +88,11 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           add = List(
             AddRatePlan(
               contractEffectiveDate = timeLocalDate,
-              productRatePlanId = "8a12865b8219d9b401822106192b64dc",
+              productRatePlanId = "8a128ed885fc6ded018602296ace3eb8",
               chargeOverrides = List(
                 ChargeOverrides(
-                  price = Some(50.00),
-                  productRatePlanChargeId = "8a12865b8219d9b401822106194e64e3",
+                  price = Some(40.00),
+                  productRatePlanChargeId = "8a128d7085fc6dec01860234cd075270",
                 ),
               ),
             ),
