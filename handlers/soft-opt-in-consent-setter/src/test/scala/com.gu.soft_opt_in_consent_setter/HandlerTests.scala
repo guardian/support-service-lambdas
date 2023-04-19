@@ -54,8 +54,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productType = "supporterPlus",
-      previousProductType = Some("contributions"),
+      productName = "supporterPlus",
+      previousProductName = Some("contributions"),
       eventType = "Switch",
     )
 
@@ -86,8 +86,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productType = "supporterPlus",
-      previousProductType = None,
+      productName = "supporterPlus",
+      previousProductName = None,
       eventType = "Acquisition",
     )
 
@@ -124,8 +124,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productType = "supporterPlus",
-      previousProductType = None,
+      productName = "supporterPlus",
+      previousProductName = None,
       eventType = "Cancellation",
     )
 
@@ -160,8 +160,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productType = "supporterPlus",
-      previousProductType = None,
+      productName = "supporterPlus",
+      previousProductName = None,
       eventType = "Cancellation",
     )
 
