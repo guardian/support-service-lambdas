@@ -18,8 +18,8 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   case class MessageBody(
       identityId: String,
       eventType: String,
-      productType: String,
-      previousProductType: Option[String],
+      productName: String,
+      previousProductName: Option[String],
   )
 
   private def handleError[T <: Exception](exception: T) = {
@@ -108,7 +108,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] =
     for {
-      consents <- consentsCalculator.getSoftOptInsByProduct(message.productType)
+      consents <- consentsCalculator.getSoftOptInsByProduct(message.productName)
       consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
       _ <- sendConsentsReq(message.identityId, consentsBody)
     } yield ()
@@ -143,8 +143,8 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       sfConnector: SalesforceConnector,
   ): Either[SoftOptInError, Unit] =
     for {
-      previousProductType <- messageBody.previousProductType.toRight(
-        SoftOptInError("Missing data: Product switch event is missing previousProductType property"),
+      previousProductName <- messageBody.previousProductName.toRight(
+        SoftOptInError("Missing data: Product switch event is missing previousProductName property"),
       )
 
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
@@ -154,12 +154,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
         .filter(_.valid)
         .headOption
         .map(_ => "InAppPurchase")
-      productTypes = activeSubs.records.map(_.Product__c) ++ hasMobileSub
+      productNames = activeSubs.records.map(_.Product__c) ++ hasMobileSub
 
       consentsBody <- buildProductSwitchConsents(
-        previousProductType,
-        messageBody.productType,
-        productTypes.toSet,
+        previousProductName,
+        messageBody.productName,
+        productNames.toSet,
         consentsCalculator,
       )
 
@@ -191,11 +191,11 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
         .filter(_.valid)
         .headOption
         .map(_ => "InAppPurchase")
-      productTypes = activeSubs.records.map(_.Product__c) ++ hasMobileSub
+      productNames = activeSubs.records.map(_.Product__c) ++ hasMobileSub
 
       consents <- consentsCalculator.getCancellationConsents(
-        messageBody.productType,
-        productTypes.toSet,
+        messageBody.productName,
+        productNames.toSet,
       )
       _ <- sendCancellationConsents(messageBody.identityId, consents)
     } yield ()
