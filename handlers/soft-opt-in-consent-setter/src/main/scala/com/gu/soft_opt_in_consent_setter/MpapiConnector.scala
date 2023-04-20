@@ -36,7 +36,7 @@ class MpapiConnector(config: MpapiConfig) {
   def sendReq(url: String): Either[Throwable, HttpResponse[String]] = {
     Try(
       Http(url)
-        .header("Authorization", s"Bearer ${config.mpapiToken}")
+        .header("Authorization", config.mpapiToken)
         .method("GET")
         .asString,
     ).toEither
