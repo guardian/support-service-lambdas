@@ -172,10 +172,6 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       sfConnector: SalesforceConnector,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
-      logger.info(consents.asJson.toString())
-
-      logger.info(identityId)
-
       if (consents.nonEmpty)
         sendConsentsReq(
           identityId,
