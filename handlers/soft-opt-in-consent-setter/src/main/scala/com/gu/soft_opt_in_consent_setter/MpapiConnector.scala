@@ -28,7 +28,7 @@ class MpapiConnector(config: MpapiConfig) {
 
   def getMobileSubscriptions(identityId: String): Either[SoftOptInError, MobileSubscriptions] = {
     handleQueryResp[MobileSubscriptions](
-      sendReq(url = s"${config.mpapiUrl}/users/subscriptions/$identityId"),
+      sendReq(url = s"${config.mpapiUrl}/user/subscriptions/$identityId"),
       errorDesc = s"Mobile purchases API (MPAPI) request failed while processing $identityId",
     )
   }
