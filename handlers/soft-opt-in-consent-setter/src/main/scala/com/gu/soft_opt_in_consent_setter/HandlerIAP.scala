@@ -94,7 +94,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       logErrors(result)
       emitIdentityMetrics(result)
 
-      result.left.foreach(error => handleError(error))
+      result.left.foreach(handleError)
     }
 
     Metrics.put(event = "successful_run")
