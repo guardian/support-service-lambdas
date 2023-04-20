@@ -94,9 +94,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       logErrors(result)
       emitIdentityMetrics(result)
 
-      result match {
-        case Left(error) => handleError(error)
-      }
+      result.left.foreach(error => handleError(error))
     }
 
     Metrics.put(event = "successful_run")
@@ -174,6 +172,10 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       sfConnector: SalesforceConnector,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
+      logger.info(consents.asJson.toString())
+
+      logger.info(identityId)
+
       if (consents.nonEmpty)
         sendConsentsReq(
           identityId,
