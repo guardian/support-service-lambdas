@@ -12,7 +12,7 @@ object Dependencies {
   val catsEffectVersion = "2.5.5"
 
   val logging = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.4.6",
+    "ch.qos.logback" % "logback-classic" % "1.4.7",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
