@@ -8,12 +8,6 @@ import software.amazon.awssdk.services.sqs.SqsClient
 import scala.collection.parallel.CollectionConverters.ImmutableIterableIsParallelizable
 import scala.util.Try
 
-case class EmailBatch(messages: List[JsObject])
-
-object EmailBatch {
-  implicit val reads = Json.reads[EmailBatch]
-}
-
 case class SendResult(json: JsObject, failure: Option[Throwable]) {
   val isFailed = failure.isDefined
 }
