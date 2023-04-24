@@ -188,7 +188,7 @@ object ProductMoveEndpoint {
           doPreview(
             SubscriptionName(subscription.id),
             postData.price,
-            ratePlanCharge.billingPeriod,
+            ratePlanCharge,
             currency,
             currentRatePlan.id,
           )
@@ -209,13 +209,13 @@ object ProductMoveEndpoint {
   def doPreview(
       subscriptionName: SubscriptionName,
       price: BigDecimal,
-      billingPeriod: BillingPeriod,
+      ratePlanCharge: RatePlanCharge,
       currency: Currency,
       currentRatePlanId: String,
   ): ZIO[SubscriptionUpdate with Stage, String, OutputBody] = for {
     _ <- ZIO.log("Fetching Preview from Zuora")
     previewResponse <- SubscriptionUpdate
-      .preview(subscriptionName, billingPeriod, price, currency, currentRatePlanId)
+      .preview(subscriptionName, ratePlanCharge.billingPeriod, price, currency, currentRatePlanId)
       .addLogMessage("SubscriptionUpdate")
   } yield previewResponse
 
