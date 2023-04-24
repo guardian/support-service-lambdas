@@ -129,20 +129,43 @@ object ProductMoveEndpoint {
       }
   }
 
-  private def run(subscriptionName: SubscriptionName, postData: ExpectedInput): TIO[OutputBody] =
-    productMove(subscriptionName, postData)
-      .provide(
-        GetSubscriptionLive.layer,
-        AwsCredentialsLive.layer,
-        SttpClientLive.layer,
-        ZuoraClientLive.layer,
-        ZuoraGetLive.layer,
-        SubscriptionUpdateLive.layer,
-        SQSLive.layer,
-        GetAccountLive.layer,
-        GuStageLive.layer,
-        DynamoLive.layer,
-      )
+  enum SwitchType {
+    case RecurringContributionToSupporterPlus, MembershipToRecurringContribution
+  }
+
+  private def run(
+      switchType: SwitchType,
+      subscriptionName: SubscriptionName,
+      postData: ExpectedInput,
+  ): TIO[OutputBody] =
+    switchType match {
+      case RecurringContributionToSupporterPlus =>
+        recurringContributionToSupporterPlus(subscriptionName, postData).provide(
+          GetSubscriptionLive.layer,
+          AwsCredentialsLive.layer,
+          SttpClientLive.layer,
+          ZuoraClientLive.layer,
+          ZuoraGetLive.layer,
+          SubscriptionUpdateLive.layer,
+          SQSLive.layer,
+          GetAccountLive.layer,
+          GuStageLive.layer,
+          DynamoLive.layer,
+        )
+      case MembershipToRecurringContribution =>
+        membershipToRecurringContribution(subscriptionName, postData).provide(
+          GetSubscriptionLive.layer,
+          AwsCredentialsLive.layer,
+          SttpClientLive.layer,
+          ZuoraClientLive.layer,
+          ZuoraGetLive.layer,
+          SubscriptionUpdateLive.layer,
+          SQSLive.layer,
+          GetAccountLive.layer,
+          GuStageLive.layer,
+          DynamoLive.layer,
+        )
+    }
 
   extension [R, E, A](zio: ZIO[R, E, A])
     def addLogMessage(message: String) = zio.catchAll { error =>
@@ -163,13 +186,14 @@ object ProductMoveEndpoint {
       case _ => ZIO.fail(message)
     }
 
-  private[productmove] def productMove(
+  private[productmove] def recurringContributionToSupporterPlus(
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
   ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
     (for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+
       currentRatePlan <- getSingleOrNotEligible(
         subscription.ratePlans,
         s"Subscription: ${subscriptionName.value} has more than one ratePlan",
@@ -183,6 +207,7 @@ object ProductMoveEndpoint {
         .orElseFail(
           s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
         )
+
       result <-
         if (postData.preview)
           doPreview(
@@ -204,6 +229,42 @@ object ProductMoveEndpoint {
             postData.csrUserId,
             postData.caseId,
           )
+    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
+
+  private[productmove] def membershipToRecurringContribution(
+      subscriptionName: SubscriptionName,
+      postData: ExpectedInput,
+  ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
+    (for {
+      _ <- ZIO.log("PostData: " + postData.toString)
+      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+
+      currentRatePlan <- getSingleOrNotEligible(
+        subscription.ratePlans,
+        s"Subscription: ${subscriptionName.value} has more than one ratePlan",
+      )
+      ratePlanCharge <- getSingleOrNotEligible(
+        currentRatePlan.ratePlanCharges,
+        s"Subscription: ${subscriptionName.value} has more than one ratePlanCharge",
+      )
+      currency <- ZIO
+        .fromOption(ratePlanCharge.currencyObject)
+        .orElseFail(
+          s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
+        )
+
+      result <-
+        doUpdate(
+          subscriptionName,
+          postData.price,
+          BigDecimal(ratePlanCharge.price),
+          ratePlanCharge.billingPeriod,
+          currency,
+          currentRatePlan,
+          subscription,
+          postData.csrUserId,
+          postData.caseId,
+        )
     } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
 
   def doPreview(
