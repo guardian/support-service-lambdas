@@ -534,7 +534,7 @@ lazy val `product-move-api` = lambdaProject(
     awsSQS,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
-    "dev.zio" %% "zio-logging-slf4j" % "2.0.1",
+    "dev.zio" %% "zio-logging-slf4j" % "2.1.12",
     "dev.zio" %% "zio-test" % zio2Version % Test,
     "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
