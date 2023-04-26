@@ -14,7 +14,6 @@ import scala.deriving.Mirror
 
 //has to be a separate file due to https://github.com/lampepfl/dotty/issues/12498#issuecomment-973991160
 object ProductMoveEndpointTypes {
-
   case class ExpectedInput(
       @description("Price of new Supporter Plus subscription") price: BigDecimal,
       @description("Whether to preview the move or to carry it out") preview: Boolean,

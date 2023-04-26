@@ -10,7 +10,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.{
 }
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes._
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
@@ -18,13 +18,13 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.*
-import com.gu.productmove.*
+import com.gu.productmove.zuora._
+import com.gu.productmove._
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config
 import com.gu.util.config.ZuoraEnvironment
 import sttp.tapir.EndpointIO.Example
-import sttp.tapir.*
+import sttp.tapir._
 import sttp.tapir.json.zio.jsonBody
 import zio.ThreadLocalBridge.trace
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
@@ -138,8 +138,6 @@ object MembershipToRecurringContribution {
         SubscriptionUpdateRequest(add = addRatePlan, remove = removeRatePlan, targetDate = None)
     }
 
-    given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
-
     _ <- SubscriptionUpdate
       .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
       .addLogMessage("SubscriptionUpdate")
@@ -216,3 +214,5 @@ object MembershipToRecurringContribution {
 
   } yield Success("Product move completed successfully")
 }
+
+given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]

@@ -3,7 +3,7 @@ package com.gu.productmove.endpoint.move
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes._
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -51,19 +51,6 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.ZuoraIds
 import java.time.format.DateTimeFormatter
 import com.gu.i18n.Currency
 import com.gu.productmove.zuora.model.SubscriptionName
-
-extension [R, E, A](zio: ZIO[R, E, A])
-  def addLogMessage(message: String) = zio.catchAll { error =>
-    ZIO.fail(s"$message failed with: $error")
-  }
-
-extension (billingPeriod: BillingPeriod)
-  def value: IO[String, String] =
-    billingPeriod match {
-      case Monthly => ZIO.succeed("month")
-      case Annual => ZIO.succeed("annual")
-      case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
-    }
 
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
@@ -190,3 +177,16 @@ object ProductMoveEndpoint {
       DynamoLive.layer,
     )
 }
+
+extension [R, E, A](zio: ZIO[R, E, A])
+  def addLogMessage(message: String) = zio.catchAll { error =>
+    ZIO.fail(s"$message failed with: $error")
+  }
+
+extension (billingPeriod: BillingPeriod)
+  def value: IO[String, String] =
+    billingPeriod match {
+      case Monthly => ZIO.succeed("month")
+      case Annual => ZIO.succeed("annual")
+      case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
+    }

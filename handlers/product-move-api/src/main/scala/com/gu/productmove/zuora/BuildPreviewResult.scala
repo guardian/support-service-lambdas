@@ -1,12 +1,10 @@
 package com.gu.productmove.move
 
-import zio.{IO, ZIO}
-import zio.*
-import zio.Clock
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.endpoint.move.SupporterPlusRatePlanIds
 import com.gu.productmove.zuora.SubscriptionUpdateInvoice
+import zio.{Clock, ZIO}
 
 object BuildPreviewResult {
   def getPreviewResult(

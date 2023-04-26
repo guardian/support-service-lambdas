@@ -16,6 +16,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
   ExpectedInput,
   InternalServerError,
   OutputBody,
+  PreviewResult,
   Success,
 }
 import com.gu.productmove.move.BuildPreviewResult
@@ -73,7 +74,6 @@ case class SupporterPlusRatePlanIds(
     subscriptionRatePlanChargeId: String,
     contributionRatePlanChargeId: Option[String],
 )
-
 object RecurringContributionToSupporterPlus {
 
   private def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
@@ -245,12 +245,13 @@ object RecurringContributionToSupporterPlus {
 
     updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
       case (addRatePlan, removeRatePlan) =>
-        SubscriptionUpdateRequest(add = addRatePlan, remove = removeRatePlan, targetDate = Some(today.plusMonths(13)))
+        SubscriptionUpdateRequest(
+          add = addRatePlan,
+          remove = removeRatePlan,
+          preview = Some(true),
+          targetDate = Some(today.plusMonths(13)),
+        )
     }
-
-    given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
-    given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
-    given JsonDecoder[SubscriptionUpdateInvoiceItem] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoiceItem]
 
     response <- SubscriptionUpdate
       .update[SubscriptionUpdatePreviewResponse](subscriptionName, updateRequestBody)
@@ -282,7 +283,13 @@ object RecurringContributionToSupporterPlus {
 
     updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
       case (addRatePlan, removeRatePlan) =>
-        SubscriptionUpdateRequest(add = addRatePlan, remove = removeRatePlan, targetDate = None)
+        SubscriptionUpdateRequest(
+          add = addRatePlan,
+          remove = removeRatePlan,
+          collect = Some(true),
+          runBilling = Some(true),
+          preview = Some(false),
+        )
     }
 
     given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
@@ -363,3 +370,7 @@ object RecurringContributionToSupporterPlus {
 
   } yield Success("Product move completed successfully")
 }
+
+given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
+given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
+given JsonDecoder[SubscriptionUpdateInvoiceItem] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoiceItem]
