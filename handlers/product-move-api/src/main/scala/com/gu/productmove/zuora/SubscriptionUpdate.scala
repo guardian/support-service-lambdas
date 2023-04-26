@@ -44,92 +44,31 @@ import java.time.LocalDate
 val SwitchToV2SupporterPlus = false
 
 trait SubscriptionUpdate:
-  def update(
+  def update[R](
       subscriptionName: SubscriptionName,
-      billingPeriod: BillingPeriod,
-      price: BigDecimal,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-  ): ZIO[Stage, String, SubscriptionUpdateResponse]
-
-  def preview(
-      subscriptionName: SubscriptionName,
-      billingPeriod: BillingPeriod,
-      price: BigDecimal,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-  ): ZIO[Stage, String, PreviewResult]
+      requestBody: SubscriptionUpdateRequest,
+  ): ZIO[Stage, String, R]
 
 object SubscriptionUpdateLive:
   val layer: URLayer[ZuoraGet, SubscriptionUpdate] = ZLayer.fromFunction(SubscriptionUpdateLive(_))
 
 private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpdate:
-  override def update(
+  override def update[R](
       subscriptionName: SubscriptionName,
-      billingPeriod: BillingPeriod,
-      price: BigDecimal,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-  ): ZIO[Stage, String, SubscriptionUpdateResponse] = {
-    for {
-      requestBody <- SubscriptionUpdateRequest(billingPeriod, currency, ratePlanIdToRemove, price)
-      response <- zuoraGet.put[SubscriptionUpdateRequest, SubscriptionUpdateResponse](
-        uri"subscriptions/${subscriptionName.value}",
-        requestBody,
-      )
-    } yield response
-  }
-
-  override def preview(
-      subscriptionName: SubscriptionName,
-      billingPeriod: BillingPeriod,
-      price: BigDecimal,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-  ): ZIO[Stage, String, PreviewResult] = {
-    for {
-      today <- Clock.currentDateTime.map(_.toLocalDate)
-
-      requestBody <- SubscriptionUpdatePreviewRequest(
-        billingPeriod,
-        currency,
-        ratePlanIdToRemove,
-        price,
-        today.plusMonths(13),
-      )
-      response <- zuoraGet.put[SubscriptionUpdatePreviewRequest, SubscriptionUpdatePreviewResponse](
-        uri"subscriptions/${subscriptionName.value}",
-        requestBody,
-      )
-      stage <- ZIO.service[Stage]
-      supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-      previewResult <- BuildPreviewResult.getPreviewResult(response.invoice, supporterPlusRatePlanIds)
-    } yield previewResult
-
+      requestBody: SubscriptionUpdateRequest,
+  ): ZIO[Stage, String, R] = {
+    zuoraGet.put[SubscriptionUpdateRequest, R](
+      uri"subscriptions/${subscriptionName.value}",
+      requestBody,
+    )
   }
 
 object SubscriptionUpdate {
-  def update(
+  def update[R](
       subscriptionName: SubscriptionName,
-      billingPeriod: BillingPeriod,
-      price: BigDecimal,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-  ): ZIO[SubscriptionUpdate with Stage, String, SubscriptionUpdateResponse] =
-    ZIO.serviceWithZIO[SubscriptionUpdate](
-      _.update(subscriptionName, billingPeriod, price, currency, ratePlanIdToRemove),
-    )
-
-  def preview(
-      subscriptionName: SubscriptionName,
-      billingPeriod: BillingPeriod,
-      price: BigDecimal,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-  ): ZIO[SubscriptionUpdate with Stage, String, PreviewResult] =
-    ZIO.serviceWithZIO[SubscriptionUpdate](
-      _.preview(subscriptionName, billingPeriod, price, currency, ratePlanIdToRemove),
-    )
+      requestBody: SubscriptionUpdateRequest,
+  ): ZIO[SubscriptionUpdate with Stage, String, R] =
+    ZIO.serviceWithZIO[SubscriptionUpdate](_.update[R](subscriptionName, requestBody))
 }
 
 case class SubscriptionUpdateRequest(
@@ -137,6 +76,10 @@ case class SubscriptionUpdateRequest(
     remove: List[RemoveRatePlan],
     collect: Boolean = true,
     runBilling: Boolean = true,
+    preview: Boolean = true,
+    targetDate: LocalDate,
+    currentTerm: String = "24",
+    currentTermPeriodType: String = "Month",
 )
 
 case class AddRatePlan(
@@ -157,15 +100,6 @@ case class SubscriptionUpdateResponse(
     paidAmount: Option[BigDecimal],
 )
 
-case class SubscriptionUpdatePreviewRequest(
-    add: List[AddRatePlan],
-    remove: List[RemoveRatePlan],
-    preview: Boolean = true,
-    targetDate: LocalDate,
-    currentTerm: String = "24",
-    currentTermPeriodType: String = "Month",
-)
-
 case class SubscriptionUpdatePreviewResponse(invoice: SubscriptionUpdateInvoice)
 
 case class SubscriptionUpdateInvoiceItem(
@@ -183,58 +117,6 @@ case class SubscriptionUpdateInvoice(
     taxAmount: BigDecimal,
     invoiceItems: List[SubscriptionUpdateInvoiceItem],
 )
-
-case class SupporterPlusRatePlanIds(
-    ratePlanId: String,
-    subscriptionRatePlanChargeId: String,
-    contributionRatePlanChargeId: Option[String],
-)
-
-object SubscriptionUpdateRequest {
-  def apply(
-      billingPeriod: BillingPeriod,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-      price: BigDecimal,
-  ): ZIO[Stage, String, SubscriptionUpdateRequest] =
-    getRatePlans(billingPeriod, currency, ratePlanIdToRemove, price).map { case (addRatePlan, removeRatePlan) =>
-      SubscriptionUpdateRequest(addRatePlan, removeRatePlan)
-    }
-}
-
-object SubscriptionUpdatePreviewRequest {
-  def apply(
-      billingPeriod: BillingPeriod,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-      price: BigDecimal,
-      targetDate: LocalDate,
-  ): ZIO[Stage, String, SubscriptionUpdatePreviewRequest] =
-    getRatePlans(billingPeriod, currency, ratePlanIdToRemove, price).map { case (addRatePlan, removeRatePlan) =>
-      SubscriptionUpdatePreviewRequest(add = addRatePlan, remove = removeRatePlan, targetDate = targetDate)
-    }
-}
-
-private def getRatePlans(
-    billingPeriod: BillingPeriod,
-    currency: Currency,
-    ratePlanIdToRemove: String,
-    price: BigDecimal,
-): ZIO[Stage, String, (List[AddRatePlan], List[RemoveRatePlan])] =
-  for {
-    date <- Clock.currentDateTime.map(_.toLocalDate)
-    stage <- ZIO.service[Stage]
-    supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-    overrideAmount <- getContributionAmount(stage, price, currency, billingPeriod)
-    chargeOverride = ChargeOverrides(
-      price = Some(overrideAmount),
-      productRatePlanChargeId = supporterPlusRatePlanIds.contributionRatePlanChargeId.getOrElse(
-        supporterPlusRatePlanIds.subscriptionRatePlanChargeId,
-      ),
-    )
-    addRatePlan = AddRatePlan(date, supporterPlusRatePlanIds.ratePlanId, chargeOverrides = List(chargeOverride))
-    removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
-  } yield (List(addRatePlan), List(removeRatePlan))
 
 def getContributionAmount(
     stage: Stage,
@@ -269,53 +151,7 @@ def getSubscriptionPriceInMinorUnits(
       ratePlanToApiId.get,
     ).toDisjunction.left.map(_.message)
   } yield prices(catalogPlanId)(currency)
-
-def getSupporterPlusRatePlanIds(
-    stage: Stage,
-    billingPeriod: BillingPeriod,
-): Either[String, SupporterPlusRatePlanIds] = {
-  zuoraIdsForStage(config.Stage(stage.toString)).flatMap { zuoraIds =>
-    import zuoraIds.supporterPlusZuoraIds.{annual, annualV2, monthly, monthlyV2}
-
-    billingPeriod match {
-      case Monthly if SwitchToV2SupporterPlus =>
-        Right(
-          SupporterPlusRatePlanIds(
-            monthlyV2.productRatePlanId.value,
-            monthlyV2.productRatePlanChargeId.value,
-            Some(monthlyV2.contributionProductRatePlanChargeId.value),
-          ),
-        )
-      case Monthly =>
-        Right(
-          SupporterPlusRatePlanIds(
-            monthly.productRatePlanId.value,
-            monthly.productRatePlanChargeId.value,
-            None,
-          ),
-        )
-      case Annual if SwitchToV2SupporterPlus =>
-        Right(
-          SupporterPlusRatePlanIds(
-            annualV2.productRatePlanId.value,
-            annualV2.productRatePlanChargeId.value,
-            Some(annualV2.contributionProductRatePlanChargeId.value),
-          ),
-        )
-      case Annual =>
-        Right(
-          SupporterPlusRatePlanIds(
-            annual.productRatePlanId.value,
-            annual.productRatePlanChargeId.value,
-            None,
-          ),
-        )
-      case _ => Left(s"error when matching on billingPeriod $billingPeriod")
-    }
-  }
-}
 given JsonEncoder[SubscriptionUpdateRequest] = DeriveJsonEncoder.gen[SubscriptionUpdateRequest]
-given JsonEncoder[SubscriptionUpdatePreviewRequest] = DeriveJsonEncoder.gen[SubscriptionUpdatePreviewRequest]
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]

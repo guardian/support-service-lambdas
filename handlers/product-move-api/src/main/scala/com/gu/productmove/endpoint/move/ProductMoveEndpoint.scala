@@ -25,7 +25,6 @@ import com.gu.productmove.zuora.{
   SubscriptionUpdateLive,
   ZuoraCancel,
   ZuoraCancelLive,
-  getSupporterPlusRatePlanIds,
 }
 import com.gu.productmove.{
   AwsCredentialsLive,
@@ -58,12 +57,21 @@ import java.time.format.DateTimeFormatter
 import com.gu.i18n.Currency
 import com.gu.productmove.zuora.model.SubscriptionName
 
+extension [R, E, A](zio: ZIO[R, E, A])
+  def addLogMessage(message: String) = zio.catchAll { error =>
+    ZIO.fail(s"$message failed with: $error")
+  }
+
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run(SubscriptionName("A-S00448793"), ExpectedInput(1, false, None, None)),
+    run(
+      SubscriptionName("A-S00448793"),
+      SwitchType.RecurringContributionToSupporterPlus,
+      ExpectedInput(1, false, None, None),
+    ),
   )
 
   val server: sttp.tapir.server.ServerEndpoint.Full[
@@ -75,7 +83,7 @@ object ProductMoveEndpoint {
     Any,
     ZIOApiGatewayRequestHandler.TIO,
   ] = {
-    val subscriptionNameCapture: EndpointInput.PathCapture[String] =
+    val subscriptionNameCapture: EndpointInput.PathCapture[String] = {
       EndpointInput.PathCapture[String](
         Some("subscriptionName"),
         implicitly,
@@ -84,8 +92,21 @@ object ProductMoveEndpoint {
           examples = List(Example("A-S000001", None, None)),
         ), // A-S000001
       )
+    }
+
+    val switchTypeCapture: EndpointInput.PathCapture[String] = {
+      EndpointInput.PathCapture[String](
+        Some("switchType"),
+        implicitly,
+        EndpointIO.Info.empty.copy(
+          description = Some("Switch type."),
+          examples = List(Example("recurring-to-supporter-plus", None, None)),
+        ), // A-S000001
+      )
+    }
+
     val endpointDescription: PublicEndpoint[
-      (String, ProductMoveEndpointTypes.ExpectedInput),
+      (String, String, ProductMoveEndpointTypes.ExpectedInput),
       Unit,
       ProductMoveEndpointTypes.OutputBody,
       Any,
@@ -93,6 +114,7 @@ object ProductMoveEndpoint {
       endpoint.post
         .in("product-move")
         .in(subscriptionNameCapture)
+        .in(switchTypeCapture)
         .in(
           jsonBody[ExpectedInput].copy(info =
             EndpointIO.Info.empty[ExpectedInput].copy(description = Some("Definition of required movement.")),
@@ -113,6 +135,11 @@ object ProductMoveEndpoint {
               jsonBody[InternalServerError]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
             ),
+            oneOfVariant(
+              sttp.model.StatusCode.BadRequest,
+              jsonBody[BadRequest]
+                .copy(info = EndpointIO.Info.empty.copy(description = Some("BadRequest."))),
+            ),
           ),
         )
         .summary("Replaces the existing subscription with a new one.")
@@ -122,10 +149,14 @@ object ProductMoveEndpoint {
             |Also manages all the service comms associated with the movement.""".stripMargin,
         )
     endpointDescription
-      .serverLogic[TIO] { (subscriptionName, postData) =>
-        run(SubscriptionName(subscriptionName), postData)
-          .tapEither(result => ZIO.log("result tapped: " + result))
-          .map(Right.apply)
+      .serverLogic[TIO] { (subscriptionName, switchTypeStr, postData) =>
+        SwitchType.values.find(_.toString == switchTypeStr) match {
+          case Some(switchType) =>
+            run(SubscriptionName(subscriptionName), switchType, postData)
+              .tapEither(result => ZIO.log("result tapped: " + result))
+              .map(Right.apply)
+          case None => ZIO.fail(BadRequest(s"Invalid switchType: $switchTypeStr"))
+        }
       }
   }
 
@@ -134,13 +165,13 @@ object ProductMoveEndpoint {
   }
 
   private def run(
-      switchType: SwitchType,
       subscriptionName: SubscriptionName,
+      switchType: SwitchType,
       postData: ExpectedInput,
   ): TIO[OutputBody] =
     switchType match {
-      case RecurringContributionToSupporterPlus =>
-        recurringContributionToSupporterPlus(subscriptionName, postData).provide(
+      case SwitchType.RecurringContributionToSupporterPlus =>
+        RecurringContributionToSupporterPlus(subscriptionName, postData).provide(
           GetSubscriptionLive.layer,
           AwsCredentialsLive.layer,
           SttpClientLive.layer,
@@ -152,8 +183,8 @@ object ProductMoveEndpoint {
           GuStageLive.layer,
           DynamoLive.layer,
         )
-      case MembershipToRecurringContribution =>
-        membershipToRecurringContribution(subscriptionName, postData).provide(
+      case SwitchType.MembershipToRecurringContribution =>
+        MembershipToRecurringContribution(subscriptionName, postData).provide(
           GetSubscriptionLive.layer,
           AwsCredentialsLive.layer,
           SttpClientLive.layer,
@@ -165,11 +196,6 @@ object ProductMoveEndpoint {
           GuStageLive.layer,
           DynamoLive.layer,
         )
-    }
-
-  extension [R, E, A](zio: ZIO[R, E, A])
-    def addLogMessage(message: String) = zio.catchAll { error =>
-      ZIO.fail(s"$message failed with: $error")
     }
 
   extension (billingPeriod: BillingPeriod)
@@ -179,199 +205,4 @@ object ProductMoveEndpoint {
         case Annual => ZIO.succeed("annual")
         case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
       }
-
-  def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
-    list.length match {
-      case 1 => ZIO.succeed(list.head)
-      case _ => ZIO.fail(message)
-    }
-
-  private[productmove] def recurringContributionToSupporterPlus(
-      subscriptionName: SubscriptionName,
-      postData: ExpectedInput,
-  ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
-    (for {
-      _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
-
-      currentRatePlan <- getSingleOrNotEligible(
-        subscription.ratePlans,
-        s"Subscription: ${subscriptionName.value} has more than one ratePlan",
-      )
-      ratePlanCharge <- getSingleOrNotEligible(
-        currentRatePlan.ratePlanCharges,
-        s"Subscription: ${subscriptionName.value} has more than one ratePlanCharge",
-      )
-      currency <- ZIO
-        .fromOption(ratePlanCharge.currencyObject)
-        .orElseFail(
-          s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
-        )
-
-      result <-
-        if (postData.preview)
-          doPreview(
-            SubscriptionName(subscription.id),
-            postData.price,
-            ratePlanCharge.billingPeriod,
-            currency,
-            currentRatePlan.id,
-          )
-        else
-          doUpdate(
-            subscriptionName,
-            postData.price,
-            BigDecimal(ratePlanCharge.price),
-            ratePlanCharge.billingPeriod,
-            currency,
-            currentRatePlan,
-            subscription,
-            postData.csrUserId,
-            postData.caseId,
-          )
-    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
-
-  private[productmove] def membershipToRecurringContribution(
-      subscriptionName: SubscriptionName,
-      postData: ExpectedInput,
-  ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
-    (for {
-      _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
-
-      currentRatePlan <- getSingleOrNotEligible(
-        subscription.ratePlans,
-        s"Subscription: ${subscriptionName.value} has more than one ratePlan",
-      )
-      ratePlanCharge <- getSingleOrNotEligible(
-        currentRatePlan.ratePlanCharges,
-        s"Subscription: ${subscriptionName.value} has more than one ratePlanCharge",
-      )
-      currency <- ZIO
-        .fromOption(ratePlanCharge.currencyObject)
-        .orElseFail(
-          s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
-        )
-
-      result <-
-        doUpdate(
-          subscriptionName,
-          postData.price,
-          BigDecimal(ratePlanCharge.price),
-          ratePlanCharge.billingPeriod,
-          currency,
-          currentRatePlan,
-          subscription,
-          postData.csrUserId,
-          postData.caseId,
-        )
-    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
-
-  def doPreview(
-      subscriptionName: SubscriptionName,
-      price: BigDecimal,
-      billingPeriod: BillingPeriod,
-      currency: Currency,
-      currentRatePlanId: String,
-  ): ZIO[SubscriptionUpdate with Stage, String, OutputBody] = for {
-    _ <- ZIO.log("Fetching Preview from Zuora")
-    previewResponse <- SubscriptionUpdate
-      .preview(subscriptionName, billingPeriod, price, currency, currentRatePlanId)
-      .addLogMessage("SubscriptionUpdate")
-  } yield previewResponse
-
-  def doUpdate(
-      subscriptionName: SubscriptionName,
-      price: BigDecimal,
-      previousAmount: BigDecimal,
-      billingPeriod: BillingPeriod,
-      currency: Currency,
-      currentRatePlan: GetSubscription.RatePlan,
-      subscription: GetSubscription.GetSubscriptionResponse,
-      csrUserId: Option[String],
-      caseId: Option[String],
-  ) = for {
-    _ <- ZIO.log("Performing product move update")
-    stage <- ZIO.service[Stage]
-    account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
-
-    identityId <- ZIO
-      .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
-
-    updateResponse <- SubscriptionUpdate
-      .update(SubscriptionName(subscription.id), billingPeriod, price, currency, currentRatePlan.id)
-      .addLogMessage("SubscriptionUpdate")
-
-    todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
-    billingPeriodValue <- billingPeriod.value
-
-    paidAmount = updateResponse.paidAmount.getOrElse(BigDecimal(0))
-
-    emailFuture <- SQS
-      .sendEmail(
-        message = EmailMessage(
-          EmailPayload(
-            Address = Some(account.billToContact.workEmail),
-            ContactAttributes = EmailPayloadContactAttributes(
-              SubscriberAttributes = EmailPayloadProductSwitchAttributes(
-                first_name = account.billToContact.firstName,
-                last_name = account.billToContact.lastName,
-                currency = account.basicInfo.currency.symbol,
-                price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = billingPeriodValue + "ly",
-                subscription_id = subscriptionName.value,
-              ),
-            ),
-          ),
-          "SV_RCtoSP_Switch",
-          account.basicInfo.sfContactId__c,
-          Some(identityId),
-        ),
-      )
-      .fork
-
-    salesforceTrackingFuture <- SQS
-      .queueSalesforceTracking(
-        SalesforceRecordInput(
-          subscriptionName.value,
-          previousAmount,
-          price,
-          currentRatePlan.productName,
-          currentRatePlan.ratePlanName,
-          "Supporter Plus",
-          todaysDate,
-          todaysDate,
-          paidAmount,
-          csrUserId,
-          caseId,
-        ),
-      )
-      .fork
-
-    supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-    amendSupporterProductDynamoTableFuture <- Dynamo
-      .writeItem(
-        SupporterRatePlanItem(
-          subscriptionName.value,
-          identityId = identityId,
-          gifteeIdentityId = None,
-          productRatePlanId = supporterPlusRatePlanIds.ratePlanId,
-          productRatePlanName = "product-move-api added Supporter Plus Monthly",
-          termEndDate = todaysDate.plusDays(7),
-          contractEffectiveDate = todaysDate,
-          contributionAmount = None,
-        ),
-      )
-      .fork
-
-    requests = emailFuture
-      .zip(salesforceTrackingFuture)
-      .zip(amendSupporterProductDynamoTableFuture)
-
-    _ <- requests.join
-
-  } yield Success("Product move completed successfully")
 }

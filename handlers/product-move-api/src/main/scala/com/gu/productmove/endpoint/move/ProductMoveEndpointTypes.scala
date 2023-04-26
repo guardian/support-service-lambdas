@@ -44,9 +44,13 @@ object ProductMoveEndpointTypes {
       ) nextPaymentDate: LocalDate,
   ) extends OutputBody
   case class InternalServerError(@description("Error message.") message: String) extends OutputBody
+
+  case class BadRequest(@description("Error message.") message: String) extends OutputBody
   given Schema[Success] = inlineSchema(Schema.derived)
   given Schema[PreviewResult] = inlineSchema(Schema.derived)
   given Schema[InternalServerError] = inlineSchema(Schema.derived)
+
+  given Schema[BadRequest] = inlineSchema(Schema.derived)
   given JsonEncoder[Success] = DeriveJsonEncoder.gen[Success]
   given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
   given JsonEncoder[PreviewResult] = DeriveJsonEncoder.gen[PreviewResult]
@@ -55,4 +59,8 @@ object ProductMoveEndpointTypes {
   given JsonDecoder[OutputBody] = DeriveJsonDecoder.gen[OutputBody] // needed to keep tapir happy
   given JsonEncoder[InternalServerError] = DeriveJsonEncoder.gen[InternalServerError]
   given JsonDecoder[InternalServerError] = DeriveJsonDecoder.gen[InternalServerError] // needed to keep tapir happy
+
+  given JsonEncoder[BadRequest] = DeriveJsonEncoder.gen[BadRequest]
+
+  given JsonDecoder[BadRequest] = DeriveJsonDecoder.gen[BadRequest] // needed to keep tapir happy
 }

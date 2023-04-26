@@ -5,6 +5,7 @@ import zio.*
 import zio.Clock
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
+import com.gu.productmove.endpoint.move.RecurringContributionToSupporterPlus.SupporterPlusRatePlanIds
 
 object BuildPreviewResult {
   def getPreviewResult(
