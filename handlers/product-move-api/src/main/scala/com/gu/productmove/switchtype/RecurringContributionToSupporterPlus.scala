@@ -236,7 +236,7 @@ object RecurringContributionToSupporterPlus {
 
       updateRequestBody <- getRatePlans(billingPeriod, currency, ratePlanIdToRemove, price).map {
         case (addRatePlan, removeRatePlan) =>
-          SubscriptionUpdatePreviewRequest(add = addRatePlan, remove = removeRatePlan, targetDate = targetDate)
+          SubscriptionUpdateRequest(add = addRatePlan, remove = removeRatePlan, targetDate = targetDate)
       }
 
       updateResponse <- SubscriptionUpdate
