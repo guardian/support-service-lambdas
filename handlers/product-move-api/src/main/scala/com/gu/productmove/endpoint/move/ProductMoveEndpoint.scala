@@ -3,9 +3,6 @@ package com.gu.productmove.endpoint.move
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 
-import java.time.LocalDate
-import scala.concurrent.ExecutionContext.Implicits.global
-import com.gu.productmove.endpoint.available.{Billing, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
@@ -40,18 +37,17 @@ import com.gu.productmove.{
   SQSLive,
   SttpClientLive,
 }
-import sttp.tapir.*
+import sttp.tapir._
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio.*
-import zio.json.*
+import zio._
+import zio.json._
 import com.gu.newproduct.api.productcatalog.PricesFromZuoraCatalog
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.effects.GetFromS3
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ZuoraIds
 
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.gu.i18n.Currency
 import com.gu.productmove.zuora.model.SubscriptionName
