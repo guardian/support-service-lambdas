@@ -44,9 +44,8 @@ import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio.{Clock, IO, URIO, ZIO}
-import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
-import zio.ThreadLocalBridge.trace
+import zio.*
+import zio.json.*
 import com.gu.newproduct.api.productcatalog.PricesFromZuoraCatalog
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.effects.GetFromS3
@@ -61,6 +60,14 @@ extension [R, E, A](zio: ZIO[R, E, A])
   def addLogMessage(message: String) = zio.catchAll { error =>
     ZIO.fail(s"$message failed with: $error")
   }
+
+extension (billingPeriod: BillingPeriod)
+  def value: IO[String, String] =
+    billingPeriod match {
+      case Monthly => ZIO.succeed("month")
+      case Annual => ZIO.succeed("annual")
+      case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
+    }
 
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
@@ -77,7 +84,7 @@ object ProductMoveEndpoint {
   val server: sttp.tapir.server.ServerEndpoint.Full[
     Unit,
     Unit,
-    (String, ProductMoveEndpointTypes.ExpectedInput),
+    (String, String, ProductMoveEndpointTypes.ExpectedInput),
     Unit,
     ProductMoveEndpointTypes.OutputBody,
     Any,
@@ -169,40 +176,21 @@ object ProductMoveEndpoint {
       switchType: SwitchType,
       postData: ExpectedInput,
   ): TIO[OutputBody] =
-    switchType match {
+    (switchType match {
       case SwitchType.RecurringContributionToSupporterPlus =>
-        RecurringContributionToSupporterPlus(subscriptionName, postData).provide(
-          GetSubscriptionLive.layer,
-          AwsCredentialsLive.layer,
-          SttpClientLive.layer,
-          ZuoraClientLive.layer,
-          ZuoraGetLive.layer,
-          SubscriptionUpdateLive.layer,
-          SQSLive.layer,
-          GetAccountLive.layer,
-          GuStageLive.layer,
-          DynamoLive.layer,
-        )
+        RecurringContributionToSupporterPlus(subscriptionName, postData)
       case SwitchType.MembershipToRecurringContribution =>
-        MembershipToRecurringContribution(subscriptionName, postData).provide(
-          GetSubscriptionLive.layer,
-          AwsCredentialsLive.layer,
-          SttpClientLive.layer,
-          ZuoraClientLive.layer,
-          ZuoraGetLive.layer,
-          SubscriptionUpdateLive.layer,
-          SQSLive.layer,
-          GetAccountLive.layer,
-          GuStageLive.layer,
-          DynamoLive.layer,
-        )
-    }
-
-  extension (billingPeriod: BillingPeriod)
-    def value: IO[String, String] =
-      billingPeriod match {
-        case Monthly => ZIO.succeed("month")
-        case Annual => ZIO.succeed("annual")
-        case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
-      }
+        MembershipToRecurringContribution(subscriptionName, postData)
+    }).provide(
+      GetSubscriptionLive.layer,
+      AwsCredentialsLive.layer,
+      SttpClientLive.layer,
+      ZuoraClientLive.layer,
+      ZuoraGetLive.layer,
+      SubscriptionUpdateLive.layer,
+      SQSLive.layer,
+      GetAccountLive.layer,
+      GuStageLive.layer,
+      DynamoLive.layer,
+    )
 }

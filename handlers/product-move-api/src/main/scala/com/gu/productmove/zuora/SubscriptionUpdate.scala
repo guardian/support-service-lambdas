@@ -41,10 +41,8 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-val SwitchToV2SupporterPlus = false
-
 trait SubscriptionUpdate:
-  def update[R](
+  def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
   ): ZIO[Stage, String, R]
@@ -53,7 +51,7 @@ object SubscriptionUpdateLive:
   val layer: URLayer[ZuoraGet, SubscriptionUpdate] = ZLayer.fromFunction(SubscriptionUpdateLive(_))
 
 private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpdate:
-  override def update[R](
+  override def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
   ): ZIO[Stage, String, R] = {
@@ -64,7 +62,7 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
   }
 
 object SubscriptionUpdate {
-  def update[R](
+  def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
   ): ZIO[SubscriptionUpdate with Stage, String, R] =
@@ -74,10 +72,10 @@ object SubscriptionUpdate {
 case class SubscriptionUpdateRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],
-    collect: Boolean = true,
-    runBilling: Boolean = true,
-    preview: Boolean = true,
-    targetDate: LocalDate,
+    collect: Option[Boolean] = Some(true),
+    runBilling: Option[Boolean] = Some(true),
+    preview: Option[Boolean] = Some(true),
+    targetDate: Option[LocalDate],
     currentTerm: String = "24",
     currentTermPeriodType: String = "Month",
 )
@@ -117,40 +115,6 @@ case class SubscriptionUpdateInvoice(
     taxAmount: BigDecimal,
     invoiceItems: List[SubscriptionUpdateInvoiceItem],
 )
-
-def getContributionAmount(
-    stage: Stage,
-    price: BigDecimal,
-    currency: Currency,
-    billingPeriod: BillingPeriod,
-): IO[String, BigDecimal] =
-  if (SwitchToV2SupporterPlus)
-    // work out how much of what the user is paying can be treated as a contribution (total amount - cost of sub)
-    val catalogPlanId =
-      if (billingPeriod == Monthly)
-        MonthlySupporterPlusV2
-      else
-        AnnualSupporterPlusV2
-    ZIO.fromEither(
-      getSubscriptionPriceInMinorUnits(stage, catalogPlanId, currency).map(subscriptionChargePrice =>
-        price - (subscriptionChargePrice.value / 100),
-      ),
-    )
-  else ZIO.succeed(price)
-
-def getSubscriptionPriceInMinorUnits(
-    stage: Stage,
-    catalogPlanId: PlanId,
-    currency: Currency,
-): Either[String, AmountMinorUnits] =
-  for {
-    ratePlanToApiId <- zuoraIdsForStage(config.Stage(stage.toString)).map(_.rateplanIdToApiId)
-    prices <- PricesFromZuoraCatalog(
-      ZuoraEnvironment(stage.toString),
-      GetFromS3.fetchString,
-      ratePlanToApiId.get,
-    ).toDisjunction.left.map(_.message)
-  } yield prices(catalogPlanId)(currency)
 given JsonEncoder[SubscriptionUpdateRequest] = DeriveJsonEncoder.gen[SubscriptionUpdateRequest]
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
