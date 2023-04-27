@@ -13,6 +13,7 @@ import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, Bill
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.productmove.zuora.*
+import com.gu.productmove.zuora.Fixtures.{invoiceWithMultipleInvoiceItems, invoiceWithTax, subscriptionsPreviewResponse}
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
@@ -359,6 +360,60 @@ val subscriptionUpdateResponse4 = SubscriptionUpdateResponse(
 )
 val subscriptionUpdateResponse5 =
   SubscriptionUpdateResponse("8ad08ccf844271800184528017044b36", -4, "8ad08ccf844271800184528017b24b4b", None)
+
+val timeLocalDate = LocalDate.of(2022, 5, 10)
+val timeLocalDate2 = LocalDate.of(2023, 2, 6)
+
+val expectedRequestBody = SubscriptionUpdateRequest(
+  add = List(
+    AddRatePlan(
+      contractEffectiveDate = timeLocalDate,
+      productRatePlanId = "8a12865b8219d9b401822106192b64dc",
+      chargeOverrides = List(
+        ChargeOverrides(
+          price = Some(15.00),
+          productRatePlanChargeId = "8a12865b8219d9b401822106194e64e3",
+        ),
+      ),
+    ),
+  ),
+  remove = List(
+    RemoveRatePlan(
+      contractEffectiveDate = timeLocalDate,
+      ratePlanId = "89ad8casd9c0asdcaj89sdc98as",
+    ),
+  ),
+  collect = Some(true),
+  runBilling = Some(true),
+  preview = Some(false),
+)
+
+val expectedRequestBodyPreview = SubscriptionUpdateRequest(
+  add = List(
+    AddRatePlan(
+      contractEffectiveDate = timeLocalDate2,
+      productRatePlanId = "8ad09fc281de1ce70181de3b251736a4",
+      chargeOverrides = List(
+        ChargeOverrides(
+          price = Some(15.00),
+          productRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6",
+        ),
+      ),
+    ),
+  ),
+  remove = List(
+    RemoveRatePlan(
+      contractEffectiveDate = timeLocalDate2,
+      ratePlanId = "89ad8casd9c0asdcaj89sdc98as",
+    ),
+  ),
+  preview = Some(true),
+  targetDate = Some(LocalDate.of(2024, 3, 6)),
+)
+
+val previewResponse = SubscriptionUpdatePreviewResponse(
+  subscriptionsPreviewResponse,
+)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service

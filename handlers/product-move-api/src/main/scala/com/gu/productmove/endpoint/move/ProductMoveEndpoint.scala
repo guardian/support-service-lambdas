@@ -154,7 +154,7 @@ object ProductMoveEndpoint {
     case RecurringContributionToSupporterPlus, MembershipToRecurringContribution
   }
 
-  private def run(
+  private[productmove] def run(
       subscriptionName: SubscriptionName,
       switchType: SwitchType,
       postData: ExpectedInput,

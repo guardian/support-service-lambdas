@@ -1,17 +1,15 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.{AwsCredentialsLive, DynamoLive, GuStageLive, SQSLive, SttpClientLive}
-import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
+import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, RecurringContributionToSupporterPlus}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove._
+import zio._
+import zio.test.Assertion._
+import zio.test._
 
-import java.time.*
-import zio.Scope
-import zio.*
-import zio.test.Assertion.*
-import zio.test.*
-import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault}
+import java.time._
 
 object ProductMoveSpec extends ZIOSpecDefault {
 
@@ -19,8 +17,7 @@ object ProductMoveSpec extends ZIOSpecDefault {
     suite("Switch")(test("Run product switch lambda locally") {
       for {
         _ <- TestClock.setTime(Instant.now())
-        _ <- ProductMoveEndpoint
-          .productMove(SubscriptionName("A-S00487531"), ExpectedInput(20, false, None, None))
+        _ <- RecurringContributionToSupporterPlus(SubscriptionName("A-S00487531"), ExpectedInput(20, false, None, None))
           .provide(
             GetSubscriptionLive.layer,
             AwsCredentialsLive.layer,

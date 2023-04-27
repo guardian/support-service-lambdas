@@ -16,6 +16,9 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import Fixtures.*
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
 import com.gu.i18n.Currency.GBP
+import com.gu.productmove.endpoint.move.RecurringContributionToSupporterPlus.getRatePlans
+import com.gu.productmove.endpoint.move.SupporterPlusRatePlanIds
+import com.gu.productmove.move.BuildPreviewResult
 
 import java.time.*
 import scala.None
@@ -51,9 +54,19 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
         for {
           _ <- TestClock.setTime(time)
-          createRequestBody <- SubscriptionUpdateRequest(Monthly, GBP, "8ad03sdfa1312f3123", 50.00).provideLayer(
-            ZLayer.succeed(Stage.valueOf("DEV")),
-          )
+          createRequestBody <- getRatePlans(Monthly, GBP, "8ad03sdfa1312f3123", 50.00)
+            .map { case (addRatePlan, removeRatePlan) =>
+              SubscriptionUpdateRequest(
+                add = addRatePlan,
+                remove = removeRatePlan,
+                collect = Some(true),
+                runBilling = Some(true),
+                preview = Some(false),
+              )
+            }
+            .provideLayer(
+              ZLayer.succeed(Stage.valueOf("DEV")),
+            )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       },
       test("SubscriptionUpdateRequest is correct for input (PROD)") {
@@ -83,9 +96,19 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
         for {
           _ <- TestClock.setTime(time)
-          createRequestBody <- SubscriptionUpdateRequest(Monthly, GBP, "8ad03sdfa1312f3123", 50.00).provideLayer(
-            ZLayer.succeed(Stage.valueOf("PROD")),
-          )
+          createRequestBody <- getRatePlans(Monthly, GBP, "8ad03sdfa1312f3123", 50.00)
+            .map { case (addRatePlan, removeRatePlan) =>
+              SubscriptionUpdateRequest(
+                add = addRatePlan,
+                remove = removeRatePlan,
+                collect = Some(true),
+                runBilling = Some(true),
+                preview = Some(false),
+              )
+            }
+            .provideLayer(
+              ZLayer.succeed(Stage.valueOf("PROD")),
+            )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       },
       test("SubscriptionUpdateRequest preview response is correct for invoice with multiple invoice items") {

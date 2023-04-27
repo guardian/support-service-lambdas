@@ -211,7 +211,7 @@ object RecurringContributionToSupporterPlus {
       )
     else ZIO.succeed(price)
 
-  private def getRatePlans(
+  def getRatePlans(
       billingPeriod: BillingPeriod,
       currency: Currency,
       ratePlanIdToRemove: String,

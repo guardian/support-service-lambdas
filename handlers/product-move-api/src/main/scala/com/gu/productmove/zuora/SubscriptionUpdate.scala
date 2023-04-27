@@ -72,10 +72,10 @@ object SubscriptionUpdate {
 case class SubscriptionUpdateRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],
-    collect: Option[Boolean],
-    runBilling: Option[Boolean],
-    preview: Option[Boolean],
-    targetDate: Option[LocalDate],
+    collect: Option[Boolean] = None,
+    runBilling: Option[Boolean] = None,
+    preview: Option[Boolean] = None,
+    targetDate: Option[LocalDate] = None,
     currentTerm: String = "24",
     currentTermPeriodType: String = "Month",
 )

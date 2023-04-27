@@ -135,7 +135,14 @@ object MembershipToRecurringContribution {
 
     updateRequestBody <- getRatePlans(billingPeriod, currency, ratePlanAmendments).map {
       case (addRatePlan, removeRatePlan) =>
-        SubscriptionUpdateRequest(add = addRatePlan, remove = removeRatePlan, targetDate = None)
+        SubscriptionUpdateRequest(
+          add = addRatePlan,
+          remove = removeRatePlan,
+          collect = Some(false),
+          runBilling = Some(true),
+          preview = Some(false),
+          targetDate = None,
+        )
     }
 
     _ <- SubscriptionUpdate
