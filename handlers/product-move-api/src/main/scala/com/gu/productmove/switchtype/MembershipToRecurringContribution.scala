@@ -38,7 +38,7 @@ object MembershipToRecurringContribution {
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
   ): ZIO[
-    GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage,
+    GetSubscription with SubscriptionUpdate with GetAccount with SQS with Stage,
     String,
     OutputBody,
   ] = {
@@ -54,19 +54,90 @@ object MembershipToRecurringContribution {
           s"",
         )
 
-      result <- doUpdate(
-        subscriptionName,
-        postData.price,
-        BigDecimal(ratePlanCharge.price),
-        ratePlanCharge.billingPeriod,
-        currency,
-        ratePlans,
-        ratePlans.head,
-        subscription,
-        postData.csrUserId,
-        postData.caseId,
-      )
-    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
+      price = postData.price
+      previousAmount = BigDecimal(ratePlanCharge.price)
+      billingPeriod = ratePlanCharge.billingPeriod
+      activeRatePlan = ratePlans.head
+
+      _ <- ZIO.log("Performing product move update")
+      account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
+
+      identityId <- ZIO
+        .fromOption(account.basicInfo.IdentityId__c)
+        .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
+
+      chargedThroughDate <- ZIO
+        .fromOption(getChargedThroughDate(ratePlans))
+        .orElseFail(s"Could not find a chargedThroughDate for subscription name ${subscriptionName.value}")
+
+      updateRequestBody <- getRatePlans(billingPeriod, currency, ratePlans, chargedThroughDate).map {
+        case (addRatePlan, removeRatePlan) =>
+          SubscriptionUpdateRequest(
+            add = addRatePlan,
+            remove = removeRatePlan,
+            collect = Some(false),
+            runBilling = Some(true),
+            preview = Some(false),
+            targetDate = None,
+          )
+      }
+
+      _ <- SubscriptionUpdate
+        .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
+        .addLogMessage("SubscriptionUpdate")
+
+      todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
+      billingPeriodValue <- billingPeriod.value
+
+      paidAmount = BigDecimal(0)
+
+      emailFuture <- SQS
+        .sendEmail(
+          message = EmailMessage(
+            EmailPayload(
+              Address = Some(account.billToContact.workEmail),
+              ContactAttributes = EmailPayloadContactAttributes(
+                SubscriberAttributes = EmailPayloadProductSwitchAttributes(
+                  first_name = account.billToContact.firstName,
+                  last_name = account.billToContact.lastName,
+                  currency = account.basicInfo.currency.symbol,
+                  price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                  first_payment_amount = BigDecimal(0).setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                  date_of_first_payment = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                  payment_frequency = billingPeriodValue + "ly",
+                  subscription_id = subscriptionName.value,
+                ),
+              ),
+            ),
+            "SV_RCtoSP_Switch",
+            account.basicInfo.sfContactId__c,
+            Some(identityId),
+          ),
+        )
+        .fork
+
+      salesforceTrackingFuture <- SQS
+        .queueSalesforceTracking(
+          SalesforceRecordInput(
+            subscriptionName.value,
+            previousAmount,
+            price,
+            activeRatePlan.productName,
+            activeRatePlan.ratePlanName,
+            "Recurring Contribution",
+            todaysDate,
+            chargedThroughDate,
+            paidAmount,
+            postData.csrUserId,
+            postData.caseId,
+          ),
+        )
+        .fork
+
+      requests = emailFuture.zip(salesforceTrackingFuture)
+      _ <- requests.join
+    } yield Success("Product move completed successfully"))
+      .fold(errorMessage => InternalServerError(errorMessage), success => success)
   }
 
   case class RecurringContributionIds(
@@ -95,9 +166,9 @@ object MembershipToRecurringContribution {
       billingPeriod: BillingPeriod,
       currency: Currency,
       ratePlanAmendments: Seq[GetSubscription.RatePlan],
+      chargedThroughDate: LocalDate,
   ): ZIO[Stage, String, (List[AddRatePlan], List[RemoveRatePlan])] =
     for {
-      date <- Clock.currentDateTime.map(_.toLocalDate)
       stage <- ZIO.service[Stage]
       contributionRatePlanIds <- ZIO.fromEither(
         getRecurringContributionRatePlanId(stage, billingPeriod),
@@ -109,117 +180,19 @@ object MembershipToRecurringContribution {
         price = Some(overrideAmount),
         productRatePlanChargeId = contributionRatePlanIds.ratePlanChargeId,
       )
-      addRatePlan = AddRatePlan(date, contributionRatePlanIds.ratePlanId, chargeOverrides = List(chargeOverride))
-      removeRatePlans = ratePlanAmendments.map(ratePlan => RemoveRatePlan(date, ratePlan.id))
+      addRatePlan = AddRatePlan(
+        chargedThroughDate,
+        contributionRatePlanIds.ratePlanId,
+        chargeOverrides = List(chargeOverride),
+      )
+      removeRatePlans = ratePlanAmendments.map(ratePlan => RemoveRatePlan(chargedThroughDate, ratePlan.id))
     } yield (List(addRatePlan), removeRatePlans.toList)
 
-  private def doUpdate(
-      subscriptionName: SubscriptionName,
-      price: BigDecimal,
-      previousAmount: BigDecimal,
-      billingPeriod: BillingPeriod,
-      currency: Currency,
-      ratePlanAmendments: List[GetSubscription.RatePlan],
-      activeRatePlan: GetSubscription.RatePlan,
-      subscription: GetSubscription.GetSubscriptionResponse,
-      csrUserId: Option[String],
-      caseId: Option[String],
-  ): ZIO[GetAccount with SubscriptionUpdate with SQS with Stage with Dynamo, String, OutputBody] = for {
-    _ <- ZIO.log("Performing product move update")
-    stage <- ZIO.service[Stage]
-    account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
-
-    identityId <- ZIO
-      .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
-
-    updateRequestBody <- getRatePlans(billingPeriod, currency, ratePlanAmendments).map {
-      case (addRatePlan, removeRatePlan) =>
-        SubscriptionUpdateRequest(
-          add = addRatePlan,
-          remove = removeRatePlan,
-          collect = Some(false),
-          runBilling = Some(true),
-          preview = Some(false),
-          targetDate = None,
-        )
-    }
-
-    _ <- SubscriptionUpdate
-      .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
-      .addLogMessage("SubscriptionUpdate")
-
-    todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
-    billingPeriodValue <- billingPeriod.value
-
-    paidAmount = 0
-
-    emailFuture <- SQS
-      .sendEmail(
-        message = EmailMessage(
-          EmailPayload(
-            Address = Some(account.billToContact.workEmail),
-            ContactAttributes = EmailPayloadContactAttributes(
-              SubscriberAttributes = EmailPayloadProductSwitchAttributes(
-                first_name = account.billToContact.firstName,
-                last_name = account.billToContact.lastName,
-                currency = account.basicInfo.currency.symbol,
-                price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                first_payment_amount = BigDecimal(0).toString,
-                date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = billingPeriodValue + "ly",
-                subscription_id = subscriptionName.value,
-              ),
-            ),
-          ),
-          "SV_RCtoSP_Switch",
-          account.basicInfo.sfContactId__c,
-          Some(identityId),
-        ),
-      )
-      .fork
-
-    salesforceTrackingFuture <- SQS
-      .queueSalesforceTracking(
-        SalesforceRecordInput(
-          subscriptionName.value,
-          previousAmount,
-          price,
-          activeRatePlan.productName,
-          activeRatePlan.ratePlanName,
-          "Supporter Plus",
-          todaysDate,
-          todaysDate,
-          paidAmount,
-          csrUserId,
-          caseId,
-        ),
-      )
-      .fork
-
-    contributionRatePlanIds <- ZIO.fromEither(getRecurringContributionRatePlanId(stage, billingPeriod))
-    amendSupporterProductDynamoTableFuture <- Dynamo
-      .writeItem(
-        SupporterRatePlanItem(
-          subscriptionName.value,
-          identityId = identityId,
-          gifteeIdentityId = None,
-          productRatePlanId = contributionRatePlanIds.ratePlanId,
-          productRatePlanName = "product-move-api added Supporter Plus Monthly",
-          termEndDate = todaysDate.plusDays(7),
-          contractEffectiveDate = todaysDate,
-          contributionAmount = None,
-        ),
-      )
-      .fork
-
-    requests = emailFuture
-      .zip(salesforceTrackingFuture)
-      .zip(amendSupporterProductDynamoTableFuture)
-
-    _ <- requests.join
-
-  } yield Success("Product move completed successfully")
+  private def getChargedThroughDate(ratePlanAmendments: List[GetSubscription.RatePlan]): Option[LocalDate] = (for {
+    ratePlan <- ratePlanAmendments
+    ratePlanCharge <- ratePlan.ratePlanCharges
+    chargedThroughDate <- ratePlanCharge.chargedThroughDate
+  } yield chargedThroughDate).headOption
 }
 
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]

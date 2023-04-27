@@ -50,6 +50,9 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               ratePlanId = "8ad03sdfa1312f3123",
             ),
           ),
+          collect = Some(true),
+          runBilling = Some(true),
+          preview = Some(false),
         )
 
         for {
@@ -92,6 +95,9 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               ratePlanId = "8ad03sdfa1312f3123",
             ),
           ),
+          collect = Some(true),
+          runBilling = Some(true),
+          preview = Some(false),
         )
 
         for {

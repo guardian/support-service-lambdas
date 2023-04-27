@@ -299,20 +299,42 @@ val emailMessageBodyNoPaymentOrRefund = EmailMessage(
   Some("12345"),
 )
 
+// MembershipToRecurringContribution
+val emailMessageBody2 = EmailMessage(
+  To = EmailPayload(
+    Address = Some("example@gmail.com"),
+    EmailPayloadContactAttributes(
+      EmailPayloadProductSwitchAttributes(
+        subscription_id = "A-S00339056",
+        first_name = "John",
+        last_name = "Hee",
+        first_payment_amount = "0.00",
+        price = "5.00",
+        payment_frequency = "monthly",
+        date_of_first_payment = "29 September 2022",
+        currency = "£",
+      ),
+    ),
+  ),
+  "SV_RCtoSP_Switch",
+  "sfContactId",
+  Some("12345"),
+)
+
 val refundInput1 = RefundInput(
   subscriptionName = SubscriptionName("A-S00339056"),
 )
 
 val salesforceRecordInput1 = SalesforceRecordInput(
   "A-S00339056",
-  BigDecimal(50),
-  BigDecimal(50),
+  BigDecimal(5.0),
+  BigDecimal(5.0),
   "P1",
   "RP1",
-  "Supporter Plus",
+  "Recurring Contribution",
   LocalDate.of(2022, 5, 10),
-  LocalDate.of(2022, 5, 10),
-  BigDecimal(4),
+  LocalDate.of(2022, 9, 29),
+  BigDecimal(0),
   csrUserId = None,
   caseId = None,
 )
@@ -347,23 +369,25 @@ val salesforceRecordInput3 = SalesforceRecordInput(
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
 val subscriptionUpdateResponse =
-  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57mkd", 28, "89ad8casd9c0asdcaj89sdc98as", Some(20))
+  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57mkd", 28, Some("89ad8casd9c0asdcaj89sdc98as"), Some(20))
 val subscriptionUpdateResponse2 =
-  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57osi", -4, "80a23d9sdf9a89fs8cjjk2", Some(10))
+  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57osi", -4, Some("80a23d9sdf9a89fs8cjjk2"), Some(10))
 val subscriptionUpdateResponse3 =
-  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57jsd", 28, "89ad8casd9c0asdcaj89sdc98as", None)
+  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57jsd", 28, Some("89ad8casd9c0asdcaj89sdc98as"), None)
 val subscriptionUpdateResponse4 = SubscriptionUpdateResponse(
   "8ad0823f841cf4e601841e61f6d070b8",
   BigDecimal(25),
-  "8ad0823f841cf4e601841e61f7b570e8",
+  Some("8ad0823f841cf4e601841e61f7b570e8"),
   Some(25),
 )
 val subscriptionUpdateResponse5 =
-  SubscriptionUpdateResponse("8ad08ccf844271800184528017044b36", -4, "8ad08ccf844271800184528017b24b4b", None)
+  SubscriptionUpdateResponse("8ad08ccf844271800184528017044b36", -4, Some("8ad08ccf844271800184528017b24b4b"), None)
 
 val timeLocalDate = LocalDate.of(2022, 5, 10)
 val timeLocalDate2 = LocalDate.of(2023, 2, 6)
+val timeLocalDate3 = LocalDate.of(2022, 9, 29)
 
+// RecurringContributionToSupporterPlus
 val expectedRequestBody = SubscriptionUpdateRequest(
   add = List(
     AddRatePlan(
@@ -388,6 +412,32 @@ val expectedRequestBody = SubscriptionUpdateRequest(
   preview = Some(false),
 )
 
+// MembershipToRecurringContribution
+val expectedRequestBody2 = SubscriptionUpdateRequest(
+  add = List(
+    AddRatePlan(
+      contractEffectiveDate = timeLocalDate3,
+      productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
+      chargeOverrides = List(
+        ChargeOverrides(
+          price = Some(5.00),
+          productRatePlanChargeId = "2c92a0fc5aacfadd015ad250bf2c6d38",
+        ),
+      ),
+    ),
+  ),
+  remove = List(
+    RemoveRatePlan(
+      contractEffectiveDate = timeLocalDate3,
+      ratePlanId = "89ad8casd9c0asdcaj89sdc98as",
+    ),
+  ),
+  collect = Some(false),
+  runBilling = Some(true),
+  preview = Some(false),
+)
+
+// RecurringContributionToSupporterPlus
 val expectedRequestBodyPreview = SubscriptionUpdateRequest(
   add = List(
     AddRatePlan(

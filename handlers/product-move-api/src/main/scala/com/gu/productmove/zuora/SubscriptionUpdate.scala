@@ -94,7 +94,7 @@ case class RemoveRatePlan(
 case class SubscriptionUpdateResponse(
     subscriptionId: String,
     totalDeltaMrr: BigDecimal,
-    invoiceId: String,
+    invoiceId: Option[String],
     paidAmount: Option[BigDecimal],
 )
 
