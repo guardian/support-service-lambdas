@@ -4,6 +4,7 @@ import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraGet
@@ -22,11 +23,11 @@ object GetSubscriptionLive:
   val layer: URLayer[ZuoraGet, GetSubscription] = ZLayer.fromFunction(GetSubscriptionLive(_))
 
 private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription:
-  override def get(subscriptionName: SubscriptionName): IO[String, GetSubscriptionResponse] =
+  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, GetSubscriptionResponse] =
     zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/${subscriptionName.value}")
 
 trait GetSubscription:
-  def get(subscriptionName: SubscriptionName): IO[String, GetSubscriptionResponse]
+  def get(subscriptionName: SubscriptionName): IO[ErrorResponse, GetSubscriptionResponse]
 
 object GetSubscription {
 
@@ -75,6 +76,6 @@ object GetSubscription {
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
   given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen[RatePlanCharge]
 
-  def get(subscriptionName: SubscriptionName): ZIO[GetSubscription, String, GetSubscriptionResponse] =
+  def get(subscriptionName: SubscriptionName): ZIO[GetSubscription, ErrorResponse, GetSubscriptionResponse] =
     ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionName))
 }

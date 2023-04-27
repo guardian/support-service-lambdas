@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.InternalServerError
 import com.gu.productmove.zuora.GetAccount.PaymentMethodResponse
 import com.gu.productmove.zuora.model.AccountNumber
 import zio.{IO, ZIO}
@@ -18,7 +19,7 @@ class MockGetAccount(
 
     accountResponse.get(accountNumber) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"success = false, subscription not found: $accountNumber")
+      case None => ZIO.fail(InternalServerError(s"success = false, subscription not found: $accountNumber"))
   }
 
   override def getPaymentMethod(paymentMethodId: String): IO[String, PaymentMethodResponse] = {
@@ -26,7 +27,7 @@ class MockGetAccount(
 
     paymentResponse.get(paymentMethodId) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"success = false, subscription not found: $paymentMethodId")
+      case None => ZIO.fail(InternalServerError(s"success = false, subscription not found: $paymentMethodId"))
   }
 }
 

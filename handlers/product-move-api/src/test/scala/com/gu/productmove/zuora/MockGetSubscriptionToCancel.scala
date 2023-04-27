@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.InternalServerError
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
 import com.gu.productmove.zuora.model.SubscriptionName
@@ -17,7 +18,7 @@ class MockGetSubscriptionToCancel(responses: Map[SubscriptionName, GetSubscripti
     responses.get(subscriptionName) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None =>
-        ZIO.fail(s"MockGetSubscriptionToCancel: No response stubbed for subscriptionId: ${subscriptionName.value}")
+        ZIO.fail(InternalServerError(s"MockGetSubscriptionToCancel: No response stubbed for subscriptionId: ${subscriptionName.value}"))
   }
 }
 

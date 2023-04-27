@@ -3,11 +3,12 @@ package com.gu.productmove.zuora
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.TimeUnit
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
-import sttp.client3.httpclient.zio.{HttpClientZioBackend}
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
@@ -28,17 +29,17 @@ private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
     s"$stagePath/$relativePath"
   }
 
-  def get: ZIO[Any, String, ZuoraProductCatalogue] =
+  def get: ZIO[Any, ErrorResponse, ZuoraProductCatalogue] =
     for {
       fileContent <- awsS3.getObject(zuoraCatalogueBucket, key(stage)).mapError(_.toString)
-      zuoraCatalogue <- ZIO.fromEither(summon[JsonDecoder[ZuoraProductCatalogue]].decodeJson(fileContent))
+      zuoraCatalogue <- ZIO.fromEither(summon[JsonDecoder[ZuoraProductCatalogue]].decodeJson(fileContent)).mapError(x => InternalServerError(x))
     } yield zuoraCatalogue
 
 trait GetCatalogue:
-  def get: ZIO[Any, String, ZuoraProductCatalogue]
+  def get: ZIO[Any, ErrorResponse, ZuoraProductCatalogue]
 
 object GetCatalogue {
-  def get: ZIO[GetCatalogue, String, ZuoraProductCatalogue] = ZIO.serviceWithZIO[GetCatalogue](_.get)
+  def get: ZIO[GetCatalogue, ErrorResponse, ZuoraProductCatalogue] = ZIO.serviceWithZIO[GetCatalogue](_.get)
 }
 
 case class ZuoraProductCatalogue(products: List[ZuoraProduct], nextPage: Option[String] = None)

@@ -3,6 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{InvoiceItemsForSubscription, PostBody, getZuoraQuery}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
@@ -26,7 +27,7 @@ object GetInvoiceItemsForSubscriptionLive:
     ZLayer.fromFunction(GetInvoiceItemsForSubscriptionLive(_))
 
 private class GetInvoiceItemsForSubscriptionLive(zuoraGet: ZuoraGet) extends GetInvoiceItemsForSubscription:
-  override def get(subscriptionName: SubscriptionName): IO[String, InvoiceItemsForSubscription] =
+  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, InvoiceItemsForSubscription] =
     zuoraGet.post[PostBody, InvoiceItemsForSubscription](
       uri"action/query",
       PostBody(getZuoraQuery(subscriptionName)),
@@ -34,7 +35,7 @@ private class GetInvoiceItemsForSubscriptionLive(zuoraGet: ZuoraGet) extends Get
     )
 
 trait GetInvoiceItemsForSubscription:
-  def get(subscriptionName: SubscriptionName): IO[String, InvoiceItemsForSubscription]
+  def get(subscriptionName: SubscriptionName): IO[ErrorResponse, InvoiceItemsForSubscription]
 
 object GetInvoiceItemsForSubscription {
 

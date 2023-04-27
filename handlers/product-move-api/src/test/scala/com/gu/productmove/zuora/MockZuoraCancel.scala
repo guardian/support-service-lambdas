@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.model.SubscriptionName
 import zio.{IO, ZIO}
 
@@ -14,15 +15,15 @@ class MockZuoraCancel(responses: Map[(SubscriptionName, LocalDate), Cancellation
   override def cancel(
       subscriptionName: SubscriptionName,
       chargedThroughDate: LocalDate,
-  ): ZIO[Any, String, CancellationResponse] = {
+  ): ZIO[Any, ErrorResponse, CancellationResponse] = {
     mutableStore = (subscriptionName, chargedThroughDate) :: mutableStore
 
     responses.get((subscriptionName, chargedThroughDate)) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None =>
         ZIO.fail(
-          s"MockZuoraCancel: no response stubbed for parameters: (${subscriptionName.value}, $chargedThroughDate)",
-        )
+          InternalServerError(s"MockZuoraCancel: no response stubbed for parameters: (${subscriptionName.value}, $chargedThroughDate)",
+        ))
   }
 }
 

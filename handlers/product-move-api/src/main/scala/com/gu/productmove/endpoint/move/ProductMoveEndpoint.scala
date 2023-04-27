@@ -146,27 +146,31 @@ object ProductMoveEndpoint {
 
   extension [R, E, A](zio: ZIO[R, E, A])
     def addLogMessage(message: String) = zio.catchAll { error =>
-      ZIO.fail(s"$message failed with: $error")
+      ZIO.fail(InternalServerError(s"$message failed with: $error"))
     }
 
   extension (billingPeriod: BillingPeriod)
-    def value: IO[String, String] =
+    def value: IO[ErrorResponse, String] =
       billingPeriod match {
         case Monthly => ZIO.succeed("month")
         case Annual => ZIO.succeed("annual")
-        case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
+        case _ => ZIO.fail(InternalServerError(s"Unrecognised billing period $billingPeriod"))
       }
 
-  def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
+  def getSingleOrNotEligible[A](list: List[A], message: String): IO[ErrorResponse, A] =
     list.length match {
       case 1 => ZIO.succeed(list.head)
-      case _ => ZIO.fail(message)
+      case _ => ZIO.fail(InternalServerError(message))
     }
 
   private[productmove] def productMove(
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
-  ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
+  ): ZIO[
+    GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage,
+    ErrorResponse,
+    OutputBody,
+  ] =
     (for {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
@@ -204,7 +208,7 @@ object ProductMoveEndpoint {
             postData.csrUserId,
             postData.caseId,
           )
-    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
+    } yield result).fold(error => error, success => success)
 
   def doPreview(
       subscriptionName: SubscriptionName,
@@ -212,7 +216,7 @@ object ProductMoveEndpoint {
       billingPeriod: BillingPeriod,
       currency: Currency,
       currentRatePlanId: String,
-  ): ZIO[SubscriptionUpdate with Stage, String, OutputBody] = for {
+  ): ZIO[SubscriptionUpdate with Stage, ErrorResponse, OutputBody] = for {
     _ <- ZIO.log("Fetching Preview from Zuora")
     previewResponse <- SubscriptionUpdate
       .preview(subscriptionName, billingPeriod, price, currency, currentRatePlanId)

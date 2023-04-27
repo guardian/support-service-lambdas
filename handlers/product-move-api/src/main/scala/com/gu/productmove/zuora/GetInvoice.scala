@@ -3,6 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck.None
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
@@ -24,14 +25,14 @@ object GetInvoiceLive:
   val layer: URLayer[ZuoraGet, GetInvoice] = ZLayer.fromFunction(GetInvoiceLive(_))
 
 private class GetInvoiceLive(zuoraGet: ZuoraGet) extends GetInvoice:
-  override def get(invoiceId: String): IO[String, GetInvoiceResponse] =
+  override def get(invoiceId: String): IO[ErrorResponse, GetInvoiceResponse] =
     zuoraGet.get[GetInvoiceResponse](
       uri"invoices/$invoiceId",
       ZuoraRestBody.ZuoraSuccessCheck.None,
     )
 
 trait GetInvoice:
-  def get(invoiceId: String): IO[String, GetInvoiceResponse]
+  def get(invoiceId: String): IO[ErrorResponse, GetInvoiceResponse]
 
 object GetInvoice {
 
@@ -39,6 +40,6 @@ object GetInvoice {
 
   given JsonDecoder[GetInvoiceResponse] = DeriveJsonDecoder.gen[GetInvoiceResponse]
 
-  def get(invoiceId: String): ZIO[GetInvoice, String, GetInvoiceResponse] =
+  def get(invoiceId: String): ZIO[GetInvoice, ErrorResponse, GetInvoiceResponse] =
     ZIO.serviceWithZIO[GetInvoice](_.get(invoiceId))
 }

@@ -2,6 +2,7 @@ package com.gu.productmove
 
 import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetAccount.{BillToContact, GetAccountResponse}
@@ -19,29 +20,29 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 trait SQS {
-  def sendEmail(message: EmailMessage): ZIO[Any, String, Unit]
+  def sendEmail(message: EmailMessage): ZIO[Any, ErrorResponse, Unit]
 
-  def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit]
+  def queueRefund(refundInput: RefundInput): ZIO[Any, ErrorResponse, Unit]
 
-  def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, String, Unit]
+  def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, ErrorResponse, Unit]
 }
 
 object SQS {
-  def sendEmail(message: EmailMessage): ZIO[SQS, String, Unit] = {
+  def sendEmail(message: EmailMessage): ZIO[SQS, ErrorResponse, Unit] = {
     ZIO.environmentWithZIO(_.get.sendEmail(message))
   }
 
-  def queueRefund(refundInput: RefundInput): ZIO[SQS, String, Unit] = {
+  def queueRefund(refundInput: RefundInput): ZIO[SQS, ErrorResponse, Unit] = {
     ZIO.environmentWithZIO(_.get.queueRefund(refundInput))
   }
 
-  def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[SQS, String, Unit] = {
+  def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[SQS, ErrorResponse, Unit] = {
     ZIO.environmentWithZIO(_.get.queueSalesforceTracking(salesforceRecordInput))
   }
 }
 
 object SQSLive {
-  val layer: ZLayer[AwsCredentialsProvider with Stage, String, SQS] =
+  val layer: ZLayer[AwsCredentialsProvider with Stage, ErrorResponse, SQS] =
     ZLayer.scoped(for {
       stage <- ZIO.service[Stage]
       sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
@@ -50,7 +51,7 @@ object SQSLive {
       refundQueueUrlResponse <- getQueue(s"product-switch-refund-${stage.toString}", sqsClient)
       salesforceTrackingQueueUrlResponse <- getQueue(s"product-switch-salesforce-tracking-${stage.toString}", sqsClient)
     } yield new SQS {
-      override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] =
+      override def sendEmail(message: EmailMessage): ZIO[Any, ErrorResponse, Unit] =
         for {
           _ <- ZIO
             .fromCompletableFuture {
@@ -64,9 +65,13 @@ object SQSLive {
             .mapError { ex =>
               message.To.ContactAttributes.SubscriberAttributes match {
                 case attributes: EmailPayloadProductSwitchAttributes =>
-                  s"Failed to send product switch email message to SQS for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName"
+                  InternalServerError(
+                    s"Failed to send product switch email message to SQS for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName",
+                  )
                 case attributes: EmailPayloadCancellationAttributes =>
-                  s"Failed to send subscription cancellation email message to SQS for sfContactId: ${message.SfContactId} with error: ${ex.toString} to SQS queue $emailQueueName"
+                  InternalServerError(
+                    s"Failed to send subscription cancellation email message to SQS for sfContactId: ${message.SfContactId} with error: ${ex.toString} to SQS queue $emailQueueName",
+                  )
               }
             }
           _ <- ZIO.log(
@@ -79,7 +84,7 @@ object SQSLive {
           )
         } yield ()
 
-      override def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit] =
+      override def queueRefund(refundInput: RefundInput): ZIO[Any, ErrorResponse, Unit] =
         for {
           _ <- ZIO
             .fromCompletableFuture {
@@ -91,7 +96,9 @@ object SQSLive {
               )
             }
             .mapError { ex =>
-              s"Failed to send sqs refund message with subscription Number: ${refundInput.subscriptionName} with error: ${ex.toString}"
+              InternalServerError(
+                s"Failed to send sqs refund message with subscription Number: ${refundInput.subscriptionName} with error: ${ex.toString}",
+              )
             }
           _ <- ZIO.log(
             s"Successfully sent refund message for subscription number: ${refundInput.subscriptionName}",
@@ -110,7 +117,9 @@ object SQSLive {
               )
             }
             .mapError { ex =>
-              s"Failed to send sqs salesforce tracking message with subscription Number: ${salesforceRecordInput.subscriptionName} with error: ${ex.toString}"
+              InternalServerError(
+                s"Failed to send sqs salesforce tracking message with subscription Number: ${salesforceRecordInput.subscriptionName} with error: ${ex.toString}",
+              )
             }
           _ <- ZIO.log(
             s"Successfully sent salesforce tracking message for subscription number: ${salesforceRecordInput.subscriptionName}",
@@ -124,14 +133,17 @@ object SQSLive {
       sqsClient <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
     } yield sqsClient
 
-  private def getQueue(queueName: String, sqsAsyncClient: SqsAsyncClient): ZIO[Any, String, GetQueueUrlResponse] =
+  private def getQueue(
+      queueName: String,
+      sqsAsyncClient: SqsAsyncClient,
+  ): ZIO[Any, ErrorResponse, GetQueueUrlResponse] =
     val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
 
     ZIO
       .fromCompletableFuture(
         sqsAsyncClient.getQueueUrl(queueUrl),
       )
-      .mapError { ex => s"Failed to get sqs queue name: $queueName, error: ${ex.getMessage}" }
+      .mapError { ex => InternalServerError(s"Failed to get sqs queue name: $queueName, error: ${ex.getMessage}") }
 
   private def impl(creds: AwsCredentialsProvider): SqsAsyncClient =
     SqsAsyncClient.builder

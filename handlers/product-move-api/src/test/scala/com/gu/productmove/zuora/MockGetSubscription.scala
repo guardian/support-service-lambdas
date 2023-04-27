@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.InternalServerError
 import com.gu.productmove.zuora.model.SubscriptionName
 import zio.{IO, ZIO}
 
@@ -14,7 +15,7 @@ class MockGetSubscription(responses: Map[SubscriptionName, GetSubscription.GetSu
 
     responses.get(subscriptionName) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"success = false, subscription not found: ${subscriptionName.value}")
+      case None => ZIO.fail(InternalServerError(s"success = false, subscription not found: ${subscriptionName.value}"))
   }
 }
 

@@ -4,6 +4,12 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.Util.getFromEnv
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ErrorResponse,
+  InternalServerError,
+  OutputBody,
+  TransactionError,
+}
 import com.gu.productmove.zuora.rest.ZuoraClient
 import com.gu.productmove.zuora.rest.ZuoraClientLive.ZuoraRestConfig
 import sttp.capabilities.zio.ZioStreams
@@ -30,9 +36,9 @@ object ZuoraClientLive {
   val layer: ZLayer[SttpBackend[Task, Any], String, ZuoraClient] =
     ZLayer {
       for {
-        zuoraBaseUrl <- ZIO.fromEither(getFromEnv("zuoraBaseUrl"))
-        zuoraUsername <- ZIO.fromEither(getFromEnv("zuoraUsername"))
-        zuoraPassword <- ZIO.fromEither(getFromEnv("zuoraPassword"))
+        zuoraBaseUrl <- ZIO.fromEither(getFromEnv("zuoraBaseUrl")).mapError(x => InternalServerError(x))
+        zuoraUsername <- ZIO.fromEither(getFromEnv("zuoraUsername")).mapError(x => InternalServerError(x))
+        zuoraPassword <- ZIO.fromEither(getFromEnv("zuoraPassword")).mapError(x => InternalServerError(x))
 
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/"))
 
@@ -46,7 +52,7 @@ object ZuoraClientLive {
 private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], zuoraRestConfig: ZuoraRestConfig)
     extends ZuoraClient:
 
-  override def send(request: Request[Either[String, String], Any]): IO[String, String] = {
+  override def send(request: Request[Either[String, String], Any]): IO[ErrorResponse, String] = {
     val absoluteUri = baseUrl.resolve(request.uri)
     sttpClient
       .send(
@@ -60,14 +66,14 @@ private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], 
           )
           .copy(uri = absoluteUri),
       )
-      .mapError(_.toString)
+      .mapError(e => InternalServerError(e.toString))
       .map(_.body)
       .absolve
   }
 
 trait ZuoraClient {
 
-  def send(request: Request[Either[String, String], Any]): IO[String, String]
+  def send(request: Request[Either[String, String], Any]): IO[ErrorResponse, String]
 
 }
 
@@ -94,13 +100,13 @@ object ZuoraRestBody {
   def parseIfSuccessful[A: JsonDecoder](
       body: String,
       zuoraSuccessCheck: ZuoraSuccessCheck,
-  ): Either[String, A] = {
-    val isSuccessful: Either[String, Unit] = zuoraSuccessCheck match {
+  ): Either[ErrorResponse, A] = {
+    val isSuccessful: Either[ErrorResponse, Unit] = zuoraSuccessCheck match {
       case ZuoraSuccessCheck.SuccessCheckSize =>
         for {
           zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessSize].decodeJson(body)
           succeeded = zuoraResponse.size.isEmpty // size field only exists if it's not found.
-          isSuccessful <- if (succeeded) Right(()) else Left(s"size = 0, body: $body")
+          isSuccessful <- if (succeeded) Right(()) else Left(InternalServerError(s"size = 0, body: $body"))
         } yield ()
 
       case ZuoraSuccessCheck.SuccessCheckLowercase =>
@@ -110,8 +116,10 @@ object ZuoraRestBody {
             if (zuoraResponse.success) Right(())
             else
               zuoraResponse.reasons match {
-                case None => Left(s"success = false, body: $body")
-                case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
+                case Some(reasons) if reasons.exists(_.code == 53500099) =>
+                  Left(TransactionError(reasons.map(_.message).mkString(" ")))
+                case Some(reasons) => Left(InternalServerError(reasons.map(_.message).mkString(" ")))
+                case None => Left(InternalServerError(s"success = false, body: $body"))
               }
         } yield ()
 
@@ -122,8 +130,10 @@ object ZuoraRestBody {
             if (zuoraResponse.Success) Right(())
             else
               zuoraResponse.reasons match {
-                case None => Left(s"Success = false, body: $body")
-                case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
+                case Some(reasons) if reasons.exists(_.code == 53500099) =>
+                  Left(TransactionError(reasons.map(_.message).mkString(" ")))
+                case Some(reasons) => Left(InternalServerError(reasons.map(_.message).mkString(" ")))
+                case None => Left(InternalServerError(s"success = false, body: $body"))
               }
         } yield ()
       case ZuoraSuccessCheck.None => Right(())
@@ -131,4 +141,5 @@ object ZuoraRestBody {
 
     isSuccessful.flatMap(_ => body.fromJson[A])
   }
+
 }

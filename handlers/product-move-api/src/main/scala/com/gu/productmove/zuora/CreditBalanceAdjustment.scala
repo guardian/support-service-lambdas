@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.rest.ZuoraGet
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
@@ -16,7 +17,12 @@ object CreditBalanceAdjustmentLive:
   val layer: URLayer[ZuoraGet, CreditBalanceAdjustment] = ZLayer.fromFunction(CreditBalanceAdjustmentLive(_))
 
 private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBalanceAdjustment:
-  override def adjust(amount: BigDecimal, comment: String, invoiceId: String, `type`: String): IO[String, Res] = {
+  override def adjust(
+      amount: BigDecimal,
+      comment: String,
+      invoiceId: String,
+      `type`: String,
+  ): IO[ErrorResponse, Res] = {
     val body = RequestBody(amount, comment, invoiceId, `type`)
 
     zuoraGet.post[RequestBody, Res](
