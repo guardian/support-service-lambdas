@@ -49,7 +49,34 @@ object HandlerSpec extends ZIOSpecDefault {
     val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
 
     suite("HandlerSpec")(
-
+      test("productMove endpoint is successful for monthly sub (upsell)") {
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
+        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
+        (for {
+          _ <- TestClock.setTime(time)
+          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
+        } yield {
+          assert(output)(equalTo(expectedOutput)) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
+          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
+          assert(sqsRequests)(hasSameElements(List(emailMessageBody, salesforceRecordInput2))) &&
+          assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD")),
+        )
+      },
       test(
         "productMove endpoint is successful if customer neither pays nor is refunded on switch (monthly sub, upsell)",
       ) {
@@ -82,6 +109,40 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
           assert(sqsRequests)(hasSameElements(List(emailMessageBodyNoPaymentOrRefund, salesforceRecordInput3))) &&
           assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
+        }).provide(layers)
+      },
+
+      test(
+        "(MembershipToRecurringContribution) productMove endpoint is successful",
+      ) {
+        val endpointJsonInputBody = ExpectedInput(5.00, false, None, None)
+        val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
+          (subscriptionName, expectedRequestBody2)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
+        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
+        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+          Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())
+
+        val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)) ++
+          ZLayer.succeed(new MockSQS(sqsStubs)) ++
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
+          ZLayer.succeed(Stage.valueOf("PROD"))
+
+        (for {
+          _ <- TestClock.setTime(time)
+
+          output <- MembershipToRecurringContribution(subscriptionName, endpointJsonInputBody)
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          sqsRequests <- MockSQS.requests
+        } yield {
+          assert(output)(equalTo(expectedOutput)) &&
+            assert(getSubRequests)(equalTo(List(subscriptionName))) &&
+            assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+            assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
+            assert(sqsRequests)(hasSameElements(List(emailMessageBody2, salesforceRecordInput1)))
         }).provide(layers)
       },
 
