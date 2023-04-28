@@ -203,6 +203,41 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
+
+      /*
+        Term renewal for many subs happens during the billing run on the renewal day which is scheduled for around 6am BST.
+        During this billing run, Zuora does not return the contribution invoice item, only supporter plus invoice items.
+        This tests this scenario.
+       */
+
+      test("productMove endpoint completes if subscription is being switched early in morning on renewal date") {
+        val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
+        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
+        val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
+        (for {
+          output <- ProductMoveEndpoint.productMove(subscriptionName, endpointJsonInputBody)
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
+        } yield {
+          assert(output)(equalTo(expectedOutput)) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
+          assert(subUpdateRequests)(equalTo(Nil)) &&
+          assert(getAccountRequests)(equalTo(Nil)) &&
+          assert(sqsRequests)(equalTo(Nil)) &&
+          assert(dynamoRequests)(equalTo(Nil))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("PROD")),
+        )
+      },
       test("preview endpoint is successful (monthly sub, upsell)") {
         val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
