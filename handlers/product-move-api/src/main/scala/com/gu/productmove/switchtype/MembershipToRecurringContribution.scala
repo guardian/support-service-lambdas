@@ -46,10 +46,15 @@ object MembershipToRecurringContribution {
       _ <- ZIO.log("PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
 
-      ratePlans = subscription.ratePlans
-      ratePlanCharge = ratePlans.head.ratePlanCharges.head
+      activeRatePlanAndCharge <- ZIO
+        .fromOption(getActiveRatePlanAndCharge(subscription.ratePlans))
+        .orElseFail(
+          s"Could not find a ratePlanCharge with a non-null chargedThroughDate for subscription name ${subscriptionName.value}",
+        )
+      (activeRatePlan, activeRatePlanCharge) = activeRatePlanAndCharge
+
       currency <- ZIO
-        .fromOption(ratePlanCharge.currencyObject)
+        .fromOption(activeRatePlanCharge.currencyObject)
         .orElseFail(
           s"",
         )
@@ -61,19 +66,17 @@ object MembershipToRecurringContribution {
         .fromOption(account.basicInfo.IdentityId__c)
         .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
 
-      activeRatePlanAndCharge <- ZIO
-        .fromOption(getActiveRatePlanAndCharge(ratePlans))
-        .orElseFail(
-          s"Could not find a ratePlanCharge with a non-null chargedThroughDate for subscription name ${subscriptionName.value}",
-        )
-      (activeRatePlan, activeRatePlanCharge) = activeRatePlanAndCharge
-
       price = postData.price
       previousAmount = activeRatePlanCharge.price.get
       billingPeriod = activeRatePlanCharge.billingPeriod
 
-      updateRequestBody <- getRatePlans(billingPeriod, currency, ratePlans, ratePlanCharge.chargedThroughDate.get).map {
-        case (addRatePlan, removeRatePlan) =>
+      updateRequestBody <- getRatePlans(
+        billingPeriod,
+        currency,
+        subscription.ratePlans,
+        activeRatePlanCharge.chargedThroughDate.get,
+      )
+        .map { case (addRatePlan, removeRatePlan) =>
           SubscriptionUpdateRequest(
             add = addRatePlan,
             remove = removeRatePlan,
@@ -82,7 +85,7 @@ object MembershipToRecurringContribution {
             preview = Some(false),
             targetDate = None,
           )
-      }
+        }
 
       _ <- SubscriptionUpdate
         .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)

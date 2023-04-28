@@ -103,8 +103,8 @@ object ProductMoveEndpoint {
     ] =
       endpoint.post
         .in("product-move")
-        .in(subscriptionNameCapture)
         .in(switchTypeCapture)
+        .in(subscriptionNameCapture)
         .in(
           jsonBody[ExpectedInput].copy(info =
             EndpointIO.Info.empty[ExpectedInput].copy(description = Some("Definition of required movement.")),
@@ -139,7 +139,7 @@ object ProductMoveEndpoint {
             |Also manages all the service comms associated with the movement.""".stripMargin,
         )
     endpointDescription
-      .serverLogic[TIO] { (subscriptionName, switchTypeStr, postData) =>
+      .serverLogic[TIO] { (switchTypeStr, subscriptionName, postData) =>
         SwitchType.values.find(_.toString == switchTypeStr) match {
           case Some(switchType) =>
             run(SubscriptionName(subscriptionName), switchType, postData)
