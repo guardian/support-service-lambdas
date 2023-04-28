@@ -187,13 +187,13 @@ object MembershipToRecurringContribution {
         productRatePlanChargeId = contributionRatePlanIds.ratePlanChargeId,
       )
       addRatePlan = AddRatePlan(
-        chargedThroughDate,
+        LocalDate.of(2023, 5, 1),
         contributionRatePlanIds.ratePlanId,
         chargeOverrides = List(chargeOverride),
       )
       removeRatePlans = ratePlanAmendments.map(ratePlan => {
         val effectiveStartDate = ratePlan.ratePlanCharges.headOption.map(_.effectiveStartDate)
-        val removeDate = effectiveStartDate.filter(_.isAfter(chargedThroughDate)).getOrElse(chargedThroughDate)
+        val removeDate = LocalDate.of(2023, 5, 1)
         RemoveRatePlan(removeDate, ratePlan.id)
       })
     } yield (List(addRatePlan), removeRatePlans.toList)
