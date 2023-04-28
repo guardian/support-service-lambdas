@@ -76,8 +76,8 @@ case class SubscriptionUpdateRequest(
     runBilling: Option[Boolean] = None,
     preview: Option[Boolean] = None,
     targetDate: Option[LocalDate] = None,
-    currentTerm: String = "24",
-    currentTermPeriodType: String = "Month",
+    currentTerm: Option[String] = None,
+    currentTermPeriodType: Option[String] = None,
 )
 
 case class AddRatePlan(

@@ -459,6 +459,8 @@ val expectedRequestBodyPreview = SubscriptionUpdateRequest(
   ),
   preview = Some(true),
   targetDate = Some(LocalDate.of(2024, 3, 6)),
+  currentTerm = Some("24"),
+  currentTermPeriodType = Some("Month"),
 )
 
 val previewResponse = SubscriptionUpdatePreviewResponse(

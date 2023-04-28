@@ -250,6 +250,8 @@ object RecurringContributionToSupporterPlus {
           remove = removeRatePlan,
           preview = Some(true),
           targetDate = Some(today.plusMonths(13)),
+          currentTerm = Some("24"),
+          currentTermPeriodType = Some("Month"),
         )
     }
 
