@@ -191,7 +191,11 @@ object MembershipToRecurringContribution {
         contributionRatePlanIds.ratePlanId,
         chargeOverrides = List(chargeOverride),
       )
-      removeRatePlans = ratePlanAmendments.map(ratePlan => RemoveRatePlan(chargedThroughDate, ratePlan.id))
+      removeRatePlans = ratePlanAmendments.map(ratePlan => {
+        val effectiveStartDate = ratePlan.ratePlanCharges.headOption.map(_.effectiveStartDate)
+        val removeDate = effectiveStartDate.filter(_.isAfter(chargedThroughDate)).getOrElse(chargedThroughDate)
+        RemoveRatePlan(removeDate, ratePlan.id)
+      })
     } yield (List(addRatePlan), removeRatePlans.toList)
 
   private def getActiveRatePlanAndCharge(
