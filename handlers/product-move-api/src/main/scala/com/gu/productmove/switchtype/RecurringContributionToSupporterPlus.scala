@@ -121,7 +121,7 @@ object RecurringContributionToSupporterPlus {
           doUpdate(
             subscriptionName,
             postData.price,
-            BigDecimal(ratePlanCharge.price),
+            BigDecimal(ratePlanCharge.price.get),
             ratePlanCharge.billingPeriod,
             currency,
             currentRatePlan,

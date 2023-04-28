@@ -54,11 +54,6 @@ object MembershipToRecurringContribution {
           s"",
         )
 
-      price = postData.price
-      previousAmount = BigDecimal(ratePlanCharge.price)
-      billingPeriod = ratePlanCharge.billingPeriod
-      activeRatePlan = ratePlans.head
-
       _ <- ZIO.log("Performing product move update")
       account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
 
@@ -66,11 +61,18 @@ object MembershipToRecurringContribution {
         .fromOption(account.basicInfo.IdentityId__c)
         .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
 
-      chargedThroughDate <- ZIO
-        .fromOption(getChargedThroughDate(ratePlans))
-        .orElseFail(s"Could not find a chargedThroughDate for subscription name ${subscriptionName.value}")
+      activeRatePlanAndCharge <- ZIO
+        .fromOption(getActiveRatePlanAndCharge(ratePlans))
+        .orElseFail(
+          s"Could not find a ratePlanCharge with a non-null chargedThroughDate for subscription name ${subscriptionName.value}",
+        )
+      (activeRatePlan, activeRatePlanCharge) = activeRatePlanAndCharge
 
-      updateRequestBody <- getRatePlans(billingPeriod, currency, ratePlans, chargedThroughDate).map {
+      price = postData.price
+      previousAmount = activeRatePlanCharge.price.get
+      billingPeriod = activeRatePlanCharge.billingPeriod
+
+      updateRequestBody <- getRatePlans(billingPeriod, currency, ratePlans, ratePlanCharge.chargedThroughDate.get).map {
         case (addRatePlan, removeRatePlan) =>
           SubscriptionUpdateRequest(
             add = addRatePlan,
@@ -103,7 +105,8 @@ object MembershipToRecurringContribution {
                   currency = account.basicInfo.currency.symbol,
                   price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                   first_payment_amount = BigDecimal(0).setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                  date_of_first_payment = chargedThroughDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                  date_of_first_payment =
+                    activeRatePlanCharge.chargedThroughDate.get.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                   payment_frequency = billingPeriodValue + "ly",
                   subscription_id = subscriptionName.value,
                 ),
@@ -126,7 +129,7 @@ object MembershipToRecurringContribution {
             activeRatePlan.ratePlanName,
             "Recurring Contribution",
             todaysDate,
-            chargedThroughDate,
+            activeRatePlanCharge.chargedThroughDate.get,
             paidAmount,
             postData.csrUserId,
             postData.caseId,
@@ -188,11 +191,14 @@ object MembershipToRecurringContribution {
       removeRatePlans = ratePlanAmendments.map(ratePlan => RemoveRatePlan(chargedThroughDate, ratePlan.id))
     } yield (List(addRatePlan), removeRatePlans.toList)
 
-  private def getChargedThroughDate(ratePlanAmendments: List[GetSubscription.RatePlan]): Option[LocalDate] = (for {
+  private def getActiveRatePlanAndCharge(
+      ratePlanAmendments: List[GetSubscription.RatePlan],
+  ): Option[(GetSubscription.RatePlan, GetSubscription.RatePlanCharge)] = (for {
     ratePlan <- ratePlanAmendments
     ratePlanCharge <- ratePlan.ratePlanCharges
-    chargedThroughDate <- ratePlanCharge.chargedThroughDate
-  } yield chargedThroughDate).headOption
+    if ratePlanCharge.chargedThroughDate.isDefined
+  } yield (ratePlan, ratePlanCharge)).headOption
+
 }
 
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
