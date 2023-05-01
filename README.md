@@ -3,7 +3,7 @@
 This is the reader revenue lambda API/orchestration layer. For tech debt look in [the google doc](https://docs.google.com/document/d/1A4IyEWhABoGUw01fiuS0JtuuYn2IfQFZdTA5mtrcNho/edit?usp=sharing), although it should probably be a trello column.
 
 Please keep all the various README in this project up to date, and improve them!
-There should be one in each project and anywhere else you think it's would help.
+There should be one in each project and anywhere else you think it would help.
 
 ---
 

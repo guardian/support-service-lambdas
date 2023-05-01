@@ -64,33 +64,7 @@ Resources:
       MemorySize: 1024
       Environment:
         Variables:
-          clientID:
-            !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId::${AppSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
-              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
-          clientSecret:
-            !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret::${AppSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
-              AppSecretsVersion: !FindInMap [ StageMap, !Ref Stage, AppSecretsVersion ]
-          username:
-            !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/MembersDataAPI:SecretString:username::${UserSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, UserSecretsVersion ]
-          password:
-            !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/MembersDataAPI:SecretString:password::${UserSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, UserSecretsVersion ]
-          token:
-            !Sub
-            - '{{resolve:secretsmanager:${SalesforceStage}/Salesforce/User/MembersDataAPI:SecretString:token::${UserSecretsVersion}}}'
-            - SalesforceStage: !FindInMap [ StageMap, !Ref Stage, SalesforceStage ]
-              UserSecretsVersion: !FindInMap [ StageMap, !Ref Stage, UserSecretsVersion ]
+          stage: !Ref Stage
           authDomain: !FindInMap [ StageMap, !Ref Stage, authDomain ]
           reqDomain: !FindInMap [ StageMap, !Ref Stage, reqDomain ]
       Events:
