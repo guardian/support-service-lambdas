@@ -142,6 +142,7 @@ object ProductMoveEndpoint {
       .serverLogic[TIO] { (switchTypeStr, subscriptionName, postData) =>
         SwitchType.values.find(_.toString == switchTypeStr) match {
           case Some(switchType) =>
+            println(switchType)
             run(SubscriptionName(subscriptionName), switchType, postData)
               .tapEither(result => ZIO.log("result tapped: " + result))
               .map(Right.apply)
