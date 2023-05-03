@@ -33,14 +33,14 @@ object ZuoraClientLive {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
 
-  val layer: ZLayer[SttpBackend[Task, Any], String, ZuoraClient] =
+  val layer: ZLayer[SttpBackend[Task, Any], ErrorResponse, ZuoraClient] =
     ZLayer {
       for {
         zuoraBaseUrl <- ZIO.fromEither(getFromEnv("zuoraBaseUrl")).mapError(x => InternalServerError(x))
         zuoraUsername <- ZIO.fromEither(getFromEnv("zuoraUsername")).mapError(x => InternalServerError(x))
         zuoraPassword <- ZIO.fromEither(getFromEnv("zuoraPassword")).mapError(x => InternalServerError(x))
 
-        baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/"))
+        baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/").left.map(e => InternalServerError(e)))
 
         _ <- ZIO.log("zuoraBaseUrl:   " + baseUrl.toString)
 
@@ -67,7 +67,7 @@ private class ZuoraClientLive(baseUrl: Uri, sttpClient: SttpBackend[Task, Any], 
           .copy(uri = absoluteUri),
       )
       .mapError(e => InternalServerError(e.toString))
-      .map(_.body)
+      .map(_.body.left.map(e => InternalServerError(e)))
       .absolve
   }
 
@@ -104,14 +104,22 @@ object ZuoraRestBody {
     val isSuccessful: Either[ErrorResponse, Unit] = zuoraSuccessCheck match {
       case ZuoraSuccessCheck.SuccessCheckSize =>
         for {
-          zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessSize].decodeJson(body)
+          zuoraResponse <- DeriveJsonDecoder
+            .gen[ZuoraSuccessSize]
+            .decodeJson(body)
+            .left
+            .map(InternalServerError(_))
           succeeded = zuoraResponse.size.isEmpty // size field only exists if it's not found.
           isSuccessful <- if (succeeded) Right(()) else Left(InternalServerError(s"size = 0, body: $body"))
         } yield ()
 
       case ZuoraSuccessCheck.SuccessCheckLowercase =>
         for {
-          zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessLowercase].decodeJson(body)
+          zuoraResponse <- DeriveJsonDecoder
+            .gen[ZuoraSuccessLowercase]
+            .decodeJson(body)
+            .left
+            .map(InternalServerError(_))
           isSuccessful <-
             if (zuoraResponse.success) Right(())
             else
@@ -125,7 +133,11 @@ object ZuoraRestBody {
 
       case ZuoraSuccessCheck.SuccessCheckCapitalised =>
         for {
-          zuoraResponse <- DeriveJsonDecoder.gen[ZuoraSuccessCapitalised].decodeJson(body)
+          zuoraResponse <- DeriveJsonDecoder
+            .gen[ZuoraSuccessCapitalised]
+            .decodeJson(body)
+            .left
+            .map(InternalServerError(_))
           isSuccessful <-
             if (zuoraResponse.Success) Right(())
             else
@@ -139,7 +151,7 @@ object ZuoraRestBody {
       case ZuoraSuccessCheck.None => Right(())
     }
 
-    isSuccessful.flatMap(_ => body.fromJson[A])
+    isSuccessful.flatMap(_ => body.fromJson[A].left.map(errorMessage => InternalServerError(errorMessage)))
   }
 
 }

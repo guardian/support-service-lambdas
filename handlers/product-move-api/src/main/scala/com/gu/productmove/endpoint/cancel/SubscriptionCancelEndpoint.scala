@@ -4,6 +4,7 @@ import cats.data.NonEmptyList
 import com.gu.newproduct.api.productcatalog.ZuoraIds
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes._
 import com.gu.productmove.{
   AwsCredentialsLive,
   AwsS3,
@@ -21,7 +22,7 @@ import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
-import com.gu.productmove.zuora.rest.*
+import com.gu.productmove.zuora.rest._
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
   CreditBalanceAdjustmentLive,
@@ -39,13 +40,13 @@ import com.gu.productmove.zuora.{
   ZuoraSetCancellationReasonLive,
 }
 import com.gu.util.config
-import sttp.tapir.*
+import sttp.tapir._
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.json.zio.jsonBody
 import sttp.client3.SttpBackend
 import zio.{Clock, IO, Task, ZIO}
 import com.gu.productmove.refund._
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes._
+import RefundType._
 import com.gu.productmove.endpoint.zuora.{GetSubscriptionToCancel, GetSubscriptionToCancelLive}
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.{GetSubscriptionToCancelResponse, RatePlanCharge}
 import com.gu.productmove.zuora.model.SubscriptionName
@@ -56,12 +57,6 @@ import scala.concurrent.Future
 
 // this is the description for just the one endpoint
 object SubscriptionCancelEndpoint {
-
-  // run this to test locally via console with some hard coded data
-  def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run("A-S00424052", ExpectedInput("targetProductId")),
-  )
-
   val server: sttp.tapir.server.ServerEndpoint.Full[
     Unit,
     Unit,
@@ -148,7 +143,10 @@ object SubscriptionCancelEndpoint {
       case None => ZIO.fail(InternalServerError(s"Subscription can't be cancelled as the charge list is empty"))
     }
 
-  private def getSupporterPlusCharge(charges: NonEmptyList[RatePlanCharge], ids: SupporterPlusZuoraIds) = {
+  private def getSupporterPlusCharge(
+      charges: NonEmptyList[RatePlanCharge],
+      ids: SupporterPlusZuoraIds,
+  ): ZIO[Any, ErrorResponse, RatePlanCharge] = {
     val supporterPlusCharge = charges.find(charge =>
       charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
         charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value ||
@@ -167,7 +165,7 @@ object SubscriptionCancelEndpoint {
 
   private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
     GetSubscriptionToCancel with ZuoraCancel with GetAccount with SQS with Stage with ZuoraSetCancellationReason,
-    String,
+    ErrorResponse,
     OutputBody,
   ] = {
     (for {
@@ -181,8 +179,7 @@ object SubscriptionCancelEndpoint {
       // should look at the relevant charge, members data api looks for the Paid Plan.
       // initially this will only apply to new prop which won't have multiple plans or charges.
       zuoraIds <- ZIO
-        .fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)))
-        .mapError(x => InternalServerError(x))
+        .fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError(_)))
       ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
       supporterPlusCharge <- getSupporterPlusCharge(charges, zuoraIds.supporterPlusZuoraIds)
@@ -201,8 +198,10 @@ object SubscriptionCancelEndpoint {
             supporterPlusCharge.chargedThroughDate,
         )
         .orElseFail(
-          s"Subscription charged through date is null is for supporter plus subscription ${subscriptionName.value}. " +
-            s"This is an error because we expect to be able to use the charged through date to work out the effective cancellation date",
+          InternalServerError(
+            s"Subscription charged through date is null is for supporter plus subscription ${subscriptionName.value}. " +
+              s"This is an error because we expect to be able to use the charged through date to work out the effective cancellation date",
+          ),
         )
       _ <- ZIO.log(s"Cancellation date is $cancellationDate")
 
@@ -217,7 +216,9 @@ object SubscriptionCancelEndpoint {
             negativeInvoice <- ZIO
               .fromOption(cancellationResponse.invoiceId)
               .orElseFail(
-                s"URGENT: subscription ${subscriptionName.value} should be refunded but has no negative invoice attached.",
+                InternalServerError(
+                  s"URGENT: subscription ${subscriptionName.value} should be refunded but has no negative invoice attached.",
+                ),
               )
             _ <- ZIO.log(s"Negative invoice id is $negativeInvoice")
             _ <- SQS.queueRefund(RefundInput(subscriptionName))
@@ -235,7 +236,7 @@ object SubscriptionCancelEndpoint {
       _ <- SQS.sendEmail(EmailMessage.cancellationEmail(account, cancellationDate))
     } yield ()).fold(
       error => error,
-      _ => Success("Subscription was successfully cancelled"),
+      _ => Success(s"Subscription ${subscriptionName.value} was successfully cancelled"),
     )
   }
 }

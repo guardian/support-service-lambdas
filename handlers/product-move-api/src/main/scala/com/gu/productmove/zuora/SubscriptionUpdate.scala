@@ -276,45 +276,47 @@ def getSupporterPlusRatePlanIds(
     stage: Stage,
     billingPeriod: BillingPeriod,
 ): Either[ErrorResponse, SupporterPlusRatePlanIds] = {
-  zuoraIdsForStage(config.Stage(stage.toString)).flatMap { zuoraIds =>
-    import zuoraIds.supporterPlusZuoraIds.{annual, annualV2, monthly, monthlyV2}
+  zuoraIdsForStage(config.Stage(stage.toString)).left
+    .map(err => InternalServerError(err))
+    .flatMap { zuoraIds =>
+      import zuoraIds.supporterPlusZuoraIds.{annual, annualV2, monthly, monthlyV2}
 
-    billingPeriod match {
-      case Monthly if SwitchToV2SupporterPlus =>
-        Right(
-          SupporterPlusRatePlanIds(
-            monthlyV2.productRatePlanId.value,
-            monthlyV2.productRatePlanChargeId.value,
-            Some(monthlyV2.contributionProductRatePlanChargeId.value),
-          ),
-        )
-      case Monthly =>
-        Right(
-          SupporterPlusRatePlanIds(
-            monthly.productRatePlanId.value,
-            monthly.productRatePlanChargeId.value,
-            None,
-          ),
-        )
-      case Annual if SwitchToV2SupporterPlus =>
-        Right(
-          SupporterPlusRatePlanIds(
-            annualV2.productRatePlanId.value,
-            annualV2.productRatePlanChargeId.value,
-            Some(annualV2.contributionProductRatePlanChargeId.value),
-          ),
-        )
-      case Annual =>
-        Right(
-          SupporterPlusRatePlanIds(
-            annual.productRatePlanId.value,
-            annual.productRatePlanChargeId.value,
-            None,
-          ),
-        )
-      case _ => Left(InternalServerError(s"error when matching on billingPeriod $billingPeriod"))
+      billingPeriod match {
+        case Monthly if SwitchToV2SupporterPlus =>
+          Right(
+            SupporterPlusRatePlanIds(
+              monthlyV2.productRatePlanId.value,
+              monthlyV2.productRatePlanChargeId.value,
+              Some(monthlyV2.contributionProductRatePlanChargeId.value),
+            ),
+          )
+        case Monthly =>
+          Right(
+            SupporterPlusRatePlanIds(
+              monthly.productRatePlanId.value,
+              monthly.productRatePlanChargeId.value,
+              None,
+            ),
+          )
+        case Annual if SwitchToV2SupporterPlus =>
+          Right(
+            SupporterPlusRatePlanIds(
+              annualV2.productRatePlanId.value,
+              annualV2.productRatePlanChargeId.value,
+              Some(annualV2.contributionProductRatePlanChargeId.value),
+            ),
+          )
+        case Annual =>
+          Right(
+            SupporterPlusRatePlanIds(
+              annual.productRatePlanId.value,
+              annual.productRatePlanChargeId.value,
+              None,
+            ),
+          )
+        case _ => Left(InternalServerError(s"error when matching on billingPeriod $billingPeriod"))
+      }
     }
-  }
 }
 given JsonEncoder[SubscriptionUpdateRequest] = DeriveJsonEncoder.gen[SubscriptionUpdateRequest]
 given JsonEncoder[SubscriptionUpdatePreviewRequest] = DeriveJsonEncoder.gen[SubscriptionUpdatePreviewRequest]

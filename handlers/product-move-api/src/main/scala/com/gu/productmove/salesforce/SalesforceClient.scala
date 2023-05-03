@@ -86,12 +86,12 @@ object SalesforceClientLive {
             response.body
           }
           .absolve
-          .mapError(_.toString)
-        base_uri <- ZIO.fromEither(Uri.parse(auth.instance_url))
+          .mapError(e => InternalServerError(e.toString))
+        base_uri <- ZIO.fromEither(Uri.parse(auth.instance_url).left.map(e => InternalServerError(e)))
 
       } yield new SalesforceClient {
 
-        override def get[Response: JsonDecoder](relativeUrl: Uri): IO[String, Response] = {
+        override def get[Response: JsonDecoder](relativeUrl: Uri): IO[ErrorResponse, Response] = {
           val absoluteUri = base_uri.resolve(relativeUrl)
 
           basicRequest
@@ -111,7 +111,7 @@ object SalesforceClientLive {
               response.body
             }
             .absolve
-            .mapError(_.toString)
+            .mapError(e => InternalServerError(e.toString))
         }
 
         override def post[Request: JsonEncoder, Response: JsonDecoder](
@@ -139,7 +139,7 @@ object SalesforceClientLive {
               response.body
             }
             .absolve
-            .mapError(_.toString)
+            .mapError(e => InternalServerError(e.toString))
         }
       },
     )

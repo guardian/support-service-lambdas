@@ -26,7 +26,10 @@ object InvoicingApiRefundLive {
   val layer: ZLayer[SttpBackend[Task, Any] with AwsS3, ErrorResponse, InvoicingApiRefundLive] =
     ZLayer {
       for {
-        invoicingApiUrl <- ZIO.fromEither(getFromEnv("invoicingApiUrl")).mapError(x => InternalServerError(x)).map(_ + "/refund")
+        invoicingApiUrl <- ZIO
+          .fromEither(getFromEnv("invoicingApiUrl"))
+          .mapError(x => InternalServerError(x))
+          .map(_ + "/refund")
         invoicingApiKey <- ZIO.fromEither(getFromEnv("invoicingApiKey")).mapError(x => InternalServerError(x))
 
         invoicingApiConfig = InvoicingApiConfig(invoicingApiUrl, invoicingApiKey)
@@ -60,7 +63,7 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
         response.body
       }
       .absolve
-      .mapError(_.toString)
+      .mapError(e => InternalServerError(e.toString))
   }
 }
 

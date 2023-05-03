@@ -27,7 +27,9 @@ object SubscriptionCancelEndpointTypes {
   sealed trait OutputBody
   case class Success(message: String) extends OutputBody
   case class NotFound(textResponse: String) extends OutputBody
-  case class InternalServerError(message: String) extends OutputBody
+
+  sealed trait ErrorResponse extends OutputBody
+  case class InternalServerError(@description("Error message.") message: String) extends ErrorResponse
 
   given Schema[Success] = inlineSchema(Schema.derived)
 

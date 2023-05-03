@@ -185,8 +185,11 @@ object ProductMoveEndpoint {
       currency <- ZIO
         .fromOption(ratePlanCharge.currencyObject)
         .orElseFail(
-          s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
+          InternalServerError(
+            s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
+          ),
         )
+
       result <-
         if (postData.preview)
           doPreview(
@@ -233,14 +236,14 @@ object ProductMoveEndpoint {
       subscription: GetSubscription.GetSubscriptionResponse,
       csrUserId: Option[String],
       caseId: Option[String],
-  ) = for {
+  ): ZIO[Dynamo with SQS with SubscriptionUpdate with Stage with GetAccount, ErrorResponse, Success] = for {
     _ <- ZIO.log("Performing product move update")
     stage <- ZIO.service[Stage]
     account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
 
     identityId <- ZIO
       .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
+      .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
 
     updateResponse <- SubscriptionUpdate
       .update(SubscriptionName(subscription.id), billingPeriod, price, currency, currentRatePlan.id)

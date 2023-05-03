@@ -31,8 +31,10 @@ private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
 
   def get: ZIO[Any, ErrorResponse, ZuoraProductCatalogue] =
     for {
-      fileContent <- awsS3.getObject(zuoraCatalogueBucket, key(stage)).mapError(_.toString)
-      zuoraCatalogue <- ZIO.fromEither(summon[JsonDecoder[ZuoraProductCatalogue]].decodeJson(fileContent)).mapError(x => InternalServerError(x))
+      fileContent <- awsS3.getObject(zuoraCatalogueBucket, key(stage))
+      zuoraCatalogue <- ZIO
+        .fromEither(summon[JsonDecoder[ZuoraProductCatalogue]].decodeJson(fileContent))
+        .mapError(x => InternalServerError(x))
     } yield zuoraCatalogue
 
 trait GetCatalogue:

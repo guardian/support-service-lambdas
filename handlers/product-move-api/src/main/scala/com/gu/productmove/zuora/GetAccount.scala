@@ -37,9 +37,9 @@ private class GetAccountLive(zuoraGet: ZuoraGet) extends GetAccount:
     zuoraGet.get[PaymentMethodResponse](uri"object/payment-method/$paymentMethodId", ZuoraSuccessCheck.SuccessCheckSize)
 
 trait GetAccount:
-  def get(subscriptionNumber: AccountNumber): ZIO[GetAccount, String, GetAccountResponse]
+  def get(subscriptionNumber: AccountNumber): ZIO[GetAccount, ErrorResponse, GetAccountResponse]
 
-  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, String, PaymentMethodResponse]
+  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, ErrorResponse, PaymentMethodResponse]
 
 object GetAccount {
   case class PaymentMethodResponse(NumConsecutiveFailures: Int)
@@ -141,10 +141,10 @@ object GetAccount {
 
   given JsonDecoder[BillToContact] = DeriveJsonDecoder.gen
 
-  def get(accountNumber: AccountNumber): ZIO[GetAccount, String, GetAccountResponse] =
+  def get(accountNumber: AccountNumber): ZIO[GetAccount, ErrorResponse, GetAccountResponse] =
     ZIO.serviceWithZIO[GetAccount](_.get(accountNumber))
 
-  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, String, PaymentMethodResponse] =
+  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, ErrorResponse, PaymentMethodResponse] =
     ZIO.serviceWithZIO[GetAccount](_.getPaymentMethod(paymentMethodId))
 }
 
