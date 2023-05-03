@@ -107,7 +107,7 @@ object MembershipToRecurringContribution {
                   last_name = account.billToContact.lastName,
                   currency = account.basicInfo.currency.symbol,
                   price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                  first_payment_amount = BigDecimal(0).setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                  first_payment_amount = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                   date_of_first_payment =
                     activeRatePlanCharge.chargedThroughDate.get.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                   payment_frequency = billingPeriodValue + "ly",
