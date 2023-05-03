@@ -38,7 +38,7 @@ trait CreditBalanceAdjustment:
       comment: String,
       invoiceId: String,
       `type`: String,
-  ): ZIO[CreditBalanceAdjustment, String, Res]
+  ): ZIO[CreditBalanceAdjustment, ErrorResponse, Res]
 
 object CreditBalanceAdjustment {
   def adjust(
@@ -46,6 +46,6 @@ object CreditBalanceAdjustment {
       comment: String,
       invoiceId: String,
       `type`: String,
-  ): ZIO[CreditBalanceAdjustment, String, Res] =
+  ): ZIO[CreditBalanceAdjustment, ErrorResponse, Res] =
     ZIO.serviceWithZIO[CreditBalanceAdjustment](_.adjust(amount, comment, invoiceId, `type`))
 }

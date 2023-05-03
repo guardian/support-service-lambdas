@@ -4,8 +4,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.{ExpectedInput, OutputBody, Success}
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, ExpectedInput, OutputBody}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemsForSubscription

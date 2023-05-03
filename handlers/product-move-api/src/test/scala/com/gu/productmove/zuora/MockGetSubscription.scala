@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.InternalServerError
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.model.SubscriptionName
 import zio.{IO, ZIO}
 
@@ -10,7 +10,7 @@ class MockGetSubscription(responses: Map[SubscriptionName, GetSubscription.GetSu
     extends GetSubscription {
   private val requests: ArrayBuffer[SubscriptionName] = ArrayBuffer.empty
 
-  override def get(subscriptionName: SubscriptionName): IO[String, GetSubscription.GetSubscriptionResponse] = {
+  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, GetSubscription.GetSubscriptionResponse] = {
     requests += subscriptionName
 
     responses.get(subscriptionName) match

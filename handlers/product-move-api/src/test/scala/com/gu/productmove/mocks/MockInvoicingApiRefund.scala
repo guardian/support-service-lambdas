@@ -1,6 +1,6 @@
 package com.gu.productmove.mocks
 
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.InternalServerError
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.zuora.MockGetAccount
@@ -14,7 +14,7 @@ class MockInvoicingApiRefund(val refundStubs: Map[(SubscriptionName, BigDecimal)
     extends InvoicingApiRefund {
   val requests: ArrayBuffer[(SubscriptionName, BigDecimal)] = ArrayBuffer.empty
 
-  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): ZIO[Any, String, RefundResponse] = {
+  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): ZIO[Any, ErrorResponse, RefundResponse] = {
     requests += ((subscriptionName, amount))
     refundStubs.get(subscriptionName, amount) match {
       case Some(response) => ZIO.succeed(response)

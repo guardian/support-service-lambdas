@@ -24,19 +24,4 @@ object SubscriptionCancelEndpointTypes {
 
   given Schema[ExpectedInput] = inlineSchema(Schema.derived)
 
-  sealed trait OutputBody
-  case class Success(message: String) extends OutputBody
-  case class NotFound(textResponse: String) extends OutputBody
-
-  sealed trait ErrorResponse extends OutputBody
-  case class InternalServerError(@description("Error message.") message: String) extends ErrorResponse
-
-  given Schema[Success] = inlineSchema(Schema.derived)
-
-  given Schema[InternalServerError] = inlineSchema(Schema.derived)
-
-  given JsonCodec[Success] = DeriveJsonCodec.gen[Success]
-  given JsonCodec[InternalServerError] = DeriveJsonCodec.gen[InternalServerError]
-  given JsonCodec[OutputBody] = DeriveJsonCodec.gen[OutputBody]
-
 }

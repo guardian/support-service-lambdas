@@ -22,7 +22,7 @@ import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
-import com.gu.productmove.zuora.rest._
+import com.gu.productmove.zuora.rest.*
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
   CreditBalanceAdjustmentLive,
@@ -40,13 +40,19 @@ import com.gu.productmove.zuora.{
   ZuoraSetCancellationReasonLive,
 }
 import com.gu.util.config
-import sttp.tapir._
+import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.json.zio.jsonBody
 import sttp.client3.SttpBackend
 import zio.{Clock, IO, Task, ZIO}
-import com.gu.productmove.refund._
-import RefundType._
+import com.gu.productmove.refund.*
+import RefundType.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ErrorResponse,
+  InternalServerError,
+  OutputBody,
+  Success,
+}
 import com.gu.productmove.endpoint.zuora.{GetSubscriptionToCancel, GetSubscriptionToCancelLive}
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.{GetSubscriptionToCancelResponse, RatePlanCharge}
 import com.gu.productmove.zuora.model.SubscriptionName

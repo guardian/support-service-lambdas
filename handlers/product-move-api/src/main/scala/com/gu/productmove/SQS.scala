@@ -45,7 +45,9 @@ object SQSLive {
   val layer: ZLayer[AwsCredentialsProvider with Stage, ErrorResponse, SQS] =
     ZLayer.scoped(for {
       stage <- ZIO.service[Stage]
-      sqsClient <- initializeSQSClient().mapError(ex => s"Failed to initialize SQS Client with error: $ex")
+      sqsClient <- initializeSQSClient().mapError(ex =>
+        InternalServerError(s"Failed to initialize SQS Client with error: $ex"),
+      )
       emailQueueName = EmailQueueName.value
       emailQueueUrlResponse <- getQueue(emailQueueName, sqsClient)
       refundQueueUrlResponse <- getQueue(s"product-switch-refund-${stage.toString}", sqsClient)
@@ -105,7 +107,9 @@ object SQSLive {
           )
         } yield ()
 
-      override def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, String, Unit] =
+      override def queueSalesforceTracking(
+          salesforceRecordInput: SalesforceRecordInput,
+      ): ZIO[Any, ErrorResponse, Unit] =
         for {
           _ <- ZIO
             .fromCompletableFuture {

@@ -343,7 +343,7 @@ object HandlerSpec extends ZIOSpecDefault {
           sqsRequests <- MockSQS.requests
           getAccountRequests <- MockGetAccount.requests
         } yield {
-          assert(output)(equalTo(SubscriptionCancelEndpointTypes.Success("Subscription was successfully cancelled"))) &&
+          assert(output)(equalTo(ProductMoveEndpointTypes.Success("Subscription was successfully cancelled"))) &&
           assert(getSubscriptionToCancelRequests)(equalTo(List(subscriptionName))) &&
           assert(zuoraCancelRequests)(equalTo(List((subscriptionName, LocalDate.of(2022, 9, 29))))) &&
           assert(getAccountRequests)(hasSameElements(List(AccountNumber("anAccountNumber"))))
