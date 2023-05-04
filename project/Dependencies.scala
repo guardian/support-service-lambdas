@@ -4,7 +4,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.18.30"
+  val awsSdkVersion = "2.20.55"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.8.15"
   val http4sVersion = "0.21.34"
@@ -38,6 +38,9 @@ object Dependencies {
   val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.9.4"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
+
+  // upickle here is a temporary redundancy of circe while we are migrating to it
+  val upickle = "com.lihaoyi" %% "upickle" % "3.1.0"
 
   // HTTP clients
   val sttp = "com.softwaremill.sttp.client3" %% "core" % sttpVersion
