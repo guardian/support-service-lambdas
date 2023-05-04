@@ -149,11 +149,6 @@ object ProductMoveEndpoint {
         DynamoLive.layer,
       )
 
-  extension [R, E, A](zio: ZIO[R, E, A])
-    def addLogMessage(message: String) = zio.catchAll { error =>
-      ZIO.fail(InternalServerError(s"$message failed with: $error"))
-    }
-
   extension (billingPeriod: BillingPeriod)
     def value: IO[ErrorResponse, String] =
       billingPeriod match {
@@ -178,7 +173,7 @@ object ProductMoveEndpoint {
   ] =
     (for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+      subscription <- GetSubscription.get(subscriptionName)
       currentRatePlan <- getSingleOrNotEligible(
         subscription.ratePlans,
         s"Subscription: ${subscriptionName.value} has more than one ratePlan",
@@ -228,7 +223,6 @@ object ProductMoveEndpoint {
     _ <- ZIO.log("Fetching Preview from Zuora")
     previewResponse <- SubscriptionUpdate
       .preview(subscriptionName, billingPeriod, price, currency, currentRatePlanId)
-      .addLogMessage("SubscriptionUpdate")
   } yield previewResponse
 
   def doUpdate(
@@ -244,7 +238,7 @@ object ProductMoveEndpoint {
   ): ZIO[Dynamo with SQS with SubscriptionUpdate with Stage with GetAccount, ErrorResponse, Success] = for {
     _ <- ZIO.log("Performing product move update")
     stage <- ZIO.service[Stage]
-    account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
+    account <- GetAccount.get(subscription.accountNumber)
 
     identityId <- ZIO
       .fromOption(account.basicInfo.IdentityId__c)
@@ -252,7 +246,6 @@ object ProductMoveEndpoint {
 
     updateResponse <- SubscriptionUpdate
       .update(SubscriptionName(subscription.id), billingPeriod, price, currency, currentRatePlan.id)
-      .addLogMessage("SubscriptionUpdate")
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriodValue <- billingPeriod.value

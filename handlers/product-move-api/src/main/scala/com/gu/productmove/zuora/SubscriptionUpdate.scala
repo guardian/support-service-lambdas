@@ -314,7 +314,7 @@ def getSupporterPlusRatePlanIds(
               None,
             ),
           )
-        case _ => Left(InternalServerError(s"error when matching on billingPeriod $billingPeriod"))
+        case _ => Left(InternalServerError(s"Error when matching on billingPeriod $billingPeriod"))
       }
     }
 }
