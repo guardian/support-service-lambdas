@@ -123,7 +123,7 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
         case Exit.Success(value) => value
         case Exit.Failure(cause) =>
           context.getLogger.log("Failed with: " + cause.toString)
-          AwsResponse(false, 200, Map.empty, "")
+          AwsResponse(false, 500, Map.empty, "")
     }
   }
 

@@ -121,7 +121,7 @@ object ProductMoveEndpoint {
               jsonBody[PreviewResult].copy(info = EndpointIO.Info.empty.copy(description = Some("Preview result."))),
             ),
             oneOfVariant(
-              sttp.model.StatusCode.InternalServerError,
+              sttp.model.StatusCode.BadRequest,
               jsonBody[InternalServerError]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
             ),
@@ -145,7 +145,7 @@ object ProductMoveEndpoint {
             run(SubscriptionName(subscriptionName), switchType, postData)
               .tapEither(result => ZIO.log("result tapped: " + result))
               .map(Right.apply)
-          case None => ZIO.fail(BadRequest(s"Invalid switchType: $switchTypeStr"))
+          case _ => ZIO.fail(BadRequest(s"Invalid switchType: $switchTypeStr"))
         }
       }
   }
