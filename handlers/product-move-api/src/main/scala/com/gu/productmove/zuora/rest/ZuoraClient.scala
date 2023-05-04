@@ -111,7 +111,7 @@ object ZuoraRestBody {
             else
               zuoraResponse.reasons match {
                 case None => Left(s"success = false, body: $body")
-                case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
+                case Some(reasons) => Left(reasons.map(r => s"${r.message} (code: ${r.code})").mkString(" "))
               }
         } yield ()
 
@@ -123,7 +123,7 @@ object ZuoraRestBody {
             else
               zuoraResponse.reasons match {
                 case None => Left(s"Success = false, body: $body")
-                case Some(reasons) => Left(reasons.map(_.message).mkString(" "))
+                case Some(reasons) => Left(reasons.map(r => s"${r.message} (code: ${r.code})").mkString(" "))
               }
         } yield ()
       case ZuoraSuccessCheck.None => Right(())
