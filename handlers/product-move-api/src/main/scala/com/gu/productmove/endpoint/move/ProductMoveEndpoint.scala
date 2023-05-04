@@ -140,13 +140,7 @@ object ProductMoveEndpoint {
         )
     endpointDescription
       .serverLogic[TIO] { (switchTypeStr, subscriptionName, postData) =>
-        SwitchType.values.find(_.toString == switchTypeStr) match {
-          case Some(switchType) =>
-            run(SubscriptionName(subscriptionName), switchType, postData)
-              .tapEither(result => ZIO.log("result tapped: " + result))
-              .map(Right.apply)
-          case _ => ZIO.fail(BadRequest(s"Invalid switchType: $switchTypeStr"))
-        }
+        ZIO.fail(BadRequest(s"Invalid switchType: $switchTypeStr"))
       }
   }
 
