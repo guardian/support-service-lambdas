@@ -126,7 +126,8 @@ object ZuoraRestBody {
               zuoraResponse.reasons match {
                 case Some(reasons) if reasons.exists(_.code == 53500099) =>
                   Left(TransactionError(reasons.map(_.message).mkString(" ")))
-                case Some(reasons) => Left(InternalServerError(reasons.map(_.message).mkString(" ")))
+                case Some(reasons) =>
+                  Left(InternalServerError(reasons.map(r => s"${r.message} (code: ${r.code})").mkString(" ")))
                 case None => Left(InternalServerError(s"success = false, body: $body"))
               }
         } yield ()
@@ -144,7 +145,8 @@ object ZuoraRestBody {
               zuoraResponse.reasons match {
                 case Some(reasons) if reasons.exists(_.code == 53500099) =>
                   Left(TransactionError(reasons.map(_.message).mkString(" ")))
-                case Some(reasons) => Left(InternalServerError(reasons.map(_.message).mkString(" ")))
+                case Some(reasons) =>
+                  Left(InternalServerError(reasons.map(r => s"${r.message} (code: ${r.code})").mkString(" ")))
                 case None => Left(InternalServerError(s"success = false, body: $body"))
               }
         } yield ()
