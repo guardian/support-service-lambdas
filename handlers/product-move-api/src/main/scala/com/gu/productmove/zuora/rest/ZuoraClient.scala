@@ -36,9 +36,9 @@ object ZuoraClientLive {
   val layer: ZLayer[SttpBackend[Task, Any], ErrorResponse, ZuoraClient] =
     ZLayer {
       for {
-        zuoraBaseUrl <- ZIO.fromEither(getFromEnv("zuoraBaseUrl")).mapError(x => InternalServerError(x))
-        zuoraUsername <- ZIO.fromEither(getFromEnv("zuoraUsername")).mapError(x => InternalServerError(x))
-        zuoraPassword <- ZIO.fromEither(getFromEnv("zuoraPassword")).mapError(x => InternalServerError(x))
+        zuoraBaseUrl <- ZIO.fromEither(getFromEnv("zuoraBaseUrl"))
+        zuoraUsername <- ZIO.fromEither(getFromEnv("zuoraUsername"))
+        zuoraPassword <- ZIO.fromEither(getFromEnv("zuoraPassword"))
 
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/").left.map(e => InternalServerError(e)))
 

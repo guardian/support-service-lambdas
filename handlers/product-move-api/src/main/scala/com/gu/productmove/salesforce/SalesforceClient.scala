@@ -53,12 +53,12 @@ object SalesforceClientLive {
   val layer: ZLayer[SttpBackend[Task, Any], ErrorResponse, SalesforceClient] =
     ZLayer.fromZIO(
       for {
-        url <- ZIO.fromEither(getFromEnv("salesforceUrl")).mapError(x => InternalServerError(x))
-        clientId <- ZIO.fromEither(getFromEnv("salesforceClientId")).mapError(x => InternalServerError(x))
-        clientSecret <- ZIO.fromEither(getFromEnv("salesforceClientSecret")).mapError(x => InternalServerError(x))
-        username <- ZIO.fromEither(getFromEnv("salesforceUsername")).mapError(x => InternalServerError(x))
-        password <- ZIO.fromEither(getFromEnv("salesforcePassword")).mapError(x => InternalServerError(x))
-        token <- ZIO.fromEither(getFromEnv("salesforceToken")).mapError(x => InternalServerError(x))
+        url <- ZIO.fromEither(getFromEnv("salesforceUrl"))
+        clientId <- ZIO.fromEither(getFromEnv("salesforceClientId"))
+        clientSecret <- ZIO.fromEither(getFromEnv("salesforceClientSecret"))
+        username <- ZIO.fromEither(getFromEnv("salesforceUsername"))
+        password <- ZIO.fromEither(getFromEnv("salesforcePassword"))
+        token <- ZIO.fromEither(getFromEnv("salesforceToken"))
 
         _ <- ZIO.log("salesforceUrl: " + url)
         _ <- ZIO.log("salesforceUsername: " + username)

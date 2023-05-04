@@ -28,9 +28,8 @@ object InvoicingApiRefundLive {
       for {
         invoicingApiUrl <- ZIO
           .fromEither(getFromEnv("invoicingApiUrl"))
-          .mapError(x => InternalServerError(x))
           .map(_ + "/refund")
-        invoicingApiKey <- ZIO.fromEither(getFromEnv("invoicingApiKey")).mapError(x => InternalServerError(x))
+        invoicingApiKey <- ZIO.fromEither(getFromEnv("invoicingApiKey"))
 
         invoicingApiConfig = InvoicingApiConfig(invoicingApiUrl, invoicingApiKey)
 
