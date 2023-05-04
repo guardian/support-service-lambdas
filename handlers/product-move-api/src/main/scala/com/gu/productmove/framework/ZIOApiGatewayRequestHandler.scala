@@ -117,6 +117,11 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
     Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
         routedTask
+          .catchAll { error =>
+            ZIO
+              .log(error.toString)
+              .as(AwsResponse(false, 500, Map.empty, ""))
+          }
           .provideLayer(Runtime.removeDefaultLoggers)
           .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger))),
       ) match
