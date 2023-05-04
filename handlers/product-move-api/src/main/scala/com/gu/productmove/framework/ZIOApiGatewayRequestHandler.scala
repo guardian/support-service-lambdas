@@ -121,7 +121,9 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
           .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger))),
       ) match
         case Exit.Success(value) => value
-        case Exit.Failure(cause) => cause
+        case Exit.Failure(cause) =>
+          context.getLogger.log("Failed with: " + cause.toString)
+          AwsResponse(false, 200, Map.empty, "")
     }
   }
 
