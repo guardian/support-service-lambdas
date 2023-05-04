@@ -66,6 +66,8 @@ object ProductMoveEndpoint {
     run(SubscriptionName("A-S00448793"), ExpectedInput(1, false, None, None)),
   )
 
+  val TransactionErrorStatusCode = sttp.model.StatusCode(430)
+
   val server: sttp.tapir.server.ServerEndpoint.Full[
     Unit,
     Unit,
@@ -111,6 +113,11 @@ object ProductMoveEndpoint {
             oneOfVariant(
               sttp.model.StatusCode.InternalServerError,
               jsonBody[InternalServerError]
+                .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
+            ),
+            oneOfVariant(
+              TransactionErrorStatusCode,
+              jsonBody[TransactionError]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
             ),
           ),
