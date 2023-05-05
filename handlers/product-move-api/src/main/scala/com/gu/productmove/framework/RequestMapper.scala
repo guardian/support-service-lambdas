@@ -48,7 +48,7 @@ object RequestMapper {
         Option(getRequestContext.getDomainName),
         AwsHttp(
           getHttpMethod,
-          getPath,
+          updatePath(getPath),
           "$.requestContext.protocol", // this is unused and not parsed from the API gateway JSON by the java SDK
           getRequestContext.getIdentity.getSourceIp, // nullable?
           getRequestContext.getIdentity.getUserAgent, // nullable?
