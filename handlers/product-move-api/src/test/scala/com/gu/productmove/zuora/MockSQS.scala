@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.{EmailMessage, SQS}
@@ -18,28 +19,28 @@ class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput,
   def addRequest(request: EmailMessage | RefundInput | SalesforceRecordInput): Unit =
     requests += request
 
-  override def sendEmail(message: EmailMessage): ZIO[Any, String, Unit] = {
+  override def sendEmail(message: EmailMessage): ZIO[Any, ErrorResponse, Unit] = {
     addRequest(message)
 
     responses.get(message) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"MockSQS: Not stubbed for message: $message")
+      case None => ZIO.fail(InternalServerError(s"MockSQS: Not stubbed for message: $message"))
   }
 
-  override def queueRefund(refundInput: RefundInput): ZIO[Any, String, Unit] = {
+  override def queueRefund(refundInput: RefundInput): ZIO[Any, ErrorResponse, Unit] = {
     addRequest(refundInput)
 
     responses.get(refundInput) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"wrong input, refund input was $refundInput")
+      case None => ZIO.fail(InternalServerError(s"wrong input, refund input was $refundInput"))
   }
 
-  override def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, String, Unit] = {
+  override def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, ErrorResponse, Unit] = {
     addRequest(salesforceRecordInput)
 
     responses.get(salesforceRecordInput) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"wrong input, salesforce record input was $salesforceRecordInput")
+      case None => ZIO.fail(InternalServerError(s"wrong input, salesforce record input was $salesforceRecordInput"))
   }
 }
 
