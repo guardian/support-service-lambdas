@@ -41,7 +41,9 @@ object DynamoLive {
                 dynamoService.writeItem(item)
               }
               .mapError { ex =>
-                InternalServerError(s"Failed to write to the Supporter Data Dynamo table for identityId: ${item.identityId} with subscription Number: ${item.subscriptionName} with error: ${ex.toString}")
+                InternalServerError(
+                  s"Failed to write to the Supporter Data Dynamo table for identityId: ${item.identityId} with subscription Number: ${item.subscriptionName} with error: ${ex.toString}",
+                )
               }
               .flatMap { _ =>
                 ZIO.log(

@@ -31,24 +31,23 @@ object StripeConfig {
 }
 
 case class ZuoraEnvironment(value: String) extends Logging {
-
+  // TODO: Can we get rid of this class?
   def stageToLoad: Stage = value match {
     case "PROD" => Stage("PROD")
-    case "UAT" => Stage("CODE")
-    case "DEV" => Stage("DEV")
+    case "CODE" => Stage("CODE")
     case _ =>
-      logger.error("Unknown Zuora environment specified, falling back to DEV")
-      Stage("DEV")
+      logger.error("Unknown Zuora environment specified, falling back to CODE")
+      Stage("CODE")
   }
 }
 object ZuoraEnvironment extends Logging {
   def EnvForStage(stage: Stage): ZuoraEnvironment = stage match {
     case Stage("PROD") => ZuoraEnvironment("PROD")
-    case Stage("CODE") => ZuoraEnvironment("UAT")
-    case Stage("DEV") => ZuoraEnvironment("DEV")
+    case Stage("CODE") => ZuoraEnvironment("CODE")
+    case Stage("DEV") => ZuoraEnvironment("CODE")
     case unknown =>
-      logger.error(s"Unknown Stage specified: '$unknown', falling back to Zuora DEV env")
-      ZuoraEnvironment("DEV")
+      logger.error(s"Unknown Stage specified: '$unknown', falling back to Zuora CODE env")
+      ZuoraEnvironment("CODE")
   }
 }
 
