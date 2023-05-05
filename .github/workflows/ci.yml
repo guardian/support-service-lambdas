@@ -41,7 +41,7 @@ jobs:
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v2
         with:
-          app: ${{ matrix.subproject }}
+          projectName: support-service-lambdas::${{ matrix.subproject }}
           buildNumberOffset: 7000
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
           contentDirectories: |
