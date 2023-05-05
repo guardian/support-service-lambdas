@@ -32,8 +32,8 @@ jobs:
           java-version: '11'
           cache: 'sbt'
 
-      - name: Build subproject JAR
-        run: sbt "project ${{ matrix.subproject }}" assembly
+      - name: Run tests and build subproject JAR
+        run: sbt "project ${{ matrix.subproject }}" test assembly
 
       - name: Generate CFN templates from GuCDK
         run: bash ./script/cfn.sh
