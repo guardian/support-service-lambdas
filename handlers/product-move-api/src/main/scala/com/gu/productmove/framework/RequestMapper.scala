@@ -25,11 +25,23 @@ object RequestMapper {
       rawQueryString
   }
 
-  def convertJavaRequestToTapirRequest(javaRequest: APIGatewayV2WebSocketEvent): AwsRequest = {
+  def updatePath(path: String): String = {
+    val newEndpointPattern = "^/product-move/RecurringContributionToSupporterPlus/(.*)$".r
+    val oldEndpointPattern = "^/product-move/(.*)$".r
 
+    path match {
+      case newEndpointPattern(subscriptionName) =>
+        s"/product-move/RecurringContributionToSupporterPlus/$subscriptionName"
+      case oldEndpointPattern(subscriptionName) =>
+        s"/product-move/RecurringContributionToSupporterPlus/$subscriptionName"
+      case _ => path
+    }
+  }
+
+  def convertJavaRequestToTapirRequest(javaRequest: APIGatewayV2WebSocketEvent): AwsRequest = {
     import javaRequest.*
     AwsRequest(
-      getPath,
+      updatePath(getPath), // Update the path
       Option(getQueryStringParameters).map(_.asScala.toMap).map(queryParamsToEncodedString).getOrElse(""),
       getHeaders.asScala.toMap,
       AwsRequestContext(
@@ -45,7 +57,6 @@ object RequestMapper {
       Option(getBody),
       isIsBase64Encoded,
     )
-
   }
 
 }
