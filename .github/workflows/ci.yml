@@ -32,11 +32,6 @@ jobs:
           java-version: '11'
           cache: 'sbt'
 
-#      - name: Setup Node
-#        uses: actions/setup-node@v3
-#        with:
-#          cache: 'yarn'
-
       - name: Build project and generate Riff-Raff artefact
         run: bash ./script/build.sh ${{ matrix.subproject }}
 
