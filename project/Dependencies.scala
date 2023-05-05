@@ -39,9 +39,6 @@ object Dependencies {
   val playJson = "com.typesafe.play" %% "play-json" % "2.9.4"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
 
-  // upickle here is a temporary redundancy of circe while we are migrating to it
-  val upickle = "com.lihaoyi" %% "upickle" % "3.1.0"
-
   // HTTP clients
   val sttp = "com.softwaremill.sttp.client3" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp.client3" %% "circe" % sttpVersion

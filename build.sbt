@@ -499,7 +499,7 @@ lazy val `batch-email-sender` = lambdaProject(
 lazy val `holiday-stop-processor` = lambdaProject(
   "holiday-stop-processor",
   "Add a holiday credit amendment to a subscription.",
-  Seq(scalaLambda, awsS3, awsSecretsManager, upickle),
+  Seq(scalaLambda, awsS3),
 ).dependsOn(
   `credit-processor`,
   `holiday-stops` % "compile->compile;test->test",
