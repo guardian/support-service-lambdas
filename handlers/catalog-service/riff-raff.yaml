@@ -17,7 +17,6 @@ deployments:
       bucket: subscriptions-dist
       prefixStack: false
       functionNames:
-      - catalog-service-zuora-dev-
-      - catalog-service-zuora-uat-
+      - catalog-service-zuora-code-
       - catalog-service-zuora-prod-
     dependencies: [cfn]
