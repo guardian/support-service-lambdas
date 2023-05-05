@@ -27,21 +27,21 @@ case class PreviewPublicationsResponse(
 
 object PreviewPublications {
   private lazy val sttpBackend: SttpBackend[Identity, Any] = HttpURLConnectionBackend()
-  private lazy val xApiKey =
-    sys.env.getOrElse("InvoicingApiKey", throw new RuntimeException("Missing x-api-key for invoicing-api"))
-  private lazy val invoicingApiUrl =
-    sys.env.getOrElse("InvoicingApiUrl", throw new RuntimeException("Missing invoicing-api url"))
-
   def preview(
       subscriptionName: String,
       startDate: String,
       endDate: String,
-  ): Either[ZuoraApiFailure, PreviewPublicationsResponse] =
-    basicRequest
-      .get(uri"$invoicingApiUrl/preview/$subscriptionName?startDate=$startDate&endDate=$endDate")
-      .header("x-api-key", xApiKey)
-      .response(asJson[PreviewPublicationsResponse])
-      .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
-      .send(sttpBackend)
-      .body
+  ): Either[ZuoraApiFailure, PreviewPublicationsResponse] = {
+    for {
+      secrets <- Secrets.getInvoicingAPISecrets
+      response <- basicRequest
+        .get(uri"${secrets.invoicingApiUrl}/preview/$subscriptionName?startDate=$startDate&endDate=$endDate")
+        .header("x-api-key", secrets.invoicingApiKey)
+        .response(asJson[PreviewPublicationsResponse])
+        .mapResponse(_.left.map(e => ZuoraApiFailure(e.getMessage)))
+        .send(sttpBackend)
+        .body
+    } yield response
+
+  }
 }
