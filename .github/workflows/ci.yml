@@ -32,8 +32,8 @@ jobs:
           java-version: '11'
           cache: 'sbt'
 
-      - name: Build project and generate Riff-Raff artefact
-        run: bash ./script/build.sh ${{ matrix.subproject }}
+      - name: Build subproject JAR
+        run: sbt "project ${{ matrix.subproject }}" assembly
 
       - name: Generate CFN templates from GuCDK
         run: bash ./script/cfn.sh
@@ -48,7 +48,7 @@ jobs:
               - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
               - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
             ${{ matrix.subproject }}:
-              - ./${{ matrix.subproject }}.jar
+              - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
 
 #  build:
 #    strategy:
