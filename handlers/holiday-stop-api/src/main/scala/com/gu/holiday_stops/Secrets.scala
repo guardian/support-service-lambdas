@@ -7,7 +7,7 @@ import upickle.default._
 import scala.util.Try
 
 /*
-  In Secrets Store we have the two following JSON objects:
+  In Secrets Store we have the following JSON object:
 
   ${Stage}/InvoicingApi
   {
