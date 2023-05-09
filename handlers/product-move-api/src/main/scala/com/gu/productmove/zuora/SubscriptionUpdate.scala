@@ -24,7 +24,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.{
   zuoraIdsForStage,
 }
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
@@ -45,7 +45,7 @@ trait SubscriptionUpdate:
   def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
-  ): ZIO[Stage, String, R]
+  ): ZIO[Stage, ErrorResponse, R]
 
 object SubscriptionUpdateLive:
   val layer: URLayer[ZuoraGet, SubscriptionUpdate] = ZLayer.fromFunction(SubscriptionUpdateLive(_))
@@ -54,7 +54,7 @@ private class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpd
   override def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
-  ): ZIO[Stage, String, R] = {
+  ): ZIO[Stage, ErrorResponse, R] = {
     zuoraGet.put[SubscriptionUpdateRequest, R](
       uri"subscriptions/${subscriptionName.value}",
       requestBody,
@@ -65,7 +65,7 @@ object SubscriptionUpdate {
   def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
-  ): ZIO[SubscriptionUpdate with Stage, String, R] =
+  ): ZIO[SubscriptionUpdate with Stage, ErrorResponse, R] =
     ZIO.serviceWithZIO[SubscriptionUpdate](_.update[R](subscriptionName, requestBody))
 }
 

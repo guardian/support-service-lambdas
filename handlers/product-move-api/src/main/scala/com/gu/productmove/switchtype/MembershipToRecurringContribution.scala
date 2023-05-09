@@ -44,7 +44,7 @@ object MembershipToRecurringContribution {
   ] = {
     (for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+      subscription <- GetSubscription.get(subscriptionName)
 
       activeRatePlanAndCharge <- ZIO
         .fromOption(getActiveRatePlanAndCharge(subscription.ratePlans))
@@ -60,7 +60,7 @@ object MembershipToRecurringContribution {
         )
 
       _ <- ZIO.log("Performing product move update")
-      account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
+      account <- GetAccount.get(subscription.accountNumber)
 
       identityId <- ZIO
         .fromOption(account.basicInfo.IdentityId__c)
@@ -89,7 +89,6 @@ object MembershipToRecurringContribution {
 
       _ <- SubscriptionUpdate
         .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
-        .addLogMessage("SubscriptionUpdate")
 
       todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
       billingPeriodValue <- billingPeriod.value
@@ -143,7 +142,7 @@ object MembershipToRecurringContribution {
       requests = emailFuture.zip(salesforceTrackingFuture)
       _ <- requests.join
     } yield Success("Product move completed successfully"))
-      .fold(errorMessage => InternalServerError(errorMessage), success => success)
+      .fold(error => error, success => success)
   }
 
   case class RecurringContributionIds(
@@ -154,8 +153,8 @@ object MembershipToRecurringContribution {
   private def getRecurringContributionRatePlanId(
       stage: Stage,
       billingPeriod: BillingPeriod,
-  ): Either[String, RecurringContributionIds] = {
-    zuoraIdsForStage(config.Stage(stage.toString)).flatMap { zuoraIds =>
+  ): Either[ErrorResponse, RecurringContributionIds] = {
+    zuoraIdsForStage(config.Stage(stage.toString)).left.map(e => InternalServerError(e)).flatMap { zuoraIds =>
       import zuoraIds.contributionsZuoraIds.{annual, monthly}
 
       billingPeriod match {
@@ -163,7 +162,7 @@ object MembershipToRecurringContribution {
           Right(RecurringContributionIds(monthly.productRatePlanId.value, monthly.productRatePlanChargeId.value))
         case Annual =>
           Right(RecurringContributionIds(annual.productRatePlanId.value, annual.productRatePlanChargeId.value))
-        case _ => Left(s"error when matching on billingPeriod $billingPeriod")
+        case _ => Left(InternalServerError(s"error when matching on billingPeriod $billingPeriod"))
       }
     }
   }
@@ -173,7 +172,7 @@ object MembershipToRecurringContribution {
       currency: Currency,
       ratePlanAmendments: Seq[GetSubscription.RatePlan],
       chargedThroughDate: LocalDate,
-  ): ZIO[Stage, String, (List[AddRatePlan], List[RemoveRatePlan])] =
+  ): ZIO[Stage, ErrorResponse, (List[AddRatePlan], List[RemoveRatePlan])] =
     for {
       stage <- ZIO.service[Stage]
       contributionRatePlanIds <- ZIO.fromEither(

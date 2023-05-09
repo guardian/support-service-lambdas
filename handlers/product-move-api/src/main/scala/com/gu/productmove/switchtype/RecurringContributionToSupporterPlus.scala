@@ -13,6 +13,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.{
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ErrorResponse,
   ExpectedInput,
   InternalServerError,
   OutputBody,
@@ -76,10 +77,10 @@ case class SupporterPlusRatePlanIds(
 )
 object RecurringContributionToSupporterPlus {
 
-  private def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
+  private def getSingleOrNotEligible[A](list: List[A], message: String): IO[ErrorResponse, A] =
     list.length match {
       case 1 => ZIO.succeed(list.head)
-      case _ => ZIO.fail(message)
+      case _ => ZIO.fail(InternalServerError(message))
     }
 
   def apply(
@@ -87,12 +88,12 @@ object RecurringContributionToSupporterPlus {
       postData: ExpectedInput,
   ): ZIO[
     GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage,
-    String,
+    ErrorResponse,
     OutputBody,
   ] = {
     (for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+      subscription <- GetSubscription.get(subscriptionName)
 
       currentRatePlan <- getSingleOrNotEligible(
         subscription.ratePlans,
@@ -105,7 +106,9 @@ object RecurringContributionToSupporterPlus {
       currency <- ZIO
         .fromOption(ratePlanCharge.currencyObject)
         .orElseFail(
-          s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
+          InternalServerError(
+            s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
+          ),
         )
 
       result <-
@@ -129,52 +132,54 @@ object RecurringContributionToSupporterPlus {
             postData.csrUserId,
             postData.caseId,
           )
-    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
+    } yield result).fold(error => error, success => success)
   }
 
   private def getSupporterPlusRatePlanIds(
       stage: Stage,
       billingPeriod: BillingPeriod,
-  ): Either[String, SupporterPlusRatePlanIds] = {
-    zuoraIdsForStage(config.Stage(stage.toString)).flatMap { zuoraIds =>
-      import zuoraIds.supporterPlusZuoraIds.{annual, annualV2, monthly, monthlyV2}
+  ): Either[ErrorResponse, SupporterPlusRatePlanIds] = {
+    zuoraIdsForStage(config.Stage(stage.toString)).left
+      .map(err => InternalServerError(err))
+      .flatMap { zuoraIds =>
+        import zuoraIds.supporterPlusZuoraIds.{annual, annualV2, monthly, monthlyV2}
 
-      billingPeriod match {
-        case Monthly if SwitchToV2SupporterPlus =>
-          Right(
-            SupporterPlusRatePlanIds(
-              monthlyV2.productRatePlanId.value,
-              monthlyV2.productRatePlanChargeId.value,
-              Some(monthlyV2.contributionProductRatePlanChargeId.value),
-            ),
-          )
-        case Monthly =>
-          Right(
-            SupporterPlusRatePlanIds(
-              monthly.productRatePlanId.value,
-              monthly.productRatePlanChargeId.value,
-              None,
-            ),
-          )
-        case Annual if SwitchToV2SupporterPlus =>
-          Right(
-            SupporterPlusRatePlanIds(
-              annualV2.productRatePlanId.value,
-              annualV2.productRatePlanChargeId.value,
-              Some(annualV2.contributionProductRatePlanChargeId.value),
-            ),
-          )
-        case Annual =>
-          Right(
-            SupporterPlusRatePlanIds(
-              annual.productRatePlanId.value,
-              annual.productRatePlanChargeId.value,
-              None,
-            ),
-          )
-        case _ => Left(s"error when matching on billingPeriod $billingPeriod")
+        billingPeriod match {
+          case Monthly if SwitchToV2SupporterPlus =>
+            Right(
+              SupporterPlusRatePlanIds(
+                monthlyV2.productRatePlanId.value,
+                monthlyV2.productRatePlanChargeId.value,
+                Some(monthlyV2.contributionProductRatePlanChargeId.value),
+              ),
+            )
+          case Monthly =>
+            Right(
+              SupporterPlusRatePlanIds(
+                monthly.productRatePlanId.value,
+                monthly.productRatePlanChargeId.value,
+                None,
+              ),
+            )
+          case Annual if SwitchToV2SupporterPlus =>
+            Right(
+              SupporterPlusRatePlanIds(
+                annualV2.productRatePlanId.value,
+                annualV2.productRatePlanChargeId.value,
+                Some(annualV2.contributionProductRatePlanChargeId.value),
+              ),
+            )
+          case Annual =>
+            Right(
+              SupporterPlusRatePlanIds(
+                annual.productRatePlanId.value,
+                annual.productRatePlanChargeId.value,
+                None,
+              ),
+            )
+          case _ => Left(InternalServerError(s"Error when matching on billingPeriod $billingPeriod"))
+        }
       }
-    }
   }
 
   private def getSubscriptionPriceInMinorUnits(
@@ -196,7 +201,7 @@ object RecurringContributionToSupporterPlus {
       price: BigDecimal,
       currency: Currency,
       billingPeriod: BillingPeriod,
-  ): IO[String, BigDecimal] =
+  ): IO[ErrorResponse, BigDecimal] =
     if (SwitchToV2SupporterPlus)
       // work out how much of what the user is paying can be treated as a contribution (total amount - cost of sub)
       val catalogPlanId =
@@ -204,11 +209,12 @@ object RecurringContributionToSupporterPlus {
           MonthlySupporterPlusV2
         else
           AnnualSupporterPlusV2
-      ZIO.fromEither(
-        getSubscriptionPriceInMinorUnits(stage, catalogPlanId, currency).map(subscriptionChargePrice =>
-          price - (subscriptionChargePrice.value / 100),
-        ),
-      )
+      ZIO
+        .fromEither(
+          getSubscriptionPriceInMinorUnits(stage, catalogPlanId, currency)
+            .map(subscriptionChargePrice => price - (subscriptionChargePrice.value / 100)),
+        )
+        .mapError(x => InternalServerError(x))
     else ZIO.succeed(price)
 
   def getRatePlans(
@@ -216,7 +222,7 @@ object RecurringContributionToSupporterPlus {
       currency: Currency,
       ratePlanIdToRemove: String,
       price: BigDecimal,
-  ): ZIO[Stage, String, (List[AddRatePlan], List[RemoveRatePlan])] =
+  ): ZIO[Stage, ErrorResponse, (List[AddRatePlan], List[RemoveRatePlan])] =
     for {
       date <- Clock.currentDateTime.map(_.toLocalDate)
       stage <- ZIO.service[Stage]
@@ -238,7 +244,7 @@ object RecurringContributionToSupporterPlus {
       billingPeriod: BillingPeriod,
       currency: Currency,
       currentRatePlanId: String,
-  ): ZIO[SubscriptionUpdate with Stage, String, OutputBody] = for {
+  ): ZIO[SubscriptionUpdate with Stage, ErrorResponse, OutputBody] = for {
     _ <- ZIO.log("Fetching Preview from Zuora")
 
     today <- Clock.currentDateTime.map(_.toLocalDate)
@@ -257,7 +263,6 @@ object RecurringContributionToSupporterPlus {
 
     response <- SubscriptionUpdate
       .update[SubscriptionUpdatePreviewResponse](subscriptionName, updateRequestBody)
-      .addLogMessage("SubscriptionUpdate")
 
     stage <- ZIO.service[Stage]
     supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
@@ -274,14 +279,14 @@ object RecurringContributionToSupporterPlus {
       subscription: GetSubscription.GetSubscriptionResponse,
       csrUserId: Option[String],
       caseId: Option[String],
-  ): ZIO[GetAccount with SubscriptionUpdate with SQS with Stage with Dynamo, String, OutputBody] = for {
+  ): ZIO[GetAccount with SubscriptionUpdate with SQS with Stage with Dynamo, ErrorResponse, OutputBody] = for {
     _ <- ZIO.log("Performing product move update")
     stage <- ZIO.service[Stage]
-    account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
+    account <- GetAccount.get(subscription.accountNumber)
 
     identityId <- ZIO
       .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
+      .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
 
     updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
       case (addRatePlan, removeRatePlan) =>
@@ -294,11 +299,8 @@ object RecurringContributionToSupporterPlus {
         )
     }
 
-    given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
-
     updateResponse <- SubscriptionUpdate
       .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
-      .addLogMessage("SubscriptionUpdate")
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriodValue <- billingPeriod.value
@@ -376,3 +378,4 @@ object RecurringContributionToSupporterPlus {
 given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
 given JsonDecoder[SubscriptionUpdateInvoiceItem] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoiceItem]
+given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]

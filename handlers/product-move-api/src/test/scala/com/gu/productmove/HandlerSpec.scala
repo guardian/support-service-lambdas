@@ -338,13 +338,13 @@ object HandlerSpec extends ZIOSpecDefault {
         (for {
           _ <- TestClock.setTime(time)
           input = SubscriptionCancelEndpointTypes.ExpectedInput("mma_other")
-          output <- SubscriptionCancelEndpoint.subscriptionCancel(subscriptionName, input, sendingEmail = true)
+          output <- SubscriptionCancelEndpoint.subscriptionCancel(subscriptionName, input)
           getSubscriptionToCancelRequests <- MockGetSubscriptionToCancel.requests
           zuoraCancelRequests <- MockZuoraCancel.requests
           sqsRequests <- MockSQS.requests
           getAccountRequests <- MockGetAccount.requests
         } yield {
-          assert(output)(equalTo(SubscriptionCancelEndpointTypes.Success("Subscription was successfully cancelled"))) &&
+          assert(output)(equalTo(ProductMoveEndpointTypes.Success("Subscription was successfully cancelled"))) &&
           assert(getSubscriptionToCancelRequests)(equalTo(List(subscriptionName))) &&
           assert(zuoraCancelRequests)(equalTo(List((subscriptionName, LocalDate.of(2022, 9, 29))))) &&
           assert(getAccountRequests)(hasSameElements(List(AccountNumber("anAccountNumber"))))

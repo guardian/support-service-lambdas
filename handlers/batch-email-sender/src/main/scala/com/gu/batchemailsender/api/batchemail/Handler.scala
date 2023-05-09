@@ -36,7 +36,7 @@ object Handler extends Logging {
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context))(
-      ContinueProcessing(Operation.noHealthcheck(steps = handle))
+      ContinueProcessing(Operation.noHealthcheck(steps = handle)),
     )
   }
 

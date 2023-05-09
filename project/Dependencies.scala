@@ -6,13 +6,13 @@ import sbtassembly.PathList
 object Dependencies {
   val awsSdkVersion = "2.18.30"
   val circeVersion = "0.13.0"
-  val sttpVersion = "3.8.13"
+  val sttpVersion = "3.8.15"
   val http4sVersion = "0.21.34"
   val catsVersion = "2.9.0"
   val catsEffectVersion = "2.5.5"
 
   val logging = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.4.6",
+    "ch.qos.logback" % "logback-classic" % "1.4.7",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -63,20 +63,20 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.17"
-  val zio2Version = "2.0.11"
+  val zio2Version = "2.0.13"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.2.12"
+  val tapirVersion = "1.3.0"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.2"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
-  val stripe = "com.stripe" % "stripe-java" % "22.16.0"
+  val stripe = "com.stripe" % "stripe-java" % "22.18.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.2" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.3" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.14" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.2.0" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.3.1" % Test
 
   /*
    * ===============================================================================================

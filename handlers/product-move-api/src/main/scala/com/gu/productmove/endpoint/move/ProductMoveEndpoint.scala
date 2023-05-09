@@ -130,6 +130,11 @@ object ProductMoveEndpoint {
               jsonBody[BadRequest]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("BadRequest."))),
             ),
+            oneOfVariant(
+              TransactionErrorStatusCode,
+              jsonBody[TransactionError]
+                .copy(info = EndpointIO.Info.empty.copy(description = Some("TransactionError."))),
+            ),
           ),
         )
         .summary("Replaces the existing subscription with a new one.")
@@ -185,9 +190,9 @@ extension [R, E, A](zio: ZIO[R, E, A])
   }
 
 extension (billingPeriod: BillingPeriod)
-  def value: IO[String, String] =
+  def value: IO[ErrorResponse, String] =
     billingPeriod match {
       case Monthly => ZIO.succeed("month")
       case Annual => ZIO.succeed("annual")
-      case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
+      case _ => ZIO.fail(InternalServerError(s"Unrecognised billing period $billingPeriod"))
     }
