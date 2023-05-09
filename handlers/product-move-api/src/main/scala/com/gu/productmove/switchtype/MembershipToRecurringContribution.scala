@@ -76,7 +76,7 @@ object MembershipToRecurringContribution {
 
       updateRequestBody <- getRatePlans(
         billingPeriod,
-        currency,
+        previousAmount,
         subscription.ratePlans,
         activeRatePlanCharge.chargedThroughDate.get,
       )
@@ -173,7 +173,7 @@ object MembershipToRecurringContribution {
 
   private def getRatePlans(
       billingPeriod: BillingPeriod,
-      currency: Currency,
+      previousAmount: Double,
       ratePlanAmendments: Seq[GetSubscription.RatePlan],
       chargedThroughDate: LocalDate,
   ): ZIO[Stage, ErrorResponse, (List[AddRatePlan], List[RemoveRatePlan])] =
@@ -183,7 +183,7 @@ object MembershipToRecurringContribution {
         getRecurringContributionRatePlanId(stage, billingPeriod),
       )
 
-      overrideAmount = 5
+      overrideAmount = previousAmount
 
       chargeOverride = ChargeOverrides(
         price = Some(overrideAmount),
