@@ -261,6 +261,8 @@ object RecurringContributionToSupporterPlus {
         )
     }
 
+    given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
+
     response <- SubscriptionUpdate
       .update[SubscriptionUpdatePreviewResponse](subscriptionName, updateRequestBody)
 
@@ -298,6 +300,8 @@ object RecurringContributionToSupporterPlus {
           preview = Some(false),
         )
     }
+
+    given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 
     updateResponse <- SubscriptionUpdate
       .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
@@ -374,8 +378,5 @@ object RecurringContributionToSupporterPlus {
 
   } yield Success("Product move completed successfully")
 }
-
-given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
 given JsonDecoder[SubscriptionUpdateInvoiceItem] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoiceItem]
-given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]

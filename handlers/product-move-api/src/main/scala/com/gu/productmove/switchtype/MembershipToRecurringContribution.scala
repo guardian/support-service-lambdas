@@ -39,7 +39,7 @@ object MembershipToRecurringContribution {
       postData: ExpectedInput,
   ): ZIO[
     GetSubscription with SubscriptionUpdate with GetAccount with SQS with Stage,
-    String,
+    ErrorResponse,
     OutputBody,
   ] = {
     (for {
@@ -49,14 +49,18 @@ object MembershipToRecurringContribution {
       activeRatePlanAndCharge <- ZIO
         .fromOption(getActiveRatePlanAndCharge(subscription.ratePlans))
         .orElseFail(
-          s"Could not find a ratePlanCharge with a non-null chargedThroughDate for subscription name ${subscriptionName.value}",
+          InternalServerError(
+            s"Could not find a ratePlanCharge with a non-null chargedThroughDate for subscription name ${subscriptionName.value}",
+          ),
         )
       (activeRatePlan, activeRatePlanCharge) = activeRatePlanAndCharge
 
       currency <- ZIO
         .fromOption(activeRatePlanCharge.currencyObject)
         .orElseFail(
-          s"",
+          InternalServerError(
+            s"Missing or unknown currency ${activeRatePlanCharge.currency} on rate plan charge in rate plan ${activeRatePlan.id} ",
+          ),
         )
 
       _ <- ZIO.log("Performing product move update")
@@ -64,7 +68,7 @@ object MembershipToRecurringContribution {
 
       identityId <- ZIO
         .fromOption(account.basicInfo.IdentityId__c)
-        .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
+        .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
 
       price = postData.price
       previousAmount = activeRatePlanCharge.price.get

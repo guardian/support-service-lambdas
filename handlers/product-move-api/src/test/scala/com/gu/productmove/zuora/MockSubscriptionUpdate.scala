@@ -26,12 +26,12 @@ class MockSubscriptionUpdate(
   override def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
-  ): ZIO[Any, String, R] = {
+  ): ZIO[Any, ErrorResponse, R] = {
     mutableStore = (subscriptionName, requestBody) :: mutableStore
 
     response.get(subscriptionName, requestBody) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse.asInstanceOf[R])
-      case None => ZIO.fail(s"success = false")
+      case None => ZIO.fail(InternalServerError(s"success = false"))
   }
 
 }
