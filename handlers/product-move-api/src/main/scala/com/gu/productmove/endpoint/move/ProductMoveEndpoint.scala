@@ -90,7 +90,9 @@ object ProductMoveEndpoint {
         implicitly,
         EndpointIO.Info.empty.copy(
           description = Some("Switch type."),
-          examples = List(Example("recurring-to-supporter-plus", None, None)),
+          examples = List(
+            Example("RecurringContributionToSupporterPlus", None, None),
+            Example("toRecurringContribution", None, None)),
         ), // A-S000001
       )
     }
