@@ -2,6 +2,9 @@ stacks:
   - membership
 regions:
   - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
 deployments:
   new-product-api-cloudformation:
     type: cloud-formation

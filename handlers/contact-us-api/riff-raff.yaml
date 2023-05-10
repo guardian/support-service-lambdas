@@ -2,7 +2,9 @@ stacks:
   - membership
 regions:
   - eu-west-1
-deployments:
+allowedStages:
+  - CODE
+  - PROD
 
   cfn:
     type: cloud-formation
