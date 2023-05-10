@@ -26,12 +26,12 @@ object RequestMapper {
   }
 
   def updatePath(path: String): String = {
-    val newEndpointPattern = "^/product-move/RecurringContributionToSupporterPlus/(.*)$".r
+    val newEndpointPattern = "^/product-move/([^/]+)/(.*)$".r
     val oldEndpointPattern = "^/product-move/(.*)$".r
 
     path match {
-      case newEndpointPattern(subscriptionName) =>
-        s"/product-move/RecurringContributionToSupporterPlus/$subscriptionName"
+      case newEndpointPattern(switchType, subscriptionName) =>
+        s"/product-move/$switchType/$subscriptionName"
       case oldEndpointPattern(subscriptionName) =>
         s"/product-move/RecurringContributionToSupporterPlus/$subscriptionName"
       case _ => path
