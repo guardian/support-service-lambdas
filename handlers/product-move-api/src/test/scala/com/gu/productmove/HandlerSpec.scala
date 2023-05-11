@@ -4,7 +4,7 @@ import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
 import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.{AvailableProductMovesEndpoint, Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
-import com.gu.productmove.endpoint.move.{MembershipToRecurringContribution, ProductMoveEndpoint, ProductMoveEndpointTypes, RecurringContributionToSupporterPlus}
+import com.gu.productmove.endpoint.move.{ToRecurringContribution, ProductMoveEndpoint, ProductMoveEndpointTypes, RecurringContributionToSupporterPlus}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, InternalServerError, OutputBody}
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
 import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, SubscriptionCancelEndpointTypes}
@@ -132,7 +132,7 @@ object HandlerSpec extends ZIOSpecDefault {
         (for {
           _ <- TestClock.setTime(time)
 
-          output <- MembershipToRecurringContribution(subscriptionName, endpointJsonInputBody)
+          output <- ToRecurringContribution(subscriptionName, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests

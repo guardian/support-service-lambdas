@@ -92,7 +92,8 @@ object ProductMoveEndpoint {
           description = Some("Switch type."),
           examples = List(
             Example("RecurringContributionToSupporterPlus", None, None),
-            Example("toRecurringContribution", None, None)),
+            Example("toRecurringContribution", None, None),
+          ),
         ), // A-S000001
       )
     }
@@ -159,7 +160,7 @@ object ProductMoveEndpoint {
   }
 
   enum SwitchType {
-    case RecurringContributionToSupporterPlus, MembershipToRecurringContribution
+    case RecurringContributionToSupporterPlus, ToRecurringContribution
   }
 
   private[productmove] def run(
@@ -170,8 +171,8 @@ object ProductMoveEndpoint {
     (switchType match {
       case SwitchType.RecurringContributionToSupporterPlus =>
         RecurringContributionToSupporterPlus(subscriptionName, postData)
-      case SwitchType.MembershipToRecurringContribution =>
-        MembershipToRecurringContribution(subscriptionName, postData)
+      case SwitchType.ToRecurringContribution =>
+        ToRecurringContribution(subscriptionName, postData)
     }).provide(
       GetSubscriptionLive.layer,
       AwsCredentialsLive.layer,
@@ -185,11 +186,6 @@ object ProductMoveEndpoint {
       DynamoLive.layer,
     )
 }
-
-extension [R, E, A](zio: ZIO[R, E, A])
-  def addLogMessage(message: String) = zio.catchAll { error =>
-    ZIO.fail(s"$message failed with: $error")
-  }
 
 extension (billingPeriod: BillingPeriod)
   def value: IO[ErrorResponse, String] =

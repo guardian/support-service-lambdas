@@ -33,7 +33,7 @@ import zio.{Clock, IO, URIO, ZIO}
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-object MembershipToRecurringContribution {
+object ToRecurringContribution {
   def apply(
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
