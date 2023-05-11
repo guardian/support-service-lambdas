@@ -1,17 +1,17 @@
-import {join} from "path";
-import {GuApiGatewayWithLambdaByPath} from "@guardian/cdk";
-import {GuAlarm} from "@guardian/cdk/lib/constructs/cloudwatch";
-import type {GuStackProps} from "@guardian/cdk/lib/constructs/core";
-import {GuStack} from "@guardian/cdk/lib/constructs/core";
-import {GuLambdaFunction} from "@guardian/cdk/lib/constructs/lambda";
-import type {App} from "aws-cdk-lib";
-import {Duration, Fn} from "aws-cdk-lib";
+import { join } from "path";
+import type { GuStackProps } from "@guardian/cdk/lib/constructs/core";
+import { GuStack } from "@guardian/cdk/lib/constructs/core";
+import type { App } from "aws-cdk-lib";
+import { CfnInclude } from "aws-cdk-lib/cloudformation-include";
+import {Runtime} from "aws-cdk-lib/aws-lambda";
 import {CfnBasePathMapping, CfnDomainName, Cors} from "aws-cdk-lib/aws-apigateway";
+import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
+import {GuLambdaFunction} from "@guardian/cdk/lib/constructs/lambda";
+import {GuApiGatewayWithLambdaByPath} from "@guardian/cdk";
+import {Duration, Fn} from "aws-cdk-lib";
+import {GuAlarm} from "@guardian/cdk/lib/constructs/cloudwatch";
 import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
-import {Runtime} from "aws-cdk-lib/aws-lambda";
-import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
-import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 
 export interface NewProductApiProps extends GuStackProps {
   domainName: string;
@@ -121,31 +121,31 @@ export class NewProductApi extends GuStack {
 
 
     // ---- DNS ---- //
-    // const certificateArn = `arn:aws:acm:${this.region}:${this.account}:certificate/${props.certificateId}`;
-    //
-    // const cfnDomainName = new CfnDomainName(this, "NewProductDomainName", {
-    //   domainName: props.domainName,
-    //   regionalCertificateArn: certificateArn,
-    //   endpointConfiguration: {
-    //     types: ["REGIONAL"]
-    //   }
-    // });
-    //
-    // new CfnBasePathMapping(this, "NewProductBasePathMapping", {
-    //   domainName: cfnDomainName.ref,
-    //   restApiId: newProductApi.api.restApiId,
-    //   stage: newProductApi.api.deploymentStage.stageName,
-    // });
-    //
-    // new CfnRecordSet(this, "NewProductDNSRecord", {
-    //   name: props.domainName,
-    //   type: "CNAME",
-    //   hostedZoneId: props.hostedZoneId,
-    //   ttl: "120",
-    //   resourceRecords: [
-    //     cfnDomainName.attrRegionalDomainName
-    //   ],
-    // });
+    const certificateArn = `arn:aws:acm:${this.region}:${this.account}:certificate/${props.certificateId}`;
+
+    const cfnDomainName = new CfnDomainName(this, "NewProductDomainName", {
+      domainName: props.domainName,
+      regionalCertificateArn: certificateArn,
+      endpointConfiguration: {
+        types: ["REGIONAL"]
+      }
+    });
+
+    new CfnBasePathMapping(this, "NewProductBasePathMapping", {
+      domainName: cfnDomainName.ref,
+      restApiId: newProductApi.api.restApiId,
+      stage: newProductApi.api.deploymentStage.stageName,
+    });
+
+    new CfnRecordSet(this, "NewProductDNSRecord", {
+      name: props.domainName,
+      type: "CNAME",
+      hostedZoneId: props.hostedZoneId,
+      ttl: "120",
+      resourceRecords: [
+        cfnDomainName.attrRegionalDomainName
+      ],
+    });
 
 
     // ---- Apply policies ---- //
@@ -190,7 +190,7 @@ export class NewProductApi extends GuStack {
           ],
           resources: [
             `arn:aws:s3:::fulfilment-date-calculator-${this.stage.toLowerCase()}/*`,
-            `arn:aws:s3:::gu-zuora-catalog/${this.stage === "DEV" ? "CODE" : this.stage}/Zuora-${this.stage}/catalog.json`
+            `arn:aws:s3:::gu-zuora-catalog/${this.stage}/Zuora-${this.stage}/catalog.json`
           ]
         }),
       ],

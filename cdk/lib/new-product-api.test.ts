@@ -1,6 +1,6 @@
 import { App } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
-import { codeProps, devProps, prodProps } from "../bin/cdk";
+import { devProps, codeProps, prodProps } from "../bin/cdk";
 import { NewProductApi } from "./new-product-api";
 
 describe("The NewProductApi stack", () => {
