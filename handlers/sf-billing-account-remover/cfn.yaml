@@ -75,35 +75,7 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
-          apiAccessKeyId:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/${Account}:SecretString:apiAccessKeyId}}'
-            - Account: !FindInMap [StageMap, !Ref Stage, ZuoraAccount]
-          apiSecretAccessKey:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/${Account}:SecretString:apiSecretAccessKey}}'
-            - Account: !FindInMap [StageMap, !Ref Stage, ZuoraAccount]
           authUrl: !FindInMap [StageMap, !Ref Stage, SalesforceUrl]
-          clientId:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${ConnectedApp}:SecretString:clientId}}'
-            - ConnectedApp: !FindInMap [StageMap, !Ref Stage, SalesforceConnectedApp]
-          clientSecret:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${ConnectedApp}:SecretString:clientSecret}}'
-            - ConnectedApp: !FindInMap [StageMap, !Ref Stage, SalesforceConnectedApp]
-          password:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:password}}'
-            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
-          token:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:token}}'
-            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
-          username:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:username}}'
-            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
           zuoraInstanceUrl: !FindInMap [StageMap, !Ref Stage, ZuoraUrl]
       Role:
         !GetAtt SFBillingAccountRemoverRole.Arn
