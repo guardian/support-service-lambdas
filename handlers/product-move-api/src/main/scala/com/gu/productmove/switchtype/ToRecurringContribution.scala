@@ -10,7 +10,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.{
 }
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes._
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
@@ -18,13 +18,14 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora._
-import com.gu.productmove._
+import com.gu.productmove.zuora.*
+import com.gu.productmove.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config
 import com.gu.util.config.ZuoraEnvironment
 import sttp.tapir.EndpointIO.Example
-import sttp.tapir._
+import sttp.tapir.*
 import sttp.tapir.json.zio.jsonBody
 import zio.ThreadLocalBridge.trace
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
@@ -63,7 +64,8 @@ object ToRecurringContribution {
           ),
         )
 
-      _ <- ZIO.log("Performing product move update")
+      _ <- ZIO.log(s"Performing product move update with switch type ${SwitchType.ToRecurringContribution.id}")
+
       account <- GetAccount.get(subscription.accountNumber)
 
       identityId <- ZIO
@@ -145,7 +147,7 @@ object ToRecurringContribution {
 
       requests = emailFuture.zip(salesforceTrackingFuture)
       _ <- requests.join
-    } yield Success("Product move completed successfully"))
+    } yield Success(s"Product move completed successfully with switch type ${SwitchType.ToRecurringContribution.id}"))
       .fold(error => error, success => success)
   }
 

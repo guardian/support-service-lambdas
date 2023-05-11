@@ -52,7 +52,7 @@ object HandlerSpec extends ZIOSpecDefault {
       test("productMove endpoint is successful for monthly sub (upsell)") {
         val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
-        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
+        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully with switch type recurring-contribution-to-supporter-plus")
         (for {
           _ <- TestClock.setTime(time)
           output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
@@ -82,7 +82,7 @@ object HandlerSpec extends ZIOSpecDefault {
       ) {
         val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
-        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
+        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully with switch type recurring-contribution-to-supporter-plus")
         val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageBodyNoPaymentOrRefund -> (), salesforceRecordInput3 -> ())
 
@@ -119,7 +119,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
           (subscriptionName, expectedRequestBody2)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
-        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully")
+        val expectedOutput = ProductMoveEndpointTypes.Success("Product move completed successfully with switch type to-recurring-contribution")
         val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())
 
