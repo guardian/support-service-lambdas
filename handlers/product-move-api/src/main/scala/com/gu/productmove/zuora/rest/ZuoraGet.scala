@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora.rest
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck
 import sttp.client3.basicRequest
 import sttp.model.Uri
@@ -14,7 +15,7 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
   override def get[T: JsonDecoder](
       relativeUrl: Uri,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[String, T] =
+  ): IO[ErrorResponse, T] =
     for {
       response <- zuoraClient.send(basicRequest.get(relativeUrl))
       parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[T](response, zuoraSuccessCheck))
@@ -24,7 +25,7 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
       relativeUrl: Uri,
       input: Request,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[String, Response] =
+  ): IO[ErrorResponse, Response] =
     for {
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).post(relativeUrl))
       parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck))
@@ -33,7 +34,7 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
   override def put[Request: JsonEncoder, Response: JsonDecoder](
       relativeUrl: Uri,
       input: Request,
-  ): IO[String, Response] =
+  ): IO[ErrorResponse, Response] =
     for {
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).put(relativeUrl))
       parsedBody <- ZIO.fromEither(
@@ -45,10 +46,10 @@ trait ZuoraGet:
   def get[T: JsonDecoder](
       relativeUrl: Uri,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[String, T]
+  ): IO[ErrorResponse, T]
   def post[Request: JsonEncoder, Response: JsonDecoder](
       relativeUrl: Uri,
       input: Request,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[String, Response]
-  def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[String, Response]
+  ): IO[ErrorResponse, Response]
+  def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[ErrorResponse, Response]

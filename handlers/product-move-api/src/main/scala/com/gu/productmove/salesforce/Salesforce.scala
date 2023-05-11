@@ -1,8 +1,10 @@
 package com.gu.productmove.salesforce
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
 import zio.ZIO
 import zio.json.*
+
 import java.time.LocalDate
 
 object Salesforce {
@@ -26,7 +28,7 @@ object Salesforce {
 
   def createSfRecord(
       salesforceRecordInput: SalesforceRecordInput,
-  ): ZIO[CreateRecord with GetSfSubscription, String, Unit] =
+  ): ZIO[CreateRecord with GetSfSubscription, ErrorResponse, Unit] =
     import salesforceRecordInput.*
 
     for {

@@ -4,13 +4,13 @@ import zio.{IO, ZIO}
 import zio.*
 import zio.Clock
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
 
 object BuildPreviewResult {
   def getPreviewResult(
       invoice: SubscriptionUpdateInvoice,
       ids: SupporterPlusRatePlanIds,
-  ): ZIO[Stage, String, PreviewResult] = {
+  ): ZIO[Stage, ErrorResponse, PreviewResult] = {
     val (supporterPlusInvoices, contributionInvoices) =
       invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.subscriptionRatePlanChargeId)
 
@@ -35,7 +35,9 @@ object BuildPreviewResult {
         )
       case (_, _) =>
         ZIO.fail(
-          s"Unexpected invoice item structure was returned from a Zuora preview call. Invoice data was: $invoice",
+          InternalServerError(
+            s"Unexpected invoice item structure was returned from a Zuora preview call. Invoice data was: $invoice",
+          ),
         )
     }
   }

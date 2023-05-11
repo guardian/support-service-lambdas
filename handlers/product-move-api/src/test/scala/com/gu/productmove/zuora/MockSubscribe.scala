@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
@@ -11,12 +12,12 @@ class MockSubscribe(responses: Map[(String, String), CreateSubscriptionResponse]
 
   def requests = mutableStore.reverse
 
-  override def create(zuoraAccountId: String, targetProductId: String): ZIO[Any, String, CreateSubscriptionResponse] = {
+  override def create(zuoraAccountId: String, targetProductId: String): ZIO[Any, ErrorResponse, CreateSubscriptionResponse] = {
     mutableStore = (zuoraAccountId, targetProductId) :: mutableStore
 
     responses.get((zuoraAccountId, targetProductId)) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"success = false")
+      case None => ZIO.fail(InternalServerError(s"success = false"))
   }
 }
 

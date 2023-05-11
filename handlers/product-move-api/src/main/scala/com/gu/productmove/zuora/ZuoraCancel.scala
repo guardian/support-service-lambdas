@@ -2,6 +2,7 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
@@ -21,7 +22,7 @@ trait ZuoraCancel:
   def cancel(
       subscriptionName: SubscriptionName,
       cancellationEffectiveDate: LocalDate,
-  ): ZIO[Any, String, CancellationResponse]
+  ): ZIO[Any, ErrorResponse, CancellationResponse]
 
 object ZuoraCancelLive:
   val layer: URLayer[ZuoraGet, ZuoraCancel] = ZLayer.fromFunction(ZuoraCancelLive(_))
@@ -30,7 +31,7 @@ private class ZuoraCancelLive(zuoraGet: ZuoraGet) extends ZuoraCancel:
   override def cancel(
       subscriptionName: SubscriptionName,
       cancellationEffectiveDate: LocalDate,
-  ): ZIO[Any, String, CancellationResponse] = {
+  ): ZIO[Any, ErrorResponse, CancellationResponse] = {
     val cancellationRequest = CancellationRequest(cancellationEffectiveDate)
 
     zuoraGet.put[CancellationRequest, CancellationResponse](
@@ -43,7 +44,7 @@ object ZuoraCancel {
   def cancel(
       subscriptionName: SubscriptionName,
       cancellationEffectiveDate: LocalDate,
-  ): ZIO[ZuoraCancel, String, CancellationResponse] =
+  ): ZIO[ZuoraCancel, ErrorResponse, CancellationResponse] =
     ZIO.serviceWithZIO[ZuoraCancel](_.cancel(subscriptionName, cancellationEffectiveDate))
 }
 

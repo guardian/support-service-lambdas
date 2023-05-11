@@ -2,7 +2,7 @@ package com.gu.productmove.zuora
 
 import com.gu.newproduct.api.productcatalog.BillingPeriod
 import com.gu.productmove.GuStageLive
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
@@ -26,12 +26,12 @@ class MockSubscriptionUpdate(
       price: BigDecimal,
       currency: Currency,
       ratePlanIdToRemove: String,
-  ): ZIO[Any, String, SubscriptionUpdateResponse] = {
+  ): ZIO[Any, ErrorResponse, SubscriptionUpdateResponse] = {
     mutableStore = (subscriptionName, billingPeriod, price, ratePlanIdToRemove) :: mutableStore
 
     updateResponse.get(subscriptionName, billingPeriod, price, ratePlanIdToRemove) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"success = false")
+      case None => ZIO.fail(InternalServerError(s"success = false"))
   }
 
   override def preview(
@@ -40,12 +40,12 @@ class MockSubscriptionUpdate(
       price: BigDecimal,
       currency: Currency,
       ratePlanIdToRemove: String,
-  ): ZIO[GuStageLive.Stage, String, PreviewResult] = {
+  ): ZIO[GuStageLive.Stage, ErrorResponse, PreviewResult] = {
     mutableStore = (subscriptionName, billingPeriod, price, ratePlanIdToRemove) :: mutableStore
 
     previewResponse.get(subscriptionName, billingPeriod, price, ratePlanIdToRemove) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"success = false")
+      case None => ZIO.fail(InternalServerError(s"success = false"))
   }
 
 }
