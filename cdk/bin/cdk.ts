@@ -6,7 +6,7 @@ import { NewProductApi } from "../lib/new-product-api";
 const app = new App();
 
 export const devProps: NewProductApiProps = {
-    stack: "support",
+    stack: "membership",
     stage: "DEV",
     domainName: "new-product-api-dev.membership.guardianapis.com",
     hostedZoneId: "Z1E4V12LQGXFEC",
@@ -17,7 +17,7 @@ export const devProps: NewProductApiProps = {
 };
 
 export const codeProps: NewProductApiProps = {
-    stack: "support",
+    stack: "membership",
     stage: "CODE",
     domainName: "new-product-api-code.membership.guardianapis.com",
     hostedZoneId: "Z1E4V12LQGXFEC",
@@ -28,7 +28,7 @@ export const codeProps: NewProductApiProps = {
 };
 
 export const prodProps: NewProductApiProps = {
-    stack: "support",
+    stack: "membership",
     stage: "PROD",
     domainName: "new-product-api-prod.membership.guardianapis.com",
     hostedZoneId: "Z1E4V12LQGXFEC",
