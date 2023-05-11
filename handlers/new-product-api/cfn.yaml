@@ -82,6 +82,7 @@ Resources:
                     - Effect: Allow
                       Action: s3:GetObject
                       Resource: !FindInMap [ StageMap, !Ref Stage, ZuoraCatalogLocation ]
+
     ProductCatalogRole:
       Type: AWS::IAM::Role
       Properties:
@@ -172,6 +173,7 @@ Resources:
         - NewProductApi
         - AddSubscriptionLambda
         - AddSubscriptionResource
+
     ProductCatalogLambda:
       Type: AWS::Lambda::Function
       Properties:
@@ -194,6 +196,7 @@ Resources:
         Timeout: 300
       DependsOn:
       - "ProductCatalogRole"
+
     ProductCatalogApiPermission:
         Type: AWS::Lambda::Permission
         Properties:
@@ -226,6 +229,7 @@ Resources:
             - NewProductApi
             - ProductCatalogLambda
             - ProductCatalogResource
+
     NewProductApi:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
