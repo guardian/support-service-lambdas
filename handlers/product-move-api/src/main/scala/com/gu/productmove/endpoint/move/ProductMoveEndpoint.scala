@@ -148,7 +148,7 @@ object ProductMoveEndpoint {
         )
     endpointDescription
       .serverLogic[TIO] { (switchTypeStr, subscriptionName, postData) =>
-        SwitchType.values.find(_.toString == switchTypeStr) match {
+        SwitchType.fromId(switchTypeStr) match {
           case Some(switchType) =>
             run(SubscriptionName(subscriptionName), switchType, postData)
               .tapEither(result => ZIO.log("result tapped: " + result))
@@ -159,10 +159,15 @@ object ProductMoveEndpoint {
       }
   }
 
-  enum SwitchType {
-    case RecurringContributionToSupporterPlus, ToRecurringContribution
+  enum SwitchType(val id: String) {
+    case RecurringContributionToSupporterPlus extends SwitchType("recurring-contribution-to-supporter-plus")
+    case ToRecurringContribution extends SwitchType("to-recurring-contribution")
   }
 
+  object SwitchType {
+    def fromId(id: String): Option[SwitchType] =
+      SwitchType.values.find(_.id == id)
+  }
   private[productmove] def run(
       subscriptionName: SubscriptionName,
       switchType: SwitchType,
