@@ -1,17 +1,17 @@
-import { join } from "path";
-import type { GuStackProps } from "@guardian/cdk/lib/constructs/core";
-import { GuStack } from "@guardian/cdk/lib/constructs/core";
-import type { App } from "aws-cdk-lib";
-import { CfnInclude } from "aws-cdk-lib/cloudformation-include";
-import {Runtime} from "aws-cdk-lib/aws-lambda";
-import {CfnBasePathMapping, CfnDomainName, Cors} from "aws-cdk-lib/aws-apigateway";
-import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
-import {GuLambdaFunction} from "@guardian/cdk/lib/constructs/lambda";
+import {join} from "path";
 import {GuApiGatewayWithLambdaByPath} from "@guardian/cdk";
-import {Duration, Fn} from "aws-cdk-lib";
 import {GuAlarm} from "@guardian/cdk/lib/constructs/cloudwatch";
+import type {GuStackProps} from "@guardian/cdk/lib/constructs/core";
+import {GuStack} from "@guardian/cdk/lib/constructs/core";
+import {GuLambdaFunction} from "@guardian/cdk/lib/constructs/lambda";
+import type { App } from "aws-cdk-lib";
+import {Duration, Fn} from "aws-cdk-lib";
+import {CfnBasePathMapping, CfnDomainName, Cors} from "aws-cdk-lib/aws-apigateway";
 import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
+import {Runtime} from "aws-cdk-lib/aws-lambda";
+import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
+import { CfnInclude } from "aws-cdk-lib/cloudformation-include";
 
 export interface NewProductApiProps extends GuStackProps {
   domainName: string;
