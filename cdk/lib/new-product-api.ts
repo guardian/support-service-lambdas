@@ -9,6 +9,10 @@ import {CfnBasePathMapping, CfnDomainName, Cors} from "aws-cdk-lib/aws-apigatewa
 import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
 import {GuLambdaFunction} from "@guardian/cdk/lib/constructs/lambda";
 import {GuApiGatewayWithLambdaByPath} from "@guardian/cdk";
+import {Duration, Fn} from "aws-cdk-lib";
+import {GuAlarm} from "@guardian/cdk/lib/constructs/cloudwatch";
+import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
+import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 
 export interface NewProductApiProps extends GuStackProps {
   domainName: string;
@@ -32,36 +36,42 @@ export class NewProductApi extends GuStack {
 
 
     // ---- Miscellaneous constants ---- //
+    const isProd = this.stage === 'PROD';
     const app = "new-product-api";
     const runtime = Runtime.JAVA_11;
     const fileName = "new-product-api.jar";
+    const memorySize = 1536;
+    const timeout = Duration.seconds(300);
     const environment = {
       "Stage": this.stage,
+      "EmailQueueName": Fn.importValue(`comms-${this.stage}-EmailQueueName`)
     };
     const sharedLambdaProps = {
       app,
       runtime,
       fileName,
+      memorySize,
+      timeout,
       environment,
     };
 
 
     // ---- API-triggered lambda functions ---- //
-    const addSubscriptionLambda = new GuLambdaFunction(this, "add-subscription", {
+    const addSubscriptionLambda = new GuLambdaFunction(this, "add-subscription-cdk", {
       handler: "com.gu.newproduct.api.addsubscription.Handler::apply",
-      functionName: `new-product-api-add-subscription-${this.stage}`,
+      functionName: `add-subscription-cdk-${this.stage}`,
       ...sharedLambdaProps,
     });
 
-    const productCatalogLambda = new GuLambdaFunction(this, "product-catalog", {
+    const productCatalogLambda = new GuLambdaFunction(this, "product-catalog-cdk", {
       handler: "com.gu.newproduct.api.productcatalog.Handler::apply",
-      functionName: `new-product-api-product-catalog-${this.stage}`,
+      functionName: `product-catalog-cdk-${this.stage}`,
       ...sharedLambdaProps,
     });
 
 
     // ---- API gateway ---- //
-    const newProductApi = new GuApiGatewayWithLambdaByPath(this, {
+    const newProductApiCDK = new GuApiGatewayWithLambdaByPath(this, {
       app,
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
@@ -89,31 +99,125 @@ export class NewProductApi extends GuStack {
     })
 
 
+    // ---- Alarms ---- //
+    new GuAlarm(this, 'ApiGateway4XXAlarm', {
+      app,
+      alarmName: `new-product-api-${this.stage} API gateway 4XX response`,
+      alarmDescription: "New Product API received an invalid request",
+      evaluationPeriods: 1,
+      threshold: 6,
+      actionsEnabled: isProd,
+      snsTopicName: "retention-dev",
+      comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      metric: new Metric({
+        metricName: "4XXError",
+        namespace: "AWS/ApiGateway",
+        statistic: "Sum",
+        period: Duration.seconds(900),
+        dimensionsMap: {
+          ApiName: `support-reminders-${this.stage}`,
+        }
+      }),
+    });
+
+
     // ---- DNS ---- //
     const certificateArn = `arn:aws:acm:${this.region}:${this.account}:certificate/${props.certificateId}`;
 
-    const cfnDomainName = new CfnDomainName(this, "NewProductDomainName", {
-      domainName: props.domainName,
-      regionalCertificateArn: certificateArn,
-      endpointConfiguration: {
-        types: ["REGIONAL"]
-      }
-    });
+    // const cfnDomainName = new CfnDomainName(this, "NewProductDomainName", {
+    //   domainName: props.domainName,
+    //   regionalCertificateArn: certificateArn,
+    //   endpointConfiguration: {
+    //     types: ["REGIONAL"]
+    //   }
+    // });
+    //
+    // new CfnBasePathMapping(this, "NewProductBasePathMapping", {
+    //   domainName: cfnDomainName.ref,
+    //   restApiId: newProductApi.api.restApiId,
+    //   stage: newProductApi.api.deploymentStage.stageName,
+    // });
+    //
+    // new CfnRecordSet(this, "NewProductDNSRecord", {
+    //   name: props.domainName,
+    //   type: "CNAME",
+    //   hostedZoneId: props.hostedZoneId,
+    //   ttl: "120",
+    //   resourceRecords: [
+    //     cfnDomainName.attrRegionalDomainName
+    //   ],
+    // });
 
-    new CfnBasePathMapping(this, "NewProductBasePathMapping", {
-      domainName: cfnDomainName.ref,
-      restApiId: newProductApi.api.restApiId,
-      stage: newProductApi.api.deploymentStage.stageName,
-    });
 
-    new CfnRecordSet(this, "NewProductDNSRecord", {
-      name: props.domainName,
-      type: "CNAME",
-      hostedZoneId: props.hostedZoneId,
-      ttl: "120",
-      resourceRecords: [
-        cfnDomainName.attrRegionalDomainName
+    // ---- Apply policies ---- //
+    const cloudwatchLogsInlinePolicy = (lambda: GuLambdaFunction): Policy => {
+      return new Policy(this, "cloudwatch-logs-inline-policy", {
+        statements: [
+          new PolicyStatement({
+            effect: Effect.ALLOW,
+            actions: [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents"
+            ],
+            resources: [
+              `arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/${lambda.functionName}:log-stream:*`
+            ]
+          }),
+        ],
+      })
+    }
+
+    const addSubscriptionS3InlinePolicy: Policy = new Policy(this, "add-subscription-s3-inline-policy", {
+      statements: [
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: [
+            "s3:GetObject"
+          ],
+          resources: [
+            `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${this.stage}/zuoraRest-${this.stage}*.json`,
+          ]
+        }),
       ],
-    });
+    })
+
+    const sharedS3InlinePolicy: Policy = new Policy(this, "shared-s3-inline-policy", {
+      statements: [
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: [
+            "s3:GetObject"
+          ],
+          resources: [
+            `arn:aws:s3:::fulfilment-date-calculator-${this.stage.toLowerCase()}/*`,
+            `arn:aws:s3:::gu-zuora-catalog/${this.stage}/Zuora-${this.stage}/catalog.json`
+          ]
+        }),
+      ],
+    })
+
+    const sqsInlinePolicy: Policy = new Policy(this, "sqs-inline-policy", {
+      statements: [
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: [
+            "sqs:GetQueueUrl",
+            "sqs:SendMessage"
+          ],
+          resources: [
+            `arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`
+          ]
+        }),
+      ],
+    })
+
+    addSubscriptionLambda.role?.attachInlinePolicy(cloudwatchLogsInlinePolicy(addSubscriptionLambda))
+    addSubscriptionLambda.role?.attachInlinePolicy(sharedS3InlinePolicy)
+    addSubscriptionLambda.role?.attachInlinePolicy(addSubscriptionS3InlinePolicy)
+    addSubscriptionLambda.role?.attachInlinePolicy(sqsInlinePolicy)
+
+    productCatalogLambda.role?.attachInlinePolicy(cloudwatchLogsInlinePolicy(productCatalogLambda))
+    productCatalogLambda.role?.attachInlinePolicy(sharedS3InlinePolicy)
   }
 }
