@@ -45,7 +45,7 @@ object Secrets {
   def getAwsCredentialsSetterSecrets: Option[AwsCredentialsSetterSecrets] = {
     for {
       stg <- stage
-      secretId: String = s"${stg}/InvoicingApi"
+      secretId: String = s"${stg}/Salesforce/User/AwsCredentialsSetter"
       secretJsonString = getJSONString(secretId)
       secrets <- Try(read[AwsCredentialsSetterSecrets](secretJsonString)).toOption
     } yield secrets
