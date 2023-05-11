@@ -113,6 +113,11 @@ object ProductMoveEndpoint {
               jsonBody[InternalServerError]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
             ),
+            oneOfVariant(
+              TransactionErrorStatusCode,
+              jsonBody[TransactionError]
+                .copy(info = EndpointIO.Info.empty.copy(description = Some("TransactionError."))),
+            ),
           ),
         )
         .summary("Replaces the existing subscription with a new one.")
@@ -144,32 +149,31 @@ object ProductMoveEndpoint {
         DynamoLive.layer,
       )
 
-  extension [R, E, A](zio: ZIO[R, E, A])
-    def addLogMessage(message: String) = zio.catchAll { error =>
-      ZIO.fail(s"$message failed with: $error")
-    }
-
   extension (billingPeriod: BillingPeriod)
-    def value: IO[String, String] =
+    def value: IO[ErrorResponse, String] =
       billingPeriod match {
         case Monthly => ZIO.succeed("month")
         case Annual => ZIO.succeed("annual")
-        case _ => ZIO.fail(s"Unrecognised billing period $billingPeriod")
+        case _ => ZIO.fail(InternalServerError(s"Unrecognised billing period $billingPeriod"))
       }
 
-  def getSingleOrNotEligible[A](list: List[A], message: String): IO[String, A] =
+  def getSingleOrNotEligible[A](list: List[A], message: String): IO[ErrorResponse, A] =
     list.length match {
       case 1 => ZIO.succeed(list.head)
-      case _ => ZIO.fail(message)
+      case _ => ZIO.fail(InternalServerError(message))
     }
 
   private[productmove] def productMove(
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
-  ): ZIO[GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage, String, OutputBody] =
+  ): ZIO[
+    GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage,
+    ErrorResponse,
+    OutputBody,
+  ] =
     (for {
       _ <- ZIO.log("PostData: " + postData.toString)
-      subscription <- GetSubscription.get(subscriptionName).addLogMessage("GetSubscription")
+      subscription <- GetSubscription.get(subscriptionName)
       currentRatePlan <- getSingleOrNotEligible(
         subscription.ratePlans,
         s"Subscription: ${subscriptionName.value} has more than one ratePlan",
@@ -181,8 +185,11 @@ object ProductMoveEndpoint {
       currency <- ZIO
         .fromOption(ratePlanCharge.currencyObject)
         .orElseFail(
-          s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
+          InternalServerError(
+            s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
+          ),
         )
+
       result <-
         if (postData.preview)
           doPreview(
@@ -204,7 +211,7 @@ object ProductMoveEndpoint {
             postData.csrUserId,
             postData.caseId,
           )
-    } yield result).fold(errorMessage => InternalServerError(errorMessage), success => success)
+    } yield result).fold(error => error, success => success)
 
   def doPreview(
       subscriptionName: SubscriptionName,
@@ -212,11 +219,10 @@ object ProductMoveEndpoint {
       billingPeriod: BillingPeriod,
       currency: Currency,
       currentRatePlanId: String,
-  ): ZIO[SubscriptionUpdate with Stage, String, OutputBody] = for {
+  ): ZIO[SubscriptionUpdate with Stage, ErrorResponse, OutputBody] = for {
     _ <- ZIO.log("Fetching Preview from Zuora")
     previewResponse <- SubscriptionUpdate
       .preview(subscriptionName, billingPeriod, price, currency, currentRatePlanId)
-      .addLogMessage("SubscriptionUpdate")
   } yield previewResponse
 
   def doUpdate(
@@ -229,18 +235,17 @@ object ProductMoveEndpoint {
       subscription: GetSubscription.GetSubscriptionResponse,
       csrUserId: Option[String],
       caseId: Option[String],
-  ) = for {
+  ): ZIO[Dynamo with SQS with SubscriptionUpdate with Stage with GetAccount, ErrorResponse, Success] = for {
     _ <- ZIO.log("Performing product move update")
     stage <- ZIO.service[Stage]
-    account <- GetAccount.get(subscription.accountNumber).addLogMessage("GetAccount")
+    account <- GetAccount.get(subscription.accountNumber)
 
     identityId <- ZIO
       .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(s"identityId is null for subscription name ${subscriptionName.value}")
+      .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
 
     updateResponse <- SubscriptionUpdate
       .update(SubscriptionName(subscription.id), billingPeriod, price, currency, currentRatePlan.id)
-      .addLogMessage("SubscriptionUpdate")
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriodValue <- billingPeriod.value

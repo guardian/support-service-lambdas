@@ -3,6 +3,7 @@ package com.gu.productmove.salesforce
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
@@ -20,19 +21,19 @@ object GetSfSubscriptionLive:
   val layer: URLayer[SalesforceClient, GetSfSubscription] = ZLayer.fromFunction(GetSfSubscriptionLive(_))
 
 private class GetSfSubscriptionLive(salesforceClient: SalesforceClient) extends GetSfSubscription:
-  override def get(subscriptionNumber: String): IO[String, GetSfSubscriptionResponse] =
+  override def get(subscriptionNumber: String): IO[ErrorResponse, GetSfSubscriptionResponse] =
     salesforceClient.get[GetSfSubscriptionResponse](
       uri"/services/data/v55.0/sobjects/SF_Subscription__c/Name/$subscriptionNumber",
     )
 
 trait GetSfSubscription:
-  def get(subscriptionNumber: String): IO[String, GetSfSubscriptionResponse]
+  def get(subscriptionNumber: String): IO[ErrorResponse, GetSfSubscriptionResponse]
 
 object GetSfSubscription {
 
   case class GetSfSubscriptionResponse(Id: String)
   given JsonDecoder[GetSfSubscriptionResponse] = DeriveJsonDecoder.gen[GetSfSubscriptionResponse]
 
-  def get(subscriptionNumber: String): ZIO[GetSfSubscription, String, GetSfSubscriptionResponse] =
+  def get(subscriptionNumber: String): ZIO[GetSfSubscription, ErrorResponse, GetSfSubscriptionResponse] =
     ZIO.serviceWithZIO[GetSfSubscription](_.get(subscriptionNumber))
 }

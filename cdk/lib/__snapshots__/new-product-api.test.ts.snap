@@ -1,0 +1,882 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The NewProductApi stack matches the snapshot 1`] = `
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Conditions": {
+    "CreateProdMonitoring": {
+      "Fn::Equals": [
+        {
+          "Ref": "Stage",
+        },
+        "PROD",
+      ],
+    },
+  },
+  "Description": "new product api",
+  "Mappings": {
+    "StageMap": {
+      "CODE": {
+        "ApiGatewayTargetDomainName": "d-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com",
+        "ApiName": "new-product-api-CODE",
+        "DomainName": "new-product-api-code.membership.guardianapis.com",
+        "FulfilmentDateCalculatorS3Resource": "arn:aws:s3:::fulfilment-date-calculator-code/*",
+        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-UAT/catalog.json",
+      },
+      "DEV": {
+        "ApiGatewayTargetDomainName": "d-papcvkgmc9.execute-api.eu-west-1.amazonaws.com",
+        "ApiName": "new-product-api-DEV",
+        "DomainName": "new-product-api-dev.membership.guardianapis.com",
+        "FulfilmentDateCalculatorS3Resource": "arn:aws:s3:::fulfilment-date-calculator-dev/*",
+        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-DEV/catalog.json",
+      },
+      "PROD": {
+        "ApiGatewayTargetDomainName": "d-yyh9pmqphi.execute-api.eu-west-1.amazonaws.com",
+        "ApiName": "new-product-api-PROD",
+        "DomainName": "new-product-api-prod.membership.guardianapis.com",
+        "FulfilmentDateCalculatorS3Resource": "arn:aws:s3:::fulfilment-date-calculator-prod/*",
+        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/catalog.json",
+      },
+    },
+  },
+  "Metadata": {
+    "gu:cdk:constructs": [],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "Stage": {
+      "AllowedValues": [
+        "PROD",
+        "CODE",
+        "DEV",
+      ],
+      "Default": "CODE",
+      "Description": "Stage name",
+      "Type": "String",
+    },
+  },
+  "Resources": {
+    "4xxApiAlarm": {
+      "Condition": "CreateProdMonitoring",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:retention-dev",
+          },
+        ],
+        "AlarmName": {
+          "Fn::Sub": [
+            "4XX rate from \${ApiName}",
+            {
+              "ApiName": {
+                "Fn::FindInMap": [
+                  "StageMap",
+                  {
+                    "Ref": "Stage",
+                  },
+                  "ApiName",
+                ],
+              },
+            },
+          ],
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": {
+              "Fn::FindInMap": [
+                "StageMap",
+                {
+                  "Ref": "Stage",
+                },
+                "ApiName",
+              ],
+            },
+          },
+          {
+            "Name": "Stage",
+            "Value": {
+              "Fn::Sub": "\${Stage}",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "4XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 900,
+        "Statistic": "Sum",
+        "Threshold": 6,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "5xxApiAlarm": {
+      "Condition": "CreateProdMonitoring",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:retention-dev",
+          },
+        ],
+        "AlarmName": {
+          "Fn::Sub": [
+            "5XX rate from \${ApiName}",
+            {
+              "ApiName": {
+                "Fn::FindInMap": [
+                  "StageMap",
+                  {
+                    "Ref": "Stage",
+                  },
+                  "ApiName",
+                ],
+              },
+            },
+          ],
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": {
+              "Fn::FindInMap": [
+                "StageMap",
+                {
+                  "Ref": "Stage",
+                },
+                "ApiName",
+              ],
+            },
+          },
+          {
+            "Name": "Stage",
+            "Value": {
+              "Fn::Sub": "\${Stage}",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 900,
+        "Statistic": "Sum",
+        "Threshold": 6,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "AddSubscriptionLambda": {
+      "DependsOn": [
+        "NewSubscriptionRole",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "support-service-lambdas-dist",
+          "S3Key": {
+            "Fn::Sub": "membership/\${Stage}/new-product-api/new-product-api.jar",
+          },
+        },
+        "Description": "add subscription to account",
+        "Environment": {
+          "Variables": {
+            "EmailQueueName": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "comms-\${Stage}-EmailQueueName",
+              },
+            },
+            "Stage": {
+              "Ref": "Stage",
+            },
+          },
+        },
+        "FunctionName": {
+          "Fn::Sub": "add-subscription-\${Stage}",
+        },
+        "Handler": "com.gu.newproduct.api.addsubscription.Handler::apply",
+        "MemorySize": 1536,
+        "Role": {
+          "Fn::GetAtt": [
+            "NewSubscriptionRole",
+            "Arn",
+          ],
+        },
+        "Runtime": "java11",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "AddSubscriptionMethod": {
+      "DependsOn": [
+        "AddSubscriptionLambda",
+        "AddSubscriptionResource",
+        "NewProductApi",
+      ],
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:\${AWS::Region}:lambda:path/2015-03-31/functions/\${AddSubscriptionLambda.Arn}/invocations",
+          },
+        },
+        "ResourceId": {
+          "Ref": "AddSubscriptionResource",
+        },
+        "RestApiId": {
+          "Ref": "NewProductApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "AddSubscriptionResource": {
+      "DependsOn": [
+        "NewProductApi",
+      ],
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "NewProductApi",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "add-subscription",
+        "RestApiId": {
+          "Ref": "NewProductApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "NewProductAPIPermission": {
+      "DependsOn": [
+        "AddSubscriptionLambda",
+      ],
+      "Properties": {
+        "Action": "lambda:invokeFunction",
+        "FunctionName": {
+          "Fn::Sub": "add-subscription-\${Stage}",
+        },
+        "Principal": "apigateway.amazonaws.com",
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "NewProductApi": {
+      "Properties": {
+        "Description": "salesforce calls this api to enable csrs to add subscriptions to accounts",
+        "Name": {
+          "Fn::FindInMap": [
+            "StageMap",
+            {
+              "Ref": "Stage",
+            },
+            "ApiName",
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "NewProductApiDeployment": {
+      "DependsOn": [
+        "AddSubscriptionMethod",
+        "ProductCatalogMethod",
+      ],
+      "Properties": {
+        "Description": "Deploys new-product-api into an environment/stage",
+        "RestApiId": {
+          "Ref": "NewProductApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "NewProductApiKey": {
+      "DependsOn": [
+        "NewProductApi",
+        "NewProductApiStage",
+      ],
+      "Properties": {
+        "Description": "Key required to call new product API",
+        "Enabled": true,
+        "Name": {
+          "Fn::Sub": "new-product-api-key-\${Stage}",
+        },
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "NewProductApi",
+            },
+            "StageName": {
+              "Fn::Sub": "\${Stage}",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "NewProductApiStage": {
+      "DependsOn": [
+        "AddSubscriptionMethod",
+        "ProductCatalogMethod",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "NewProductApiDeployment",
+        },
+        "Description": "Stage for new product api",
+        "RestApiId": {
+          "Ref": "NewProductApi",
+        },
+        "StageName": {
+          "Fn::Sub": "\${Stage}",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "NewProductBasePathMapping": {
+      "DependsOn": [
+        "NewProductApi",
+        "NewProductApiStage",
+        "NewProductDomainName",
+      ],
+      "Properties": {
+        "DomainName": {
+          "Ref": "NewProductDomainName",
+        },
+        "RestApiId": {
+          "Ref": "NewProductApi",
+        },
+        "Stage": {
+          "Fn::Sub": "\${Stage}",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "NewProductDNSRecord": {
+      "Properties": {
+        "Comment": {
+          "Fn::Sub": "CNAME for new product API \${Stage}",
+        },
+        "HostedZoneName": "membership.guardianapis.com.",
+        "Name": {
+          "Fn::FindInMap": [
+            "StageMap",
+            {
+              "Ref": "Stage",
+            },
+            "DomainName",
+          ],
+        },
+        "ResourceRecords": [
+          {
+            "Fn::FindInMap": [
+              "StageMap",
+              {
+                "Ref": "Stage",
+              },
+              "ApiGatewayTargetDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "NewProductDomainName": {
+      "Properties": {
+        "DomainName": {
+          "Fn::FindInMap": [
+            "StageMap",
+            {
+              "Ref": "Stage",
+            },
+            "DomainName",
+          ],
+        },
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Sub": "arn:aws:acm:\${AWS::Region}:\${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "NewProductUsagePlan": {
+      "DependsOn": [
+        "NewProductApi",
+        "NewProductApiStage",
+      ],
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "NewProductApi",
+            },
+            "Stage": {
+              "Ref": "NewProductApiStage",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "UsagePlanName": {
+          "Fn::Sub": "new-product-api-usage-plan-\${Stage}",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "NewProductUsagePlanKey": {
+      "DependsOn": [
+        "NewProductApiKey",
+        "NewProductUsagePlan",
+      ],
+      "Properties": {
+        "KeyId": {
+          "Ref": "NewProductApiKey",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "NewProductUsagePlan",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "NewSubscriptionRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                ],
+              },
+            },
+          ],
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "lambda:InvokeFunction",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:\${AWS::Region}:\${AWS::AccountId}:log-group:/aws/lambda/add-subscription-\${Stage}:log-stream:*",
+                  },
+                },
+              ],
+            },
+            "PolicyName": "LambdaPolicy",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "s3:GetObject",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/\${Stage}/zuoraRest-\${Stage}*.json",
+                    },
+                    {
+                      "Fn::FindInMap": [
+                        "StageMap",
+                        {
+                          "Ref": "Stage",
+                        },
+                        "FulfilmentDateCalculatorS3Resource",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            "PolicyName": "ReadPrivateCredentials",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "sqs:GetQueueUrl",
+                    "sqs:SendMessage",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "comms-\${Stage}-EmailQueueArn",
+                    },
+                  },
+                },
+              ],
+            },
+            "PolicyName": "SQSAddEmailRequest",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "s3:GetObject",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage",
+                      },
+                      "ZuoraCatalogLocation",
+                    ],
+                  },
+                },
+              ],
+            },
+            "PolicyName": "ReadZuoraCatalog",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ProductCatalogApiPermission": {
+      "DependsOn": [
+        "ProductCatalogLambda",
+      ],
+      "Properties": {
+        "Action": "lambda:invokeFunction",
+        "FunctionName": {
+          "Fn::Sub": "product-catalog-\${Stage}",
+        },
+        "Principal": "apigateway.amazonaws.com",
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "ProductCatalogLambda": {
+      "DependsOn": [
+        "ProductCatalogRole",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "support-service-lambdas-dist",
+          "S3Key": {
+            "Fn::Sub": "membership/\${Stage}/new-product-api/new-product-api.jar",
+          },
+        },
+        "Description": "get description of available products",
+        "Environment": {
+          "Variables": {
+            "Stage": {
+              "Ref": "Stage",
+            },
+          },
+        },
+        "FunctionName": {
+          "Fn::Sub": "product-catalog-\${Stage}",
+        },
+        "Handler": "com.gu.newproduct.api.productcatalog.Handler::apply",
+        "MemorySize": 1536,
+        "Role": {
+          "Fn::GetAtt": [
+            "ProductCatalogRole",
+            "Arn",
+          ],
+        },
+        "Runtime": "java11",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "ProductCatalogMethod": {
+      "DependsOn": [
+        "NewProductApi",
+        "ProductCatalogLambda",
+        "ProductCatalogResource",
+      ],
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:\${AWS::Region}:lambda:path/2015-03-31/functions/\${ProductCatalogLambda.Arn}/invocations",
+          },
+        },
+        "ResourceId": {
+          "Ref": "ProductCatalogResource",
+        },
+        "RestApiId": {
+          "Ref": "NewProductApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "ProductCatalogResource": {
+      "DependsOn": [
+        "NewProductApi",
+      ],
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "NewProductApi",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "product-catalog",
+        "RestApiId": {
+          "Ref": "NewProductApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "ProductCatalogRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                ],
+              },
+            },
+          ],
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "lambda:InvokeFunction",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:\${AWS::Region}:\${AWS::AccountId}:log-group:/aws/lambda/product-catalog-\${Stage}:log-stream:*",
+                  },
+                },
+              ],
+            },
+            "PolicyName": "LambdaPolicy",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "s3:GetObject",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::FindInMap": [
+                        "StageMap",
+                        {
+                          "Ref": "Stage",
+                        },
+                        "ZuoraCatalogLocation",
+                      ],
+                    },
+                    {
+                      "Fn::FindInMap": [
+                        "StageMap",
+                        {
+                          "Ref": "Stage",
+                        },
+                        "FulfilmentDateCalculatorS3Resource",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            "PolicyName": "ReadZuoraCatalog",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+  },
+}
+`;
