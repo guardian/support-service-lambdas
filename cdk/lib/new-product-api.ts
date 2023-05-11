@@ -3,7 +3,6 @@ import type { GuStackProps } from "@guardian/cdk/lib/constructs/core";
 import { GuStack } from "@guardian/cdk/lib/constructs/core";
 import type { App } from "aws-cdk-lib";
 import { CfnInclude } from "aws-cdk-lib/cloudformation-include";
-import {GuVpc} from "@guardian/cdk/lib/constructs/ec2";
 import {Runtime} from "aws-cdk-lib/aws-lambda";
 import {CfnBasePathMapping, CfnDomainName, Cors} from "aws-cdk-lib/aws-apigateway";
 import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
@@ -71,7 +70,7 @@ export class NewProductApi extends GuStack {
 
 
     // ---- API gateway ---- //
-    const newProductApiCDK = new GuApiGatewayWithLambdaByPath(this, {
+    const newProductApi = new GuApiGatewayWithLambdaByPath(this, {
       app,
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
@@ -124,34 +123,34 @@ export class NewProductApi extends GuStack {
     // ---- DNS ---- //
     const certificateArn = `arn:aws:acm:${this.region}:${this.account}:certificate/${props.certificateId}`;
 
-    // const cfnDomainName = new CfnDomainName(this, "NewProductDomainName", {
-    //   domainName: props.domainName,
-    //   regionalCertificateArn: certificateArn,
-    //   endpointConfiguration: {
-    //     types: ["REGIONAL"]
-    //   }
-    // });
-    //
-    // new CfnBasePathMapping(this, "NewProductBasePathMapping", {
-    //   domainName: cfnDomainName.ref,
-    //   restApiId: newProductApi.api.restApiId,
-    //   stage: newProductApi.api.deploymentStage.stageName,
-    // });
-    //
-    // new CfnRecordSet(this, "NewProductDNSRecord", {
-    //   name: props.domainName,
-    //   type: "CNAME",
-    //   hostedZoneId: props.hostedZoneId,
-    //   ttl: "120",
-    //   resourceRecords: [
-    //     cfnDomainName.attrRegionalDomainName
-    //   ],
-    // });
+    const cfnDomainName = new CfnDomainName(this, "NewProductDomainName", {
+      domainName: props.domainName,
+      regionalCertificateArn: certificateArn,
+      endpointConfiguration: {
+        types: ["REGIONAL"]
+      }
+    });
+
+    new CfnBasePathMapping(this, "NewProductBasePathMapping", {
+      domainName: cfnDomainName.ref,
+      restApiId: newProductApi.api.restApiId,
+      stage: newProductApi.api.deploymentStage.stageName,
+    });
+
+    new CfnRecordSet(this, "NewProductDNSRecord", {
+      name: props.domainName,
+      type: "CNAME",
+      hostedZoneId: props.hostedZoneId,
+      ttl: "120",
+      resourceRecords: [
+        cfnDomainName.attrRegionalDomainName
+      ],
+    });
 
 
     // ---- Apply policies ---- //
-    const cloudwatchLogsInlinePolicy = (lambda: GuLambdaFunction): Policy => {
-      return new Policy(this, "cloudwatch-logs-inline-policy", {
+    const cloudwatchLogsInlinePolicy = (lambda: GuLambdaFunction, idPrefix: string): Policy => {
+      return new Policy(this, `${idPrefix}-cloudwatch-logs-inline-policy`, {
         statements: [
           new PolicyStatement({
             effect: Effect.ALLOW,
@@ -212,12 +211,12 @@ export class NewProductApi extends GuStack {
       ],
     })
 
-    addSubscriptionLambda.role?.attachInlinePolicy(cloudwatchLogsInlinePolicy(addSubscriptionLambda))
+    addSubscriptionLambda.role?.attachInlinePolicy(cloudwatchLogsInlinePolicy(addSubscriptionLambda, "add-subscription"))
     addSubscriptionLambda.role?.attachInlinePolicy(sharedS3InlinePolicy)
     addSubscriptionLambda.role?.attachInlinePolicy(addSubscriptionS3InlinePolicy)
     addSubscriptionLambda.role?.attachInlinePolicy(sqsInlinePolicy)
 
-    productCatalogLambda.role?.attachInlinePolicy(cloudwatchLogsInlinePolicy(productCatalogLambda))
+    productCatalogLambda.role?.attachInlinePolicy(cloudwatchLogsInlinePolicy(productCatalogLambda, "product-catalog"))
     productCatalogLambda.role?.attachInlinePolicy(sharedS3InlinePolicy)
   }
 }
