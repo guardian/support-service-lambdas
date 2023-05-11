@@ -2,6 +2,7 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.{
   CaseId,
   ChargeOverrides,
@@ -30,7 +31,7 @@ trait ZuoraSetCancellationReason:
       subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
       userCancellationReason: String,
-  ): ZIO[Any, String, UpdateResponse]
+  ): ZIO[Any, ErrorResponse, UpdateResponse]
 
 object ZuoraSetCancellationReasonLive:
   val layer: URLayer[ZuoraGet, ZuoraSetCancellationReason] = ZLayer.fromFunction(ZuoraSetCancellationReasonLive(_))
@@ -40,7 +41,7 @@ private class ZuoraSetCancellationReasonLive(zuoraGet: ZuoraGet) extends ZuoraSe
       subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
       userCancellationReason: String,
-  ): ZIO[Any, String, UpdateResponse] = {
+  ): ZIO[Any, ErrorResponse, UpdateResponse] = {
     val updateRequest = UpdateRequest(CustomFields(userCancellationReason))
 
     zuoraGet.put[UpdateRequest, UpdateResponse](
@@ -54,7 +55,7 @@ object ZuoraSetCancellationReason {
       subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
       userCancellationReason: String,
-  ): ZIO[ZuoraSetCancellationReason, String, UpdateResponse] =
+  ): ZIO[ZuoraSetCancellationReason, ErrorResponse, UpdateResponse] =
     ZIO.serviceWithZIO[ZuoraSetCancellationReason](
       _.update(subscriptionName, subscriptionVersion, userCancellationReason),
     )
