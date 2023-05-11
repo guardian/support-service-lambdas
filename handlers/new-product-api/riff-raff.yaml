@@ -3,12 +3,13 @@ stacks:
 regions:
 - eu-west-1
 deployments:
-
-  cfn:
+  new-product-api-cloudformation:
     type: cloud-formation
     app: new-product-api
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: new-product-api-CODE.template.json
+        PROD: new-product-api-PROD.template.json
 
   new-product-api:
     type: aws-lambda
@@ -19,4 +20,4 @@ deployments:
       functionNames:
       - add-subscription-
       - product-catalog-
-    dependencies: [cfn]
+    dependencies: [new-product-api-cloudformation]

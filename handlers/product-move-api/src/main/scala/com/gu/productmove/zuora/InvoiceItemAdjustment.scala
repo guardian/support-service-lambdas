@@ -3,6 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.InvoiceItemAdjustment.*
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck.None
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
@@ -28,7 +29,7 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
       invoiceId: String,
       amount: BigDecimal,
       invoiceItemId: String,
-  ): IO[String, InvoiceItemAdjustmentResponse] =
+  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse] =
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
       response <- zuoraGet.post[PostBody, InvoiceItemAdjustmentResponse](
@@ -39,7 +40,7 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
     } yield response
 
 trait InvoiceItemAdjustment:
-  def update(invoiceId: String, amount: BigDecimal, invoiceItemId: String): IO[String, InvoiceItemAdjustmentResponse]
+  def update(invoiceId: String, amount: BigDecimal, invoiceItemId: String): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
 
 object InvoiceItemAdjustment {
 
@@ -62,6 +63,6 @@ object InvoiceItemAdjustment {
       invoiceId: String,
       amount: BigDecimal,
       invoiceItemId: String,
-  ): ZIO[InvoiceItemAdjustment, String, InvoiceItemAdjustmentResponse] =
+  ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResponse] =
     ZIO.serviceWithZIO[InvoiceItemAdjustment](_.update(invoiceId, amount, invoiceItemId))
 }

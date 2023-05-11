@@ -3,6 +3,7 @@ package com.gu.productmove.salesforce
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.salesforce.CreateRecord.{CreateRecordRequest, CreateRecordResponse}
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
 import com.gu.productmove.zuora.rest.ZuoraGet
@@ -21,14 +22,14 @@ object CreateRecordLive:
   val layer: URLayer[SalesforceClient, CreateRecord] = ZLayer.fromFunction(CreateRecordLive(_))
 
 private class CreateRecordLive(salesforceClient: SalesforceClient) extends CreateRecord:
-  override def create(requestBody: CreateRecordRequest): IO[String, CreateRecordResponse] =
+  override def create(requestBody: CreateRecordRequest): IO[ErrorResponse, CreateRecordResponse] =
     salesforceClient.post[CreateRecordRequest, CreateRecordResponse](
       requestBody,
       uri"/services/data/v55.0/sobjects/Subscription_Rate_Plan_Update__c/",
     )
 
 trait CreateRecord:
-  def create(requestBody: CreateRecordRequest): IO[String, CreateRecordResponse]
+  def create(requestBody: CreateRecordRequest): IO[ErrorResponse, CreateRecordResponse]
 
 object CreateRecord {
   case class CreateRecordRequest(
@@ -51,6 +52,6 @@ object CreateRecord {
   case class CreateRecordResponse(id: String)
   given JsonDecoder[CreateRecordResponse] = DeriveJsonDecoder.gen[CreateRecordResponse]
 
-  def create(requestBody: CreateRecordRequest): ZIO[CreateRecord, String, CreateRecordResponse] =
+  def create(requestBody: CreateRecordRequest): ZIO[CreateRecord, ErrorResponse, CreateRecordResponse] =
     ZIO.serviceWithZIO[CreateRecord](_.create(requestBody))
 }

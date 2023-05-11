@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{InvoiceItemsForSubscription, PostBody, getZuoraQuery}
 import com.gu.productmove.zuora.rest.ZuoraRestBody
 import sttp.client3.Request
@@ -135,7 +136,7 @@ object MockGetInvoicesZuoraClient {
 
 class MockGetInvoicesZuoraClient(response: MockGetInvoicesZuoraClient.ClientResponse) extends ZuoraClient {
 
-  override def send(request: Request[Either[String, String], Any]): IO[String, String] =
+  override def send(request: Request[Either[String, String], Any]): IO[ErrorResponse, String] =
     ZIO.succeed(response);
 
 }
