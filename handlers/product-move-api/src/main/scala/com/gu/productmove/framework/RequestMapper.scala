@@ -33,7 +33,7 @@ object RequestMapper {
       case newEndpointPattern(switchType, subscriptionName) =>
         s"/product-move/$switchType/$subscriptionName"
       case oldEndpointPattern(subscriptionName) =>
-        s"/product-move/RecurringContributionToSupporterPlus/$subscriptionName"
+        s"/product-move/recurring-contribution-to-supporter-plus/$subscriptionName"
       case _ => path
     }
   }
