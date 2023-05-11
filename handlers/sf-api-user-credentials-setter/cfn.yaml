@@ -64,35 +64,6 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
-          authUrl:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:authUrl::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
-          clientId:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:clientId::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
-          clientSecret:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:clientSecret::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
-          password:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:password::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
-          token:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:token::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
-          username:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:username::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
-          stageName:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:stageName::${SecretsVersion}}}'
-            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
-
       Role:
         !GetAtt SfApiUserCredentialsSetterRole.Arn
       MemorySize: 512
