@@ -15,7 +15,8 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: new-product-api.jar
-      bucket: support-service-lambdas-dist
+#      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - add-subscription-
