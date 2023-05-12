@@ -255,30 +255,6 @@ Resources:
           Stage: !Ref Stage
           bucketName: !Sub emails-from-sf-${Stage}
           sfApiVersion: v50.0
-          sfAuthUrl:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${AppName}:SecretString:authUrl}}'
-            - AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
-          sfClientId:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientId}}'
-            - AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
-          sfClientSecret:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${AppName}:SecretString:clientSecret}}'
-            - AppName: !FindInMap [ StageMap, !Ref Stage, AppName ]
-          sfPassword:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${SalesforceUsername}:SecretString:sfPassword}}'
-            - SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
-          sfToken:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${SalesforceUsername}:SecretString:sfToken}}'
-            - SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
-          sfUsername:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${SalesforceUsername}:SecretString:sfUsername}}'
-            - SalesforceUsername: !FindInMap [ StageMap, !Ref Stage, SalesforceUsername ]
       Policies:
         - Statement:
             - Effect: Allow
