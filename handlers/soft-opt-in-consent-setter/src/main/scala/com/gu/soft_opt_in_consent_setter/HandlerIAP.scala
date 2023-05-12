@@ -118,7 +118,9 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       consents <- consentsCalculator.getSoftOptInsByProduct(message.productName)
       consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
       _ <- {
-        logger.info(s"Sending consents request for identityId ${message.identityId} with payload: $consentsBody")
+        logger.info(
+          s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody",
+        )
         sendConsentsReq(message.identityId, consentsBody)
       }
     } yield ()
@@ -174,7 +176,9 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       )
 
       res <- {
-        logger.info(s"Sending consents request for identityId ${messageBody.identityId} with payload: $consentsBody")
+        logger.info(
+          s"(product switch) Sending consents request for identityId ${messageBody.identityId} with payload: $consentsBody",
+        )
         sendConsentsReq(messageBody.identityId, consentsBody)
       }
     } yield res
@@ -192,7 +196,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
           _ <- {
             val consentsBody = consentsCalculator.buildConsentsBody(consents, state = false)
             logger.info(
-              s"Sending cancellation consents request for identityId $identityId with payload: $consentsBody",
+              s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
             )
             sendConsentsReq(identityId, consentsBody)
           }
