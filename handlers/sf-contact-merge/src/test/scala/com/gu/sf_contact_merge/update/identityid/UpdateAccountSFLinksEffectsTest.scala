@@ -41,7 +41,9 @@ class UpdateAccountSFLinksEffectsTest extends AnyFlatSpec with Matchers {
         _: AccountId,
       )
       _ <- updateAccount(CodeZuora.accountWithRandomLinks).toApiGatewayOp("AddIdentityIdToAccount")
-      basicInfo <- GetZuoraAccount(zuoraDeps)(CodeZuora.accountWithRandomLinks).toApiGatewayOp("GetIdentityIdForAccount")
+      basicInfo <- GetZuoraAccount(zuoraDeps)(CodeZuora.accountWithRandomLinks).toApiGatewayOp(
+        "GetIdentityIdForAccount",
+      )
     } yield basicInfo
     actual.toDisjunction should be(
       Right(
