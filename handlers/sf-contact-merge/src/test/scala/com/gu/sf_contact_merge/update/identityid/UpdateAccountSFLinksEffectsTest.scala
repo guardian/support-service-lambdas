@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.update.identityid
 
-import com.gu.DevZuora
+import com.gu.CodeZuora
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.TypeConvert._
@@ -22,12 +22,12 @@ import org.scalatest.matchers.should.Matchers
 // run this manually
 class UpdateAccountSFLinksEffectsTest extends AnyFlatSpec with Matchers {
 
-  it should "successfully UPDATE the identity id against dev" taggedAs EffectsTest in {
+  it should "successfully UPDATE the identity id against CODE" taggedAs EffectsTest in {
 
     val unique = s"${Random.nextInt(10000)}"
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
         .toApiGatewayOp("load config")
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       update = UpdateAccountSFLinks(zuoraDeps.put)
@@ -40,8 +40,8 @@ class UpdateAccountSFLinksEffectsTest extends AnyFlatSpec with Matchers {
         ),
         _: AccountId,
       )
-      _ <- updateAccount(DevZuora.accountWithRandomLinks).toApiGatewayOp("AddIdentityIdToAccount")
-      basicInfo <- GetZuoraAccount(zuoraDeps)(DevZuora.accountWithRandomLinks).toApiGatewayOp("GetIdentityIdForAccount")
+      _ <- updateAccount(CodeZuora.accountWithRandomLinks).toApiGatewayOp("AddIdentityIdToAccount")
+      basicInfo <- GetZuoraAccount(zuoraDeps)(CodeZuora.accountWithRandomLinks).toApiGatewayOp("GetIdentityIdForAccount")
     } yield basicInfo
     actual.toDisjunction should be(
       Right(

@@ -27,6 +27,6 @@ aws --profile membership ssm put-parameter --overwrite --type SecureString --key
 
 For example these command would create the properties for the [example app](src/test/scala/com/gu/util/config/ConfigCatsExample.scala):
 ```$bash
-aws --profile membership ssm put-parameter --overwrite --type String --name /DEV/membership-DEV-example-app/example-app-DEV/example --value  example-value
-aws --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /DEV/membership-DEV-example-app/example-app-DEV/secretExample --value secret-example-value
+aws --profile membership ssm put-parameter --overwrite --type String --name /CODE/membership-CODE-example-app/example-app-CODE/example --value  example-value
+aws --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /CODE/membership-CODE-example-app/example-app-CODE/secretExample --value secret-example-value
 ```

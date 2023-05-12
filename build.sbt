@@ -555,7 +555,7 @@ lazy val `product-move-api` = lambdaProject(
     genDocs := genDocsImpl("com.gu.productmove.MakeDocsYaml").value
 
     lazy val deployTo =
-      inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+      inputKey[Unit]("Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop")
 
     // run from product-move-api project eg. deployTo CODE
     // product-move-api needs its own deploy task currently because firstly it's Scala 3 so the jar path is different to
@@ -692,13 +692,13 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
   dependencyOverrides ++= jacksonDependencies
   lazy val deployTo =
     inputKey[Unit](
-      "Command to directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop",
+      "Command to directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop",
     )
 
   /*
   To run script in sbt shell:
     1. run `project stripe-webhook-endpoints`
-    2. run `deployTo CODE` or `deployTo DEV`
+    2. run `deployTo CODE`
    */
   deployTo := {
     import scala.sys.process._
@@ -737,7 +737,7 @@ initialize := {
 }
 
 lazy val deployAwsLambda =
-  inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+  inputKey[Unit]("Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop")
 deployAwsLambda := {
   import scala.sys.process._
   import complete.DefaultParsers._

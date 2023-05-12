@@ -405,7 +405,7 @@ object ZuoraIds {
           sixDayPlus = ProductRatePlanId("2c92c0f870f682820171070470ad4120"),
         ),
       ),
-      Stage("DEV") -> ZuoraIds(
+      Stage("CODE") -> ZuoraIds(
         SupporterPlusZuoraIds(
           monthly = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("8ad09fc281de1ce70181de3b251736a4"),

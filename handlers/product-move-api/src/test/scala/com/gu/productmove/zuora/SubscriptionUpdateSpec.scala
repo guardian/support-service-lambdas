@@ -68,7 +68,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               )
             }
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       },
@@ -135,7 +135,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(response)(equalTo(expectedResponse))
       },
@@ -157,7 +157,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(response)(equalTo(expectedResponse))
       },

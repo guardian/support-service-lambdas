@@ -118,7 +118,7 @@ object Runner {
     )
     // execute
     ReportsLambda[REQUEST, RESPONSE](
-      Stage("DEV"),
+      Stage("CODE"),
       FakeFetchString.fetchString,
       LambdaIO(stream, os, null),
       wire,
