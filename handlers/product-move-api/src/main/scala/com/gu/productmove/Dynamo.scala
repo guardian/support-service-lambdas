@@ -2,7 +2,7 @@ package com.gu.productmove
 
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.supporterdata.model.Stage.{DEV, PROD, UAT}
+import com.gu.supporterdata.model.Stage.{PROD, DEV}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.supporterdata.services.SupporterDataDynamoService
 
@@ -24,8 +24,8 @@ object Dynamo {
 object DynamoLive {
   private def getStage(stage: Stage) = {
     stage match
-      case Stage.DEV => DEV
-      case Stage.CODE => DEV
+      case Stage.CODE =>
+        DEV // TODO: to update this to CODE we need to release a new version of supporter-product-data-dynamo library
       case Stage.PROD => PROD
   }
 
