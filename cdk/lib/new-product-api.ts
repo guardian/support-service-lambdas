@@ -190,7 +190,7 @@ export class NewProductApi extends GuStack {
           ],
           resources: [
             `arn:aws:s3:::fulfilment-date-calculator-${this.stage.toLowerCase()}/*`,
-            `arn:aws:s3:::gu-zuora-catalog/${this.stage}/Zuora-${this.stage === 'CODE' ? 'UAT' : this.stage}/catalog.json`
+            `arn:aws:s3:::gu-zuora-catalog/${this.stage === "DEV" ? "CODE" : this.stage}/Zuora-${this.stage}/catalog.json`
           ]
         }),
       ],
