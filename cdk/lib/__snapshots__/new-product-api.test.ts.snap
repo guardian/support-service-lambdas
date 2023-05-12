@@ -4231,7 +4231,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3:::fulfilment-date-calculator-code/*",
-                "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-UAT/catalog.json",
+                "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-CODE/catalog.json",
               ],
             },
           ],
