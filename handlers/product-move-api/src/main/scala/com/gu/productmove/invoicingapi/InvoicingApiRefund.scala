@@ -1,7 +1,7 @@
 package com.gu.productmove.invoicingapi
 
 import com.gu.productmove.AwsS3
-import com.gu.productmove.invoicingapi.Secrets
+import com.gu.productmove.Secrets
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.Util.getFromEnv
@@ -9,6 +9,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse,
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.{RefundRequest, RefundResponse}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive.InvoicingApiConfig
 import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.Secrets
 import sttp.client3.Response.ExampleGet.uri
 import sttp.client3.quick.basicRequest
 import sttp.client3.ziojson.*

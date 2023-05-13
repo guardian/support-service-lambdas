@@ -1,4 +1,4 @@
-package com.gu.productmove.invoicingapi
+package com.gu.productmove
 
 import software.amazon.awssdk.services.secretsmanager.*
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
