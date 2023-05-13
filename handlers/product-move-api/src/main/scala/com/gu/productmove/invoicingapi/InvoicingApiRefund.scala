@@ -1,6 +1,7 @@
 package com.gu.productmove.invoicingapi
 
 import com.gu.productmove.AwsS3
+import com.gu.productmove.invoicingapi.Secrets
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.Util.getFromEnv
@@ -23,16 +24,14 @@ object InvoicingApiRefundLive {
     given JsonDecoder[InvoicingApiConfig] = DeriveJsonDecoder.gen[InvoicingApiConfig]
   }
 
-  val layer: ZLayer[SttpBackend[Task, Any] with AwsS3, ErrorResponse, InvoicingApiRefundLive] =
+  val layer: ZLayer[SttpBackend[Task, Any] with AwsS3 with Secrets, ErrorResponse, InvoicingApiRefundLive] =
     ZLayer {
       for {
-        invoicingApiUrl <- ZIO
-          .fromEither(getFromEnv("invoicingApiUrl"))
-          .map(_ + "/refund")
-        invoicingApiKey <- ZIO.fromEither(getFromEnv("invoicingApiKey"))
-
-        invoicingApiConfig = InvoicingApiConfig(invoicingApiUrl, invoicingApiKey)
-
+        secrets <- ZIO.service[Secrets]
+        invoicingApiConfig = InvoicingApiConfig(
+          secrets.invoicing.invoicingApiUrl + "/refund",
+          secrets.invoicing.invoicingApiKey,
+        )
         _ <- ZIO.logInfo(s"Invoice API url is ${invoicingApiConfig.url}")
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield InvoicingApiRefundLive(invoicingApiConfig, sttpClient)
