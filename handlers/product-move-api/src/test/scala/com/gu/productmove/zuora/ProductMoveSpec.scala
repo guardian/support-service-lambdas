@@ -5,6 +5,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.Secrets
 
 import java.time.*
 import zio.Scope
@@ -32,6 +33,7 @@ object ProductMoveSpec extends ZIOSpecDefault {
             GetAccountLive.layer,
             GuStageLive.layer,
             DynamoLive.layer,
+            Secrets.layer
           )
       } yield {
 

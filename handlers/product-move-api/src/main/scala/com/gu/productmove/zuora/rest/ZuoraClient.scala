@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora.rest
 
-import com.gu.productmove.AwsS3
+import com.gu.productmove.{AwsS3, Secrets}
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.Util.getFromEnv
@@ -33,19 +33,18 @@ object ZuoraClientLive {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
 
-  val layer: ZLayer[SttpBackend[Task, Any], ErrorResponse, ZuoraClient] =
+  val layer: ZLayer[SttpBackend[Task, Any] with Secrets, ErrorResponse, ZuoraClient] =
     ZLayer {
       for {
-        zuoraBaseUrl <- ZIO.fromEither(getFromEnv("zuoraBaseUrl"))
-        zuoraUsername <- ZIO.fromEither(getFromEnv("zuoraUsername"))
-        zuoraPassword <- ZIO.fromEither(getFromEnv("zuoraPassword"))
-
-        baseUrl <- ZIO.fromEither(Uri.parse(zuoraBaseUrl + "/").left.map(e => InternalServerError(e)))
-
+        secrets <- ZIO.service[Secrets]
+        baseUrl <- ZIO.fromEither(Uri.parse(secrets.zuora.baseUrl + "/").left.map(e => InternalServerError(e)))
         _ <- ZIO.log("zuoraBaseUrl:   " + baseUrl.toString)
-
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
-      } yield ZuoraClientLive(baseUrl, sttpClient, ZuoraRestConfig(zuoraBaseUrl, zuoraUsername, zuoraPassword))
+      } yield ZuoraClientLive(
+        baseUrl,
+        sttpClient,
+        ZuoraRestConfig(secrets.zuora.baseUrl, secrets.zuora.username, secrets.zuora.password),
+      )
     }
 }
 

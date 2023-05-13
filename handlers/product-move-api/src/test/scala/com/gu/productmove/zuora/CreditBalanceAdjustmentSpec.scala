@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive, Secrets}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.{RefundSupporterPlus, RefundInput}
 import com.gu.productmove.zuora.RefundSupporterPlusSpec.{suite, test}
@@ -28,6 +28,7 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               ZuoraGetLive.layer,
               ZuoraClientLive.layer,
               SttpClientLive.layer,
+              Secrets.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,
@@ -47,6 +48,7 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               ZuoraGetLive.layer,
               ZuoraClientLive.layer,
               SttpClientLive.layer,
+              Secrets.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,

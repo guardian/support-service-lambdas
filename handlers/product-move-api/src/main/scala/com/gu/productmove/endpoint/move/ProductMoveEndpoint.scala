@@ -7,6 +7,7 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.gu.productmove.endpoint.available.{Billing, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
+import com.gu.productmove.Secrets
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -147,6 +148,7 @@ object ProductMoveEndpoint {
         GetAccountLive.layer,
         GuStageLive.layer,
         DynamoLive.layer,
+        Secrets.layer
       )
 
   extension (billingPeriod: BillingPeriod)
