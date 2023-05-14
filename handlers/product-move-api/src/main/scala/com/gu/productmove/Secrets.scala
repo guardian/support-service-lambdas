@@ -51,10 +51,7 @@ object SecretsLive extends Secrets {
   }
 
   def getStage: ZIO[Any, ErrorResponse, String] =
-    sys.env.get("stage") match {
-      case None => ZIO.fail(SecretsError("Failure while extracting stage from environmnt"))
-      case Some(str) => ZIO.succeed(str)
-    }
+    ZIO.fromOption(sys.env.get("stage")).mapError(_ => SecretsError("Failure while extracting stage from environmnt"))
 
   def parseInvoicingAPISecretsJSONString(str: String): ZIO[Any, ErrorResponse, InvoicingAPISecrets] = {
     Try(read[InvoicingAPISecrets](str)) match {
