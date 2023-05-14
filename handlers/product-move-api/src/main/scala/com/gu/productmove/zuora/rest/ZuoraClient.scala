@@ -39,7 +39,7 @@ object ZuoraClientLive {
     ZLayer {
       for {
         secrets <- ZIO.service[Secrets]
-        zuoraApiSecrets <- secrets.getZuoraApiUserSecrets.tapError(_ => ZIO.fail(SecretsError("Could not")))
+        zuoraApiSecrets <- secrets.getZuoraApiUserSecrets
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraApiSecrets.baseUrl + "/").left.map(e => InternalServerError(e)))
         _ <- ZIO.log("zuoraBaseUrl:   " + baseUrl.toString)
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
