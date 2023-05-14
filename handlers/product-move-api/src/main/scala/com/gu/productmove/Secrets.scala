@@ -2,11 +2,10 @@ package com.gu.productmove
 
 import software.amazon.awssdk.services.secretsmanager.*
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
-import upickle.default._
-import scala.util.Try
+import upickle.default.*
 
-import zio.{ZIO, ZLayer, ULayer}
-
+import scala.util.{Success, Failure, Try}
+import zio.{ULayer, ZIO, ZLayer}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, SecretsError}
 
 /*
@@ -53,16 +52,30 @@ object SecretsLive extends Secrets {
 
   def getStage: ZIO[Any, ErrorResponse, String] =
     sys.env.get("stage") match {
-      case None => ZIO.fail(SecretsError("Not"))
+      case None => ZIO.fail(SecretsError("Failure while extracting stage from environmnt"))
       case Some(str) => ZIO.succeed(str)
     }
+
+  def parseInvoicingAPISecretsJSONString(str: String): ZIO[Any, ErrorResponse, InvoicingAPISecrets] = {
+    Try(read[InvoicingAPISecrets](str)) match {
+      case Success(x) => ZIO.succeed(x)
+      case Failure(s) => ZIO.fail(SecretsError(s"Failure while parsing json string: ${s}"))
+    }
+  }
+
+  def parseZuoraApiUserSecretsJSONString(str: String): ZIO[Any, ErrorResponse, ZuoraApiUserSecrets] = {
+    Try(read[ZuoraApiUserSecrets](str)) match {
+      case Success(x) => ZIO.succeed(x)
+      case Failure(s) => ZIO.fail(SecretsError(s"Failure while parsing json string: ${s}"))
+    }
+  }
 
   def getInvoicingAPISecrets: ZIO[Any, ErrorResponse, InvoicingAPISecrets] = {
     for {
       stg <- getStage
-      secretId: String = s"${stg}/Zuora/User/ZuoraApiUser"
+      secretId: String = s"${stg}/InvoicingApi"
       secretJsonString = getJSONString(secretId)
-      secrets <- ZIO.succeed(read[InvoicingAPISecrets](secretJsonString))
+      secrets <- parseInvoicingAPISecretsJSONString(secretJsonString)
     } yield secrets
   }
 
@@ -71,7 +84,7 @@ object SecretsLive extends Secrets {
       stg <- getStage
       secretId: String = s"${stg}/Zuora/User/ZuoraApiUser"
       secretJsonString = getJSONString(secretId)
-      secrets <- ZIO.succeed(read[ZuoraApiUserSecrets](secretJsonString))
+      secrets <- parseZuoraApiUserSecretsJSONString(secretJsonString)
     } yield secrets
   }
 
