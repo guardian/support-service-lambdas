@@ -9,13 +9,14 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse,
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.{RefundRequest, RefundResponse}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive.InvoicingApiConfig
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.Secrets
 import sttp.client3.Response.ExampleGet.uri
 import sttp.client3.quick.basicRequest
 import sttp.client3.ziojson.*
 import sttp.client3.*
 import zio.json.*
 import zio.{Task, ZIO, ZLayer}
+
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.SecretsError
 
 object InvoicingApiRefundLive {
 
@@ -29,10 +30,10 @@ object InvoicingApiRefundLive {
     ZLayer {
       for {
         secrets <- ZIO.service[Secrets]
-        invoicingApiConfig = InvoicingApiConfig(
-          secrets.invoicing.invoicingApiUrl + "/refund",
-          secrets.invoicing.invoicingApiKey,
-        )
+        invoicingAPISecrets <- secrets.getInvoicingAPISecrets.tapError(_ => ZIO.fail(SecretsError("Could not")))
+        invoicingApiUrl = invoicingAPISecrets.invoicingApiUrl
+        invoicingApiKey = invoicingAPISecrets.invoicingApiKey
+        invoicingApiConfig = InvoicingApiConfig(invoicingApiUrl + "/refund", invoicingApiKey)
         _ <- ZIO.logInfo(s"Invoice API url is ${invoicingApiConfig.url}")
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield InvoicingApiRefundLive(invoicingApiConfig, sttpClient)

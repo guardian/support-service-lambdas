@@ -21,6 +21,8 @@ import sttp.model.Uri
 import zio.json.*
 import zio.{IO, RIO, Task, ZIO, ZLayer}
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.SecretsError
+
 object ZuoraClientLive {
 
   case class ZuoraRestConfig(
@@ -37,13 +39,14 @@ object ZuoraClientLive {
     ZLayer {
       for {
         secrets <- ZIO.service[Secrets]
-        baseUrl <- ZIO.fromEither(Uri.parse(secrets.zuora.baseUrl + "/").left.map(e => InternalServerError(e)))
+        zuoraApiSecrets <- secrets.getZuoraApiUserSecrets.tapError(_ => ZIO.fail(SecretsError("Could not")))
+        baseUrl <- ZIO.fromEither(Uri.parse(zuoraApiSecrets.baseUrl + "/").left.map(e => InternalServerError(e)))
         _ <- ZIO.log("zuoraBaseUrl:   " + baseUrl.toString)
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield ZuoraClientLive(
         baseUrl,
         sttpClient,
-        ZuoraRestConfig(secrets.zuora.baseUrl, secrets.zuora.username, secrets.zuora.password),
+        ZuoraRestConfig(zuoraApiSecrets.baseUrl, zuoraApiSecrets.username, zuoraApiSecrets.password),
       )
     }
 }

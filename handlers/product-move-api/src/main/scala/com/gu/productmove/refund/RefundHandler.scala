@@ -3,7 +3,7 @@ package com.gu.productmove.refund
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
-import com.gu.productmove.Secrets
+import com.gu.productmove.SecretsLive
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
 import com.gu.productmove.zuora.{
@@ -55,7 +55,7 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
             GetInvoiceItemsForSubscriptionLive.layer,
             GetInvoiceLive.layer,
             InvoiceItemAdjustmentLive.layer,
-            Secrets.layer,
+            SecretsLive.layer,
           ),
       ) match
         case Exit.Success(value) => value

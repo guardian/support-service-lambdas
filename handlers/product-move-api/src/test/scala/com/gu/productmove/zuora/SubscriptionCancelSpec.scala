@@ -10,7 +10,7 @@ import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.RefundType.*
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancelLive
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.Secrets
+import com.gu.productmove.SecretsLive
 import zio.Scope
 import zio.test.Assertion.equalTo
 import zio.test.{Spec, TestAspect, TestClock, TestEnvironment, ZIOSpecDefault, assert}
@@ -39,7 +39,7 @@ object SubscriptionCancelSpec extends ZIOSpecDefault {
             ZuoraClientLive.layer,
             SttpClientLive.layer,
             GetAccountLive.layer,
-            Secrets.layer
+            SecretsLive.layer
           )
       } yield assert(true)(equalTo(true))
     } @@ TestAspect.ignore)

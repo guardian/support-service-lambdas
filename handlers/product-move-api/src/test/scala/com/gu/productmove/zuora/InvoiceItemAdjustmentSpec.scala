@@ -33,7 +33,7 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
             ZuoraClientLive.layer,
             ZuoraGetLive.layer,
             InvoiceItemAdjustmentLive.layer,
-            Secrets.layer
+            SecretsLive.layer
           )
       } yield assert(true)(equalTo(true))
     } @@ TestAspect.ignore)

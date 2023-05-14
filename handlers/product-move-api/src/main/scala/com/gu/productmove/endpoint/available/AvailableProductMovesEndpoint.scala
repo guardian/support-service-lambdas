@@ -1,7 +1,7 @@
 package com.gu.productmove.endpoint.available
 
 import com.gu.productmove.AwsS3
-import com.gu.productmove.Secrets
+import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.*
 import com.gu.productmove.endpoint.available.Currency.GBP
@@ -91,7 +91,7 @@ object AvailableProductMovesEndpoint {
       GetAccountLive.layer,
       ZuoraGetLive.layer,
       GuStageLive.layer,
-      Secrets.layer
+      SecretsLive.layer
     )
 
   private val freeTrialDays = 14

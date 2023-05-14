@@ -7,7 +7,7 @@ import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, 
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
-import com.gu.productmove.Secrets
+import com.gu.productmove.SecretsLive
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
@@ -41,7 +41,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
             GetInvoiceItemsForSubscriptionLive.layer,
             GetInvoiceLive.layer,
             InvoiceItemAdjustmentLive.layer,
-            Secrets.layer,
+            SecretsLive.layer,
           )
       } yield assert(true)(equalTo(true))
     } @@ TestAspect.ignore)
