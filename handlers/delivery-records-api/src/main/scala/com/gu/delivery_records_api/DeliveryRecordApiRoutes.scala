@@ -25,7 +25,7 @@ object DeliveryRecordApiRoutes {
     def getContactFromHeaders(request: Request[F]): EitherT[F, F[Response[F]], Contact] = {
       SalesforceHandlerSupport
         .extractContactFromHeaders(
-          request.headers.toList.map(header => header.name.value -> header.value),
+          request.headers.toList.map(header => header.name.toString -> header.value),
         )
         .toEitherT[F]
         .leftMap(error => BadRequest(error))

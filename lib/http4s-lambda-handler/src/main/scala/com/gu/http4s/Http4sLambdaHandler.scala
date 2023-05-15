@@ -13,6 +13,7 @@ import fs2.{Stream, text}
 
 import scala.collection.immutable
 import scala.io.Source
+import org.typelevel.ci._
 
 case class LambdaRequest(
     httpMethod: String,
@@ -114,12 +115,10 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
   }
 
   private def extractHeaders(apiGateWayRequest: LambdaRequest): Headers = {
-    Headers.of(
-      apiGateWayRequest.multiValueHeaders
+    Headers(apiGateWayRequest.multiValueHeaders
         .getOrElse(Nil)
         .flatMap { case (key, multiValue) => multiValue.map(value => Header(key, value)) }
-        .toList: _*,
-    )
+        .toList: _*)Header.RawCIString(key)
   }
 
   private def extractBody(apiGateWayRequest: LambdaRequest) = {
