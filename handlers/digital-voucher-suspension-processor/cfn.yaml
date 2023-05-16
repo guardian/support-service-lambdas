@@ -48,22 +48,10 @@ Resources:
       Environment:
         Variables:
           salesforceUrl: !FindInMap [ StageMap, !Ref Stage, SalesforceUrl ]
-          salesforceClientId:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${ConnectedApp}:SecretString:clientId}}'
-            - ConnectedApp: !FindInMap [StageMap, !Ref Stage, SalesforceConnectedApp]
-          salesforceClientSecret:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${ConnectedApp}:SecretString:clientSecret}}'
-            - ConnectedApp: !FindInMap [StageMap, !Ref Stage, SalesforceConnectedApp]
-          salesforceUserName: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataAPI:SecretString:username}}'
-          salesforcePassword: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataAPI:SecretString:password}}'
-          salesforceToken: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/User/MembersDataAPI:SecretString:token}}'
           imovoUrl:
             !Sub
             - '{{resolve:ssm:/${Stage}/membership/support-service-lambdas-shared-imovo/imovoBaseUrl:${Version}}}'
             - Version: !FindInMap [StageMap, !Ref Stage, ImovoUrlVersion]
-          imovoApiKey: !Sub '{{resolve:secretsmanager:${Stage}/Imovo:SecretString:apiKey}}'
 
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup

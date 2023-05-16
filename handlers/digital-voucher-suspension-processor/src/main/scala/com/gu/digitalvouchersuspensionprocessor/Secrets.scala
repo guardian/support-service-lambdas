@@ -10,23 +10,25 @@ import scala.util.Try
   In Secrets Store we have the following JSON objects:
 
   ${SalesforceStage}/Salesforce/ConnectedApp/${AppName}
+  // SalesforceStage is the standard GU stage
   {
-      "name":"TouchpointUpdate",
-      "clientId":"REMOVED",
-      "clientSecret":"REMOVED",
-      "authUrl":"REMOVED"
+      "name"         : "REMOVED",
+      "clientId"     : "REMOVED",
+      "clientSecret" : "REMOVED",
+      "authUrl"      : "REMOVED"
   }
 
   ${SalesforceStage}/Salesforce/User/MembersDataAPI
+  // SalesforceStage is the standard GU stage
   {
-      "username":"REMOVED",
-      "password":"REMOVED",
-      "token":"REMOVED"
+      "username" : "REMOVED",
+      "password" : "REMOVED",
+      "token"    : "REMOVED"
   }
 
   ${Stage}/Imovo
   {
-      "apiKey":"REMOVED"
+      "apiKey" : "REMOVED"
   }
  */
 
