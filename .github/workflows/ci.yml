@@ -7,6 +7,8 @@ on:
       - main
 jobs:
   gu-cdk-build:
+#    env:
+#      S3_BUCKET: ''
     strategy:
       matrix:
         subproject:
@@ -16,6 +18,9 @@ jobs:
       id-token: write
       contents: read
     steps:
+      - name: Env
+        run: env
+
       - name: Checkout
         uses: actions/checkout@v3
 
