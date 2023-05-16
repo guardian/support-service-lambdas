@@ -1,12 +1,13 @@
-package com.gu.productmove.zuora
+package com.gu.productmove.move
 
-import zio.{IO, ZIO}
-import zio.*
-import zio.Clock
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.endpoint.move.SupporterPlusRatePlanIds
+import com.gu.productmove.zuora.SubscriptionUpdateInvoice
+import zio.{Clock, ZIO}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
 
 object BuildPreviewResult {
   def getPreviewResult(
@@ -14,7 +15,7 @@ object BuildPreviewResult {
       activeRatePlanCharge: RatePlanCharge,
       invoice: SubscriptionUpdateInvoice,
       ids: SupporterPlusRatePlanIds,
-  ): ZIO[Stage, String, PreviewResult] = {
+  ): ZIO[Stage, ErrorResponse, PreviewResult] = {
     val (supporterPlusInvoices, contributionInvoices) =
       invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.subscriptionRatePlanChargeId)
 
@@ -46,13 +47,15 @@ object BuildPreviewResult {
         for {
           date <- Clock.currentDateTime.map(_.toLocalDate)
           isRenewalDate = activeRatePlanCharge.effectiveStartDate == date
-          priceDifference = if (isRenewalDate) activeRatePlanCharge.price else 0
+          priceDifference = if (isRenewalDate) activeRatePlanCharge.price.get else 0
           supporterPlusInvoiceItems = supporterPlusInvoices.sortWith((i1, i2) =>
             i1.serviceStartDate.isBefore(i2.serviceStartDate),
           )
           _ <- ZIO.when(priceDifference == 0)(
             ZIO.fail(
-              s"Unexpected invoice item structure was returned from a Zuora preview call. Subscription name is $subscriptionName. Invoice data was: $invoice",
+              InternalServerError(
+                s"Unexpected invoice item structure was returned from a Zuora preview call. Subscription name is $subscriptionName. Invoice data was: $invoice",
+              ),
             ),
           )
         } yield PreviewResult(
@@ -63,7 +66,9 @@ object BuildPreviewResult {
         )
       case (_, _) =>
         ZIO.fail(
-          s"Unexpected invoice item structure was returned from a Zuora preview call. Subscription name is $subscriptionName. Invoice data was: $invoice",
+          InternalServerError(
+            s"Unexpected invoice item structure was returned from a Zuora preview call. Subscription name is $subscriptionName. Invoice data was: $invoice",
+          ),
         )
     }
   }

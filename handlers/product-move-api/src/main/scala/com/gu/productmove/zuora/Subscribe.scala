@@ -2,6 +2,7 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.{
   CaseId,
   ChargeOverrides,
@@ -25,7 +26,7 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 import java.time.LocalDate
 
 trait Subscribe:
-  def create(zuoraAccountId: String, targetProductId: String): ZIO[Stage, String, CreateSubscriptionResponse]
+  def create(zuoraAccountId: String, targetProductId: String): ZIO[Stage, ErrorResponse, CreateSubscriptionResponse]
 
 object SubscribeLive:
   val layer: URLayer[ZuoraGet, Subscribe] = ZLayer.fromFunction(SubscribeLive(_))
@@ -34,7 +35,7 @@ private class SubscribeLive(zuoraGet: ZuoraGet) extends Subscribe:
   override def create(
       zuoraAccountId: String,
       targetProductId: String,
-  ): ZIO[Stage, String, CreateSubscriptionResponse] = {
+  ): ZIO[Stage, ErrorResponse, CreateSubscriptionResponse] = {
     for {
       subscribeRequest <- SubscribeRequest.withTodaysDate(zuoraAccountId, targetProductId)
       response <- zuoraGet.post[SubscribeRequest, CreateSubscriptionResponse](uri"subscriptions", subscribeRequest)
@@ -45,7 +46,7 @@ object Subscribe {
   def create(
       zuoraAccountId: String,
       targetProductId: String,
-  ): ZIO[Subscribe with Stage, String, CreateSubscriptionResponse] =
+  ): ZIO[Subscribe with Stage, ErrorResponse, CreateSubscriptionResponse] =
     ZIO.serviceWithZIO[Subscribe](_.create(zuoraAccountId, targetProductId))
 }
 

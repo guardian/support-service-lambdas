@@ -1,5 +1,6 @@
 package com.gu.productmove.salesforce
 
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.salesforce.CreateRecord.{CreateRecordRequest, CreateRecordResponse}
 import zio.{IO, ZIO}
 
@@ -9,12 +10,12 @@ class MockCreateRecord(responses: Map[CreateRecordRequest, CreateRecordResponse]
 
   def requests = mutableStore.reverse
 
-  override def create(createRecordRequest: CreateRecordRequest): ZIO[Any, String, CreateRecordResponse] = {
+  override def create(createRecordRequest: CreateRecordRequest): ZIO[Any, ErrorResponse, CreateRecordResponse] = {
     mutableStore = createRecordRequest :: mutableStore
 
     responses.get(createRecordRequest) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"Salesforce error message")
+      case None => ZIO.fail(InternalServerError(s"Salesforce error message"))
   }
 }
 

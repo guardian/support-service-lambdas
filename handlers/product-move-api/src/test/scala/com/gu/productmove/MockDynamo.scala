@@ -1,10 +1,10 @@
 package com.gu.productmove.zuora
 
-import com.gu.supporterdata.model.{SupporterRatePlanItem}
-
+import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.Dynamo
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
@@ -16,12 +16,12 @@ class MockDynamo(responses: Map[SupporterRatePlanItem, Unit]) extends Dynamo {
 
   def requests = mutableStore.reverse
 
-  override def writeItem(item: SupporterRatePlanItem): ZIO[Any, String, Unit] = {
+  override def writeItem(item: SupporterRatePlanItem): ZIO[Any, ErrorResponse, Unit] = {
     mutableStore = item :: mutableStore
 
     responses.get(item) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(s"wrong input, item was $item")
+      case None => ZIO.fail(InternalServerError(s"wrong input, item was $item"))
   }
 }
 

@@ -4,6 +4,7 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.Currency.currencyCodetoObject
 import com.gu.productmove.endpoint.available.{Currency, TimeUnit}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.DefaultPaymentMethod
 import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
@@ -28,17 +29,17 @@ object GetAccountLive:
   val layer: URLayer[ZuoraGet, GetAccount] = ZLayer.fromFunction(GetAccountLive(_))
 
 private class GetAccountLive(zuoraGet: ZuoraGet) extends GetAccount:
-  override def get(accountNumber: AccountNumber): IO[String, GetAccountResponse] =
+  override def get(accountNumber: AccountNumber): IO[ErrorResponse, GetAccountResponse] =
     zuoraGet
       .get[GetAccountResponse](uri"accounts/${accountNumber.value}/summary", ZuoraSuccessCheck.SuccessCheckLowercase)
 
-  override def getPaymentMethod(paymentMethodId: String): IO[String, PaymentMethodResponse] =
+  override def getPaymentMethod(paymentMethodId: String): IO[ErrorResponse, PaymentMethodResponse] =
     zuoraGet.get[PaymentMethodResponse](uri"object/payment-method/$paymentMethodId", ZuoraSuccessCheck.SuccessCheckSize)
 
 trait GetAccount:
-  def get(subscriptionNumber: AccountNumber): ZIO[GetAccount, String, GetAccountResponse]
+  def get(subscriptionNumber: AccountNumber): ZIO[GetAccount, ErrorResponse, GetAccountResponse]
 
-  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, String, PaymentMethodResponse]
+  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, ErrorResponse, PaymentMethodResponse]
 
 object GetAccount {
   case class PaymentMethodResponse(NumConsecutiveFailures: Int)
@@ -140,10 +141,10 @@ object GetAccount {
 
   given JsonDecoder[BillToContact] = DeriveJsonDecoder.gen
 
-  def get(accountNumber: AccountNumber): ZIO[GetAccount, String, GetAccountResponse] =
+  def get(accountNumber: AccountNumber): ZIO[GetAccount, ErrorResponse, GetAccountResponse] =
     ZIO.serviceWithZIO[GetAccount](_.get(accountNumber))
 
-  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, String, PaymentMethodResponse] =
+  def getPaymentMethod(paymentMethodId: String): ZIO[GetAccount, ErrorResponse, PaymentMethodResponse] =
     ZIO.serviceWithZIO[GetAccount](_.getPaymentMethod(paymentMethodId))
 }
 

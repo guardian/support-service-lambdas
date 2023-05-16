@@ -5,6 +5,7 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.Util.getFromEnv
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
@@ -34,22 +35,22 @@ case class SalesforceAuthDetails(access_token: String, instance_url: String)
 given JsonDecoder[SalesforceAuthDetails] = DeriveJsonDecoder.gen[SalesforceAuthDetails]
 
 trait SalesforceClient {
-  def get[Response: JsonDecoder](relativeUrl: Uri): IO[String, Response]
-  def post[Request: JsonEncoder, Response: JsonDecoder](input: Request, relativeUrl: Uri): IO[String, Response]
+  def get[Response: JsonDecoder](relativeUrl: Uri): IO[ErrorResponse, Response]
+  def post[Request: JsonEncoder, Response: JsonDecoder](input: Request, relativeUrl: Uri): IO[ErrorResponse, Response]
 }
 
 object SalesforceClient {
-  def get[Response: JsonDecoder](relativeUrl: Uri): ZIO[SalesforceClient, String, Response] =
+  def get[Response: JsonDecoder](relativeUrl: Uri): ZIO[SalesforceClient, ErrorResponse, Response] =
     ZIO.environmentWithZIO(_.get.get(relativeUrl))
   def post[Request: JsonEncoder, Response: JsonDecoder](
       input: Request,
       relativeUrl: Uri,
-  ): ZIO[SalesforceClient, String, Response] = ZIO.environmentWithZIO(_.get.post(input, relativeUrl))
+  ): ZIO[SalesforceClient, ErrorResponse, Response] = ZIO.environmentWithZIO(_.get.post(input, relativeUrl))
 }
 
 object SalesforceClientLive {
 
-  val layer: ZLayer[SttpBackend[Task, Any], String, SalesforceClient] =
+  val layer: ZLayer[SttpBackend[Task, Any], ErrorResponse, SalesforceClient] =
     ZLayer.fromZIO(
       for {
         url <- ZIO.fromEither(getFromEnv("salesforceUrl"))
@@ -85,12 +86,12 @@ object SalesforceClientLive {
             response.body
           }
           .absolve
-          .mapError(_.toString)
-        base_uri <- ZIO.fromEither(Uri.parse(auth.instance_url))
+          .mapError(e => InternalServerError(e.toString))
+        base_uri <- ZIO.fromEither(Uri.parse(auth.instance_url).left.map(e => InternalServerError(e)))
 
       } yield new SalesforceClient {
 
-        override def get[Response: JsonDecoder](relativeUrl: Uri): IO[String, Response] = {
+        override def get[Response: JsonDecoder](relativeUrl: Uri): IO[ErrorResponse, Response] = {
           val absoluteUri = base_uri.resolve(relativeUrl)
 
           basicRequest
@@ -110,13 +111,13 @@ object SalesforceClientLive {
               response.body
             }
             .absolve
-            .mapError(_.toString)
+            .mapError(e => InternalServerError(e.toString))
         }
 
         override def post[Request: JsonEncoder, Response: JsonDecoder](
             input: Request,
             relativeUrl: Uri,
-        ): ZIO[Any, String, Response] = {
+        ): ZIO[Any, ErrorResponse, Response] = {
           val absoluteUri = base_uri.resolve(relativeUrl)
 
           basicRequest
@@ -138,7 +139,7 @@ object SalesforceClientLive {
               response.body
             }
             .absolve
-            .mapError(_.toString)
+            .mapError(e => InternalServerError(e.toString))
         }
       },
     )

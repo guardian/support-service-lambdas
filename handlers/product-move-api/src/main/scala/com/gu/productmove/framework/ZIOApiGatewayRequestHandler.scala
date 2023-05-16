@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.*
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent.RequestContext
 import com.gu.productmove
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{BadRequest, InternalServerError, OutputBody}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
@@ -116,11 +117,6 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
     Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
         routedTask
-          .catchAll { error =>
-            ZIO
-              .log(error.toString)
-              .as(AwsResponse(false, 500, Map.empty, ""))
-          }
           .provideLayer(Runtime.removeDefaultLoggers)
           .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger))),
       ) match

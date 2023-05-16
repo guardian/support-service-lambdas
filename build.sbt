@@ -666,6 +666,8 @@ lazy val `contact-us-api` = lambdaProject(
     scalatest,
     scalajHttp,
     awsEvents,
+    awsSecretsManager,
+    upickle,
   ),
 ).dependsOn(handler)
 

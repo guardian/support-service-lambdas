@@ -4,6 +4,7 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.Util.getFromEnv
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.{RefundRequest, RefundResponse}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive.InvoicingApiConfig
 import com.gu.productmove.zuora.model.SubscriptionName
@@ -22,10 +23,12 @@ object InvoicingApiRefundLive {
     given JsonDecoder[InvoicingApiConfig] = DeriveJsonDecoder.gen[InvoicingApiConfig]
   }
 
-  val layer: ZLayer[SttpBackend[Task, Any] with AwsS3, String, InvoicingApiRefundLive] =
+  val layer: ZLayer[SttpBackend[Task, Any] with AwsS3, ErrorResponse, InvoicingApiRefundLive] =
     ZLayer {
       for {
-        invoicingApiUrl <- ZIO.fromEither(getFromEnv("invoicingApiUrl")).map(_ + "/refund")
+        invoicingApiUrl <- ZIO
+          .fromEither(getFromEnv("invoicingApiUrl"))
+          .map(_ + "/refund")
         invoicingApiKey <- ZIO.fromEither(getFromEnv("invoicingApiKey"))
 
         invoicingApiConfig = InvoicingApiConfig(invoicingApiUrl, invoicingApiKey)
@@ -41,7 +44,7 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
   override def refund(
       subscriptionName: SubscriptionName,
       amount: BigDecimal,
-  ): ZIO[Any, String, RefundResponse] = {
+  ): ZIO[Any, ErrorResponse, RefundResponse] = {
 
     val requestBody = RefundRequest(subscriptionName, amount)
     basicRequest
@@ -59,19 +62,19 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
         response.body
       }
       .absolve
-      .mapError(_.toString)
+      .mapError(e => InternalServerError(e.toString))
   }
 }
 
 trait InvoicingApiRefund {
-  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): ZIO[Any, String, RefundResponse]
+  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): ZIO[Any, ErrorResponse, RefundResponse]
 }
 
 object InvoicingApiRefund {
   def refund(
       subscriptionName: SubscriptionName,
       amount: BigDecimal,
-  ): ZIO[InvoicingApiRefund, String, RefundResponse] =
+  ): ZIO[InvoicingApiRefund, ErrorResponse, RefundResponse] =
     ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount))
 
   case class RefundRequest(subscriptionName: SubscriptionName, refund: BigDecimal)
