@@ -1,17 +1,9 @@
 stacks:
-  - membership
+- membership
 regions:
-  - eu-west-1
+- eu-west-1
 deployments:
-  new-product-api-cloudformation:
-    type: cloud-formation
-    app: new-product-api
-    parameters:
-      templateStagePaths:
-        CODE: new-product-api-CODE.template.json
-        PROD: new-product-api-PROD.template.json
-
-  new-product-api:
+  upload-new-product-api:
     type: aws-lambda
     parameters:
       fileName: new-product-api.jar
@@ -20,4 +12,28 @@ deployments:
       functionNames:
         - add-subscription-
         - product-catalog-
+      actions:
+        - uploadLambda
+
+  new-product-api-cloudformation:
+    type: cloud-formation
+    app: new-product-api
+    parameters:
+      templateStagePaths:
+        DEV: new-product-api-DEV.template.json
+        CODE: new-product-api-CODE.template.json
+        PROD: new-product-api-PROD.template.json
+    dependencies: [ upload-new-product-api ]
+
+  update-new-product-api:
+    type: aws-lambda
+    parameters:
+      fileName: new-product-api.jar
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+      - add-subscription-
+      - product-catalog-
+    actions:
+      - updateLambda
     dependencies: [new-product-api-cloudformation]
