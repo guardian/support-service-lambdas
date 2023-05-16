@@ -566,7 +566,7 @@ lazy val `product-move-api` = lambdaProject(
       val jarFile = assembly.value
 
       val Seq(stage) = spaceDelimited("<arg>").parsed
-      val s3Bucket = sys.env.get("S3_BUCKET").getOrElse("support-service-lambdas-dist")
+      val s3Bucket = "support-service-lambdas-dist"
       val s3Path = s"membership/$stage/product-move-api/product-move-api.jar"
 
       s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!!
@@ -704,7 +704,7 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     val jarFile = assembly.value
 
     val Seq(stage) = spaceDelimited("<arg>").parsed
-    val s3Bucket = sys.env.get("S3_BUCKET").getOrElse("support-service-lambdas-dist")
+    val s3Bucket = "support-service-lambdas-dist"
     val s3Path = s"membership/$stage/stripe-webhook-endpoints/stripe-webhook-endpoints.jar"
 
     s"aws s3 cp $jarFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1".!
