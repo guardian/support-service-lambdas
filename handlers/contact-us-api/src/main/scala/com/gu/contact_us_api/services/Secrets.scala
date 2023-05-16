@@ -12,19 +12,19 @@ import scala.util.Try
 
   ${SalesforceStage}/Salesforce/ConnectedApp/${AppName}
   {
-      "name":"TouchpointUpdate",
-      "clientId":"REMOVED",
+      "name"        :"REMOVED",
+      "clientId"    :"REMOVED",
       "clientSecret":"REMOVED",
-      "authUrl":"REMOVED"
+      "authUrl"     :"REMOVED"
   }
 
   and
 
   ${SalesforceStage}/Salesforce/User/MembersDataAPI
   {
-      "username":"REMOVED",
-      "password":"REMOVED",
-      "token":"REMOVED"
+      "username" :"REMOVED",
+      "password" :"REMOVED",
+      "token"    :"REMOVED"
   }
  */
 
