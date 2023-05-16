@@ -38,6 +38,7 @@ Mappings:
       UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
 
 Resources:
+
   ContactUsApiGateway:
     Type: AWS::Serverless::Api
     Properties:
@@ -50,6 +51,52 @@ Resources:
           CreateUsagePlan: PER_API
           UsagePlanName: !Sub contact-us-api-${Stage}-UsagePlan
           Description: !Sub Usage plan for contact-us-api-${Stage}
+
+  ContactUsLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      Tags:
+        - Key: App
+          Value: contact-us-api
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+      Path: /
+      Policies:
+        - PolicyName: ContactUsLambdaPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/contact-us-api-${Stage}:log-stream:*
+        - PolicyName: ReadFromSecretsManagerPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - Fn::Sub:
+                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}"
+                      - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
+                        AppName: !FindInMap [StageMap, !Ref Stage, AppName]
+                  - Fn::Sub:
+                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/User/MembersDataAPI"
+                      - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
 
   ContactUsLambda:
     Type: AWS::Serverless::Function
@@ -75,6 +122,10 @@ Resources:
             Method: POST
             RestApiId:
               Ref: ContactUsApiGateway
+      Role:
+        Fn::GetAtt:
+          - "ContactUsLambdaRole"
+          - Arn
 
   4xxApiAlarm:
     Type: AWS::CloudWatch::Alarm
