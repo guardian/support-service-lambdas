@@ -5,6 +5,8 @@ regions:
 deployments:
   upload-new-product-api:
     type: aws-lambda
+    actions:
+      - uploadLambda
     parameters:
       fileName: new-product-api.jar
       bucketSsmLookup: true
@@ -12,10 +14,8 @@ deployments:
       functionNames:
         - add-subscription-
         - product-catalog-
-      actions:
-        - uploadLambda
 
-  new-product-api-cloudformation:
+  cfn-new-product-api:
     type: cloud-formation
     app: new-product-api
     parameters:
@@ -27,6 +27,8 @@ deployments:
 
   update-new-product-api:
     type: aws-lambda
+    actions:
+      - updateLambda
     parameters:
       fileName: new-product-api.jar
       bucketSsmLookup: true
@@ -34,6 +36,4 @@ deployments:
       functionNames:
       - add-subscription-
       - product-catalog-
-    actions:
-      - updateLambda
-    dependencies: [new-product-api-cloudformation]
+    dependencies: [ cfn-new-product-api ]
