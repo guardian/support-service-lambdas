@@ -16,6 +16,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   val readyToProcessCancellationStatus = "Ready to process cancellation"
   val readyProcessSwitchStatus = "Ready to process switch"
   case class MessageBody(
+      subscriptionNumber: String,
       identityId: String,
       eventType: String,
       productName: String,
@@ -105,7 +106,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       result match {
         case Left(e) => handleError(e)
         case Right(_) =>
-          dynamoConnector.updateLoggingTable(message.identityId, "")
+          dynamoConnector.updateLoggingTable(message.subscriptionNumber, message.identityId)
       }
     }
 

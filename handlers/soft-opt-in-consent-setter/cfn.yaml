@@ -334,3 +334,28 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+
+  failedDynamoUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to update the Dynamo logging table.
+      AlarmDescription: >
+        A run failed to update (some) records in Salesforce in the last hour.
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedUpdateAlarm
+        for possible causes, impacts and fixes.
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Stage
+          Value: !Sub ${Stage}
+      EvaluationPeriods: 1
+      MetricName: failed_dynamo_update
+      Namespace: soft-opt-in-consent-setter
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

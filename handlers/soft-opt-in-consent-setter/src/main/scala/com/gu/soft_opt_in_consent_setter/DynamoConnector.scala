@@ -21,9 +21,9 @@ class DynamoConnector private (dynamoDbClient: DynamoDbClient) extends LazyLoggi
   val app = "mobile"
   private val stage = sys.env.getOrElse("Stage", "DEV")
 
-  def updateLoggingTable(subscriptionId: String, identityId: String): Unit = {
+  def updateLoggingTable(subscriptionNumber: String, identityId: String): Unit = {
     val timestamp = System.currentTimeMillis()
-    val record = SoftOptInLog(identityId, subscriptionId, timestamp, "Soft opt-ins processed for acquisition")
+    val record = SoftOptInLog(identityId, subscriptionNumber, timestamp, "Soft opt-ins processed for acquisition")
 
     val itemValues = Map(
       "userId" -> AttributeValue.builder().s(record.userId).build(),
