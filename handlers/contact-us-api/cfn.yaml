@@ -23,7 +23,7 @@ Mappings:
       UserSecretsVersion: dfbf9eba-5215-4cb8-91f1-ff5bcbbf5201
     CODE:
       authDomain: test.salesforce.com
-      reqDomain: gnmtouchpoint--DEV1.my.salesforce.com
+      reqDomain: gnmtouchpoint--DEV1.sandbox.my.salesforce.com
       SalesforceStage: CODE
       AppName: AwsConnectorSandbox
       AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
