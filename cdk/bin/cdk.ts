@@ -5,17 +5,6 @@ import { NewProductApi } from "../lib/new-product-api";
 
 const app = new App();
 
-export const devProps: NewProductApiProps = {
-    stack: "membership",
-    stage: "DEV",
-    domainName: "new-product-api-dev.membership.guardianapis.com",
-    hostedZoneId: "Z1E4V12LQGXFEC",
-    certificateId: "c1efc564-9ff8-4a03-be48-d1990a3d79d2",
-    apiGatewayTargetDomainName: "d-papcvkgmc9.execute-api.eu-west-1.amazonaws.com",
-    zuoraCatalogLocation: "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-DEV/catalog.json",
-    fulfilmentDateCalculatorS3Resource: "arn:aws:s3:::fulfilment-date-calculator-dev/*"
-};
-
 export const codeProps: NewProductApiProps = {
     stack: "membership",
     stage: "CODE",
@@ -38,6 +27,5 @@ export const prodProps: NewProductApiProps = {
     fulfilmentDateCalculatorS3Resource: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
 };
 
-new NewProductApi(app, "new-product-api-DEV", devProps);
 new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
