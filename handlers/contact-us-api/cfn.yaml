@@ -82,13 +82,10 @@ Resources:
                   - secretsmanager:DescribeSecret
                   - secretsmanager:GetSecretValue
                 Resource:
-                  - Fn::Sub:
-                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}"
-                      - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
-                        AppName: !FindInMap [StageMap, !Ref Stage, AppName]
-                  - Fn::Sub:
-                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/User/MembersDataAPI"
-                      - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/MembersDataAPI-1wX7Rg"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA"
 
   ContactUsLambda:
     Type: AWS::Serverless::Function
@@ -116,7 +113,7 @@ Resources:
               Ref: ContactUsApiGateway
       Role:
         Fn::GetAtt:
-          - "ContactUsLambdaRole"
+          - ContactUsLambdaRole
           - Arn
     DependsOn:
       - ContactUsLambdaRole
