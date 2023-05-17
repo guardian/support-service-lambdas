@@ -1,7 +1,7 @@
 stacks:
-- membership
+  - membership
 regions:
-- eu-west-1
+  - eu-west-1
 deployments:
   new-product-api-cloudformation:
     type: cloud-formation
@@ -15,9 +15,9 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: new-product-api.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - add-subscription-
-      - product-catalog-
+        - add-subscription-
+        - product-catalog-
     dependencies: [new-product-api-cloudformation]
