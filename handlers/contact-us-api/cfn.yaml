@@ -52,6 +52,27 @@ Resources:
           UsagePlanName: !Sub contact-us-api-${Stage}-UsagePlan
           Description: !Sub Usage plan for contact-us-api-${Stage}
 
+  ReadFromSecretsManagerPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ReadFromSecretsManager
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:DescribeSecret
+              - secretsmanager:GetSecretValue
+            Resource:
+                - Fn::Sub:
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}-jaCgRl"
+                  - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
+                    AppName: !FindInMap [StageMap, !Ref Stage, AppName]
+                - Fn::Sub:
+                    - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/User/MembersDataAPI-xpUthA"
+                    - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
+      Roles:
+        - Ref: ContactUsLambdaRole
+
   ContactUsLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -82,21 +103,6 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/contact-us-api-${Stage}:log-stream:*
-        - PolicyName: ReadFromSecretsManagerPolicy
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - secretsmanager:DescribeSecret
-                  - secretsmanager:GetSecretValue
-                Resource:
-                  - Fn::Sub:
-                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}-jaCgRl"
-                      - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
-                        AppName: !FindInMap [StageMap, !Ref Stage, AppName]
-                  - Fn::Sub:
-                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/User/MembersDataAPI-xpUthA"
-                      - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
 
   ContactUsLambda:
     Type: AWS::Serverless::Function
