@@ -126,6 +126,8 @@ Resources:
         Fn::GetAtt:
           - "ContactUsLambdaRole"
           - Arn
+    DependsOn:
+      - ContactUsLambdaRole
 
   4xxApiAlarm:
     Type: AWS::CloudWatch::Alarm
