@@ -75,7 +75,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/contact-us-api-${Stage}:log-stream:*
-        - PolicyName: ReadFromSecretsManager
+        - PolicyName: ReadFromSecretsManagerPolicy
           PolicyDocument:
             Statement:
               - Effect: Allow
