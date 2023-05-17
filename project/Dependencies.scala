@@ -22,6 +22,7 @@ object Dependencies {
   val awsSecretsManager = "software.amazon.awssdk" % "secretsmanager" % awsSdkVersion
   val awsSQS = "software.amazon.awssdk" % "sqs" % awsSdkVersion
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
+  val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.2"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.1"

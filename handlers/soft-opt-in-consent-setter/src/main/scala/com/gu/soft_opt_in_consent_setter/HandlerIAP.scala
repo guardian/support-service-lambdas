@@ -52,13 +52,14 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     val setup = for {
       config <- SoftOptInConfig()
       sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
+      dynamoConnector <- DynamoConnector()
 
       identityConnector = new IdentityConnector(config.identityConfig)
       consentsCalculator = new ConsentsCalculator(config.consentsMapping)
       mpapiConnector = new MpapiConnector(config.mpapiConfig)
-    } yield (sfConnector, identityConnector, consentsCalculator, mpapiConnector)
+    } yield (sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
 
-    val (sfConnector, identityConnector, consentsCalculator, mpapiConnector) = setup match {
+    val (sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector) = setup match {
       case Left(error) => handleError(error)
       case Right(x) =>
         logger.info("Setup successful")
@@ -99,10 +100,13 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
           )
       }
 
-      logErrors(result)
-      emitIdentityMetrics(result)
+      emitIdentityMetric(result)
 
-      result.left.foreach(handleError)
+      result match {
+        case Left(e) => handleError(e)
+        case Right(_) =>
+          dynamoConnector.updateLoggingTable(message.identityId, "")
+      }
     }
 
     logger.info("Finished processing messages")
@@ -223,11 +227,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     } yield ()
   }
 
-  def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {
-    updateResults.left.foreach(error => logger.warn(s"${error.getMessage}"))
-  }
-
-  def emitIdentityMetrics(updateResults: Either[SoftOptInError, Unit]): Unit = {
+  def emitIdentityMetric(updateResults: Either[SoftOptInError, Unit]): Unit = {
     updateResults match {
       case Left(_) => Metrics.put(event = "failed_consents_updates", 1)
       case Right(_) => Metrics.put(event = "successful_consents_updates", 1)
