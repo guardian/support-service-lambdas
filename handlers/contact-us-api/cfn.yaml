@@ -45,24 +45,6 @@ Resources:
           UsagePlanName: !Sub contact-us-api-${Stage}-UsagePlan
           Description: !Sub Usage plan for contact-us-api-${Stage}
 
-  ReadFromSecretsManagerPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ReadFromSecretsManager
-      PolicyDocument:
-        Statement:
-          - Effect: Allow
-            Action:
-              - secretsmanager:DescribeSecret
-              - secretsmanager:GetSecretValue
-            Resource:
-              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP"
-              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
-              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/MembersDataAPI-1wX7Rg"
-              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA"
-      Roles:
-        - Ref: ContactUsLambdaRole
-
   ContactUsLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -93,6 +75,18 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/contact-us-api-${Stage}:log-stream:*
+        - PolicyName: ReadFromSecretsManager
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/MembersDataAPI-1wX7Rg"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA"
 
   ContactUsLambda:
     Type: AWS::Serverless::Function
