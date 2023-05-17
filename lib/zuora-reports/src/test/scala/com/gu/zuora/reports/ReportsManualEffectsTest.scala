@@ -11,7 +11,7 @@ import play.api.libs.json.Json
 object ReportsManualEffectsTest extends App {
 
   def getZuoraRequest(response: Request => Response) = for {
-    zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+    zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
     zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, zuoraRestConfig)
   } yield zuoraRequests
 
@@ -66,7 +66,7 @@ object ReportsManualEffectsTest extends App {
         List(Batch("2c92c08663f7f01701641749196b2a76", "manualTest/SomeTest2")),
         false,
       )
-      upload = S3ReportUpload("zuora-retention-dev", RawEffects.s3Write) _
+      upload = S3ReportUpload("zuora-retention-code", RawEffects.s3Write) _
       res <- FetchFile(upload, zuoraRequests.getDownloadStream)(request).toDisjunction
     } yield {
       res

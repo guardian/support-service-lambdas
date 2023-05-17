@@ -7,7 +7,6 @@ Parameters:
     Description: Stage name
     Type: String
     AllowedValues:
-      - DEV
       - CODE
       - PROD
     Default: CODE
@@ -17,8 +16,6 @@ Conditions:
 
 Mappings:
   StageMap:
-    DEV:
-      bucketName: "fulfilment-date-calculator-dev"
     CODE:
       bucketName: "fulfilment-date-calculator-code"
     PROD:

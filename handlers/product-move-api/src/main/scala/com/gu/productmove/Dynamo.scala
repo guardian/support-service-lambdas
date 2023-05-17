@@ -2,7 +2,7 @@ package com.gu.productmove
 
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.supporterdata.model.Stage.{DEV, PROD, UAT}
+import com.gu.supporterdata.model.Stage.{PROD, CODE}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.supporterdata.services.SupporterDataDynamoService
 
@@ -24,8 +24,8 @@ object Dynamo {
 object DynamoLive {
   private def getStage(stage: Stage) = {
     stage match
-      case Stage.DEV => DEV
-      case Stage.CODE => DEV
+      case Stage.CODE =>
+        CODE
       case Stage.PROD => PROD
   }
 
@@ -41,7 +41,9 @@ object DynamoLive {
                 dynamoService.writeItem(item)
               }
               .mapError { ex =>
-                InternalServerError(s"Failed to write to the Supporter Data Dynamo table for identityId: ${item.identityId} with subscription Number: ${item.subscriptionName} with error: ${ex.toString}")
+                InternalServerError(
+                  s"Failed to write to the Supporter Data Dynamo table for identityId: ${item.identityId} with subscription Number: ${item.subscriptionName} with error: ${ex.toString}",
+                )
               }
               .flatMap { _ =>
                 ZIO.log(

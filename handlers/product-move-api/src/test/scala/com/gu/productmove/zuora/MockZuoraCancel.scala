@@ -22,8 +22,10 @@ class MockZuoraCancel(responses: Map[(SubscriptionName, LocalDate), Cancellation
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None =>
         ZIO.fail(
-          InternalServerError(s"MockZuoraCancel: no response stubbed for parameters: (${subscriptionName.value}, $chargedThroughDate)",
-        ))
+          InternalServerError(
+            s"MockZuoraCancel: no response stubbed for parameters: (${subscriptionName.value}, $chargedThroughDate)",
+          ),
+        )
   }
 }
 

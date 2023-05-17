@@ -6,9 +6,8 @@ case class Stage(value: String) extends AnyVal {
 
 object Stage {
 
-  val Dev: Stage = Stage("DEV")
   val Code: Stage = Stage("CODE")
   val Prod: Stage = Stage("PROD")
 
-  def apply(): Stage = sys.env.get("Stage").fold(Dev)(Stage(_))
+  def apply(): Stage = sys.env.get("Stage").fold(Code)(Stage(_))
 }

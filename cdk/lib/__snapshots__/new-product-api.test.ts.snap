@@ -21,14 +21,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "ApiName": "new-product-api-CODE",
         "DomainName": "new-product-api-code.membership.guardianapis.com",
         "FulfilmentDateCalculatorS3Resource": "arn:aws:s3:::fulfilment-date-calculator-code/*",
-        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-UAT/catalog.json",
-      },
-      "DEV": {
-        "ApiGatewayTargetDomainName": "d-papcvkgmc9.execute-api.eu-west-1.amazonaws.com",
-        "ApiName": "new-product-api-DEV",
-        "DomainName": "new-product-api-dev.membership.guardianapis.com",
-        "FulfilmentDateCalculatorS3Resource": "arn:aws:s3:::fulfilment-date-calculator-dev/*",
-        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-DEV/catalog.json",
+        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-CODE/catalog.json",
       },
       "PROD": {
         "ApiGatewayTargetDomainName": "d-yyh9pmqphi.execute-api.eu-west-1.amazonaws.com",
@@ -88,7 +81,6 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       "AllowedValues": [
         "PROD",
         "CODE",
-        "DEV",
       ],
       "Default": "CODE",
       "Description": "Stage name",
@@ -2181,14 +2173,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "ApiName": "new-product-api-CODE",
         "DomainName": "new-product-api-code.membership.guardianapis.com",
         "FulfilmentDateCalculatorS3Resource": "arn:aws:s3:::fulfilment-date-calculator-code/*",
-        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-UAT/catalog.json",
-      },
-      "DEV": {
-        "ApiGatewayTargetDomainName": "d-papcvkgmc9.execute-api.eu-west-1.amazonaws.com",
-        "ApiName": "new-product-api-DEV",
-        "DomainName": "new-product-api-dev.membership.guardianapis.com",
-        "FulfilmentDateCalculatorS3Resource": "arn:aws:s3:::fulfilment-date-calculator-dev/*",
-        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-DEV/catalog.json",
+        "ZuoraCatalogLocation": "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-CODE/catalog.json",
       },
       "PROD": {
         "ApiGatewayTargetDomainName": "d-yyh9pmqphi.execute-api.eu-west-1.amazonaws.com",
@@ -2248,7 +2233,6 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       "AllowedValues": [
         "PROD",
         "CODE",
-        "DEV",
       ],
       "Default": "CODE",
       "Description": "Stage name",

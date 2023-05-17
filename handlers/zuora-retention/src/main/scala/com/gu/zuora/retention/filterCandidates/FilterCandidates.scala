@@ -31,7 +31,6 @@ object FilterCandidates {
   val retentionBucketFor = Map(
     Stage("PROD") -> "zuora-retention-prod",
     Stage("CODE") -> "zuora-retention-code",
-    Stage("DEV") -> "zuora-retention-dev",
   )
 
   // this is the entry point
