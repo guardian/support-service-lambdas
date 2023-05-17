@@ -24,14 +24,14 @@ Mappings:
       UserSecretsVersion: dfbf9eba-5215-4cb8-91f1-ff5bcbbf5201
     CODE:
       authDomain: test.salesforce.com
-      reqDomain: gnmtouchpoint--DEV1.my.salesforce.com
+      reqDomain: gnmtouchpoint--DEV1.sandbox.my.salesforce.com
       SalesforceStage: DEV
       AppName: AwsConnectorSandbox
       AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
       UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
     DEV:
       authDomain: test.salesforce.com
-      reqDomain: gnmtouchpoint--DEV1.my.salesforce.com
+      reqDomain: gnmtouchpoint--DEV1.sandbox.my.salesforce.com
       SalesforceStage: DEV
       AppName: AwsConnectorSandbox
       AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
@@ -62,7 +62,9 @@ Resources:
             Action:
               - secretsmanager:DescribeSecret
               - secretsmanager:GetSecretValue
-            Resource: "arn:aws:secretsmanager:eu-west-1:865473395570:secret:*"
+            Resource:
+              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
+              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA"
       Roles:
         - Ref: ContactUsLambdaRole
 
