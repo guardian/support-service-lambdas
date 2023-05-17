@@ -5,7 +5,7 @@ regions:
 allowedStages:
   - CODE
   - PROD
-
+deployments:
   cfn:
     type: cloud-formation
     app: contact-us-api
