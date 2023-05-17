@@ -17,9 +17,9 @@ class PricesFromZuoraCatalogEffectsTest extends AnyFlatSpec with Matchers {
     val expectedProducts = digital ++ voucher ++ hd ++ subsCard ++ gw ++ supporterPlus
 
     val actual = for {
-      zuoraIds <- ZuoraIds.zuoraIdsForStage(Stage("DEV"))
+      zuoraIds <- ZuoraIds.zuoraIdsForStage(Stage("CODE"))
       response <- PricesFromZuoraCatalog(
-        ZuoraEnvironment("DEV"),
+        ZuoraEnvironment("CODE"),
         GetFromS3.fetchString,
         zuoraIds.rateplanIdToApiId.get,
       ).toDisjunction.left.map(_.toString)

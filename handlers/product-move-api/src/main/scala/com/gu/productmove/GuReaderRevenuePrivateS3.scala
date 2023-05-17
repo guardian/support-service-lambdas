@@ -8,7 +8,7 @@ object GuReaderRevenuePrivateS3 {
   def key(configFileName: String, stage: Stage, version: Int = 1) = {
     val basePath = s"membership/support-service-lambdas/$stage"
 
-    val versionString = if (stage == Stage.DEV) "" else s".v${version}"
+    val versionString = s".v${version}"
     val relativePath = s"$configFileName-$stage$versionString.json"
     s"$basePath/$relativePath"
   }

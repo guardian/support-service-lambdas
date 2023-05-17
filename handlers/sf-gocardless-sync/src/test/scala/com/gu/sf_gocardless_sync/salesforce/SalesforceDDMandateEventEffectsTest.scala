@@ -18,7 +18,7 @@ class SalesforceDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
   it should "create a 'DD Mandate Event' in salesforce" taggedAs EffectsTest in {
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       wiredOp = SalesforceDDMandateEvent.Create(sfAuth.wrapWith(JsonHttp.post))
@@ -46,7 +46,7 @@ class SalesforceDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
   it should "fetch the GoCardlessID of the last successfully processed 'DD Mandate Event' from salesforce" taggedAs EffectsTest in {
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       wiredOp = SalesforceDDMandateEvent.GetGoCardlessIdOfLastProcessed(sfAuth.wrapWith(JsonHttp.get))

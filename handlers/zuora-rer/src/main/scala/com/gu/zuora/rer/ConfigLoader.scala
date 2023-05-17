@@ -11,7 +11,7 @@ case class ZuoraRerConfig(
 
 object ConfigLoader {
   def getRerLambdaConfigTemp: ZuoraRerConfig =
-    ZuoraRerConfig("baton-results", "zuora-results/DEV", "performRerLambdaFunctionName")
+    ZuoraRerConfig("baton-results", "zuora-results/CODE", "performRerLambdaFunctionName")
 }
 
 object ZuoraRerConfig {

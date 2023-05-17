@@ -43,33 +43,6 @@ object HolidayCreditProduct {
   object Code {
 
     val GuardianWeekly: CreditProduct = CreditProduct(
-      productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
-      productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14",
-      ProductRatePlanChargeName,
-    )
-
-    val Voucher: CreditProduct = CreditProduct(
-      productRatePlanId = "2c92c0f87466eaa2017467be65222246",
-      productRatePlanChargeId = "2c92c0f87466eaa2017467be659e2248",
-      ProductRatePlanChargeName,
-    )
-
-    val DigitalVoucher: CreditProduct = CreditProduct(
-      productRatePlanId = "2c92c0f87506696a01750d7946807e17",
-      productRatePlanChargeId = "2c92c0f87506696a01750d7946ae7e19",
-      ProductRatePlanChargeName,
-    )
-
-    val HomeDelivery: CreditProduct = CreditProduct(
-      productRatePlanId = "2c92c0f97466f60b017467c6e02707b0",
-      productRatePlanChargeId = "2c92c0f97466f60b017467c6e04407b3",
-      ProductRatePlanChargeName,
-    )
-  }
-
-  object Dev {
-
-    val GuardianWeekly: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
       productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4",
       ProductRatePlanChargeName,
@@ -119,10 +92,6 @@ object HolidayCreditProduct {
       case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
       case (Stage.Code, "Newspaper Voucher") => Some(HolidayCreditProduct.Code.Voucher)
       case (Stage.Code, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.DigitalVoucher)
-      case (_, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Dev.GuardianWeekly)
-      case (_, "Newspaper Delivery") => Some(HolidayCreditProduct.Dev.HomeDelivery)
-      case (_, "Newspaper Voucher") => Some(HolidayCreditProduct.Dev.Voucher)
-      case (_, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Dev.DigitalVoucher)
       case _ => None
     }
 

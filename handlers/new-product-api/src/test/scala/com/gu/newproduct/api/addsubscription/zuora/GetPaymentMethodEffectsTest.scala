@@ -15,7 +15,7 @@ class GetPaymentMethodEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get payment details" taggedAs EffectsTest in {
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       res <- GetPaymentMethod(zuoraDeps.get[PaymentMethodWire])(
         PaymentMethodId("8ad095dd82f7aaa50182f96de2883de1"),

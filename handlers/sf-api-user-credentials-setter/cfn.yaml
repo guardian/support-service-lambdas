@@ -7,15 +7,12 @@ Parameters:
     Type: String
     AllowedValues:
       - CODE
-      - DEV
-    Default: DEV
+    Default: CODE
 
 Mappings:
   StageMap:
-    DEV:
-      SecretsVersion: "10741350-3232-40ba-8713-7728bc180170"
     CODE:
-      SecretsVersion: "84f470bf-a9e5-40a7-a044-6b91dcae7670"
+      SecretsVersion: "10741350-3232-40ba-8713-7728bc180170"
 
 Resources:
   SfApiUserCredentialsSetterRole:

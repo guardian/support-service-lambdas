@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.newproduct.api.addsubscription.Handler
 import play.api.libs.json.{JsString, Json}
 
-//This is just a way to locally run the addSubscription lambda in dev
+//This is just a way to locally run the addSubscription lambda in code
 object AddSubscriptionManualTest extends App {
   val requestBody =
     """{

@@ -27,7 +27,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("subscription update service")(
-      test("SubscriptionUpdateRequest is correct for input (DEV)") {
+      test("SubscriptionUpdateRequest is correct for input (CODE)") {
         val timeLocalDate = LocalDate.of(2022, 5, 10)
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
 
@@ -68,7 +68,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               )
             }
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       },
@@ -135,7 +135,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(response)(equalTo(expectedResponse))
       },
@@ -157,7 +157,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(response)(equalTo(expectedResponse))
       },

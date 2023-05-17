@@ -19,7 +19,7 @@ class FulfilmentDatesFetcherTest extends AnyFlatSpec {
     def fetchFromS3(s3Location: S3Location): Try[String] = {
       s3Location match {
         case S3Location(
-              "fulfilment-date-calculator-dev",
+              "fulfilment-date-calculator-code",
               "Newspaper - Home Delivery/2019-12-11_Newspaper - Home Delivery.json",
             ) =>
           Success(Source.fromResource("Newspaper - Home Delivery.json").mkString)
@@ -29,7 +29,7 @@ class FulfilmentDatesFetcherTest extends AnyFlatSpec {
     }
 
     Inside.inside(
-      FulfilmentDatesFetcher(fetchFromS3, Stage("DEV"))
+      FulfilmentDatesFetcher(fetchFromS3, Stage("CODE"))
         .getFulfilmentDates(
           ZuoraProductTypes.NewspaperHomeDelivery,
           LocalDate.of(2019, 12, 11),

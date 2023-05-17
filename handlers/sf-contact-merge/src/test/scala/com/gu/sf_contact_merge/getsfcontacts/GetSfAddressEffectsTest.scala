@@ -23,7 +23,7 @@ class GetSfAddressEffectsTest extends AnyFlatSpec with Matchers {
     val testContact = SFEffectsData.testContactHasNamePhoneOtherAddress
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       getSfContact = sfAuth
