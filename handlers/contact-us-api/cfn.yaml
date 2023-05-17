@@ -91,11 +91,11 @@ Resources:
                   - secretsmanager:GetSecretValue
                 Resource:
                   - Fn::Sub:
-                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}"
+                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/ConnectedApp/${AppName}*"
                       - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
                         AppName: !FindInMap [StageMap, !Ref Stage, AppName]
                   - Fn::Sub:
-                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/User/MembersDataAPI"
+                      - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:${SalesforceStage}/Salesforce/User/MembersDataAPI*"
                       - SalesforceStage: !FindInMap [StageMap, !Ref Stage, SalesforceStage]
 
   ContactUsLambda:
