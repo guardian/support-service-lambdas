@@ -287,11 +287,7 @@ object RecurringContributionToSupporterPlus {
       s"Performing product move update with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
     )
     stage <- ZIO.service[Stage]
-    account <- GetAccount.get(subscription.accountNumber)
-
-    identityId <- ZIO
-      .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
+    accountFuture <- GetAccount.get(subscription.accountNumber).fork
 
     updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
       case (addRatePlan, removeRatePlan) =>
@@ -308,6 +304,12 @@ object RecurringContributionToSupporterPlus {
 
     updateResponse <- SubscriptionUpdate
       .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
+
+    account <- accountFuture.join
+
+    identityId <- ZIO
+      .fromOption(account.basicInfo.IdentityId__c)
+      .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriodValue <- billingPeriod.value
@@ -380,7 +382,7 @@ object RecurringContributionToSupporterPlus {
     _ <- requests.join
 
   } yield Success(
-    s"Product move completed successfully with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
+    s"Product move completed successfully with subscription number ${subscriptionName.value} and switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
   )
 }
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
