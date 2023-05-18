@@ -6,6 +6,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp
 import ApiGatewayOp._
+import com.gu.google.BigQueryHelper
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
@@ -31,6 +32,15 @@ object IdentityRetentionSteps extends Logging {
       subs <- SubscriptionsForAccounts(zuoraQuerier)(accounts)
     } yield RelationshipForSubscriptions(subs)).apiResponse
   })
+
+  def apply(bigQueryHelper: BigQueryHelper): Operation =
+    Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
+      (for {
+        queryStringParameters <- apiGatewayRequest.queryParamsAsCaseClass[UrlParams]()
+        identityId <- extractIdentityId(queryStringParameters)
+        holdings <- GetActiveProductHoldings(bigQueryHelper)(identityId)
+      } yield RelationshipForHoldings(holdings)).apiResponse
+    })
 
   def extractIdentityId(queryStringParams: UrlParams): ApiGatewayOp[IdentityId] = {
     validate(queryStringParams.identityId) match {
