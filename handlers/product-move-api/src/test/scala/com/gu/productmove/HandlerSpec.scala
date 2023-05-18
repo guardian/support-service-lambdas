@@ -97,7 +97,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = ProductMoveEndpointTypes.Success(
-          "Product move completed successfully with switch type recurring-contribution-to-supporter-plus",
+          "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
         (for {
           _ <- TestClock.setTime(time)
@@ -129,7 +129,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
         val expectedOutput = ProductMoveEndpointTypes.Success(
-          "Product move completed successfully with switch type recurring-contribution-to-supporter-plus",
+          "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
         val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageBodyNoPaymentOrRefund -> (), salesforceRecordInput3 -> ())
@@ -167,7 +167,7 @@ object HandlerSpec extends ZIOSpecDefault {
           (subscriptionName, expectedRequestBody2)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
         val expectedOutput = ProductMoveEndpointTypes.Success(
-          "Product move completed successfully with switch type to-recurring-contribution",
+          "Product move completed successfully with subscription number A-S00339056 and switch type to-recurring-contribution",
         )
         val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())

@@ -380,7 +380,7 @@ object RecurringContributionToSupporterPlus {
     _ <- requests.join
 
   } yield Success(
-    s"Product move completed successfully with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
+    s"Product move completed successfully with subscription number ${subscriptionName.value} and switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
   )
 }
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]

@@ -147,7 +147,9 @@ object ToRecurringContribution {
 
       requests = emailFuture.zip(salesforceTrackingFuture)
       _ <- requests.join
-    } yield Success(s"Product move completed successfully with switch type ${SwitchType.ToRecurringContribution.id}"))
+    } yield Success(
+      s"Product move completed successfully with subscription number ${subscriptionName.value} and switch type ${SwitchType.ToRecurringContribution.id}",
+    ))
       .fold(error => error, success => success)
   }
 
