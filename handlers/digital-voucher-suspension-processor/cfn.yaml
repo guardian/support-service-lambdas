@@ -31,6 +31,51 @@ Conditions:
 
 Resources:
 
+  SuspensionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      Tags:
+        - Key: App
+          Value: digital-voucher-suspension-processor
+        - Key: Stage
+          Value:
+            Ref: Stage
+        - Key: Stack
+          Value: membership
+      Path: /
+      Policies:
+        - PolicyName: SuspensionLambdaPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/digital-voucher-suspension-processor-${Stage}:log-stream:*
+        - PolicyName: ReadFromSecretsManagerPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/MembersDataAPI-1wX7Rg"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Imovo-MZGuf9"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Imovo-HU0Qij"
+
   SuspensionLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -52,6 +97,12 @@ Resources:
             !Sub
             - '{{resolve:ssm:/${Stage}/membership/support-service-lambdas-shared-imovo/imovoBaseUrl:${Version}}}'
             - Version: !FindInMap [StageMap, !Ref Stage, ImovoUrlVersion]
+      Role:
+        Fn::GetAtt:
+          - SuspensionLambdaRole
+          - Arn
+    DependsOn:
+      - SuspensionLambdaRole
 
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
