@@ -195,7 +195,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(layers)
       },
       test("productMove endpoint returns 500 error if identityId does not exist") {
-        val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("identityId is null for subscription name A-S00339056")
         (for {
@@ -209,7 +209,7 @@ object HandlerSpec extends ZIOSpecDefault {
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
           assert(getSubRequests)(equalTo(List(SubscriptionName("A-S00339056")))) &&
-          assert(subUpdateRequests)(equalTo(Nil)) &&
+          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
           assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
           assert(sqsRequests)(equalTo(Nil)) &&
           assert(dynamoRequests)(equalTo(Nil))
