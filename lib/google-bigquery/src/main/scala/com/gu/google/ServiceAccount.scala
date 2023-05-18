@@ -15,6 +15,9 @@ object ServiceAccount {
       .build()
       .getService
 
+  def credentialsFromConfig(config: BigQueryConfig): ServiceAccountCredentials =
+    credentialsFromStream(new ByteArrayInputStream(config.bigQueryCredentials.toString.getBytes()))
+
   def credentialsFromString(jsonString: String): ServiceAccountCredentials =
     credentialsFromStream(new ByteArrayInputStream(jsonString.getBytes()))
 

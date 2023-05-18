@@ -12,8 +12,7 @@ import scala.util.{Success, Try}
 class BigQueryConfigTest extends AnyFlatSpec with Matchers {
 
   it should "parse a config file" in {
-    def config(dummyLocation: S3Location): Try[String] = Success(
-      """
+    def config(dummyLocation: S3Location): Try[String] = Success("""
         |  {
         |    "stage": "DEV",
         |    "bigQueryCredentials": {
@@ -32,14 +31,13 @@ class BigQueryConfigTest extends AnyFlatSpec with Matchers {
     maybeConfig match {
       case Left(error) => fail(error.toString)
       case Right(config) =>
-        config.bigQueryCredentials shouldBe a [JsObject]
+        config.bigQueryCredentials shouldBe a[JsObject]
         (config.bigQueryCredentials \ "project_id").as[String] shouldBe "my-project"
     }
   }
 
   it should "fail to parse an invalid config file" in {
-    def config(dummyLocation: S3Location): Try[String] = Success(
-      """
+    def config(dummyLocation: S3Location): Try[String] = Success("""
         |  {
         |    "stage": "DEV",
         |    "bigQueryCredentials": 4
@@ -50,10 +48,9 @@ class BigQueryConfigTest extends AnyFlatSpec with Matchers {
     val maybeConfig = loadConfig[BigQueryConfig]
     maybeConfig match {
       case Left(error) =>
-        error shouldBe a [ConfigFailure]
+        error shouldBe a[ConfigFailure]
       case Right(_) =>
         fail("BigQueryConfig should not parse")
     }
   }
-
 }
