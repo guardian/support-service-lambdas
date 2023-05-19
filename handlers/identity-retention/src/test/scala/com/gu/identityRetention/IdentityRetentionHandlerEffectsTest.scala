@@ -12,18 +12,29 @@ import org.scalatest.matchers.should.Matchers
 
 class IdentityRetentionHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
+//  101341673
+//  16600072
+//  102445045
+//  12250654
+//  106079085
+//  101470367
+//  15432550
+//  108066819
+//  105745964
+//  16509342
+
   it should "return 404 if the identity id is not linked to any Zuora billing accounts" taggedAs EffectsTest in {
     val actualResponse = runWithMock(dummyRequest("12345"))
     actualResponse jsonMatches (safeToDelete)
   }
 
   it should "return an ongoing relationship response (200) if identity id is linked to an active sub" taggedAs EffectsTest in {
-    val actualResponse = runWithMock(dummyRequest("78973512"))
+    val actualResponse = runWithMock(dummyRequest("101341673"))
     actualResponse jsonMatches (ongoingRelationship)
   }
 
   it should "return 200 if the identity id has a cancelled sub" taggedAs EffectsTest in {
-    val actualResponse = runWithMock(dummyRequest("78973513"))
+    val actualResponse = runWithMock(dummyRequest("105214218"))
     actualResponse jsonMatches (cancelledRelationship)
   }
 
@@ -120,7 +131,7 @@ class IdentityRetentionHandlerEffectsTest extends AnyFlatSpec with Matchers {
       |{
       |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2018-04-04\"\n}"
+      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2022-11-23\"\n}"
       |}""".stripMargin
 
   val safeToDelete =

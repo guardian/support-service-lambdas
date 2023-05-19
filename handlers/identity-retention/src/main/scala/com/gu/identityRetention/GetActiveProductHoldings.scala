@@ -9,7 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json.Json
 
 import scala.jdk.CollectionConverters._
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 
 object GetActiveProductHoldings extends LazyLogging {
 
@@ -46,7 +46,7 @@ object GetActiveProductHoldings extends LazyLogging {
          |    , reader_revenue_product AS product
          |    , holding_product_status AS status
          |    , COALESCE(churn_date, DATE_ADD(CURRENT_DATE, INTERVAL 1 YEAR)) AS effective_lapsed_date -- WRONG, just stops it being NULL
-         |  FROM `datatech-platform-prod.reader_revenue.fact_holding_snapshot_day_current`
+         |  FROM `reader_revenue.fact_holding_snapshot_day_current`
          |)
          |
          |SELECT *
@@ -90,7 +90,7 @@ object GetActiveProductHoldings extends LazyLogging {
   }
 
   def getDateValue(fieldValue: FieldValue): LocalDate = {
-    LocalDate.ofInstant(fieldValue.getTimestampInstant, ZoneId.systemDefault())
+    LocalDate.parse(fieldValue.getStringValue)
   }
 
   def toSqlString(value: String) = s"'${value.replace("'", "''")}'"
