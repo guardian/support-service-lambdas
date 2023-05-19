@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.getaccounts
 
-import com.gu.DevZuora
+import com.gu.CodeZuora
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.TypeConvert._
@@ -20,10 +20,10 @@ class GetZuoraEmailsForAccountsEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "return the right emails" taggedAs EffectsTest in {
 
-    val testData = NonEmptyList(DevZuora.account1, List(DevZuora.account2))
+    val testData = NonEmptyList(CodeZuora.account1, List(CodeZuora.account2))
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
         .toApiGatewayOp("parse config")
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))
       getZuoraEmailsForAccounts = GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier)

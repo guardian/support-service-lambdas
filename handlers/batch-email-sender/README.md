@@ -97,8 +97,8 @@ Code changes are necessary in at least
 
 Tips for quicker dev feedback loop:
  - Due to multiple moving parts, when something goes wrong, it is helpful to enable realtime [log tailing](https://github.com/guardian/salesforce#tailing-logs) on each system
- - In SF DEV, `CommsDetailsToServiceLayer.cls` currently cannot be saved. Workaround is to use `VSC | Right click on the file | SFDX: Deploy this source to Org` or the corresponding sfdx CLI command.
- - First figure out a quick way to trigger emails from salesforce, for example, by making sure [CODE MMA](https://manage.code.dev-theguardian.com/delivery/guardianweekly/address/confirmed) actually affects SF DEV. If test-user is NOT used then CODE MMA should talk to SF DEV.
+ - In SF CODE, `CommsDetailsToServiceLayer.cls` currently cannot be saved. Workaround is to use `VSC | Right click on the file | SFDX: Deploy this source to Org` or the corresponding sfdx CLI command.
+ - First figure out a quick way to trigger emails from salesforce, for example, by making sure [CODE MMA](https://manage.code.dev-theguardian.com/delivery/guardianweekly/address/confirmed) actually affects SF CODE. If test-user is NOT used then CODE MMA should talk to SF CODE.
  - Deploy changes to batch-email-sender CODE directly from CLI:
      ```
      sbt batch-email-sender/assembly

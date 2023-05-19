@@ -4,18 +4,62 @@ import com.gu.effects.GetFromS3
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlusV2, MonthlySupporterPlusV2}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, SupporterPlusZuoraIds, ZuoraIds, zuoraIdsForStage}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{
+  ProductRatePlanId,
+  SupporterPlusZuoraIds,
+  ZuoraIds,
+  zuoraIdsForStage,
+}
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, ExpectedInput, InternalServerError, OutputBody, PreviewResult, Success}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ErrorResponse,
+  ExpectedInput,
+  InternalServerError,
+  OutputBody,
+  PreviewResult,
+  Success,
+}
 import com.gu.productmove.move.BuildPreviewResult
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.zuora.{AddRatePlan, ChargeOverrides, GetAccount, GetAccountLive, GetSubscription, GetSubscriptionLive, RemoveRatePlan, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateInvoice, SubscriptionUpdateInvoiceItem, SubscriptionUpdateLive, SubscriptionUpdatePreviewResponse, SubscriptionUpdateRequest, SubscriptionUpdateResponse, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, Dynamo, DynamoLive, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadProductSwitchAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
+import com.gu.productmove.zuora.{
+  AddRatePlan,
+  ChargeOverrides,
+  GetAccount,
+  GetAccountLive,
+  GetSubscription,
+  GetSubscriptionLive,
+  RemoveRatePlan,
+  Subscribe,
+  SubscribeLive,
+  SubscriptionUpdate,
+  SubscriptionUpdateInvoice,
+  SubscriptionUpdateInvoiceItem,
+  SubscriptionUpdateLive,
+  SubscriptionUpdatePreviewResponse,
+  SubscriptionUpdateRequest,
+  SubscriptionUpdateResponse,
+  ZuoraCancel,
+  ZuoraCancelLive,
+}
+import com.gu.productmove.{
+  AwsCredentialsLive,
+  AwsS3Live,
+  Dynamo,
+  DynamoLive,
+  EmailMessage,
+  EmailPayload,
+  EmailPayloadContactAttributes,
+  EmailPayloadProductSwitchAttributes,
+  GuStageLive,
+  SQS,
+  SQSLive,
+  SttpClientLive,
+}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config
 import com.gu.util.config.ZuoraEnvironment
@@ -239,13 +283,11 @@ object RecurringContributionToSupporterPlus {
       csrUserId: Option[String],
       caseId: Option[String],
   ): ZIO[GetAccount with SubscriptionUpdate with SQS with Stage with Dynamo, ErrorResponse, OutputBody] = for {
-    _ <- ZIO.log(s"Performing product move update with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}")
+    _ <- ZIO.log(
+      s"Performing product move update with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
+    )
     stage <- ZIO.service[Stage]
-    account <- GetAccount.get(subscription.accountNumber)
-
-    identityId <- ZIO
-      .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
+    accountFuture <- GetAccount.get(subscription.accountNumber).fork
 
     updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
       case (addRatePlan, removeRatePlan) =>
@@ -262,6 +304,12 @@ object RecurringContributionToSupporterPlus {
 
     updateResponse <- SubscriptionUpdate
       .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
+
+    account <- accountFuture.join
+
+    identityId <- ZIO
+      .fromOption(account.basicInfo.IdentityId__c)
+      .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
 
     todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
     billingPeriodValue <- billingPeriod.value
@@ -333,7 +381,9 @@ object RecurringContributionToSupporterPlus {
 
     _ <- requests.join
 
-  } yield Success(s"Product move completed successfully with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}")
+  } yield Success(
+    s"Product move completed successfully with subscription number ${subscriptionName.value} and switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
+  )
 }
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
 given JsonDecoder[SubscriptionUpdateInvoiceItem] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoiceItem]
