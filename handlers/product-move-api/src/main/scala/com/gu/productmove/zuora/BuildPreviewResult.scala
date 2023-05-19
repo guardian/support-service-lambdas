@@ -41,7 +41,7 @@ object BuildPreviewResult {
       /*
               Term renewal for many subs happens during the billing run on the renewal day which is scheduled for around 6am BST.
               During this billing run, Zuora does not return the contribution invoice item, only supporter plus invoice items.
-              This ensures this edge case is still processed.
+              When this happens we can just use the full price of the active rate plan as the amount to be refunded
        */
       case (n1, n2) if n1 > 1 && n2 == 0 =>
         for {
