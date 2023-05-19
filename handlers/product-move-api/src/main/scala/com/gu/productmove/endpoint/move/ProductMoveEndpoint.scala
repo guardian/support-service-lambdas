@@ -172,7 +172,8 @@ object ProductMoveEndpoint {
       subscriptionName: SubscriptionName,
       switchType: SwitchType,
       postData: ExpectedInput,
-  ): TIO[OutputBody] =
+  ): TIO[OutputBody] = {
+    scala.Console.println(s"running with $subscriptionName, $switchType, $postData")
     (switchType match {
       case SwitchType.RecurringContributionToSupporterPlus =>
         RecurringContributionToSupporterPlus(subscriptionName, postData)
@@ -190,6 +191,7 @@ object ProductMoveEndpoint {
       GuStageLive.layer,
       DynamoLive.layer,
     )
+  }
 }
 
 extension (billingPeriod: BillingPeriod)

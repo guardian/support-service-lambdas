@@ -5,16 +5,17 @@ import cats.effect.kernel.{CancelScope, Poll}
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.*
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent.RequestContext
+import com.amazonaws.xray.AWSXRay
 import com.gu.productmove
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{BadRequest, InternalServerError, OutputBody}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
-import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
+import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraGet, ZuoraGetLive, ZuoraClientLive}
+import com.gu.productmove.zuora.{GetSubscriptionLive, GetSubscription}
 import software.amazon.awssdk.auth.credentials.*
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.{GetObjectRequest, S3Exception}
+import software.amazon.awssdk.services.s3.model.{S3Exception, GetObjectRequest}
 import software.amazon.awssdk.utils.SdkAutoCloseable
 import sttp.capabilities
 import sttp.capabilities.WebSockets
@@ -28,14 +29,14 @@ import sttp.tapir.capabilities.NoStreams
 import sttp.tapir.model.{ConnectionInfo, ServerRequest}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.interceptor.reject.RejectInterceptor
-import sttp.tapir.server.interceptor.{CustomiseInterceptors, RequestResult}
+import sttp.tapir.server.interceptor.{RequestResult, CustomiseInterceptors}
 import sttp.tapir.server.interpreter.*
 import sttp.tapir.serverless.aws.lambda.*
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
-import sttp.tapir.{AttributeKey, AttributeMap, CodecFormat, RawBodyType, WebSocketBodyOutput}
+import sttp.tapir.{RawBodyType, AttributeMap, AttributeKey, CodecFormat, WebSocketBodyOutput}
 import zio.ZIO.attemptBlocking
 import zio.json.*
-import zio.{IO, Runtime, ZIO, *}
+import zio.{ZIO, Runtime, IO, *}
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.net.{InetSocketAddress, URLDecoder}
@@ -44,7 +45,7 @@ import java.nio.charset.Charset
 import java.util.Base64
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.*
-import scala.util.{Success, Try}
+import scala.util.{Try, Success}
 
 object ZIOApiGatewayRequestHandler {
 
@@ -89,9 +90,7 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
       javaRequest: APIGatewayV2WebSocketEvent,
       context: Context,
   ): APIGatewayV2WebSocketResponse = {
-
     context.getLogger.log("Lambda input: " + javaRequest)
-
     val awsRequest: AwsRequest = RequestMapper.convertJavaRequestToTapirRequest(javaRequest)
     val response: AwsResponse = handleWithLoggerAndErrorHandling(awsRequest, context)
 
@@ -109,10 +108,11 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
   }
 
   private def handleWithLoggerAndErrorHandling(awsRequest: AwsRequest, context: Context): AwsResponse = {
+    val routeSegment = AWSXRay.beginSubsegment("Route request")
     val swaggerEndpoints = SwaggerInterpreter().fromServerEndpoints[TIO](server, "My App", "1.0")
-
     val route: Route[TIO] = TIOInterpreter().toRoute(server ++ swaggerEndpoints)
     val routedTask: TIO[AwsResponse] = route(awsRequest)
+    routeSegment.end
     val runtime = Runtime.default
     Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(

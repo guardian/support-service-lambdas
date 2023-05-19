@@ -541,6 +541,7 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
+    "com.amazonaws" % "aws-xray-recorder-sdk-core" % "2.11.0",
   ),
   scala3Settings ++ Seq(
     excludeDependencies ++= Seq(
@@ -555,7 +556,9 @@ lazy val `product-move-api` = lambdaProject(
     genDocs := genDocsImpl("com.gu.productmove.MakeDocsYaml").value
 
     lazy val deployTo =
-      inputKey[Unit]("Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop")
+      inputKey[Unit](
+        "Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop",
+      )
 
     // run from product-move-api project eg. deployTo CODE
     // product-move-api needs its own deploy task currently because firstly it's Scala 3 so the jar path is different to
@@ -737,7 +740,9 @@ initialize := {
 }
 
 lazy val deployAwsLambda =
-  inputKey[Unit]("Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop")
+  inputKey[Unit](
+    "Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop",
+  )
 deployAwsLambda := {
   import scala.sys.process._
   import complete.DefaultParsers._

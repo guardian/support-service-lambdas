@@ -26,6 +26,7 @@ Resources:
   ProductMoveApiGateway:
     Type: AWS::Serverless::Api
     Properties:
+      Tracing: Active
       OpenApiVersion: 3.0.1
       Name: !Sub product-move-api-${Stage}-ApiGateway
       StageName: !Sub ${Stage}

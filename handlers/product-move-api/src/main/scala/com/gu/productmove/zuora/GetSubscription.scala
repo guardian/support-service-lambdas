@@ -1,21 +1,22 @@
 package com.gu.productmove.zuora
 
+import com.amazonaws.xray.AWSXRay
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
+import com.gu.newproduct.api.productcatalog.{Monthly, Annual, BillingPeriod}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
+import com.gu.productmove.zuora.model.{SubscriptionName, AccountNumber}
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.capabilities.zio.ZioStreams
-import sttp.capabilities.{Effect, WebSockets}
+import sttp.capabilities.{WebSockets, Effect}
 import sttp.client3.*
 import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
-import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
+import zio.{URLayer, Task, ZLayer, RIO, ZIO, IO}
 
 import java.time.LocalDate
 
@@ -76,6 +77,8 @@ object GetSubscription {
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
   given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen[RatePlanCharge]
 
-  def get(subscriptionName: SubscriptionName): ZIO[GetSubscription, ErrorResponse, GetSubscriptionResponse] =
-    ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionName))
+  def get(subscriptionName: SubscriptionName): ZIO[GetSubscription, ErrorResponse, GetSubscriptionResponse] = {
+    val subsegment = AWSXRay.beginSubsegment("Get subscription")
+    ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionName).debug { subsegment.end; "" })
+  }
 }
