@@ -28,7 +28,7 @@ object Config {
       ),
       imovo = ImovoConfig(
         imovoBaseUrl = imovoUrl,
-        imovoApiKey = imovoSecrets.imovoAPIKey,
+        imovoApiKey = imovoSecrets.apiKey,
       ),
     )
 }

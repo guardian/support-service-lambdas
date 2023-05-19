@@ -34,7 +34,7 @@ import scala.util.Try
 
 case class SalesforceSecrets(clientId: String, clientSecret: String)
 case class MembersDataAPISecrets(username: String, password: String, token: String)
-case class ImovoSecrets(imovoAPIKey: String)
+case class ImovoSecrets(apiKey: String)
 
 object Secrets {
 

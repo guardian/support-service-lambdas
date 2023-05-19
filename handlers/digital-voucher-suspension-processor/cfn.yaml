@@ -5,7 +5,6 @@ Description: >
   Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor
 
 Parameters:
-
   Stage:
     Description: Stage name
     Type: String
@@ -92,6 +91,7 @@ Resources:
       Handler: com.gu.digitalvouchersuspensionprocessor.Handler::handleRequest
       Environment:
         Variables:
+          stage: !Ref Stage
           salesforceUrl: !FindInMap [ StageMap, !Ref Stage, SalesforceUrl ]
           imovoUrl:
             !Sub
