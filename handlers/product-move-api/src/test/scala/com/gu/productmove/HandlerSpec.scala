@@ -14,12 +14,17 @@ import com.gu.productmove.endpoint.available.{
   Trial,
 }
 import com.gu.productmove.endpoint.move.{
-  ToRecurringContribution,
   ProductMoveEndpoint,
   ProductMoveEndpointTypes,
   RecurringContributionToSupporterPlus,
+  ToRecurringContribution,
 }
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, InternalServerError, OutputBody}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ExpectedInput,
+  InternalServerError,
+  OutputBody,
+  PreviewResult,
+}
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
 import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, SubscriptionCancelEndpointTypes}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
@@ -257,19 +262,18 @@ object HandlerSpec extends ZIOSpecDefault {
        */
 
       test("productMove endpoint completes if subscription is being switched early in morning on renewal date") {
-        val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
-        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdatePreviewResult)
-        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
-        val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
+        val endpointJsonInputBody = ExpectedInput(50.00, true, None, None)
+        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> previewResponse)
+
         (for {
-          output <- ProductMoveEndpoint.productMove(subscriptionName, endpointJsonInputBody)
+          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
           getSubRequests <- MockGetSubscription.requests
           subUpdateRequests <- MockSubscriptionUpdate.requests
           getAccountRequests <- MockGetAccount.requests
           sqsRequests <- MockSQS.requests
           dynamoRequests <- MockDynamo.requests
         } yield {
-          assert(output)(equalTo(expectedOutput)) &&
+          assert(output)(equalTo(subscriptionUpdatePreviewResult)) &&
           assert(getSubRequests)(equalTo(List(subscriptionName))) &&
           assert(subUpdateRequests)(equalTo(Nil)) &&
           assert(getAccountRequests)(equalTo(Nil)) &&
@@ -277,7 +281,7 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(dynamoRequests)(equalTo(Nil))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),

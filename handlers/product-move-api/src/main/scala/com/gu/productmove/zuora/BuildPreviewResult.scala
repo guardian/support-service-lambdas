@@ -47,7 +47,7 @@ object BuildPreviewResult {
         for {
           date <- Clock.currentDateTime.map(_.toLocalDate)
           isRenewalDate = activeRatePlanCharge.effectiveStartDate == date
-          priceDifference = if (isRenewalDate) activeRatePlanCharge.price.getOrElse(0) else 0
+          priceDifference = if (isRenewalDate) activeRatePlanCharge.price.getOrElse(0.00) else 0.00
           supporterPlusInvoiceItems = supporterPlusInvoices.sortWith((i1, i2) =>
             i1.serviceStartDate.isBefore(i2.serviceStartDate),
           )
@@ -59,8 +59,8 @@ object BuildPreviewResult {
             ),
           )
         } yield PreviewResult(
-          supporterPlusInvoiceItems.head.totalAmount - priceDifference,
-          priceDifference,
+          supporterPlusInvoiceItems.head.totalAmount - BigDecimal.valueOf(priceDifference),
+          BigDecimal.valueOf(priceDifference),
           supporterPlusInvoiceItems.head.totalAmount,
           supporterPlusInvoiceItems(1).serviceStartDate,
         )
