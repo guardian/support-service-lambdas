@@ -3,7 +3,7 @@
 This is the reader revenue lambda API/orchestration layer. For tech debt look in [the google doc](https://docs.google.com/document/d/1A4IyEWhABoGUw01fiuS0JtuuYn2IfQFZdTA5mtrcNho/edit?usp=sharing), although it should probably be a trello column.
 
 Please keep all the various README in this project up to date, and improve them!
-There should be one in each project and anywhere else you think it's would help.
+There should be one in each project and anywhere else you think it would help.
 
 ---
 
@@ -80,7 +80,7 @@ If you're making a change that you only want to go live on deployment (and have 
 with riffraff) then you can increment the version.  Make sure you upload the file with the new version,
 otherwise it will break the existing lambda immediately.
 
-Follow the same process to update the prod config, and for DEV there is no version number.
+Follow the same process to update the prod config.
 
 To check that you have done it correctly, run the [S3ConfigFilesEffectsTest](lib/s3ConfigValidator/src/test/scala/com/gu/test/S3ConfigFilesEffectsTest.scala).
 That will check the relevant version can be understood by the local version of the code.

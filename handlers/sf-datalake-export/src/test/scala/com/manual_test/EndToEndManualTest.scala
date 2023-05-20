@@ -9,7 +9,7 @@ import play.api.libs.json._
 
 /** Run a query as a salesforce job, wait for it to complete and copy the results to s3.
   *
-  * See a log entry like "Copying file to S3. Bucket: gu-salesforce-export-dev | Key:
+  * See a log entry like "Copying file to S3. Bucket: gu-salesforce-export-code | Key:
   * ImovoContract_2019-07-01_7503E0000063xJmQAI_7523E0000029Hyi.csv" at the end of the execution.
   */
 object EndToEndManualTest extends App {

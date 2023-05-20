@@ -14,22 +14,22 @@ import org.scalatest.matchers.should.Matchers
 
 class StartDateFromFulfilmentFilesTest extends AnyFlatSpec with Matchers {
   def stubFetchString(s3Location: S3Location): Try[String] = s3Location match {
-    case S3Location("fulfilment-date-calculator-dev", "Guardian Weekly/2020-04-27_Guardian Weekly.json") =>
+    case S3Location("fulfilment-date-calculator-code", "Guardian Weekly/2020-04-27_Guardian Weekly.json") =>
       Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Guardian Weekly.json").getLines().mkString("\n"))
     case S3Location(
-          "fulfilment-date-calculator-dev",
+          "fulfilment-date-calculator-code",
           "Newspaper - Home Delivery/2020-04-27_Newspaper - Home Delivery.json",
         ) =>
       Try(
         Source.fromResource("fulfilmentdatefiles/2020-04-27_Newspaper - Home Delivery.json").getLines().mkString("\n"),
       )
     case S3Location(
-          "fulfilment-date-calculator-dev",
+          "fulfilment-date-calculator-code",
           "Newspaper - Voucher Book/2020-04-27_Newspaper - Voucher Book.json",
         ) =>
       Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Newspaper - Voucher Book.json").getLines().mkString("\n"))
     case S3Location(
-          "fulfilment-date-calculator-dev",
+          "fulfilment-date-calculator-code",
           "Newspaper - Digital Voucher/2020-04-27_Newspaper - Digital Voucher.json",
         ) =>
       Try(
@@ -110,7 +110,7 @@ class StartDateFromFulfilmentFilesTest extends AnyFlatSpec with Matchers {
   }
 
   private def testStartDate(productType: ProductType, issueDayOfWeek: List[DayOfWeek], expectedStartDate: LocalDate) = {
-    Inside.inside(StartDateFromFulfilmentFiles(Stage("DEV"), stubFetchString, LocalDate.of(2020, 4, 27))) {
+    Inside.inside(StartDateFromFulfilmentFiles(Stage("CODE"), stubFetchString, LocalDate.of(2020, 4, 27))) {
       case Right(startDateCaclulationFunction) =>
         startDateCaclulationFunction(productType, issueDayOfWeek) should equal(expectedStartDate)
     }
