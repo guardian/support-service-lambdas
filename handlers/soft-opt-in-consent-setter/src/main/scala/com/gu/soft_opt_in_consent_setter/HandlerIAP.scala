@@ -29,6 +29,8 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   }
 
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
+    logger.info("Handling request")
+
     val messages =
       input.getRecords.asScala.toList.map(message =>
         circeDecode[MessageBody](message.getBody) match {
@@ -41,7 +43,9 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             val exception =
               SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: ${message.getBody}")
             handleError(exception)
-          case Right(result) => result
+          case Right(result) =>
+            logger.info(s"Decoded message body: $result")
+            result
         },
       )
 
@@ -56,10 +60,14 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
 
     val (sfConnector, identityConnector, consentsCalculator, mpapiConnector) = setup match {
       case Left(error) => handleError(error)
-      case Right(x) => x
+      case Right(x) =>
+        logger.info("Setup successful")
+        x
     }
 
     messages.foreach { message =>
+      logger.info(s"Processing message: $message")
+
       val result = message.eventType match {
         case "Acquisition" =>
           Metrics.put(event = "acquisitions_to_process", 1)
@@ -97,6 +105,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       result.left.foreach(handleError)
     }
 
+    logger.info("Finished processing messages")
     Metrics.put(event = "successful_run")
   }
 
@@ -108,7 +117,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     for {
       consents <- consentsCalculator.getSoftOptInsByProduct(message.productName)
       consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
-      _ <- sendConsentsReq(message.identityId, consentsBody)
+      _ <- {
+        logger.info(
+          s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody",
+        )
+        sendConsentsReq(message.identityId, consentsBody)
+      }
     } yield ()
 
   def buildProductSwitchConsents(
@@ -161,7 +175,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
         consentsCalculator,
       )
 
-      res <- sendConsentsReq(messageBody.identityId, consentsBody)
+      res <- {
+        logger.info(
+          s"(product switch) Sending consents request for identityId ${messageBody.identityId} with payload: $consentsBody",
+        )
+        sendConsentsReq(messageBody.identityId, consentsBody)
+      }
     } yield res
 
   def processCancelledSub(
@@ -173,10 +192,15 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
       if (consents.nonEmpty)
-        sendConsentsReq(
-          identityId,
-          consentsCalculator.buildConsentsBody(consents, state = false),
-        )
+        for {
+          _ <- {
+            val consentsBody = consentsCalculator.buildConsentsBody(consents, state = false)
+            logger.info(
+              s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
+            )
+            sendConsentsReq(identityId, consentsBody)
+          }
+        } yield ()
       else
         Right(())
     }

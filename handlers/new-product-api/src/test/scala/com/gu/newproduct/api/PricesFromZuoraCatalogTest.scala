@@ -16,7 +16,7 @@ import org.scalatest.matchers.should.Matchers
 class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
 
   val fakeGetStringFromS3: StringFromS3 = s3Location => {
-    s3Location shouldBe S3Location(bucket = "gu-zuora-catalog", key = "CODE/Zuora-DEV/catalog.json")
+    s3Location shouldBe S3Location(bucket = "gu-zuora-catalog", key = "CODE/Zuora-CODE/catalog.json")
     Try {
       """
         |{
@@ -67,7 +67,7 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
     )
 
     val actual = PricesFromZuoraCatalog(
-      ZuoraEnvironment("DEV"),
+      ZuoraEnvironment("CODE"),
       fakeGetStringFromS3,
       rateplanToPlanId.get,
     )

@@ -22,8 +22,9 @@ class MockZuoraSetCancellationReason(stubs: Map[(SubscriptionName, Int, String),
       case None =>
         ZIO.fail(
           InternalServerError(
-          s"MockZuoraSetCancellationReason: No response stubbed for input: (${subscriptionName.value}, $subscriptionVersion, $userCancellationReason)",
-        ))
+            s"MockZuoraSetCancellationReason: No response stubbed for input: (${subscriptionName.value}, $subscriptionVersion, $userCancellationReason)",
+          ),
+        )
     }
   }
 }

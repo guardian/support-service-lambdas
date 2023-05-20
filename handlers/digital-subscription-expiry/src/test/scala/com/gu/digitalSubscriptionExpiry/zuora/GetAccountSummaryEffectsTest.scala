@@ -12,11 +12,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class GetAccountSummaryEffectsTest extends AnyFlatSpec with Matchers {
-  it should "successfully get account summary against dev" taggedAs EffectsTest in {
+  it should "successfully get account summary against code" taggedAs EffectsTest in {
     val testAccountId = AccountId("2c92c0f86078c4d4016079e1402d6536")
 
     val actual: ApiGatewayOp[AccountSummaryResult] = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
         .toApiGatewayOp("parse config")
 
       zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)

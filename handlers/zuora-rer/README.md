@@ -58,14 +58,14 @@ The `Payments - Right to Erasure` role has the following permissions:
 
 There's a few different levels of testing you can do with this project.
 1. `scalatest` unit tests are in `src/test/scala` and a selection `Stub` classes are provided for mocking calls to REST endpoints etc.
-2. Local testing against the Zuora DEV environment using AWS credentials.
+2. Local testing against the Zuora CODE environment using AWS credentials.
 3. Manually calling Lambdas in the CODE env.
 4. Integration testing with Baton in the CODE env.
 
 ### Local Testing
 
-`src/local` contains a test app `ZuoraRerLocalRun` which can be run from your DEV machine. 
-It allows you to test the code against the Zuora DEV sandbox account.  
+`src/local` contains a test app `ZuoraRerLocalRun` which can be run from your local machine. 
+It allows you to test the code against the Zuora CODE sandbox account.  
 This is a much quicker develop/test cycle compared to deploying a branch to CODE.
 
 ### Lambda testing on CODE

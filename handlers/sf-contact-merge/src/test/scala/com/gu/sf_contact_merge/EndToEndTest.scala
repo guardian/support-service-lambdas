@@ -50,7 +50,7 @@ object Runner {
 
     val result = Handler
       .operationForEffects(
-        Stage("DEV"),
+        Stage("CODE"),
         FakeFetchString.fetchString,
         EndToEndTest.mock.response,
       )

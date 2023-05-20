@@ -19,9 +19,9 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
 
     def validatingStringFromS3(s3Location: S3Location): Try[String] = Try {
       val zuoraLocation = ZuoraRestConfig.location
-      val uatlocation =
+      val codelocation =
         s"membership/support-service-lambdas/CODE/${zuoraLocation.path}-CODE.v${zuoraLocation.version}.json"
-      val expectedS3Location = S3Location("gu-reader-revenue-private", uatlocation)
+      val expectedS3Location = S3Location("gu-reader-revenue-private", codelocation)
       if (s3Location != expectedS3Location)
         throw new RuntimeException(s"test failure : unexpected s3Location $s3Location expected $expectedS3Location")
       else
@@ -38,8 +38,8 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
     noException should be thrownBy {
       Handler.runWithEffects(
         successfulResponseEffects.response,
-        Stage("DEV"),
-        ZuoraEnvironment("UAT"),
+        Stage("CODE"),
+        ZuoraEnvironment("CODE"),
         validatingStringFromS3,
         TestingRawEffects.successfulS3Upload,
       )
@@ -49,8 +49,8 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
         successfulResponseEffects.response,
-        Stage("DEV"),
-        ZuoraEnvironment("DEV"),
+        Stage("CODE"),
+        ZuoraEnvironment("CODE"),
         _ => Failure(new RuntimeException("broken config load")),
         TestingRawEffects.successfulS3Upload,
       )
@@ -61,8 +61,8 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
         failureResponseEffects.response,
-        Stage("DEV"),
-        ZuoraEnvironment("DEV"),
+        Stage("CODE"),
+        ZuoraEnvironment("CODE"),
         FakeFetchString.fetchString,
         TestingRawEffects.successfulS3Upload,
       )
@@ -73,8 +73,8 @@ class CatalogServiceStepsTest extends AnyFlatSpec with Matchers {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
         successfulResponseEffects.response,
-        Stage("DEV"),
-        ZuoraEnvironment("DEV"),
+        Stage("CODE"),
+        ZuoraEnvironment("CODE"),
         FakeFetchString.fetchString,
         TestingRawEffects.failedS3Upload,
       )

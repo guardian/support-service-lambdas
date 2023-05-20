@@ -24,11 +24,11 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
 
     val startDate = MutableCalendar.today.plusDays(10)
     val endDate = MutableCalendar.today.plusDays(15)
-    val subscriptionName = SubscriptionName("A-S00050817") // must exist in DEV SalesForce
-    val contact = IdentityId("100004814") // must exist in DEV SalesForce
+    val subscriptionName = SubscriptionName("A-S00050817") // must exist in CODE SalesForce
+    val contact = IdentityId("100004814") // must exist in CODE SalesForce
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
 
