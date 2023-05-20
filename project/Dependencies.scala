@@ -24,7 +24,7 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.2"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.1"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.2"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
@@ -68,7 +68,7 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.17"
   val zio2Version = "2.0.13"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.3.0"
+  val tapirVersion = "1.4.0"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.2"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
   val stripe = "com.stripe" % "stripe-java" % "22.18.0"
