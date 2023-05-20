@@ -13,27 +13,34 @@ import com.gu.contact_us_api.ParserUtils._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import scalaj.http.{Http, HttpRequest, HttpResponse}
+import com.gu.contact_us_api.services._
 
 class SalesforceConnector(runRequest: HttpRequest => Either[ContactUsError, HttpResponse[String]]) {
 
   def handle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
     for {
       env <- ContactUsConfig.env
-      token <- auth(env)
+      salesforceSecrets <- Secrets.getSalesforceSecrets
+      membersDataAPISecrets <- Secrets.getMembersDataAPISecrets
+      token <- auth(env, salesforceSecrets, membersDataAPISecrets)
       resp <- sendReq(env, token, req)
     } yield resp
   }
 
-  def auth(env: ContactUsConfig): Either[ContactUsError, String] = {
+  def auth(
+      env: ContactUsConfig,
+      salesforceSecrets: SalesforceSecrets,
+      membersDataAPISecrets: MembersDataAPISecrets,
+  ): Either[ContactUsError, String] = {
     runRequest(
       Http(env.authEndpoint)
         .postForm(
           Seq(
             ("grant_type", "password"),
-            ("client_id", env.clientID),
-            ("client_secret", env.clientSecret),
-            ("username", env.username),
-            ("password", env.password + env.token),
+            ("client_id", salesforceSecrets.clientId),
+            ("client_secret", salesforceSecrets.clientSecret),
+            ("username", membersDataAPISecrets.username),
+            ("password", membersDataAPISecrets.password + membersDataAPISecrets.token),
           ),
         ),
     )
@@ -88,5 +95,4 @@ class SalesforceConnector(runRequest: HttpRequest => Either[ContactUsError, Http
             )
       })
   }
-
 }

@@ -2,8 +2,10 @@ stacks:
 - membership
 regions:
 - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
 deployments:
-
   cfn:
     type: cloud-formation
     app: sf-gocardless-sync

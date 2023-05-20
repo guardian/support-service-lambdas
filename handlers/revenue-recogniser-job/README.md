@@ -14,10 +14,10 @@ as appropriate.
 
 This is not possible to test with an EffectsTest as when you create a subscription, the revenue
 schedules are not created immediately by zuora.  This means you can't distribute them without
-polling them and waiting a while. (seems to be seconds in DEV, but minutes in PROD)
+polling them and waiting a while. (seems to be seconds in CODE, but minutes in PROD)
 
-As a result, there is a HandlerManualTest file which has one App to create a DEV test sub, and one
-to run the lambda in DEV.  Run one and then the other to see if it's working right.
+As a result, there is a HandlerManualTest file which has one App to create a CODE test sub, and one
+to run the lambda in CODE.  Run one and then the other to see if it's working right.
 
 ## Alarms
 

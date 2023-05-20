@@ -52,11 +52,6 @@ object Config {
             zuoraConfig,
             sfConfig,
           )
-        case "DEV" =>
-          Config(
-            zuoraConfig,
-            sfConfig,
-          )
       }
     }
   }

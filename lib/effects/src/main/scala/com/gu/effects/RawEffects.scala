@@ -12,8 +12,8 @@ import scala.util.Try
 
 object RawEffects {
 
-  val stage = Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("DEV"))
-  val zuoraEnvironment = ZuoraEnvironment(Option(System.getenv("ZuoraEnvironment")).filter(_ != "").getOrElse("DEV"))
+  val stage = Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("CODE"))
+  val zuoraEnvironment = ZuoraEnvironment(Option(System.getenv("ZuoraEnvironment")).filter(_ != "").getOrElse("CODE"))
 
   val response: Request => Response = Http.response
   val downloadResponse: Request => Response = Http.downloadResponse

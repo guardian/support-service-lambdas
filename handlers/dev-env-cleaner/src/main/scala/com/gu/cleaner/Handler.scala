@@ -70,7 +70,7 @@ object Handler extends RequestStreamHandler {
     def log(message: String) = context.getLogger.log(message)
 
     log("starting lambda!")
-    val stageForZuora = Stage("DEV") // always clean dev, even in PROD
+    val stageForZuora = Stage("CODE") // always clean CODE, even in PROD
     val loadConfig = LoadConfigModule(stageForZuora, GetFromS3.fetchString)
     val response = RawEffects.response
     val downloadResponse = RawEffects.downloadResponse

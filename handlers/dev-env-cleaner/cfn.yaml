@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Lambda for cleaning up SF dev
+Description: Lambda for cleaning up SF CODE
 
 Parameters:
   Stage:
@@ -27,7 +27,7 @@ Resources:
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Description: Cleans up SF dev (via zuora)
+      Description: Cleans up SF CODE (via zuora)
       FunctionName:
         !Sub dev-env-cleaner-${Stage}
       Handler: com.gu.cleaner.Handler::handleRequest
@@ -45,7 +45,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: !FindInMap [ Stages, Schedule, !Ref Stage ]
-            Description: clean zuora dev regularly so that space in SF is cleaned up
+            Description: clean zuora CODE regularly so that space in SF is cleaned up
       EventInvokeConfig:
         MaximumRetryAttempts: 2
       Policies:
@@ -61,7 +61,7 @@ Resources:
             - Effect: Allow
               Action: s3:GetObject
               Resource:
-                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/DEV/zuoraRest-DEV.json
+                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE.v1.json
         - Statement:
             - Effect: Allow
               Action: cloudwatch:PutMetricData
@@ -83,10 +83,10 @@ Resources:
       AlarmName: !Join
         - ' '
         - - 'non urgent -'
-          - 'DEV env cleaner is not completing'
+          - 'CODE env cleaner is not completing'
       AlarmDescription: !Join
         - ' '
-        - - 'Impact - SF DEV will gradually fill up unless this is fixed'
+        - - 'Impact - SF CODE will gradually fill up unless this is fixed'
           - !FindInMap [ Constants, Alarm, Process ]
       Metrics:
         - Id: total

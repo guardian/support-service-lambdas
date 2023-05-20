@@ -2,6 +2,7 @@ package com.gu.contact_us_api
 
 import com.gu.contact_us_api.models.ContactUsTestVars.{testEmail, testMessage, testName, testSubject, testTopic}
 import com.gu.contact_us_api.models.{ContactUsConfig, ContactUsError, SFCaseRequest, SFCompositeRequest, SFErrorDetails}
+import com.gu.contact_us_api.services.{MembersDataAPISecrets, SalesforceSecrets}
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -20,8 +21,10 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
     mockedRunRequest
   }
 
-  private val fakeConfg =
-    ContactUsConfig("clientID", "clientSecret", "username", "password", "token", "authEndpoint", "reqEndpoint")
+  private val fakeConfg = ContactUsConfig("authEndpoint", "reqEndpoint")
+  private val fakeSalesforceSecrets = SalesforceSecrets("clientId", "clientSecret")
+  private val fakeMembersDataAPISecrets = MembersDataAPISecrets("username", "password", "token")
+
   private val fakeRequest = SFCompositeRequest(
     List(SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage)),
   )
@@ -51,14 +54,9 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
   private val failedCompositeReqJson =
     s"""[{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }]"""
 
-  "auth" should "return a token when the request is successful " in {
-    new SalesforceConnector(getRunRequest(successfulAuthRequestJson))
-      .auth(fakeConfg) shouldBe Right(authToken)
-  }
-
   it should "return a ContactUsError when the request fails" in {
     new SalesforceConnector(getRunRequest(failedAuthReqJson, failedAuthStatusCode))
-      .auth(fakeConfg) shouldBe
+      .auth(fakeConfg, fakeSalesforceSecrets, fakeMembersDataAPISecrets) shouldBe
       Left(
         ContactUsError(
           "Salesforce",
@@ -69,7 +67,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
   it should "return a ContactUsError of type Decoder when it receives as unexpected response body in a 2xx response" in {
     val result2xx = new SalesforceConnector(getRunRequest(invalidJson))
-      .auth(fakeConfg)
+      .auth(fakeConfg, fakeSalesforceSecrets, fakeMembersDataAPISecrets)
 
     result2xx.isLeft shouldBe true
     result2xx.left.value shouldBe a[ContactUsError]
@@ -78,7 +76,7 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
 
   it should "return a ContactUsError of type Decoder when it receives as unexpected response body in a non-2xx response" in {
     val result500 = new SalesforceConnector(getRunRequest(invalidJson, 500))
-      .auth(fakeConfg)
+      .auth(fakeConfg, fakeSalesforceSecrets, fakeMembersDataAPISecrets)
 
     result500.isLeft shouldBe true
     result500.left.value shouldBe a[ContactUsError]

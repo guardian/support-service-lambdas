@@ -81,12 +81,12 @@ class LoadConfigModuleTest extends AnyFlatSpec with Matchers {
 
   it should "fail if the stage in the config file differs from the expected stage provided" in {
 
-    // note this will return the dev json when asking for the prod stage
-    def wrongFileS3Load = fakeS3Load(devJSon) _
+    // note this will return the code json when asking for the prod stage
+    def wrongFileS3Load = fakeS3Load(codeJSon) _
 
     val prodConfig = LoadConfigModule(prodStage, wrongFileS3Load)
 
-    prodConfig[TestConfig] shouldBe Left(ConfigFailure("Expected to load PROD config, but loaded DEV config"))
+    prodConfig[TestConfig] shouldBe Left(ConfigFailure("Expected to load PROD config, but loaded CODE config"))
   }
 
   it should "fail if no stage variable in configuration file" in {
@@ -128,9 +128,9 @@ class LoadConfigModuleTest extends AnyFlatSpec with Matchers {
       |}
     """.stripMargin
 
-  val devJSon: String =
+  val codeJSon: String =
     """
-      |{ "stage": "DEV",
+      |{ "stage": "CODE",
       |  "someValue": "devValue",
       |  "someOtherValue" : 93
       |}

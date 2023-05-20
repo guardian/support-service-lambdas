@@ -7,7 +7,6 @@ Parameters:
     Description: Stage name
     Type: String
     AllowedValues:
-      - DEV
       - CODE
       - PROD
     Default: CODE
@@ -17,9 +16,6 @@ Conditions:
 
 Mappings:
   StageMap:
-    DEV:
-      FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-dev/*"
-      ScheduleName: holiday-stop-processor-schedule-dev
     CODE:
       FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code/*"
       ScheduleName: holiday-stop-processor-schedule-code

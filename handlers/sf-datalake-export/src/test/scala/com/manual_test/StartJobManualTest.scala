@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.sf_datalake_export.handlers.StartJobHandler
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
 
-//This is just a way to locally run the lambda in dev
+//This is just a way to locally run the lambda in code
 object StartJobManualTest extends App {
 
   val sfObject = BulkApiParams.contact

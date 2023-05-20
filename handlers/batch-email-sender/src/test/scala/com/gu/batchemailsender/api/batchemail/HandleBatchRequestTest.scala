@@ -12,10 +12,8 @@ class HandleBatchRequestTest extends AnyFlatSpec with Matchers {
     val handleEmailBatchRequest = new HandleEmailBatchRequest(sendEmailBatchToSqsMock)
     val firstMessage = Json.parse("""{ "first": "message" }""").as[JsObject]
     val secondMessage = Json.parse("""{ "second": "message" }""").as[JsObject]
-    when(sendEmailBatchToSqsMock(List(
-      firstMessage,
-      secondMessage)
-    )).thenReturn(List(SendResult(firstMessage, None), SendResult(secondMessage, None)))
+    when(sendEmailBatchToSqsMock(List(firstMessage, secondMessage)))
+      .thenReturn(List(SendResult(firstMessage, None), SendResult(secondMessage, None)))
     val response = handleEmailBatchRequest(
       ApiGatewayRequest(
         httpMethod = Some("POST"),
@@ -43,10 +41,8 @@ class HandleBatchRequestTest extends AnyFlatSpec with Matchers {
     val handleEmailBatchRequest = new HandleEmailBatchRequest(sendEmailBatchToSqsMock)
     val firstMessage = Json.parse("""{ "first": "message" }""").as[JsObject]
     val secondMessage = Json.parse("""{ "second": "message" }""").as[JsObject]
-    when(sendEmailBatchToSqsMock(List(
-      firstMessage,
-      secondMessage)
-    )).thenReturn(List(SendResult(firstMessage, None), SendResult(secondMessage, Some(new RuntimeException("Error")))))
+    when(sendEmailBatchToSqsMock(List(firstMessage, secondMessage)))
+      .thenReturn(List(SendResult(firstMessage, None), SendResult(secondMessage, Some(new RuntimeException("Error")))))
     val response = handleEmailBatchRequest(
       ApiGatewayRequest(
         httpMethod = Some("POST"),

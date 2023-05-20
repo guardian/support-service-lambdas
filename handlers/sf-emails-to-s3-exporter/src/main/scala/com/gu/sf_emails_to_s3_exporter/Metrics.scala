@@ -8,7 +8,7 @@ import scala.util.{Failure, Success}
 
 object Metrics extends LazyLogging {
 
-  private val stage = sys.env.getOrElse("Stage", "DEV")
+  private val stage = sys.env.getOrElse("Stage", "CODE")
 
   def put(event: String): Unit = {
 

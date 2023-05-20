@@ -40,7 +40,11 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
     } yield response
 
 trait InvoiceItemAdjustment:
-  def update(invoiceId: String, amount: BigDecimal, invoiceItemId: String): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
+  def update(
+      invoiceId: String,
+      amount: BigDecimal,
+      invoiceItemId: String,
+  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
 
 object InvoiceItemAdjustment {
 
