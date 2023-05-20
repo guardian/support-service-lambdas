@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.sf_datalake_export.handlers.EndJobHandler
 
-//This is just a way to locally run the lambda in dev
+//This is just a way to locally run the lambda in code
 object EndJobManualTest extends App {
   val request =
     """{

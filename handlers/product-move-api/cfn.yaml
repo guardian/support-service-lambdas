@@ -11,7 +11,7 @@ Parameters:
     Description: Set by RiffRaff on each deploy
     Type: String
     AllowedValues:
-      - DEV
+      - CODE
       - PROD
   DeployBucket:
     Description: Bucket to copy files to
@@ -44,7 +44,7 @@ Resources:
       Runtime: java11
       Architectures: [arm64]
       Handler: com.gu.productmove.Handler::handleRequest
-      MemorySize: 1024
+      MemorySize: 1536
       Timeout: 300
       Environment:
         Variables:

@@ -122,7 +122,7 @@ object ZuoraRestBody {
             .decodeJson(body)
             .left
             .map(InternalServerError(_))
-          isSuccessful <-
+          _ <-
             if (zuoraResponse.success) Right(())
             else
               zuoraResponse.reasons match {

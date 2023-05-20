@@ -1,8 +1,8 @@
 package com.gu.productmove
 
-import software.amazon.awssdk.services.secretsmanager.*
+import software.amazon.awssdk.services.secretsmanager._
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
-import upickle.default.*
+import upickle.default._
 
 import scala.util.{Success, Failure, Try}
 import zio.{ULayer, ZIO, ZLayer}

@@ -141,7 +141,7 @@ object AvailableProductMovesEndpoint {
     val output = for {
       stage <- ZIO.service[Stage]
       monthlyContributionRatePlanId =
-        if (stage == Stage.DEV) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
+        if (stage == Stage.CODE) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
 
       _ <- ZIO.log("subscription name: " + subscriptionName)
 

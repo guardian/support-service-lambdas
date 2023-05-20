@@ -90,4 +90,30 @@ object Fixtures {
     ),
   )
 
+  val subscriptionsPreviewResponse = SubscriptionUpdateInvoice(
+    amount = 20,
+    amountWithoutTax = 18,
+    taxAmount = 2,
+    invoiceItems = List(
+      SubscriptionUpdateInvoiceItem(
+        serviceStartDate = LocalDate.parse("2023-02-06"),
+        chargeAmount = -20,
+        taxAmount = -0,
+        productRatePlanChargeId = contributionRatePlanChargeId,
+      ),
+      SubscriptionUpdateInvoiceItem(
+        serviceStartDate = LocalDate.parse("2023-03-06"),
+        chargeAmount = 20,
+        taxAmount = 0,
+        productRatePlanChargeId = supporterPlusRatePlanChargeId,
+      ),
+      SubscriptionUpdateInvoiceItem(
+        serviceStartDate = LocalDate.parse("2023-02-06"),
+        chargeAmount = 20,
+        taxAmount = 0,
+        productRatePlanChargeId = supporterPlusRatePlanChargeId,
+      ),
+    ),
+  )
+
 }

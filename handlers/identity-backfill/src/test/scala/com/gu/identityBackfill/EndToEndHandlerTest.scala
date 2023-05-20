@@ -135,7 +135,7 @@ object Runner {
 
     // execute
     Handler.runForLegacyTestsSeeTestingMd(
-      Stage("DEV"),
+      Stage("CODE"),
       FakeFetchString.fetchString,
       config.response,
       LambdaIO(stream, os, null),

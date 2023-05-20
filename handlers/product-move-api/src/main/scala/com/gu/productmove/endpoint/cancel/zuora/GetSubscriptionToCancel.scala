@@ -64,7 +64,9 @@ object GetSubscriptionToCancel {
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
   given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen[RatePlanCharge]
 
-  def get(subscriptionName: SubscriptionName): ZIO[GetSubscriptionToCancel, ErrorResponse, GetSubscriptionToCancelResponse] =
+  def get(
+      subscriptionName: SubscriptionName,
+  ): ZIO[GetSubscriptionToCancel, ErrorResponse, GetSubscriptionToCancelResponse] =
     ZIO.serviceWithZIO[GetSubscriptionToCancel](_.get(subscriptionName))
 
 }

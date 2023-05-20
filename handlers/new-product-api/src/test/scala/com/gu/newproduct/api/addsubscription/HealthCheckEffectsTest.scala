@@ -14,7 +14,7 @@ class HealthCheckEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "pass" taggedAs EffectsTest in {
 
-    val stage = Stage("DEV")
+    val stage = Stage("CODE")
     val actual = (for {
       zuoraConfig <- LoadConfigModule(stage, GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       zuoraClient = ZuoraRestRequestMaker(Http.response, zuoraConfig)
