@@ -45,7 +45,7 @@ object Handler extends Logging {
   // run this method with membership janus credentials, to check that the lambda is working and log the output to the console
   def main(args: Array[String]): Unit = {
     val result = runWithEffects(
-      Stage("DEV"),
+      Stage("CODE"),
       GetFromS3.fetchString,
       LocalDate.now(),
     )

@@ -11,7 +11,7 @@ case class ZuoraSarConfig(
 
 object ConfigLoader {
   def getSarLambdaConfigTemp: ZuoraSarConfig =
-    ZuoraSarConfig("baton-results", "zuora-results/DEV", "performSarLambdaFunctionName")
+    ZuoraSarConfig("baton-results", "zuora-results/CODE", "performSarLambdaFunctionName")
 }
 
 object ZuoraSarConfig {

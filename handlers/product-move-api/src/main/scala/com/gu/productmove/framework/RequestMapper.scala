@@ -25,18 +25,30 @@ object RequestMapper {
       rawQueryString
   }
 
-  def convertJavaRequestToTapirRequest(javaRequest: APIGatewayV2WebSocketEvent): AwsRequest = {
+  def updatePath(path: String): String = {
+    val newEndpointPattern = "^/product-move/([^/]+)/(.*)$".r
+    val oldEndpointPattern = "^/product-move/(.*)$".r
 
+    path match {
+      case newEndpointPattern(switchType, subscriptionName) =>
+        s"/product-move/$switchType/$subscriptionName"
+      case oldEndpointPattern(subscriptionName) =>
+        s"/product-move/recurring-contribution-to-supporter-plus/$subscriptionName"
+      case _ => path
+    }
+  }
+
+  def convertJavaRequestToTapirRequest(javaRequest: APIGatewayV2WebSocketEvent): AwsRequest = {
     import javaRequest.*
     AwsRequest(
-      getPath,
+      updatePath(getPath), // Update the path
       Option(getQueryStringParameters).map(_.asScala.toMap).map(queryParamsToEncodedString).getOrElse(""),
       getHeaders.asScala.toMap,
       AwsRequestContext(
         Option(getRequestContext.getDomainName),
         AwsHttp(
           getHttpMethod,
-          getPath,
+          updatePath(getPath),
           "$.requestContext.protocol", // this is unused and not parsed from the API gateway JSON by the java SDK
           getRequestContext.getIdentity.getSourceIp, // nullable?
           getRequestContext.getIdentity.getUserAgent, // nullable?
@@ -45,7 +57,6 @@ object RequestMapper {
       Option(getBody),
       isIsBase64Encoded,
     )
-
   }
 
 }

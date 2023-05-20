@@ -12,7 +12,10 @@ class MockSubscribe(responses: Map[(String, String), CreateSubscriptionResponse]
 
   def requests = mutableStore.reverse
 
-  override def create(zuoraAccountId: String, targetProductId: String): ZIO[Any, ErrorResponse, CreateSubscriptionResponse] = {
+  override def create(
+      zuoraAccountId: String,
+      targetProductId: String,
+  ): ZIO[Any, ErrorResponse, CreateSubscriptionResponse] = {
     mutableStore = (zuoraAccountId, targetProductId) :: mutableStore
 
     responses.get((zuoraAccountId, targetProductId)) match

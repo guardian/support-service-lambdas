@@ -16,12 +16,12 @@ class FilterCandidatesEffectsTest extends AnyFlatSpec with Matchers {
     |"fetched": [
     |    {
     |      "fileId": "someId",
-    |      "uri": "s3://zuora-retention-dev/effectsTest/exclusionQuery.csv",
+    |      "uri": "s3://zuora-retention-code/effectsTest/exclusionQuery.csv",
     |      "name": "exclusionQuery"
     |    },
     |    {
     |      "fileId": "someId",
-    |      "uri": "s3://zuora-retention-dev/effectsTest/candidatesQuery.csv",
+    |      "uri": "s3://zuora-retention-code/effectsTest/candidatesQuery.csv",
     |      "name" : "candidatesQuery"
     |    }
     |  ],
@@ -37,7 +37,7 @@ class FilterCandidatesEffectsTest extends AnyFlatSpec with Matchers {
       """
         {
           "jobId":"testJobId",
-          "uri":"s3://zuora-retention-dev/testJobId/doNoProcess.csv",
+          "uri":"s3://zuora-retention-code/testJobId/doNoProcess.csv",
           "dryRun":false
           }
       """,

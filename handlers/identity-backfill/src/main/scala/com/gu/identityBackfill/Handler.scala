@@ -132,8 +132,7 @@ object Handler {
   def standardRecordTypeForStage(stage: Stage): ApiGatewayOp[RecordTypeId] = {
     val mappings = Map(
       Stage("PROD") -> RecordTypeId("01220000000VB52AAG"),
-      Stage("CODE") -> RecordTypeId("012g0000000DZmNAAW"),
-      Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY"),
+      Stage("CODE") -> RecordTypeId("STANDARD_TEST_DUMMY"),
     )
     mappings
       .get(stage)

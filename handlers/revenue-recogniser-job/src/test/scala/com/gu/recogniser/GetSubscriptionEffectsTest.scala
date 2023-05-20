@@ -15,7 +15,7 @@ class GetSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
   it should "get a subscription that hasn't been redeemed" taggedAs EffectsTest in {
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       subscription <- GetSubscription(zuoraDeps)
         .execute("A-S00102333")
@@ -31,7 +31,7 @@ class GetSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
   it should "get a subscription that's been redeemed" taggedAs EffectsTest in {
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       subscription <- GetSubscription(zuoraDeps)
         .execute("A-S00102334")
