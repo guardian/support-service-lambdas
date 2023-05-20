@@ -7,7 +7,6 @@ Parameters:
     AllowedValues:
       - PROD
       - CODE
-      - DEV
     Default: CODE
 
   MobileAccountId:
@@ -27,13 +26,6 @@ Mappings:
     CODE:
       Schedule: 'rate(365 days)'
       SalesforceStage: CODE
-      IdentityStage: CODE
-      MpapiStage: CODE
-      SalesforceUsername: SoftOptInConsentSetterAPIUser
-      AppName: AwsConnectorSandbox
-    DEV:
-      Schedule: 'rate(365 days)'
-      SalesforceStage: DEV
       IdentityStage: CODE
       MpapiStage: CODE
       SalesforceUsername: SoftOptInConsentSetterAPIUser

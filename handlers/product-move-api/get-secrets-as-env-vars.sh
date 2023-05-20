@@ -4,7 +4,7 @@
 # Intellij test configurations
 
 # Zuora secrets
-aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-west-1:865473395570:secret:DEV/Zuora/User/ZuoraApiUser-kxm7mq | jq -c '[.SecretString | fromjson]' | \
+aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser | jq -c '[.SecretString | fromjson]' | \
 jq -M -r '.[] | .baseUrl, .username, .password' | \
 while read -r baseUrl; read -r username; read -r password; do
   export zuoraBaseUrl="$baseUrl"
@@ -17,7 +17,7 @@ while read -r baseUrl; read -r username; read -r password; do
 done
 
 # Invoicing api
-aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-west-1:865473395570:secret:DEV/InvoicingApi | jq -c '[.SecretString | fromjson]' | \
+aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/InvoicingApi | jq -c '[.SecretString | fromjson]' | \
 jq -M -r '.[] | .InvoicingApiKey, .InvoicingApiUrl' | \
 while read -r invoicingApiKey; read -r invoicingApiUrl; do
   export invoicingApiKey="$invoicingApiKey"
@@ -29,7 +29,7 @@ while read -r invoicingApiKey; read -r invoicingApiUrl; do
 done
 
 # Salesforce
-aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-west-1:865473395570:secret:DEV/Salesforce/User/SupportServiceLambdas | jq -c '[.SecretString | fromjson]' | \
+aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SupportServiceLambdas | jq -c '[.SecretString | fromjson]' | \
 jq -M -r '.[] | .url, .client_id, .client_secret, .username, .password, .token' | \
 while read -r url; read -r client_id; read -r client_secret; read -r username; read -r password; read -r token; do
   export salesforceUrl="$url"

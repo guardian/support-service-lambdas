@@ -83,7 +83,7 @@ object TestingRawEffects {
 
   val codeConfig: String =
     """
-      |{ "stage": "DEV",
+      |{ "stage": "CODE",
       |  "trustedApiConfig": {
       |    "apiClientId": "a",
       |    "apiToken": "b",

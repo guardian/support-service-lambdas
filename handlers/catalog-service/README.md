@@ -5,8 +5,8 @@ This means that applications can use the product catalog without requiring API c
 
 ## Handling Multiple Environments 
 
-The PROD stack fetches the catalog from each Zuora environment (DEV, UAT and PROD). 
-The CODE stack fetches the catalog from Zuora DEV and UAT only, and cannot access the PROD Zuora credentials or environment.
+The PROD stack fetches the catalog from both Zuora environments (CODE and PROD). 
+The CODE stack fetches the catalog from Zuora CODE only, and cannot access the PROD Zuora credentials or environment.
 
 Each stack contains a lambda per Zuora environment to simplify monitoring and prevent any instability of Zuora's sandbox from affecting the PROD service.
 

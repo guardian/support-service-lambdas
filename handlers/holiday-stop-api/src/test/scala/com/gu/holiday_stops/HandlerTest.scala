@@ -132,7 +132,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         unwrappedOp(
           Handler.operationForEffects(
             defaultTestEffects.response,
-            Stage("DEV"),
+            Stage("CODE"),
             FakeFetchString.fetchString,
             testBackend,
             "test-generated-id",
@@ -170,7 +170,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         Handler
           .operationForEffects(
             defaultTestEffects.response,
-            Stage("DEV"),
+            Stage("CODE"),
             FakeFetchString.fetchString,
             SttpBackendStub.synchronous,
             testId,
@@ -192,7 +192,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         Handler
           .operationForEffects(
             defaultTestEffects.response,
-            Stage("DEV"),
+            Stage("CODE"),
             FakeFetchString.fetchString,
             SttpBackendStub.synchronous,
             testId,
@@ -251,7 +251,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
                 SFTestEffects.authSuccess,
               ),
             ).response,
-            Stage("DEV"),
+            Stage("CODE"),
             FakeFetchString.fetchString,
             testBackend,
             testId,
@@ -332,7 +332,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
                 SFTestEffects.cancelSuccess(testId, price),
               ),
             ).response,
-            Stage("DEV"),
+            Stage("CODE"),
             FakeFetchString.fetchString,
             testBackend,
             testId,
@@ -388,7 +388,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
                 SFTestEffects.authSuccess,
               ),
             ).response,
-            Stage("DEV"),
+            Stage("CODE"),
             FakeFetchString.fetchString,
             testBackend,
             testId,

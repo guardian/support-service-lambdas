@@ -23,7 +23,7 @@ object CreateExpiredGiftTestSubscriptionManualTest {
     val startDate = LocalDate.of(2020, 2, 9)
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       subNumber <- ZuoraGiftSubscribe
         .subscribe(zuoraDeps, startDate)
@@ -44,7 +44,7 @@ object CreateRefundedBeforeRedemptionTestSubscriptionManualTest {
     val startDate = LocalDate.now().minusWeeks(2) // arbitrary recent but not expired
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       subNumber <- ZuoraGiftSubscribe
         .subscribe(zuoraDeps, startDate)
@@ -63,7 +63,7 @@ object RunQueryManualTest {
   def main(args: Array[String]): Unit = {
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       downloadRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
       aquaQuerier = Querier.lowLevel(downloadRequests) _
       schedules <- new RevenueSchedulesQuerier(

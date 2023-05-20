@@ -18,7 +18,7 @@ class GetSFContactSyncCheckFieldsEffectsTest extends AnyFlatSpec with Matchers {
   it should "get auth SF correctly" taggedAs EffectsTest in {
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
       sfAuth <- SalesforceClient(RawEffects.response, sfConfig).value.toDisjunction
       getOp = sfAuth.wrapWith(JsonHttp.get)
       result <- GetSFContactSyncCheckFields(getOp)
