@@ -6,8 +6,8 @@ Parameters:
     Type: String
     AllowedValues:
       - PROD
-      - DEV
-    Default: DEV
+      - CODE
+    Default: CODE
   StackName:
     Type: String
     Default: emails-transporter-between-sf-and-s3
@@ -19,15 +19,14 @@ Mappings:
       SalesforceUsername: EmailsToS3APIUser
       AppName: SFEmailsToS3
       ToLowerCase: prod
-    DEV:
+    CODE:
       Schedule: 'cron(00,30 03 * * ? *)'
       SalesforceUsername: EmailsToS3APIUser
       AppName: AwsConnectorSandbox
-      ToLowerCase: dev
+      ToLowerCase: code
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
-  IsDev: !Equals [ !Ref Stage, DEV ]
 
 Resources:
   IAMRoleS3ReadWrite:

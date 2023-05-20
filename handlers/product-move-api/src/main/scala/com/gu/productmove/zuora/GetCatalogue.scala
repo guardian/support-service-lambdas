@@ -24,7 +24,7 @@ private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
 
   private def key(stage: Stage) = {
     val stagePath =
-      if (stage == Stage.DEV) "CODE/Zuora-DEV" else if (stage == Stage.CODE) "CODE/Zuora-UAT" else "PROD/Zuora-PROD"
+      if (stage == Stage.CODE) "CODE/Zuora-CODE" else "PROD/Zuora-PROD"
     val relativePath = "catalog.json"
     s"$stagePath/$relativePath"
   }

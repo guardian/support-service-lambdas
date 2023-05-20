@@ -7,7 +7,7 @@ import scala.util.Try
 
 object Metrics {
 
-  private val stage = sys.env.getOrElse("Stage", "DEV")
+  private val stage = sys.env.getOrElse("Stage", "CODE")
 
   def put(event: String, value: Double = 1.0): Try[Unit] = {
     AwsCloudWatch.metricPut(

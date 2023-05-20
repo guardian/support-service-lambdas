@@ -8,7 +8,6 @@ Parameters:
         AllowedValues:
             - PROD
             - CODE
-            - DEV
         Default: CODE
 
 Conditions:
@@ -16,8 +15,6 @@ Conditions:
 
 Mappings:
     StageMap:
-        DEV:
-            ApiName: delivery-records-api-DEV
         CODE:
             ApiName: delivery-records-api-CODE
         PROD:

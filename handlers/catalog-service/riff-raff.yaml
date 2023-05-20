@@ -2,8 +2,10 @@ stacks:
 - subscriptions
 regions:
 - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
 deployments:
-
   cfn:
     type: cloud-formation
     app: catalog-service
@@ -17,7 +19,6 @@ deployments:
       bucket: subscriptions-dist
       prefixStack: false
       functionNames:
-      - catalog-service-zuora-dev-
-      - catalog-service-zuora-uat-
+      - catalog-service-zuora-code-
       - catalog-service-zuora-prod-
     dependencies: [cfn]

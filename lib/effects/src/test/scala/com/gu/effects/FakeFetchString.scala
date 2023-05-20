@@ -10,7 +10,7 @@ object FakeFetchString {
   val zuoraRestTestConfig =
     """
        {
-       | "stage" : "DEV",
+       | "stage" : "CODE",
        | "baseUrl": "https://ddd",
        | "username": "e@f.com",
        | "password": "ggg",
@@ -26,7 +26,7 @@ object FakeFetchString {
   val identityTestConfig =
     """
        {
-        | "stage" : "DEV",
+        | "stage" : "CODE",
         | "baseUrl": "https://ididbaseurl",
         | "apiToken": "tokentokentokenidentity"
        |}
@@ -35,7 +35,7 @@ object FakeFetchString {
   val sfTestConfig =
     """
        {
-         |"stage" : "DEV",
+         |"stage" : "CODE",
          |"url": "https://sfurl.haha",
          |"client_id": "clientsfclient",
          |"client_secret": "clientsecretsfsecret",
@@ -48,7 +48,7 @@ object FakeFetchString {
   val trustedApiconfig =
     """
        {
-         |"stage" : "DEV",
+         |"stage" : "CODE",
          |"apiClientId": "a",
          |"apiToken": "b",
          |"tenantId": "c"
@@ -58,7 +58,7 @@ object FakeFetchString {
   val exactTargetConfig =
     """
       |{
-      | "stage" : "DEV",
+      | "stage" : "CODE",
       | "etSendIDs":
       |   {
       |     "pf1": "111",
@@ -74,7 +74,7 @@ object FakeFetchString {
   val stripeConfig =
     """
       |{
-      | "stage" : "DEV",
+      | "stage" : "CODE",
       | "customerSourceUpdatedWebhook": {
       | "api.key.secret": "abc",
       | "au-membership.key.secret": "def"
@@ -98,12 +98,12 @@ object FakeFetchString {
   }
 
   val configFiles = Map(
-    "membership/support-service-lambdas/DEV/identity-DEV.json" -> identityTestConfig,
-    "membership/support-service-lambdas/DEV/sfAuth-DEV.json" -> sfTestConfig,
-    "membership/support-service-lambdas/DEV/trustedApi-DEV.json" -> trustedApiconfig,
-    "membership/support-service-lambdas/DEV/zuoraRest-DEV.json" -> zuoraRestTestConfig,
-    "membership/support-service-lambdas/DEV/exactTarget-DEV.json" -> exactTargetConfig,
-    "membership/support-service-lambdas/DEV/stripe-DEV.json" -> stripeConfig,
+    "membership/support-service-lambdas/CODE/identity-CODE.v1.json" -> identityTestConfig,
+    "membership/support-service-lambdas/CODE/sfAuth-CODE.v1.json" -> sfTestConfig,
+    "membership/support-service-lambdas/CODE/trustedApi-CODE.v1.json" -> trustedApiconfig,
+    "membership/support-service-lambdas/CODE/zuoraRest-CODE.v1.json" -> zuoraRestTestConfig,
+    "membership/support-service-lambdas/CODE/exactTarget-CODE.v1.json" -> exactTargetConfig,
+    "membership/support-service-lambdas/CODE/stripe-CODE.v1.json" -> stripeConfig,
   )
 
   def fetchString(location: S3Location): Try[String] = {
@@ -117,7 +117,7 @@ object FakeFetchString {
           .get(s3Key)
           .map(contents => Success(contents))
           .getOrElse(Failure(new RuntimeException(s"test failure unexpected config s3 key ${location.key}")))
-      case S3Location("fulfilment-date-calculator-dev", s3Key) if s3Key.contains("Guardian Weekly") =>
+      case S3Location("fulfilment-date-calculator-code", s3Key) if s3Key.contains("Guardian Weekly") =>
         Success(guardianWeeklyFulfilmentDatesFile(today))
       case _ => Failure(new RuntimeException(s"test failure unexpected config s3 $location"))
     }

@@ -14,13 +14,11 @@ Mappings:
     StageVariables:
         CODE:
             ReadableS3Buckets:
-              - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/DEV/zuoraRest-DEV.json
               - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE.*.json
             WriteableS3Buckets:
               - arn:aws:s3:::gu-zuora-catalog/CODE/*
         PROD:
             ReadableS3Buckets:
-              - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/DEV/zuoraRest-DEV.json
               - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE.*.json
               - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD.*.json
             WriteableS3Buckets:
@@ -53,8 +51,7 @@ Resources:
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
                             Resource:
-                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-zuora-dev-${Stage}:log-stream:*
-                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-zuora-uat-${Stage}:log-stream:*
+                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-zuora-code-${Stage}:log-stream:*
                             - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-zuora-prod-${Stage}:log-stream:*
 
                 - PolicyName: ReadPrivateCredentials
@@ -67,12 +64,12 @@ Resources:
                             Action: s3:PutObject
                             Resource: !FindInMap [StageVariables, !Ref Stage, WriteableS3Buckets]
 
-    UATCatalogServiceLambda:
+    CODECatalogServiceLambda:
         Type: AWS::Lambda::Function
         Properties:
-            Description: Reads the product catalog from UAT Zuora and stores it in S3
+            Description: Reads the product catalog from CODE Zuora and stores it in S3
             FunctionName:
-                !Sub catalog-service-zuora-uat-${Stage}
+                !Sub catalog-service-zuora-code-${Stage}
             Code:
                 S3Bucket: subscriptions-dist
                 S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
@@ -80,7 +77,7 @@ Resources:
             Environment:
                 Variables:
                   Stage: !Ref Stage
-                  ZuoraEnvironment: UAT
+                  ZuoraEnvironment: CODE
             Role:
                 !GetAtt CatalogServiceRole.Arn
             MemorySize: 1536
@@ -89,64 +86,28 @@ Resources:
         DependsOn:
         - CatalogServiceRole
 
-    DEVCatalogServiceLambda:
-        Type: AWS::Lambda::Function
-        Properties:
-            Description: Reads the product catalog from DEV Zuora and stores it in S3
-            FunctionName:
-                !Sub catalog-service-zuora-dev-${Stage}
-            Code:
-                S3Bucket: subscriptions-dist
-                S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
-            Handler: com.gu.catalogService.Handler::apply
-            Environment:
-                Variables:
-                  Stage: !Ref Stage
-                  ZuoraEnvironment: DEV
-            Role:
-                !GetAtt CatalogServiceRole.Arn
-            MemorySize: 1536
-            Runtime: java11
-            Timeout: 300
-        DependsOn:
-        - CatalogServiceRole
-
-    UATCatalogServiceLambdaInvokePermission:
+    CODECatalogServiceLambdaInvokePermission:
         Type: AWS::Lambda::Permission
         Properties:
             Action: lambda:invokeFunction
-            FunctionName: !Ref UATCatalogServiceLambda
+            FunctionName: !Ref CODECatalogServiceLambda
             Principal: events.amazonaws.com
             SourceArn: !GetAtt CatalogServiceScheduler.Arn
         DependsOn:
-        - UATCatalogServiceLambda
-        - CatalogServiceScheduler
-
-    DEVCatalogServiceLambdaInvokePermission:
-        Type: AWS::Lambda::Permission
-        Properties:
-            Action: lambda:invokeFunction
-            FunctionName: !Ref DEVCatalogServiceLambda
-            Principal: events.amazonaws.com
-            SourceArn: !GetAtt CatalogServiceScheduler.Arn
-        DependsOn:
-        - DEVCatalogServiceLambda
+        - CODECatalogServiceLambda
         - CatalogServiceScheduler
 
     CatalogServiceScheduler:
         Type: "AWS::Events::Rule"
         Properties:
-            Description: Triggers the DEV and UAT Catalog Service Lambdas on a schedule
-            Name: !Sub catalog-service-scheduler-zuora-dev-and-uat-${Stage}
+            Description: Triggers the COFR Catalog Service Lambda on a schedule
+            Name: !Sub catalog-service-scheduler-zuora-code-${Stage}
             ScheduleExpression: rate(10 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             Targets:
-            - Arn: !GetAtt UATCatalogServiceLambda.Arn
-              Id: !Ref UATCatalogServiceLambda
-            - Arn: !GetAtt DEVCatalogServiceLambda.Arn
-              Id: !Ref DEVCatalogServiceLambda
+            - Arn: !GetAtt CODECatalogServiceLambda.Arn
+              Id: !Ref CODECatalogServiceLambda
         DependsOn:
-        - UATCatalogServiceLambda
-        - DEVCatalogServiceLambda
+        - CODECatalogServiceLambda
 
     CatalogS3Bucket:
         Type: "AWS::S3::Bucket"
@@ -224,17 +185,17 @@ Resources:
         Threshold: 1
         TreatMissingData: notBreaching
 
-    StaleUatCatalogAlarm:
+    StaleCodeCatalogAlarm:
       Type: AWS::CloudWatch::Alarm
       Condition: CreateProdOnlyResources
       Properties:
         AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
-        AlarmName: High error rate when fetching UAT Zuora Catalog
+        AlarmName: High error rate when fetching CODE Zuora Catalog
         ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:
           - Name: FunctionName
-            Value: !Ref UATCatalogServiceLambda
+            Value: !Ref CODECatalogServiceLambda
         EvaluationPeriods: 36
         MetricName: Errors
         Namespace: AWS/Lambda
@@ -243,21 +204,3 @@ Resources:
         Threshold: 1
         TreatMissingData: notBreaching
 
-    StaleDevCatalogAlarm:
-      Type: AWS::CloudWatch::Alarm
-      Condition: CreateProdOnlyResources
-      Properties:
-        AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
-        AlarmName: High error rate when fetching DEV Zuora Catalog
-        ComparisonOperator: GreaterThanOrEqualToThreshold
-        Dimensions:
-          - Name: FunctionName
-            Value: !Ref DEVCatalogServiceLambda
-        EvaluationPeriods: 72
-        MetricName: Errors
-        Namespace: AWS/Lambda
-        Period: 300
-        Statistic: Sum
-        Threshold: 1
-        TreatMissingData: notBreaching

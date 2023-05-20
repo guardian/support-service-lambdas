@@ -4,12 +4,12 @@ import zio.{Layer, System, Task, ZIO, ZLayer}
 
 object GuStageLive {
   enum Stage:
-    case PROD, CODE, DEV
+    case PROD, CODE
 
   val layer: Layer[String, Stage] =
     ZLayer {
       for {
-        stageString <- System.envOrElse("Stage", "DEV")
+        stageString <- System.envOrElse("Stage", "CODE")
         stage <- ZIO.attempt(Stage.valueOf(stageString))
       } yield stage
     }.mapError(_.toString)

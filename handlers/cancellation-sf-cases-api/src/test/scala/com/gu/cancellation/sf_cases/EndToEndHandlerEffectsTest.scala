@@ -111,7 +111,7 @@ object EndToEndData {
        |        "path": "/case${pathSuffix}",
        |        "accountId": "865473395570",
        |        "resourceId": "ls9b61",
-       |        "stage": "DEV",
+       |        "stage": "CODE",
        |        "requestId": "11111111-cbc2-11e7-a389-b7e6e2ab8316",
        |        "identity": null,
        |        "resourcePath": "/case${pathSuffix}",
