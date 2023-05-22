@@ -656,6 +656,8 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
     sttpOkhttpBackend,
     scalatest,
     scalaMock,
+    awsSecretsManager,
+    upickle,
   ),
 ).dependsOn(`salesforce-sttp-client`, `imovo-sttp-client`).settings(dependencyOverrides ++= Seq(nettyCodec))
 
