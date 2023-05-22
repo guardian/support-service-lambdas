@@ -25,7 +25,7 @@ object Handler extends LazyLogging {
   def processSuspensions(): Unit = {
 
     def processed(sttpBackend: SttpBackend[IO, Any]) = for {
-      config <- EitherT.fromEither[IO](Config.fromEnv()).leftWiden[Failure]
+      config <- EitherT.fromEither[IO](Config.get()).leftWiden[Failure]
       salesforce <- SalesforceClient(sttpBackend, config.salesforce)
         .leftMap(e => SalesforceFetchFailure(s"Failed to create Salesforce client: $e"))
       imovo <- ImovoClient(sttpBackend, config.imovo)
