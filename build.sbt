@@ -536,7 +536,7 @@ lazy val `product-move-api` = lambdaProject(
     awsSQS,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
-    "dev.zio" %% "zio-logging-slf4j" % "2.1.12",
+    "dev.zio" %% "zio-logging-slf4j" % "2.1.13",
     "dev.zio" %% "zio-test" % zio2Version % Test,
     "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
@@ -557,7 +557,9 @@ lazy val `product-move-api` = lambdaProject(
     genDocs := genDocsImpl("com.gu.productmove.MakeDocsYaml").value
 
     lazy val deployTo =
-      inputKey[Unit]("Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop")
+      inputKey[Unit](
+        "Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop",
+      )
 
     // run from product-move-api project eg. deployTo CODE
     // product-move-api needs its own deploy task currently because firstly it's Scala 3 so the jar path is different to
@@ -656,6 +658,8 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
     sttpOkhttpBackend,
     scalatest,
     scalaMock,
+    awsSecretsManager,
+    upickle,
   ),
 ).dependsOn(`salesforce-sttp-client`, `imovo-sttp-client`).settings(dependencyOverrides ++= Seq(nettyCodec))
 
@@ -739,7 +743,9 @@ initialize := {
 }
 
 lazy val deployAwsLambda =
-  inputKey[Unit]("Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop")
+  inputKey[Unit](
+    "Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop",
+  )
 deployAwsLambda := {
   import scala.sys.process._
   import complete.DefaultParsers._
