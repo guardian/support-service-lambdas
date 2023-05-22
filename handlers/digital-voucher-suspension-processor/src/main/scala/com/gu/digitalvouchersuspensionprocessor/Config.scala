@@ -10,28 +10,25 @@ object Config {
   def envVal(name: String): Either[ConfigFailure, String] =
     sys.env.get(name).toRight(ConfigFailure(s"No value in environment for '$name'"))
 
-  def fromEnv(): Either[ConfigFailure, Config] =
+  def get(): Either[ConfigFailure, Config] =
     for {
+      salesforceSecrets <- Secrets.getSalesforceSecrets
+      membersDataAPISecrets <- Secrets.getMembersDataAPISecrets
+      imovoSecrets <- Secrets.getImovoSecrets
       sfUrl <- envVal("salesforceUrl")
-      sfClientId <- envVal("salesforceClientId")
-      sfClientSecret <- envVal("salesforceClientSecret")
-      sfUserName <- envVal("salesforceUserName")
-      sfPassword <- envVal("salesforcePassword")
-      sfToken <- envVal("salesforceToken")
       imovoUrl <- envVal("imovoUrl")
-      imovoApiKey <- envVal("imovoApiKey")
     } yield Config(
       salesforce = SFAuthConfig(
         url = sfUrl,
-        client_id = sfClientId,
-        client_secret = sfClientSecret,
-        username = sfUserName,
-        password = sfPassword,
-        token = sfToken,
+        client_id = salesforceSecrets.clientId,
+        client_secret = salesforceSecrets.clientSecret,
+        username = membersDataAPISecrets.username,
+        password = membersDataAPISecrets.password,
+        token = membersDataAPISecrets.token,
       ),
       imovo = ImovoConfig(
         imovoBaseUrl = imovoUrl,
-        imovoApiKey = imovoApiKey,
+        imovoApiKey = imovoSecrets.apiKey,
       ),
     )
 }
