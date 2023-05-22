@@ -10,7 +10,7 @@ object Config {
   def envVal(name: String): Either[ConfigFailure, String] =
     sys.env.get(name).toRight(ConfigFailure(s"No value in environment for '$name'"))
 
-  def get(): Either[ConfigFailure, Config] =
+  def fromEnv(): Either[ConfigFailure, Config] =
     for {
       salesforceSecrets <- Secrets.getSalesforceSecrets
       membersDataAPISecrets <- Secrets.getMembersDataAPISecrets
