@@ -80,17 +80,7 @@ object Dependencies {
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.3.1" % Test
-
-  /*
-   * ===============================================================================================
-   * These are versions of transitive dependencies in which a vulnerability has been resolved.
-   * These are only here because there was no other resolution available.
-   *
-   * These dependencies should be removed as soon as the direct dependency they are consumed
-   * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
-   */
-  val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
-  val netty4168Codec = "io.netty" % "netty-codec" % "4.1.68.Final"
+  val nettyCodec = "io.netty" % "netty-codec" % "4.1.92.Final"
   val jacksonVersion = "2.13.2"
   val jacksonDatabindVersion = "2.13.2.2"
 
