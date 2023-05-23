@@ -49,14 +49,11 @@ object Main extends App with LazyLogging {
     ),
   )
 
-  setApiUserPasswordInSfAndSyncToAwsSecret(SecretsManagerClient.create())
-
   def setApiUserPasswordInSfAndSyncToAwsSecret(secretsManagerClient: SecretsManagerClient): Unit = {
     (for {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
       sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
       awsApiUsersInSf <- getAwsApiUsersInSf(sfAuthDetails)
-
       activations = awsApiUsersInSf.records.map { awsApiUser =>
         val newPassword = generatePassword()
         updatePassword(sfAuthDetails, awsApiUser, newPassword)
@@ -67,11 +64,11 @@ object Main extends App with LazyLogging {
           config.awsConfig.stageName,
         )
       }
-
     } yield {}).left
       .foreach(e => throw new RuntimeException("An error occurred: ", e))
-
   }
+
+  setApiUserPasswordInSfAndSyncToAwsSecret(SecretsManagerClient.create())
 
   // Convention: <stage>/<system>/User/<user>
   def getSecretName(
