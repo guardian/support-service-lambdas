@@ -84,11 +84,6 @@ Resources:
                 S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/holiday-stop-api/holiday-stop-api.jar
             Handler: com.gu.holiday_stops.Handler::apply
-            Environment:
-                Variables:
-                  Stage: !Ref Stage
-                  InvoicingApiUrl: !Sub '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiUrl}}'
-                  InvoicingApiKey: !Sub '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiKey}}'
             Role:
                 Fn::GetAtt:
                 - HolidayStopApiRole
