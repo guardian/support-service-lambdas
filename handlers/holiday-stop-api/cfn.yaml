@@ -84,6 +84,9 @@ Resources:
                 S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/holiday-stop-api/holiday-stop-api.jar
             Handler: com.gu.holiday_stops.Handler::apply
+            Environment:
+              Variables:
+                Stage: !Ref Stage
             Role:
                 Fn::GetAtt:
                 - HolidayStopApiRole
