@@ -78,6 +78,9 @@ Resources:
         S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/holiday-stop-processor/holiday-stop-processor.jar
       Handler: com.gu.holidaystopprocessor.Handler::handle
+      Environment:
+        Variables:
+          Stage: !Ref Stage
       Role:
         !GetAtt HolidayStopProcessorRole.Arn
       MemorySize: 1024
