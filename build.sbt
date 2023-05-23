@@ -646,7 +646,7 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   `imovo-sttp-client`,
   `imovo-sttp-test-stub` % Test,
 ).settings(
-  dependencyOverrides += netty4168Codec,
+  dependencyOverrides += nettyCodec,
 )
 
 lazy val `digital-voucher-suspension-processor` = lambdaProject(
