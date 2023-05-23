@@ -469,7 +469,7 @@ lazy val `sf-gocardless-sync` = lambdaProject(
 lazy val `holiday-stop-api` = lambdaProject(
   "holiday-stop-api",
   "CRUD API for Holiday Stop Requests stored in SalesForce",
-  Seq(playJsonExtensions),
+  Seq(playJsonExtensions, awsSecretsManager, upickle),
 ).dependsOn(
   `holiday-stops` % "compile->compile;test->test",
   handler,
