@@ -263,7 +263,7 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
 lazy val `zuora-models` = library(project in file("lib/zuora-models"), scala3Settings)
   .dependsOn(`config-core`)
   .settings(
-    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.15" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
+    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
   )
 
 lazy val `credit-processor` = library(project in file("lib/credit-processor"))
