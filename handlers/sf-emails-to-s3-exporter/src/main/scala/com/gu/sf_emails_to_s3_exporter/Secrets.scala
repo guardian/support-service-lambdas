@@ -34,12 +34,12 @@ object Secrets {
   private lazy val secretsClient = SecretsManagerClient.create()
 
   val stageToConnectedApp: Map[String, String] = Map(
-    "DEV" -> "AwsConnectorSandbox",
+    "CODE" -> "AwsConnectorSandbox",
     "PROD" -> "SFEmailsToS3",
   )
 
   val stageToSalesforceUser: Map[String, String] = Map(
-    "DEV" -> "EmailsToS3APIUser",
+    "CODE" -> "EmailsToS3APIUser",
     "PROD" -> "EmailsToS3APIUser",
   )
 
