@@ -240,6 +240,8 @@ Resources:
                   - sqs:GetQueueAttributes
                 Resource: !GetAtt SoftOptInsQueue.Arn
 
+
+
   SoftOptInsQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -261,6 +263,42 @@ Resources:
       Enabled: true
       EventSourceArn: !GetAtt SoftOptInsQueue.Arn
       FunctionName: !Ref LambdaFunctionIAP
+
+  SoftOptInsLoggingTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${App}-${Stage}-soft-opt-ins-logging
+      AttributeDefinitions:
+        - AttributeName: timestamp
+          AttributeType: N
+        - AttributeName: identityId
+          AttributeType: S
+        - AttributeName: subscriptionId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: identityId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      GlobalSecondaryIndexes:
+        - IndexName: subscriptionId-index
+          KeySchema:
+            - AttributeName: subscriptionId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Stage
+          Value: !Ref Stage
+        - Key: Stack
+          Value: !Ref Stack
+        - Key: App
+          Value: !Ref App
 
   failedRunAlarm:
     Type: AWS::CloudWatch::Alarm

@@ -1,5 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
+import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, Cancellation, EventType, Switch}
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
 import com.typesafe.scalalogging.LazyLogging
 import software.amazon.awssdk.regions.Region
@@ -9,32 +10,29 @@ import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRe
 import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
-case class SoftOptInLog(userId: String, subscriptionId: String, timestamp: Long, logMessage: String)
-
-object SoftOptInLog {
-  val app = "mobile"
-
-  def tableName(app: String, stage: String): String = s"${app}-${stage}-soft-opt-ins-logging-v2"
-}
-
 class DynamoConnector private (dynamoDbClient: DynamoDbClient) extends LazyLogging {
-  val app = "mobile"
+  private val app = "membership"
   private val stage = sys.env.getOrElse("Stage", "DEV")
+  private val tableName = s"$app-$stage-soft-opt-ins-logging"
 
-  def updateLoggingTable(subscriptionNumber: String, identityId: String): Unit = {
+  def updateLoggingTable(subscriptionNumber: String, identityId: String, eventType: EventType): Unit = {
     val timestamp = System.currentTimeMillis()
-    val record = SoftOptInLog(identityId, subscriptionNumber, timestamp, "Soft opt-ins processed for acquisition")
+    val logMessage = eventType match {
+      case Acquisition => "Soft opt-ins processed for acquisition"
+      case Cancellation => "Soft opt-ins processed for cancellation"
+      case Switch => "Soft opt-ins processed for switch"
+    }
 
     val itemValues = Map(
-      "userId" -> AttributeValue.builder().s(record.userId).build(),
-      "subscriptionId" -> AttributeValue.builder().s(record.subscriptionId).build(),
-      "timestamp" -> AttributeValue.builder().n(record.timestamp.toString).build(),
-      "logMessage" -> AttributeValue.builder().s(record.logMessage).build(),
+      "identityId" -> AttributeValue.builder().s(identityId).build(),
+      "subscriptionId" -> AttributeValue.builder().s(subscriptionNumber).build(),
+      "timestamp" -> AttributeValue.builder().n(timestamp.toString).build(),
+      "logMessage" -> AttributeValue.builder().s(logMessage).build(),
     )
 
     val putReq = PutItemRequest
       .builder()
-      .tableName(SoftOptInLog.tableName(app, stage))
+      .tableName(tableName)
       .item(itemValues.asJava)
       .build()
 
@@ -42,7 +40,7 @@ class DynamoConnector private (dynamoDbClient: DynamoDbClient) extends LazyLoggi
       case Success(_) =>
         logger.info("Logged soft opt-in setting to Dynamo")
       case Failure(exception) =>
-        logger.error(s"Dynamo write failed for record: $record")
+        logger.error(s"Dynamo write failed for identityId: $identityId")
         logger.error(s"Exception: $exception")
         Metrics.put("failed_dynamo_update")
     }

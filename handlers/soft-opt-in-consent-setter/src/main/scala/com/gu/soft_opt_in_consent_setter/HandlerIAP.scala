@@ -15,10 +15,16 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
   val readyProcessSwitchStatus = "Ready to process switch"
+
+  sealed trait EventType
+  case object Acquisition extends EventType
+  case object Cancellation extends EventType
+  case object Switch extends EventType
+
   case class MessageBody(
       subscriptionNumber: String,
       identityId: String,
-      eventType: String,
+      eventType: EventType,
       productName: String,
       previousProductName: Option[String],
   )
@@ -71,7 +77,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       logger.info(s"Processing message: $message")
 
       val result = message.eventType match {
-        case "Acquisition" =>
+        case Acquisition =>
           Metrics.put(event = "acquisitions_to_process", 1)
 
           processAcquiredSub(
@@ -79,7 +85,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             identityConnector.sendConsentsReq,
             consentsCalculator,
           )
-        case "Cancellation" =>
+        case Cancellation =>
           Metrics.put(event = "cancellations_to_process", 1)
 
           processCancelledSub(
@@ -89,7 +95,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             consentsCalculator,
             sfConnector,
           )
-        case "Switch" =>
+        case Switch =>
           Metrics.put(event = "product_switches_to_process", 1)
 
           processProductSwitchSub(
@@ -106,7 +112,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       result match {
         case Left(e) => handleError(e)
         case Right(_) =>
-          dynamoConnector.updateLoggingTable(message.subscriptionNumber, message.identityId)
+          dynamoConnector.updateLoggingTable(message.subscriptionNumber, message.identityId, message.eventType)
       }
     }
 
