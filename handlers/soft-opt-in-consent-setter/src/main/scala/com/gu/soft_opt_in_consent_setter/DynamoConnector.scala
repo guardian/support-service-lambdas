@@ -5,22 +5,29 @@ import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
 import com.typesafe.scalalogging.LazyLogging
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest}
+import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest, PutItemResponse}
 
 import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
-class DynamoConnector private (dynamoDbClient: DynamoDbClient) extends LazyLogging {
+class DynamoConnector(dynamoDbClient: DynamoDbClient) extends LazyLogging {
   private val app = "membership"
   private val stage = sys.env.getOrElse("Stage", "DEV")
   private val tableName = s"$app-$stage-soft-opt-ins-logging"
 
-  def updateLoggingTable(subscriptionNumber: String, identityId: String, eventType: EventType): Unit = {
+  def putItem(putReq: PutItemRequest): Try[Unit] = Try(dynamoDbClient.putItem(putReq)).map(_ => ())
+
+  def updateLoggingTable(
+      subscriptionNumber: String,
+      identityId: String,
+      eventType: EventType,
+      putItem: PutItemRequest => Try[Unit] = putItem,
+  ): Try[Unit] = {
     val timestamp = System.currentTimeMillis()
     val logMessage = eventType match {
-      case Acquisition => "Soft opt-ins processed for acquisition"
-      case Cancellation => "Soft opt-ins processed for cancellation"
-      case Switch => "Soft opt-ins processed for switch"
+      case Acquisition => "soft opt-ins processed for acquisition"
+      case Cancellation => "Soft opt-ins processed for expired subscription"
+      case Switch => "Soft opt-ins processed for product-switch"
     }
 
     val itemValues = Map(
@@ -36,14 +43,7 @@ class DynamoConnector private (dynamoDbClient: DynamoDbClient) extends LazyLoggi
       .item(itemValues.asJava)
       .build()
 
-    Try(dynamoDbClient.putItem(putReq)) match {
-      case Success(_) =>
-        logger.info("Logged soft opt-in setting to Dynamo")
-      case Failure(exception) =>
-        logger.error(s"Dynamo write failed for identityId: $identityId")
-        logger.error(s"Exception: $exception")
-        Metrics.put("failed_dynamo_update")
-    }
+    putItem(putReq)
   }
 }
 

@@ -1,17 +1,7 @@
-import com.gu.soft_opt_in_consent_setter.{
-  ConsentsCalculator,
-  MobileSubscription,
-  MobileSubscriptions,
-  SalesforceConnector,
-}
-import com.gu.soft_opt_in_consent_setter.HandlerIAP.{
-  MessageBody,
-  processAcquiredSub,
-  processCancelledSub,
-  processProductSwitchSub,
-}
+import com.gu.soft_opt_in_consent_setter.HandlerIAP._
 import com.gu.soft_opt_in_consent_setter.models.{SFAssociatedSubRecord, SFAssociatedSubResponse, SoftOptInError}
 import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.testConsentMappings
+import com.gu.soft_opt_in_consent_setter.{ConsentsCalculator, MobileSubscription, MobileSubscriptions, SalesforceConnector}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -25,6 +15,9 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   val mockGetMobileSubscriptions = mockFunction[String, Either[SoftOptInError, MobileSubscriptions]]
   val mockSfConnector = mock[SalesforceConnector]
 
+  val identityId = "someIdentityId"
+  val subscriptionNumber = "A-S12345678"
+
   test(testName = "processProductSwitchSub should handle product switch event correctly") {
     val mobileSubscriptions = MobileSubscriptions(
       List(
@@ -34,7 +27,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        identityId,
         "[\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : true\n  }\n]",
       )
       .returning(Right(()))
@@ -46,7 +39,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         records = Seq(
           SFAssociatedSubRecord(
             "contributions",
-            "someIdentityId",
+            identityId,
           ),
         ),
       ),
@@ -56,7 +49,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       identityId = "someIdentityId",
       productName = "supporterPlus",
       previousProductName = Some("contributions"),
-      eventType = "Switch",
+      eventType = Switch,
+      subscriptionNumber = "A-S12345678",
     )
 
     val result = processProductSwitchSub(
@@ -88,7 +82,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       identityId = "someIdentityId",
       productName = "supporterPlus",
       previousProductName = None,
-      eventType = "Acquisition",
+      eventType = Acquisition,
+      subscriptionNumber = "A-S12345678",
     )
 
     val result = processAcquiredSub(
@@ -126,7 +121,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       identityId = "someIdentityId",
       productName = "supporterPlus",
       previousProductName = None,
-      eventType = "Cancellation",
+      eventType = Cancellation,
+      subscriptionNumber = "A-S12345678",
     )
 
     val result = processCancelledSub(
@@ -162,7 +158,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       identityId = "someIdentityId",
       productName = "supporterPlus",
       previousProductName = None,
-      eventType = "Cancellation",
+      eventType = Cancellation,
+      subscriptionNumber = "A-S12345678",
     )
 
     val result = processCancelledSub(
