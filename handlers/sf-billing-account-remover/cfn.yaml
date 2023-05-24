@@ -47,6 +47,20 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-billing-account-remover-${Stage}:log-stream:*
+        - PolicyName: ReadFromSecretsManagerPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/SubscriptionsZuoraApi-XW49AL"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/SupportServiceLambdas-WeibUa"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ"
 
   SFBillingAccountRemoverLambda:
     Type: AWS::Serverless::Function
@@ -68,35 +82,7 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
-          apiAccessKeyId:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/${Account}:SecretString:apiAccessKeyId}}'
-            - Account: !FindInMap [StageMap, !Ref Stage, ZuoraAccount]
-          apiSecretAccessKey:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Zuora/${Account}:SecretString:apiSecretAccessKey}}'
-            - Account: !FindInMap [StageMap, !Ref Stage, ZuoraAccount]
           authUrl: !FindInMap [StageMap, !Ref Stage, SalesforceUrl]
-          clientId:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${ConnectedApp}:SecretString:clientId}}'
-            - ConnectedApp: !FindInMap [StageMap, !Ref Stage, SalesforceConnectedApp]
-          clientSecret:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/ConnectedApp/${ConnectedApp}:SecretString:clientSecret}}'
-            - ConnectedApp: !FindInMap [StageMap, !Ref Stage, SalesforceConnectedApp]
-          password:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:password}}'
-            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
-          token:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:token}}'
-            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
-          username:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/${User}:SecretString:username}}'
-            - User: !FindInMap [StageMap, !Ref Stage, SalesforceUser]
           zuoraInstanceUrl: !FindInMap [StageMap, !Ref Stage, ZuoraUrl]
       Role:
         !GetAtt SFBillingAccountRemoverRole.Arn

@@ -81,8 +81,6 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
-          InvoicingApiUrl: !Sub '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiUrl}}'
-          InvoicingApiKey: !Sub '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiKey}}'
       Role:
         !GetAtt HolidayStopProcessorRole.Arn
       MemorySize: 1024
