@@ -67,7 +67,7 @@ object Secrets {
     secretsClient.getSecretValue(GetSecretValueRequest.builder().secretId(secretId).build()).secretString()
   }
 
-  lazy val stage: Option[String] = sys.env.get("stage")
+  lazy val stage: Option[String] = sys.env.get("Stage")
 
   def getZuoraSecrets: Option[ZuoraSecrets] = {
     for {
