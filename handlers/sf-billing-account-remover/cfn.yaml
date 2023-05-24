@@ -47,6 +47,20 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-billing-account-remover-${Stage}:log-stream:*
+        - PolicyName: ReadFromSecretsManagerPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/SubscriptionsZuoraApi-XW49AL"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/SupportServiceLambdas-WeibUa"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA"
+                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ"
 
   SFBillingAccountRemoverLambda:
     Type: AWS::Serverless::Function
