@@ -35,10 +35,22 @@ class BigQueryHelper(bigQuery: BigQuery) extends LazyLogging {
 }
 
 object BigQueryHelper {
+
+  /** Uses service account credentials loaded from a secret store
+    */
   def apply(bigQueryConfig: BigQueryConfig): BigQueryHelper = {
     val credentials = ServiceAccount.credentialsFromConfig(bigQueryConfig)
     val projectId = (bigQueryConfig.bigQueryCredentials \ "project_id").as[String]
     val bigQuery = ServiceAccount.bigQuery(credentials, projectId)
+    new BigQueryHelper(bigQuery)
+  }
+
+  /** Uses application default credentials for local testing
+    * https://cloud.google.com/docs/authentication/application-default-credentials#personal
+    */
+  def apply(): BigQueryHelper = {
+    import com.google.cloud.bigquery.BigQueryOptions
+    val bigQuery = BigQueryOptions.getDefaultInstance.getService
     new BigQueryHelper(bigQuery)
   }
 }
