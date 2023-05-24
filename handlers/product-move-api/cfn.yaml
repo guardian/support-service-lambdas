@@ -44,7 +44,7 @@ Resources:
       Runtime: java11
       Architectures: [arm64]
       Handler: com.gu.productmove.Handler::handleRequest
-      MemorySize: 1024
+      MemorySize: 6144
       Timeout: 300
       Environment:
         Variables:
