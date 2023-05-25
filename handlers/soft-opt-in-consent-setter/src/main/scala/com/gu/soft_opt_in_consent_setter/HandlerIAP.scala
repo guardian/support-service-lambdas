@@ -4,14 +4,13 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.{Decoder, ParsingFailure}
-import io.circe.parser.{decode => circeDecode}
+import io.circe.ParsingFailure
 import io.circe.generic.auto._
+import io.circe.parser.{decode => circeDecode}
 import io.circe.syntax._
-import software.amazon.awssdk.services.dynamodb.model.PutItemResponse
 
 import scala.jdk.CollectionConverters._
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
 
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
@@ -24,7 +23,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   case object Switch extends EventType
 
   case class MessageBody(
-      subscriptionNumber: String,
+      subscriptionId: String,
       identityId: String,
       eventType: EventType,
       productName: String,
@@ -114,7 +113,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       result match {
         case Left(e) => handleError(e)
         case Right(_) =>
-          dynamoConnector.updateLoggingTable(message.subscriptionNumber, message.identityId, message.eventType) match {
+          dynamoConnector.updateLoggingTable(message.subscriptionId, message.identityId, message.eventType) match {
             case Success(_) =>
               logger.info("Logged soft opt-in setting to Dynamo")
             case Failure(exception) =>
