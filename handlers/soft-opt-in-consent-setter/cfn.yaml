@@ -295,10 +295,6 @@ Resources:
       Tags:
         - Key: Stage
           Value: !Ref Stage
-        - Key: Stack
-          Value: !Ref Stack
-        - Key: App
-          Value: !Ref App
 
   failedRunAlarm:
     Type: AWS::CloudWatch::Alarm
