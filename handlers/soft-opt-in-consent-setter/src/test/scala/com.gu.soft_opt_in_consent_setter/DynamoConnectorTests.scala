@@ -29,7 +29,7 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "updateLoggingTable builds request correctly") {
     val putReq = PutItemRequest
       .builder()
-      .tableName("membership-DEV-soft-opt-ins-logging")
+      .tableName("soft-opt-in-consent-setter-DEV-logging")
       .item(itemValues1.asJava)
       .build()
 

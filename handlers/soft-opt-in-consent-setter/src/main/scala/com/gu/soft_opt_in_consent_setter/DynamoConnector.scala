@@ -11,9 +11,8 @@ import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 class DynamoConnector(dynamoDbClient: DynamoDbClient) extends LazyLogging {
-  private val app = "membership"
   private val stage = sys.env.getOrElse("Stage", "DEV")
-  private val tableName = s"$app-$stage-soft-opt-ins-logging"
+  private val tableName = s"soft-opt-in-consent-setter-$stage-logging"
 
   def putItem(putReq: PutItemRequest): Try[Unit] = Try(dynamoDbClient.putItem(putReq)).map(_ => ())
 
