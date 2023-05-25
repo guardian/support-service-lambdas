@@ -53,7 +53,7 @@ object BuildPreviewResult {
               .fromOption(activeRatePlanCharge.price)
               .orElseFail(
                 InternalServerError(
-                  s"Price difference is zero. Subscription name is $subscriptionName. Invoice data was: $invoice",
+                  s"Price is null on rate plan. Subscription name is $subscriptionName. Invoice data was: $invoice",
                 ),
               )
           } yield PreviewResult(
