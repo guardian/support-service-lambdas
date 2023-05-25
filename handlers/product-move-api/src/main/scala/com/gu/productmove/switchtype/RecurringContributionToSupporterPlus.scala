@@ -118,6 +118,7 @@ object RecurringContributionToSupporterPlus {
             SubscriptionName(subscription.id),
             postData.price,
             ratePlanCharge.billingPeriod,
+            ratePlanCharge,
             currency,
             currentRatePlan.id,
           )
@@ -243,6 +244,7 @@ object RecurringContributionToSupporterPlus {
       subscriptionName: SubscriptionName,
       price: BigDecimal,
       billingPeriod: BillingPeriod,
+      activeRatePlanCharge: RatePlanCharge,
       currency: Currency,
       currentRatePlanId: String,
   ): ZIO[SubscriptionUpdate with Stage, ErrorResponse, OutputBody] = for {
@@ -269,7 +271,12 @@ object RecurringContributionToSupporterPlus {
 
     stage <- ZIO.service[Stage]
     supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-    previewResult <- BuildPreviewResult.getPreviewResult(response.invoice, supporterPlusRatePlanIds)
+    previewResult <- BuildPreviewResult.getPreviewResult(
+      subscriptionName,
+      activeRatePlanCharge,
+      response.invoice,
+      supporterPlusRatePlanIds,
+    )
   } yield previewResult
 
   private def doUpdate(
