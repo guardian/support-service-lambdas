@@ -62,29 +62,24 @@ object BillingAccountRemover extends App with LazyLogging {
   case class ZuoraResponse(Success: Boolean, Errors: Seq[Errors])
 
   lazy val optConfig = for {
-    sfUserName <- Option(System.getenv("username"))
-    sfClientId <- Option(System.getenv("clientId"))
-    sfClientSecret <- Option(System.getenv("clientSecret"))
-    sfPassword <- Option(System.getenv("password"))
-    sfToken <- Option(System.getenv("token"))
+    zuoraSecrets <- Secrets.getZuoraSecrets
+    salesForceConnectedAppSecrets <- Secrets.getSalesforceConnectedAppSecrets
+    salesForceUserSecrets <- Secrets.getSalesforceUserSecrets
     sfAuthUrl <- Option(System.getenv("authUrl"))
-
-    zuoraApiAccessKeyId <- Option(System.getenv("apiAccessKeyId"))
-    zuoraApiSecretAccessKey <- Option(System.getenv("apiSecretAccessKey"))
     zuoraInstanceUrl <- Option(System.getenv("zuoraInstanceUrl"))
 
   } yield Config(
     SalesforceConfig(
-      username = sfUserName,
-      clientId = sfClientId,
-      clientSecret = sfClientSecret,
-      password = sfPassword,
-      token = sfToken,
+      username = salesForceUserSecrets.username,
+      clientId = salesForceConnectedAppSecrets.clientId,
+      clientSecret = salesForceConnectedAppSecrets.clientSecret,
+      password = salesForceUserSecrets.password,
+      token = salesForceUserSecrets.token,
       authUrl = sfAuthUrl,
     ),
     ZuoraConfig(
-      apiAccessKeyId = zuoraApiAccessKeyId,
-      apiSecretAccessKey = zuoraApiSecretAccessKey,
+      apiAccessKeyId = zuoraSecrets.apiSecretAccessKey,
+      apiSecretAccessKey = zuoraSecrets.apiAccessKeyId,
       zuoraInstanceUrl = zuoraInstanceUrl,
     ),
   )

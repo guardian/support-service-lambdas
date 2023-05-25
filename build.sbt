@@ -421,7 +421,7 @@ lazy val `sf-contact-merge` = lambdaProject(
 lazy val `sf-billing-account-remover` = lambdaProject(
   "sf-billing-account-remover",
   "Removes Billing Accounts and related records from Salesforce",
-  Seq(circe, circeParser, scalajHttp),
+  Seq(circe, circeParser, scalajHttp, awsSecretsManager, upickle),
 )
 
 lazy val `soft-opt-in-consent-setter` = lambdaProject(
@@ -453,7 +453,7 @@ lazy val `sf-emails-to-s3-exporter` = lambdaProject(
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",
   "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
-  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3),
+  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3, upickle),
 )
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
@@ -471,7 +471,7 @@ lazy val `sf-gocardless-sync` = lambdaProject(
 lazy val `holiday-stop-api` = lambdaProject(
   "holiday-stop-api",
   "CRUD API for Holiday Stop Requests stored in SalesForce",
-  Seq(playJsonExtensions),
+  Seq(playJsonExtensions, awsSecretsManager, upickle),
 ).dependsOn(
   `holiday-stops` % "compile->compile;test->test",
   handler,

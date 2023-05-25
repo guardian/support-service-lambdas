@@ -34,35 +34,32 @@ object Main extends App with LazyLogging {
   )
 
   lazy val optConfig = for {
-    sfUserName <- Option(System.getenv("username"))
-    sfClientId <- Option(System.getenv("clientId"))
-    sfClientSecret <- Option(System.getenv("clientSecret"))
-    sfPassword <- Option(System.getenv("password"))
-    sfToken <- Option(System.getenv("token"))
-    sfAuthUrl <- Option(System.getenv("authUrl"))
-    stage <- Option(System.getenv("stageName"))
+    secrets <- Secrets.getAwsCredentialsSetterSecrets
   } yield Config(
     SalesforceConfig(
-      userName = sfUserName,
-      clientId = sfClientId,
-      clientSecret = sfClientSecret,
-      password = sfPassword,
-      token = sfToken,
-      authUrl = sfAuthUrl,
+      userName = secrets.username,
+      clientId = secrets.clientId,
+      clientSecret = secrets.clientSecret,
+      password = secrets.password,
+      token = secrets.token,
+      authUrl = secrets.authUrl,
     ),
     AwsConfig(
-      stageName = stage,
+      stageName = secrets.stageName,
     ),
   )
-
-  setApiUserPasswordInSfAndSyncToAwsSecret(SecretsManagerClient.create())
 
   def setApiUserPasswordInSfAndSyncToAwsSecret(secretsManagerClient: SecretsManagerClient): Unit = {
     (for {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
-      sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
+      sfauth <- (auth(config.salesforceConfig) match {
+        // Here I am converting an Option into an Either, the other option was to
+        // have auth return an Option.
+        case None => Left(new RuntimeException("Missing config value"))
+        case Some(str) => Right(str)
+      })
+      sfAuthDetails <- decode[SfAuthDetails](sfauth)
       awsApiUsersInSf <- getAwsApiUsersInSf(sfAuthDetails)
-
       activations = awsApiUsersInSf.records.map { awsApiUser =>
         val newPassword = generatePassword()
         updatePassword(sfAuthDetails, awsApiUser, newPassword)
@@ -73,11 +70,11 @@ object Main extends App with LazyLogging {
           config.awsConfig.stageName,
         )
       }
-
     } yield {}).left
       .foreach(e => throw new RuntimeException("An error occurred: ", e))
-
   }
+
+  setApiUserPasswordInSfAndSyncToAwsSecret(SecretsManagerClient.create())
 
   // Convention: <stage>/<system>/User/<user>
   def getSecretName(
@@ -234,20 +231,24 @@ object Main extends App with LazyLogging {
     }.toEither
   }
 
-  def auth(salesforceConfig: SalesforceConfig): String = {
-    logger.info("Authenticating with Salesforce...")
-    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
-      .postForm(
-        Seq(
-          "grant_type" -> "password",
-          "client_id" -> salesforceConfig.clientId,
-          "client_secret" -> salesforceConfig.clientSecret,
-          "username" -> salesforceConfig.userName,
-          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}",
-        ),
-      )
-      .asString
-      .body
+  def auth(salesforceConfig: SalesforceConfig): Option[String] = {
+    for {
+      secrets <- Secrets.getAwsCredentialsSetterSecrets
+    } yield {
+      logger.info("Authenticating with Salesforce...")
+      Http(s"${secrets.authUrl}/services/oauth2/token")
+        .postForm(
+          Seq(
+            "grant_type" -> "password",
+            "client_id" -> salesforceConfig.clientId,
+            "client_secret" -> salesforceConfig.clientSecret,
+            "username" -> salesforceConfig.userName,
+            "password" -> s"${salesforceConfig.password}${salesforceConfig.token}",
+          ),
+        )
+        .asString
+        .body
+    }
   }
 
   def randomStringFromCharList(length: Int, chars: Seq[Char]): String = {
