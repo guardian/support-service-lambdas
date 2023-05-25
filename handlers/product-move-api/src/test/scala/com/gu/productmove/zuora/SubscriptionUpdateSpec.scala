@@ -2,7 +2,14 @@ package com.gu.productmove.zuora
 
 import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
+import com.gu.productmove.{
+  AwsCredentialsLive,
+  AwsS3Live,
+  GuStageLive,
+  SttpClientLive,
+  getSubscriptionResponse,
+  ratePlanCharge1,
+}
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.Subscribe.*
@@ -19,6 +26,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.productmove.endpoint.move.RecurringContributionToSupporterPlus.getRatePlans
 import com.gu.productmove.endpoint.move.SupporterPlusRatePlanIds
 import com.gu.productmove.move.BuildPreviewResult
+import com.gu.productmove.zuora.model.SubscriptionName
 
 import java.time.*
 import scala.None
@@ -131,6 +139,8 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           _ <- TestClock.setTime(time)
           response <- BuildPreviewResult
             .getPreviewResult(
+              SubscriptionName("A-S12345678"),
+              ratePlanCharge1,
               invoiceWithMultipleInvoiceItems,
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
@@ -153,6 +163,8 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           _ <- TestClock.setTime(time)
           response <- BuildPreviewResult
             .getPreviewResult(
+              SubscriptionName("A-S12345678"),
+              ratePlanCharge1,
               invoiceWithTax,
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
