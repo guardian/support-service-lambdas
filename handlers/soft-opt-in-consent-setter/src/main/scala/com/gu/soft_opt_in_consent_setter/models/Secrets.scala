@@ -50,31 +50,26 @@ object Secrets {
   private lazy val secretsClient = SecretsManagerClient.create()
 
   val stageToSalesforceStage: Map[String, String] = Map(
-    "DEV" -> "DEV",
     "CODE" -> "CODE",
     "PROD" -> "PROD",
   )
 
   val stageToAppname: Map[String, String] = Map(
-    "DEV" -> "AwsConnectorSandbox",
     "CODE" -> "AwsConnectorSandbox",
     "PROD" -> "TouchpointUpdate",
   )
 
   val stageToSalesforceUsername: Map[String, String] = Map(
-    "DEV" -> "SoftOptInConsentSetterAPIUser",
     "CODE" -> "SoftOptInConsentSetterAPIUser",
     "PROD" -> "SoftOptInConsentSetterAPIUser",
   )
 
   val stageToIdentityStage: Map[String, String] = Map(
-    "DEV" -> "CODE",
     "CODE" -> "CODE",
     "PROD" -> "PROD",
   )
 
   val stageMpapiStage: Map[String, String] = Map(
-    "DEV" -> "CODE",
     "CODE" -> "CODE",
     "PROD" -> "PROD",
   )
