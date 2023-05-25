@@ -16,7 +16,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   val mockSfConnector = mock[SalesforceConnector]
 
   val identityId = "someIdentityId"
-  val subscriptionNumber = "A-S12345678"
+  val subscriptionId = "A-S12345678"
 
   test(testName = "processProductSwitchSub should handle product switch event correctly") {
     val mobileSubscriptions = MobileSubscriptions(
@@ -50,7 +50,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       productName = "supporterPlus",
       previousProductName = Some("contributions"),
       eventType = Switch,
-      subscriptionNumber = "A-S12345678",
+      subscriptionId = "A-S12345678",
     )
 
     val result = processProductSwitchSub(
@@ -83,7 +83,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       productName = "supporterPlus",
       previousProductName = None,
       eventType = Acquisition,
-      subscriptionNumber = "A-S12345678",
+      subscriptionId = "A-S12345678",
     )
 
     val result = processAcquiredSub(
@@ -122,7 +122,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       productName = "supporterPlus",
       previousProductName = None,
       eventType = Cancellation,
-      subscriptionNumber = "A-S12345678",
+      subscriptionId = "A-S12345678",
     )
 
     val result = processCancelledSub(
@@ -159,7 +159,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       productName = "supporterPlus",
       previousProductName = None,
       eventType = Cancellation,
-      subscriptionNumber = "A-S12345678",
+      subscriptionId = "A-S12345678",
     )
 
     val result = processCancelledSub(

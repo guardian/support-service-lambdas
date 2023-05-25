@@ -18,7 +18,7 @@ class DynamoConnector(dynamoDbClient: DynamoDbClient) extends LazyLogging {
   def putItem(putReq: PutItemRequest): Try[Unit] = Try(dynamoDbClient.putItem(putReq)).map(_ => ())
 
   def updateLoggingTable(
-      subscriptionNumber: String,
+      subscriptionId: String,
       identityId: String,
       eventType: EventType,
       putItem: PutItemRequest => Try[Unit] = putItem,
@@ -32,7 +32,7 @@ class DynamoConnector(dynamoDbClient: DynamoDbClient) extends LazyLogging {
 
     val itemValues = Map(
       "identityId" -> AttributeValue.builder().s(identityId).build(),
-      "subscriptionId" -> AttributeValue.builder().s(subscriptionNumber).build(),
+      "subscriptionId" -> AttributeValue.builder().s(subscriptionId).build(),
       "timestamp" -> AttributeValue.builder().n(timestamp.toString).build(),
       "logMessage" -> AttributeValue.builder().s(logMessage).build(),
     )

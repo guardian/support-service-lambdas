@@ -15,13 +15,13 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
   val dynamoConnector = new DynamoConnector(mockDbClient)
 
   val identityId = "someIdentityId"
-  val subscriptionNumber = "A-S12345678"
+  val subscriptionId = "A-S12345678"
 
   val switchLogMessage = "Soft opt-ins processed for product-switch"
 
   val itemValues1 = Map(
     "identityId" -> AttributeValue.builder().s(identityId).build(),
-    "subscriptionId" -> AttributeValue.builder().s(subscriptionNumber).build(),
+    "subscriptionId" -> AttributeValue.builder().s(subscriptionId).build(),
     "timestamp" -> AttributeValue.builder().n("timestamp not tested").build(),
     "logMessage" -> AttributeValue.builder().s(switchLogMessage).build(),
   )
@@ -45,6 +45,6 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     }
 
     val dynamoConnector = new DynamoConnector(mockDbClient)
-    dynamoConnector.updateLoggingTable(subscriptionNumber, identityId, Switch, mockPutItem)
+    dynamoConnector.updateLoggingTable(subscriptionId, identityId, Switch, mockPutItem)
   }
 }
