@@ -267,7 +267,7 @@ Resources:
   SoftOptInsLoggingTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub ${App}-${Stage}-soft-opt-ins-logging
+      TableName: !Sub soft-opt-in-consent-setter-${Stage}-logging
       AttributeDefinitions:
         - AttributeName: timestamp
           AttributeType: N
