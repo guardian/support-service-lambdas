@@ -13,7 +13,12 @@ import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, Bill
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.productmove.zuora.*
-import com.gu.productmove.zuora.Fixtures.{invoiceWithMultipleInvoiceItems, invoiceWithTax, subscriptionsPreviewResponse}
+import com.gu.productmove.zuora.Fixtures.{
+  invoiceWithMultipleInvoiceItems,
+  invoiceWithTax,
+  subscriptionsPreviewResponse,
+  subscriptionsPreviewResponse2,
+}
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
@@ -27,6 +32,30 @@ import java.time.LocalDate
 //-----------------------------------------------------
 // Stubs for GetSubscription service
 //-----------------------------------------------------
+val ratePlanCharge1 = RatePlanCharge(
+  productRatePlanChargeId = "PRPC1",
+  name = "Contribution",
+  price = Some(5.000000000),
+  currency = "GBP",
+  number = "number",
+  effectiveStartDate = LocalDate.of(2017, 12, 15),
+  effectiveEndDate = LocalDate.of(2020, 11, 29),
+  chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
+  billingPeriod = Monthly,
+)
+
+val ratePlanCharge2 = RatePlanCharge(
+  productRatePlanChargeId = "PRPC1",
+  name = "Contribution",
+  price = Some(5.000000000),
+  currency = "GBP",
+  number = "number",
+  effectiveStartDate = LocalDate.of(2021, 2, 5),
+  effectiveEndDate = LocalDate.of(2021, 3, 5),
+  chargedThroughDate = Some(LocalDate.of(2021, 3, 5)),
+  billingPeriod = Monthly,
+)
+
 val getSubscriptionResponse = GetSubscriptionResponse(
   "A-S00339056",
   "zuoraAccountId",
@@ -37,19 +66,7 @@ val getSubscriptionResponse = GetSubscriptionResponse(
       productName = "P1",
       productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
       ratePlanName = "RP1",
-      ratePlanCharges = List(
-        RatePlanCharge(
-          productRatePlanChargeId = "PRPC1",
-          name = "Contribution",
-          price = Some(5.000000000),
-          currency = "GBP",
-          number = "number",
-          effectiveStartDate = LocalDate.of(2017, 12, 15),
-          effectiveEndDate = LocalDate.of(2020, 11, 29),
-          chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
-          billingPeriod = Monthly,
-        ),
-      ),
+      ratePlanCharges = List(ratePlanCharge1),
     ),
   ),
 )
@@ -132,6 +149,21 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
       ),
       "8ad09fc281de1ce70181de3b251736a4",
       "8ad0823f841cf4e601841e61f6d470bb",
+    ),
+  ),
+)
+
+val getSubscriptionResponse3 = GetSubscriptionResponse(
+  "A-S00339056",
+  "zuoraAccountId",
+  AccountNumber("accountNumber"),
+  ratePlans = List(
+    RatePlan(
+      id = "89ad8casd9c0asdcaj89sdc98as",
+      productName = "P1",
+      productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
+      ratePlanName = "RP1",
+      ratePlanCharges = List(ratePlanCharge2),
     ),
   ),
 )
@@ -386,6 +418,7 @@ val subscriptionUpdateResponse5 =
 val timeLocalDate = LocalDate.of(2022, 5, 10)
 val timeLocalDate2 = LocalDate.of(2023, 2, 6)
 val timeLocalDate3 = LocalDate.of(2022, 9, 29)
+val timeLocalDate4 = LocalDate.of(2021, 2, 5)
 
 // RecurringContributionToSupporterPlus
 val expectedRequestBody = SubscriptionUpdateRequest(
@@ -463,14 +496,45 @@ val expectedRequestBodyPreview = SubscriptionUpdateRequest(
   currentTermPeriodType = Some("Month"),
 )
 
+// RecurringContributionToSupporterPlus
+val expectedRequestBodyPreview2 = SubscriptionUpdateRequest(
+  add = List(
+    AddRatePlan(
+      contractEffectiveDate = timeLocalDate4,
+      productRatePlanId = "8ad09fc281de1ce70181de3b251736a4",
+      chargeOverrides = List(
+        ChargeOverrides(
+          price = Some(15.00),
+          productRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6",
+        ),
+      ),
+    ),
+  ),
+  remove = List(
+    RemoveRatePlan(
+      contractEffectiveDate = timeLocalDate4,
+      ratePlanId = "89ad8casd9c0asdcaj89sdc98as",
+    ),
+  ),
+  preview = Some(true),
+  targetDate = Some(LocalDate.of(2022, 3, 5)),
+  currentTerm = Some("24"),
+  currentTermPeriodType = Some("Month"),
+)
+
 val previewResponse = SubscriptionUpdatePreviewResponse(
   subscriptionsPreviewResponse,
+)
+
+val previewResponse2 = SubscriptionUpdatePreviewResponse(
+  subscriptionsPreviewResponse2,
 )
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
 //-----------------------------------------------------
 val subscriptionUpdatePreviewResult = PreviewResult(40, -10, 50, LocalDate.of(2023, 6, 10))
+val subscriptionUpdatePreviewResult2 = PreviewResult(15, 5, 20, LocalDate.of(2021, 3, 15))
 
 //-----------------------------------------------------
 // Stubs for GetSfSubscription service
