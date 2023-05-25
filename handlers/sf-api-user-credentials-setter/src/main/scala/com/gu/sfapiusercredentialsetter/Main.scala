@@ -53,6 +53,8 @@ object Main extends App with LazyLogging {
     (for {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
       sfauth <- (auth(config.salesforceConfig) match {
+        // Here I am converting an Option into an Either, the other option was to
+        // have auth return an Option.
         case None => Left(new RuntimeException("Missing config value"))
         case Some(str) => Right(str)
       })
