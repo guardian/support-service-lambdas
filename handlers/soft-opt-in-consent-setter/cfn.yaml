@@ -195,6 +195,12 @@ Resources:
         - AWSLambdaBasicExecutionRole
         - Statement:
             - Effect: Allow
+              Action:
+                - "dynamodb:PutItem"
+              Resource:
+                - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/soft-opt-in-consent-setter-${Stage}-logging
+        - Statement:
+            - Effect: Allow
               Action: s3:GetObject
               Resource:
                 - !Sub arn:aws:s3:::soft-opt-in-consent-setter/${Stage}/ConsentsByProductMapping.json
@@ -321,13 +327,38 @@ Resources:
       Threshold: 5
       TreatMissingData: notBreaching
 
-  failedRunAlarmIAP:
+  exceptionsAlarmIAP:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - LambdaFunctionIAP
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: !Sub soft-opt-in-consent-setter-IAP-${Stage} threw an exception
+      AlarmDescription: >
+        Five or more runs found an error and were unable to complete.
+        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedRunAlarm
+        for possible causes, impacts and fixes.
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunctionIAP
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 3600
+      Statistic: Sum
+      Threshold: 5
+      TreatMissingData: notBreaching
+
+  deadLetterBuildUpAlarmIAP:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
     Properties:
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub soft-opt-in-consent-setter-IAP-${Stage} failed to run
+      AlarmName: !Sub soft-opt-in-consent-setter-IAP-${Stage} failed to run and sent the message to the dead letter queue.
       AlarmDescription: >
         Five or more runs found an error and were unable to complete.
         See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedRunAlarm
