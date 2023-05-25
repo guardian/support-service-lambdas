@@ -52,7 +52,11 @@ object Main extends App with LazyLogging {
   def setApiUserPasswordInSfAndSyncToAwsSecret(secretsManagerClient: SecretsManagerClient): Unit = {
     (for {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
-      sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
+      sfauth <- (auth(config.salesforceConfig) match {
+        case None => Left(new RuntimeException("Missing config value"))
+        case Some(str) => Right(str)
+      })
+      sfAuthDetails <- decode[SfAuthDetails](sfauth)
       awsApiUsersInSf <- getAwsApiUsersInSf(sfAuthDetails)
       activations = awsApiUsersInSf.records.map { awsApiUser =>
         val newPassword = generatePassword()
@@ -225,20 +229,24 @@ object Main extends App with LazyLogging {
     }.toEither
   }
 
-  def auth(salesforceConfig: SalesforceConfig): String = {
-    logger.info("Authenticating with Salesforce...")
-    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
-      .postForm(
-        Seq(
-          "grant_type" -> "password",
-          "client_id" -> salesforceConfig.clientId,
-          "client_secret" -> salesforceConfig.clientSecret,
-          "username" -> salesforceConfig.userName,
-          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}",
-        ),
-      )
-      .asString
-      .body
+  def auth(salesforceConfig: SalesforceConfig): Option[String] = {
+    for {
+      secrets <- Secrets.getAwsCredentialsSetterSecrets
+    } yield {
+      logger.info("Authenticating with Salesforce...")
+      Http(s"${secrets.authUrl}/services/oauth2/token")
+        .postForm(
+          Seq(
+            "grant_type" -> "password",
+            "client_id" -> salesforceConfig.clientId,
+            "client_secret" -> salesforceConfig.clientSecret,
+            "username" -> salesforceConfig.userName,
+            "password" -> s"${salesforceConfig.password}${salesforceConfig.token}",
+          ),
+        )
+        .asString
+        .body
+    }
   }
 
   def randomStringFromCharList(length: Int, chars: Seq[Char]): String = {
