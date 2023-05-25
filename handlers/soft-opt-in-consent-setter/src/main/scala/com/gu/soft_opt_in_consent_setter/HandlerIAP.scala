@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.ParsingFailure
+import io.circe.{Decoder, DecodingFailure}
 import io.circe.generic.auto._
 import io.circe.parser.{decode => circeDecode}
 import io.circe.syntax._
@@ -21,6 +22,15 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   case object Acquisition extends EventType
   case object Cancellation extends EventType
   case object Switch extends EventType
+
+  object EventType {
+    implicit val eventTypeDecoder: Decoder[EventType] = Decoder.decodeString.emap {
+      case "Acquisition" => Right(Acquisition)
+      case "Cancellation" => Right(Cancellation)
+      case "Switch" => Right(Switch)
+      case unknown => Left(s"Invalid EventType: $unknown")
+    }
+  }
 
   case class MessageBody(
       subscriptionId: String,
