@@ -43,13 +43,9 @@ private class AwsS3Live(s3Client: S3Client) extends AwsS3:
       .mapError(e => InternalServerError(e.toString))
 
 trait AwsS3 {
-
   def getObject(bucket: String, key: String): ZIO[Any, ErrorResponse, String]
-
 }
 object AwsS3 {
-
   def getObject(bucket: String, key: String): ZIO[AwsS3, ErrorResponse, String] =
     ZIO.environmentWithZIO[AwsS3](_.get.getObject(bucket, key))
-
 }

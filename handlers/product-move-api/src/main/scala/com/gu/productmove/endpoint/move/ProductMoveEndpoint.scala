@@ -3,6 +3,7 @@ package com.gu.productmove.endpoint.move
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 
+import com.gu.productmove.SecretsLive
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes._
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
@@ -189,6 +190,7 @@ object ProductMoveEndpoint {
       GetAccountLive.layer,
       GuStageLive.layer,
       DynamoLive.layer,
+      SecretsLive.layer,
     )
 }
 
