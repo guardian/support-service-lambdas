@@ -14,12 +14,17 @@ import com.gu.productmove.endpoint.available.{
   Trial,
 }
 import com.gu.productmove.endpoint.move.{
-  ToRecurringContribution,
   ProductMoveEndpoint,
   ProductMoveEndpointTypes,
   RecurringContributionToSupporterPlus,
+  ToRecurringContribution,
 }
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, InternalServerError, OutputBody}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ExpectedInput,
+  InternalServerError,
+  OutputBody,
+  PreviewResult,
+}
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
 import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, SubscriptionCancelEndpointTypes}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
@@ -74,6 +79,7 @@ object HandlerSpec extends ZIOSpecDefault {
   def spec = {
     val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
     val time2 = OffsetDateTime.of(LocalDateTime.of(2023, 2, 6, 10, 2), ZoneOffset.ofHours(0)).toInstant
+    val time3 = OffsetDateTime.of(LocalDateTime.of(2021, 2, 5, 5, 2), ZoneOffset.ofHours(0)).toInstant
     val subscriptionName = SubscriptionName("A-S00339056")
 
     def getSubscriptionStubs(subscriptionResponse: GetSubscriptionResponse = getSubscriptionResponse) = {
@@ -158,6 +164,40 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(sqsRequests)(hasSameElements(List(emailMessageBodyNoPaymentOrRefund, salesforceRecordInput3))) &&
           assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
         }).provide(layers)
+      },
+      /*
+        Term renewal for many subs happens during the billing run on the renewal day which is scheduled for around 6am BST.
+        During this billing run, Zuora does not return the contribution invoice item, only supporter plus invoice items.
+        This tests this scenario.
+       */
+
+      test("productMove endpoint completes if subscription is being switched early in morning on renewal date") {
+        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
+        val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
+          (subscriptionName, expectedRequestBodyPreview2)
+        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> previewResponse2)
+
+        (for {
+          _ <- TestClock.setTime(time3)
+          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
+        } yield {
+          assert(output)(equalTo(subscriptionUpdatePreviewResult2)) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
+          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(sqsRequests)(equalTo(Nil)) &&
+          assert(dynamoRequests)(equalTo(Nil))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse3))),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("CODE")),
+        )
       },
       test(
         "(MembershipToRecurringContribution) productMove endpoint is successful",

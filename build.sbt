@@ -451,7 +451,7 @@ lazy val `sf-emails-to-s3-exporter` = lambdaProject(
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",
   "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
-  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3),
+  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3, upickle),
 )
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
@@ -541,6 +541,8 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
+    awsSecretsManager,
+    upickle,
   ),
   scala3Settings ++ Seq(
     excludeDependencies ++= Seq(
