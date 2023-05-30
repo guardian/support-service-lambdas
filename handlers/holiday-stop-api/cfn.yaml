@@ -8,7 +8,6 @@ Parameters:
         AllowedValues:
             - PROD
             - CODE
-            - DEV
         Default: CODE
 
 Conditions:
@@ -16,9 +15,6 @@ Conditions:
 
 Mappings:
     StageMap:
-        DEV:
-            ApiName: holiday-stop-api-DEV
-            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-dev/*"
         CODE:
             ApiName: holiday-stop-api-CODE
             FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code/*"
@@ -89,10 +85,8 @@ Resources:
                 S3Key: !Sub membership/${Stage}/holiday-stop-api/holiday-stop-api.jar
             Handler: com.gu.holiday_stops.Handler::apply
             Environment:
-                Variables:
-                  Stage: !Ref Stage
-                  InvoicingApiUrl: !Sub '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiUrl}}'
-                  InvoicingApiKey: !Sub '{{resolve:secretsmanager:${Stage}/InvoicingApi:SecretString:InvoicingApiKey}}'
+              Variables:
+                Stage: !Ref Stage
             Role:
                 Fn::GetAtt:
                 - HolidayStopApiRole

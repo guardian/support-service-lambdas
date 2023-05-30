@@ -3,6 +3,7 @@ package com.gu.productmove.endpoint.cancel
 import cats.data.NonEmptyList
 import com.gu.newproduct.api.productcatalog.ZuoraIds
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
+import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes._
 import com.gu.productmove.{
@@ -128,6 +129,7 @@ object SubscriptionCancelEndpoint {
         ZuoraSetCancellationReasonLive.layer,
         GetAccountLive.layer,
         SQSLive.layer,
+        SecretsLive.layer
       )
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res)

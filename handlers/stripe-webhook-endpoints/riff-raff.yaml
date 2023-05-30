@@ -1,6 +1,10 @@
-stacks: [membership]
-regions: [eu-west-1]
-
+stacks:
+- membership
+regions:
+- eu-west-1
+allowedStages:
+  - CODE
+  - PROD
 deployments:
   stripe-webhook-endpoints:
     type: aws-lambda

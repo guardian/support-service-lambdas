@@ -17,7 +17,7 @@ import org.scalatest.matchers.should.Matchers
 
 class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
 
-  import ZuoraDevContributions._
+  import ZuoraCodeContributions._
 
   def currentDate = () => LocalDate.of(2018, 2, 10)
   it should "create subscription in account" taggedAs EffectsTest in {
@@ -25,7 +25,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
     val request = CreateSubscription.ZuoraCreateSubRequest(
       ZuoraAccountId(
         "8ad095dd82f7aaa50182f96de24d3ddb",
-      ), // dev https://apisandbox.zuora.com/apps/CustomerAccount.do?method=view&id=8ad095dd82f7aaa50182f96de24d3ddb
+      ), // code https://apisandbox.zuora.com/apps/CustomerAccount.do?method=view&id=8ad095dd82f7aaa50182f96de24d3ddb
       currentDate().plusDays(2),
       validCaseIdToAvoidCausingSFErrors,
       AcquisitionSource("sourcesource"),
@@ -44,7 +44,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
       ),
     )
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
       res <- CreateSubscription(post, currentDate)(request).toDisjunction
@@ -56,7 +56,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
   }
 }
 
-object ZuoraDevContributions {
+object ZuoraCodeContributions {
 
   val monthlyContribution = PlanAndCharge(
     productRatePlanId = ProductRatePlanId("2c92c0f85a6b134e015a7fcd9f0c7855"),

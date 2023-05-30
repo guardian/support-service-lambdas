@@ -26,7 +26,7 @@ class SubscriptionsForAccountsEffectsTest extends AnyFlatSpec with Matchers {
     )
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))
       subsForAccounts = SubscriptionsForAccounts(zuoraQuerier) _
       subs <- subsForAccounts(testAccountIds).toDisjunction

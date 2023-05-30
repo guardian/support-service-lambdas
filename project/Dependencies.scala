@@ -4,7 +4,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.18.30"
+  val awsSdkVersion = "2.20.72"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.8.15"
   val http4sVersion = "0.21.34"
@@ -24,7 +24,7 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.2"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.1"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.2"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
@@ -38,6 +38,9 @@ object Dependencies {
   val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
   val playJson = "com.typesafe.play" %% "play-json" % "2.9.4"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.42.0"
+
+  // upickle here is a temporary redundancy of circe while we are migrating to it
+  val upickle = "com.lihaoyi" %% "upickle" % "3.1.0"
 
   // HTTP clients
   val sttp = "com.softwaremill.sttp.client3" %% "core" % sttpVersion
@@ -65,29 +68,19 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.17"
   val zio2Version = "2.0.13"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.3.0"
+  val tapirVersion = "1.4.0"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.2"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
-  val stripe = "com.stripe" % "stripe-java" % "22.19.0"
+  val stripe = "com.stripe" % "stripe-java" % "22.20.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.3" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.14" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.16" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.3.1" % Test
-
-  /*
-   * ===============================================================================================
-   * These are versions of transitive dependencies in which a vulnerability has been resolved.
-   * These are only here because there was no other resolution available.
-   *
-   * These dependencies should be removed as soon as the direct dependency they are consumed
-   * by has been updated.  We don't want to clog up the repo with references to unused dependencies.
-   */
-  val nettyCodec = "io.netty" % "netty-codec" % "4.1.75.Final"
-  val netty4168Codec = "io.netty" % "netty-codec" % "4.1.68.Final"
+  val nettyCodec = "io.netty" % "netty-codec" % "4.1.92.Final"
   val jacksonVersion = "2.13.2"
   val jacksonDatabindVersion = "2.13.2.2"
 

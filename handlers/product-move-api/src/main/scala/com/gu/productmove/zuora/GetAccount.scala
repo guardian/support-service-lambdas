@@ -123,10 +123,10 @@ object GetAccount {
       productRatePlanId: String, // TBC what field should we check in the rateplan to know it's a recurring contribution?
       /*
     {
-                    "productId": "2c92c0f84b786da2014b91d3629b4298",//DEV
+                    "productId": "2c92c0f84b786da2014b91d3629b4298", // CODE
                     "productName": "Digital Pack",
                     "productSku": "SKU-00000022",
-                    "productRatePlanId": "2c92c0f94bbffaaa014bc6a4212e205b",//DEV
+                    "productRatePlanId": "2c92c0f94bbffaaa014bc6a4212e205b", // CODE
                     "ratePlanName": "Digital Pack Annual"
                 }*/
   )

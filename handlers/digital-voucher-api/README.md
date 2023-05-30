@@ -209,6 +209,6 @@ aws --profile membership ssm put-parameter --overwrite --type SecureString --key
 
 For example:
 ```$bash
-aws --profile membership ssm put-parameter --overwrite --type String --name /DEV/membership-DEV-digital-voucher-api/digital-voucher-api-DEV/imovoBaseUrl --value  https://core-uat-api.azurewebsites.net
-aws --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /DEV/membership-DEV-digital-voucher-api/digital-voucher-api-DEV/imovoApiKey --value xxxxxx
+aws --profile membership ssm put-parameter --overwrite --type String --name /CODE/membership-CODE-digital-voucher-api/digital-voucher-api-CODE/imovoBaseUrl --value  https://core-uat-api.azurewebsites.net
+aws --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /CODE/membership-CODE-digital-voucher-api/digital-voucher-api-CODE/imovoApiKey --value xxxxxx
 ```

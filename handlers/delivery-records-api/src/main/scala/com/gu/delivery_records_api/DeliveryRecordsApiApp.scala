@@ -53,7 +53,7 @@ object DeliveryRecordsApiApp extends LazyLogging {
   }
 
   private lazy val stage: Stage =
-    Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("DEV"))
+    Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("CODE"))
 
   private val bucket = "gu-reader-revenue-private"
 }
