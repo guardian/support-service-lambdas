@@ -18,9 +18,21 @@ object GetActiveProductHoldings extends LazyLogging {
 
   def apply(bigQueryHelper: BigQueryHelper)(identityId: IdentityId): ApiGatewayOp[List[ProductHolding]] = {
 
-    val productsToIgnore = List("Friend")
-    val productsToIgnoreSql = productsToIgnore.map(toSqlString).mkString(",")
+    val query: String = productHoldingsQuery(identityId)
 
+    logger.debug(s"querying active product holdings: $query")
+
+    val result = bigQueryHelper.runQuery(query) match {
+      case Left(error) =>
+        Left(ApiGatewayResponse.internalServerError(error.toString))
+      case Right(results) =>
+        Right(getProductHoldingResults(results))
+    }
+
+    result.toApiGatewayOp
+  }
+
+  def productHoldingsQuery(identityId: IdentityId): String = {
     /*
      TODO: we have a few options for putting together the different data sources we require:
       1) write a large query here that interrogates multiple tables, UNION's the results and applies the
@@ -43,7 +55,7 @@ object GetActiveProductHoldings extends LazyLogging {
       s"""
          |  SELECT 
          |    acc.identity_id_c AS identity_id 
-         |    , p.name AS product
+         |    , 'Zuora' AS product
          |    -- statuses: Draft, Pending Acceptance, Cancelled, Expired, Active
          |    , CASE sub.status 
          |        WHEN 'Active' THEN true
@@ -56,10 +68,6 @@ object GetActiveProductHoldings extends LazyLogging {
          |  FROM `datatech-fivetran.zuora.account` acc
          |  INNER JOIN `datatech-fivetran.zuora.subscription` sub
          |  ON sub.account_id = acc.id
-         |  INNER JOIN `datatech-fivetran.zuora.rate_plan` rp
-         |  ON rp.subscription_id = sub.id
-         |  INNER JOIN `datatech-fivetran.zuora.product` p
-         |  ON p.id = rp.product_id
          |  WHERE identity_id_c = '${identityId.value}'
          |  AND acc.status != 'Canceled' 
          |  AND (acc.processing_advice_c IS NULL OR acc.processing_advice_c != 'DoNotProcess')
@@ -158,17 +166,7 @@ object GetActiveProductHoldings extends LazyLogging {
     )
 
     val query = subQueries.mkString("\nUNION ALL\n")
-
-    logger.debug(s"querying active product holdings: $query")
-
-    val result = bigQueryHelper.runQuery(query) match {
-      case Left(error) =>
-        Left(ApiGatewayResponse.internalServerError(error.toString))
-      case Right(results) =>
-        Right(getProductHoldingResults(results))
-    }
-
-    result.toApiGatewayOp
+    query
   }
 
   def getProductHoldingResults(queryResult: TableResult): List[ProductHolding] = {
@@ -183,10 +181,8 @@ object GetActiveProductHoldings extends LazyLogging {
   def toProductHolding(row: FieldValueList): ProductHolding = {
     val holding = ProductHolding(
       row.get("identity_id").getStringValue,
-      row.get("product").getStringValue,
-      row.get("status").getStringValue,
+      row.get("ongoing_relationship").getBooleanValue,
       getDateValue(row.get("effective_lapsed_date")),
-      getDateValue(row.get("effective_deletion_date")),
     )
     logger.debug(holding.toString)
     holding
@@ -195,6 +191,4 @@ object GetActiveProductHoldings extends LazyLogging {
   def getDateValue(fieldValue: FieldValue): LocalDate = {
     LocalDate.parse(fieldValue.getStringValue)
   }
-
-  def toSqlString(value: String) = s"'${value.replace("'", "''")}'"
 }

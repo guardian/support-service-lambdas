@@ -9,8 +9,9 @@ object RelationshipForHoldings {
     holdings match {
       case Nil =>
         IdentityRetentionApiResponses.canBeDeleted
-      case subs if (subs.exists(_.status == "Active")) =>
-        IdentityRetentionApiResponses.ongoingRelationship
+      case subs if (subs.exists(_.ongoingRelationship)) =>
+        val serviceEndDate = holdings.map(_.effectiveLapsedDate).max
+        IdentityRetentionApiResponses.ongoingRelationship(serviceEndDate)
       case _ =>
         // User only has cancelled subs
         val serviceEndDate = holdings.map(_.effectiveLapsedDate).max

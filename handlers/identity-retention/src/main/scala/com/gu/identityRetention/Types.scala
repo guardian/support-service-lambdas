@@ -8,10 +8,8 @@ object Types {
   case class AccountId(value: String)
   case class ProductHolding(
       identityId: String,
-      product: String,
-      status: String,
+      ongoingRelationship: Boolean,
       effectiveLapsedDate: LocalDate,
-      effectiveDeletionDate: LocalDate,
   )
 
 }
