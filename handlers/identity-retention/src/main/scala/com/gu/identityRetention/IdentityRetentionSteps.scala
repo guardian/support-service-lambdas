@@ -7,8 +7,6 @@ import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp
 import ApiGatewayOp._
 import com.gu.google.BigQueryHelper
-import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
-import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
 import com.gu.util.reader.Types._
 
@@ -20,18 +18,6 @@ object IdentityRetentionSteps extends Logging {
   object UrlParams {
     implicit val reads = Json.reads[UrlParams]
   }
-
-  def apply(zuoraQuerier: ZuoraQuerier): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
-    (for {
-      queryStringParameters <- apiGatewayRequest.queryParamsAsCaseClass[UrlParams]()
-      identityId <- extractIdentityId(queryStringParameters)
-      possibleAccounts <- GetActiveZuoraAccounts(zuoraQuerier)(identityId)
-      accounts <- MaybeNonEmptyList(possibleAccounts).toApiGatewayContinueProcessing(
-        ApiGatewayResponse.notFound("no active zuora accounts"),
-      )
-      subs <- SubscriptionsForAccounts(zuoraQuerier)(accounts)
-    } yield RelationshipForSubscriptions(subs)).apiResponse
-  })
 
   def apply(bigQueryHelper: BigQueryHelper): Operation =
     Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
