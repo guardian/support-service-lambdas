@@ -30,7 +30,11 @@ object IdentityRetentionResponseModels {
         today: LocalDate = LocalDate.now(),
     ): SuccessResponse = {
       val effectiveDeletionDate = relationshipEndDate.plusYears(7)
-      val responseValidUntil = List(effectiveDeletionDate, today.plusMonths(3)).min
+      val responseValidUntil =
+        if (effectiveDeletionDate isBefore today)
+          today.plusMonths(3)
+        else
+          List(effectiveDeletionDate, today.plusMonths(3)).min
       SuccessResponse(ongoingRelationship, relationshipEndDate, effectiveDeletionDate, responseValidUntil)
     }
   }
@@ -66,15 +70,15 @@ object IdentityRetentionApiResponses {
   }
 
   def ongoingRelationship(
-      effectiveLapsedDate: LocalDate,
+      latestLapsedDate: LocalDate,
       today: LocalDate = LocalDate.now(),
-  ) = apiResponse(SuccessResponse(true, effectiveLapsedDate, today), "200")
+  ) = apiResponse(SuccessResponse(true, latestLapsedDate, today), "200")
 
-  def cancelledRelationship(
-      latestCancellationDate: LocalDate,
+  def lapsedRelationship(
+      latestLapsedDate: LocalDate,
       today: LocalDate = LocalDate.now(),
   ) =
-    apiResponse(SuccessResponse(false, latestCancellationDate, today), "200")
+    apiResponse(SuccessResponse(false, latestLapsedDate, today), "200")
 
   val canBeDeleted = apiResponse(NotFoundResponse(), "404")
 

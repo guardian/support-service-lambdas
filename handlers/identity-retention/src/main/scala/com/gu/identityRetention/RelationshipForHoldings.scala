@@ -17,7 +17,7 @@ object RelationshipForHoldings {
       case _ =>
         // User only has cancelled subs
         val serviceEndDate = holdings.map(_.effectiveLapsedDate).max
-        IdentityRetentionApiResponses.cancelledRelationship(serviceEndDate, today)
+        IdentityRetentionApiResponses.lapsedRelationship(serviceEndDate, today)
     }
   }
 

@@ -6,15 +6,11 @@ import com.gu.identityRetention.Types.{IdentityId, ProductHolding}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
 import com.typesafe.scalalogging.LazyLogging
-import play.api.libs.json.Json
 
 import scala.jdk.CollectionConverters._
 import java.time.LocalDate
 
 object GetActiveProductHoldings extends LazyLogging {
-
-  case class IdentityQueryResponse(Id: String) extends Product
-  implicit val reads = Json.reads[IdentityQueryResponse]
 
   def apply(bigQueryHelper: BigQueryHelper)(identityId: IdentityId): ApiGatewayOp[List[ProductHolding]] = {
 

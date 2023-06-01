@@ -2,7 +2,6 @@ package com.gu.identityRetention
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.Assertion
@@ -12,35 +11,34 @@ import org.scalatest.matchers.should.Matchers
 
 class IdentityRetentionHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
-//  101341673
-//  16600072
-//  102445045
-//  12250654
-//  106079085
-//  101470367
-//  15432550
-//  108066819
-//  105745964
-//  16509342
+  /** NOTE that these tests are liable to break because they are designed to run against real data in the CODE datalake
+    *
+    * Because time passes and identities come and go, you may need to look for new identity id's that fulfil the test
+    * cases.
+    */
 
   it should "return 404 if the identity id is not linked to any Zuora billing accounts" taggedAs EffectsTest in {
+    // use an identity id that doesn't exist
     val actualResponse = runWithMock(dummyRequest("12345"))
     actualResponse jsonMatches (safeToDelete)
   }
 
   it should "return an ongoing relationship response (200) if identity id is linked to an active sub" taggedAs EffectsTest in {
-    val actualResponse = runWithMock(dummyRequest("101341673"))
+    // use an identity id that has an active subscription
+    val actualResponse = runWithMock(dummyRequest("105946507"))
     actualResponse jsonMatches (ongoingRelationship)
   }
 
-  it should "return 200 if the identity id has a cancelled sub" taggedAs EffectsTest in {
-    val actualResponse = runWithMock(dummyRequest("105214218"))
-    actualResponse jsonMatches (cancelledRelationship)
+  it should "return 200 if the identity id has only cancelled subs" taggedAs EffectsTest in {
+    // use an identity id that has only cancelled/expired subscriptions, but still within 7 years retention
+    val actualResponse = runWithMock(dummyRequest("100000321"))
+    actualResponse jsonMatches (cancelledRelationship_RETAIN)
   }
 
-  it should "return 404 if the identity id is only linked to Zuora accounts which are cancelled or tagged with DoNotProcess" taggedAs EffectsTest in {
-    val actualResponse = runWithMock(dummyRequest("78973514"))
-    actualResponse jsonMatches (safeToDelete)
+  it should "return 200 if the identity id is only linked to Zuora accounts which are cancelled and outside retention period" taggedAs EffectsTest in {
+    // use an identity id that has only very old cancelled/expired subscriptions, all of which are beyond 7 years retention
+    val actualResponse = runWithMock(dummyRequest("100286679"))
+    actualResponse jsonMatches (cancelledRelationship_DELETE)
   }
 
   implicit class JsonMatcher(private val actual: String) {
@@ -54,10 +52,8 @@ class IdentityRetentionHandlerEffectsTest extends AnyFlatSpec with Matchers {
   def runWithMock(mockRequest: String): String = {
     val stream = new ByteArrayInputStream(mockRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val output = new ByteArrayOutputStream()
+    // this will run against bigquery with your local application default credentials
     Handler.runForLegacyTestsSeeTestingMd(
-      RawEffects.response,
-      RawEffects.stage,
-      GetFromS3.fetchString,
       LambdaIO(stream, output, null),
     )
     new String(output.toByteArray, "UTF-8")
@@ -123,15 +119,23 @@ class IdentityRetentionHandlerEffectsTest extends AnyFlatSpec with Matchers {
       |{
       |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"ongoingRelationship\" : true\n}"
+      |"body":"{\n  \"ongoingRelationship\" : true,\n  \"relationshipEndDate\" : \"2023-02-13\",\n  \"effectiveDeletionDate\" : \"2029-07-30\",\n  \"responseValidUntil\" : \"2023-09-01\"\n}"
       |}""".stripMargin
 
-  val cancelledRelationship =
+  val cancelledRelationship_RETAIN =
     """
       |{
       |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2022-11-23\"\n}"
+      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2022-11-23\",\n  \"effectiveDeletionDate\" : \"2030-02-13\",\n  \"responseValidUntil\" : \"2023-09-01\"\n}"
+      |}""".stripMargin
+
+  val cancelledRelationship_DELETE =
+    """
+      |{
+      |"statusCode":"200",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2012-10-27\",\n  \"effectiveDeletionDate\" : \"2019-10-27\",\n  \"responseValidUntil\" : \"2023-09-01\"\n}"
       |}""".stripMargin
 
   val safeToDelete =
