@@ -29,12 +29,13 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
       invoiceId: String,
       amount: BigDecimal,
       invoiceItemId: String,
+      Type: String,
   ): IO[ErrorResponse, InvoiceItemAdjustmentResponse] =
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
       response <- zuoraGet.post[PostBody, InvoiceItemAdjustmentResponse](
         uri"object/invoice-item-adjustment",
-        PostBody(today, amount, invoiceId, invoiceItemId),
+        PostBody(today, amount, invoiceId, invoiceItemId, Type),
         ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckCapitalised,
       )
     } yield response
@@ -44,6 +45,7 @@ trait InvoiceItemAdjustment:
       invoiceId: String,
       amount: BigDecimal,
       invoiceItemId: String,
+      Type: String,
   ): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
 
 object InvoiceItemAdjustment {
@@ -53,8 +55,8 @@ object InvoiceItemAdjustment {
       Amount: BigDecimal,
       InvoiceId: String,
       SourceId: String, // The invoice item id
+      Type: String,
       SourceType: String = "InvoiceDetail",
-      Type: String = "Charge",
       Comment: String = "Created by the product-move-api refund process to balance a cancelled invoice",
   )
 
@@ -67,6 +69,7 @@ object InvoiceItemAdjustment {
       invoiceId: String,
       amount: BigDecimal,
       invoiceItemId: String,
+      Type: String,
   ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResponse] =
-    ZIO.serviceWithZIO[InvoiceItemAdjustment](_.update(invoiceId, amount, invoiceItemId))
+    ZIO.serviceWithZIO[InvoiceItemAdjustment](_.update(invoiceId, amount, invoiceItemId, Type))
 }

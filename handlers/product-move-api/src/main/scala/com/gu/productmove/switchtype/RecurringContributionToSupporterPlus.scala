@@ -33,10 +33,13 @@ import com.gu.productmove.zuora.{
   GetAccountLive,
   GetSubscription,
   GetSubscriptionLive,
+  InvoiceItemAdjustment,
   RemoveRatePlan,
   Subscribe,
   SubscribeLive,
   SubscriptionUpdate,
+  GetInvoiceItems,
+  GetInvoiceItemsLive,
   SubscriptionUpdateInvoice,
   SubscriptionUpdateInvoiceItem,
   SubscriptionUpdateLive,
@@ -127,7 +130,7 @@ object RecurringContributionToSupporterPlus {
             subscriptionName,
             postData.price,
             BigDecimal(ratePlanCharge.price.get),
-            ratePlanCharge.billingPeriod,
+            ratePlanCharge,
             currency,
             currentRatePlan,
             subscription,
@@ -283,114 +286,150 @@ object RecurringContributionToSupporterPlus {
       subscriptionName: SubscriptionName,
       price: BigDecimal,
       previousAmount: BigDecimal,
-      billingPeriod: BillingPeriod,
+      ratePlanCharge: RatePlanCharge,
       currency: Currency,
       currentRatePlan: GetSubscription.RatePlan,
       subscription: GetSubscription.GetSubscriptionResponse,
       csrUserId: Option[String],
       caseId: Option[String],
-  ): ZIO[GetAccount with SubscriptionUpdate with SQS with Stage with Dynamo, ErrorResponse, OutputBody] = for {
-    _ <- ZIO.log(
-      s"Performing product move update with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
-    )
-    stage <- ZIO.service[Stage]
-    accountFuture <- GetAccount.get(subscription.accountNumber).fork
+  ): ZIO[
+    GetAccount with SubscriptionUpdate with GetInvoiceItems with SQS with Stage with Dynamo,
+    ErrorResponse,
+    OutputBody,
+  ] = {
+    import ratePlanCharge.billingPeriod
 
-    updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
-      case (addRatePlan, removeRatePlan) =>
-        SubscriptionUpdateRequest(
-          add = addRatePlan,
-          remove = removeRatePlan,
-          collect = Some(true),
-          runBilling = Some(true),
-          preview = Some(false),
-        )
-    }
+    for {
+      _ <- ZIO.log(
+        s"Performing product move update with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
+      )
+      stage <- ZIO.service[Stage]
+      accountFuture <- GetAccount.get(subscription.accountNumber).fork
 
-    given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
+      previewResponse <- doPreview(
+        subscriptionName,
+        price,
+        billingPeriod,
+        ratePlanCharge,
+        currency,
+        currentRatePlan.id,
+      )
+      amountPayableToday = previewResponse.asInstanceOf[PreviewResult].amountPayableToday
 
-    updateResponse <- SubscriptionUpdate
-      .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
+      given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 
-    account <- accountFuture.join
+      updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
+        case (addRatePlan, removeRatePlan) =>
+          SubscriptionUpdateRequest(
+            add = addRatePlan,
+            remove = removeRatePlan,
+            collect =
+              if (amountPayableToday < 0.50 && amountPayableToday > 0) Some(false)
+              else Some(true),
+            runBilling = Some(true),
+            preview = Some(false),
+          )
+      }
 
-    identityId <- ZIO
-      .fromOption(account.basicInfo.IdentityId__c)
-      .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
+      updateResponse <- SubscriptionUpdate
+        .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
 
-    todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
-    billingPeriodValue <- billingPeriod.value
+      supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
 
-    paidAmount = updateResponse.paidAmount.getOrElse(BigDecimal(0))
+      _ <-
+        if (amountPayableToday < 0.50 && amountPayableToday > 0) {
+          for {
+            invoiceItems <- GetInvoiceItems.get(updateResponse.invoiceId)
+            invoiceItem <- ZIO
+              .fromOption(
+                invoiceItems.find(_.productRatePlanChargeId == supporterPlusRatePlanIds.subscriptionRatePlanChargeId),
+              )
+              .orElseFail(
+                InternalServerError(s"Could not find invoice item for rateplanchargeid ${subscriptionName.value}"),
+              )
+            _ <- InvoiceItemAdjustment.update(updateResponse.invoiceId, amountPayableToday, invoiceItem.id, "Credit")
+          } yield ()
+        } else ZIO.succeed(())
 
-    emailFuture <- SQS
-      .sendEmail(
-        message = EmailMessage(
-          EmailPayload(
-            Address = Some(account.billToContact.workEmail),
-            ContactAttributes = EmailPayloadContactAttributes(
-              SubscriberAttributes = EmailPayloadProductSwitchAttributes(
-                first_name = account.billToContact.firstName,
-                last_name = account.billToContact.lastName,
-                currency = account.basicInfo.currency.symbol,
-                price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
-                payment_frequency = billingPeriodValue + "ly",
-                subscription_id = subscriptionName.value,
+      account <- accountFuture.join
+
+      identityId <- ZIO
+        .fromOption(account.basicInfo.IdentityId__c)
+        .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
+
+      todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
+      billingPeriodValue <- billingPeriod.value
+
+      paidAmount = updateResponse.paidAmount.getOrElse(BigDecimal(0))
+
+      emailFuture <- SQS
+        .sendEmail(
+          message = EmailMessage(
+            EmailPayload(
+              Address = Some(account.billToContact.workEmail),
+              ContactAttributes = EmailPayloadContactAttributes(
+                SubscriberAttributes = EmailPayloadProductSwitchAttributes(
+                  first_name = account.billToContact.firstName,
+                  last_name = account.billToContact.lastName,
+                  currency = account.basicInfo.currency.symbol,
+                  price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                  first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                  date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
+                  payment_frequency = billingPeriodValue + "ly",
+                  subscription_id = subscriptionName.value,
+                ),
               ),
             ),
+            "SV_RCtoSP_Switch",
+            account.basicInfo.sfContactId__c,
+            Some(identityId),
           ),
-          "SV_RCtoSP_Switch",
-          account.basicInfo.sfContactId__c,
-          Some(identityId),
-        ),
-      )
-      .fork
+        )
+        .fork
 
-    salesforceTrackingFuture <- SQS
-      .queueSalesforceTracking(
-        SalesforceRecordInput(
-          subscriptionName.value,
-          previousAmount,
-          price,
-          currentRatePlan.productName,
-          currentRatePlan.ratePlanName,
-          "Supporter Plus",
-          todaysDate,
-          todaysDate,
-          paidAmount,
-          csrUserId,
-          caseId,
-        ),
-      )
-      .fork
+      salesforceTrackingFuture <- SQS
+        .queueSalesforceTracking(
+          SalesforceRecordInput(
+            subscriptionName.value,
+            previousAmount,
+            price,
+            currentRatePlan.productName,
+            currentRatePlan.ratePlanName,
+            "Supporter Plus",
+            todaysDate,
+            todaysDate,
+            paidAmount,
+            csrUserId,
+            caseId,
+          ),
+        )
+        .fork
 
-    supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
-    amendSupporterProductDynamoTableFuture <- Dynamo
-      .writeItem(
-        SupporterRatePlanItem(
-          subscriptionName.value,
-          identityId = identityId,
-          gifteeIdentityId = None,
-          productRatePlanId = supporterPlusRatePlanIds.ratePlanId,
-          productRatePlanName = "product-move-api added Supporter Plus Monthly",
-          termEndDate = todaysDate.plusDays(7),
-          contractEffectiveDate = todaysDate,
-          contributionAmount = None,
-        ),
-      )
-      .fork
+      amendSupporterProductDynamoTableFuture <- Dynamo
+        .writeItem(
+          SupporterRatePlanItem(
+            subscriptionName.value,
+            identityId = identityId,
+            gifteeIdentityId = None,
+            productRatePlanId = supporterPlusRatePlanIds.ratePlanId,
+            productRatePlanName = "product-move-api added Supporter Plus Monthly",
+            termEndDate = todaysDate.plusDays(7),
+            contractEffectiveDate = todaysDate,
+            contributionAmount = None,
+          ),
+        )
+        .fork
 
-    requests = emailFuture
-      .zip(salesforceTrackingFuture)
-      .zip(amendSupporterProductDynamoTableFuture)
+      requests = emailFuture
+        .zip(salesforceTrackingFuture)
+        .zip(amendSupporterProductDynamoTableFuture)
 
-    _ <- requests.join
+      _ <- requests.join
 
-  } yield Success(
-    s"Product move completed successfully with subscription number ${subscriptionName.value} and switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
-  )
+    } yield Success(
+      s"Product move completed successfully with subscription number ${subscriptionName.value} and switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
+    )
+  }
 }
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
 given JsonDecoder[SubscriptionUpdateInvoiceItem] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoiceItem]
