@@ -31,6 +31,7 @@ import com.gu.productmove.zuora.{
   ChargeOverrides,
   GetAccount,
   GetAccountLive,
+  GetInvoiceItems,
   GetSubscription,
   GetSubscriptionLive,
   InvoiceItemAdjustment,
@@ -38,8 +39,6 @@ import com.gu.productmove.zuora.{
   Subscribe,
   SubscribeLive,
   SubscriptionUpdate,
-  GetInvoiceItems,
-  GetInvoiceItemsLive,
   SubscriptionUpdateInvoice,
   SubscriptionUpdateInvoiceItem,
   SubscriptionUpdateLive,
@@ -91,7 +90,14 @@ object RecurringContributionToSupporterPlus {
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
   ): ZIO[
-    GetSubscription with SubscriptionUpdate with GetAccount with SQS with Dynamo with Stage,
+    GetSubscription
+      with SubscriptionUpdate
+      with GetInvoiceItems
+      with InvoiceItemAdjustment
+      with GetAccount
+      with SQS
+      with Dynamo
+      with Stage,
     ErrorResponse,
     OutputBody,
   ] = {
@@ -293,7 +299,7 @@ object RecurringContributionToSupporterPlus {
       csrUserId: Option[String],
       caseId: Option[String],
   ): ZIO[
-    GetAccount with SubscriptionUpdate with GetInvoiceItems with SQS with Stage with Dynamo,
+    GetAccount with SubscriptionUpdate with GetInvoiceItems with InvoiceItemAdjustment with SQS with Stage with Dynamo,
     ErrorResponse,
     OutputBody,
   ] = {
@@ -339,7 +345,8 @@ object RecurringContributionToSupporterPlus {
       _ <-
         if (amountPayableToday < 0.50 && amountPayableToday > 0) {
           for {
-            invoiceItems <- GetInvoiceItems.get(updateResponse.invoiceId)
+            invoiceResponse <- GetInvoiceItems.get(updateResponse.invoiceId.get)
+            invoiceItems = invoiceResponse.invoiceItems
             invoiceItem <- ZIO
               .fromOption(
                 invoiceItems.find(_.productRatePlanChargeId == supporterPlusRatePlanIds.subscriptionRatePlanChargeId),
@@ -347,7 +354,12 @@ object RecurringContributionToSupporterPlus {
               .orElseFail(
                 InternalServerError(s"Could not find invoice item for rateplanchargeid ${subscriptionName.value}"),
               )
-            _ <- InvoiceItemAdjustment.update(updateResponse.invoiceId, amountPayableToday, invoiceItem.id, "Credit")
+            _ <- InvoiceItemAdjustment.update(
+              updateResponse.invoiceId.get,
+              amountPayableToday,
+              invoiceItem.id,
+              "Credit",
+            )
           } yield ()
         } else ZIO.succeed(())
 

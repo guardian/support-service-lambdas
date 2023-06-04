@@ -19,6 +19,7 @@ import com.gu.productmove.zuora.Fixtures.{
   subscriptionsPreviewResponse,
   subscriptionsPreviewResponse2,
 }
+import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
@@ -573,4 +574,16 @@ val createRecordRequest2 = CreateRecordRequest(
   CSR__c = Some("a_csr_id"),
   Case__c = Some("a_case_id"),
   Source__c = "CSR",
+)
+
+//-----------------------------------------------------
+// Stubs for GetInvoiceItems service
+//-----------------------------------------------------
+val getInvoiceItemsResponse = GetInvoiceItemsResponse(
+  List(
+    InvoiceItem(
+      "invoice_item_id",
+      "product_rate_plan_id",
+    ),
+  ),
 )

@@ -27,13 +27,14 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
             invoiceId = "8ad09b2186bfd8100186c73164d82886",
             amount = 11.43,
             invoiceItemId = "8ad09b2186bfd8100186c73164e92887",
+            "Charge",
           )
           .provide(
             SttpClientLive.layer,
             ZuoraClientLive.layer,
             ZuoraGetLive.layer,
             InvoiceItemAdjustmentLive.layer,
-            SecretsLive.layer
+            SecretsLive.layer,
           )
       } yield assert(true)(equalTo(true))
     } @@ TestAspect.ignore)

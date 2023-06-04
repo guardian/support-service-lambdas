@@ -29,13 +29,13 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
       invoiceId: String,
       amount: BigDecimal,
       invoiceItemId: String,
-      Type: String,
+      adjustmentType: String,
   ): IO[ErrorResponse, InvoiceItemAdjustmentResponse] =
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
       response <- zuoraGet.post[PostBody, InvoiceItemAdjustmentResponse](
         uri"object/invoice-item-adjustment",
-        PostBody(today, amount, invoiceId, invoiceItemId, Type),
+        PostBody(today, amount, invoiceId, invoiceItemId, adjustmentType),
         ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckCapitalised,
       )
     } yield response
@@ -45,7 +45,7 @@ trait InvoiceItemAdjustment:
       invoiceId: String,
       amount: BigDecimal,
       invoiceItemId: String,
-      Type: String,
+      adjustmentType: String,
   ): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
 
 object InvoiceItemAdjustment {
@@ -69,7 +69,7 @@ object InvoiceItemAdjustment {
       invoiceId: String,
       amount: BigDecimal,
       invoiceItemId: String,
-      Type: String,
+      adjustmentType: String,
   ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResponse] =
-    ZIO.serviceWithZIO[InvoiceItemAdjustment](_.update(invoiceId, amount, invoiceItemId, Type))
+    ZIO.serviceWithZIO[InvoiceItemAdjustment](_.update(invoiceId, amount, invoiceItemId, adjustmentType))
 }

@@ -4,7 +4,7 @@ import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
-import com.gu.productmove.zuora.GetInvoice.{GetInvoiceItemsResponse}
+import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse}
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck.None
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.capabilities.zio.ZioStreams
@@ -34,10 +34,12 @@ private class GetInvoiceItemsLive(zuoraGet: ZuoraGet) extends GetInvoiceItems:
 trait GetInvoiceItems:
   def get(invoiceId: String): IO[ErrorResponse, GetInvoiceItemsResponse]
 
-object GetInvoice {
+object GetInvoiceItems {
 
-  case class GetInvoiceItemsResponse(id: String, productRatePlanChargeId: String)
+  case class InvoiceItem(id: String, productRatePlanChargeId: String)
+  case class GetInvoiceItemsResponse(invoiceItems: List[InvoiceItem])
 
+  given JsonDecoder[InvoiceItem] = DeriveJsonDecoder.gen[InvoiceItem]
   given JsonDecoder[GetInvoiceItemsResponse] = DeriveJsonDecoder.gen[GetInvoiceItemsResponse]
 
   def get(invoiceId: String): ZIO[GetInvoiceItems, ErrorResponse, GetInvoiceItemsResponse] =

@@ -48,12 +48,15 @@ import com.gu.productmove.zuora.{
   DefaultPaymentMethod,
   GetAccount,
   GetCatalogue,
+  GetInvoiceItems,
   GetSubscription,
   MockCatalogue,
   MockDynamo,
   MockGetAccount,
+  MockGetInvoiceItems,
   MockGetSubscription,
   MockGetSubscriptionToCancel,
+  MockInvoiceItemAdjustment,
   MockSQS,
   MockSubscribe,
   MockSubscriptionUpdate,
@@ -145,6 +148,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockSQS(sqsStubs)) ++
           ZLayer.succeed(new MockDynamo(dynamoStubs)) ++
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
+          ZLayer.succeed(new MockInvoiceItemAdjustment()) ++
+          ZLayer.succeed(new MockGetInvoiceItems()) ++
           ZLayer.succeed(Stage.valueOf("PROD"))
 
         (for {
@@ -196,6 +201,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment()),
+          ZLayer.succeed(new MockGetInvoiceItems()),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       },
@@ -259,6 +266,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs2, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment()),
+          ZLayer.succeed(new MockGetInvoiceItems()),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
@@ -286,6 +295,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment()),
+          ZLayer.succeed(new MockGetInvoiceItems()),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
@@ -316,6 +327,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment()),
+          ZLayer.succeed(new MockGetInvoiceItems()),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       },

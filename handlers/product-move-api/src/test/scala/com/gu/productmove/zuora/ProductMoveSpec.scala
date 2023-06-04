@@ -30,6 +30,8 @@ object ProductMoveSpec extends ZIOSpecDefault {
             GetAccountLive.layer,
             GuStageLive.layer,
             DynamoLive.layer,
+            GetInvoiceItemsLive.layer,
+            InvoiceItemAdjustmentLive.layer,
             SecretsLive.layer,
           )
       } yield {
