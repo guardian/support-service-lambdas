@@ -1,17 +1,15 @@
 package com.gu.productmove
 
 import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
-import com.gu.productmove.*
+import com.gu.productmove._
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.available.{
-  AvailableProductMovesEndpoint,
-  Billing,
-  Currency,
-  MoveToProduct,
-  Offer,
-  TimePeriod,
-  TimeUnit,
-  Trial,
+import com.gu.productmove.endpoint.available._
+import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, SubscriptionCancelEndpointTypes}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ExpectedInput,
+  InternalServerError,
+  OutputBody,
+  PreviewResult,
 }
 import com.gu.productmove.endpoint.move.{
   ProductMoveEndpoint,
@@ -19,35 +17,20 @@ import com.gu.productmove.endpoint.move.{
   RecurringContributionToSupporterPlus,
   ToRecurringContribution,
 }
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
-  ExpectedInput,
-  InternalServerError,
-  OutputBody,
-  PreviewResult,
-}
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, SubscriptionCancelEndpointTypes}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.mocks.MockInvoicingApiRefund
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
-import com.gu.productmove.zuora.GetAccount.{
-  AccountSubscription,
-  BasicInfo,
-  BillToContact,
-  GetAccountResponse,
-  PaymentMethodResponse,
-  ZuoraSubscription,
-}
 import com.gu.productmove.zuora._
+import com.gu.productmove.zuora.GetAccount._
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResponse
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.supporterdata.model.SupporterRatePlanItem
-import zio.*
-import zio.test.*
-import zio.test.Assertion.*
+import zio._
+import zio.test._
+import zio.test.Assertion._
 
 import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
 import scala.language.postfixOps
@@ -108,6 +91,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
