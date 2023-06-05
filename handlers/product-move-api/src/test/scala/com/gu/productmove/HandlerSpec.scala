@@ -99,40 +99,6 @@ object HandlerSpec extends ZIOSpecDefault {
     val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
 
     suite("HandlerSpec")(
-      /*
-        Term renewal for many subs happens during the billing run on the renewal day which is scheduled for around 6am BST.
-        During this billing run, Zuora does not return the contribution invoice item, only supporter plus invoice items.
-        This tests this scenario.
-       */
-
-      test("productMove endpoint completes if subscription is being switched early in morning on renewal date") {
-        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
-        val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
-          (subscriptionName, expectedRequestBodyPreview2)
-        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> previewResponse2)
-
-        (for {
-          _ <- TestClock.setTime(time3)
-          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          sqsRequests <- MockSQS.requests
-          dynamoRequests <- MockDynamo.requests
-        } yield {
-          assert(output)(equalTo(subscriptionUpdatePreviewResult2)) &&
-          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-          assert(sqsRequests)(equalTo(Nil)) &&
-          assert(dynamoRequests)(equalTo(Nil))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse3))),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(Stage.valueOf("CODE")),
-        )
-      },
       test("productMove endpoint is successful for monthly sub (upsell)") {
         val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
@@ -198,6 +164,40 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(sqsRequests)(hasSameElements(List(emailMessageBodyNoPaymentOrRefund, salesforceRecordInput3))) &&
           assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
         }).provide(layers)
+      },
+      /*
+        Term renewal for many subs happens during the billing run on the renewal day which is scheduled for around 6am BST.
+        During this billing run, Zuora does not return the contribution invoice item, only supporter plus invoice items.
+        This tests this scenario.
+       */
+
+      test("productMove endpoint completes if subscription is being switched early in morning on renewal date") {
+        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
+        val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
+          (subscriptionName, expectedRequestBodyPreview2)
+        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> previewResponse2)
+
+        (for {
+          _ <- TestClock.setTime(time3)
+          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
+        } yield {
+          assert(output)(equalTo(subscriptionUpdatePreviewResult2)) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
+          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(sqsRequests)(equalTo(Nil)) &&
+          assert(dynamoRequests)(equalTo(Nil))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse3))),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(Stage.valueOf("CODE")),
+        )
       },
       test(
         "(MembershipToRecurringContribution) productMove endpoint is successful",
