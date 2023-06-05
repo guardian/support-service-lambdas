@@ -2,7 +2,14 @@ package com.gu.productmove.zuora
 
 import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
+import com.gu.productmove.{
+  AwsCredentialsLive,
+  AwsS3Live,
+  GuStageLive,
+  SttpClientLive,
+  getSubscriptionResponse,
+  ratePlanCharge1,
+}
 import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.Subscribe.*
@@ -19,6 +26,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.productmove.endpoint.move.RecurringContributionToSupporterPlus.getRatePlans
 import com.gu.productmove.endpoint.move.SupporterPlusRatePlanIds
 import com.gu.productmove.move.BuildPreviewResult
+import com.gu.productmove.zuora.model.SubscriptionName
 
 import java.time.*
 import scala.None
@@ -27,7 +35,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("subscription update service")(
-      test("SubscriptionUpdateRequest is correct for input (DEV)") {
+      test("SubscriptionUpdateRequest is correct for input (CODE)") {
         val timeLocalDate = LocalDate.of(2022, 5, 10)
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
 
@@ -68,7 +76,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               )
             }
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       },
@@ -131,11 +139,13 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           _ <- TestClock.setTime(time)
           response <- BuildPreviewResult
             .getPreviewResult(
+              SubscriptionName("A-S12345678"),
+              ratePlanCharge1,
               invoiceWithMultipleInvoiceItems,
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(response)(equalTo(expectedResponse))
       },
@@ -153,11 +163,13 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           _ <- TestClock.setTime(time)
           response <- BuildPreviewResult
             .getPreviewResult(
+              SubscriptionName("A-S12345678"),
+              ratePlanCharge1,
               invoiceWithTax,
               SupporterPlusRatePlanIds("8ad09fc281de1ce70181de3b251736a4", "8ad09fc281de1ce70181de3b253e36a6", None),
             )
             .provideLayer(
-              ZLayer.succeed(Stage.valueOf("DEV")),
+              ZLayer.succeed(Stage.valueOf("CODE")),
             )
         } yield assert(response)(equalTo(expectedResponse))
       },

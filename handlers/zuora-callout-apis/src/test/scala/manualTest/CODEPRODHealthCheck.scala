@@ -29,7 +29,7 @@ class CODEPRODHealthCheck extends AnyFlatSpec with Matchers {
   private def healthcheckForEnv(env: HealthChecks => List[HealthCheckConfig]) = {
     val configLocation = S3Location(
       bucket = "gu-reader-revenue-private",
-      key = "membership/support-service-lambdas/DEV/support-service-lambdas-healthcheck.private.json",
+      key = "membership/support-service-lambdas/CODE/support-service-lambdas-healthcheck.private.json",
     )
     val healthchecks = for {
       jsonString <- GetFromS3.fetchString(configLocation).toApiGatewayOp("read local config")

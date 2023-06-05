@@ -1,6 +1,7 @@
 package com.gu.productmove.endpoint.available
 
 import com.gu.productmove.AwsS3
+import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.*
 import com.gu.productmove.endpoint.available.Currency.GBP
@@ -90,6 +91,7 @@ object AvailableProductMovesEndpoint {
       GetAccountLive.layer,
       ZuoraGetLive.layer,
       GuStageLive.layer,
+      SecretsLive.layer
     )
 
   private val freeTrialDays = 14
@@ -139,7 +141,7 @@ object AvailableProductMovesEndpoint {
     val output = for {
       stage <- ZIO.service[Stage]
       monthlyContributionRatePlanId =
-        if (stage == Stage.DEV) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
+        if (stage == Stage.CODE) "2c92c0f85a6b134e015a7fcd9f0c7855" else "2c92a0fc5aacfadd015ad24db4ff5e97"
 
       _ <- ZIO.log("subscription name: " + subscriptionName)
 

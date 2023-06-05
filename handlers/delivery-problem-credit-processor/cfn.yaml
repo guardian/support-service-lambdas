@@ -9,12 +9,10 @@ Parameters:
     AllowedValues:
       - PROD
       - CODE
-      - DEV
     Default: CODE
 
 Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
-  IsNotDev: !Not [!Equals [!Ref "Stage", "DEV"]]
 
 Mappings:
   StageMap:
@@ -112,7 +110,7 @@ Resources:
   DeliveryProblemCreditProcessorScheduleRule:
     Type: AWS::Events::Rule
     # No need to run on a schedule in Dev stage
-    Condition: IsNotDev
+    Condition: IsProd
     Properties:
       Description: Trigger processing of delivery-problem credits every 20 mins
       Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
@@ -127,7 +125,7 @@ Resources:
 
   DeliveryProblemCreditProcessorLambdaInvokePermission:
     Type: AWS::Lambda::Permission
-    Condition: IsNotDev
+    Condition: IsProd
     Properties:
       Action: lambda:invokeFunction
       FunctionName: !Ref DeliveryProblemCreditProcessor

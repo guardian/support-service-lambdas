@@ -15,7 +15,7 @@ class GetAccountEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get account from Zuora" taggedAs EffectsTest in {
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       res <- GetAccount(zuoraDeps.get[ZuoraAccount])(ZuoraAccountId("8ad095dd82f7aaa50182f96de24d3ddb")).toDisjunction
     } yield res
