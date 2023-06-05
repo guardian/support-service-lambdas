@@ -20,6 +20,9 @@ object BuildPreviewResult {
       val (supporterPlusInvoices, contributionInvoices) =
         invoice.invoiceItems.partition(_.productRatePlanChargeId == ids.subscriptionRatePlanChargeId)
 
+      val supporterPlusInvoiceItems =
+        supporterPlusInvoices.sortWith((i1, i2) => i1.serviceStartDate.isBefore(i2.serviceStartDate))
+
       (supporterPlusInvoices.length, contributionInvoices.length) match {
         case (n1, n2) if n1 > 1 && n2 >= 1 =>
           for {
@@ -30,8 +33,6 @@ object BuildPreviewResult {
                   invoiceItem.serviceStartDate == date,
               )
               .head
-            supporterPlusInvoiceItems = supporterPlusInvoices
-              .sortWith((i1, i2) => i1.serviceStartDate.isBefore(i2.serviceStartDate))
           } yield PreviewResult(
             supporterPlusInvoiceItems.head.totalAmount - contributionRefundInvoice.totalAmount.abs,
             contributionRefundInvoice.totalAmount,
@@ -43,7 +44,7 @@ object BuildPreviewResult {
               During this billing run, Zuora does not return the contribution invoice item, only supporter plus invoice items.
               When this happens we can just use the full price of the active rate plan as the amount to be refunded
          */
-        case (n1, n2) if n1 > 1 && n2 == 0 && activeRatePlanCharge.effectiveStartDate == today =>
+        case (n1, n2) if n1 > 1 && n2 == 0 && supporterPlusInvoiceItems.head.serviceStartDate == today =>
           val supporterPlusInvoiceItems =
             supporterPlusInvoices.sortWith((i1, i2) => i1.serviceStartDate.isBefore(i2.serviceStartDate))
 
