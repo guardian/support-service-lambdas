@@ -34,8 +34,6 @@ object ProductMoveEndpointTypes {
   given Schema[ExpectedInput] = inlineSchema(Schema.derived)
 
   sealed trait OutputBody
-
-  sealed trait ErrorResponse extends OutputBody
   case class Success(
       @description("Success message.") message: String,
   ) extends OutputBody
@@ -47,16 +45,22 @@ object ProductMoveEndpointTypes {
         "The next payment date of the new supporter plus subscription, i.e.: the second payment date",
       ) nextPaymentDate: LocalDate,
   ) extends OutputBody
+
   case class BadRequest(@description("Error message.") message: String) extends ErrorResponse
+
   case class InternalServerError(@description("Error message.") message: String) extends ErrorResponse
 
+  sealed trait ErrorResponse extends OutputBody
   case class TransactionError(@description("Error message.") message: String) extends ErrorResponse
+  case class SecretsError(@description("Error message.") message: String) extends ErrorResponse
+
   given Schema[Success] = inlineSchema(Schema.derived)
   given Schema[PreviewResult] = inlineSchema(Schema.derived)
   given Schema[InternalServerError] = inlineSchema(Schema.derived)
-
   given Schema[BadRequest] = inlineSchema(Schema.derived)
   given Schema[TransactionError] = inlineSchema(Schema.derived)
+  given Schema[SecretsError] = inlineSchema(Schema.derived)
+
   given JsonEncoder[Success] = DeriveJsonEncoder.gen[Success]
   given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
   given JsonEncoder[PreviewResult] = DeriveJsonEncoder.gen[PreviewResult]
@@ -65,11 +69,11 @@ object ProductMoveEndpointTypes {
   given JsonDecoder[OutputBody] = DeriveJsonDecoder.gen[OutputBody] // needed to keep tapir happy
   given JsonEncoder[InternalServerError] = DeriveJsonEncoder.gen[InternalServerError]
   given JsonDecoder[InternalServerError] = DeriveJsonDecoder.gen[InternalServerError] // needed to keep tapir happy
-
   given JsonEncoder[BadRequest] = DeriveJsonEncoder.gen[BadRequest]
 
   given JsonDecoder[BadRequest] = DeriveJsonDecoder.gen[BadRequest] // needed to keep tapir happy
   given JsonEncoder[TransactionError] = DeriveJsonEncoder.gen[TransactionError]
-
   given JsonDecoder[TransactionError] = DeriveJsonDecoder.gen[TransactionError] // needed to keep tapir happy
+  given JsonEncoder[SecretsError] = DeriveJsonEncoder.gen[SecretsError]
+  given JsonDecoder[SecretsError] = DeriveJsonDecoder.gen[SecretsError] // needed to keep tapir happy
 }

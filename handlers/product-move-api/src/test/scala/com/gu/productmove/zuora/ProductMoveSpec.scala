@@ -4,6 +4,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, RecurringContributionToSupporterPlus}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.SecretsLive
 import com.gu.productmove._
 import zio._
 import zio.test.Assertion._
@@ -29,6 +30,7 @@ object ProductMoveSpec extends ZIOSpecDefault {
             GetAccountLive.layer,
             GuStageLive.layer,
             DynamoLive.layer,
+            SecretsLive.layer,
           )
       } yield {
 
