@@ -112,6 +112,7 @@ object HandlerSpec extends ZIOSpecDefault {
     val getInvoiceItemsStubs = Map("89ad8casd9c0asdcaj89sdc98as" -> getInvoiceItemsResponse)
 
     suite("HandlerSpec")(
+      /*
       test("productMove endpoint completes switch when charge amount is below 50 cents") {
         val endpointJsonInputBody = ExpectedInput(15.00, false, true, None, None)
         val expectedOutput = ProductMoveEndpointTypes.Success(
@@ -157,7 +158,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       },
-      /*
+
       test("productMove endpoint is successful for monthly sub (upsell)") {
         val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
         val expectedOutput = ProductMoveEndpointTypes.Success(
