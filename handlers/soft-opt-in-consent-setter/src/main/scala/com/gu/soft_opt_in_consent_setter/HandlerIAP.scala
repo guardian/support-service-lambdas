@@ -46,8 +46,6 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     throw exception
   }
 
-  private val dynamoLoggingFeatureFlag = false
-
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
     logger.info("Handling request")
 
@@ -125,15 +123,14 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       result match {
         case Left(e) => handleError(e)
         case Right(_) =>
-          if (dynamoLoggingFeatureFlag)
-            dynamoConnector.updateLoggingTable(message.subscriptionId, message.identityId, message.eventType) match {
-              case Success(_) =>
-                logger.info("Logged soft opt-in setting to Dynamo")
-              case Failure(exception) =>
-                logger.error(s"Dynamo write failed for identityId: ${message.identityId}")
-                logger.error(s"Exception: $exception")
-                Metrics.put("failed_dynamo_update")
-            }
+          dynamoConnector.updateLoggingTable(message.subscriptionId, message.identityId, message.eventType) match {
+            case Success(_) =>
+              logger.info("Logged soft opt-in setting to Dynamo")
+            case Failure(exception) =>
+              logger.error(s"Dynamo write failed for identityId: ${message.identityId}")
+              logger.error(s"Exception: $exception")
+              Metrics.put("failed_dynamo_update")
+          }
       }
     }
 
