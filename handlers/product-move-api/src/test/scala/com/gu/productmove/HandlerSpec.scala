@@ -246,7 +246,7 @@ object HandlerSpec extends ZIOSpecDefault {
         } yield {
           assert(output)(equalTo(subscriptionUpdatePreviewResult2)) &&
           assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(subUpdateRequests)(equalTo(List(subscriptionUpdatePreviewInputsShouldBe))) &&
           assert(sqsRequests)(equalTo(Nil)) &&
           assert(dynamoRequests)(equalTo(Nil))
         }).provide(

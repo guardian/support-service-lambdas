@@ -142,19 +142,19 @@ object Fixtures {
     taxAmount = 2,
     invoiceItems = List(
       SubscriptionUpdateInvoiceItem(
-        serviceStartDate = LocalDate.parse("2021-02-05"),
+        serviceStartDate = LocalDate.parse("2021-02-15"),
         chargeAmount = -19.70,
         taxAmount = -0,
         productRatePlanChargeId = contributionRatePlanChargeId,
       ),
       SubscriptionUpdateInvoiceItem(
-        serviceStartDate = LocalDate.parse("2021-03-05"),
+        serviceStartDate = LocalDate.parse("2021-03-15"),
         chargeAmount = 20,
         taxAmount = 0,
         productRatePlanChargeId = supporterPlusRatePlanChargeId,
       ),
       SubscriptionUpdateInvoiceItem(
-        serviceStartDate = LocalDate.parse("2021-04-05"),
+        serviceStartDate = LocalDate.parse("2021-04-15"),
         chargeAmount = 20,
         taxAmount = 0,
         productRatePlanChargeId = supporterPlusRatePlanChargeId,
