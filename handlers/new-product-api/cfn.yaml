@@ -279,37 +279,37 @@ Resources:
       - NewProductApiKey
       - NewProductUsagePlan
 
-    NewProductDomainName:
-      Type: "AWS::ApiGateway::DomainName"
-      Properties:
-        RegionalCertificateArn: # only for *.membership.guardianapis.com
-          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
-        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
-        EndpointConfiguration:
-          Types:
-            - REGIONAL
+#    NewProductDomainName:
+#      Type: "AWS::ApiGateway::DomainName"
+#      Properties:
+#        RegionalCertificateArn: # only for *.membership.guardianapis.com
+#          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+#        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+#        EndpointConfiguration:
+#          Types:
+#            - REGIONAL
 
-    NewProductBasePathMapping:
-      Type: "AWS::ApiGateway::BasePathMapping"
-      Properties:
-        RestApiId: !Ref NewProductApi
-        DomainName: !Ref NewProductDomainName
-        Stage: !Sub ${Stage}
-      DependsOn:
-      - NewProductApi
-      - NewProductDomainName
-      - NewProductApiStage
+#    NewProductBasePathMapping:
+#      Type: "AWS::ApiGateway::BasePathMapping"
+#      Properties:
+#        RestApiId: !Ref NewProductApi
+#        DomainName: !Ref NewProductDomainName
+#        Stage: !Sub ${Stage}
+#      DependsOn:
+#      - NewProductApi
+#      - NewProductDomainName
+#      - NewProductApiStage
 
-    NewProductDNSRecord:
-      Type: AWS::Route53::RecordSet
-      Properties:
-        HostedZoneName: membership.guardianapis.com.
-        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
-        Comment: !Sub CNAME for new product API ${Stage}
-        Type: CNAME
-        TTL: '120'
-        ResourceRecords:
-        - !FindInMap [ StageMap, !Ref Stage, ApiGatewayTargetDomainName ]
+#    NewProductDNSRecord:
+#      Type: AWS::Route53::RecordSet
+#      Properties:
+#        HostedZoneName: membership.guardianapis.com.
+#        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+#        Comment: !Sub CNAME for new product API ${Stage}
+#        Type: CNAME
+#        TTL: '120'
+#        ResourceRecords:
+#        - !FindInMap [ StageMap, !Ref Stage, ApiGatewayTargetDomainName ]
 
     5xxApiAlarm:
       Type: AWS::CloudWatch::Alarm
