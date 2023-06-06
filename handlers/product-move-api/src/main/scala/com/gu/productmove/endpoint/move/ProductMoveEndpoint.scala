@@ -2,8 +2,9 @@ package com.gu.productmove.endpoint.move
 
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
+
 import com.gu.productmove.SecretsLive
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes._
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -11,14 +12,42 @@ import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetAccount, GetAccountLive, GetInvoiceItemsLive, GetSubscription, GetSubscriptionLive, InvoiceItemAdjustmentLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, Dynamo, DynamoLive, EmailMessage, EmailPayload, EmailPayloadContactAttributes, EmailPayloadProductSwitchAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
-import sttp.tapir.*
+import com.gu.productmove.zuora.{
+  GetAccount,
+  GetAccountLive,
+  GetSubscription,
+  GetSubscriptionLive,
+  Subscribe,
+  SubscribeLive,
+  SubscriptionUpdate,
+  SubscriptionUpdateLive,
+  GetInvoiceItems,
+  GetInvoiceItemsLive,
+  InvoiceItemAdjustment,
+  InvoiceItemAdjustmentLive,
+  ZuoraCancel,
+  ZuoraCancelLive,
+}
+import com.gu.productmove.{
+  AwsCredentialsLive,
+  AwsS3Live,
+  Dynamo,
+  DynamoLive,
+  EmailMessage,
+  EmailPayload,
+  EmailPayloadContactAttributes,
+  EmailPayloadProductSwitchAttributes,
+  GuStageLive,
+  SQS,
+  SQSLive,
+  SttpClientLive,
+}
+import sttp.tapir._
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio.*
-import zio.json.*
+import zio._
+import zio.json._
 import com.gu.newproduct.api.productcatalog.PricesFromZuoraCatalog
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.effects.GetFromS3
@@ -36,7 +65,7 @@ object ProductMoveEndpoint {
     run(
       SubscriptionName("A-S00448793"),
       SwitchType.RecurringContributionToSupporterPlus,
-      ExpectedInput(1, false, None, None),
+      ExpectedInput(1, false, false, None, None),
     ),
   )
 

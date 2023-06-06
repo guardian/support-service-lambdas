@@ -135,6 +135,7 @@ object RecurringContributionToSupporterPlus {
           doUpdate(
             subscriptionName,
             postData.price,
+            postData.recallPreview,
             BigDecimal(ratePlanCharge.price.get),
             ratePlanCharge,
             currency,
@@ -291,6 +292,7 @@ object RecurringContributionToSupporterPlus {
   private def doUpdate(
       subscriptionName: SubscriptionName,
       price: BigDecimal,
+      recallPreview: Boolean,
       previousAmount: BigDecimal,
       ratePlanCharge: RatePlanCharge,
       currency: Currency,
@@ -312,15 +314,22 @@ object RecurringContributionToSupporterPlus {
       stage <- ZIO.service[Stage]
       accountFuture <- GetAccount.get(subscription.accountNumber).fork
 
-      previewResponse <- doPreview(
-        subscriptionName,
-        price,
-        billingPeriod,
-        ratePlanCharge,
-        currency,
-        currentRatePlan.id,
-      )
-      amountPayableToday = previewResponse.asInstanceOf[PreviewResult].amountPayableToday
+      amountPayableToday <-
+        if (recallPreview) {
+          for {
+            previewResponse <- doPreview(
+              subscriptionName,
+              price,
+              billingPeriod,
+              ratePlanCharge,
+              currency,
+              currentRatePlan.id,
+            )
+            amount = previewResponse.asInstanceOf[PreviewResult].amountPayableToday
+          } yield amount
+        } else ZIO.succeed(BigDecimal(1))
+
+      collectPayment = !(amountPayableToday > BigDecimal(0) && amountPayableToday < BigDecimal(0.50))
 
       given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 
@@ -329,9 +338,7 @@ object RecurringContributionToSupporterPlus {
           SubscriptionUpdateRequest(
             add = addRatePlan,
             remove = removeRatePlan,
-            collect =
-              if (amountPayableToday < 0.50 && amountPayableToday > 0) Some(false)
-              else Some(true),
+            collect = Some(collectPayment),
             runBilling = Some(true),
             preview = Some(false),
           )
@@ -343,7 +350,7 @@ object RecurringContributionToSupporterPlus {
       supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
 
       _ <-
-        if (amountPayableToday < 0.50 && amountPayableToday > 0) {
+        if (!collectPayment) {
           for {
             invoiceResponse <- GetInvoiceItems.get(updateResponse.invoiceId.get)
             invoiceItems = invoiceResponse.invoiceItems
@@ -385,7 +392,8 @@ object RecurringContributionToSupporterPlus {
                   last_name = account.billToContact.lastName,
                   currency = account.basicInfo.currency.symbol,
                   price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                  first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                  first_payment_amount =
+                    if (collectPayment) paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString else "0.00",
                   date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                   payment_frequency = billingPeriodValue + "ly",
                   subscription_id = subscriptionName.value,
@@ -410,7 +418,7 @@ object RecurringContributionToSupporterPlus {
             "Supporter Plus",
             todaysDate,
             todaysDate,
-            paidAmount,
+            if (collectPayment) paidAmount else BigDecimal(0),
             csrUserId,
             caseId,
           ),

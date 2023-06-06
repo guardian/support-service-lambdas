@@ -23,6 +23,6 @@ class MockGetInvoiceItems(
   }
 }
 
-object MockGetAccount {
+object MockGetInvoiceItems {
   def requests: ZIO[MockGetInvoiceItems, Nothing, List[String]] = ZIO.serviceWith[MockGetInvoiceItems](_.requests)
 }

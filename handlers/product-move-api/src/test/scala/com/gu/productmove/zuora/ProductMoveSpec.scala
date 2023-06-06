@@ -18,7 +18,10 @@ object ProductMoveSpec extends ZIOSpecDefault {
     suite("Switch")(test("Run product switch lambda locally") {
       for {
         _ <- TestClock.setTime(Instant.now())
-        _ <- RecurringContributionToSupporterPlus(SubscriptionName("A-S00487531"), ExpectedInput(20, false, None, None))
+        _ <- RecurringContributionToSupporterPlus(
+          SubscriptionName("A-S00487531"),
+          ExpectedInput(20, false, false, None, None),
+        )
           .provide(
             GetSubscriptionLive.layer,
             AwsCredentialsLive.layer,

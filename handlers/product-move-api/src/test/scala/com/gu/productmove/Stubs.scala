@@ -18,6 +18,7 @@ import com.gu.productmove.zuora.Fixtures.{
   invoiceWithTax,
   subscriptionsPreviewResponse,
   subscriptionsPreviewResponse2,
+  subscriptionsPreviewResponse3,
 }
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
 import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadProductSwitchAttributes}
@@ -266,6 +267,17 @@ val supporterRatePlanItem1 = SupporterRatePlanItem(
   contributionAmount = None,
 )
 
+val supporterRatePlanItem2 = SupporterRatePlanItem(
+  subscriptionName = "A-S00339056",
+  identityId = "12345",
+  gifteeIdentityId = None,
+  productRatePlanId = "8ad09fc281de1ce70181de3b251736a4",
+  productRatePlanName = "product-move-api added Supporter Plus Monthly",
+  termEndDate = LocalDate.of(2021, 2, 12),
+  contractEffectiveDate = LocalDate.of(2021, 2, 5),
+  contributionAmount = None,
+)
+
 //-----------------------------------------------------
 // Stubs for SQS service
 //-----------------------------------------------------
@@ -323,6 +335,27 @@ val emailMessageBodyNoPaymentOrRefund = EmailMessage(
         price = "15.00",
         payment_frequency = "monthly",
         date_of_first_payment = "10 May 2022",
+        currency = "£",
+      ),
+    ),
+  ),
+  "SV_RCtoSP_Switch",
+  "sfContactId",
+  Some("12345"),
+)
+
+val emailMessageLowCharge = EmailMessage(
+  To = EmailPayload(
+    Address = Some("example@gmail.com"),
+    EmailPayloadContactAttributes(
+      EmailPayloadProductSwitchAttributes(
+        subscription_id = "A-S00339056",
+        first_name = "John",
+        last_name = "Hee",
+        first_payment_amount = "0.00",
+        price = "15.00",
+        payment_frequency = "monthly",
+        date_of_first_payment = "5 February 2021",
         currency = "£",
       ),
     ),
@@ -397,6 +430,19 @@ val salesforceRecordInput3 = SalesforceRecordInput(
   csrUserId = None,
   caseId = None,
 )
+val salesforceRecordInput4 = SalesforceRecordInput(
+  "A-S00339056",
+  BigDecimal(5),
+  BigDecimal(15),
+  "P1",
+  "RP1",
+  "Supporter Plus",
+  LocalDate.of(2021, 2, 5),
+  LocalDate.of(2021, 2, 5),
+  BigDecimal(0),
+  csrUserId = None,
+  caseId = None,
+)
 
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate service
@@ -442,6 +488,30 @@ val expectedRequestBody = SubscriptionUpdateRequest(
     ),
   ),
   collect = Some(true),
+  runBilling = Some(true),
+  preview = Some(false),
+)
+
+val expectedRequestBodyLowCharge = SubscriptionUpdateRequest(
+  add = List(
+    AddRatePlan(
+      contractEffectiveDate = timeLocalDate4,
+      productRatePlanId = "8ad09fc281de1ce70181de3b251736a4",
+      chargeOverrides = List(
+        ChargeOverrides(
+          price = Some(15.00),
+          productRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6",
+        ),
+      ),
+    ),
+  ),
+  remove = List(
+    RemoveRatePlan(
+      contractEffectiveDate = timeLocalDate4,
+      ratePlanId = "89ad8casd9c0asdcaj89sdc98as",
+    ),
+  ),
+  collect = Some(false),
   runBilling = Some(true),
   preview = Some(false),
 )
@@ -531,11 +601,16 @@ val previewResponse2 = SubscriptionUpdatePreviewResponse(
   subscriptionsPreviewResponse2,
 )
 
+val previewResponse3 = SubscriptionUpdatePreviewResponse(
+  subscriptionsPreviewResponse3,
+)
+
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
 //-----------------------------------------------------
 val subscriptionUpdatePreviewResult = PreviewResult(40, -10, 50, LocalDate.of(2023, 6, 10))
 val subscriptionUpdatePreviewResult2 = PreviewResult(15, 5, 20, LocalDate.of(2021, 3, 15))
+val subscriptionUpdatePreviewResult3 = PreviewResult(0.20, 5, 20, LocalDate.of(2021, 3, 15))
 
 //-----------------------------------------------------
 // Stubs for GetSfSubscription service
@@ -583,7 +658,7 @@ val getInvoiceItemsResponse = GetInvoiceItemsResponse(
   List(
     InvoiceItem(
       "invoice_item_id",
-      "product_rate_plan_id",
+      "8ad09fc281de1ce70181de3b253e36a6",
     ),
   ),
 )
