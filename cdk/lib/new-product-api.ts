@@ -121,31 +121,31 @@ export class NewProductApi extends GuStack {
 
 
     // ---- DNS ---- //
-    // const certificateArn = `arn:aws:acm:${this.region}:${this.account}:certificate/${props.certificateId}`;
-    //
-    // const cfnDomainName = new CfnDomainName(this, "NewProductDomainName", {
-    //   domainName: props.domainName,
-    //   regionalCertificateArn: certificateArn,
-    //   endpointConfiguration: {
-    //     types: ["REGIONAL"]
-    //   }
-    // });
-    //
-    // new CfnBasePathMapping(this, "NewProductBasePathMapping", {
-    //   domainName: cfnDomainName.ref,
-    //   restApiId: newProductApi.api.restApiId,
-    //   stage: newProductApi.api.deploymentStage.stageName,
-    // });
-    //
-    // new CfnRecordSet(this, "NewProductDNSRecord", {
-    //   name: props.domainName,
-    //   type: "CNAME",
-    //   hostedZoneId: props.hostedZoneId,
-    //   ttl: "120",
-    //   resourceRecords: [
-    //     cfnDomainName.attrRegionalDomainName
-    //   ],
-    // });
+    const certificateArn = `arn:aws:acm:${this.region}:${this.account}:certificate/${props.certificateId}`;
+
+    const cfnDomainName = new CfnDomainName(this, "NewProductDomainName", {
+      domainName: props.domainName,
+      regionalCertificateArn: certificateArn,
+      endpointConfiguration: {
+        types: ["REGIONAL"]
+      }
+    });
+
+    new CfnBasePathMapping(this, "NewProductBasePathMapping", {
+      domainName: cfnDomainName.ref,
+      restApiId: newProductApi.api.restApiId,
+      stage: newProductApi.api.deploymentStage.stageName,
+    });
+
+    new CfnRecordSet(this, "NewProductDNSRecord", {
+      name: props.domainName,
+      type: "CNAME",
+      hostedZoneId: props.hostedZoneId,
+      ttl: "120",
+      resourceRecords: [
+        cfnDomainName.attrRegionalDomainName
+      ],
+    });
 
 
     // ---- Apply policies ---- //

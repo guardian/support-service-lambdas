@@ -52,9 +52,9 @@ val ratePlanCharge2 = RatePlanCharge(
   price = Some(5.000000000),
   currency = "GBP",
   number = "number",
-  effectiveStartDate = LocalDate.of(2021, 2, 5),
-  effectiveEndDate = LocalDate.of(2021, 3, 5),
-  chargedThroughDate = Some(LocalDate.of(2021, 3, 5)),
+  effectiveStartDate = LocalDate.of(2021, 1, 15),
+  effectiveEndDate = LocalDate.of(2022, 1, 15),
+  chargedThroughDate = Some(LocalDate.of(2021, 2, 15)),
   billingPeriod = Monthly,
 )
 
@@ -465,7 +465,7 @@ val subscriptionUpdateResponse5 =
 val timeLocalDate = LocalDate.of(2022, 5, 10)
 val timeLocalDate2 = LocalDate.of(2023, 2, 6)
 val timeLocalDate3 = LocalDate.of(2022, 9, 29)
-val timeLocalDate4 = LocalDate.of(2021, 2, 5)
+val timeLocalDate4 = LocalDate.of(2021, 2, 15)
 
 // RecurringContributionToSupporterPlus
 val expectedRequestBody = SubscriptionUpdateRequest(
@@ -588,7 +588,7 @@ val expectedRequestBodyPreview2 = SubscriptionUpdateRequest(
     ),
   ),
   preview = Some(true),
-  targetDate = Some(LocalDate.of(2022, 3, 5)),
+  targetDate = Some(LocalDate.of(2022, 3, 15)),
   currentTerm = Some("24"),
   currentTermPeriodType = Some("Month"),
 )
