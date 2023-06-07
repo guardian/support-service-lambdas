@@ -22,22 +22,18 @@ case class S3Config(
 object Config {
   lazy val fromEnvironment: Option[Config] = {
     for {
-      sfUserName <- Option(System.getenv("sfUsername"))
-      sfClientId <- Option(System.getenv("sfClientId"))
-      sfClientSecret <- Option(System.getenv("sfClientSecret"))
-      sfPassword <- Option(System.getenv("sfPassword"))
-      sfToken <- Option(System.getenv("sfToken"))
-      sfAuthUrl <- Option(System.getenv("sfAuthUrl"))
+      salesForceConnectedAppSecrets <- Secrets.getSalesforceConnectedAppSecrets
+      salesForceUserSecrets <- Secrets.getSalesforceUserSecrets
       sfApiVersion <- Option(System.getenv("sfApiVersion"))
       s3BucketName <- Option(System.getenv("bucketName"))
     } yield Config(
       SalesforceConfig(
-        userName = sfUserName,
-        clientId = sfClientId,
-        clientSecret = sfClientSecret,
-        password = sfPassword,
-        token = sfToken,
-        authUrl = sfAuthUrl,
+        userName = salesForceUserSecrets.sfUsername,
+        clientId = salesForceConnectedAppSecrets.clientId,
+        clientSecret = salesForceConnectedAppSecrets.clientSecret,
+        password = salesForceUserSecrets.sfPassword,
+        token = salesForceUserSecrets.sfToken,
+        authUrl = salesForceConnectedAppSecrets.authUrl,
         apiVersion = sfApiVersion,
       ),
       S3Config(
