@@ -23,7 +23,12 @@ import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadProductSwitch
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
 
+import java.io.File
 import java.time.LocalDate
+import scala.io.Source
+import zio.json._
+import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdateResponse
+import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdateRequest
 
 //======================================================================
 // Stubs/test data/Mock Data
@@ -56,20 +61,11 @@ val ratePlanCharge2 = RatePlanCharge(
   billingPeriod = Monthly,
 )
 
-val getSubscriptionResponse = GetSubscriptionResponse(
-  "A-S00339056",
-  "zuoraAccountId",
-  AccountNumber("accountNumber"),
-  ratePlans = List(
-    RatePlan(
-      id = "89ad8casd9c0asdcaj89sdc98as",
-      productName = "P1",
-      productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
-      ratePlanName = "RP1",
-      ratePlanCharges = List(ratePlanCharge1),
-    ),
-  ),
-)
+val getSubscriptionResponse = Source
+  .fromResource("zuora/GetSubscription/responses/response1.json")
+  .mkString
+  .fromJson[GetSubscriptionResponse]
+  .getOrElse(throw new RuntimeException("Failed to parse GetSubscriptionResponse. Check the file path is correct."))
 
 val getSubscriptionForCancelResponse = GetSubscriptionToCancelResponse(
   id = "A-S00339056",
@@ -198,17 +194,11 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
 //-----------------------------------------------------
 // Stubs for GetAccount service
 //-----------------------------------------------------
-val getAccountResponse = GetAccountResponse(
-  BasicInfo(
-    DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
-    Some("12345"),
-    "sfContactId",
-    balance = 0,
-    currency = Currency.GBP,
-  ),
-  BillToContact("John", "Hee", "example@gmail.com"),
-  List(AccountSubscription("subscriptionId")),
-)
+val getAccountResponse = Source
+  .fromResource("zuora/GetAccount/responses/response1.json")
+  .mkString
+  .fromJson[GetAccountResponse]
+  .getOrElse(throw new RuntimeException("Failed to parse GetAccountResponse. Check the file path is correct."))
 
 val getAccountResponse2 = GetAccountResponse(
   BasicInfo(
@@ -370,6 +360,7 @@ val salesforceRecordInput1 = SalesforceRecordInput(
   csrUserId = None,
   caseId = None,
 )
+
 val salesforceRecordInput2 = SalesforceRecordInput(
   "A-S00339056",
   BigDecimal(5),
@@ -383,6 +374,7 @@ val salesforceRecordInput2 = SalesforceRecordInput(
   csrUserId = None,
   caseId = None,
 )
+
 val salesforceRecordInput3 = SalesforceRecordInput(
   "A-S00339056",
   BigDecimal(5),
@@ -401,7 +393,14 @@ val salesforceRecordInput3 = SalesforceRecordInput(
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
 val subscriptionUpdateResponse =
-  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57mkd", 28, Some("89ad8casd9c0asdcaj89sdc98as"), Some(20))
+  Source
+    .fromResource("zuora/SubscriptionUpdate/responses/update1.json")
+    .mkString
+    .fromJson[SubscriptionUpdateResponse]
+    .getOrElse(
+      throw new RuntimeException("Failed to parse SubscriptionUpdateResponse. Check the file path is correct."),
+    )
+
 val subscriptionUpdateResponse2 =
   SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57osi", -4, Some("80a23d9sdf9a89fs8cjjk2"), Some(10))
 val subscriptionUpdateResponse3 =
@@ -421,29 +420,11 @@ val timeLocalDate3 = LocalDate.of(2022, 9, 29)
 val timeLocalDate4 = LocalDate.of(2021, 2, 15)
 
 // RecurringContributionToSupporterPlus
-val expectedRequestBody = SubscriptionUpdateRequest(
-  add = List(
-    AddRatePlan(
-      contractEffectiveDate = timeLocalDate,
-      productRatePlanId = "8a12865b8219d9b401822106192b64dc",
-      chargeOverrides = List(
-        ChargeOverrides(
-          price = Some(15.00),
-          productRatePlanChargeId = "8a12865b8219d9b401822106194e64e3",
-        ),
-      ),
-    ),
-  ),
-  remove = List(
-    RemoveRatePlan(
-      contractEffectiveDate = timeLocalDate,
-      ratePlanId = "89ad8casd9c0asdcaj89sdc98as",
-    ),
-  ),
-  collect = Some(true),
-  runBilling = Some(true),
-  preview = Some(false),
-)
+val expectedRequestBody = Source
+  .fromResource("zuora/SubscriptionUpdate/requests/update1.json")
+  .mkString
+  .fromJson[SubscriptionUpdateRequest]
+  .getOrElse(throw new RuntimeException("Failed to parse SubscriptionUpdateResponse. Check the file path is correct."))
 
 // MembershipToRecurringContribution
 val expectedRequestBody2 = SubscriptionUpdateRequest(

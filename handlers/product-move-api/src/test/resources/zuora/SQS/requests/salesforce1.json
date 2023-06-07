@@ -1,0 +1,13 @@
+{
+  "SF_Subscription__c":"a2F5I000000arumUAA",
+  "Type__c":"Product Switch",
+  "Source__c":"MMA",
+  "Previous_Amount__c":4.0,
+  "New_Amount__c":10,
+  "Previous_Product_Name__c":"Contributor",
+  "Previous_Rate_Plan_Name__c":"Monthly Contribution",
+  "New_Rate_Plan_Name__c":"Supporter Plus",
+  "Requested_Date__c":"2023-06-07",
+  "Effective_Date__c":"2023-06-07",
+  "Paid_Amount__c":6.670000000
+}

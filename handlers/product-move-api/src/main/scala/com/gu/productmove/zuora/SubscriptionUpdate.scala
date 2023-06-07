@@ -116,9 +116,13 @@ case class SubscriptionUpdateInvoice(
     invoiceItems: List[SubscriptionUpdateInvoiceItem],
 )
 given JsonEncoder[SubscriptionUpdateRequest] = DeriveJsonEncoder.gen[SubscriptionUpdateRequest]
+given JsonDecoder[SubscriptionUpdateRequest] = DeriveJsonDecoder.gen[SubscriptionUpdateRequest]
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
 given JsonDecoder[SubscriptionUpdateInvoiceItem] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoiceItem]
 given JsonEncoder[AddRatePlan] = DeriveJsonEncoder.gen[AddRatePlan]
 given JsonEncoder[RemoveRatePlan] = DeriveJsonEncoder.gen[RemoveRatePlan]
+
+given JsonDecoder[AddRatePlan] = DeriveJsonDecoder.gen[AddRatePlan]
+given JsonDecoder[RemoveRatePlan] = DeriveJsonDecoder.gen[RemoveRatePlan]
