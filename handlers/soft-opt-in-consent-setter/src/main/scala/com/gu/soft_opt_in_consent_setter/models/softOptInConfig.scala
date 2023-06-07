@@ -23,36 +23,30 @@ object SoftOptInConfig {
 
   def apply(): Either[SoftOptInError, SoftOptInConfig] = {
     (for {
-      sfUsername <- sys.env.get("sfUsername")
-      sfClientId <- sys.env.get("sfClientId")
-      sfClientSecret <- sys.env.get("sfClientSecret")
-      sfPassword <- sys.env.get("sfPassword")
-      sfToken <- sys.env.get("sfToken")
-      sfAuthUrl <- sys.env.get("sfAuthUrl")
+      salesforceConnectedAppSecrets <- Secrets.getSalesforceConnectedAppSecrets
+      salesforceUserSecrets <- Secrets.getSalesforceUserSecrets
+      identitySoftOptInConsentAPISecrets <- Secrets.getIdentitySoftOptInConsentAPISecrets
+      mobilePurchasesAPIUserGetSubscriptionsSecrets <- Secrets.getMobilePurchasesAPIUserGetSubscriptionsSecrets
       sfApiVersion <- sys.env.get("sfApiVersion")
-      identityUrl <- sys.env.get("identityUrl")
-      identityToken <- sys.env.get("identityToken")
-      mpapiUrl <- sys.env.get("mpapiUrl")
-      mpapiToken <- sys.env.get("mpapiToken")
       stage <- sys.env.get("Stage")
       consentsMapping <- getConsentsByProductMapping(stage)
     } yield SoftOptInConfig(
       SFAuthConfig(
-        sfAuthUrl,
-        sfClientId,
-        sfClientSecret,
-        sfUsername,
-        sfPassword,
-        sfToken,
+        salesforceConnectedAppSecrets.authUrl,
+        salesforceConnectedAppSecrets.clientId,
+        salesforceConnectedAppSecrets.clientSecret,
+        salesforceUserSecrets.sfUsername,
+        salesforceUserSecrets.sfPassword,
+        salesforceUserSecrets.sfToken,
       ),
       sfApiVersion,
       IdentityConfig(
-        identityUrl,
-        identityToken,
+        identitySoftOptInConsentAPISecrets.identityUrl,
+        identitySoftOptInConsentAPISecrets.identityToken,
       ),
       MpapiConfig(
-        mpapiUrl,
-        mpapiToken,
+        mobilePurchasesAPIUserGetSubscriptionsSecrets.mpapiUrl,
+        mobilePurchasesAPIUserGetSubscriptionsSecrets.mpapiToken,
       ),
       consentsMapping,
       stage,
@@ -69,5 +63,4 @@ object SoftOptInConfig {
       case Failure(f) => None
     }
   }
-
 }
