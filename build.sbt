@@ -434,6 +434,7 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     scalatest,
     scalajHttp,
     awsS3,
+    awsDynamo,
     simpleConfig,
     awsLambda,
     awsSQS,
