@@ -74,6 +74,20 @@ Resources:
               Action: s3:GetObject
               Resource:
                 - arn:aws:s3::*:membership-dist/*
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:DescribeSecret
+                - secretsmanager:GetSecretValue
+              Resource:
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H"
 
   LambdaFunctionIAP:
     Type: AWS::Serverless::Function
@@ -121,6 +135,20 @@ Resources:
               - sqs:GetQueueAttributes
               - sqs:ReceiveMessage
             Resource: !GetAtt SoftOptInsQueue.Arn
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:DescribeSecret
+                - secretsmanager:GetSecretValue
+              Resource:
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN"
+                - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H"
 
   SoftOptInsQueueCrossAccountRole:
     Type: AWS::IAM::Role
@@ -145,8 +173,6 @@ Resources:
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
                 Resource: !GetAtt SoftOptInsQueue.Arn
-
-
 
   SoftOptInsQueue:
     Type: AWS::SQS::Queue
