@@ -4,20 +4,38 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.{Decoder, ParsingFailure}
-import io.circe.parser.{decode => circeDecode}
+import io.circe.ParsingFailure
+import io.circe.{Decoder, DecodingFailure}
 import io.circe.generic.auto._
+import io.circe.parser.{decode => circeDecode}
 import io.circe.syntax._
 
 import scala.jdk.CollectionConverters._
+import scala.util.{Failure, Success}
 object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
 
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
   val readyProcessSwitchStatus = "Ready to process switch"
+
+  sealed trait EventType
+  case object Acquisition extends EventType
+  case object Cancellation extends EventType
+  case object Switch extends EventType
+
+  object EventType {
+    implicit val eventTypeDecoder: Decoder[EventType] = Decoder.decodeString.emap {
+      case "Acquisition" => Right(Acquisition)
+      case "Cancellation" => Right(Cancellation)
+      case "Switch" => Right(Switch)
+      case unknown => Left(s"Invalid EventType: $unknown")
+    }
+  }
+
   case class MessageBody(
+      subscriptionId: String,
       identityId: String,
-      eventType: String,
+      eventType: EventType,
       productName: String,
       previousProductName: Option[String],
   )
@@ -52,13 +70,14 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     val setup = for {
       config <- SoftOptInConfig()
       sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
+      dynamoConnector <- DynamoConnector()
 
       identityConnector = new IdentityConnector(config.identityConfig)
       consentsCalculator = new ConsentsCalculator(config.consentsMapping)
       mpapiConnector = new MpapiConnector(config.mpapiConfig)
-    } yield (sfConnector, identityConnector, consentsCalculator, mpapiConnector)
+    } yield (sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
 
-    val (sfConnector, identityConnector, consentsCalculator, mpapiConnector) = setup match {
+    val (sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector) = setup match {
       case Left(error) => handleError(error)
       case Right(x) =>
         logger.info("Setup successful")
@@ -69,7 +88,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       logger.info(s"Processing message: $message")
 
       val result = message.eventType match {
-        case "Acquisition" =>
+        case Acquisition =>
           Metrics.put(event = "acquisitions_to_process", 1)
 
           processAcquiredSub(
@@ -77,7 +96,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             identityConnector.sendConsentsReq,
             consentsCalculator,
           )
-        case "Cancellation" =>
+        case Cancellation =>
           Metrics.put(event = "cancellations_to_process", 1)
 
           processCancelledSub(
@@ -87,7 +106,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             consentsCalculator,
             sfConnector,
           )
-        case "Switch" =>
+        case Switch =>
           Metrics.put(event = "product_switches_to_process", 1)
 
           processProductSwitchSub(
@@ -99,10 +118,20 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
           )
       }
 
-      logErrors(result)
-      emitIdentityMetrics(result)
+      emitIdentityMetric(result)
 
-      result.left.foreach(handleError)
+      result match {
+        case Left(e) => handleError(e)
+        case Right(_) =>
+          dynamoConnector.updateLoggingTable(message.subscriptionId, message.identityId, message.eventType) match {
+            case Success(_) =>
+              logger.info("Logged soft opt-in setting to Dynamo")
+            case Failure(exception) =>
+              logger.error(s"Dynamo write failed for identityId: ${message.identityId}")
+              logger.error(s"Exception: $exception")
+              Metrics.put("failed_dynamo_update")
+          }
+      }
     }
 
     logger.info("Finished processing messages")
@@ -223,11 +252,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     } yield ()
   }
 
-  def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {
-    updateResults.left.foreach(error => logger.warn(s"${error.getMessage}"))
-  }
-
-  def emitIdentityMetrics(updateResults: Either[SoftOptInError, Unit]): Unit = {
+  def emitIdentityMetric(updateResults: Either[SoftOptInError, Unit]): Unit = {
     updateResults match {
       case Left(_) => Metrics.put(event = "failed_consents_updates", 1)
       case Right(_) => Metrics.put(event = "successful_consents_updates", 1)
