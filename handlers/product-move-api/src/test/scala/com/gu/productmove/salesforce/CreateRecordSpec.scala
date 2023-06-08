@@ -53,6 +53,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
               CreateRecordLive.layer,
               GetSfSubscriptionLive.layer,
               SalesforceClientLive.layer,
+              SecretsLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,
