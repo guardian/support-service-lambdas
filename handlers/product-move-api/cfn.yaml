@@ -195,30 +195,6 @@ Resources:
           App: product-move-api
           Stack: !Ref Stack
           Stage: !Ref Stage
-          salesforceUrl:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:url}}'
-            - { Stage: !Ref Stage }
-          salesforceClientId:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:client_id}}'
-            - { Stage: !Ref Stage }
-          salesforceClientSecret:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:client_secret}}'
-            - { Stage: !Ref Stage }
-          salesforceUsername:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:username}}'
-            - { Stage: !Ref Stage }
-          salesforcePassword:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:password}}'
-            - { Stage: !Ref Stage }
-          salesforceToken:
-            !Sub
-            - '{{resolve:secretsmanager:${Stage}/Salesforce/User/SupportServiceLambdas:SecretString:token}}'
-            - { Stage: !Ref Stage }
       CodeUri:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/product-move-api/product-move-api.jar
@@ -236,6 +212,14 @@ Resources:
               - sqs:GetQueueAttributes
               - sqs:ReceiveMessage
             Resource: "*"
+        - Statement:
+            Effect: Allow
+            Action:
+              - secretsmanager:DescribeSecret
+              - secretsmanager:GetSecretValue
+            Resource:
+              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SupportServiceLambdas-729iA5"
+              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SupportServiceLambdas-417yMt"
 
   SalesforceTrackingQueue:
     Type: AWS::SQS::Queue
