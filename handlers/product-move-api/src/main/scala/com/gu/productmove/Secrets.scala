@@ -118,7 +118,7 @@ object SecretsLive extends Secrets {
   def getSalesforceSSLSecrets: ZIO[Any, ErrorResponse, SalesforceSSLSecrets] = {
     for {
       stg <- getStage
-      secretId: String = s"${stg}/Zuora/User/ZuoraApiUser"
+      secretId: String = s"${stg}/Salesforce/User/SupportServiceLambdas"
       secretJsonString = getJSONString(secretId)
       secrets <- parseSalesforceSSLSecretsJSONString(secretJsonString)
     } yield secrets
