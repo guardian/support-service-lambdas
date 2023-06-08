@@ -220,7 +220,8 @@ Resources:
             Resource:
               - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SupportServiceLambdas-729iA5"
               - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SupportServiceLambdas-417yMt"
-
+              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho"
+              - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm"
   SalesforceTrackingQueue:
     Type: AWS::SQS::Queue
     Properties:
