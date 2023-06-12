@@ -1,7 +1,7 @@
 package com.gu.productmove.salesforce
 
 import sttp.client3.quick.basicRequest
-import com.gu.productmove.AwsS3
+import com.gu.productmove.{AwsS3, Secrets}
 import com.gu.productmove.GuReaderRevenuePrivateS3.{bucket, key}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.Util.getFromEnv
@@ -50,15 +50,17 @@ object SalesforceClient {
 
 object SalesforceClientLive {
 
-  val layer: ZLayer[SttpBackend[Task, Any], ErrorResponse, SalesforceClient] =
+  val layer: ZLayer[SttpBackend[Task, Any] with Secrets, ErrorResponse, SalesforceClient] =
     ZLayer.fromZIO(
       for {
-        url <- ZIO.fromEither(getFromEnv("salesforceUrl"))
-        clientId <- ZIO.fromEither(getFromEnv("salesforceClientId"))
-        clientSecret <- ZIO.fromEither(getFromEnv("salesforceClientSecret"))
-        username <- ZIO.fromEither(getFromEnv("salesforceUsername"))
-        password <- ZIO.fromEither(getFromEnv("salesforcePassword"))
-        token <- ZIO.fromEither(getFromEnv("salesforceToken"))
+        secrets <- ZIO.service[Secrets]
+        salesforceSSLSecrets <- secrets.getSalesforceSSLSecrets
+        url = salesforceSSLSecrets.url
+        clientId = salesforceSSLSecrets.client_id
+        clientSecret = salesforceSSLSecrets.client_secret
+        username = salesforceSSLSecrets.username
+        password = salesforceSSLSecrets.password
+        token = salesforceSSLSecrets.token
 
         _ <- ZIO.log("salesforceUrl: " + url)
         _ <- ZIO.log("salesforceUsername: " + username)
