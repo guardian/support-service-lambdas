@@ -1,13 +1,14 @@
 package com.gu.identityRetention
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.Assertion
 import play.api.libs.json.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.time.LocalDate
 
 class IdentityRetentionHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
@@ -114,28 +115,30 @@ class IdentityRetentionHandlerEffectsTest extends AnyFlatSpec with Matchers {
      |}
     """.stripMargin
 
+  val responseValidUntil = LocalDate.now().plusMonths(3).toString
+
   val ongoingRelationship =
-    """
+    s"""
       |{
       |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"ongoingRelationship\" : true,\n  \"relationshipEndDate\" : \"2023-02-13\",\n  \"effectiveDeletionDate\" : \"2029-07-30\",\n  \"responseValidUntil\" : \"2023-09-01\"\n}"
+      |"body":"{\\n  \\"ongoingRelationship\\" : true,\\n  \\"relationshipEndDate\\" : \\"2022-07-30\\",\\n  \\"effectiveDeletionDate\\" : \\"2029-07-30\\",\\n  \\"responseValidUntil\\" : \\"$responseValidUntil\\"\\n}"
       |}""".stripMargin
 
   val cancelledRelationship_RETAIN =
-    """
+    s"""
       |{
       |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2022-11-23\",\n  \"effectiveDeletionDate\" : \"2030-02-13\",\n  \"responseValidUntil\" : \"2023-09-01\"\n}"
+      |"body":"{\\n  \\"ongoingRelationship\\" : false,\\n  \\"relationshipEndDate\\" : \\"2023-02-13\\",\\n  \\"effectiveDeletionDate\\" : \\"2030-02-13\\",\\n  \\"responseValidUntil\\" : \\"$responseValidUntil\\"\\n}"
       |}""".stripMargin
 
   val cancelledRelationship_DELETE =
-    """
+    s"""
       |{
       |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2012-10-27\",\n  \"effectiveDeletionDate\" : \"2019-10-27\",\n  \"responseValidUntil\" : \"2023-09-01\"\n}"
+      |"body":"{\\n  \\"ongoingRelationship\\" : false,\\n  \\"relationshipEndDate\\" : \\"2012-10-27\\",\\n  \\"effectiveDeletionDate\\" : \\"2019-10-27\\",\\n  \\"responseValidUntil\\" : \\"$responseValidUntil\\"\\n}"
       |}""".stripMargin
 
   val safeToDelete =
