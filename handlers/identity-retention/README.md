@@ -77,3 +77,21 @@ The user has no recorded active or lapsed relationships.
 The user can be deleted.
 
 
+## Architecture/Components
+
+The lambda is a typical `support-service-lambdas` lambda.  
+
+Configuration is in `bigQuery-<env>.json` in the standard place in S3.
+
+The lambda depends on a library `google-bigquery` (also in this repo) which provides a general wrapper for querying BQ based on the above config.
+
+The SQL in the lambda queries a custom table `supporter_revenue_engine.identity_product_retention` which is generated 
+by a dbt model which runs daily to bring together different types of paying relationship.
+
+So any changes to the business logic of what is a paying relationship should be made in the dbt model here: https://github.com/guardian/data-platform-models/blob/10479a7290cc6803f3ffdc47341cc97f50bae68b/dbt/models/supporter_revenue_engine/identity_product_retention.sql
+
+Data Design team can help you with this.
+
+The service accounts that call BigQuery and permissions for the `supporter_revenue_engine` dataset are defined in Data Tech's `gcp-iac-terraform` repo: https://github.com/guardian/gcp-iac-terraform/tree/main/tf-cicd
+
+Data Tech team can help you with this.
