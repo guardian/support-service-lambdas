@@ -608,9 +608,9 @@ val previewResponse3 = SubscriptionUpdatePreviewResponse(
 //-----------------------------------------------------
 // Stubs for SubscriptionUpdate preview service
 //-----------------------------------------------------
-val subscriptionUpdatePreviewResult = PreviewResult(40, -10, 50, LocalDate.of(2023, 6, 10))
-val subscriptionUpdatePreviewResult2 = PreviewResult(15, 5, 20, LocalDate.of(2021, 3, 15))
-val subscriptionUpdatePreviewResult3 = PreviewResult(0.20, 5, 20, LocalDate.of(2021, 3, 15))
+val subscriptionUpdatePreviewResult = PreviewResult(40, false, -10, 50, LocalDate.of(2023, 6, 10))
+val subscriptionUpdatePreviewResult2 = PreviewResult(15, false, 5, 20, LocalDate.of(2021, 3, 15))
+val subscriptionUpdatePreviewResult3 = PreviewResult(0.20, false, 5, 20, LocalDate.of(2021, 3, 15))
 
 //-----------------------------------------------------
 // Stubs for GetSfSubscription service

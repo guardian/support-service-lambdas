@@ -40,6 +40,9 @@ object ProductMoveEndpointTypes {
   ) extends OutputBody
   case class PreviewResult(
       @description("The amount payable by the customer today") amountPayableToday: BigDecimal,
+      @description(
+        "Whether or not the amount needs to be calculated before switching the product",
+      ) checkChargeAmountBeforeUpdate: Boolean,
       @description("The amount refunded from the cancelled contribution") contributionRefundAmount: BigDecimal,
       @description("The cost of the new supporter plus subscription") supporterPlusPurchaseAmount: BigDecimal,
       @description(

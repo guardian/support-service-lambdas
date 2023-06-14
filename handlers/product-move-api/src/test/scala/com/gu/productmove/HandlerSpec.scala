@@ -362,6 +362,7 @@ object HandlerSpec extends ZIOSpecDefault {
           Map(subscriptionUpdateInputsShouldBe -> previewResponse)
         val expectedOutput = ProductMoveEndpointTypes.PreviewResult(
           amountPayableToday = 0,
+          false,
           contributionRefundAmount = -20,
           supporterPlusPurchaseAmount = 20,
           LocalDate.of(2023, 3, 6),
