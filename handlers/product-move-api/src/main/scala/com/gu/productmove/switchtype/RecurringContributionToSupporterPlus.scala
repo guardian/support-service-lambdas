@@ -412,7 +412,8 @@ object RecurringContributionToSupporterPlus {
                   last_name = account.billToContact.lastName,
                   currency = account.basicInfo.currency.symbol,
                   price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                  first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+                  first_payment_amount =
+                    if (collectPayment) paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString else "0.00",
                   date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                   payment_frequency = billingPeriodValue + "ly",
                   subscription_id = subscriptionName.value,
@@ -437,7 +438,7 @@ object RecurringContributionToSupporterPlus {
             "Supporter Plus",
             todaysDate,
             todaysDate,
-            paidAmount,
+            if (collectPayment) paidAmount else BigDecimal(0),
             csrUserId,
             caseId,
           ),
