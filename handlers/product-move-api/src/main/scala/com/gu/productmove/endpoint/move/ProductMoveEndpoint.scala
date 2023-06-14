@@ -21,6 +21,10 @@ import com.gu.productmove.zuora.{
   SubscribeLive,
   SubscriptionUpdate,
   SubscriptionUpdateLive,
+  GetInvoiceItems,
+  GetInvoiceItemsLive,
+  InvoiceItemAdjustment,
+  InvoiceItemAdjustmentLive,
   ZuoraCancel,
   ZuoraCancelLive,
 }
@@ -61,7 +65,7 @@ object ProductMoveEndpoint {
     run(
       SubscriptionName("A-S00448793"),
       SwitchType.RecurringContributionToSupporterPlus,
-      ExpectedInput(1, false, None, None),
+      ExpectedInput(1, false, false, None, None),
     ),
   )
 
@@ -188,8 +192,10 @@ object ProductMoveEndpoint {
       SubscriptionUpdateLive.layer,
       SQSLive.layer,
       GetAccountLive.layer,
+      InvoiceItemAdjustmentLive.layer,
       GuStageLive.layer,
       DynamoLive.layer,
+      GetInvoiceItemsLive.layer,
       SecretsLive.layer,
     )
 }

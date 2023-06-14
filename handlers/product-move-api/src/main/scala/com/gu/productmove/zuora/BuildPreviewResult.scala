@@ -10,6 +10,8 @@ import zio.{Clock, ZIO}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
 
 object BuildPreviewResult {
+  def isBelowMinimumStripeCharge(amount: BigDecimal): Boolean =
+    amount > BigDecimal(0) && amount < BigDecimal(0.50)
   def getPreviewResult(
       subscriptionName: SubscriptionName,
       activeRatePlanCharge: RatePlanCharge,
@@ -33,8 +35,10 @@ object BuildPreviewResult {
                   invoiceItem.serviceStartDate == date,
               )
               .head
+            amountPayableToday = supporterPlusInvoiceItems.head.totalAmount - contributionRefundInvoice.totalAmount.abs
           } yield PreviewResult(
-            supporterPlusInvoiceItems.head.totalAmount - contributionRefundInvoice.totalAmount.abs,
+            amountPayableToday,
+            isBelowMinimumStripeCharge(amountPayableToday),
             contributionRefundInvoice.totalAmount,
             supporterPlusInvoiceItems.head.totalAmount,
             supporterPlusInvoiceItems(1).serviceStartDate,
@@ -57,8 +61,10 @@ object BuildPreviewResult {
                   s"Price is null on rate plan. Subscription name is $subscriptionName. Invoice data was: $invoice",
                 ),
               )
+            amountPayableToday = supporterPlusInvoiceItems.head.totalAmount - BigDecimal.valueOf(priceDifference)
           } yield PreviewResult(
             supporterPlusInvoiceItems.head.totalAmount - BigDecimal.valueOf(priceDifference),
+            isBelowMinimumStripeCharge(amountPayableToday),
             BigDecimal.valueOf(priceDifference),
             supporterPlusInvoiceItems.head.totalAmount,
             supporterPlusInvoiceItems(1).serviceStartDate,

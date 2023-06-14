@@ -52,19 +52,23 @@ import com.gu.productmove.zuora.{
   MockCatalogue,
   MockDynamo,
   MockGetAccount,
+  MockGetInvoiceItems,
   MockGetSubscription,
   MockGetSubscriptionToCancel,
+  MockInvoiceItemAdjustment,
   MockSQS,
   MockSubscribe,
   MockSubscriptionUpdate,
   MockZuoraCancel,
   MockZuoraSetCancellationReason,
   RemoveRatePlan,
+  SubscriptionUpdatePreviewResponse,
   SubscriptionUpdateRequest,
   SubscriptionUpdateResponse,
   UpdateResponse,
 }
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
+import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResponse
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import zio.*
@@ -88,6 +92,10 @@ object HandlerSpec extends ZIOSpecDefault {
 
     val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
       (subscriptionName, expectedRequestBody)
+    val subscriptionUpdatePreviewInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
+      (subscriptionName, expectedRequestBodyPreview2)
+    val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse2)
+    val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
     val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)
     val getAccountStubs2 = Map(AccountNumber("accountNumber") -> getAccountResponse2)
     val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
@@ -97,11 +105,60 @@ object HandlerSpec extends ZIOSpecDefault {
       NumConsecutiveFailures = 0,
     )
     val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+    val invoiceItemAdjustmentInputs = ("89ad8casd9c0asdcaj89sdc98as", BigDecimal(0.30), "invoice_item_id", "Credit")
+    val invoiceItemAdjustmentStubs = Map(
+      invoiceItemAdjustmentInputs -> InvoiceItemAdjustmentResponse(true),
+    )
+    val getInvoiceItemsStubs = Map("89ad8casd9c0asdcaj89sdc98as" -> getInvoiceItemsResponse)
 
     suite("HandlerSpec")(
-      test("productMove endpoint is successful for monthly sub (upsell)") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
+      test("productMove endpoint completes switch when charge amount is below 50 cents") {
+        val endpointJsonInputBody = ExpectedInput(15.00, false, true, None, None)
+        val expectedOutput = ProductMoveEndpointTypes.Success(
+          "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
+        )
+        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse3)
+        val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
+          (subscriptionName, expectedRequestBodyLowCharge)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
+        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+          Map(emailMessageLowCharge -> (), salesforceRecordInput4 -> ())
+        val dynamoStubs = Map(supporterRatePlanItem2 -> ())
+
+        (for {
+          _ <- TestClock.setTime(time3)
+          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          invoiceItemAdjustmentRequests <- MockInvoiceItemAdjustment.requests
+          getInvoiceItemRequests <- MockGetInvoiceItems.requests
+          sqsRequests <- MockSQS.requests
+          dynamoRequests <- MockDynamo.requests
+        } yield {
+          assert(output)(equalTo(expectedOutput)) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
+          assert(subUpdateRequests)(
+            equalTo(List(subscriptionUpdatePreviewInputsShouldBe, subscriptionUpdateInputsShouldBe)),
+          ) &&
+          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
+          assert(getInvoiceItemRequests)(equalTo(List("89ad8casd9c0asdcaj89sdc98as"))) &&
+          assert(invoiceItemAdjustmentRequests)(equalTo(List(invoiceItemAdjustmentInputs))) &&
+          assert(sqsRequests)(hasSameElements(List(emailMessageLowCharge, salesforceRecordInput4))) &&
+          assert(dynamoRequests)(equalTo(List(supporterRatePlanItem2)))
+        }).provide(
+          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSQS(sqsStubs)),
+          ZLayer.succeed(new MockDynamo(dynamoStubs)),
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(Stage.valueOf("CODE")),
+        )
+      },
+      test("productMove endpoint is successful for monthly sub (upsell)") {
+        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
@@ -122,17 +179,19 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
       test(
         "productMove endpoint is successful if customer neither pays nor is refunded on switch (monthly sub, upsell)",
       ) {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
@@ -141,10 +200,12 @@ object HandlerSpec extends ZIOSpecDefault {
           Map(emailMessageBodyNoPaymentOrRefund -> (), salesforceRecordInput3 -> ())
 
         val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)) ++
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)) ++
           ZLayer.succeed(new MockSQS(sqsStubs)) ++
           ZLayer.succeed(new MockDynamo(dynamoStubs)) ++
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
+          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)) ++
+          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)) ++
           ZLayer.succeed(Stage.valueOf("PROD"))
 
         (for {
@@ -172,10 +233,8 @@ object HandlerSpec extends ZIOSpecDefault {
        */
 
       test("productMove endpoint completes if subscription is being switched early in morning on renewal date") {
-        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
-        val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
-          (subscriptionName, expectedRequestBodyPreview2)
-        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> previewResponse2)
+        val endpointJsonInputBody = ExpectedInput(15.00, true, false, None, None)
+        val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse2)
 
         (for {
           _ <- TestClock.setTime(time3)
@@ -187,22 +246,24 @@ object HandlerSpec extends ZIOSpecDefault {
         } yield {
           assert(output)(equalTo(subscriptionUpdatePreviewResult2)) &&
           assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(subUpdateRequests)(equalTo(List(subscriptionUpdatePreviewInputsShouldBe))) &&
           assert(sqsRequests)(equalTo(Nil)) &&
           assert(dynamoRequests)(equalTo(Nil))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse3))),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs)),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       },
       test(
         "(MembershipToRecurringContribution) productMove endpoint is successful",
       ) {
-        val endpointJsonInputBody = ExpectedInput(5.00, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(5.00, false, false, None, None)
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
           (subscriptionName, expectedRequestBody2)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
@@ -213,7 +274,7 @@ object HandlerSpec extends ZIOSpecDefault {
           Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())
 
         val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)) ++
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)) ++
           ZLayer.succeed(new MockSQS(sqsStubs)) ++
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
           ZLayer.succeed(Stage.valueOf("PROD"))
@@ -235,7 +296,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(layers)
       },
       test("productMove endpoint returns 500 error if identityId does not exist") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("identityId is null for subscription name A-S00339056")
         (for {
@@ -255,15 +316,17 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(dynamoRequests)(equalTo(Nil))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs2, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
-        val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(50.00, false, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
         (for {
@@ -282,21 +345,24 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(dynamoRequests)(equalTo(Nil))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
       test("preview endpoint is successful (monthly sub, upsell)") {
-        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, true, false, None, None)
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
           (subscriptionName, expectedRequestBodyPreview)
         val subscriptionUpdatePreviewStubs =
           Map(subscriptionUpdateInputsShouldBe -> previewResponse)
         val expectedOutput = ProductMoveEndpointTypes.PreviewResult(
           amountPayableToday = 0,
+          false,
           contributionRefundAmount = -20,
           supporterPlusPurchaseAmount = 20,
           LocalDate.of(2023, 3, 6),
@@ -312,10 +378,12 @@ object HandlerSpec extends ZIOSpecDefault {
           assert(subUpdatePreviewRequests)(equalTo(List(subscriptionUpdateInputsShouldBe)))
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs)),
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
+          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       },

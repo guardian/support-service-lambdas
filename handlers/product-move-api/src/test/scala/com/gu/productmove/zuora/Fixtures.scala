@@ -136,4 +136,30 @@ object Fixtures {
     ),
   )
 
+  val subscriptionsPreviewResponse3 = SubscriptionUpdateInvoice(
+    amount = 20,
+    amountWithoutTax = 18,
+    taxAmount = 2,
+    invoiceItems = List(
+      SubscriptionUpdateInvoiceItem(
+        serviceStartDate = LocalDate.parse("2021-02-15"),
+        chargeAmount = -19.70,
+        taxAmount = -0,
+        productRatePlanChargeId = contributionRatePlanChargeId,
+      ),
+      SubscriptionUpdateInvoiceItem(
+        serviceStartDate = LocalDate.parse("2021-03-15"),
+        chargeAmount = 20,
+        taxAmount = 0,
+        productRatePlanChargeId = supporterPlusRatePlanChargeId,
+      ),
+      SubscriptionUpdateInvoiceItem(
+        serviceStartDate = LocalDate.parse("2021-04-15"),
+        chargeAmount = 20,
+        taxAmount = 0,
+        productRatePlanChargeId = supporterPlusRatePlanChargeId,
+      ),
+    ),
+  )
+
 }

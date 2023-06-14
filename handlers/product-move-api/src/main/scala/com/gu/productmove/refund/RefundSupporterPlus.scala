@@ -93,6 +93,7 @@ object RefundSupporterPlus {
         negativeInvoiceId,
         balance.abs,
         invoiceItemId,
+        "Charge",
       )
       _ <- ZIO.log(
         s"Successfully applied invoice item adjustment of $balance" +
