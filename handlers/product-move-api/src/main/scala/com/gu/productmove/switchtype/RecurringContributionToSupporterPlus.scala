@@ -341,6 +341,9 @@ object RecurringContributionToSupporterPlus {
       _ <- ZIO.log(
         s"Performing product move update with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
       )
+      _ <- ZIO.log(
+        s"checkChargeAmountBeforeUpdate is $checkChargeAmountBeforeUpdate for subscription ${subscriptionName.value}",
+      )
       stage <- ZIO.service[Stage]
       accountFuture <- GetAccount.get(subscription.accountNumber).fork
 
