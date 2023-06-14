@@ -135,7 +135,7 @@ object RecurringContributionToSupporterPlus {
           doUpdate(
             subscriptionName,
             postData.price,
-            postData.recallPreview,
+            postData.checkChargeAmountBeforeUpdate,
             BigDecimal(ratePlanCharge.price.get),
             ratePlanCharge,
             currency,
@@ -322,7 +322,7 @@ object RecurringContributionToSupporterPlus {
   private def doUpdate(
       subscriptionName: SubscriptionName,
       price: BigDecimal,
-      recallPreview: Boolean,
+      checkChargeAmountBeforeUpdate: Boolean,
       previousAmount: BigDecimal,
       ratePlanCharge: RatePlanCharge,
       currency: Currency,
@@ -349,7 +349,7 @@ object RecurringContributionToSupporterPlus {
         Instead we write-off the invoices in the `adjustNonCollectedInvoices` function.
        */
       amountPayableToday <-
-        if (recallPreview) {
+        if (checkChargeAmountBeforeUpdate) {
           for {
             previewResponse <- doPreview(
               subscriptionName,
