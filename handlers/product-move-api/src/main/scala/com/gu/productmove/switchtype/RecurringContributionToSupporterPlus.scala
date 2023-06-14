@@ -289,6 +289,36 @@ object RecurringContributionToSupporterPlus {
     )
   } yield previewResult
 
+  /*
+     This function is used to adjust the invoice item for the subscription charge
+   */
+  private def adjustNonCollectedInvoices(
+      collectPayment: Boolean,
+      updateResponse: SubscriptionUpdateResponse,
+      supporterPlusRatePlanIds: SupporterPlusRatePlanIds,
+      subscriptionName: SubscriptionName,
+      amountPayableToday: BigDecimal,
+  ) =
+    if (!collectPayment) {
+      for {
+        invoiceResponse <- GetInvoiceItems.get(updateResponse.invoiceId.get)
+        invoiceItems = invoiceResponse.invoiceItems
+        invoiceItem <- ZIO
+          .fromOption(
+            invoiceItems.find(_.productRatePlanChargeId == supporterPlusRatePlanIds.subscriptionRatePlanChargeId),
+          )
+          .orElseFail(
+            InternalServerError(s"Could not find invoice item for rateplanchargeid ${subscriptionName.value}"),
+          )
+        _ <- InvoiceItemAdjustment.update(
+          updateResponse.invoiceId.get,
+          amountPayableToday,
+          invoiceItem.id,
+          "Credit",
+        )
+      } yield ()
+    } else ZIO.succeed(())
+
   private def doUpdate(
       subscriptionName: SubscriptionName,
       price: BigDecimal,
@@ -314,6 +344,10 @@ object RecurringContributionToSupporterPlus {
       stage <- ZIO.service[Stage]
       accountFuture <- GetAccount.get(subscription.accountNumber).fork
 
+      /*
+        If the amount payable today is less than 0.50, we don't want to collect payment. Stripe has a minimum charge of 50 cents.
+        Instead we write-off the invoices in the `adjustNonCollectedInvoices` function.
+       */
       amountPayableToday <-
         if (recallPreview) {
           for {
@@ -328,7 +362,6 @@ object RecurringContributionToSupporterPlus {
             amount = previewResponse.asInstanceOf[PreviewResult].amountPayableToday
           } yield amount
         } else ZIO.succeed(BigDecimal(1))
-
       collectPayment = !(amountPayableToday > BigDecimal(0) && amountPayableToday < BigDecimal(0.50))
 
       given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
@@ -349,26 +382,13 @@ object RecurringContributionToSupporterPlus {
 
       supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
 
-      _ <-
-        if (!collectPayment) {
-          for {
-            invoiceResponse <- GetInvoiceItems.get(updateResponse.invoiceId.get)
-            invoiceItems = invoiceResponse.invoiceItems
-            invoiceItem <- ZIO
-              .fromOption(
-                invoiceItems.find(_.productRatePlanChargeId == supporterPlusRatePlanIds.subscriptionRatePlanChargeId),
-              )
-              .orElseFail(
-                InternalServerError(s"Could not find invoice item for rateplanchargeid ${subscriptionName.value}"),
-              )
-            _ <- InvoiceItemAdjustment.update(
-              updateResponse.invoiceId.get,
-              amountPayableToday,
-              invoiceItem.id,
-              "Credit",
-            )
-          } yield ()
-        } else ZIO.succeed(())
+      _ <- adjustNonCollectedInvoices(
+        collectPayment,
+        updateResponse,
+        supporterPlusRatePlanIds,
+        subscriptionName,
+        amountPayableToday,
+      )
 
       account <- accountFuture.join
 
@@ -392,8 +412,7 @@ object RecurringContributionToSupporterPlus {
                   last_name = account.billToContact.lastName,
                   currency = account.basicInfo.currency.symbol,
                   price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                  first_payment_amount =
-                    if (collectPayment) paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString else "0.00",
+                  first_payment_amount = paidAmount.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
                   date_of_first_payment = todaysDate.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                   payment_frequency = billingPeriodValue + "ly",
                   subscription_id = subscriptionName.value,
@@ -418,7 +437,7 @@ object RecurringContributionToSupporterPlus {
             "Supporter Plus",
             todaysDate,
             todaysDate,
-            if (collectPayment) paidAmount else BigDecimal(0),
+            paidAmount,
             csrUserId,
             caseId,
           ),
