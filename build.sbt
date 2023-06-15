@@ -236,6 +236,12 @@ lazy val `fulfilment-dates` = library(project in file("lib/fulfilment-dates"))
     dependencyOverrides ++= jacksonDependencies,
   )
 
+lazy val `google-bigquery` = library(project in file("lib/google-bigquery"))
+  .dependsOn(testDep, `config-core`, `effects-s3` % "test", handler % "test")
+  .settings(
+    libraryDependencies ++= Seq(googleBigQuery, playJson) ++ logging,
+  )
+
 lazy val `zuora-baton` = library(project in file("lib/zuora-baton"))
   .dependsOn(zuora, `config-core`)
   .settings(
@@ -352,7 +358,17 @@ lazy val `catalog-service` = lambdaProject(
 lazy val `identity-retention` = lambdaProject(
   "identity-retention",
   "Confirms whether an identity account can be deleted, from a reader revenue perspective",
-).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `google-bigquery`, testDep)
+  .settings(
+    assemblyMergeStrategy := {
+      case "arrow-git.properties" => MergeStrategy.discard
+      case "META-INF/kotlin-stdlib.kotlin_module" => MergeStrategy.discard
+      case "META-INF/kotlin-stdlib-common.kotlin_module" => MergeStrategy.discard
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy).value
+        oldStrategy(x)
+    },
+  )
 
 lazy val `new-product-api` = lambdaProject(
   "new-product-api",
