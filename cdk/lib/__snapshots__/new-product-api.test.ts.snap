@@ -328,7 +328,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5032d7ffc24edfcab8649012f7318980e5c": {
+    "RestApiDeployment180EC50344407816d47702394b8804555dadfdb6": {
       "DependsOn": [
         "RestApiaddsubscriptionOPTIONS2806FCEE",
         "RestApiaddsubscriptionPOST9C82CE2B",
@@ -352,7 +352,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5032d7ffc24edfcab8649012f7318980e5c",
+          "Ref": "RestApiDeployment180EC50344407816d47702394b8804555dadfdb6",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -497,7 +497,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "addsubscriptioncdk2DDD486E",
+                    "addsubscriptionA4705116",
                     "Arn",
                   ],
                 },
@@ -520,7 +520,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "addsubscriptioncdk2DDD486E",
+            "addsubscriptionA4705116",
             "Arn",
           ],
         },
@@ -557,7 +557,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "addsubscriptioncdk2DDD486E",
+            "addsubscriptionA4705116",
             "Arn",
           ],
         },
@@ -630,7 +630,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "productcatalogcdk8321E349",
+                    "productcatalog39C6E2D1",
                     "Arn",
                   ],
                 },
@@ -653,7 +653,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "productcatalogcdk8321E349",
+            "productcatalog39C6E2D1",
             "Arn",
           ],
         },
@@ -690,7 +690,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "productcatalogcdk8321E349",
+            "productcatalog39C6E2D1",
             "Arn",
           ],
         },
@@ -765,10 +765,10 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "addsubscriptioncdk2DDD486E": {
+    "addsubscriptionA4705116": {
       "DependsOn": [
-        "addsubscriptioncdkServiceRoleDefaultPolicy653A984A",
-        "addsubscriptioncdkServiceRole8DDC569D",
+        "addsubscriptionServiceRoleDefaultPolicy00A36F4C",
+        "addsubscriptionServiceRole472A8352",
       ],
       "Properties": {
         "Code": {
@@ -788,12 +788,12 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "add-subscription-cdk-CODE",
+        "FunctionName": "add-subscription-CODE",
         "Handler": "com.gu.newproduct.api.addsubscription.Handler::apply",
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
-            "addsubscriptioncdkServiceRole8DDC569D",
+            "addsubscriptionServiceRole472A8352",
             "Arn",
           ],
         },
@@ -824,7 +824,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "addsubscriptioncdkServiceRole8DDC569D": {
+    "addsubscriptionServiceRole472A8352": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -877,7 +877,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "addsubscriptioncdkServiceRoleDefaultPolicy653A984A": {
+    "addsubscriptionServiceRoleDefaultPolicy00A36F4C": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -968,10 +968,10 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "addsubscriptioncdkServiceRoleDefaultPolicy653A984A",
+        "PolicyName": "addsubscriptionServiceRoleDefaultPolicy00A36F4C",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
         ],
       },
@@ -1002,7 +1002,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
                     },
                     ":log-group:/aws/lambda/",
                     {
-                      "Ref": "addsubscriptioncdk2DDD486E",
+                      "Ref": "addsubscriptionA4705116",
                     },
                     ":log-stream:*",
                   ],
@@ -1015,7 +1015,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "PolicyName": "addsubscriptioncloudwatchlogsinlinepolicy8E213983",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
         ],
       },
@@ -1036,16 +1036,16 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "PolicyName": "addsubscriptions3inlinepolicy04D3AE08",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "productcatalogcdk8321E349": {
+    "productcatalog39C6E2D1": {
       "DependsOn": [
-        "productcatalogcdkServiceRoleDefaultPolicy76370F34",
-        "productcatalogcdkServiceRole806EFAB9",
+        "productcatalogServiceRoleDefaultPolicyD9F5584E",
+        "productcatalogServiceRoleDC36DEAA",
       ],
       "Properties": {
         "Code": {
@@ -1065,12 +1065,12 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "product-catalog-cdk-CODE",
+        "FunctionName": "product-catalog-CODE",
         "Handler": "com.gu.newproduct.api.productcatalog.Handler::apply",
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
-            "productcatalogcdkServiceRole806EFAB9",
+            "productcatalogServiceRoleDC36DEAA",
             "Arn",
           ],
         },
@@ -1101,7 +1101,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "productcatalogcdkServiceRole806EFAB9": {
+    "productcatalogServiceRoleDC36DEAA": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1154,7 +1154,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "productcatalogcdkServiceRoleDefaultPolicy76370F34": {
+    "productcatalogServiceRoleDefaultPolicyD9F5584E": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1245,10 +1245,10 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "productcatalogcdkServiceRoleDefaultPolicy76370F34",
+        "PolicyName": "productcatalogServiceRoleDefaultPolicyD9F5584E",
         "Roles": [
           {
-            "Ref": "productcatalogcdkServiceRole806EFAB9",
+            "Ref": "productcatalogServiceRoleDC36DEAA",
           },
         ],
       },
@@ -1279,7 +1279,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
                     },
                     ":log-group:/aws/lambda/",
                     {
-                      "Ref": "productcatalogcdk8321E349",
+                      "Ref": "productcatalog39C6E2D1",
                     },
                     ":log-stream:*",
                   ],
@@ -1292,7 +1292,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "PolicyName": "productcatalogcloudwatchlogsinlinepolicy8AAE3528",
         "Roles": [
           {
-            "Ref": "productcatalogcdkServiceRole806EFAB9",
+            "Ref": "productcatalogServiceRoleDC36DEAA",
           },
         ],
       },
@@ -1316,10 +1316,10 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "PolicyName": "shareds3inlinepolicyEE2F91BC",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
           {
-            "Ref": "productcatalogcdkServiceRole806EFAB9",
+            "Ref": "productcatalogServiceRoleDC36DEAA",
           },
         ],
       },
@@ -1358,7 +1358,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "PolicyName": "sqsinlinepolicyA7B14341",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
         ],
       },
@@ -1696,7 +1696,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503f400754115e5a4122a60eff57814e724": {
+    "RestApiDeployment180EC503f3c2ec544e65ed3405279ac7fc540907": {
       "DependsOn": [
         "RestApiaddsubscriptionOPTIONS2806FCEE",
         "RestApiaddsubscriptionPOST9C82CE2B",
@@ -1720,7 +1720,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503f400754115e5a4122a60eff57814e724",
+          "Ref": "RestApiDeployment180EC503f3c2ec544e65ed3405279ac7fc540907",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1865,7 +1865,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "addsubscriptioncdk2DDD486E",
+                    "addsubscriptionA4705116",
                     "Arn",
                   ],
                 },
@@ -1888,7 +1888,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "addsubscriptioncdk2DDD486E",
+            "addsubscriptionA4705116",
             "Arn",
           ],
         },
@@ -1925,7 +1925,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "addsubscriptioncdk2DDD486E",
+            "addsubscriptionA4705116",
             "Arn",
           ],
         },
@@ -1998,7 +1998,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "productcatalogcdk8321E349",
+                    "productcatalog39C6E2D1",
                     "Arn",
                   ],
                 },
@@ -2021,7 +2021,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "productcatalogcdk8321E349",
+            "productcatalog39C6E2D1",
             "Arn",
           ],
         },
@@ -2058,7 +2058,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "productcatalogcdk8321E349",
+            "productcatalog39C6E2D1",
             "Arn",
           ],
         },
@@ -2133,10 +2133,10 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "addsubscriptioncdk2DDD486E": {
+    "addsubscriptionA4705116": {
       "DependsOn": [
-        "addsubscriptioncdkServiceRoleDefaultPolicy653A984A",
-        "addsubscriptioncdkServiceRole8DDC569D",
+        "addsubscriptionServiceRoleDefaultPolicy00A36F4C",
+        "addsubscriptionServiceRole472A8352",
       ],
       "Properties": {
         "Code": {
@@ -2156,12 +2156,12 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "add-subscription-cdk-PROD",
+        "FunctionName": "add-subscription-PROD",
         "Handler": "com.gu.newproduct.api.addsubscription.Handler::apply",
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
-            "addsubscriptioncdkServiceRole8DDC569D",
+            "addsubscriptionServiceRole472A8352",
             "Arn",
           ],
         },
@@ -2192,7 +2192,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "addsubscriptioncdkServiceRole8DDC569D": {
+    "addsubscriptionServiceRole472A8352": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -2245,7 +2245,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "addsubscriptioncdkServiceRoleDefaultPolicy653A984A": {
+    "addsubscriptionServiceRoleDefaultPolicy00A36F4C": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2336,10 +2336,10 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "addsubscriptioncdkServiceRoleDefaultPolicy653A984A",
+        "PolicyName": "addsubscriptionServiceRoleDefaultPolicy00A36F4C",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
         ],
       },
@@ -2370,7 +2370,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
                     },
                     ":log-group:/aws/lambda/",
                     {
-                      "Ref": "addsubscriptioncdk2DDD486E",
+                      "Ref": "addsubscriptionA4705116",
                     },
                     ":log-stream:*",
                   ],
@@ -2383,7 +2383,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "PolicyName": "addsubscriptioncloudwatchlogsinlinepolicy8E213983",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
         ],
       },
@@ -2404,16 +2404,16 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "PolicyName": "addsubscriptions3inlinepolicy04D3AE08",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "productcatalogcdk8321E349": {
+    "productcatalog39C6E2D1": {
       "DependsOn": [
-        "productcatalogcdkServiceRoleDefaultPolicy76370F34",
-        "productcatalogcdkServiceRole806EFAB9",
+        "productcatalogServiceRoleDefaultPolicyD9F5584E",
+        "productcatalogServiceRoleDC36DEAA",
       ],
       "Properties": {
         "Code": {
@@ -2433,12 +2433,12 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "product-catalog-cdk-PROD",
+        "FunctionName": "product-catalog-PROD",
         "Handler": "com.gu.newproduct.api.productcatalog.Handler::apply",
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
-            "productcatalogcdkServiceRole806EFAB9",
+            "productcatalogServiceRoleDC36DEAA",
             "Arn",
           ],
         },
@@ -2469,7 +2469,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "productcatalogcdkServiceRole806EFAB9": {
+    "productcatalogServiceRoleDC36DEAA": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -2522,7 +2522,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "productcatalogcdkServiceRoleDefaultPolicy76370F34": {
+    "productcatalogServiceRoleDefaultPolicyD9F5584E": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2613,10 +2613,10 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "productcatalogcdkServiceRoleDefaultPolicy76370F34",
+        "PolicyName": "productcatalogServiceRoleDefaultPolicyD9F5584E",
         "Roles": [
           {
-            "Ref": "productcatalogcdkServiceRole806EFAB9",
+            "Ref": "productcatalogServiceRoleDC36DEAA",
           },
         ],
       },
@@ -2647,7 +2647,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
                     },
                     ":log-group:/aws/lambda/",
                     {
-                      "Ref": "productcatalogcdk8321E349",
+                      "Ref": "productcatalog39C6E2D1",
                     },
                     ":log-stream:*",
                   ],
@@ -2660,7 +2660,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "PolicyName": "productcatalogcloudwatchlogsinlinepolicy8AAE3528",
         "Roles": [
           {
-            "Ref": "productcatalogcdkServiceRole806EFAB9",
+            "Ref": "productcatalogServiceRoleDC36DEAA",
           },
         ],
       },
@@ -2684,10 +2684,10 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "PolicyName": "shareds3inlinepolicyEE2F91BC",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
           {
-            "Ref": "productcatalogcdkServiceRole806EFAB9",
+            "Ref": "productcatalogServiceRoleDC36DEAA",
           },
         ],
       },
@@ -2726,7 +2726,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "PolicyName": "sqsinlinepolicyA7B14341",
         "Roles": [
           {
-            "Ref": "addsubscriptioncdkServiceRole8DDC569D",
+            "Ref": "addsubscriptionServiceRole472A8352",
           },
         ],
       },
