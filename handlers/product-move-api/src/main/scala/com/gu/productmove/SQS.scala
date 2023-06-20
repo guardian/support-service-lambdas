@@ -66,7 +66,11 @@ object SQSLive {
             }
             .mapError { ex =>
               message.To.ContactAttributes.SubscriberAttributes match {
-                case attributes: EmailPayloadProductSwitchAttributes =>
+                case attributes: RCtoSPEmailPayloadProductSwitchAttributes =>
+                  InternalServerError(
+                    s"Failed to send product switch email message to SQS for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName",
+                  )
+                case attributes: toRCEmailPayloadProductSwitchAttributes =>
                   InternalServerError(
                     s"Failed to send product switch email message to SQS for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName",
                   )
@@ -78,7 +82,9 @@ object SQSLive {
             }
           _ <- ZIO.log(
             message.To.ContactAttributes.SubscriberAttributes match {
-              case attributes: EmailPayloadProductSwitchAttributes =>
+              case attributes: RCtoSPEmailPayloadProductSwitchAttributes =>
+                s"Successfully sent product switch email for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} to SQS queue $emailQueueName"
+              case attributes: toRCEmailPayloadProductSwitchAttributes =>
                 s"Successfully sent product switch email for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} to SQS queue $emailQueueName"
               case _: EmailPayloadCancellationAttributes =>
                 s"Successfully sent subscription cancellation email for sfContactId: ${message.SfContactId} to SQS queue $emailQueueName"
@@ -158,7 +164,17 @@ object SQSLive {
 
 sealed trait EmailPayloadAttributes
 
-case class EmailPayloadProductSwitchAttributes(
+case class toRCEmailPayloadProductSwitchAttributes(
+    first_name: String,
+    last_name: String,
+    start_date: String,
+    price: String,
+    payment_frequency: String,
+    currency: String,
+    subscription_id: String,
+) extends EmailPayloadAttributes
+
+case class RCtoSPEmailPayloadProductSwitchAttributes(
     first_name: String,
     last_name: String,
     first_payment_amount: String,
@@ -211,13 +227,18 @@ object EmailMessage {
   }
 }
 
-given JsonEncoder[EmailPayloadProductSwitchAttributes] = DeriveJsonEncoder.gen[EmailPayloadProductSwitchAttributes]
+given JsonEncoder[RCtoSPEmailPayloadProductSwitchAttributes] =
+  DeriveJsonEncoder.gen[RCtoSPEmailPayloadProductSwitchAttributes]
+given JsonEncoder[toRCEmailPayloadProductSwitchAttributes] =
+  DeriveJsonEncoder.gen[toRCEmailPayloadProductSwitchAttributes]
 given JsonEncoder[EmailPayloadCancellationAttributes] = DeriveJsonEncoder.gen[EmailPayloadCancellationAttributes]
 given JsonEncoder[EmailPayloadAttributes] =
   (attributes: EmailPayloadAttributes, indent: Option[RuntimeFlags], out: Write) =>
     attributes match {
-      case attributes: EmailPayloadProductSwitchAttributes =>
-        implicitly[JsonEncoder[EmailPayloadProductSwitchAttributes]].unsafeEncode(attributes, indent, out)
+      case attributes: RCtoSPEmailPayloadProductSwitchAttributes =>
+        implicitly[JsonEncoder[RCtoSPEmailPayloadProductSwitchAttributes]].unsafeEncode(attributes, indent, out)
+      case attributes: toRCEmailPayloadProductSwitchAttributes =>
+        implicitly[JsonEncoder[toRCEmailPayloadProductSwitchAttributes]].unsafeEncode(attributes, indent, out)
       case attributes: EmailPayloadCancellationAttributes =>
         implicitly[JsonEncoder[EmailPayloadCancellationAttributes]].unsafeEncode(attributes, indent, out)
     }

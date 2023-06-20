@@ -21,7 +21,7 @@ import com.gu.productmove.zuora.Fixtures.{
   subscriptionsPreviewResponse3,
 }
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
-import com.gu.productmove.{EmailMessage, EmailPayload, EmailPayloadProductSwitchAttributes}
+import com.gu.productmove.{EmailMessage, EmailPayload, RCtoSPEmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
 
@@ -285,7 +285,7 @@ val emailMessageBody = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
-      EmailPayloadProductSwitchAttributes(
+      RCtoSPEmailPayloadProductSwitchAttributes(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
@@ -306,7 +306,7 @@ val emailMessageBodyRefund = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
-      EmailPayloadProductSwitchAttributes(
+      RCtoSPEmailPayloadProductSwitchAttributes(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
@@ -327,7 +327,7 @@ val emailMessageBodyNoPaymentOrRefund = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
-      EmailPayloadProductSwitchAttributes(
+      RCtoSPEmailPayloadProductSwitchAttributes(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
@@ -348,7 +348,7 @@ val emailMessageLowCharge = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
-      EmailPayloadProductSwitchAttributes(
+      RCtoSPEmailPayloadProductSwitchAttributes(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
@@ -370,19 +370,18 @@ val emailMessageBody2 = EmailMessage(
   To = EmailPayload(
     Address = Some("example@gmail.com"),
     EmailPayloadContactAttributes(
-      EmailPayloadProductSwitchAttributes(
+      toRCEmailPayloadProductSwitchAttributes(
         subscription_id = "A-S00339056",
         first_name = "John",
         last_name = "Hee",
-        first_payment_amount = "5.00",
         price = "5.00",
         payment_frequency = "monthly",
-        date_of_first_payment = "29 September 2022",
+        start_date = "29 September 2022",
         currency = "£",
       ),
     ),
   ),
-  "SV_RCtoSP_Switch",
+  "SV_MBtoRC_Switch",
   "sfContactId",
   Some("12345"),
 )

@@ -36,7 +36,6 @@ import com.gu.productmove.{
   EmailMessage,
   EmailPayload,
   EmailPayloadContactAttributes,
-  EmailPayloadProductSwitchAttributes,
   GuStageLive,
   SQS,
   SQSLive,

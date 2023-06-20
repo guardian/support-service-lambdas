@@ -107,13 +107,12 @@ object ToRecurringContribution {
             EmailPayload(
               Address = Some(account.billToContact.workEmail),
               ContactAttributes = EmailPayloadContactAttributes(
-                SubscriberAttributes = EmailPayloadProductSwitchAttributes(
+                SubscriberAttributes = toRCEmailPayloadProductSwitchAttributes(
                   first_name = account.billToContact.firstName,
                   last_name = account.billToContact.lastName,
                   currency = account.basicInfo.currency.symbol,
                   price = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                  first_payment_amount = price.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
-                  date_of_first_payment =
+                  start_date =
                     activeRatePlanCharge.chargedThroughDate.get.format(DateTimeFormatter.ofPattern("d MMMM uuuu")),
                   payment_frequency = billingPeriodValue + "ly",
                   subscription_id = subscriptionName.value,
