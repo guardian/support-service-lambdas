@@ -434,18 +434,21 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     scalatest,
     scalajHttp,
     awsS3,
+    awsDynamo,
     simpleConfig,
     awsLambda,
     awsSQS,
     awsEvents,
     scalaMock,
+    awsSecretsManager,
+    upickle,
   ) ++ logging,
 ).dependsOn(`effects-s3`, `effects-cloudwatch`, `salesforce-core`)
 
 lazy val `sf-emails-to-s3-exporter` = lambdaProject(
   "sf-emails-to-s3-exporter",
   "Runs regularly to retrieve emails from Salesforce and save as json in S3",
-  Seq(circe, circeParser, scalajHttp, awsS3),
+  Seq(circe, circeParser, scalajHttp, awsS3, awsSecretsManager, upickle),
 ).dependsOn(`effects-s3`, `effects-cloudwatch`)
 
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
