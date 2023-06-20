@@ -29,6 +29,9 @@ object Dependencies {
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
+  // GCP
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.23.2"
+
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion

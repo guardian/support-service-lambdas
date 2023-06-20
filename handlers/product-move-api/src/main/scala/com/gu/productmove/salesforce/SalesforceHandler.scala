@@ -6,7 +6,7 @@ import com.gu.productmove.GuStageLive.Stage
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
 import com.gu.productmove.salesforce.Salesforce.{SalesforceRecordInput, createSfRecord}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SecretsLive, SttpClientLive}
 import sttp.client3.SttpBackend
 import zio.json.*
 import zio.{Exit, Runtime, Task, Unsafe, ZIO}
@@ -38,6 +38,7 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
             GetSfSubscriptionLive.layer,
             SalesforceClientLive.layer,
             CreateRecordLive.layer,
+            SecretsLive.layer,
           ),
       ) match
         case Exit.Success(value) => value

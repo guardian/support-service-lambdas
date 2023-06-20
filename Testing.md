@@ -1,5 +1,7 @@
 # Testing best practice
 
+See [README.md](README.md) for details on running the tests.
+
 ## Unit Testing
 The purpose of unit/component testing is:
 1. to prevent us breaking things
