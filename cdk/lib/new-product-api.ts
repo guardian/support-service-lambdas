@@ -1,4 +1,3 @@
-import {join} from "path";
 import {GuApiGatewayWithLambdaByPath} from "@guardian/cdk";
 import {GuAlarm} from "@guardian/cdk/lib/constructs/cloudwatch";
 import type {GuStackProps} from "@guardian/cdk/lib/constructs/core";
@@ -11,7 +10,6 @@ import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {Runtime} from "aws-cdk-lib/aws-lambda";
 import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
-import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 
 export interface NewProductApiProps extends GuStackProps {
   domainName: string;
@@ -25,13 +23,6 @@ export interface NewProductApiProps extends GuStackProps {
 export class NewProductApi extends GuStack {
   constructor(scope: App, id: string, props: NewProductApiProps) {
     super(scope, id, props);
-
-
-    // ---- CFN template resources ---- //
-    const yamlTemplateFilePath = join(__dirname, "../..", "handlers/new-product-api/cfn.yaml");
-    new CfnInclude(this, "YamlTemplate", {
-      templateFile: yamlTemplateFilePath,
-    });
 
 
     // ---- Miscellaneous constants ---- //
