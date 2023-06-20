@@ -56,8 +56,8 @@ import com.gu.productmove.{
   EmailMessage,
   EmailPayload,
   EmailPayloadContactAttributes,
-  EmailPayloadProductSwitchAttributes,
   GuStageLive,
+  RCtoSPEmailPayloadProductSwitchAttributes,
   SQS,
   SQSLive,
   SttpClientLive,
@@ -410,7 +410,7 @@ object RecurringContributionToSupporterPlus {
             EmailPayload(
               Address = Some(account.billToContact.workEmail),
               ContactAttributes = EmailPayloadContactAttributes(
-                SubscriberAttributes = EmailPayloadProductSwitchAttributes(
+                SubscriberAttributes = RCtoSPEmailPayloadProductSwitchAttributes(
                   first_name = account.billToContact.firstName,
                   last_name = account.billToContact.lastName,
                   currency = account.basicInfo.currency.symbol,
