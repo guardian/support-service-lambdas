@@ -120,7 +120,7 @@ object ToRecurringContribution {
                 ),
               ),
             ),
-            "SV_RCtoSP_Switch",
+            "SV_MBtoRC_Switch",
             account.basicInfo.sfContactId__c,
             Some(identityId),
           ),
