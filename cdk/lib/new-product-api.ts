@@ -47,15 +47,15 @@ export class NewProductApi extends GuStack {
 
 
     // ---- API-triggered lambda functions ---- //
-    const addSubscriptionLambda = new GuLambdaFunction(this, "add-subscription-cdk", {
+    const addSubscriptionLambda = new GuLambdaFunction(this, "add-subscription", {
       handler: "com.gu.newproduct.api.addsubscription.Handler::apply",
-      functionName: `add-subscription-cdk-${this.stage}`,
+      functionName: `add-subscription-${this.stage}`,
       ...sharedLambdaProps,
     });
 
-    const productCatalogLambda = new GuLambdaFunction(this, "product-catalog-cdk", {
+    const productCatalogLambda = new GuLambdaFunction(this, "product-catalog", {
       handler: "com.gu.newproduct.api.productcatalog.Handler::apply",
-      functionName: `product-catalog-cdk-${this.stage}`,
+      functionName: `product-catalog-${this.stage}`,
       ...sharedLambdaProps,
     });
 
