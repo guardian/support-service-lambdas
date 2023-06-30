@@ -1,0 +1,20 @@
+{
+  "To":{
+    "Address":"example@gmail.com",
+    "ContactAttributes":{
+      "SubscriberAttributes":{
+        "first_name":"Jon",
+        "last_name":"Hee",
+        "first_payment_amount":"6.67",
+        "date_of_first_payment":"7 June 2023",
+        "price":"10.00",
+        "payment_frequency":"monthly",
+        "currency":"€",
+        "subscription_id":"A-S01743427"
+      }
+    }
+  },
+  "DataExtensionName":"SV_RCtoSP_Switch",
+  "SfContactId":"0035I00000Wum13QAB",
+  "IdentityUserId":"101388443"
+}

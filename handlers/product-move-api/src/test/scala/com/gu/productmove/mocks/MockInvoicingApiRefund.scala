@@ -3,7 +3,6 @@ package com.gu.productmove.mocks
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
-import com.gu.productmove.zuora.MockGetAccount
 import com.gu.productmove.zuora.model.SubscriptionName
 import zio.ZIO
 

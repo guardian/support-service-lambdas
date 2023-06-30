@@ -16,5 +16,5 @@ object SubscriptionJsonCleaner extends App {
       str.replaceAll(s""""($fieldName)": ".+"""", s""""$$1": "$replacementVal"""")
     }
 
-  println(cleaned(Source.fromResource(args(0)).mkString))
+  println(cleaned(Source.fromResource("zuora/GetAccount/responses/response1.json").mkString))
 }
