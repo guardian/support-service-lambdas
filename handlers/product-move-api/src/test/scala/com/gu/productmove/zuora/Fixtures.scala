@@ -5,7 +5,7 @@ import com.gu.productmove.zuora.SubscriptionUpdateSpec.test
 import java.time.LocalDate
 
 object Fixtures {
-  val supporterPlusRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6"
+  val supporterPlusRatePlanChargeId = "8ad08cbd8586721c01858804e3715378"
   val contributionRatePlanChargeId = "2c92c0f85a6b1352015a7fcf35ab397c"
 
   val invoiceWithMultipleInvoiceItems = SubscriptionUpdateInvoice(

@@ -3,22 +3,22 @@ package com.gu.productmove.endpoint.move
 import com.gu.effects.GetFromS3
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId
-import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlusV2, MonthlySupporterPlusV2}
+import com.gu.newproduct.api.productcatalog.PlanId.{MonthlySupporterPlus, AnnualSupporterPlus}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{
-  ProductRatePlanId,
-  SupporterPlusZuoraIds,
-  ZuoraIds,
   zuoraIdsForStage,
+  ZuoraIds,
+  SupporterPlusZuoraIds,
+  ProductRatePlanId,
 }
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
+import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly, PricesFromZuoraCatalog, AmountMinorUnits, Annual}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
-  ErrorResponse,
   ExpectedInput,
-  InternalServerError,
   OutputBody,
   PreviewResult,
+  ErrorResponse,
+  InternalServerError,
   Success,
 }
 import com.gu.productmove.move.BuildPreviewResult
@@ -27,40 +27,40 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.{
-  AddRatePlan,
-  ChargeOverrides,
-  GetAccount,
-  GetAccountLive,
-  GetInvoiceItems,
-  GetSubscription,
-  GetSubscriptionLive,
-  InvoiceItemAdjustment,
-  RemoveRatePlan,
-  Subscribe,
-  SubscribeLive,
-  SubscriptionUpdate,
-  SubscriptionUpdateInvoice,
-  SubscriptionUpdateInvoiceItem,
-  SubscriptionUpdateLive,
-  SubscriptionUpdatePreviewResponse,
-  SubscriptionUpdateRequest,
   SubscriptionUpdateResponse,
-  ZuoraCancel,
+  AddRatePlan,
+  GetAccountLive,
+  SubscriptionUpdateLive,
   ZuoraCancelLive,
+  SubscribeLive,
+  SubscriptionUpdateInvoice,
+  InvoiceItemAdjustment,
+  SubscriptionUpdateRequest,
+  GetAccount,
+  ZuoraCancel,
+  GetSubscription,
+  ChargeOverrides,
+  SubscriptionUpdate,
+  RemoveRatePlan,
+  SubscriptionUpdatePreviewResponse,
+  SubscriptionUpdateInvoiceItem,
+  GetSubscriptionLive,
+  Subscribe,
+  GetInvoiceItems,
 }
 import com.gu.productmove.{
+  SQSLive,
   AwsCredentialsLive,
-  AwsS3Live,
-  Dynamo,
   DynamoLive,
   EmailMessage,
-  EmailPayload,
-  EmailPayloadContactAttributes,
-  GuStageLive,
-  RCtoSPEmailPayloadProductSwitchAttributes,
-  SQS,
-  SQSLive,
   SttpClientLive,
+  Dynamo,
+  RCtoSPEmailPayloadProductSwitchAttributes,
+  AwsS3Live,
+  EmailPayloadContactAttributes,
+  EmailPayload,
+  GuStageLive,
+  SQS,
 }
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config
@@ -70,8 +70,6 @@ import zio.json.*
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-val SwitchToV2SupporterPlus = false
 
 case class SupporterPlusRatePlanIds(
     ratePlanId: String,
@@ -154,10 +152,10 @@ object RecurringContributionToSupporterPlus {
     zuoraIdsForStage(config.Stage(stage.toString)).left
       .map(err => InternalServerError(err))
       .flatMap { zuoraIds =>
-        import zuoraIds.supporterPlusZuoraIds.{annual, annualV2, monthly, monthlyV2}
+        import zuoraIds.supporterPlusZuoraIds.{annualV2, monthlyV2}
 
         billingPeriod match {
-          case Monthly if SwitchToV2SupporterPlus =>
+          case Monthly =>
             Right(
               SupporterPlusRatePlanIds(
                 monthlyV2.productRatePlanId.value,
@@ -165,28 +163,12 @@ object RecurringContributionToSupporterPlus {
                 Some(monthlyV2.contributionProductRatePlanChargeId.value),
               ),
             )
-          case Monthly =>
-            Right(
-              SupporterPlusRatePlanIds(
-                monthly.productRatePlanId.value,
-                monthly.productRatePlanChargeId.value,
-                None,
-              ),
-            )
-          case Annual if SwitchToV2SupporterPlus =>
+          case Annual =>
             Right(
               SupporterPlusRatePlanIds(
                 annualV2.productRatePlanId.value,
                 annualV2.productRatePlanChargeId.value,
                 Some(annualV2.contributionProductRatePlanChargeId.value),
-              ),
-            )
-          case Annual =>
-            Right(
-              SupporterPlusRatePlanIds(
-                annual.productRatePlanId.value,
-                annual.productRatePlanChargeId.value,
-                None,
               ),
             )
           case _ => Left(InternalServerError(s"Error when matching on billingPeriod $billingPeriod"))
@@ -214,20 +196,18 @@ object RecurringContributionToSupporterPlus {
       currency: Currency,
       billingPeriod: BillingPeriod,
   ): IO[ErrorResponse, BigDecimal] =
-    if (SwitchToV2SupporterPlus)
-      // work out how much of what the user is paying can be treated as a contribution (total amount - cost of sub)
-      val catalogPlanId =
-        if (billingPeriod == Monthly)
-          MonthlySupporterPlusV2
-        else
-          AnnualSupporterPlusV2
-      ZIO
-        .fromEither(
-          getSubscriptionPriceInMinorUnits(stage, catalogPlanId, currency)
-            .map(subscriptionChargePrice => price - (subscriptionChargePrice.value / 100)),
-        )
-        .mapError(x => InternalServerError(x))
-    else ZIO.succeed(price)
+    // work out how much of what the user is paying can be treated as a contribution (total amount - cost of sub)
+    val catalogPlanId =
+      if (billingPeriod == Monthly)
+        MonthlySupporterPlus
+      else
+        AnnualSupporterPlus
+    ZIO
+      .fromEither(
+        getSubscriptionPriceInMinorUnits(stage, catalogPlanId, currency)
+          .map(subscriptionChargePrice => price - (subscriptionChargePrice.value / 100)),
+      )
+      .mapError(x => InternalServerError(x))
 
   def getRatePlans(
       billingPeriod: BillingPeriod,

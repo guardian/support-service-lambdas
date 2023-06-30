@@ -24,7 +24,7 @@ class PricesFromZuoraCatalogEffectsTest extends AnyFlatSpec with Matchers {
         zuoraIds.rateplanIdToApiId.get,
       ).toDisjunction.left.map(_.toString)
     } yield response
-    actual.map(result => result(MonthlySupporterPlusV2).get(GBP)) shouldBe Right(Some(AmountMinorUnits(1000)))
+    actual.map(result => result(MonthlySupporterPlus).get(GBP)) shouldBe Right(Some(AmountMinorUnits(1000)))
     // the prices might change but at least we can assert that we got some price for each product
     actual.map(_.keySet) shouldBe Right(expectedProducts)
   }
@@ -88,7 +88,5 @@ object ProductsData {
   val supporterPlus = Set(
     AnnualSupporterPlus,
     MonthlySupporterPlus,
-    AnnualSupporterPlusV2,
-    MonthlySupporterPlusV2,
   )
 }

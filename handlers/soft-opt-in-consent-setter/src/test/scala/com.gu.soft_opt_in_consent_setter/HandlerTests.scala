@@ -1,7 +1,12 @@
 import com.gu.soft_opt_in_consent_setter.HandlerIAP._
 import com.gu.soft_opt_in_consent_setter.models.{SFAssociatedSubRecord, SFAssociatedSubResponse, SoftOptInError}
 import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.testConsentMappings
-import com.gu.soft_opt_in_consent_setter.{ConsentsCalculator, MobileSubscription, MobileSubscriptions, SalesforceConnector}
+import com.gu.soft_opt_in_consent_setter.{
+  ConsentsCalculator,
+  MobileSubscription,
+  MobileSubscriptions,
+  SalesforceConnector,
+}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers

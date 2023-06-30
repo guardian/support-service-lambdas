@@ -138,7 +138,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
       "Supporter Plus Monthly",
       List(
         RatePlanCharge(
-          productRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6",
+          productRatePlanChargeId = "8ad09ea0858682bb0185880ac57f4c4c",
           name = "Supporter Plus Monthly",
           number = "C-00732747",
           price = Some(30.000000000),
@@ -149,7 +149,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
           effectiveEndDate = LocalDate.of(2023, 10, 28),
         ),
       ),
-      "8ad09fc281de1ce70181de3b251736a4",
+      "8ad08cbd8586721c01858804e3275376",
       "8ad0823f841cf4e601841e61f6d470bb",
     ),
   ),
@@ -260,7 +260,7 @@ val supporterRatePlanItem1 = SupporterRatePlanItem(
   subscriptionName = "A-S00339056",
   identityId = "12345",
   gifteeIdentityId = None,
-  productRatePlanId = "8a12865b8219d9b401822106192b64dc",
+  productRatePlanId = "8a128ed885fc6ded018602296ace3eb8",
   productRatePlanName = "product-move-api added Supporter Plus Monthly",
   termEndDate = LocalDate.of(2022, 5, 17),
   contractEffectiveDate = LocalDate.of(2022, 5, 10),
@@ -271,7 +271,7 @@ val supporterRatePlanItem2 = SupporterRatePlanItem(
   subscriptionName = "A-S00339056",
   identityId = "12345",
   gifteeIdentityId = None,
-  productRatePlanId = "8ad09fc281de1ce70181de3b251736a4",
+  productRatePlanId = "8ad08cbd8586721c01858804e3275376",
   productRatePlanName = "product-move-api added Supporter Plus Monthly",
   termEndDate = LocalDate.of(2021, 2, 22),
   contractEffectiveDate = LocalDate.of(2021, 2, 15),
@@ -471,11 +471,11 @@ val expectedRequestBody = SubscriptionUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate,
-      productRatePlanId = "8a12865b8219d9b401822106192b64dc",
+      productRatePlanId = "8a128ed885fc6ded018602296ace3eb8",
       chargeOverrides = List(
         ChargeOverrides(
-          price = Some(15.00),
-          productRatePlanChargeId = "8a12865b8219d9b401822106194e64e3",
+          price = Some(5.00),
+          productRatePlanChargeId = "8a128d7085fc6dec01860234cd075270",
         ),
       ),
     ),
@@ -495,11 +495,11 @@ val expectedRequestBodyLowCharge = SubscriptionUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate4,
-      productRatePlanId = "8ad09fc281de1ce70181de3b251736a4",
+      productRatePlanId = "8ad08cbd8586721c01858804e3275376",
       chargeOverrides = List(
         ChargeOverrides(
-          price = Some(15.00),
-          productRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6",
+          price = Some(5.00),
+          productRatePlanChargeId = "8ad09ea0858682bb0185880ac57f4c4c",
         ),
       ),
     ),
@@ -545,11 +545,11 @@ val expectedRequestBodyPreview = SubscriptionUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate2,
-      productRatePlanId = "8ad09fc281de1ce70181de3b251736a4",
+      productRatePlanId = "8ad08cbd8586721c01858804e3275376",
       chargeOverrides = List(
         ChargeOverrides(
-          price = Some(15.00),
-          productRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6",
+          price = Some(5.00),
+          productRatePlanChargeId = "8ad09ea0858682bb0185880ac57f4c4c",
         ),
       ),
     ),
@@ -571,11 +571,11 @@ val expectedRequestBodyPreview2 = SubscriptionUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate4,
-      productRatePlanId = "8ad09fc281de1ce70181de3b251736a4",
+      productRatePlanId = "8ad08cbd8586721c01858804e3275376",
       chargeOverrides = List(
         ChargeOverrides(
-          price = Some(15.00),
-          productRatePlanChargeId = "8ad09fc281de1ce70181de3b253e36a6",
+          price = Some(5.00),
+          productRatePlanChargeId = "8ad09ea0858682bb0185880ac57f4c4c",
         ),
       ),
     ),
@@ -657,7 +657,7 @@ val getInvoiceItemsResponse = GetInvoiceItemsResponse(
   List(
     InvoiceItem(
       "invoice_item_id",
-      "8ad09fc281de1ce70181de3b253e36a6",
+      "8ad08cbd8586721c01858804e3715378",
     ),
   ),
 )
