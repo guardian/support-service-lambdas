@@ -56,14 +56,6 @@ object ToRecurringContribution {
         )
       (activeRatePlan, activeRatePlanCharge) = activeRatePlanAndCharge
 
-      currency <- ZIO
-        .fromOption(activeRatePlanCharge.currencyObject)
-        .orElseFail(
-          InternalServerError(
-            s"Missing or unknown currency ${activeRatePlanCharge.currency} on rate plan charge in rate plan ${activeRatePlan.id} ",
-          ),
-        )
-
       _ <- ZIO.log(s"Performing product move update with switch type ${SwitchType.ToRecurringContribution.id}")
 
       account <- GetAccount.get(subscription.accountNumber)
@@ -73,12 +65,11 @@ object ToRecurringContribution {
         .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
 
       price = postData.price
-      previousAmount = activeRatePlanCharge.price.get
       billingPeriod = activeRatePlanCharge.billingPeriod
 
       updateRequestBody <- getRatePlans(
         billingPeriod,
-        previousAmount,
+        price.toDouble,
         subscription.ratePlans,
         activeRatePlanCharge.chargedThroughDate.get,
       )
@@ -130,7 +121,7 @@ object ToRecurringContribution {
         .queueSalesforceTracking(
           SalesforceRecordInput(
             subscriptionName.value,
-            previousAmount,
+            price,
             price,
             activeRatePlan.productName,
             activeRatePlan.ratePlanName,
