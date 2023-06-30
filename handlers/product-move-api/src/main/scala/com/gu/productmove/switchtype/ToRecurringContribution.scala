@@ -208,7 +208,7 @@ object ToRecurringContribution {
   private def getActiveRatePlanAndCharge(
       ratePlanAmendments: List[GetSubscription.RatePlan],
   ): Option[(GetSubscription.RatePlan, GetSubscription.RatePlanCharge)] = (for {
-    ratePlan <- ratePlanAmendments
+    ratePlan <- ratePlanAmendments.filter(_.lastChangeType != Some("Remove"))
     ratePlanCharge <- ratePlan.ratePlanCharges
     if ratePlanCharge.chargedThroughDate.isDefined
   } yield (ratePlan, ratePlanCharge)).headOption

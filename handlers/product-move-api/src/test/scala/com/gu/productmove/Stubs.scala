@@ -67,6 +67,12 @@ val getSubscriptionResponse = Source
   .fromJson[GetSubscriptionResponse]
   .getOrElse(throw new RuntimeException("Failed to parse GetSubscriptionResponse. Check the file path is correct."))
 
+val getSubscriptionResponse23 = Source
+  .fromResource("zuora/GetSubscription/responses/response2.json")
+  .mkString
+  .fromJson[GetSubscriptionResponse]
+  .getOrElse(throw new RuntimeException("Failed to parse GetSubscriptionResponse. Check the file path is correct."))
+
 val getSubscriptionForCancelResponse = GetSubscriptionToCancelResponse(
   id = "A-S00339056",
   version = 1,

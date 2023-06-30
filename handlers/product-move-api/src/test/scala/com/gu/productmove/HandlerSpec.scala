@@ -74,8 +74,47 @@ object HandlerSpec extends ZIOSpecDefault {
       NumConsecutiveFailures = 0,
     )
     val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
+    val subscriptionUpdatePreviewStubs = Map(subscriptionUpdateInputsShouldBe -> previewResponse2)
 
     suite("HandlerSpec")(
+      test(
+        "(MembershipToRecurringContribution) productMove endpoint is successful",
+      ) {
+        val endpointJsonInputBody = ExpectedInput(10.00, false, None, None)
+        val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
+          (subscriptionName, expectedRequestBody2)
+
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
+        val expectedOutput = ProductMoveEndpointTypes.Success(
+          "Product move completed successfully with subscription number A-S00339056 and switch type to-recurring-contribution",
+        )
+        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+          Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())
+
+        val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse23))) ++
+          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdateStubs)) ++
+          ZLayer.succeed(new MockSQS(sqsStubs)) ++
+          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
+          ZLayer.succeed(Stage.valueOf("PROD"))
+
+        (for {
+          _ <- TestClock.setTime(time)
+
+          output <- ToRecurringContribution(subscriptionName, endpointJsonInputBody)
+          getSubRequests <- MockGetSubscription.requests
+          subUpdateRequests <- MockSubscriptionUpdate.requests
+          getAccountRequests <- MockGetAccount.requests
+          sqsRequests <- MockSQS.requests
+        } yield {
+          assert(output)(equalTo(expectedOutput)) &&
+          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
+          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
+          assert(sqsRequests)(hasSameElements(List(emailMessageBody2, salesforceRecordInput1)))
+        }).provide(layers)
+      },
+
+      /*
       test("productMove endpoint is successful for monthly sub (upsell)") {
         val endpointJsonInputBody = ExpectedInput(BigDecimal(10), false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
@@ -106,7 +145,7 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       },
-      /*
+
       test(
         "productMove endpoint is successful if customer neither pays nor is refunded on switch (monthly sub, upsell)",
       ) {
