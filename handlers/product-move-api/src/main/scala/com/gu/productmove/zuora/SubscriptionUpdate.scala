@@ -69,15 +69,33 @@ object SubscriptionUpdate {
     ZIO.serviceWithZIO[SubscriptionUpdate](_.update[R](subscriptionName, requestBody))
 }
 
-case class SubscriptionUpdateRequest(
+sealed trait SubscriptionUpdateRequest
+case class SwitchProductUpdateRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],
-    collect: Option[Boolean] = None,
-    runBilling: Option[Boolean] = None,
-    preview: Option[Boolean] = None,
-    targetDate: Option[LocalDate] = None,
-    currentTerm: Option[String] = None,
-    currentTermPeriodType: Option[String] = None,
+    collect: Option[Boolean],
+    runBilling: Option[Boolean],
+    preview: Option[Boolean],
+    targetDate: Option[LocalDate],
+    currentTerm: Option[String],
+    currentTermPeriodType: Option[String],
+) extends SubscriptionUpdateRequest
+
+case class UpdateSubscriptionAmount(
+    update: List[UpdateSubscriptionAmountItem],
+) extends SubscriptionUpdateRequest
+
+case class UpdateSubscriptionAmountItem(
+    contractEffectiveDate: LocalDate,
+    customerAcceptanceDate: LocalDate,
+    serviceActivationDate: LocalDate,
+    ratePlanId: ProductRatePlanId,
+    chargeUpdateDetails: List[ChargeUpdateDetails],
+)
+
+case class ChargeUpdateDetails(
+    price: BigDecimal,
+    ratePlanChargeId: ProductRatePlanChargeId,
 )
 
 case class AddRatePlan(
