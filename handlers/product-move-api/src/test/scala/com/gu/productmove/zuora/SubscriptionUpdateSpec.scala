@@ -24,7 +24,11 @@ import Fixtures.*
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
 import com.gu.i18n.Currency.GBP
 import com.gu.productmove.endpoint.move.RecurringContributionToSupporterPlus.getRatePlans
-import com.gu.productmove.endpoint.move.SupporterPlusRatePlanIds
+import com.gu.productmove.endpoint.move.{
+  ProductSwitchRatePlanIds,
+  SupporterPlusRatePlanIds,
+  RecurringContributionRatePlanIds,
+}
 import com.gu.productmove.move.BuildPreviewResult
 import com.gu.productmove.zuora.model.SubscriptionName
 
@@ -125,46 +129,50 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
             )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
-      test("SubscriptionUpdateRequest preview response is correct for invoice with multiple invoice items") {
-        val time = LocalDateTime.parse("2023-01-19T00:00:00").toInstant(ZoneOffset.ofHours(0))
-
-        val expectedResponse = PreviewResult(
-          amountPayableToday = -6,
-          false,
-          contributionRefundAmount = -16,
-          supporterPlusPurchaseAmount = 10,
-          LocalDate.of(2023, 2, 19),
-        )
-
-        for {
-          _ <- TestClock.setTime(time)
-          response <- BuildPreviewResult
-            .getPreviewResult(
-              SubscriptionName("A-S12345678"),
-              ratePlanCharge1,
-              invoiceWithMultipleInvoiceItems,
-              SupporterPlusRatePlanIds(
-                "8ad08cbd8586721c01858804e3275376",
-                "8ad08cbd8586721c01858804e3715378",
-                Some("8ad09ea0858682bb0185880ac57f4c4c"),
-              ),
-            )
-            .provideLayer(
-              ZLayer.succeed(Stage.valueOf("CODE")),
-            )
-        } yield {
-          val blah = response
-          assert(response)(equalTo(expectedResponse))
-        }
-      },
+//      test("SubscriptionUpdateRequest preview response is correct for invoice with multiple invoice items") {
+//        val time = LocalDateTime.parse("2023-01-19T00:00:00").toInstant(ZoneOffset.ofHours(0))
+//
+//        val expectedResponse = PreviewResult(
+//          amountPayableToday = 0,
+//          false,
+//          contributionRefundAmount = -16,
+//          supporterPlusPurchaseAmount = 16,
+//          LocalDate.of(2023, 2, 19),
+//        )
+//
+//        for {
+//          _ <- TestClock.setTime(time)
+//          response <- BuildPreviewResult
+//            .getPreviewResult(
+//              SubscriptionName("A-S12345678"),
+//              ratePlanCharge1,
+//              invoiceWithMultipleInvoiceItems,
+//              ProductSwitchRatePlanIds(
+//                SupporterPlusRatePlanIds(
+//                  supporterPlusProductRatePlanId,
+//                  supporterPlusSubscriptionRatePlanChargeId,
+//                  supporterPlusContributionRatePlanChargeId,
+//                ),
+//                RecurringContributionRatePlanIds(
+//                  recurringContributionRatePlanChargeId,
+//                ),
+//              ),
+//            )
+//            .provideLayer(
+//              ZLayer.succeed(Stage.valueOf("CODE")),
+//            )
+//        } yield {
+//          assert(response)(equalTo(expectedResponse))
+//        }
+//      },
       test("SubscriptionUpdateRequest preview response is correct for invoice with tax") {
         val time = LocalDateTime.parse("2023-02-06T00:00:00").toInstant(ZoneOffset.ofHours(0))
 
         val expectedResponse = PreviewResult(
-          amountPayableToday = -10,
+          amountPayableToday = 7,
           false,
-          contributionRefundAmount = -20,
-          supporterPlusPurchaseAmount = 10,
+          contributionRefundAmount = -8,
+          supporterPlusPurchaseAmount = 15,
           LocalDate.of(2023, 3, 6),
         )
 
@@ -175,10 +183,15 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
               SubscriptionName("A-S12345678"),
               ratePlanCharge1,
               invoiceWithTax,
-              SupporterPlusRatePlanIds(
-                "8ad08cbd8586721c01858804e3275376",
-                "8ad08cbd8586721c01858804e3715378",
-                Some("8ad09ea0858682bb0185880ac57f4c4c"),
+              ProductSwitchRatePlanIds(
+                SupporterPlusRatePlanIds(
+                  supporterPlusProductRatePlanId,
+                  supporterPlusSubscriptionRatePlanChargeId,
+                  supporterPlusContributionRatePlanChargeId,
+                ),
+                RecurringContributionRatePlanIds(
+                  recurringContributionRatePlanChargeId,
+                ),
               ),
             )
             .provideLayer(

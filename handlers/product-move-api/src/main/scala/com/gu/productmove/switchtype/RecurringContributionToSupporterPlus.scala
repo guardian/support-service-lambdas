@@ -74,8 +74,17 @@ import java.time.format.DateTimeFormatter
 case class SupporterPlusRatePlanIds(
     ratePlanId: String,
     subscriptionRatePlanChargeId: String,
-    contributionRatePlanChargeId: Option[String],
+    contributionRatePlanChargeId: String,
 )
+case class RecurringContributionRatePlanIds(
+    ratePlanChargeId: String,
+)
+
+case class ProductSwitchRatePlanIds(
+    supporterPlusRatePlanIds: SupporterPlusRatePlanIds,
+    recurringContributionRatePlanIds: RecurringContributionRatePlanIds,
+)
+
 object RecurringContributionToSupporterPlus {
 
   private def getSingleOrNotEligible[A](list: List[A], message: String): IO[ErrorResponse, A] =
@@ -145,30 +154,37 @@ object RecurringContributionToSupporterPlus {
     } yield result).fold(error => error, success => success)
   }
 
-  private def getSupporterPlusRatePlanIds(
+  private def getProductSwitchRatePlanIds(
       stage: Stage,
       billingPeriod: BillingPeriod,
-  ): Either[ErrorResponse, SupporterPlusRatePlanIds] = {
+  ): Either[ErrorResponse, ProductSwitchRatePlanIds] = {
     zuoraIdsForStage(config.Stage(stage.toString)).left
       .map(err => InternalServerError(err))
       .flatMap { zuoraIds =>
         import zuoraIds.supporterPlusZuoraIds.{annualV2, monthlyV2}
+        import zuoraIds.contributionsZuoraIds.{annual, monthly}
 
         billingPeriod match {
           case Monthly =>
             Right(
-              SupporterPlusRatePlanIds(
-                monthlyV2.productRatePlanId.value,
-                monthlyV2.productRatePlanChargeId.value,
-                Some(monthlyV2.contributionProductRatePlanChargeId.value),
+              ProductSwitchRatePlanIds(
+                SupporterPlusRatePlanIds(
+                  monthlyV2.productRatePlanId.value,
+                  monthlyV2.productRatePlanChargeId.value,
+                  monthlyV2.contributionProductRatePlanChargeId.value,
+                ),
+                RecurringContributionRatePlanIds(monthly.productRatePlanChargeId.value),
               ),
             )
           case Annual =>
             Right(
-              SupporterPlusRatePlanIds(
-                annualV2.productRatePlanId.value,
-                annualV2.productRatePlanChargeId.value,
-                Some(annualV2.contributionProductRatePlanChargeId.value),
+              ProductSwitchRatePlanIds(
+                SupporterPlusRatePlanIds(
+                  annualV2.productRatePlanId.value,
+                  annualV2.productRatePlanChargeId.value,
+                  annualV2.contributionProductRatePlanChargeId.value,
+                ),
+                RecurringContributionRatePlanIds(annual.productRatePlanChargeId.value),
               ),
             )
           case _ => Left(InternalServerError(s"Error when matching on billingPeriod $billingPeriod"))
@@ -218,15 +234,17 @@ object RecurringContributionToSupporterPlus {
     for {
       date <- Clock.currentDateTime.map(_.toLocalDate)
       stage <- ZIO.service[Stage]
-      supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
+      productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
       overrideAmount <- getContributionAmount(stage, price, currency, billingPeriod)
       chargeOverride = ChargeOverrides(
         price = Some(overrideAmount),
-        productRatePlanChargeId = supporterPlusRatePlanIds.contributionRatePlanChargeId.getOrElse(
-          supporterPlusRatePlanIds.subscriptionRatePlanChargeId,
-        ),
+        productRatePlanChargeId = productSwitchRatePlanIds.supporterPlusRatePlanIds.contributionRatePlanChargeId,
       )
-      addRatePlan = AddRatePlan(date, supporterPlusRatePlanIds.ratePlanId, chargeOverrides = List(chargeOverride))
+      addRatePlan = AddRatePlan(
+        date,
+        productSwitchRatePlanIds.supporterPlusRatePlanIds.ratePlanId,
+        chargeOverrides = List(chargeOverride),
+      )
       removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
     } yield (List(addRatePlan), List(removeRatePlan))
 
@@ -260,12 +278,12 @@ object RecurringContributionToSupporterPlus {
       .update[SubscriptionUpdatePreviewResponse](subscriptionName, updateRequestBody)
 
     stage <- ZIO.service[Stage]
-    supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
+    productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
     previewResult <- BuildPreviewResult.getPreviewResult(
       subscriptionName,
       activeRatePlanCharge,
       response.invoice,
-      supporterPlusRatePlanIds,
+      productSwitchRatePlanIds,
     )
   } yield previewResult
 
@@ -363,12 +381,12 @@ object RecurringContributionToSupporterPlus {
       updateResponse <- SubscriptionUpdate
         .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
 
-      supporterPlusRatePlanIds <- ZIO.fromEither(getSupporterPlusRatePlanIds(stage, billingPeriod))
+      productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
 
       _ <- adjustNonCollectedInvoices(
         collectPayment,
         updateResponse,
-        supporterPlusRatePlanIds,
+        productSwitchRatePlanIds.supporterPlusRatePlanIds,
         subscriptionName,
         amountPayableToday,
       )
@@ -434,7 +452,7 @@ object RecurringContributionToSupporterPlus {
             subscriptionName.value,
             identityId = identityId,
             gifteeIdentityId = None,
-            productRatePlanId = supporterPlusRatePlanIds.ratePlanId,
+            productRatePlanId = productSwitchRatePlanIds.supporterPlusRatePlanIds.ratePlanId,
             productRatePlanName = "product-move-api added Supporter Plus Monthly",
             termEndDate = todaysDate.plusDays(7),
             contractEffectiveDate = todaysDate,
