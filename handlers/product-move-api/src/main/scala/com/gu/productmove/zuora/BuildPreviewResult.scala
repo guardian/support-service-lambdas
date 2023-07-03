@@ -5,13 +5,33 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.endpoint.move.SupporterPlusRatePlanIds
-import com.gu.productmove.zuora.SubscriptionUpdateInvoice
-import zio.{Clock, ZIO}
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
+import com.gu.productmove.zuora.{SubscriptionUpdateInvoice, SubscriptionUpdateInvoiceItem}
+import zio.{ZIO, Clock}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{PreviewResult, InternalServerError, ErrorResponse}
 
 object BuildPreviewResult {
   def isBelowMinimumStripeCharge(amount: BigDecimal): Boolean =
     amount > BigDecimal(0) && amount < BigDecimal(0.50)
+
+  def getRefundInvoiceAmount(contributionInvoices: List[SubscriptionUpdateInvoiceItem]): ZIO[Any, Nothing, BigDecimal] =
+    for {
+      date <- Clock.currentDateTime.map(_.toLocalDate)
+      invoice =
+        contributionInvoices
+          .find(invoiceItem =>
+            invoiceItem.totalAmount <= 0 &&
+              invoiceItem.serviceStartDate == date,
+          )
+    } yield invoice.head.totalAmount.abs
+
+  def getSupporterPlusContributionAmount(
+      contributionInvoices: List[SubscriptionUpdateInvoiceItem],
+  ): ZIO[Any, Nothing, BigDecimal] = for {
+    date <- Clock.currentDateTime.map(_.toLocalDate)
+    invoice = contributionInvoices
+      .find(invoiceItem => invoiceItem.totalAmount > 0 && invoiceItem.serviceStartDate == date)
+  } yield invoice.map(_.totalAmount).getOrElse(0)
+
   def getPreviewResult(
       subscriptionName: SubscriptionName,
       activeRatePlanCharge: RatePlanCharge,
@@ -29,18 +49,16 @@ object BuildPreviewResult {
         case (n1, n2) if n1 > 1 && n2 >= 1 =>
           for {
             date <- Clock.currentDateTime.map(_.toLocalDate)
-            contributionRefundInvoice = contributionInvoices
-              .filter(invoiceItem =>
-                invoiceItem.totalAmount <= 0 &&
-                  invoiceItem.serviceStartDate == date,
-              )
-              .head
-            amountPayableToday = supporterPlusInvoiceItems.head.totalAmount - contributionRefundInvoice.totalAmount.abs
+            refundAmount <- getRefundInvoiceAmount(contributionInvoices)
+            contributionAmount <- getSupporterPlusContributionAmount(contributionInvoices)
+            subscriptionAmount = supporterPlusInvoices.head.totalAmount
+            totalSupporterPlusCost = subscriptionAmount + contributionAmount
+            amountPayableToday = totalSupporterPlusCost - refundAmount
           } yield PreviewResult(
             amountPayableToday,
             isBelowMinimumStripeCharge(amountPayableToday),
-            contributionRefundInvoice.totalAmount,
-            supporterPlusInvoiceItems.head.totalAmount,
+            refundAmount,
+            totalSupporterPlusCost,
             supporterPlusInvoiceItems(1).serviceStartDate,
           )
         /*
