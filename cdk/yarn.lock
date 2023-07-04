@@ -358,10 +358,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.39.0.tgz#58b536bcc843f4cd1e02a7e6171da5c040f4d44b"
   integrity sha512-kf9RB0Fg7NZfap83B3QOqOGg9QmD9yBudqQXzzOtn3i4y7ZUXe5ONeW34Gwi+TxhH4mvj72R1Zc300KUMa9Bng==
 
-"@guardian/cdk@50.4.0":
-  version "50.4.0"
-  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-50.4.0.tgz#d03cee36b0da1b7daebf9c73419fd5f3ad6f9b84"
-  integrity sha512-mWEwgskPYiVlneMvP18EK41BRuxIfWFpRMC78K7oaQXBL7Ll4JKXB+48A2UNAEJ/mJ3WGHny8SWslzLf73gEvA==
+"@guardian/cdk@50.5.0":
+  version "50.5.0"
+  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-50.5.0.tgz#f6718ad13928134d93761f6cc1dad0a5dd166f74"
+  integrity sha512-/nxwIRsXyIBKhQHUl8LCofetJjBiQGyX2rh7zPtnzW4lyebBjG4AJ1OrBm5TSe6OxVupS7q+WqesqFIJ3C1mIQ==
   dependencies:
     "@oclif/core" "2.8.2"
     aws-cdk-lib "2.77.0"
