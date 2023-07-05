@@ -3,12 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.effects.GetFromS3
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.*
-import com.gu.newproduct.api.productcatalog.PlanId.{
-  AnnualSupporterPlus,
-  AnnualSupporterPlusV2,
-  MonthlySupporterPlus,
-  MonthlySupporterPlusV2,
-}
+import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, MonthlySupporterPlus}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{
   ProductRatePlanId,
   SupporterPlusZuoraIds,

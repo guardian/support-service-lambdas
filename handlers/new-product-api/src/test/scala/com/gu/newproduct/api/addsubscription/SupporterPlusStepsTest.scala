@@ -1,22 +1,29 @@
 package com.gu.newproduct.api.addsubscription
 
 import com.gu.i18n.Currency
+import com.gu.i18n.Currency.GBP
+import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
-import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
+import com.gu.newproduct.api.addsubscription.validation.{Passed, Failed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
-  ChargeOverride,
-  SubscriptionName,
-  ZuoraCreateSubRequest,
   ZuoraCreateSubRequestRatePlan,
+  ZuoraCreateSubRequest,
+  SubscriptionName,
+  ChargeOverride,
 }
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription, PlanId}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{
+  ProductRatePlanChargeId,
+  PlanAndCharge,
+  ProductRatePlanId,
+  PlanAndCharges,
+}
+import com.gu.newproduct.api.productcatalog.{Plan, PaymentPlan, PlanDescription, PlanId, AmountMinorUnits}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
@@ -26,21 +33,19 @@ import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json._
-
 import java.time.LocalDate
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
-
   case class ExpectedOut(subscriptionNumber: String)
 
   it should "run end to end with fakes" in {
-
-    val planAndCharge = PlanAndCharge(
+    val planAndCharge = PlanAndCharges(
       ProductRatePlanId("ratePlanId"),
       ProductRatePlanChargeId("ratePlanChargeId"),
+      ProductRatePlanChargeId("contributionRatePlanChargeId"),
     )
 
     def getPlanAndCharge(planId: PlanId) = Some(planAndCharge)
@@ -56,8 +61,8 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
           productRatePlanId = planAndCharge.productRatePlanId,
           maybeChargeOverride = Some(
             ChargeOverride(
-              amountMinorUnits = Some(AmountMinorUnits(123)),
-              productRatePlanChargeId = planAndCharge.productRatePlanChargeId,
+              amountMinorUnits = Some(AmountMinorUnits(1000)),
+              productRatePlanChargeId = planAndCharge.contributionProductRatePlanChargeId,
               triggerDate = None,
             ),
           ),
@@ -82,14 +87,19 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
 
     def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.supporterPlusCustomerData)
 
-    def getPlan(planId: PlanId) = Plan(MonthlySupporterPlus, PlanDescription("some description"), testStartDateRules)
+    def getPlan(planId: PlanId) = Plan(
+      MonthlySupporterPlus,
+      PlanDescription("some description"),
+      testStartDateRules,
+      Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1000), Monthly, "monthly")),
+    )
 
     def currentDate() = LocalDate.of(2018, 12, 12)
 
     val requestInput = JsObject(
       Map(
         "acquisitionCase" -> JsString("case"),
-        "amountMinorUnits" -> JsNumber(123),
+        "amountMinorUnits" -> JsNumber(2000),
         "startDate" -> JsString("2018-07-18"),
         "zuoraAccountId" -> JsString("acccc"),
         "acquisitionSource" -> JsString("CSR"),

@@ -91,7 +91,7 @@ object AvailableProductMovesEndpoint {
       GetAccountLive.layer,
       ZuoraGetLive.layer,
       GuStageLive.layer,
-      SecretsLive.layer
+      SecretsLive.layer,
     )
 
   private val freeTrialDays = 14

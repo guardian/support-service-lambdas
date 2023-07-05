@@ -161,13 +161,13 @@
       "productId": "8ad09fc281de1ce70181de3b23b2363d",
       "productName": "Supporter Plus",
       "productSku": "SKU-00000072",
-      "productRatePlanId": "8ad09fc281de1ce70181de3b251736a4",
+      "productRatePlanId": "8ad08cbd8586721c01858804e3275376",
       "ratePlanName": "Supporter Plus Monthly",
       "ratePlanCharges": [
         {
           "id": "id",
           "originalChargeId": "origChgId",
-          "productRatePlanChargeId": "8ad09fc281de1ce70181de3b253e36a6",
+          "productRatePlanChargeId": "8ad09ea0858682bb0185880ac57f4c4c",
           "number": "C-00732747",
           "name": "Supporter Plus Monthly",
           "type": "Recurring",

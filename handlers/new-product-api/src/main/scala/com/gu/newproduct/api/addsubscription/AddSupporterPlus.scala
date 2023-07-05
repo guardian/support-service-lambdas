@@ -30,7 +30,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetCont
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetContacts, GetPaymentMethod}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, PlanAndCharge, ProductRatePlanId, ZuoraIds}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharges, PlanAndCharge, ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Catalog, Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
@@ -46,7 +46,7 @@ object AddSupporterPlus {
   def steps(
       getPlan: PlanId => Plan,
       getCurrentDate: () => LocalDate,
-      getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
+      getPlanAndCharge: PlanId => Option[PlanAndCharges],
       getCustomerData: ZuoraAccountId => ApiGatewayOp[SupporterPlusCustomerData],
       supporterPlusValidations: (
           SupporterPlusValidations.ValidatableFields,
@@ -66,10 +66,12 @@ object AddSupporterPlus {
         account.currency,
       ).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
+      plan = getPlan(request.planId)
       planAndCharge <- getPlanAndCharge(request.planId)
         .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
         .toAsync
-      chargeOverride = ChargeOverride(Some(amountMinorUnits), planAndCharge.productRatePlanChargeId, None)
+      contributionAmount = getContributionAmount(amountMinorUnits, account.currency, plan)
+      chargeOverride = ChargeOverride(Some(contributionAmount), planAndCharge.contributionProductRatePlanChargeId, None)
       zuoraCreateSubRequest = ZuoraCreateSubRequest(
         request = request,
         acceptanceDate = acceptanceDate,
@@ -88,7 +90,7 @@ object AddSupporterPlus {
         firstPaymentDate = acceptanceDate,
         contacts = contacts,
         amountMinorUnits = amountMinorUnits,
-        plan = getPlan(request.planId),
+        plan = plan,
         currentDate = getCurrentDate(),
       )
       _ <- sendConfirmationEmail(account.sfContactId, supporterPlusEmailData).recoverAndLog(
@@ -108,10 +110,10 @@ object AddSupporterPlus {
       currentDate: () => LocalDate,
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
-    val planAndChargeForSupporterPlusPlanId = zuoraIds.apiIdToPlanAndCharge.get _
+    val planAndChargeForSupporterPlusPlanId = zuoraIds.supporterPlusZuoraIds.planAndChargeByApiPlanId.get _
     val supporterPlusIds = List(
-      zuoraIds.supporterPlusZuoraIds.monthly.productRatePlanId,
-      zuoraIds.supporterPlusZuoraIds.annual.productRatePlanId,
+      zuoraIds.supporterPlusZuoraIds.monthlyV2.productRatePlanId,
+      zuoraIds.supporterPlusZuoraIds.annualV2.productRatePlanId,
     )
     val getCustomerData = getValidatedSupporterPlusCustomerData(zuoraClient, supporterPlusIds)
     val isValidSupporterPlusStartDate = isValidStartDateForPlan(MonthlySupporterPlus, _: LocalDate)
@@ -158,6 +160,11 @@ object AddSupporterPlus {
       contacts = contacts,
       created = currentDate,
     )
+
+  def getContributionAmount(totalAmount: AmountMinorUnits, currency: Currency, plan: Plan): AmountMinorUnits = {
+    val subscriptionAmount = plan.paymentPlans(currency).amountMinorUnits.value
+    AmountMinorUnits(totalAmount.value - subscriptionAmount)
+  }
 
   def getValidatedSupporterPlusCustomerData(
       zuoraClient: Requests,

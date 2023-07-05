@@ -39,7 +39,7 @@ object SubscriptionCancelSpec extends ZIOSpecDefault {
             ZuoraClientLive.layer,
             SttpClientLive.layer,
             GetAccountLive.layer,
-            SecretsLive.layer
+            SecretsLive.layer,
           )
       } yield assert(true)(equalTo(true))
     } @@ TestAspect.ignore)
