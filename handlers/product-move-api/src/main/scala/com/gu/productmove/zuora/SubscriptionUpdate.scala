@@ -84,13 +84,13 @@ case class UpdateSubscriptionAmountItem(
     contractEffectiveDate: LocalDate,
     customerAcceptanceDate: LocalDate,
     serviceActivationDate: LocalDate,
-    ratePlanId: ProductRatePlanId,
+    ratePlanId: String,
     chargeUpdateDetails: List[ChargeUpdateDetails],
 )
 
 case class ChargeUpdateDetails(
     price: BigDecimal,
-    ratePlanChargeId: ProductRatePlanChargeId,
+    ratePlanChargeId: String,
 )
 
 case class AddRatePlan(

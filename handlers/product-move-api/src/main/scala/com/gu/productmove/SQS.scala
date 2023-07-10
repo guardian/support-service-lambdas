@@ -1,7 +1,9 @@
 package com.gu.productmove
 
 import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
+import com.gu.newproduct.api.productcatalog.BillingPeriod
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
@@ -192,6 +194,15 @@ case class EmailPayloadCancellationAttributes(
     cancellation_effective_date: Option[String],
 ) extends EmailPayloadAttributes
 
+case class EmailPayloadUpdateAmountAttributes(
+    first_name: String,
+    last_name: String,
+    new_amount: String,
+    currency: String,
+    frequency: String,
+    next_payment_date: String,
+) extends EmailPayloadAttributes
+
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadAttributes)
 
 case class EmailPayload(Address: Option[String], ContactAttributes: EmailPayloadContactAttributes)
@@ -221,6 +232,34 @@ object EmailMessage {
         ),
       ),
       DataExtensionName = "subscription-cancelled-email",
+      SfContactId = account.basicInfo.sfContactId__c,
+      IdentityUserId = account.basicInfo.IdentityId__c,
+    )
+  }
+
+  def updateAmountEmail(
+      account: GetAccountResponse,
+      newPrice: BigDecimal,
+      currency: Currency,
+      billingPeriod: String,
+      nextPaymentDate: LocalDate,
+  ) = {
+    val contact = account.billToContact
+    EmailMessage(
+      EmailPayload(
+        Address = Some(contact.workEmail),
+        ContactAttributes = EmailPayloadContactAttributes(
+          SubscriberAttributes = EmailPayloadUpdateAmountAttributes(
+            first_name = contact.firstName,
+            last_name = contact.lastName,
+            new_amount = newPrice.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+            currency = currency.symbol,
+            frequency = billingPeriod,
+            next_payment_date = emailDateFormat.format(nextPaymentDate),
+          ),
+        ),
+      ),
+      DataExtensionName = "payment-amount-changed-email",
       SfContactId = account.basicInfo.sfContactId__c,
       IdentityUserId = account.basicInfo.IdentityId__c,
     )

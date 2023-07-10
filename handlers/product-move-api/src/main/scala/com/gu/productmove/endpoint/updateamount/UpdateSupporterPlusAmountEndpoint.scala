@@ -4,7 +4,7 @@ import cats.data.NonEmptyList
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.productmove.SecretsLive
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
+import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -12,7 +12,10 @@ import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
+import com.gu.util.config
+import com.gu.util.config.ZuoraEnvironment
 import com.gu.productmove.zuora.{
+  ChargeUpdateDetails,
   GetAccount,
   GetAccountLive,
   GetInvoiceItems,
@@ -26,7 +29,9 @@ import com.gu.productmove.zuora.{
   SubscriptionUpdate,
   SubscriptionUpdateLive,
   SubscriptionUpdateRequest,
+  SubscriptionUpdateResponse,
   UpdateSubscriptionAmount,
+  UpdateSubscriptionAmountItem,
   ZuoraCancel,
   ZuoraCancelLive,
 }
@@ -52,7 +57,8 @@ import zio.json.*
 import com.gu.newproduct.api.productcatalog.PricesFromZuoraCatalog
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.effects.GetFromS3
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{SupporterPlusZuoraIds, ZuoraIds}
+import com.gu.newproduct.api.productcatalog.ZuoraIds
+import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 
 import java.time.format.DateTimeFormatter
 import com.gu.i18n.Currency
@@ -64,7 +70,7 @@ object UpdateSupporterPlusAmountEndpoint {
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
     run(
-      SubscriptionName("A-S00448793"),
+      "A-S00448793",
       ExpectedInput(BigDecimal(20)),
     ),
   )
@@ -144,8 +150,10 @@ object UpdateSupporterPlusAmountEndpoint {
       ids: SupporterPlusZuoraIds,
   ): ZIO[Any, ErrorResponse, RatePlanCharge] = {
     val supporterPlusCharge = charges.find(charge =>
-      charge.productRatePlanChargeId == ids.monthlyV2.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.annualV2.productRatePlanChargeId.value,
+      charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
+        charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value ||
+        charge.productRatePlanChargeId == ids.monthlyV2.contributionProductRatePlanChargeId.value ||
+        charge.productRatePlanChargeId == ids.annualV2.contributionProductRatePlanChargeId.value,
     )
     supporterPlusCharge
       .map(ZIO.succeed(_))
@@ -186,33 +194,55 @@ object UpdateSupporterPlusAmountEndpoint {
 
       _ <- ZIO.log(s"Subscription is $subscription")
 
-      zuoraIds <- ZIO.fromEither(
-        ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError(_)),
-      )
+      zuoraIds <- ZIO
+        .fromEither(
+          ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError(_)),
+        )
 
       ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
       supporterPlusCharge <- getSupporterPlusCharge(charges, zuoraIds.supporterPlusZuoraIds)
 
-      subUpdateRequest = UpdateSubscriptionAmount(
+      applyFromDate = supporterPlusCharge.chargedThroughDate.getOrElse(supporterPlusCharge.effectiveStartDate)
+
+      updateRequestBody = UpdateSubscriptionAmount(
         List(
-          UpdateSubscriptionAmountRequest(
-            subscriptionName,
+          UpdateSubscriptionAmountItem(
+            applyFromDate,
+            applyFromDate,
+            applyFromDate,
             ratePlan.id,
-            postData.amount,
-            postData.billingPeriod,
+            List(
+              ChargeUpdateDetails(
+                price = postData.newPaymentAmount,
+                ratePlanChargeId = supporterPlusCharge.productRatePlanChargeId,
+              ),
+            ),
           ),
         ),
       )
+      _ <- SubscriptionUpdate
+        .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
+
+      billingPeriod <- supporterPlusCharge.billingPeriod.value
 
       account <- accountFuture.join
-      _ <- SQS.sendEmail(EmailMessage.cancellationEmail(account, cancellationDate))
-    } yield ()).fold(
-      error => error,
-      _ => Success(s"Subscription ${subscriptionName.value} was successfully updated"),
-    )
+      _ <- SQS.sendEmail(
+        EmailMessage.updateAmountEmail(
+          account,
+          postData.newPaymentAmount,
+          account.basicInfo.currency,
+          billingPeriod + "ly",
+          applyFromDate,
+        ),
+      )
+    } yield Success(
+      s"Successfully updated payment amount for Supporter Plus subscription ${subscriptionName.value} with amount ${postData.newPaymentAmount}",
+    )).fold(error => error, success => success)
   }
 }
+
+given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 
 extension (billingPeriod: BillingPeriod)
   def value: IO[ErrorResponse, String] =

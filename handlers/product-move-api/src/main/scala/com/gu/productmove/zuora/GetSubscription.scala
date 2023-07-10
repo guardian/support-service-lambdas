@@ -42,6 +42,7 @@ object GetSubscription {
       productName: String,
       ratePlanName: String,
       ratePlanCharges: List[RatePlanCharge],
+      lastChangeType: Option[String],
       productRatePlanId: String,
       id: String,
   )
