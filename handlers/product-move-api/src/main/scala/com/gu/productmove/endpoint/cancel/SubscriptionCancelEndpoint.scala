@@ -129,7 +129,7 @@ object SubscriptionCancelEndpoint {
         ZuoraSetCancellationReasonLive.layer,
         GetAccountLive.layer,
         SQSLive.layer,
-        SecretsLive.layer
+        SecretsLive.layer,
       )
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res)

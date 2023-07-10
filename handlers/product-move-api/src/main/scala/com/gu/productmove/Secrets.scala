@@ -1,12 +1,17 @@
 package com.gu.productmove
 
-import software.amazon.awssdk.services.secretsmanager._
+import software.amazon.awssdk.services.secretsmanager.*
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
-import upickle.default._
+import upickle.default.*
 
-import scala.util.{Success, Failure, Try}
-import zio.{ULayer, ZIO, ZLayer}
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, SecretsError}
+import scala.util.{Try, Success, Failure}
+import zio.{ZIO, ULayer, ZLayer}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{SecretsError, ErrorResponse}
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProviderChain,
+  ProfileCredentialsProvider,
+  EnvironmentVariableCredentialsProvider,
+}
 
 /*
   In Secrets Store we have the following JSON objects:
@@ -67,7 +72,16 @@ object SecretsLive extends Secrets {
   implicit val reader2: Reader[ZuoraApiUserSecrets] = macroRW
   implicit val reader3: Reader[SalesforceSSLSecrets] = macroRW
 
-  private lazy val secretsClient = SecretsManagerClient.create()
+  private val ProfileName = "membership"
+
+  val credentialsProvider = AwsCredentialsProviderChain
+    .builder()
+    .credentialsProviders(
+      ProfileCredentialsProvider.create(ProfileName),
+      EnvironmentVariableCredentialsProvider.create(),
+    )
+    .build()
+  private lazy val secretsClient = SecretsManagerClient.builder().credentialsProvider(credentialsProvider).build()
 
   def getJSONString(secretId: String): String = {
     secretsClient.getSecretValue(GetSecretValueRequest.builder().secretId(secretId).build()).secretString()

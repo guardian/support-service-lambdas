@@ -29,11 +29,9 @@ object ZuoraIds {
       annual: PlanAndCharge,
       annualV2: PlanAndCharges,
   ) {
-    val planAndChargeByApiPlanId: Map[PlanId, HasPlanAndChargeIds] = Map(
-      MonthlySupporterPlus -> monthly,
-      MonthlySupporterPlusV2 -> monthlyV2,
-      AnnualSupporterPlus -> annual,
-      AnnualSupporterPlusV2 -> annualV2,
+    val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharges] = Map(
+      MonthlySupporterPlus -> monthlyV2,
+      AnnualSupporterPlus -> annualV2,
     )
   }
 
@@ -231,6 +229,7 @@ object ZuoraIds {
       // todo ideally we should add an id to the fields in zuora so we don't have to hard code
       Stage("PROD") -> ZuoraIds(
         SupporterPlusZuoraIds(
+          // Can be deleted after migration of existing subs to V2 - needed until then for cancellations
           monthly = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("8a12865b8219d9b401822106192b64dc"),
             productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b401822106194e64e3"),
@@ -240,6 +239,7 @@ object ZuoraIds {
             productRatePlanChargeId = ProductRatePlanChargeId("8a128ed885fc6ded018602296af13eba"),
             contributionProductRatePlanChargeId = ProductRatePlanChargeId("8a128d7085fc6dec01860234cd075270"),
           ),
+          // Can be deleted after migration of existing subs to V2 - needed until then for cancellations
           annual = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("8a12865b8219d9b40182210618a464ba"),
             productRatePlanChargeId = ProductRatePlanChargeId("8a12865b8219d9b40182210618c664c1"),
