@@ -68,12 +68,12 @@ sealed trait SubscriptionUpdateRequest
 case class SwitchProductUpdateRequest(
     add: List[AddRatePlan],
     remove: List[RemoveRatePlan],
-    collect: Option[Boolean],
-    runBilling: Option[Boolean],
-    preview: Option[Boolean],
-    targetDate: Option[LocalDate],
-    currentTerm: Option[String],
-    currentTermPeriodType: Option[String],
+    collect: Option[Boolean] = None,
+    runBilling: Option[Boolean] = None,
+    preview: Option[Boolean] = None,
+    targetDate: Option[LocalDate] = None,
+    currentTerm: Option[String] = None,
+    currentTermPeriodType: Option[String] = None,
 ) extends SubscriptionUpdateRequest
 
 case class UpdateSubscriptionAmount(
@@ -128,7 +128,14 @@ case class SubscriptionUpdateInvoice(
     taxAmount: BigDecimal,
     invoiceItems: List[SubscriptionUpdateInvoiceItem],
 )
+
 given JsonEncoder[SubscriptionUpdateRequest] = DeriveJsonEncoder.gen[SubscriptionUpdateRequest]
+given JsonEncoder[SwitchProductUpdateRequest] = DeriveJsonEncoder.gen[SwitchProductUpdateRequest]
+
+given JsonEncoder[UpdateSubscriptionAmountItem] = DeriveJsonEncoder.gen[UpdateSubscriptionAmountItem]
+
+given JsonEncoder[ChargeUpdateDetails] = DeriveJsonEncoder.gen[ChargeUpdateDetails]
+given JsonEncoder[UpdateSubscriptionAmount] = DeriveJsonEncoder.gen[UpdateSubscriptionAmount]
 given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]

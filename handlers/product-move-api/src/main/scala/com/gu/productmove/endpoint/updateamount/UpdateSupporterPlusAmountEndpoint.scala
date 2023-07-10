@@ -4,7 +4,13 @@ import cats.data.NonEmptyList
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.productmove.SecretsLive
-import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpointTypes.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ErrorResponse,
+  InternalServerError,
+  OutputBody,
+  Success,
+}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -62,6 +68,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 
 import java.time.format.DateTimeFormatter
 import com.gu.i18n.Currency
+import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpointTypes.{ExpectedInput}
 import com.gu.productmove.zuora.model.SubscriptionName
 
 // this is the description for just the one endpoint
@@ -78,9 +85,9 @@ object UpdateSupporterPlusAmountEndpoint {
   val server: sttp.tapir.server.ServerEndpoint.Full[
     Unit,
     Unit,
-    (String, UpdateSupporterPlusAmountEndpointTypes.ExpectedInput),
+    (String, ExpectedInput),
     Unit,
-    UpdateSupporterPlusAmountEndpointTypes.OutputBody,
+    OutputBody,
     Any,
     ZIOApiGatewayRequestHandler.TIO,
   ] = {
@@ -96,9 +103,9 @@ object UpdateSupporterPlusAmountEndpoint {
     }
 
     val endpointDescription: PublicEndpoint[
-      (String, UpdateSupporterPlusAmountEndpointTypes.ExpectedInput),
+      (String, ExpectedInput),
       Unit,
-      UpdateSupporterPlusAmountEndpointTypes.OutputBody,
+      OutputBody,
       Any,
     ] =
       endpoint.post
@@ -141,6 +148,8 @@ object UpdateSupporterPlusAmountEndpoint {
         GetAccountLive.layer,
         SQSLive.layer,
         SecretsLive.layer,
+        GetSubscriptionLive.layer,
+        SubscriptionUpdateLive.layer,
       )
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res)
