@@ -6,6 +6,7 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
 import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, ProductMoveEndpointTypes}
+import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpoint
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
@@ -68,6 +69,7 @@ object Handler extends ZIOApiGatewayRequestHandler {
   override val server: List[ServerEndpoint[Any, TIO]] = List(
     AvailableProductMovesEndpoint.server,
     ProductMoveEndpoint.server,
+    UpdateSupporterPlusAmountEndpoint.server,
     SubscriptionCancelEndpoint.server,
   )
 
