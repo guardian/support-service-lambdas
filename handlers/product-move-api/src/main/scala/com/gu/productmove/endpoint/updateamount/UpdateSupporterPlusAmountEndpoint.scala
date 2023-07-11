@@ -224,7 +224,7 @@ object UpdateSupporterPlusAmountEndpoint {
             List(
               ChargeUpdateDetails(
                 price = postData.newPaymentAmount,
-                ratePlanChargeId = supporterPlusCharge.productRatePlanChargeId,
+                ratePlanChargeId = supporterPlusCharge.id,
               ),
             ),
           ),

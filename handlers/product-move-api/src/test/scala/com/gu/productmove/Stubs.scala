@@ -35,6 +35,7 @@ import java.time.LocalDate
 // Stubs for GetSubscription service
 //-----------------------------------------------------
 val ratePlanCharge1 = RatePlanCharge(
+  id = "RPC1",
   productRatePlanChargeId = "PRPC1",
   name = "Contribution",
   price = Some(5.000000000),
@@ -47,6 +48,7 @@ val ratePlanCharge1 = RatePlanCharge(
 )
 
 val ratePlanCharge2 = RatePlanCharge(
+  id = "RPC1",
   productRatePlanChargeId = "PRPC1",
   name = "Contribution",
   price = Some(5.000000000),
@@ -120,6 +122,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
       ratePlanName = "Monthly Contribution",
       ratePlanCharges = List(
         RatePlanCharge(
+          id = "8ad0823f841cf4e601841e61f6d98asd",
           productRatePlanChargeId = "2c92c0f85a6b1352015a7fcf35ab397c",
           name = "Contribution",
           number = "C-00732721",
@@ -140,6 +143,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
       "Supporter Plus Monthly",
       List(
         RatePlanCharge(
+          id = "id",
           productRatePlanChargeId = "8ad09ea0858682bb0185880ac57f4c4c",
           name = "Supporter Plus Monthly",
           number = "C-00732747",
@@ -187,6 +191,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
       ratePlanName = "RP1",
       ratePlanCharges = List(
         RatePlanCharge(
+          id = "RPC1",
           productRatePlanChargeId = "PRPC1",
           name = "Digital Pack Monthly",
           price = Some(11.11),

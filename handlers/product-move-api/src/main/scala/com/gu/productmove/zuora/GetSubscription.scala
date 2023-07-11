@@ -51,6 +51,7 @@ object GetSubscription {
   }
 
   case class RatePlanCharge(
+      id: String,
       productRatePlanChargeId: String,
       effectiveEndDate: LocalDate,
       name: String,
