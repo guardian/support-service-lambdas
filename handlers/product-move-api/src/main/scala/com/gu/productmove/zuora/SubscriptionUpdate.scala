@@ -32,6 +32,8 @@ import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
+import zio.json.ast.Json
+import zio.json.internal.Write
 import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
@@ -129,7 +131,17 @@ case class SubscriptionUpdateInvoice(
     invoiceItems: List[SubscriptionUpdateInvoiceItem],
 )
 
-given JsonEncoder[SubscriptionUpdateRequest] = DeriveJsonEncoder.gen[SubscriptionUpdateRequest]
+given JsonEncoder[SubscriptionUpdateRequest] with {
+  override def unsafeEncode(request: SubscriptionUpdateRequest, indent: Option[Int], out: Write): Unit = {
+    request match {
+      case z: SwitchProductUpdateRequest =>
+        summon[JsonEncoder[SwitchProductUpdateRequest]].unsafeEncode(z, indent, out)
+      case y: UpdateSubscriptionAmount =>
+        summon[JsonEncoder[UpdateSubscriptionAmount]].unsafeEncode(y, indent, out)
+    }
+  }
+}
+
 given JsonEncoder[SwitchProductUpdateRequest] = DeriveJsonEncoder.gen[SwitchProductUpdateRequest]
 given JsonEncoder[UpdateSubscriptionAmountItem] = DeriveJsonEncoder.gen[UpdateSubscriptionAmountItem]
 
