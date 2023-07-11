@@ -138,7 +138,7 @@ object UpdateSupporterPlusAmountEndpoint {
 
   private def run(subscriptionName: String, postData: ExpectedInput): TIO[Right[Nothing, OutputBody]] = for {
     _ <- ZIO.log(s"INPUT: $subscriptionName: $postData")
-    res <- subscriptionCancel(SubscriptionName(subscriptionName), postData)
+    res <- subscriptionUpdateAmount(SubscriptionName(subscriptionName), postData)
       .provide(
         AwsCredentialsLive.layer,
         SttpClientLive.layer,
@@ -201,7 +201,7 @@ object UpdateSupporterPlusAmountEndpoint {
       case false => postData.newPaymentAmount
     }
 
-  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
+  private[productmove] def subscriptionUpdateAmount(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
     GetSubscription with GetAccount with SubscriptionUpdate with SQS with Stage,
     ErrorResponse,
     OutputBody,
