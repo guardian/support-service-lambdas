@@ -76,9 +76,13 @@ object SQSLive {
                   InternalServerError(
                     s"Failed to send product switch email message to SQS for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName",
                   )
-                case attributes: EmailPayloadCancellationAttributes =>
+                case _: EmailPayloadCancellationAttributes =>
                   InternalServerError(
                     s"Failed to send subscription cancellation email message to SQS for sfContactId: ${message.SfContactId} with error: ${ex.toString} to SQS queue $emailQueueName",
+                  )
+                case attributes: EmailPayloadUpdateAmountAttributes =>
+                  InternalServerError(
+                    s"Failed to send update amount email message to SQS for sfContactId: ${message.SfContactId} with error: ${ex.toString} to SQS queue $emailQueueName",
                   )
               }
             }
@@ -90,6 +94,8 @@ object SQSLive {
                 s"Successfully sent product switch email for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} to SQS queue $emailQueueName"
               case _: EmailPayloadCancellationAttributes =>
                 s"Successfully sent subscription cancellation email for sfContactId: ${message.SfContactId} to SQS queue $emailQueueName"
+              case attributes: EmailPayloadUpdateAmountAttributes =>
+                s"Successfully sent update amount email for sfContactId: ${message.SfContactId} to SQS queue $emailQueueName"
             },
           )
         } yield ()

@@ -77,7 +77,7 @@ object UpdateSupporterPlusAmountEndpoint {
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
     run(
-      "A-S00448793",
+      "A-S00609043",
       ExpectedInput(BigDecimal(20)),
     ),
   )
