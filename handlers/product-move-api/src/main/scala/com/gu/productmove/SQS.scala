@@ -277,6 +277,8 @@ given JsonEncoder[RCtoSPEmailPayloadProductSwitchAttributes] =
 given JsonEncoder[toRCEmailPayloadProductSwitchAttributes] =
   DeriveJsonEncoder.gen[toRCEmailPayloadProductSwitchAttributes]
 given JsonEncoder[EmailPayloadCancellationAttributes] = DeriveJsonEncoder.gen[EmailPayloadCancellationAttributes]
+
+given JsonEncoder[EmailPayloadUpdateAmountAttributes] = DeriveJsonEncoder.gen[EmailPayloadUpdateAmountAttributes]
 given JsonEncoder[EmailPayloadAttributes] =
   (attributes: EmailPayloadAttributes, indent: Option[RuntimeFlags], out: Write) =>
     attributes match {
