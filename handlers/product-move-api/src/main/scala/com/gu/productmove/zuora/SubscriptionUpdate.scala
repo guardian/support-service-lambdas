@@ -131,7 +131,6 @@ case class SubscriptionUpdateInvoice(
 
 given JsonEncoder[SubscriptionUpdateRequest] = DeriveJsonEncoder.gen[SubscriptionUpdateRequest]
 given JsonEncoder[SwitchProductUpdateRequest] = DeriveJsonEncoder.gen[SwitchProductUpdateRequest]
-
 given JsonEncoder[UpdateSubscriptionAmountItem] = DeriveJsonEncoder.gen[UpdateSubscriptionAmountItem]
 
 given JsonEncoder[ChargeUpdateDetails] = DeriveJsonEncoder.gen[ChargeUpdateDetails]

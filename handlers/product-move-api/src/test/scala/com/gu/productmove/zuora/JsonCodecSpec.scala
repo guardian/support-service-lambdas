@@ -15,6 +15,27 @@ import java.time.LocalDate
 import scala.io.Source
 
 class JsonCodecSpec extends AnyFlatSpec {
+  it should "JSON Encoding: correctly encode subscription update request for updating subscription payment amount" in {
+    val updateRequestBody: SubscriptionUpdateRequest = UpdateSubscriptionAmount(
+      List(
+        UpdateSubscriptionAmountItem(
+          LocalDate.of(2022, 2, 2),
+          LocalDate.of(2022, 2, 2),
+          LocalDate.of(2022, 2, 2),
+          "ratePlanId",
+          List(
+            ChargeUpdateDetails(
+              price = BigDecimal(20),
+              ratePlanChargeId = "productRatePlanChargeId",
+            ),
+          ),
+        ),
+      ),
+    )
+
+    println(updateRequestBody.toJson)
+  }
+
   it should "JSON Decoding: null fields should convert to type None" in {
     val json = Source.fromResource("AccountBasicInfo2.json").mkString
     val expectedBasicInfo = BasicInfo(

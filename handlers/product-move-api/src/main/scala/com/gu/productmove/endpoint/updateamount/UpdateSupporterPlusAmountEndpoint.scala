@@ -230,6 +230,7 @@ object UpdateSupporterPlusAmountEndpoint {
           ),
         ),
       )
+
       _ <- SubscriptionUpdate
         .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
 
