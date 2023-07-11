@@ -188,6 +188,19 @@ object UpdateSupporterPlusAmountEndpoint {
       case None => ZIO.fail(InternalServerError(s"Subscription can't be updated as the charge list is empty"))
     }
 
+  def getNewRatePlanAmount(
+      charges: NonEmptyList[RatePlanCharge],
+      ids: SupporterPlusZuoraIds,
+      postData: ExpectedInput,
+  ): BigDecimal =
+    charges.exists(charge =>
+      charge.productRatePlanChargeId == ids.monthlyV2.contributionProductRatePlanChargeId.value ||
+        charge.productRatePlanChargeId == ids.annualV2.contributionProductRatePlanChargeId.value,
+    ) match {
+      case true => postData.newPaymentAmount - 10
+      case false => postData.newPaymentAmount
+    }
+
   private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
     GetSubscription with GetAccount with SubscriptionUpdate with SQS with Stage,
     ErrorResponse,
@@ -212,6 +225,7 @@ object UpdateSupporterPlusAmountEndpoint {
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
       supporterPlusCharge <- getSupporterPlusCharge(charges, zuoraIds.supporterPlusZuoraIds)
 
+      newRatePlanAmount = getNewRatePlanAmount(charges, zuoraIds.supporterPlusZuoraIds, postData)
       applyFromDate = supporterPlusCharge.chargedThroughDate.getOrElse(supporterPlusCharge.effectiveStartDate)
 
       updateRequestBody = UpdateSubscriptionAmount(
@@ -223,7 +237,7 @@ object UpdateSupporterPlusAmountEndpoint {
             ratePlan.id,
             List(
               ChargeUpdateDetails(
-                price = postData.newPaymentAmount,
+                price = newRatePlanAmount,
                 ratePlanChargeId = supporterPlusCharge.id,
               ),
             ),
