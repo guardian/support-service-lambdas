@@ -256,7 +256,7 @@ object UpdateSupporterPlusAmountEndpoint {
           account,
           postData.newPaymentAmount,
           account.basicInfo.currency,
-          billingPeriod + "ly",
+          billingPeriod,
           applyFromDate,
         ),
       )
