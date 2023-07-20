@@ -1,7 +1,7 @@
 package com.gu.sf.move.subscriptions.api
 
 import cats.data.EitherT
-import cats.effect.{ContextShift, IO}
+import cats.effect.{IO, ContextShift}
 import cats.syntax.all._
 import com.gu.AppIdentity
 import com.gu.util.config.ConfigLoader
@@ -23,12 +23,17 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
   def apply(
       appIdentity: AppIdentity,
       backend: SttpBackend[Identity, Any],
+      updateSupporterProductData: UpdateSupporterProductData,
   ): EitherT[IO, MoveSubscriptionApiError, HttpRoutes[IO]] = {
     for {
       apiConfig <- ConfigLoader
         .loadConfig[IO, MoveSubscriptionApiConfig](appIdentity)
         .leftMap(error => MoveSubscriptionApiError(error.toString))
-      routes <- createLogging()(SFMoveSubscriptionsApiRoutes(SFMoveSubscriptionsService(apiConfig, backend)))
+      routes <- createLogging()(
+        SFMoveSubscriptionsApiRoutes(
+          SFMoveSubscriptionsService(apiConfig, backend, updateSupporterProductData),
+        ),
+      )
         .asRight[MoveSubscriptionApiError]
         .toEitherT[IO]
     } yield routes

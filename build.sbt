@@ -616,7 +616,7 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
     scalatest,
     diffx,
   ),
-).dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
+).dependsOn(`effects-s3`, `effects-sqs`,  `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
 lazy val `fulfilment-date-calculator` = lambdaProject(
   "fulfilment-date-calculator",

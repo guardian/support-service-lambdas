@@ -1,9 +1,9 @@
 package com.gu.sf.move.subscriptions.api
 
-import com.gu.zuora.subscription.{Subscription, ZuoraApiFailure}
+import com.gu.zuora.subscription.{ZuoraApiFailure, Subscription}
 import com.gu.zuora.{AccessToken, MoveSubscriptionAtZuoraAccountResponse}
 import sttp.client3.testing.SttpBackendStub
-import sttp.client3.{Identity, Response}
+import sttp.client3.{Response, Identity}
 import sttp.model.StatusCode
 
 import java.time.LocalDate
@@ -43,6 +43,10 @@ trait ZuoraTestBackendMixin {
 
   protected val updateAccountFailedRes: Response[Either[ZuoraApiFailure, MoveSubscriptionAtZuoraAccountResponse]] =
     Response(Left(ZuoraApiFailure("update ZuoraAccount failure")), StatusCode.InternalServerError)
+
+  class UpdateSupporterProductDataStub extends UpdateSupporterProductData {
+    override def update(subscription: Subscription, identityId: String): Either[String, Unit] = Right(())
+  }
 
   def createZuoraBackendStub(
       oauthResponse: Response[Either[ZuoraApiFailure, AccessToken]],

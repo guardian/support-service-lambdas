@@ -177,7 +177,11 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
   }
 
   private def createApp(backendStub: SttpBackendStub[Identity, Any]) = {
-    SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api"), backendStub).value
+    SFMoveSubscriptionsApiApp(
+      DevIdentity("sf-move-subscriptions-api"),
+      backendStub,
+      new UpdateSupporterProductDataStub(),
+    ).value
       .unsafeRunSync()
       .getOrElse(throw new RuntimeException)
   }
