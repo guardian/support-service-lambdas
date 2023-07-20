@@ -3,7 +3,7 @@ package com.gu.sf.move.subscriptions.api
 import cats.Monad
 import cats.data.EitherT
 import cats.syntax.all._
-import com.gu.zuora.Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
+import com.gu.zuora.Zuora.{updateAccountByMovingSubscription, subscriptionGetResponse, accessTokenGetResponseV2}
 import com.gu.zuora._
 import com.gu.zuora.subscription._
 import sttp.client3._
@@ -21,9 +21,12 @@ case class FetchZuoraSubscriptionError(message: String) extends MoveSubscription
 
 case class UpdateZuoraAccountError(message: String) extends MoveSubscriptionServiceError
 
+case class UpdateSupporterProductDataError(message: String) extends MoveSubscriptionServiceError
+
 class SFMoveSubscriptionsService[F[_]: Monad](
     apiCfg: MoveSubscriptionApiConfig,
     backend: SttpBackend[Identity, Any],
+    updateSupporterProductData: UpdateSupporterProductData,
 ) extends LazyLogging {
 
   private val ZuoraConfig = ZuoraRestOauthConfig(
@@ -68,6 +71,9 @@ class SFMoveSubscriptionsService[F[_]: Monad](
         .leftMap(err => FetchZuoraSubscriptionError(err.reason))
       updateRes <- updateAccountByMovingSubscription(accessToken, backend)(subscription, moveSubCommand)
         .leftMap(err => UpdateZuoraAccountError(err.reason))
+      _ <- updateSupporterProductData
+        .update(subscription, identityId)
+        .leftMap(errList => UpdateSupporterProductDataError(errList.mkString(", ")))
     } yield updateRes)
       .toEitherT[F]
       .map(res => MoveSubscriptionServiceSuccess(res.toString))
@@ -94,6 +100,7 @@ object SFMoveSubscriptionsService {
   def apply[F[_]: Monad](
       apiCfg: MoveSubscriptionApiConfig,
       backend: SttpBackend[Identity, Any],
+      updateSupporterProductData: UpdateSupporterProductData,
   ): SFMoveSubscriptionsService[F] =
-    new SFMoveSubscriptionsService(apiCfg, backend)
+    new SFMoveSubscriptionsService(apiCfg, backend, updateSupporterProductData)
 }

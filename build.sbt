@@ -208,6 +208,12 @@ lazy val `effects-sqs` = library(project in file("lib/effects-sqs"))
     libraryDependencies ++= Seq(awsSQS) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
+lazy val `effects-eventbridge` = library(project in file("lib/effects-eventbridge"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(awsEventBridge) ++ logging,
+    dependencyOverrides ++= jacksonDependencies,
+  )
 lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
   .dependsOn(testDep)
   .settings(
@@ -616,7 +622,7 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
     scalatest,
     diffx,
   ),
-).dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
+).dependsOn(`effects-s3`, `effects-eventbridge`,  `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
 lazy val `fulfilment-date-calculator` = lambdaProject(
   "fulfilment-date-calculator",
