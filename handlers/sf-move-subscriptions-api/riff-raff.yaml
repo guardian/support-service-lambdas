@@ -3,7 +3,6 @@ stacks:
 regions:
 - eu-west-1
 allowedStages:
-  - DEV
   - CODE
   - PROD
 deployments:
