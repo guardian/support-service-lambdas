@@ -32,6 +32,17 @@ Resources:
     Properties:
       PolicyDocument:
         Statement:
+          - Action: events:PutEvents
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:events:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - ":event-bus/supporter-product-data-"
+                  - Ref: stage
           - Action: ssm:GetParametersByPath
             Effect: Allow
             Resource:
