@@ -41,10 +41,15 @@ class SFMoveSubscriptionsService[F[_]: Monad](
       moveSubscriptionData: MoveSubscriptionReqBody,
   ): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     logger.info(s"Attempting to move subscription $moveSubscriptionData")
-    moveSubscriptionInternal(moveSubscriptionData, updateAccountByMovingSubscriptionRun).leftMap(err => {
-      logger.error(s"Failed to move subscription with error $err")
-      err
-    })
+    moveSubscriptionInternal(moveSubscriptionData, updateAccountByMovingSubscriptionRun)
+      .leftMap(err => {
+        logger.error(s"Failed to move subscription with error $err")
+        err
+      })
+      .map(res => {
+        logger.info(s"Successfully moved subscription with response $res")
+        res
+      })
   }
 
   def moveSubscriptionDryRun(
