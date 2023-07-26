@@ -13,20 +13,8 @@ trait UpdateSupporterProductData {
 class UpdateSupporterProductDataService(queueName: QueueName) extends UpdateSupporterProductData with LazyLogging {
 
   def combineErrorsOrUnit(list: List[Either[String, Unit]]): Either[String, Unit] = {
-    list.foldLeft[Either[String, Unit]](Right(())) { (acc, either) =>
-      acc match {
-        case Left(errors) =>
-          either match {
-            case Left(error) => Left(s"$errors, $error")
-            case Right(_) => acc
-          }
-        case Right(_) =>
-          either match {
-            case Left(error) => Left(s"$error")
-            case Right(_) => acc
-          }
-      }
-    }
+    val errors = list.collect { case Left(error) => error }
+    if (errors.isEmpty) Right(()) else Left(errors.mkString(", "))
   }
   override def update(
       subscription: Subscription,
