@@ -30,7 +30,7 @@ object InvoicingApiRefundLive {
     ZLayer {
       for {
         secrets <- ZIO.service[Secrets]
-        invoicingAPISecrets <- secrets.getInvoicingAPISecrets.tapError(_ => ZIO.fail(SecretsError("Could not")))
+        invoicingAPISecrets <- secrets.getInvoicingAPISecrets.tapError(ex => ZIO.fail(SecretsError(s"Failed to get InvoicingApi secrets because: $ex")))
         invoicingApiUrl = invoicingAPISecrets.invoicingApiUrl
         invoicingApiKey = invoicingAPISecrets.invoicingApiKey
         invoicingApiConfig = InvoicingApiConfig(invoicingApiUrl + "/refund", invoicingApiKey)
