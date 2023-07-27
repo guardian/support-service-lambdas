@@ -13,7 +13,9 @@ trait UpdateSupporterProductData {
 class UpdateSupporterProductDataService(queueName: QueueName) extends UpdateSupporterProductData with LazyLogging {
 
   def combineErrorsOrUnit(list: List[Either[String, Unit]]): Either[String, Unit] = {
-    val errors = list.collect { case Left(error) => error }
+    val errors = list.zipWithIndex.collect { case (Left(error), index) =>
+      s"Error writing item $index to SQS: $error"
+    }
     if (errors.isEmpty) Right(()) else Left(errors.mkString(", "))
   }
   override def update(
