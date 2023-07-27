@@ -12,6 +12,7 @@ This is only up to date by people using it and hitting problems!  So please edit
 1. Open the project in Intellij with Scala plugin installed
 1. Open Intellij->Settings->sbt (search for it)
 1. Turn on sbt shell for project loading and compilation.
+1. (optional for better scala 3 support) switch the scala plugin to "nightly" or "early access" rather than Release
 1. Go into "handlers" and find the relevant lambda(s), and check (or add) their Getting Started section
 
 ### Running all Integration tests
