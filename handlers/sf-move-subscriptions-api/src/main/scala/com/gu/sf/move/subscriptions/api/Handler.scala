@@ -10,6 +10,12 @@ object Handler
       SFMoveSubscriptionsApiApp(
         AppIdentity.whoAmI(defaultAppName = "sf-move-subscriptions-api"),
         HttpURLConnectionBackend(),
+        UpdateSupporterProductDataService(
+          sys.env.getOrElse(
+            "Stage",
+            throw new RuntimeException("Stage parameter is missing from the lambda environment variables"),
+          ),
+        ),
       ).value
         .unsafeRunSync()
         .valueOr((error: MoveSubscriptionApiError) => throw new RuntimeException(error.toString)),

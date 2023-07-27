@@ -32,6 +32,19 @@ Resources:
     Properties:
       PolicyDocument:
         Statement:
+          - Action:
+              - sqs:GetQueueUrl
+              - sqs:SendMessage
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:sqs:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - ":supporter-product-data-"
+                  - Ref: stage
           - Action: ssm:GetParametersByPath
             Effect: Allow
             Resource:
