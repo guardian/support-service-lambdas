@@ -155,6 +155,16 @@ Resources:
             - sqs:GetQueueAttributes
             - sqs:ReceiveMessage
           Resource: "*"
+      - Statement:
+        - Effect: Allow
+          Action:
+            - secretsmanager:DescribeSecret
+            - secretsmanager:GetSecretValue
+          Resource:
+            - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/InvoicingApi-qNhLQS"
+            - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/InvoicingApi-JBxYpW"
+            - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho"
+            - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm"
 
   RefundQueue:
     Type: AWS::SQS::Queue

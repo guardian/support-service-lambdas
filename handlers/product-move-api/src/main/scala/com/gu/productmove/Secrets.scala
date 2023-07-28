@@ -40,7 +40,7 @@ import software.amazon.awssdk.auth.credentials.{
   }
  */
 
-case class InvoicingAPISecrets(invoicingApiUrl: String, invoicingApiKey: String)
+case class InvoicingAPISecrets(InvoicingApiUrl: String, InvoicingApiKey: String)
 case class ZuoraApiUserSecrets(baseUrl: String, username: String, password: String)
 case class SalesforceSSLSecrets(
     url: String,
