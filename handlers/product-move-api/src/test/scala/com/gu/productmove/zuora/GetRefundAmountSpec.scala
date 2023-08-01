@@ -32,8 +32,8 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
           lastPaidInvoiceId <- result.lastPaidInvoiceId
           lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
         } yield {
-          assert(negativeInvoiceId)(equalTo("8ad0934e86a19cca0186a817d551251e"))
-          assert(lastPaidInvoiceId)(equalTo("8ad08d2986a18ded0186a811f7e56e01"))
+          assert(negativeInvoiceId)(equalTo("8ad0934e86a19cca0186a817d551251e")) &&
+          assert(lastPaidInvoiceId)(equalTo("8ad08d2986a18ded0186a811f7e56e01")) &&
           assert(lastPaidInvoiceAmount)(equalTo(12.14))
         }
       },
@@ -51,8 +51,8 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
           lastPaidInvoiceId <- result.lastPaidInvoiceId
           lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
         } yield {
-          assert(negativeInvoiceId)(equalTo("8ad0934e86a19cca0186a817d551251e"))
-          assert(lastPaidInvoiceId)(equalTo("8ad08d2986a18ded0186a811f7e56e01"))
+          assert(negativeInvoiceId)(equalTo("8a1289288995cad501899c3fa6b0501c")) &&
+          assert(lastPaidInvoiceId)(equalTo("8a129f89898cbdf301898ee88c0f085f")) &&
           assert(lastPaidInvoiceAmount)(equalTo(12))
         }
       },
@@ -69,8 +69,8 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
           lastPaidInvoiceId <- result.lastPaidInvoiceId
           lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
         } yield {
-          assert(negativeInvoiceId)(equalTo("8ad09b2186b5fdb50186b708669f2114"))
-          assert(lastPaidInvoiceId)(equalTo("8ad08c8486b5ec340186b70539871852"))
+          assert(negativeInvoiceId)(equalTo("8ad09b2186b5fdb50186b708669f2114")) &&
+          assert(lastPaidInvoiceId)(equalTo("8ad08c8486b5ec340186b70539871852")) &&
           assert(lastPaidInvoiceAmount)(equalTo(20))
         }
       },
