@@ -40,7 +40,7 @@ trait GetInvoiceItemsForSubscription:
 object GetInvoiceItemsForSubscription {
 
   def getZuoraQuery(subscriptionName: SubscriptionName) =
-    s"select Id, ChargeAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
+    s"select Id, ChargeAmount, TaxAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
 
   case class PostBody(queryString: String)
 
@@ -73,7 +73,8 @@ object GetInvoiceItemsForSubscription {
         ),
       )
 
-    def lastPaidInvoiceAmount = getLastPaidInvoice.map(_._2.map(_.ChargeAmount).sum)
+    def lastPaidInvoiceAmount =
+      getLastPaidInvoice.map(_._2.map(invoice => invoice.ChargeAmount + invoice.TaxAmount).sum)
 
     def lastPaidInvoiceId = getLastPaidInvoice.map(_._1)
 
@@ -90,6 +91,7 @@ object GetInvoiceItemsForSubscription {
       Id: String,
       ChargeDate: String,
       ChargeAmount: BigDecimal,
+      TaxAmount: BigDecimal,
       InvoiceId: String,
   ) {
     def chargeDateAsDateTime = LocalDateTime.parse(ChargeDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME)

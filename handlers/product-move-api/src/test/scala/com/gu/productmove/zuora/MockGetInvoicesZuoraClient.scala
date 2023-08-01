@@ -26,6 +26,7 @@ object MockGetInvoicesZuoraClient {
       |            "Id": "8ad08c8486b5ec340186b70539931853",
       |            "InvoiceId": "8ad08c8486b5ec340186b70539871852",
       |            "ChargeAmount": 20,
+      |            "TaxAmount": 0,
       |            "ChargeNumber": "C-00837124"
       |        },
       |        {
@@ -39,6 +40,7 @@ object MockGetInvoicesZuoraClient {
       |            "Id": "8ad09b2186b5fdb50186b70866b02115",
       |            "InvoiceId": "8ad09b2186b5fdb50186b708669f2114",
       |            "ChargeAmount": -20,
+      |            "TaxAmount": 0,
       |            "ChargeNumber": "C-00837124"
       |        }
       |    ],
@@ -61,6 +63,7 @@ object MockGetInvoicesZuoraClient {
       |            "Id": "8ad081c6864e90cc018651f4568e06b0",
       |            "InvoiceId": "8ad081c6864e90cc018651f4568306af",
       |            "ChargeAmount": 20,
+      |            "TaxAmount": 0,
       |            "ChargeNumber": "C-00819652"
       |        },
       |        {
@@ -74,6 +77,7 @@ object MockGetInvoicesZuoraClient {
       |            "Id": "8ad08d2986a18ded0186a811f7f16e02",
       |            "InvoiceId": "8ad08d2986a18ded0186a811f7e56e01",
       |            "ChargeAmount": -7.86,
+      |            "TaxAmount": 0,
       |            "ChargeNumber": "C-00819652"
       |        },
       |        {
@@ -87,6 +91,7 @@ object MockGetInvoicesZuoraClient {
       |            "Id": "8ad08d2986a18ded0186a811f7f16e03",
       |            "InvoiceId": "8ad08d2986a18ded0186a811f7e56e01",
       |            "ChargeAmount": 20,
+      |            "TaxAmount": 0,
       |            "ChargeNumber": "C-00834502"
       |        },
       |        {
@@ -100,6 +105,7 @@ object MockGetInvoicesZuoraClient {
       |            "Id": "8ad0934e86a19cca0186a817d564251f",
       |            "InvoiceId": "8ad0934e86a19cca0186a817d551251e",
       |            "ChargeAmount": -20,
+      |            "TaxAmount": 0,
       |            "ChargeNumber": "C-00834502"
       |        },
       |        {
@@ -113,6 +119,7 @@ object MockGetInvoicesZuoraClient {
       |            "Id": "8ad0934e86a19cca0186a817d5642520",
       |            "InvoiceId": "8ad0934e86a19cca0186a817d551251e",
       |            "ChargeAmount": -20,
+      |            "TaxAmount": 0,
       |            "ChargeNumber": "C-00819652"
       |        },
       |        {
@@ -126,7 +133,73 @@ object MockGetInvoicesZuoraClient {
       |            "Id": "8ad0934e86a19cca0186a817d5642521",
       |            "InvoiceId": "8ad0934e86a19cca0186a817d551251e",
       |            "ChargeAmount": 7.86,
+      |            "TaxAmount": 0,
       |            "ChargeNumber": "C-00819652"
+      |        }
+      |    ],
+      |    "done": true
+      |}
+      |""".stripMargin
+  val responseWithTax: ClientResponse =
+    """
+      |{
+      |    "size": 4,
+      |    "records": [
+      |        {
+      |            "ChargeDate": "2023-07-28T12:26:04.000+01:00",
+      |            "TaxAmount": -0.24,
+      |            "UnitPrice": 10,
+      |            "SubscriptionNumber": "A-S01918489",
+      |            "ProductName": "Supporter Plus",
+      |            "ServiceEndDate": "2023-08-24",
+      |            "ServiceStartDate": "2023-07-25",
+      |            "ChargeName": "Supporter Plus Monthly Charge",
+      |            "Id": "8a1289288995cad501899c3fa6be501d",
+      |            "InvoiceId": "8a1289288995cad501899c3fa6b0501c",
+      |            "ChargeAmount": -9.76,
+      |            "ChargeNumber": "C-04460599"
+      |        },
+      |        {
+      |            "ChargeDate": "2023-07-28T12:26:04.000+01:00",
+      |            "TaxAmount": 0,
+      |            "UnitPrice": 2,
+      |            "SubscriptionNumber": "A-S01918489",
+      |            "ProductName": "Supporter Plus",
+      |            "ServiceEndDate": "2023-08-24",
+      |            "ServiceStartDate": "2023-07-25",
+      |            "ChargeName": "Contribution",
+      |            "Id": "8a1289288995cad501899c3fa6be501e",
+      |            "InvoiceId": "8a1289288995cad501899c3fa6b0501c",
+      |            "ChargeAmount": -2,
+      |            "ChargeNumber": "C-04460598"
+      |        },
+      |        {
+      |            "ChargeDate": "2023-07-25T22:15:52.000+01:00",
+      |            "TaxAmount": 0.24,
+      |            "UnitPrice": 10,
+      |            "SubscriptionNumber": "A-S01918489",
+      |            "ProductName": "Supporter Plus",
+      |            "ServiceEndDate": "2023-08-24",
+      |            "ServiceStartDate": "2023-07-25",
+      |            "ChargeName": "Supporter Plus Monthly Charge",
+      |            "Id": "8a129f89898cbdf301898ee88c260860",
+      |            "InvoiceId": "8a129f89898cbdf301898ee88c0f085f",
+      |            "ChargeAmount": 9.76,
+      |            "ChargeNumber": "C-04460599"
+      |        },
+      |        {
+      |            "ChargeDate": "2023-07-25T22:15:52.000+01:00",
+      |            "TaxAmount": 0,
+      |            "UnitPrice": 2,
+      |            "SubscriptionNumber": "A-S01918489",
+      |            "ProductName": "Supporter Plus",
+      |            "ServiceEndDate": "2023-08-24",
+      |            "ServiceStartDate": "2023-07-25",
+      |            "ChargeName": "Contribution",
+      |            "Id": "8a129f89898cbdf301898ee88c260861",
+      |            "InvoiceId": "8a129f89898cbdf301898ee88c0f085f",
+      |            "ChargeAmount": 2,
+      |            "ChargeNumber": "C-04460598"
       |        }
       |    ],
       |    "done": true

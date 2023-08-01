@@ -37,6 +37,25 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
           assert(lastPaidInvoiceAmount)(equalTo(12.14))
         }
       },
+      test("finds the right amount for a switched sub where tax has been paid") {
+
+        for {
+          result <- GetInvoiceItemsForSubscription
+            .get(SubscriptionName("A-S01918489"))
+            .provide(
+              GetInvoiceItemsForSubscriptionLive.layer,
+              ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.responseWithTax)),
+              ZuoraGetLive.layer,
+            )
+          negativeInvoiceId <- result.negativeInvoiceId
+          lastPaidInvoiceId <- result.lastPaidInvoiceId
+          lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
+        } yield {
+          assert(negativeInvoiceId)(equalTo("8ad0934e86a19cca0186a817d551251e"))
+          assert(lastPaidInvoiceId)(equalTo("8ad08d2986a18ded0186a811f7e56e01"))
+          assert(lastPaidInvoiceAmount)(equalTo(12))
+        }
+      },
       test("finds the right amount for a regular cancelled sub") {
         for {
           result <- GetInvoiceItemsForSubscription
