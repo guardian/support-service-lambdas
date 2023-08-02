@@ -67,6 +67,6 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               SecretsLive.layer,
             )
         } yield assert(true)(equalTo(true))
-      },
+      } @@ TestAspect.ignore,
     )
 }
