@@ -7,7 +7,7 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
-import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemsForSubscription
+import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{InvoiceItem, InvoiceItemsForSubscription}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{
@@ -22,6 +22,7 @@ import com.gu.productmove.zuora.{
   ZuoraCancelLive,
   ZuoraSetCancellationReason,
 }
+import sttp.capabilities.zio.ZioStreams
 import sttp.client3.SttpBackend
 import zio.{Task, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
@@ -69,35 +70,54 @@ object RefundSupporterPlus {
       invoiceItemsForSub: InvoiceItemsForSubscription,
   ): ZIO[GetInvoice with InvoiceItemAdjustment, ErrorResponse, Unit] = for {
     negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
+    negativeInvoiceItems <- invoiceItemsForSub.negativeInvoiceItems
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(
       negativeInvoiceId,
     )
     _ <-
       if (negativeInvoice.balance < 0) {
-        adjustInvoiceBalanceToZero(invoiceItemsForSub, negativeInvoice.balance)
+        adjustInvoiceItemsBalanceToZero(
+          negativeInvoiceId,
+          negativeInvoiceItems,
+          negativeInvoice.balance,
+        )
       } else {
         ZIO.log(s"Invoice with id $negativeInvoiceId has zero balance")
       }
   } yield ()
 
-  def adjustInvoiceBalanceToZero(
-      invoiceItemsForSub: InvoiceItemsForSubscription,
+  private def adjustInvoiceItemsBalanceToZero(
+      negativeInvoiceId: String,
+      invoiceItems: List[InvoiceItem],
       balance: BigDecimal,
   ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] =
     for {
-      negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
-      invoiceItemId <- invoiceItemsForSub.negativeInvoiceItemId
       _ <- ZIO.log(s"Invoice with id $negativeInvoiceId still has balance of $balance")
+      _ <- ZIO.foreachParDiscard(invoiceItems) { invoiceItem =>
+        adjustInvoiceItem(
+          negativeInvoiceId,
+          invoiceItem,
+          invoiceItem.amountWithTax.abs,
+        )
+      }
+    } yield ()
+
+  private def adjustInvoiceItem(
+      negativeInvoiceId: String,
+      invoiceItem: InvoiceItem,
+      amountToRefundOnInvoiceItem: BigDecimal,
+  ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] =
+    for {
       _ <- InvoiceItemAdjustment.update(
         negativeInvoiceId,
-        balance.abs,
-        invoiceItemId,
+        amountToRefundOnInvoiceItem,
+        invoiceItem.Id,
         "Charge",
       )
       _ <- ZIO.log(
-        s"Successfully applied invoice item adjustment of $balance" +
-          s" to invoice item $invoiceItemId of invoice $negativeInvoiceId",
+        s"Successfully applied invoice item adjustment of $amountToRefundOnInvoiceItem" +
+          s" to invoice item ${invoiceItem.Id} of invoice $negativeInvoiceId",
       )
     } yield ()
 }

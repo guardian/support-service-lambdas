@@ -58,9 +58,13 @@ object GetInvoiceItemsForSubscription {
         ),
       )
 
-    def negativeInvoiceId = getNegativeInvoice.map(_._1)
+    def negativeInvoiceId = getNegativeInvoice.map { case (invoiceId, invoiceItems) =>
+      invoiceId
+    }
 
-    def negativeInvoiceItemId = getNegativeInvoice.map(_._2.head.Id)
+    def negativeInvoiceItems = getNegativeInvoice.map { case (invoiceId, invoiceItems) =>
+      invoiceItems
+    }
 
     def getLastPaidInvoice = getInvoicesSortedByDate.tail.headOption
       .map(ZIO.succeed(_))
@@ -74,7 +78,7 @@ object GetInvoiceItemsForSubscription {
       )
 
     def lastPaidInvoiceAmount =
-      getLastPaidInvoice.map(_._2.map(invoice => invoice.ChargeAmount + invoice.TaxAmount).sum)
+      getLastPaidInvoice.map(_._2.map(invoice => invoice.amountWithTax).sum)
 
     def lastPaidInvoiceId = getLastPaidInvoice.map(_._1)
 
@@ -95,6 +99,7 @@ object GetInvoiceItemsForSubscription {
       InvoiceId: String,
   ) {
     def chargeDateAsDateTime = LocalDateTime.parse(ChargeDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    def amountWithTax = ChargeAmount + TaxAmount
   }
 
   given JsonDecoder[InvoiceItemsForSubscription] = DeriveJsonDecoder.gen[InvoiceItemsForSubscription]
