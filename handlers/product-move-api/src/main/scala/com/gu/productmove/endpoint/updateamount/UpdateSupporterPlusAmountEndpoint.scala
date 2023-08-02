@@ -96,7 +96,7 @@ object UpdateSupporterPlusAmountEndpoint {
         Some("subscriptionName"),
         implicitly,
         EndpointIO.Info.empty.copy(
-          description = Some("Name of subscription to be moved to a different product."),
+          description = Some(Name of supporter plus subscription to have its contribution amount updated."),
           examples = List(Example("A-S000001", None, None)),
         ), // A-S000001
       )
@@ -113,7 +113,7 @@ object UpdateSupporterPlusAmountEndpoint {
         .in(subscriptionNameCapture)
         .in(
           jsonBody[ExpectedInput].copy(info =
-            EndpointIO.Info.empty[ExpectedInput].copy(description = Some("Definition of required movement.")),
+            EndpointIO.Info.empty[ExpectedInput].copy(description = Some("Definition of the updated total amount of regular payment")),
           ),
         )
         .out(
@@ -208,7 +208,7 @@ object UpdateSupporterPlusAmountEndpoint {
   ] = {
     (for {
       _ <- ZIO.log(s"PostData: ${postData.toString}")
-      stage <- ZIO.service[Stage]
+      stage <- ZIO.service[Stage].map(stage => config.Stage(stage.toString))
       _ <- ZIO.log(s"Stage is $stage")
 
       subscription <- GetSubscription.get(subscriptionName)
@@ -216,10 +216,9 @@ object UpdateSupporterPlusAmountEndpoint {
 
       _ <- ZIO.log(s"Subscription is $subscription")
 
-      zuoraIds <- ZIO
-        .fromEither(
-          ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError(_)),
-        )
+      zuoraIds <- ZIO.fromEither(
+        ZuoraIds.zuoraIdsForStage(stage).left.map(InternalServerError(_)),
+      )
 
       ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
