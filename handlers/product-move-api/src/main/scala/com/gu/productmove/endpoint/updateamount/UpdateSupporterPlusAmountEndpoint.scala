@@ -96,7 +96,7 @@ object UpdateSupporterPlusAmountEndpoint {
         Some("subscriptionName"),
         implicitly,
         EndpointIO.Info.empty.copy(
-          description = Some(Name of supporter plus subscription to have its contribution amount updated."),
+          description = Some("Name of supporter plus subscription to have its contribution amount updated."),
           examples = List(Example("A-S000001", None, None)),
         ), // A-S000001
       )
