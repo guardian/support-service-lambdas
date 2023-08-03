@@ -68,12 +68,7 @@ export class NewProductApi extends GuStack {
         allowMethods: Cors.ALL_METHODS,
         allowHeaders: ["Content-Type"],
       },
-      monitoringConfiguration: {
-        snsTopicName: "retention-dev",
-        http5xxAlarm: {
-          tolerated5xxPercentage: 1,
-        }
-      },
+      monitoringConfiguration: { noMonitoring: true },
       targets: [
         {
           path: "/add-subscription",
@@ -104,6 +99,26 @@ export class NewProductApi extends GuStack {
         namespace: "AWS/ApiGateway",
         statistic: "Sum",
         period: Duration.seconds(900),
+        dimensionsMap: {
+          ApiName: `support-reminders-${this.stage}`,
+        }
+      }),
+    });
+
+    new GuAlarm(this, 'ApiGateway5XXAlarm', {
+      app,
+      alarmName: `new-product-api-${this.stage} 5XX error`,
+      alarmDescription: `new-product-api-${this.stage} exceeded 1% 5XX error rate`,
+      evaluationPeriods: 1,
+      threshold: 1,
+      actionsEnabled: isProd,
+      snsTopicName: "retention-dev",
+      comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+      metric: new Metric({
+        metricName: "5XXError",
+        namespace: "AWS/ApiGateway",
+        statistic: "Sum",
+        period: Duration.seconds(60),
         dimensionsMap: {
           ApiName: `support-reminders-${this.stage}`,
         }

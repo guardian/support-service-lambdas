@@ -8,7 +8,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
-      "GuApiGateway5xxPercentageAlarm",
+      "GuAlarm",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -88,9 +88,9 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "ApiGatewayHigh5xxPercentageAlarmNewproductapiC005EFAC": {
+    "ApiGateway5XXAlarm56962DAF": {
       "Properties": {
-        "ActionsEnabled": true,
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -109,55 +109,21 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "AlarmDescription": "new-product-api exceeded 1% error rate",
-        "AlarmName": "High 5XX error % from new-product-api (ApiGateway) in CODE",
+        "AlarmDescription": "new-product-api-CODE exceeded 1% 5XX error rate",
+        "AlarmName": "new-product-api-CODE 5XX error",
         "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
+        "Dimensions": [
           {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for new-product-api",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "membership-CODE-new-product-api",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "membership-CODE-new-product-api",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
+            "Name": "ApiName",
+            "Value": "support-reminders-CODE",
           },
         ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
         "Threshold": 1,
-        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -1376,7 +1342,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
-      "GuApiGateway5xxPercentageAlarm",
+      "GuAlarm",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -1456,7 +1422,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "ApiGatewayHigh5xxPercentageAlarmNewproductapiC005EFAC": {
+    "ApiGateway5XXAlarm56962DAF": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1477,55 +1443,21 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "new-product-api exceeded 1% error rate",
-        "AlarmName": "High 5XX error % from new-product-api (ApiGateway) in PROD",
+        "AlarmDescription": "new-product-api-PROD exceeded 1% 5XX error rate",
+        "AlarmName": "new-product-api-PROD 5XX error",
         "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
+        "Dimensions": [
           {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for new-product-api",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "membership-PROD-new-product-api",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "membership-PROD-new-product-api",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
+            "Name": "ApiName",
+            "Value": "support-reminders-PROD",
           },
         ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
         "Threshold": 1,
-        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
