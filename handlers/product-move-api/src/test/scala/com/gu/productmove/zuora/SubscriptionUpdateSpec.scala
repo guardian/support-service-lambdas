@@ -39,11 +39,11 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("subscription update service")(
-      test("SubscriptionUpdateRequest is correct for input (CODE)") {
+      test("SwitchProductUpdateRequest is correct for input (CODE)") {
         val timeLocalDate = LocalDate.of(2022, 5, 10)
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
 
-        val expectedRequestBody = SubscriptionUpdateRequest(
+        val expectedRequestBody = SwitchProductUpdateRequest(
           add = List(
             AddRatePlan(
               contractEffectiveDate = timeLocalDate,
@@ -71,7 +71,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           _ <- TestClock.setTime(time)
           createRequestBody <- getRatePlans(Monthly, GBP, "8ad03sdfa1312f3123", 50.00)
             .map { case (addRatePlan, removeRatePlan) =>
-              SubscriptionUpdateRequest(
+              SwitchProductUpdateRequest(
                 add = addRatePlan,
                 remove = removeRatePlan,
                 collect = Some(true),
@@ -84,11 +84,11 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
             )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
-      test("SubscriptionUpdateRequest is correct for input (PROD)") {
+      test("SwitchProductUpdateRequest is correct for input (PROD)") {
         val timeLocalDate = LocalDate.of(2022, 5, 10)
         val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
 
-        val expectedRequestBody = SubscriptionUpdateRequest(
+        val expectedRequestBody = SwitchProductUpdateRequest(
           add = List(
             AddRatePlan(
               contractEffectiveDate = timeLocalDate,
@@ -116,7 +116,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           _ <- TestClock.setTime(time)
           createRequestBody <- getRatePlans(Monthly, GBP, "8ad03sdfa1312f3123", 50.00)
             .map { case (addRatePlan, removeRatePlan) =>
-              SubscriptionUpdateRequest(
+              SwitchProductUpdateRequest(
                 add = addRatePlan,
                 remove = removeRatePlan,
                 collect = Some(true),
@@ -129,7 +129,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
             )
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
-//      test("SubscriptionUpdateRequest preview response is correct for invoice with multiple invoice items") {
+//      test("SwitchProductUpdateRequest preview response is correct for invoice with multiple invoice items") {
 //        val time = LocalDateTime.parse("2023-01-19T00:00:00").toInstant(ZoneOffset.ofHours(0))
 //
 //        val expectedResponse = PreviewResult(
@@ -165,7 +165,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
 //          assert(response)(equalTo(expectedResponse))
 //        }
 //      },
-      test("SubscriptionUpdateRequest preview response is correct for invoice with tax") {
+      test("SwitchProductUpdateRequest preview response is correct for invoice with tax") {
         val time = LocalDateTime.parse("2023-02-06T00:00:00").toInstant(ZoneOffset.ofHours(0))
 
         val expectedResponse = PreviewResult(

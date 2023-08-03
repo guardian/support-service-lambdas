@@ -42,6 +42,7 @@ object GetSubscription {
       productName: String,
       ratePlanName: String,
       ratePlanCharges: List[RatePlanCharge],
+      lastChangeType: Option[String],
       productRatePlanId: String,
       id: String,
   )
@@ -50,6 +51,7 @@ object GetSubscription {
   }
 
   case class RatePlanCharge(
+      id: String,
       productRatePlanChargeId: String,
       effectiveEndDate: LocalDate,
       name: String,

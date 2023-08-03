@@ -83,7 +83,7 @@ object ToRecurringContribution {
         activeRatePlanCharge.chargedThroughDate.get,
       )
         .map { case (addRatePlan, removeRatePlan) =>
-          SubscriptionUpdateRequest(
+          SwitchProductUpdateRequest(
             add = addRatePlan,
             remove = removeRatePlan,
             collect = Some(false),
