@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{InvoiceItem, InvoiceItemsForSubscription}
@@ -66,34 +66,39 @@ object RefundSupporterPlus {
     } yield ()
   }
 
-  def ensureThatNegativeInvoiceBalanceIsZero(
+  private def ensureThatNegativeInvoiceBalanceIsZero(
       invoiceItemsForSub: InvoiceItemsForSubscription,
   ): ZIO[GetInvoice with InvoiceItemAdjustment, ErrorResponse, Unit] = for {
     negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
-    negativeInvoiceItems <- invoiceItemsForSub.negativeInvoiceItems
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(
       negativeInvoiceId,
     )
     _ <-
       if (negativeInvoice.balance < 0) {
-        adjustInvoiceItemsBalanceToZero(
-          negativeInvoiceId,
-          negativeInvoiceItems,
-          negativeInvoice.balance,
-        )
+        adjustInvoiceBalanceToZero(negativeInvoiceId, invoiceItemsForSub, negativeInvoice.balance)
       } else {
         ZIO.log(s"Invoice with id $negativeInvoiceId has zero balance")
       }
   } yield ()
 
-  private def adjustInvoiceItemsBalanceToZero(
+  private def checkInvoicesEqualBalance(balance: BigDecimal, invoiceItems: List[InvoiceItem]) = {
+    val invoiceItemsTotal = invoiceItems.map(_.amountWithTax).sum
+    if (balance.abs == invoiceItemsTotal.abs)
+      ZIO.succeed(())
+    else
+      ZIO.fail(TransactionError(s"Invoice balance of $balance does not equal sum of invoice items $invoiceItemsTotal"))
+  }
+
+  private def adjustInvoiceBalanceToZero(
       negativeInvoiceId: String,
-      invoiceItems: List[InvoiceItem],
+      invoiceItemsForSub: InvoiceItemsForSubscription,
       balance: BigDecimal,
   ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] =
     for {
       _ <- ZIO.log(s"Invoice with id $negativeInvoiceId still has balance of $balance")
+      invoiceItems <- invoiceItemsForSub.negativeInvoiceItems
+      _ <- checkInvoicesEqualBalance(balance, invoiceItems)
       _ <- ZIO.foreachParDiscard(invoiceItems) { invoiceItem =>
         adjustInvoiceItem(
           negativeInvoiceId,
@@ -106,17 +111,17 @@ object RefundSupporterPlus {
   private def adjustInvoiceItem(
       negativeInvoiceId: String,
       invoiceItem: InvoiceItem,
-      amountToRefundOnInvoiceItem: BigDecimal,
+      amountToRefund: BigDecimal,
   ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] =
     for {
       _ <- InvoiceItemAdjustment.update(
         negativeInvoiceId,
-        amountToRefundOnInvoiceItem,
+        amountToRefund,
         invoiceItem.Id,
         "Charge",
       )
       _ <- ZIO.log(
-        s"Successfully applied invoice item adjustment of $amountToRefundOnInvoiceItem" +
+        s"Successfully applied invoice item adjustment of $amountToRefund" +
           s" to invoice item ${invoiceItem.Id} of invoice $negativeInvoiceId",
       )
     } yield ()
