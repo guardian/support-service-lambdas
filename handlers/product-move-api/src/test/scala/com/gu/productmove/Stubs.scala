@@ -35,6 +35,7 @@ import java.time.LocalDate
 // Stubs for GetSubscription service
 //-----------------------------------------------------
 val ratePlanCharge1 = RatePlanCharge(
+  id = "RPC1",
   productRatePlanChargeId = "PRPC1",
   name = "Contribution",
   price = Some(5.000000000),
@@ -47,6 +48,7 @@ val ratePlanCharge1 = RatePlanCharge(
 )
 
 val ratePlanCharge2 = RatePlanCharge(
+  id = "RPC1",
   productRatePlanChargeId = "PRPC1",
   name = "Contribution",
   price = Some(5.000000000),
@@ -69,6 +71,7 @@ val getSubscriptionResponse = GetSubscriptionResponse(
       productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
       ratePlanName = "RP1",
       ratePlanCharges = List(ratePlanCharge1),
+      lastChangeType = None,
     ),
   ),
 )
@@ -119,6 +122,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
       ratePlanName = "Monthly Contribution",
       ratePlanCharges = List(
         RatePlanCharge(
+          id = "8ad0823f841cf4e601841e61f6d98asd",
           productRatePlanChargeId = "2c92c0f85a6b1352015a7fcf35ab397c",
           name = "Contribution",
           number = "C-00732721",
@@ -130,6 +134,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
           chargedThroughDate = Some(LocalDate.of(2022, 10, 28)),
         ),
       ),
+      Some("Remove"),
       "2c92c0f85a6b134e015a7fcd9f0c7855",
       "8ad0823f841cf4e601841e61f6d47234",
     ),
@@ -138,6 +143,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
       "Supporter Plus Monthly",
       List(
         RatePlanCharge(
+          id = "id",
           productRatePlanChargeId = "8ad09ea0858682bb0185880ac57f4c4c",
           name = "Supporter Plus Monthly",
           number = "C-00732747",
@@ -149,6 +155,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
           effectiveEndDate = LocalDate.of(2023, 10, 28),
         ),
       ),
+      Some("Add"),
       "8ad08cbd8586721c01858804e3275376",
       "8ad0823f841cf4e601841e61f6d470bb",
     ),
@@ -166,6 +173,7 @@ val getSubscriptionResponse3 = GetSubscriptionResponse(
       productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
       ratePlanName = "RP1",
       ratePlanCharges = List(ratePlanCharge2),
+      lastChangeType = None,
     ),
   ),
 )
@@ -179,9 +187,11 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
       id = "R1",
       productName = "P1",
       productRatePlanId = "PRP1",
+      lastChangeType = None,
       ratePlanName = "RP1",
       ratePlanCharges = List(
         RatePlanCharge(
+          id = "RPC1",
           productRatePlanChargeId = "PRPC1",
           name = "Digital Pack Monthly",
           price = Some(11.11),
@@ -467,7 +477,7 @@ val timeLocalDate3 = LocalDate.of(2022, 9, 29)
 val timeLocalDate4 = LocalDate.of(2021, 2, 15)
 
 // RecurringContributionToSupporterPlus
-val expectedRequestBody = SubscriptionUpdateRequest(
+val expectedRequestBody = SwitchProductUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate,
@@ -491,7 +501,7 @@ val expectedRequestBody = SubscriptionUpdateRequest(
   preview = Some(false),
 )
 
-val expectedRequestBodyLowCharge = SubscriptionUpdateRequest(
+val expectedRequestBodyLowCharge = SwitchProductUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate4,
@@ -516,7 +526,7 @@ val expectedRequestBodyLowCharge = SubscriptionUpdateRequest(
 )
 
 // MembershipToRecurringContribution
-val expectedRequestBody2 = SubscriptionUpdateRequest(
+val expectedRequestBody2 = SwitchProductUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate3,
@@ -541,7 +551,7 @@ val expectedRequestBody2 = SubscriptionUpdateRequest(
 )
 
 // RecurringContributionToSupporterPlus
-val expectedRequestBodyPreview = SubscriptionUpdateRequest(
+val expectedRequestBodyPreview = SwitchProductUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate2,
@@ -567,7 +577,7 @@ val expectedRequestBodyPreview = SubscriptionUpdateRequest(
 )
 
 // RecurringContributionToSupporterPlus
-val expectedRequestBodyPreview2 = SubscriptionUpdateRequest(
+val expectedRequestBodyPreview2 = SwitchProductUpdateRequest(
   add = List(
     AddRatePlan(
       contractEffectiveDate = timeLocalDate4,

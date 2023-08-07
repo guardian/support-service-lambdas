@@ -1,7 +1,9 @@
 package com.gu.productmove
 
 import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
+import com.gu.newproduct.api.productcatalog.BillingPeriod
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
@@ -74,9 +76,13 @@ object SQSLive {
                   InternalServerError(
                     s"Failed to send product switch email message to SQS for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} with error: ${ex.toString} to SQS queue $emailQueueName",
                   )
-                case attributes: EmailPayloadCancellationAttributes =>
+                case _: EmailPayloadCancellationAttributes =>
                   InternalServerError(
                     s"Failed to send subscription cancellation email message to SQS for sfContactId: ${message.SfContactId} with error: ${ex.toString} to SQS queue $emailQueueName",
+                  )
+                case _: EmailPayloadUpdateAmountAttributes =>
+                  InternalServerError(
+                    s"Failed to send update amount email message to SQS for sfContactId: ${message.SfContactId} with error: ${ex.toString} to SQS queue $emailQueueName",
                   )
               }
             }
@@ -88,6 +94,8 @@ object SQSLive {
                 s"Successfully sent product switch email for sfContactId: ${message.SfContactId} with subscription Number: ${attributes.subscription_id} to SQS queue $emailQueueName"
               case _: EmailPayloadCancellationAttributes =>
                 s"Successfully sent subscription cancellation email for sfContactId: ${message.SfContactId} to SQS queue $emailQueueName"
+              case _: EmailPayloadUpdateAmountAttributes =>
+                s"Successfully sent update amount email for sfContactId: ${message.SfContactId} to SQS queue $emailQueueName"
             },
           )
         } yield ()
@@ -192,6 +200,15 @@ case class EmailPayloadCancellationAttributes(
     cancellation_effective_date: Option[String],
 ) extends EmailPayloadAttributes
 
+case class EmailPayloadUpdateAmountAttributes(
+    first_name: String,
+    last_name: String,
+    new_amount: String,
+    currency: String,
+    frequency: String,
+    next_payment_date: String,
+) extends EmailPayloadAttributes
+
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadAttributes)
 
 case class EmailPayload(Address: Option[String], ContactAttributes: EmailPayloadContactAttributes)
@@ -225,6 +242,34 @@ object EmailMessage {
       IdentityUserId = account.basicInfo.IdentityId__c,
     )
   }
+
+  def updateAmountEmail(
+      account: GetAccountResponse,
+      newPrice: BigDecimal,
+      currency: Currency,
+      billingPeriod: String,
+      nextPaymentDate: LocalDate,
+  ) = {
+    val contact = account.billToContact
+    EmailMessage(
+      EmailPayload(
+        Address = Some(contact.workEmail),
+        ContactAttributes = EmailPayloadContactAttributes(
+          SubscriberAttributes = EmailPayloadUpdateAmountAttributes(
+            first_name = contact.firstName,
+            last_name = contact.lastName,
+            new_amount = newPrice.setScale(2, BigDecimal.RoundingMode.FLOOR).toString,
+            currency = currency.symbol,
+            frequency = billingPeriod,
+            next_payment_date = emailDateFormat.format(nextPaymentDate),
+          ),
+        ),
+      ),
+      DataExtensionName = "payment-amount-changed-email",
+      SfContactId = account.basicInfo.sfContactId__c,
+      IdentityUserId = account.basicInfo.IdentityId__c,
+    )
+  }
 }
 
 given JsonEncoder[RCtoSPEmailPayloadProductSwitchAttributes] =
@@ -232,6 +277,8 @@ given JsonEncoder[RCtoSPEmailPayloadProductSwitchAttributes] =
 given JsonEncoder[toRCEmailPayloadProductSwitchAttributes] =
   DeriveJsonEncoder.gen[toRCEmailPayloadProductSwitchAttributes]
 given JsonEncoder[EmailPayloadCancellationAttributes] = DeriveJsonEncoder.gen[EmailPayloadCancellationAttributes]
+
+given JsonEncoder[EmailPayloadUpdateAmountAttributes] = DeriveJsonEncoder.gen[EmailPayloadUpdateAmountAttributes]
 given JsonEncoder[EmailPayloadAttributes] =
   (attributes: EmailPayloadAttributes, indent: Option[RuntimeFlags], out: Write) =>
     attributes match {
@@ -241,6 +288,8 @@ given JsonEncoder[EmailPayloadAttributes] =
         implicitly[JsonEncoder[toRCEmailPayloadProductSwitchAttributes]].unsafeEncode(attributes, indent, out)
       case attributes: EmailPayloadCancellationAttributes =>
         implicitly[JsonEncoder[EmailPayloadCancellationAttributes]].unsafeEncode(attributes, indent, out)
+      case attributes: EmailPayloadUpdateAmountAttributes =>
+        implicitly[JsonEncoder[EmailPayloadUpdateAmountAttributes]].unsafeEncode(attributes, indent, out)
     }
 given JsonEncoder[EmailPayloadContactAttributes] = DeriveJsonEncoder.gen[EmailPayloadContactAttributes]
 given JsonEncoder[EmailPayload] = DeriveJsonEncoder.gen[EmailPayload]

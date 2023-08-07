@@ -3,22 +3,22 @@ package com.gu.productmove.endpoint.move
 import com.gu.effects.GetFromS3
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId
-import com.gu.newproduct.api.productcatalog.PlanId.{MonthlySupporterPlus, AnnualSupporterPlus}
+import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, MonthlySupporterPlus}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{
-  zuoraIdsForStage,
-  ZuoraIds,
-  SupporterPlusZuoraIds,
   ProductRatePlanId,
+  SupporterPlusZuoraIds,
+  ZuoraIds,
+  zuoraIdsForStage,
 }
-import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly, PricesFromZuoraCatalog, AmountMinorUnits, Annual}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  ErrorResponse,
   ExpectedInput,
+  InternalServerError,
   OutputBody,
   PreviewResult,
-  ErrorResponse,
-  InternalServerError,
   Success,
 }
 import com.gu.productmove.move.BuildPreviewResult
@@ -27,40 +27,42 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.{
-  SubscriptionUpdateResponse,
   AddRatePlan,
-  GetAccountLive,
-  SubscriptionUpdateLive,
-  ZuoraCancelLive,
-  SubscribeLive,
-  SubscriptionUpdateInvoice,
-  InvoiceItemAdjustment,
-  SubscriptionUpdateRequest,
-  GetAccount,
-  ZuoraCancel,
-  GetSubscription,
   ChargeOverrides,
-  SubscriptionUpdate,
-  RemoveRatePlan,
-  SubscriptionUpdatePreviewResponse,
-  SubscriptionUpdateInvoiceItem,
-  GetSubscriptionLive,
-  Subscribe,
+  GetAccount,
+  GetAccountLive,
   GetInvoiceItems,
+  GetSubscription,
+  GetSubscriptionLive,
+  InvoiceItemAdjustment,
+  RemoveRatePlan,
+  Subscribe,
+  SubscribeLive,
+  SubscriptionUpdate,
+  SubscriptionUpdateInvoice,
+  SubscriptionUpdateInvoiceItem,
+  SubscriptionUpdateLive,
+  SubscriptionUpdatePreviewResponse,
+  SubscriptionUpdateRequest,
+  SubscriptionUpdateResponse,
+  SwitchProductUpdateRequest,
+  UpdateSubscriptionAmount,
+  ZuoraCancel,
+  ZuoraCancelLive,
 }
 import com.gu.productmove.{
-  SQSLive,
   AwsCredentialsLive,
+  AwsS3Live,
+  Dynamo,
   DynamoLive,
   EmailMessage,
-  SttpClientLive,
-  Dynamo,
-  RCtoSPEmailPayloadProductSwitchAttributes,
-  AwsS3Live,
-  EmailPayloadContactAttributes,
   EmailPayload,
+  EmailPayloadContactAttributes,
   GuStageLive,
+  RCtoSPEmailPayloadProductSwitchAttributes,
   SQS,
+  SQSLive,
+  SttpClientLive,
 }
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config
@@ -262,7 +264,7 @@ object RecurringContributionToSupporterPlus {
 
     updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
       case (addRatePlan, removeRatePlan) =>
-        SubscriptionUpdateRequest(
+        SwitchProductUpdateRequest(
           add = addRatePlan,
           remove = removeRatePlan,
           preview = Some(true),
@@ -369,7 +371,7 @@ object RecurringContributionToSupporterPlus {
 
       updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
         case (addRatePlan, removeRatePlan) =>
-          SubscriptionUpdateRequest(
+          SwitchProductUpdateRequest(
             add = addRatePlan,
             remove = removeRatePlan,
             collect = Some(collectPayment),
