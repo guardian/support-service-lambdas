@@ -13,6 +13,7 @@ import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assert}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.collection.immutable.{ListMap, SortedMap}
+import scala.collection.mutable
 
 object GetRefundAmountSpec extends ZIOSpecDefault {
 
@@ -44,16 +45,23 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
             .get(SubscriptionName("A-S01918489"))
             .provide(
               GetInvoiceItemsForSubscriptionLive.layer,
-              ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.responseWithTax)),
+              ZLayer.succeed(
+                new MockStackedGetInvoicesZuoraClient(
+                  mutable.Stack(
+                    MockGetInvoicesZuoraClient.responseWithTaxToMatchTaxItems,
+                    MockGetInvoicesZuoraClient.taxationItemsResponse,
+                  ),
+                ),
+              ),
               ZuoraGetLive.layer,
             )
           negativeInvoiceId <- result.negativeInvoiceId
           lastPaidInvoiceId <- result.lastPaidInvoiceId
           lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
         } yield {
-          assert(negativeInvoiceId)(equalTo("8a1289288995cad501899c3fa6b0501c")) &&
-          assert(lastPaidInvoiceId)(equalTo("8a129f89898cbdf301898ee88c0f085f")) &&
-          assert(lastPaidInvoiceAmount)(equalTo(12))
+          assert(negativeInvoiceId)(equalTo("8ad08dc989b97c170189c0c7de7f2d89")) &&
+          assert(lastPaidInvoiceId)(equalTo("8ad081c689b97c150189c0c748ee3c38")) &&
+          assert(lastPaidInvoiceAmount)(equalTo(16))
         }
       },
       test("finds the right amount for a regular cancelled sub") {

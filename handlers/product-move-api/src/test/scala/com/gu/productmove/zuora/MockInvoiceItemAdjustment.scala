@@ -20,6 +20,7 @@ class MockInvoiceItemAdjustment(
       amount: BigDecimal,
       invoiceItemId: String,
       adjustmentType: String,
+      sourceType: String,
   ): IO[ErrorResponse, InvoiceItemAdjustmentResponse] = {
     mutableStore = (invoiceId, amount, invoiceItemId, adjustmentType) :: mutableStore
 

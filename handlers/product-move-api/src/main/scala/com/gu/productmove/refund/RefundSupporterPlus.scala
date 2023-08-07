@@ -7,7 +7,11 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
-import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{InvoiceItem, InvoiceItemsForSubscription}
+import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{
+  InvoiceItem,
+  InvoiceItemWithTaxDetails,
+  InvoiceItemsForSubscription,
+}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{
@@ -82,7 +86,7 @@ object RefundSupporterPlus {
       }
   } yield ()
 
-  private def checkInvoicesEqualBalance(balance: BigDecimal, invoiceItems: List[InvoiceItem]) = {
+  private def checkInvoicesEqualBalance(balance: BigDecimal, invoiceItems: List[InvoiceItemWithTaxDetails]) = {
     val invoiceItemsTotal = invoiceItems.map(_.amountWithTax).sum
     if (balance.abs == invoiceItemsTotal.abs)
       ZIO.succeed(())
@@ -103,26 +107,45 @@ object RefundSupporterPlus {
         adjustInvoiceItem(
           negativeInvoiceId,
           invoiceItem,
-          invoiceItem.amountWithTax.abs,
         )
       }
     } yield ()
 
   private def adjustInvoiceItem(
       negativeInvoiceId: String,
-      invoiceItem: InvoiceItem,
-      amountToRefund: BigDecimal,
-  ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] =
+      invoiceItem: InvoiceItemWithTaxDetails,
+  ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] = {
+    // If the invoice item has tax paid on it, this needs to be adjusted
+    // in two separate adjustments, one for the charge with the invoice item id
+    // and one for the tax with a taxation item id
+    // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
     for {
+      _ <- ZIO.log(s"adjusting invoice item $invoiceItem")
       _ <- InvoiceItemAdjustment.update(
-        negativeInvoiceId,
-        amountToRefund,
-        invoiceItem.Id,
-        "Charge",
+        invoiceId = negativeInvoiceId,
+        amount = invoiceItem.ChargeAmount.abs,
+        invoiceItemId = invoiceItem.Id,
+        adjustmentType = "Charge",
       )
+
+      _ <- invoiceItem.TaxDetails match
+        case Some(taxDetails) =>
+          println(s"Adjusting invoice item tax amount of ${taxDetails.amount.abs}")
+          InvoiceItemAdjustment.update(
+            invoiceId = negativeInvoiceId,
+            amount = taxDetails.amount.abs,
+            invoiceItemId = taxDetails.taxationId,
+            adjustmentType = "Charge",
+            sourceType = "Tax",
+          )
+        case _ =>
+          println(s"Invoice item $invoiceItem does not contain any tax payments")
+          ZIO.succeed(())
+
       _ <- ZIO.log(
-        s"Successfully applied invoice item adjustment of $amountToRefund" +
+        s"Successfully applied invoice item adjustments" +
           s" to invoice item ${invoiceItem.Id} of invoice $negativeInvoiceId",
       )
     } yield ()
+  }
 }

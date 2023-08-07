@@ -1,12 +1,18 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
-import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{InvoiceItemsForSubscription, PostBody, getZuoraQuery}
+import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{
+  InvoiceItemsForSubscription,
+  PostBody,
+  getInvoiceItemsQuery,
+}
 import com.gu.productmove.zuora.rest.ZuoraRestBody
 import sttp.client3.Request
 import sttp.model.Uri
 import zio.{IO, ZIO}
 import com.gu.productmove.zuora.rest.ZuoraClient
+
+import scala.collection.mutable
 
 object MockGetInvoicesZuoraClient {
   type ClientResponse = String
@@ -205,11 +211,190 @@ object MockGetInvoicesZuoraClient {
       |    "done": true
       |}
       |""".stripMargin
+
+  val responseWithTaxToMatchTaxItems: ClientResponse =
+    """
+      |{
+      |  "size": 4,
+      |  "records": [
+      |    {
+      |      "ChargeDate": "2023-08-04T14:40:33.000+01:00",
+      |      "TaxAmount": 0,
+      |      "UnitPrice": 6,
+      |      "Id": "8ad081c689b97c150189c0c749003c39",
+      |      "InvoiceId": "8ad081c689b97c150189c0c748ee3c38",
+      |      "ChargeAmount": 6
+      |    },
+      |    {
+      |      "ChargeDate": "2023-08-04T14:40:33.000+01:00",
+      |      "TaxAmount": 0.91,
+      |      "UnitPrice": 10,
+      |      "Id": "8ad081c689b97c150189c0c749003c3a",
+      |      "InvoiceId": "8ad081c689b97c150189c0c748ee3c38",
+      |      "ChargeAmount": 9.09
+      |    },
+      |    {
+      |      "ChargeDate": "2023-08-04T14:41:11.000+01:00",
+      |      "TaxAmount": 0,
+      |      "UnitPrice": 6,
+      |      "Id": "8ad08dc989b97c170189c0c7de8b2d8a",
+      |      "InvoiceId": "8ad08dc989b97c170189c0c7de7f2d89",
+      |      "ChargeAmount": -6
+      |    },
+      |    {
+      |      "ChargeDate": "2023-08-04T14:41:11.000+01:00",
+      |      "TaxAmount": -0.91,
+      |      "UnitPrice": 10,
+      |      "Id": "8ad08dc989b97c170189c0c7de8b2d8b",
+      |      "InvoiceId": "8ad08dc989b97c170189c0c7de7f2d89",
+      |      "ChargeAmount": -9.09
+      |    }
+      |  ],
+      |  "done": true
+      |}
+      |""".stripMargin
+  val taxationItemsResponse: ClientResponse =
+    """
+      |{"size":1,"records":[{"InvoiceItemId":"8ad081c689b97c150189c0c749003c3a","Id":"8ad081c689b97c150189c0c748da3c37","InvoiceId":"8ad081c689b97c150189c0c748ee3c38"}],"done":true}
+      |""".stripMargin
+
+  val invoiceItemsForAmountTest =
+    """
+    |{
+    |  "size": 8,
+    |  "records": [
+    |    {
+    |      "ChargeDate": "2023-08-02T06:00:19.000+01:00",
+    |      "TaxAmount": 0.98,
+    |      "UnitPrice": 15,
+    |      "SubscriptionNumber": "A-S00573682",
+    |      "ProductName": "Supporter Plus",
+    |      "ServiceEndDate": "2023-09-01",
+    |      "ServiceStartDate": "2023-08-02",
+    |      "ChargeName": "Supporter Plus Monthly",
+    |      "Id": "8ad0880589b2ecb50189b49e46f155c8",
+    |      "InvoiceId": "8ad0880589b2ecb50189b49e46e755c7",
+    |      "ChargeAmount": 14.02,
+    |      "ChargeNumber": "C-00957752"
+    |    },
+    |    {
+    |      "ChargeDate": "2023-07-02T06:08:59.000+01:00",
+    |      "TaxAmount": 0.98,
+    |      "UnitPrice": 15,
+    |      "SubscriptionNumber": "A-S00573682",
+    |      "ProductName": "Supporter Plus",
+    |      "ServiceEndDate": "2023-08-01",
+    |      "ServiceStartDate": "2023-07-02",
+    |      "ChargeName": "Supporter Plus Monthly",
+    |      "Id": "8ad0962d8906c8f401891501158551d0",
+    |      "InvoiceId": "8ad0962d8906c8f401891501157751cd",
+    |      "ChargeAmount": 14.02,
+    |      "ChargeNumber": "C-00957752"
+    |    },
+    |    {
+    |      "ChargeDate": "2023-06-02T11:04:16.000+01:00",
+    |      "TaxAmount": 0.98,
+    |      "UnitPrice": 15,
+    |      "SubscriptionNumber": "A-S00573682",
+    |      "ProductName": "Supporter Plus",
+    |      "ServiceEndDate": "2023-07-01",
+    |      "ServiceStartDate": "2023-06-02",
+    |      "ChargeName": "Supporter Plus Monthly",
+    |      "Id": "8ad096ca8876356b01887b90a42010fb",
+    |      "InvoiceId": "8ad096ca8876356b01887b90a40e10fa",
+    |      "ChargeAmount": 14.02,
+    |      "ChargeNumber": "C-00957752"
+    |    },
+    |    {
+    |      "ChargeDate": "2023-08-07T12:01:06.000+01:00",
+    |      "TaxAmount": 0,
+    |      "UnitPrice": 5,
+    |      "SubscriptionNumber": "A-S00573682",
+    |      "ProductName": "Supporter Plus",
+    |      "ServiceEndDate": "2023-09-06",
+    |      "ServiceStartDate": "2023-08-07",
+    |      "ChargeName": "Contribution",
+    |      "Id": "8ad09e2089cf509b0189cfa8615d6d27",
+    |      "InvoiceId": "8ad09e2089cf509b0189cfa861436d26",
+    |      "ChargeAmount": 5,
+    |      "ChargeNumber": "C-01062166"
+    |    },
+    |    {
+    |      "ChargeDate": "2023-08-07T12:01:06.000+01:00",
+    |      "TaxAmount": 0.65,
+    |      "UnitPrice": 10,
+    |      "SubscriptionNumber": "A-S00573682",
+    |      "ProductName": "Supporter Plus",
+    |      "ServiceEndDate": "2023-09-06",
+    |      "ServiceStartDate": "2023-08-07",
+    |      "ChargeName": "Subscription",
+    |      "Id": "8ad09e2089cf509b0189cfa8615d6d28",
+    |      "InvoiceId": "8ad09e2089cf509b0189cfa861436d26",
+    |      "ChargeAmount": 9.35,
+    |      "ChargeNumber": "C-01062165"
+    |    },
+    |    {
+    |      "ChargeDate": "2023-08-07T12:01:06.000+01:00",
+    |      "TaxAmount": -0.82,
+    |      "UnitPrice": 15,
+    |      "SubscriptionNumber": "A-S00573682",
+    |      "ProductName": "Supporter Plus",
+    |      "ServiceEndDate": "2023-09-01",
+    |      "ServiceStartDate": "2023-08-07",
+    |      "ChargeName": "Supporter Plus Monthly",
+    |      "Id": "8ad09e2089cf509b0189cfa8615d6d29",
+    |      "InvoiceId": "8ad09e2089cf509b0189cfa861436d26",
+    |      "ChargeAmount": -11.76,
+    |      "ChargeNumber": "C-00957752"
+    |    },
+    |    {
+    |      "ChargeDate": "2023-08-07T12:04:58.000+01:00",
+    |      "TaxAmount": 0,
+    |      "UnitPrice": 5,
+    |      "SubscriptionNumber": "A-S00573682",
+    |      "ProductName": "Supporter Plus",
+    |      "ServiceEndDate": "2023-09-06",
+    |      "ServiceStartDate": "2023-08-07",
+    |      "ChargeName": "Contribution",
+    |      "Id": "8ad09e2089cf509b0189cfabed300ab4",
+    |      "InvoiceId": "8ad09e2089cf509b0189cfabed210ab2",
+    |      "ChargeAmount": -5,
+    |      "ChargeNumber": "C-01062166"
+    |    },
+    |    {
+    |      "ChargeDate": "2023-08-07T12:04:58.000+01:00",
+    |      "TaxAmount": -0.65,
+    |      "UnitPrice": 10,
+    |      "SubscriptionNumber": "A-S00573682",
+    |      "ProductName": "Supporter Plus",
+    |      "ServiceEndDate": "2023-09-06",
+    |      "ServiceStartDate": "2023-08-07",
+    |      "ChargeName": "Subscription",
+    |      "Id": "8ad09e2089cf509b0189cfabed300ab6",
+    |      "InvoiceId": "8ad09e2089cf509b0189cfabed210ab2",
+    |      "ChargeAmount": -9.35,
+    |      "ChargeNumber": "C-01062165"
+    |    }
+    |  ],
+    |  "done": true
+    |}
+    |""".stripMargin
+
+  val taxationItemsForAmountTest =
+    """
+      |{"size":1,"records":[{"InvoiceItemId":"8ad0880589b2ecb50189b49e46f155c8","Id":"8ad0880589b2ecb50189b49e46df55c6","InvoiceId":"8ad0880589b2ecb50189b49e46e755c7"}],"done":true}
+      |""".stripMargin
 }
 
 class MockGetInvoicesZuoraClient(response: MockGetInvoicesZuoraClient.ClientResponse) extends ZuoraClient {
 
   override def send(request: Request[Either[String, String], Any]): IO[ErrorResponse, String] =
     ZIO.succeed(response);
+}
 
+class MockStackedGetInvoicesZuoraClient(responses: mutable.Stack[MockGetInvoicesZuoraClient.ClientResponse])
+    extends ZuoraClient {
+
+  override def send(request: Request[Either[String, String], Any]): IO[ErrorResponse, String] =
+    ZIO.succeed(responses.pop);
 }

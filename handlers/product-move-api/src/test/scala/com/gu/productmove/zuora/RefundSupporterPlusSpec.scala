@@ -27,7 +27,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
          */
         for {
           _ <- RefundSupporterPlus
-            .applyRefund(RefundInput(SubscriptionName("A-S00497072")))
+            .applyRefund(RefundInput(SubscriptionName("A-S00631533")))
             .provide(
               AwsS3Live.layer,
               AwsCredentialsLive.layer,
