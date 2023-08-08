@@ -71,7 +71,11 @@ object AddSupporterPlus {
         .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
         .toAsync
       contributionAmount = getContributionAmount(amountMinorUnits, account.currency, plan)
-      chargeOverride = ChargeOverride(Some(contributionAmount), planAndCharge.contributionProductRatePlanChargeId, None)
+      chargeOverride = ChargeOverride(
+        Some(contributionAmount),
+        planAndCharge.contributionProductRatePlanChargeId,
+        Some(acceptanceDate),
+      )
       zuoraCreateSubRequest = ZuoraCreateSubRequest(
         request = request,
         acceptanceDate = acceptanceDate,
