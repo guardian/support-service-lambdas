@@ -50,9 +50,10 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
 
     def getPlanAndCharge(planId: PlanId) = Some(planAndCharge)
 
+    val acceptanceDate = LocalDate.of(2018, 7, 28)
     val expectedIn = ZuoraCreateSubRequest(
       ZuoraAccountId("acccc"),
-      LocalDate.of(2018, 7, 28),
+      acceptanceDate,
       CaseId("case"),
       AcquisitionSource("CSR"),
       CreatedByCSR("bob"),
@@ -63,7 +64,7 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
             ChargeOverride(
               amountMinorUnits = Some(AmountMinorUnits(1000)),
               productRatePlanChargeId = planAndCharge.contributionProductRatePlanChargeId,
-              triggerDate = None,
+              triggerDate = Some(acceptanceDate),
             ),
           ),
         ),
