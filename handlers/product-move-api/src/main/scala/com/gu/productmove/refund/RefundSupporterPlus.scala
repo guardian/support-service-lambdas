@@ -28,10 +28,10 @@ import com.gu.productmove.zuora.{
 }
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3.SttpBackend
-import zio.{Task, ZIO}
+import zio.{Clock, Task, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 case class RefundInput(subscriptionName: SubscriptionName)
 
@@ -103,14 +103,48 @@ object RefundSupporterPlus {
       _ <- ZIO.log(s"Invoice with id $negativeInvoiceId still has balance of $balance")
       invoiceItems <- invoiceItemsForSub.negativeInvoiceItems
       _ <- checkInvoicesEqualBalance(balance, invoiceItems)
-      _ <- ZIO.foreachParDiscard(invoiceItems) { invoiceItem =>
-        adjustInvoiceItem(
-          negativeInvoiceId,
-          invoiceItem,
-        )
-      }
+      today <- Clock.currentDateTime.map(_.toLocalDate)
+      invoiceItemAdjustments = buildInvoiceItemAdjustments(today, invoiceItems)
+      _ <- InvoiceItemAdjustment.batchUpdate(invoiceItemAdjustments)
+      _ <- ZIO.log(
+        s"Successfully applied invoice item adjustments $invoiceItemAdjustments" +
+          s" to invoice $negativeInvoiceId",
+      )
     } yield ()
 
+  def buildInvoiceItemAdjustments(
+      adjustmentDate: LocalDate,
+      invoiceItems: List[InvoiceItemWithTaxDetails],
+  ): List[InvoiceItemAdjustment.PostBody] = {
+    invoiceItems.filter(_.amountWithTax != 0).flatMap { invoiceItem =>
+      val chargeAdjustment =
+        List(
+          InvoiceItemAdjustment.PostBody(
+            AdjustmentDate = adjustmentDate,
+            Amount = invoiceItem.ChargeAmount.abs,
+            InvoiceId = invoiceItem.InvoiceId,
+            SourceId = invoiceItem.Id,
+            SourceType = "InvoiceDetail",
+          ),
+        )
+      val taxAdjustment = invoiceItem.TaxDetails match
+        case Some(taxDetails) =>
+          List(
+            InvoiceItemAdjustment.PostBody(
+              AdjustmentDate = adjustmentDate,
+              Amount = taxDetails.amount.abs,
+              InvoiceId = invoiceItem.InvoiceId,
+              SourceId = invoiceItem.Id,
+              SourceType = "Tax",
+            ),
+          )
+        case None => Nil
+
+      chargeAdjustment ++ taxAdjustment
+    }
+  }
+
+  // TODO: delete this
   private def adjustInvoiceItem(
       negativeInvoiceId: String,
       invoiceItem: InvoiceItemWithTaxDetails,

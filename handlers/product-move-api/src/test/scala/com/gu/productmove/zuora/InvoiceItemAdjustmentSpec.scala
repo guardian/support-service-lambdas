@@ -11,6 +11,7 @@ import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.*
+import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemWithTaxDetails
 import zio.test.*
 import zio.test.Assertion.*
 import zio.*
@@ -19,23 +20,48 @@ import java.time.*
 
 object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("InvoiceItemAdjustment")(test("Run InvoiceItemAdjustment locally") {
-      for {
-        _ <- TestClock.setTime(LocalDateTime.now.toInstant(ZoneOffset.UTC))
-        _ <- InvoiceItemAdjustment
-          .update(
-            invoiceId = "8ad09b2186bfd8100186c73164d82886",
-            amount = 11.43,
-            invoiceItemId = "8ad09b2186bfd8100186c73164e92887",
-            "Charge",
-          )
-          .provide(
-            SttpClientLive.layer,
-            ZuoraClientLive.layer,
-            ZuoraGetLive.layer,
-            InvoiceItemAdjustmentLive.layer,
-            SecretsLive.layer,
-          )
-      } yield assert(true)(equalTo(true))
-    } @@ TestAspect.ignore)
+    suite("InvoiceItemAdjustment")(
+      test("Run InvoiceItemAdjustment locally") {
+        for {
+          _ <- TestClock.setTime(LocalDateTime.now.toInstant(ZoneOffset.UTC))
+          _ <- InvoiceItemAdjustment
+            .update(
+              invoiceId = "8ad09b2186bfd8100186c73164d82886",
+              amount = 11.43,
+              invoiceItemId = "8ad09b2186bfd8100186c73164e92887",
+              "Charge",
+            )
+            .provide(
+              SttpClientLive.layer,
+              ZuoraClientLive.layer,
+              ZuoraGetLive.layer,
+              InvoiceItemAdjustmentLive.layer,
+              SecretsLive.layer,
+            )
+        } yield assert(true)(equalTo(true))
+      } @@ TestAspect.ignore,
+      test("buildInvoiceAdjustments function ignores invoice items with zero value") {
+        val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
+          LocalDate.now,
+          List(
+            InvoiceItemWithTaxDetails(
+              "8ad08dc989d472290189db0888460962",
+              "2023-08-09T17:01:56.000+01:00",
+              -120,
+              None,
+              "8ad08dc989d472290189db08883a0961",
+            ),
+            InvoiceItemWithTaxDetails(
+              "8ad08dc989d472290189db0888460963",
+              "2023-08-09T17:01:56.000+01:00",
+              0,
+              None,
+              "8ad08dc989d472290189db08883a0961",
+            ),
+          ),
+        )
+        assert(adjustments.length)(equalTo(1)) &&
+        assert(adjustments.head.Amount)(equalTo(120))
+      },
+    )
 }

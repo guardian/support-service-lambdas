@@ -25,6 +25,7 @@ object InvoiceItemAdjustmentLive:
   val layer: URLayer[ZuoraGet, InvoiceItemAdjustment] = ZLayer.fromFunction(InvoiceItemAdjustmentLive(_))
 
 private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemAdjustment:
+  // TODO: only need one method here
   override def update(
       invoiceId: String,
       amount: BigDecimal,
@@ -41,6 +42,18 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
       )
     } yield response
 
+  def batchUpdate(
+      invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
+  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse] =
+    for {
+      today <- Clock.currentDateTime.map(_.toLocalDate)
+      response <- zuoraGet.post[InvoiceItemAdjustmentsWriteRequest, InvoiceItemAdjustmentResponse](
+        uri"action/create",
+        InvoiceItemAdjustmentsWriteRequest(objects = invoiceItemAdjustments),
+        ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckCapitalised,
+      )
+    } yield response
+
 trait InvoiceItemAdjustment:
   def update(
       invoiceId: String,
@@ -50,6 +63,10 @@ trait InvoiceItemAdjustment:
       sourceType: String,
   ): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
 
+  def batchUpdate(
+      invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
+  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
+
 object InvoiceItemAdjustment {
 
   case class PostBody(
@@ -57,15 +74,21 @@ object InvoiceItemAdjustment {
       Amount: BigDecimal,
       InvoiceId: String,
       SourceId: String, // The invoice item id
-      Type: String,
+      Type: String = "Charge",
       SourceType: String,
-      Comment: String = "Created by the product-move-api refund process to balance a cancelled invoice",
+      Comments: String = "Created by the product-move-api refund process to balance a cancelled invoice",
   )
 
   case class InvoiceItemAdjustmentResponse(Success: Boolean)
 
+  case class InvoiceItemAdjustmentsWriteRequest(
+      objects: List[PostBody],
+      `type`: String = "InvoiceItemAdjustment",
+  )
+
   given JsonDecoder[InvoiceItemAdjustmentResponse] = DeriveJsonDecoder.gen[InvoiceItemAdjustmentResponse]
   given JsonEncoder[PostBody] = DeriveJsonEncoder.gen[PostBody]
+  given JsonEncoder[InvoiceItemAdjustmentsWriteRequest] = DeriveJsonEncoder.gen[InvoiceItemAdjustmentsWriteRequest]
 
   def update(
       invoiceId: String,
@@ -75,4 +98,9 @@ object InvoiceItemAdjustment {
       sourceType: String = "InvoiceDetail",
   ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResponse] =
     ZIO.serviceWithZIO[InvoiceItemAdjustment](_.update(invoiceId, amount, invoiceItemId, adjustmentType, sourceType))
+
+  def batchUpdate(
+      invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
+  ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResponse] =
+    ZIO.serviceWithZIO[InvoiceItemAdjustment](_.batchUpdate(invoiceItemAdjustments))
 }

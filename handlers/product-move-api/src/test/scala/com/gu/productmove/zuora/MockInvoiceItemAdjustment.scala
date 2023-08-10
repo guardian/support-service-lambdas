@@ -28,6 +28,10 @@ class MockInvoiceItemAdjustment(
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(InternalServerError(s"success = false"))
   }
+
+  override def batchUpdate(
+      invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
+  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse] = ???
 }
 
 object MockInvoiceItemAdjustment {
