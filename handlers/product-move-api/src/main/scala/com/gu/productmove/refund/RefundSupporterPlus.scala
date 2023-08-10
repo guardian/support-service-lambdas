@@ -91,7 +91,11 @@ object RefundSupporterPlus {
     if (balance.abs == invoiceItemsTotal.abs)
       ZIO.succeed(())
     else
-      ZIO.fail(TransactionError(s"Invoice balance of $balance does not equal sum of invoice items $invoiceItemsTotal"))
+      ZIO.fail(
+        TransactionError(
+          s"Invoice balance of $balance does not equal sum of invoice items $invoiceItemsTotal, with invoiceItems $invoiceItems",
+        ),
+      )
   }
 
   private def adjustInvoiceBalanceToZero(
