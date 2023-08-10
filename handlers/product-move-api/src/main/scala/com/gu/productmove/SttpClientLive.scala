@@ -1,13 +1,13 @@
 package com.gu.productmove
 
-import sttp.client3.httpclient.zio.HttpClientZioBackend
+import sttp.client3.httpclient.zio.{HttpClientZioBackend, SttpClient}
 import sttp.client3.logging
 import sttp.client3.logging.{Logger, LoggingBackend}
-import zio.{Task, ZEnvironment, ZIO}
+import zio.{Task, ZEnvironment, ZIO, ZLayer}
 
 object SttpClientLive {
 
-  val layer = HttpClientZioBackend
+  val layer: ZLayer[Any, Throwable, SttpClient] = HttpClientZioBackend
     .layer()
     .map(
       _.update(underlying =>
@@ -24,10 +24,11 @@ object SttpClientLive {
 
   private class SttpLogger extends Logger[Task] {
 
-    override def apply(level: logging.LogLevel, message: => String): Task[Unit] = ZIO.log("STTP Backend: " + message)
+    override def apply(level: logging.LogLevel, message: => String): Task[Unit] = 
+      ZIO.logDebug("STTP Backend: " + message)
 
     override def apply(level: logging.LogLevel, message: => String, t: Throwable): Task[Unit] =
-      ZIO.log("STTP Backend: " + message + t.toString)
+      ZIO.logDebug("STTP Backend: " + message + t.toString)
 
   }
 
