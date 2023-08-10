@@ -32,10 +32,10 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
       invoiceItemId: String,
       adjustmentType: String,
       sourceType: String,
-  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse] =
+  ): IO[ErrorResponse, InvoiceItemAdjustmentResult] =
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
-      response <- zuoraGet.post[PostBody, InvoiceItemAdjustmentResponse](
+      response <- zuoraGet.post[PostBody, InvoiceItemAdjustmentResult](
         uri"object/invoice-item-adjustment",
         PostBody(today, amount, invoiceId, invoiceItemId, adjustmentType, sourceType),
         ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckCapitalised,
@@ -44,10 +44,10 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
 
   def batchUpdate(
       invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
-  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse] =
+  ): IO[ErrorResponse, List[InvoiceItemAdjustmentResult]] =
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
-      response <- zuoraGet.post[InvoiceItemAdjustmentsWriteRequest, InvoiceItemAdjustmentResponse](
+      response <- zuoraGet.post[InvoiceItemAdjustmentsWriteRequest, List[InvoiceItemAdjustmentResult]](
         uri"action/create",
         InvoiceItemAdjustmentsWriteRequest(objects = invoiceItemAdjustments),
         ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckCapitalised,
@@ -61,11 +61,11 @@ trait InvoiceItemAdjustment:
       invoiceItemId: String,
       adjustmentType: String,
       sourceType: String,
-  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
+  ): IO[ErrorResponse, InvoiceItemAdjustmentResult]
 
   def batchUpdate(
       invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
-  ): IO[ErrorResponse, InvoiceItemAdjustmentResponse]
+  ): IO[ErrorResponse, List[InvoiceItemAdjustmentResult]]
 
 object InvoiceItemAdjustment {
 
@@ -79,14 +79,14 @@ object InvoiceItemAdjustment {
       Comments: String = "Created by the product-move-api refund process to balance a cancelled invoice",
   )
 
-  case class InvoiceItemAdjustmentResponse(Success: Boolean)
+  case class InvoiceItemAdjustmentResult(Success: Boolean, Id: String)
 
   case class InvoiceItemAdjustmentsWriteRequest(
       objects: List[PostBody],
       `type`: String = "InvoiceItemAdjustment",
   )
 
-  given JsonDecoder[InvoiceItemAdjustmentResponse] = DeriveJsonDecoder.gen[InvoiceItemAdjustmentResponse]
+  given JsonDecoder[InvoiceItemAdjustmentResult] = DeriveJsonDecoder.gen[InvoiceItemAdjustmentResult]
   given JsonEncoder[PostBody] = DeriveJsonEncoder.gen[PostBody]
   given JsonEncoder[InvoiceItemAdjustmentsWriteRequest] = DeriveJsonEncoder.gen[InvoiceItemAdjustmentsWriteRequest]
 
@@ -96,11 +96,11 @@ object InvoiceItemAdjustment {
       invoiceItemId: String,
       adjustmentType: String,
       sourceType: String = "InvoiceDetail",
-  ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResponse] =
+  ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResult] =
     ZIO.serviceWithZIO[InvoiceItemAdjustment](_.update(invoiceId, amount, invoiceItemId, adjustmentType, sourceType))
 
   def batchUpdate(
       invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
-  ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResponse] =
+  ): ZIO[InvoiceItemAdjustment, ErrorResponse, List[InvoiceItemAdjustmentResult]] =
     ZIO.serviceWithZIO[InvoiceItemAdjustment](_.batchUpdate(invoiceItemAdjustments))
 }

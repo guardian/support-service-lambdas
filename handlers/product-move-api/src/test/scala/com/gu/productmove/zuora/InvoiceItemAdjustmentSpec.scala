@@ -12,9 +12,11 @@ import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.*
 import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemWithTaxDetails
+import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
 import zio.test.*
 import zio.test.Assertion.*
 import zio.*
+import zio.json.JsonDecoder
 
 import java.time.*
 
@@ -63,5 +65,14 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
         assert(adjustments.length)(equalTo(1)) &&
         assert(adjustments.head.Amount)(equalTo(120))
       },
+      test("Deserialisation of the invoice adjustment response works") {
+        val responseJson =
+          """
+            |[{"Id":"8ad081c689de67b50189df0bdcca3b2f","Success":true}]
+            |""".stripMargin
+
+        val result = summon[JsonDecoder[List[InvoiceItemAdjustmentResult]]].decodeJson(responseJson)
+        assert(result.isRight)(equalTo(true))
+      }
     )
 }
