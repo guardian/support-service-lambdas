@@ -47,9 +47,6 @@ import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
 import zio._
 import zio.json._
-import com.gu.newproduct.api.productcatalog.PricesFromZuoraCatalog
-import com.gu.util.config.ZuoraEnvironment
-import com.gu.effects.GetFromS3
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ZuoraIds
 
 import java.time.format.DateTimeFormatter
