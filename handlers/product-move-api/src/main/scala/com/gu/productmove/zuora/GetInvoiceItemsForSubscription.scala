@@ -53,7 +53,7 @@ private class GetInvoiceItemsForSubscriptionLive(zuoraGet: ZuoraGet) extends Get
               ZuoraRestBody.ZuoraSuccessCheck.None,
             )
             .map { items =>
-              println("Got items")
+              println("Got taxation items")
               items.records
             }
         } else ZIO.succeed(Nil)
@@ -72,7 +72,6 @@ private class GetInvoiceItemsForSubscriptionLive(zuoraGet: ZuoraGet) extends Get
               println("Couldn't find taxation item")
             item.map(taxationItem => TaxDetails(i.TaxAmount, taxationItem.Id))
           } else {
-            println(s"Tax amount for invoice item $i is zero")
             None
           },
           i.InvoiceId,

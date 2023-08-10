@@ -25,7 +25,6 @@ object InvoiceItemAdjustmentLive:
   val layer: URLayer[ZuoraGet, InvoiceItemAdjustment] = ZLayer.fromFunction(InvoiceItemAdjustmentLive(_))
 
 private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemAdjustment:
-  // TODO: only need one method here
   override def update(
       invoiceId: String,
       amount: BigDecimal,

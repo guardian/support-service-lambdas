@@ -116,6 +116,11 @@ object RefundSupporterPlus {
       adjustmentDate: LocalDate,
       invoiceItems: List[InvoiceItemWithTaxDetails],
   ): List[InvoiceItemAdjustment.PostBody] = {
+    // If the invoice item has tax paid on it, this needs to be adjusted
+    // in two separate adjustments,
+    // - one for the charge where the SourceType is "InvoiceDetail" and SourceId is the invoice item id
+    // - one for the tax where the SourceType is "Tax" and SourceId is the taxation item id
+    // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
     invoiceItems.filter(_.amountWithTax != 0).flatMap { invoiceItem =>
       val chargeAdjustment =
         List(
@@ -142,44 +147,5 @@ object RefundSupporterPlus {
 
       chargeAdjustment ++ taxAdjustment
     }
-  }
-
-  // TODO: delete this
-  private def adjustInvoiceItem(
-      negativeInvoiceId: String,
-      invoiceItem: InvoiceItemWithTaxDetails,
-  ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] = {
-    // If the invoice item has tax paid on it, this needs to be adjusted
-    // in two separate adjustments, one for the charge with the invoice item id
-    // and one for the tax with a taxation item id
-    // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
-    for {
-      _ <- ZIO.log(s"adjusting invoice item $invoiceItem")
-      _ <- InvoiceItemAdjustment.update(
-        invoiceId = negativeInvoiceId,
-        amount = invoiceItem.ChargeAmount.abs,
-        invoiceItemId = invoiceItem.Id,
-        adjustmentType = "Charge",
-      )
-
-      _ <- invoiceItem.TaxDetails match
-        case Some(taxDetails) =>
-          println(s"Adjusting invoice item tax amount of ${taxDetails.amount.abs}")
-          InvoiceItemAdjustment.update(
-            invoiceId = negativeInvoiceId,
-            amount = taxDetails.amount.abs,
-            invoiceItemId = taxDetails.taxationId,
-            adjustmentType = "Charge",
-            sourceType = "Tax",
-          )
-        case _ =>
-          println(s"Invoice item $invoiceItem does not contain any tax payments")
-          ZIO.succeed(())
-
-      _ <- ZIO.log(
-        s"Successfully applied invoice item adjustments" +
-          s" to invoice item ${invoiceItem.Id} of invoice $negativeInvoiceId",
-      )
-    } yield ()
   }
 }
