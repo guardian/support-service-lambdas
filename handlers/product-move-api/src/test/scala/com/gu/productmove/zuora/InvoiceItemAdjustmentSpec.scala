@@ -11,7 +11,7 @@ import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.*
-import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemWithTaxDetails
+import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
 import zio.test.*
 import zio.test.Assertion.*
@@ -73,6 +73,6 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
 
         val result = summon[JsonDecoder[List[InvoiceItemAdjustmentResult]]].decodeJson(responseJson)
         assert(result.isRight)(equalTo(true))
-      }
+      },
     )
 }

@@ -1,11 +1,6 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
-import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.{
-  InvoiceItemsForSubscription,
-  PostBody,
-  getInvoiceItemsQuery,
-}
 import com.gu.productmove.zuora.rest.ZuoraRestBody
 import sttp.client3.Request
 import sttp.model.Uri
@@ -218,36 +213,32 @@ object MockGetInvoicesZuoraClient {
       |  "size": 4,
       |  "records": [
       |    {
-      |      "ChargeDate": "2023-08-04T14:40:33.000+01:00",
+      |      "ChargeDate": "2023-08-11T10:03:41.000+01:00",
       |      "TaxAmount": 0,
-      |      "UnitPrice": 6,
-      |      "Id": "8ad081c689b97c150189c0c749003c39",
-      |      "InvoiceId": "8ad081c689b97c150189c0c748ee3c38",
-      |      "ChargeAmount": 6
+      |      "Id": "8ad081c689e27bbb0189e3d654fc04bb",
+      |      "InvoiceId": "8ad081c689e27bbb0189e3d654f104ba",
+      |      "ChargeAmount": 0
       |    },
       |    {
-      |      "ChargeDate": "2023-08-04T14:40:33.000+01:00",
+      |      "ChargeDate": "2023-08-11T10:03:41.000+01:00",
       |      "TaxAmount": 0.91,
-      |      "UnitPrice": 10,
-      |      "Id": "8ad081c689b97c150189c0c749003c3a",
-      |      "InvoiceId": "8ad081c689b97c150189c0c748ee3c38",
+      |      "Id": "8ad081c689e27bbb0189e3d654fc04bc",
+      |      "InvoiceId": "8ad081c689e27bbb0189e3d654f104ba",
       |      "ChargeAmount": 9.09
       |    },
       |    {
-      |      "ChargeDate": "2023-08-04T14:41:11.000+01:00",
-      |      "TaxAmount": 0,
-      |      "UnitPrice": 6,
-      |      "Id": "8ad08dc989b97c170189c0c7de8b2d8a",
-      |      "InvoiceId": "8ad08dc989b97c170189c0c7de7f2d89",
-      |      "ChargeAmount": -6
+      |      "ChargeDate": "2023-08-11T11:04:54.000+01:00",
+      |      "TaxAmount": -0.91,
+      |      "Id": "8ad08dc989e27bbe0189e40e611d0abb",
+      |      "InvoiceId": "8ad08dc989e27bbe0189e40e61110aba",
+      |      "ChargeAmount": -9.09
       |    },
       |    {
-      |      "ChargeDate": "2023-08-04T14:41:11.000+01:00",
-      |      "TaxAmount": -0.91,
-      |      "UnitPrice": 10,
-      |      "Id": "8ad08dc989b97c170189c0c7de8b2d8b",
-      |      "InvoiceId": "8ad08dc989b97c170189c0c7de7f2d89",
-      |      "ChargeAmount": -9.09
+      |      "ChargeDate": "2023-08-11T11:04:54.000+01:00",
+      |      "TaxAmount": 0,
+      |      "Id": "8ad08dc989e27bbe0189e40e611d0abc",
+      |      "InvoiceId": "8ad08dc989e27bbe0189e40e61110aba",
+      |      "ChargeAmount": 0
       |    }
       |  ],
       |  "done": true
@@ -255,7 +246,17 @@ object MockGetInvoicesZuoraClient {
       |""".stripMargin
   val taxationItemsResponse: ClientResponse =
     """
-      |{"size":1,"records":[{"InvoiceItemId":"8ad081c689b97c150189c0c749003c3a","Id":"8ad081c689b97c150189c0c748da3c37","InvoiceId":"8ad081c689b97c150189c0c748ee3c38"}],"done":true}
+      |{
+      |    "size": 1,
+      |    "records": [
+      |        {
+      |            "InvoiceItemId": "8ad08dc989e27bbe0189e40e611d0abb",
+      |            "Id": "8ad08dc989e27bbe0189e40e60f80ab8",
+      |            "InvoiceId": "8ad08dc989e27bbe0189e40e61110aba"
+      |        }
+      |    ],
+      |    "done": true
+      |}
       |""".stripMargin
 
   val invoiceItemsForAmountTest =

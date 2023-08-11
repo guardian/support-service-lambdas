@@ -26,14 +26,14 @@ object ZuoraGetSerialisationSpec extends ZIOSpecDefault {
               ZuoraRestBody.ZuoraSuccessCheck.None,
             )
             .provide(
-              SttpClientLive.layer,
-              SecretsLive.layer,
               ZuoraGetLive.layer,
-              ZLayer.succeed(new MockZuoraClient(
-                """
+              ZLayer.succeed(
+                new MockZuoraClient(
+                  """
                   |[{"Id":"8ad085e289de67b00189dfbf1cc62efb","Success":true}]
-                  |""".stripMargin
-              )),
+                  |""".stripMargin,
+                ),
+              ),
             )
         } yield assert(true)(equalTo(true))
       },
