@@ -138,7 +138,7 @@ object RefundSupporterPlus {
               AdjustmentDate = adjustmentDate,
               Amount = taxDetails.amount.abs,
               InvoiceId = invoiceItem.InvoiceId,
-              SourceId = invoiceItem.Id,
+              SourceId = taxDetails.taxationId,
               SourceType = "Tax",
             ),
           )
