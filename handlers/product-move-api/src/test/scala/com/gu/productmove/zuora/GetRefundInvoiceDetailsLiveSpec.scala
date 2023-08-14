@@ -18,7 +18,7 @@ import scala.collection.immutable.{ListMap, SortedMap}
 import scala.collection.mutable
 import scala.collection.mutable.Stack
 
-object GetRefundInvoiceDetailsLiveSpec$$ extends ZIOSpecDefault {
+object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("GetInvoiceItemsForSubscriptionLive")(
       test("finds taxation details for a subscription") {
