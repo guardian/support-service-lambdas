@@ -125,7 +125,7 @@ object RefundSupporterPlus {
         List(
           InvoiceItemAdjustment.PostBody(
             AdjustmentDate = adjustmentDate,
-            Amount = invoiceItem.ChargeAmount.abs,
+            Amount = invoiceItem.ChargeAmount.abs + 999,
             InvoiceId = invoiceItem.InvoiceId,
             SourceId = invoiceItem.Id,
             SourceType = "InvoiceDetail",
