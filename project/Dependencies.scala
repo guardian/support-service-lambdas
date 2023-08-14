@@ -70,7 +70,7 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.17"
-  val zio2Version = "2.0.13"
+  val zio2Version = "2.0.15"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion = "1.7.0"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.3"
