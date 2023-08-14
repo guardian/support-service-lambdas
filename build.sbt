@@ -1,4 +1,4 @@
-import Dependencies._
+import Dependencies.*
 
 val scala2Settings = Seq(
   ThisBuild / scalaVersion := "2.13.10",
@@ -366,7 +366,7 @@ lazy val `identity-retention` = lambdaProject(
       case "META-INF/kotlin-stdlib.kotlin_module" => MergeStrategy.discard
       case "META-INF/kotlin-stdlib-common.kotlin_module" => MergeStrategy.discard
       case x =>
-        val oldStrategy = (assemblyMergeStrategy).value
+        val oldStrategy = assemblyMergeStrategy.value
         oldStrategy(x)
     },
   )
@@ -585,8 +585,8 @@ lazy val `product-move-api` = lambdaProject(
     // product-move-api needs its own deploy task currently because firstly it's Scala 3 so the jar path is different to
     // other projects and secondly the jar is too large to deploy with the aws cli --zip-file parameter so we need to use S3
     deployTo := {
-      import scala.sys.process._
-      import complete.DefaultParsers._
+      import scala.sys.process.*
+      import complete.DefaultParsers.*
       val jarFile = assembly.value
 
       val Seq(stage) = spaceDelimited("<arg>").parsed
@@ -599,7 +599,7 @@ lazy val `product-move-api` = lambdaProject(
       s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
-  .dependsOn(`zuora-models`, `new-product-api`)
+  .dependsOn(`zuora-models`, `effects-sqs`, `new-product-api`)
 
 lazy val `metric-push-api` =
   lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")
@@ -727,8 +727,8 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     2. run `deployTo CODE`
    */
   deployTo := {
-    import scala.sys.process._
-    import complete.DefaultParsers._
+    import scala.sys.process.*
+    import complete.DefaultParsers.*
     val jarFile = assembly.value
 
     val Seq(stage) = spaceDelimited("<arg>").parsed
@@ -767,8 +767,8 @@ lazy val deployAwsLambda =
     "Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop",
   )
 deployAwsLambda := {
-  import scala.sys.process._
-  import complete.DefaultParsers._
+  import scala.sys.process.*
+  import complete.DefaultParsers.*
   val Seq(name, stage) = spaceDelimited("<arg>").parsed
   s"aws lambda update-function-code --function-name $name-$stage --zip-file fileb://handlers/$name/target/scala-2.13/$name.jar --profile membership --region eu-west-1".!
 }
