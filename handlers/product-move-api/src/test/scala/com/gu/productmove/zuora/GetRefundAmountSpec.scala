@@ -22,10 +22,10 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
       test("finds the right amount for a switched sub") {
 
         for {
-          invoicesForRefund <- GetInvoiceItemsForSubscription
+          invoicesForRefund <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00492211"))
             .provide(
-              GetInvoiceItemsForSubscriptionLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
               ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.switchedResponse)),
               ZuoraGetLive.layer,
             )
@@ -37,10 +37,10 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
       test("finds the right amount for a switched sub where tax has been paid") {
 
         for {
-          invoicesForRefund <- GetInvoiceItemsForSubscription
+          invoicesForRefund <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S01918489"))
             .provide(
-              GetInvoiceItemsForSubscriptionLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(
@@ -58,10 +58,10 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
       },
       test("finds the right amount for a regular cancelled sub") {
         for {
-          invoicesForRefund <- GetInvoiceItemsForSubscription
+          invoicesForRefund <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00502641"))
             .provide(
-              GetInvoiceItemsForSubscriptionLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
               ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.standardSubResponse)),
               ZuoraGetLive.layer,
             )

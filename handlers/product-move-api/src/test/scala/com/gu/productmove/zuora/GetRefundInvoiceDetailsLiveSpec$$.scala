@@ -18,16 +18,16 @@ import scala.collection.immutable.{ListMap, SortedMap}
 import scala.collection.mutable
 import scala.collection.mutable.Stack
 
-object GetInvoiceItemsForSubscriptionLiveSpec extends ZIOSpecDefault {
+object GetRefundInvoiceDetailsLiveSpec$$ extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("GetInvoiceItemsForSubscriptionLive")(
       test("finds taxation details for a subscription") {
 
         for {
-          result <- GetInvoiceItemsForSubscription
+          result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00631534"))
             .provide(
-              GetInvoiceItemsForSubscriptionLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(
@@ -50,10 +50,10 @@ object GetInvoiceItemsForSubscriptionLiveSpec extends ZIOSpecDefault {
       test("checkInvoicesEqualBalance function works correctly") {
 
         for {
-          result <- GetInvoiceItemsForSubscription
+          result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00637582"))
             .provide(
-              GetInvoiceItemsForSubscriptionLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(

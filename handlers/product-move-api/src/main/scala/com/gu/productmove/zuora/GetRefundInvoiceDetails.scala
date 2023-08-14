@@ -20,16 +20,16 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.collection.immutable.ListMap
 import math.Ordered.orderingToOrdered
 
-object GetInvoiceItemsForSubscriptionLive:
-  val layer: URLayer[ZuoraGet, GetInvoiceItemsForSubscription] =
-    ZLayer.fromFunction(GetInvoiceItemsForSubscriptionLive(_))
+object GetRefundInvoiceDetailsLive:
+  val layer: URLayer[ZuoraGet, GetRefundInvoiceDetails] =
+    ZLayer.fromFunction(GetRefundInvoiceDetailsLive(_))
 
-private class GetInvoiceItemsForSubscriptionLive(zuoraGet: ZuoraGet) extends GetInvoiceItemsForSubscription {
+private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundInvoiceDetails {
   private def getInvoiceItemsQuery(subscriptionName: SubscriptionName) =
     s"select Id, ChargeAmount, TaxAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
   private def getTaxationItemsQuery(invoiceId: String) =
     s"select Id, InvoiceItemId, InvoiceId from TaxationItem where InvoiceId = '$invoiceId'"
-  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, InvoicesForRefund] = {
+  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, RefundInvoiceDetails] = {
     for {
       invoiceItems <- zuoraGet
         .post[PostBody, InvoiceItemsResponse](
@@ -55,7 +55,7 @@ private class GetInvoiceItemsForSubscriptionLive(zuoraGet: ZuoraGet) extends Get
               items.records
             }
         } else ZIO.succeed(Nil)
-    } yield InvoicesForRefund(
+    } yield RefundInvoiceDetails(
       refundAmount,
       negativeInvoiceId,
       negativeInvoiceItems.map(i =>
@@ -146,10 +146,10 @@ private class GetInvoiceItemsForSubscriptionLive(zuoraGet: ZuoraGet) extends Get
   given JsonDecoder[TaxationItem] = DeriveJsonDecoder.gen[TaxationItem]
 }
 
-trait GetInvoiceItemsForSubscription {
-  def get(subscriptionName: SubscriptionName): IO[ErrorResponse, InvoicesForRefund]
+trait GetRefundInvoiceDetails {
+  def get(subscriptionName: SubscriptionName): IO[ErrorResponse, RefundInvoiceDetails]
 }
-case class InvoicesForRefund(
+case class RefundInvoiceDetails(
     refundAmount: BigDecimal,
     negativeInvoiceId: String,
     negativeInvoiceItems: List[InvoiceItemWithTaxDetails],
@@ -165,9 +165,9 @@ case class InvoiceItemWithTaxDetails(
   def amountWithTax = ChargeAmount + TaxDetails.map(_.amount).getOrElse(0)
 }
 
-object GetInvoiceItemsForSubscription {
+object GetRefundInvoiceDetails {
   def get(
       subscriptionName: SubscriptionName,
-  ): ZIO[GetInvoiceItemsForSubscription, ErrorResponse, InvoicesForRefund] =
-    ZIO.serviceWithZIO[GetInvoiceItemsForSubscription](_.get(subscriptionName))
+  ): ZIO[GetRefundInvoiceDetails, ErrorResponse, RefundInvoiceDetails] =
+    ZIO.serviceWithZIO[GetRefundInvoiceDetails](_.get(subscriptionName))
 }

@@ -7,17 +7,17 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
-import com.gu.productmove.zuora.{InvoiceItemWithTaxDetails}
+import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
   GetAccountLive,
   GetInvoice,
-  GetInvoiceItemsForSubscription,
+  GetRefundInvoiceDetails,
   GetSubscriptionLive,
   InvoiceItemAdjustment,
-  InvoicesForRefund,
+  RefundInvoiceDetails,
   SubscribeLive,
   ZuoraCancel,
   ZuoraCancelLive,
@@ -47,7 +47,7 @@ object RefundSupporterPlus {
       with Stage
       with SttpBackend[Task, Any]
       with AwsS3
-      with GetInvoiceItemsForSubscription
+      with GetRefundInvoiceDetails
       with GetInvoice
       with InvoiceItemAdjustment,
     ErrorResponse,
@@ -56,28 +56,28 @@ object RefundSupporterPlus {
 
     for {
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
-      invoicesForRefund <- GetInvoiceItemsForSubscription.get(refundInput.subscriptionName)
-      _ <- ZIO.log(s"Amount to refund is ${invoicesForRefund.refundAmount}")
+      refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
+      _ <- ZIO.log(s"Amount to refund is ${refundInvoiceDetails.refundAmount}")
       _ <- InvoicingApiRefund.refund(
         refundInput.subscriptionName,
-        invoicesForRefund.refundAmount,
+        refundInvoiceDetails.refundAmount,
       )
-      _ <- ensureThatNegativeInvoiceBalanceIsZero(invoicesForRefund)
+      _ <- ensureThatNegativeInvoiceBalanceIsZero(refundInvoiceDetails)
     } yield ()
   }
 
   private def ensureThatNegativeInvoiceBalanceIsZero(
-      invoicesForRefund: InvoicesForRefund,
+      refundInvoiceDetails: RefundInvoiceDetails,
   ): ZIO[GetInvoice with InvoiceItemAdjustment, ErrorResponse, Unit] = for {
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(
-      invoicesForRefund.negativeInvoiceId,
+      refundInvoiceDetails.negativeInvoiceId,
     )
     _ <-
       if (negativeInvoice.balance < 0) {
-        adjustInvoiceBalanceToZero(invoicesForRefund, negativeInvoice.balance)
+        adjustInvoiceBalanceToZero(refundInvoiceDetails, negativeInvoice.balance)
       } else {
-        ZIO.log(s"Invoice with id ${invoicesForRefund.negativeInvoiceId} has zero balance")
+        ZIO.log(s"Invoice with id ${refundInvoiceDetails.negativeInvoiceId} has zero balance")
       }
   } yield ()
 
@@ -94,20 +94,20 @@ object RefundSupporterPlus {
   }
 
   private def adjustInvoiceBalanceToZero(
-      invoicesForRefund: InvoicesForRefund,
+      refundInvoiceDetails: RefundInvoiceDetails,
       negativeInvoiceBalance: BigDecimal,
   ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] =
     for {
       _ <- ZIO.log(
-        s"Invoice with id ${invoicesForRefund.negativeInvoiceId} still has balance of $negativeInvoiceBalance",
+        s"Invoice with id ${refundInvoiceDetails.negativeInvoiceId} still has balance of $negativeInvoiceBalance",
       )
-      _ <- checkInvoicesEqualBalance(negativeInvoiceBalance, invoicesForRefund.negativeInvoiceItems)
+      _ <- checkInvoicesEqualBalance(negativeInvoiceBalance, refundInvoiceDetails.negativeInvoiceItems)
       today <- Clock.currentDateTime.map(_.toLocalDate)
-      invoiceItemAdjustments = buildInvoiceItemAdjustments(today, invoicesForRefund.negativeInvoiceItems)
+      invoiceItemAdjustments = buildInvoiceItemAdjustments(today, refundInvoiceDetails.negativeInvoiceItems)
       _ <- InvoiceItemAdjustment.batchUpdate(invoiceItemAdjustments)
       _ <- ZIO.log(
         s"Successfully applied invoice item adjustments $invoiceItemAdjustments" +
-          s" to invoice ${invoicesForRefund.negativeInvoiceId}",
+          s" to invoice ${refundInvoiceDetails.negativeInvoiceId}",
       )
     } yield ()
 
