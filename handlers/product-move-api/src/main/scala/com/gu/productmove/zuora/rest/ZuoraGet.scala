@@ -53,3 +53,24 @@ trait ZuoraGet:
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): IO[ErrorResponse, Response]
   def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[ErrorResponse, Response]
+
+object ZuoraGet {
+  def get[T: JsonDecoder](
+      relativeUrl: Uri,
+      zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
+  ): ZIO[ZuoraGet, ErrorResponse, T] =
+    ZIO.serviceWithZIO[ZuoraGet](_.get(relativeUrl, zuoraSuccessCheck))
+
+  def post[Request: JsonEncoder, Response: JsonDecoder](
+      relativeUrl: Uri,
+      input: Request,
+      zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
+  ): ZIO[ZuoraGet, ErrorResponse, Response] =
+    ZIO.serviceWithZIO[ZuoraGet](_.post(relativeUrl, input, zuoraSuccessCheck))
+
+  def put[Request: JsonEncoder, Response: JsonDecoder](
+      relativeUrl: Uri,
+      input: Request,
+  ): ZIO[ZuoraGet, ErrorResponse, Response] =
+    ZIO.serviceWithZIO[ZuoraGet](_.put(relativeUrl, input))
+}

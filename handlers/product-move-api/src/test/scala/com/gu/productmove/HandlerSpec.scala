@@ -68,7 +68,7 @@ import com.gu.productmove.zuora.{
   UpdateResponse,
 }
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
-import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResponse
+import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import zio.*
@@ -107,7 +107,7 @@ object HandlerSpec extends ZIOSpecDefault {
     val getPaymentMethodStubs = Map("paymentMethodId" -> getPaymentMethodResponse)
     val invoiceItemAdjustmentInputs = ("89ad8casd9c0asdcaj89sdc98as", BigDecimal(0.30), "invoice_item_id", "Credit")
     val invoiceItemAdjustmentStubs = Map(
-      invoiceItemAdjustmentInputs -> InvoiceItemAdjustmentResponse(true),
+      invoiceItemAdjustmentInputs -> List(InvoiceItemAdjustmentResult(true, "source_id")),
     )
     val getInvoiceItemsStubs = Map("89ad8casd9c0asdcaj89sdc98as" -> getInvoiceItemsResponse)
 

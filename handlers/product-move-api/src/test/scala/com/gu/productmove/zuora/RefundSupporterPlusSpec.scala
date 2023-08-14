@@ -18,31 +18,55 @@ import zio.*
 import zio.test.Assertion.*
 import zio.test.*
 
-import java.time.*
-
 object RefundSupporterPlusSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("RefundSupporterPlus")(test("Run refund lambda locally") {
-      /*
+    suite("RefundSupporterPlus")(
+      test("Run refund lambda locally") {
+        /*
            Test suite used to run the RefundSupporterPlus lambda locally
-       */
-      for {
-        _ <- RefundSupporterPlus
-          .applyRefund(RefundInput(SubscriptionName("A-S00497072")))
-          .provide(
-            AwsS3Live.layer,
-            AwsCredentialsLive.layer,
-            SttpClientLive.layer,
-            ZuoraClientLive.layer,
-            ZuoraGetLive.layer,
-            GuStageLive.layer,
-            InvoicingApiRefundLive.layer,
-            CreditBalanceAdjustmentLive.layer,
-            GetInvoiceItemsForSubscriptionLive.layer,
-            GetInvoiceLive.layer,
-            InvoiceItemAdjustmentLive.layer,
-            SecretsLive.layer,
-          )
-      } yield assert(true)(equalTo(true))
-    } @@ TestAspect.ignore)
+         */
+        for {
+          _ <- RefundSupporterPlus
+            .applyRefund(RefundInput(SubscriptionName("A-S00631533")))
+            .provide(
+              AwsS3Live.layer,
+              AwsCredentialsLive.layer,
+              SttpClientLive.layer,
+              ZuoraClientLive.layer,
+              ZuoraGetLive.layer,
+              GuStageLive.layer,
+              InvoicingApiRefundLive.layer,
+              CreditBalanceAdjustmentLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
+              GetInvoiceLive.layer,
+              InvoiceItemAdjustmentLive.layer,
+              SecretsLive.layer,
+            )
+        } yield assert(true)(equalTo(true))
+      } @@ TestAspect.ignore,
+      test("Balance invoices locally") {
+        /*
+             Test suite used to run the ensureThatNegativeInvoiceBalanceIsZero lambda locally
+         */
+        for {
+          _ <- TestClock.setTime(java.time.Instant.now())
+          _ <- RefundSupporterPlus
+            .applyRefund(RefundInput(SubscriptionName("A-S00629631")))
+            .provide(
+              AwsS3Live.layer,
+              AwsCredentialsLive.layer,
+              SttpClientLive.layer,
+              ZuoraClientLive.layer,
+              ZuoraGetLive.layer,
+              GuStageLive.layer,
+              ZLayer.succeed(new MockInvoicingApiRefund()),
+              CreditBalanceAdjustmentLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
+              GetInvoiceLive.layer,
+              InvoiceItemAdjustmentLive.layer,
+              SecretsLive.layer,
+            )
+        } yield assert(true)(equalTo(true))
+      } @@ TestAspect.ignore,
+    )
 }
