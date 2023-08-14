@@ -272,16 +272,15 @@ Resources:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName: !Sub An error in the refund lambda ${Stage}. Please check the logs to diagnose and redrive the product-switch-refund-dead-letter-${Stage} SQS queue when ready.
       ComparisonOperator: GreaterThanOrEqualToThreshold
+      Namespace: AWS/Lambda
+      MetricName: Errors
       Dimensions:
-        - Name: QueueName
-          Value: !GetAtt RefundDeadLetterQueue.QueueName
-      Period: 300
-      EvaluationPeriods: 1
-      MetricName: ApproximateNumberOfMessagesVisible
-      Namespace: AWS/SQS
+        - Name: FunctionName
+          Value: !Ref RefundLambda
       Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
       Threshold: 1
-      TreatMissingData: notBreaching
 
   5xxApiAlarm:
     Type: AWS::CloudWatch::Alarm
