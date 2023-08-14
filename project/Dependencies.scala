@@ -83,7 +83,7 @@ object Dependencies {
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.16" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.3.1" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.4.0" % Test
   val nettyCodec = "io.netty" % "netty-codec" % "4.1.92.Final"
   val jacksonVersion = "2.13.2"
   val jacksonDatabindVersion = "2.13.2.2"
