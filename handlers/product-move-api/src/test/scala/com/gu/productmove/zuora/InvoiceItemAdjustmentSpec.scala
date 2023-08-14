@@ -63,7 +63,7 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
           ),
         )
         assert(adjustments.length)(equalTo(1)) &&
-        assert(adjustments.head.Amount)(equalTo(1119))
+        assert(adjustments.head.Amount)(equalTo(120))
       },
       test("Deserialisation of the invoice adjustment response works") {
         val responseJson =

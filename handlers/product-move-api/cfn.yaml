@@ -263,12 +263,15 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
-      
+
   RefundLambdaFailureAlarm:
     Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
     Properties:
-      AlarmName: LambdaFailureAlarm
-      AlarmDescription: Alarm triggered when the refund Lambda fails
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName: !Sub An error in the refund lambda ${Stage}. Please check the logs to diagnose and redrive the product-switch-refund-dead-letter-${Stage} SQS queue when ready.
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Namespace: AWS/Lambda
       MetricName: Errors
       Dimensions:
@@ -278,9 +281,6 @@ Resources:
       Period: 60
       EvaluationPeriods: 1
       Threshold: 1
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
 
   5xxApiAlarm:
     Type: AWS::CloudWatch::Alarm
