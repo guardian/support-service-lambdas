@@ -102,8 +102,7 @@ object RefundSupporterPlus {
         s"Invoice with id ${refundInvoiceDetails.negativeInvoiceId} still has balance of $negativeInvoiceBalance",
       )
       _ <- checkInvoicesEqualBalance(negativeInvoiceBalance, refundInvoiceDetails.negativeInvoiceItems)
-      today <- Clock.currentDateTime.map(_.toLocalDate)
-      invoiceItemAdjustments = buildInvoiceItemAdjustments(today, refundInvoiceDetails.negativeInvoiceItems)
+      invoiceItemAdjustments = buildInvoiceItemAdjustments(refundInvoiceDetails.negativeInvoiceItems)
       _ <- InvoiceItemAdjustment.batchUpdate(invoiceItemAdjustments)
       _ <- ZIO.log(
         s"Successfully applied invoice item adjustments $invoiceItemAdjustments" +
@@ -112,7 +111,6 @@ object RefundSupporterPlus {
     } yield ()
 
   def buildInvoiceItemAdjustments(
-      adjustmentDate: LocalDate,
       invoiceItems: List[InvoiceItemWithTaxDetails],
   ): List[InvoiceItemAdjustment.PostBody] = {
     // If the invoice item has tax paid on it, this needs to be adjusted
@@ -124,7 +122,7 @@ object RefundSupporterPlus {
       val chargeAdjustment =
         List(
           InvoiceItemAdjustment.PostBody(
-            AdjustmentDate = adjustmentDate,
+            AdjustmentDate = invoiceItem.chargeDateAsDate,
             Amount = invoiceItem.ChargeAmount.abs,
             InvoiceId = invoiceItem.InvoiceId,
             SourceId = invoiceItem.Id,
@@ -135,7 +133,7 @@ object RefundSupporterPlus {
         case Some(taxDetails) =>
           List(
             InvoiceItemAdjustment.PostBody(
-              AdjustmentDate = adjustmentDate,
+              AdjustmentDate = invoiceItem.chargeDateAsDate,
               Amount = taxDetails.amount.abs,
               InvoiceId = invoiceItem.InvoiceId,
               SourceId = taxDetails.taxationId,

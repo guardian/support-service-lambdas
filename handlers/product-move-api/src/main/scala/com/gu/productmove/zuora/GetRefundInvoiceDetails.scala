@@ -163,6 +163,7 @@ case class InvoiceItemWithTaxDetails(
     InvoiceId: String,
 ) {
   def amountWithTax = ChargeAmount + TaxDetails.map(_.amount).getOrElse(0)
+  def chargeDateAsDate = LocalDate.parse(ChargeDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 }
 
 object GetRefundInvoiceDetails {

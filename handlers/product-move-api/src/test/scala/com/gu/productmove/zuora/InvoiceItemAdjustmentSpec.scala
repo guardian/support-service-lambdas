@@ -44,7 +44,6 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
       } @@ TestAspect.ignore,
       test("buildInvoiceAdjustments function ignores invoice items with zero value") {
         val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
-          LocalDate.now,
           List(
             InvoiceItemWithTaxDetails(
               "8ad08dc989d472290189db0888460962",
@@ -64,6 +63,28 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
         )
         assert(adjustments.length)(equalTo(1)) &&
         assert(adjustments.head.Amount)(equalTo(120))
+      },
+      test("buildInvoiceAdjustments function uses the correct adjustment date") {
+        val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
+          List(
+            InvoiceItemWithTaxDetails(
+              "8a12843289e577d00189f660966d56bd",
+              "2023-08-15T00:27:52.000+01:00",
+              33,
+              None,
+              "8a12843289e577d00189f660965f56bc",
+            ),
+            InvoiceItemWithTaxDetails(
+              "8a12843289e577d00189f660966d56be",
+              "2023-08-15T00:27:52.000+01:00",
+              15.45,
+              None,
+              "8a12843289e577d00189f660965f56bc",
+            ),
+          ),
+        )
+        assert(adjustments.length)(equalTo(2)) &&
+          assert(adjustments.head.AdjustmentDate.getDayOfMonth)(equalTo(15))
       },
       test("Deserialisation of the invoice adjustment response works") {
         val responseJson =
