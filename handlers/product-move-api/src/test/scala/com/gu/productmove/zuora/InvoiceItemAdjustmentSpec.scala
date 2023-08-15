@@ -44,7 +44,6 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
       } @@ TestAspect.ignore,
       test("buildInvoiceAdjustments function ignores invoice items with zero value") {
         val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
-          LocalDate.now,
           List(
             InvoiceItemWithTaxDetails(
               "8ad08dc989d472290189db0888460962",
