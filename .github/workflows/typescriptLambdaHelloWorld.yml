@@ -10,7 +10,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    name: support-reminders build
+    name: typescript-lambda-hello-world build
     runs-on: ubuntu-latest
     steps:
       - name: Env
@@ -62,7 +62,7 @@ jobs:
         uses: guardian/actions-riff-raff@v2
         with:
           app: typescript-lambda-hello-world
-          configPath: ./riff-raff.yaml
+          configPath: handlers/TypescriptHelloWorld1/riff-raff.yaml
           contentDirectories: |
             typescript-lambda-hello-world-cloudformation:
               - ./cdk/cdk.out/typescript-lambda-hello-world-DEV.template.json
