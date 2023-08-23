@@ -28,7 +28,6 @@ jobs:
 
       - name: Yarn
         run: |
-          yarn clean
           yarn install
           yarn run build
         working-directory: handlers/TypescriptHelloWorld1
