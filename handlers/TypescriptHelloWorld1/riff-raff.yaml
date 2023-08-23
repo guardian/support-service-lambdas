@@ -1,0 +1,23 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - DEV
+deployments:
+  typescript-lambda-hello-world-cloudformation:
+    type: cloud-formation
+    app: typescript-lambda-hello-world
+    parameters:
+      templateStagePaths:
+        DEV: typescript-lambda-hello-world-DEV.template.json
+
+  typescript-lambda-hello-world:
+    type: aws-lambda
+    parameters:
+      fileName: typescript-lambda-hello-world.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - greeting-
+    dependencies: [typescript-lambda-hello-world-cloudformation]

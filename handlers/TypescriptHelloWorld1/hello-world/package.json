@@ -1,0 +1,9 @@
+{
+	"name": "example-lambda",
+	"version": "1.0.0",
+	"scripts": {
+		"typecheck": "tsc -noEmit",
+		"build": "esbuild src/handler.ts --bundle --outdir=dist --platform=node --target=node16 --external:aws-sdk",
+		"start": "DOTENV_CONFIG_PATH=../../.env ts-node src/run-locally.ts"
+	}
+}

@@ -1,6 +1,8 @@
 import "source-map-support/register";
 import { App } from "aws-cdk-lib";
 import type { NewProductApiProps } from "../lib/new-product-api";
+import { TypescriptLambdaHelloWorld } from "../lib/typescript-lambda-hello-world";
+
 import { NewProductApi } from "../lib/new-product-api";
 
 const app = new App();
@@ -29,3 +31,5 @@ export const prodProps: NewProductApiProps = {
 
 new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
+
+new TypescriptLambdaHelloWorld(app, "typescript-lambda-hello-world-DEV", {stack: "membership", stage: "DEV"});
