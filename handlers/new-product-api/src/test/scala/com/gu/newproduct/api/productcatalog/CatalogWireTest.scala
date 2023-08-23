@@ -1134,6 +1134,15 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
           LocalDate.of(2020, 4, 4)
         case (ProductType.NewspaperDigitalVoucher, List(SUNDAY)) =>
           LocalDate.of(2020, 4, 5)
+        case (
+          ProductType.NewspaperNationalDelivery,
+          List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
+          ) =>
+          LocalDate.of(2020, 4, 1)
+        case (ProductType.NewspaperNationalDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY)) =>
+          LocalDate.of(2020, 4, 2)
+        case (ProductType.NewspaperNationalDelivery, List(SATURDAY, SUNDAY)) =>
+          LocalDate.of(2020, 4, 3)
       }
     }
 
