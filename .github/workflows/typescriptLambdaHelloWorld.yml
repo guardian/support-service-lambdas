@@ -24,6 +24,7 @@ jobs:
         with:
           node-version-file: 'handlers/TypescriptHelloWorld1/.nvmrc'
           cache: 'yarn'
+        working-directory: handlers/TypescriptHelloWorld1
 
       - name: Yarn
         run: |

@@ -3,3 +3,4 @@
 target/
 cdk-cfn.yaml
 metals.sbt
+node_modules/
