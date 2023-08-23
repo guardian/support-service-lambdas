@@ -1,9 +1,8 @@
 import "source-map-support/register";
 import { App } from "aws-cdk-lib";
 import type { NewProductApiProps } from "../lib/new-product-api";
-import { TypescriptLambdaHelloWorld } from "../lib/typescript-lambda-hello-world";
-
 import { NewProductApi } from "../lib/new-product-api";
+import { TypescriptLambdaHelloWorld } from "../lib/typescript-lambda-hello-world";
 
 const app = new App();
 
