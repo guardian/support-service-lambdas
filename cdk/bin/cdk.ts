@@ -1,5 +1,6 @@
 import "source-map-support/register";
 import { App } from "aws-cdk-lib";
+import { FailedNationalDeliveriesProcessor } from "../lib/failed-national-deliveries-processor";
 import type { NewProductApiProps } from "../lib/new-product-api";
 import { NewProductApi } from "../lib/new-product-api";
 
@@ -29,3 +30,4 @@ export const prodProps: NewProductApiProps = {
 
 new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
+new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-CODE", {stack: "membership", stage: "CODE"});
