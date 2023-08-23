@@ -31,3 +31,4 @@ export const prodProps: NewProductApiProps = {
 new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
 new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-CODE", {stack: "membership", stage: "CODE"});
+new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-CODE", {stack: "membership", stage: "PROD"});
