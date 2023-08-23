@@ -2,9 +2,8 @@ package com.gu.newproduct.api.addsubscription.email.digipack
 
 import com.gu.i18n.Country
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation.{Passed, ValidationResult}
+import com.gu.newproduct.api.addsubscription.validation.ValidationResult
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.AddressField
 
 case class ValidatedAddress(
     address1: Address1,

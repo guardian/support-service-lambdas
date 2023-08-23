@@ -36,6 +36,8 @@ object AccountIdentitys {
         HealthCheckTestAccountData(ZuoraAccountId("2c92a0fb4a38064e014a3f48f1663ad8"), IdentityId("13552794"))
       case Stage("CODE") =>
         HealthCheckTestAccountData(ZuoraAccountId("8ad095dd82f7aaa50182f96de24d3ddb"), IdentityId("200045767"))
+      case _ =>
+        throw new RuntimeException("unknown stage: " + stage)
     }
 
 }

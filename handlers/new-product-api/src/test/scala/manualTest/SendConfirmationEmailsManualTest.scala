@@ -1,8 +1,6 @@
 package manualTest
 
 import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
-
-import java.time.LocalDate
 import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.{Country, Currency}
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
@@ -15,8 +13,8 @@ import com.gu.newproduct.api.addsubscription.zuora.{PaymentMethodStatus, Payment
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription}
-import com.gu.util.config.Stage
 
+import java.time.LocalDate
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 

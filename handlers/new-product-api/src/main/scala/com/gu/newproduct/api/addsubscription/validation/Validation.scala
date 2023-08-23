@@ -18,16 +18,15 @@ object Validation {
     }
   }
 
-  implicit class GetAndValidate[ID, DATA](getter: ID => ClientFailableOp[DATA]) {
+  implicit class GetAndValidate[ID, DATA](result: ClientFailableOp[DATA]) {
     def andValidateWith[VALIDATED](
         validate: DATA => ValidationResult[VALIDATED],
         ifNotFoundReturn: Option[String] = None,
-    ): ID => ApiGatewayOp[VALIDATED] =
-      (id: ID) =>
+    ): ApiGatewayOp[VALIDATED] =
         for {
           data <- ifNotFoundReturn match {
-            case Some(notFoundError) => getter(id).toApiResponseCheckingNotFound("getting data", notFoundError)
-            case None => getter(id).toApiGatewayOp("getting data")
+            case Some(notFoundError) => result.toApiResponseCheckingNotFound("getting data", notFoundError)
+            case None => result.toApiGatewayOp("getting data")
           }
           validatedData <- validate(data).toApiGatewayOp
         } yield validatedData

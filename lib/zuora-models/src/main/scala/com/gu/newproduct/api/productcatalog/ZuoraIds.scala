@@ -68,15 +68,6 @@ object ZuoraIds {
       VoucherSaturdayPlus -> saturdayPlus,
     )
 
-    val plansWithDigipack = List(
-      everydayPlus,
-      weekendPlus,
-      sixDayPlus,
-      sundayPlus,
-      saturdayPlus,
-    )
-    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
-
   }
 
   case class HomeDeliveryZuoraIds(
@@ -104,15 +95,6 @@ object ZuoraIds {
       HomeDeliverySundayPlus -> sundayPlus,
     )
 
-    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
-
-    val plansWithDigipack = List(
-      everydayPlus,
-      weekendPlus,
-      sixDayPlus,
-      sundayPlus,
-      saturdayPlus,
-    )
   }
 
   case class DigipackZuoraIds(
@@ -123,7 +105,6 @@ object ZuoraIds {
       DigipackAnnual -> annual,
       DigipackMonthly -> monthly,
     )
-    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
   }
 
   case class GuardianWeeklyDomesticIds(
@@ -183,26 +164,30 @@ object ZuoraIds {
       DigitalVoucherSundayPlus -> sundayPlus,
     )
 
-    val plansWithDigipack = List(
-      everydayPlus,
-      weekendPlus,
-      sixDayPlus,
-      sundayPlus,
-      saturdayPlus,
-    )
+  }
 
-    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+  case class NationalDeliveryZuoraIds(
+    everyday: ProductRatePlanId,
+    weekend: ProductRatePlanId,
+    sixDay: ProductRatePlanId,
+  ) {
+    val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
+      NationalDeliveryEveryday -> everyday,
+      NationalDeliveryWeekend -> weekend,
+      NationalDeliverySixday -> sixDay,
+    )
   }
 
   case class ZuoraIds(
-      supporterPlusZuoraIds: SupporterPlusZuoraIds,
-      contributionsZuoraIds: ContributionsZuoraIds,
-      voucherZuoraIds: VoucherZuoraIds,
-      homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
-      digitalPackIds: DigipackZuoraIds,
-      guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
-      guardianWeeklyROW: GuardianWeeklyROWIds,
-      digitalVoucher: DigitalVoucherZuoraIds,
+    supporterPlusZuoraIds: SupporterPlusZuoraIds,
+    contributionsZuoraIds: ContributionsZuoraIds,
+    voucherZuoraIds: VoucherZuoraIds,
+    homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
+    digitalPackIds: DigipackZuoraIds,
+    guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
+    guardianWeeklyROW: GuardianWeeklyROWIds,
+    digitalVoucher: DigitalVoucherZuoraIds,
+    nationalDeliveryZuoraIds: NationalDeliveryZuoraIds,
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
       (supporterPlusZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
@@ -212,7 +197,9 @@ object ZuoraIds {
         digitalPackIds.byApiPlanId ++
         guardianWeeklyDomestic.zuoraRatePlanIdByApiPlanId ++
         guardianWeeklyROW.zuoraRatePlanIdByApiPlanId ++
-        digitalVoucher.byApiPlanId).toMap
+        digitalVoucher.byApiPlanId ++ 
+        nationalDeliveryZuoraIds.byApiPlanId
+      ).toMap
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 
@@ -316,6 +303,11 @@ object ZuoraIds {
           weekendPlus = ProductRatePlanId("2c92a00870ec598001710740c6672ee7"),
           sixDayPlus = ProductRatePlanId("2c92a00870ec598001710740c4582ead"),
         ),
+        NationalDeliveryZuoraIds(
+          everyday = ProductRatePlanId("TODO TBC when created"),
+          weekend = ProductRatePlanId("TODO TBC when created"),
+          sixDay = ProductRatePlanId("TODO TBC when created"),
+        ),
       ),
       Stage("CODE") -> ZuoraIds(
         SupporterPlusZuoraIds(
@@ -403,6 +395,11 @@ object ZuoraIds {
           saturdayPlus = ProductRatePlanId("2c92c0f86fa49142016fa49eb1732a39"),
           weekendPlus = ProductRatePlanId("2c92c0f86fa49142016fa49eaecb29dd"),
           sixDayPlus = ProductRatePlanId("2c92c0f86fa49142016fa49ea1af28c8"),
+        ),
+        NationalDeliveryZuoraIds(
+          everyday = ProductRatePlanId("8ad096ca8992481d018992a363bd17ad"),
+          weekend = ProductRatePlanId("8ad096ca8992481d018992a36256175e"), 
+          sixDay = ProductRatePlanId("8ad096ca8992481d018992a35f60171b"),
         ),
       ),
     )

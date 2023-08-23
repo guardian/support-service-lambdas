@@ -1,11 +1,11 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.{DayOfWeek, LocalDate}
-
-import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
+import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAddressValidator
 import play.api.libs.json.{JsString, Json, Writes}
+
+import java.time.{DayOfWeek, LocalDate}
 
 object WireModel {
 
@@ -121,11 +121,11 @@ object WireModel {
     implicit val writes = Json.writes[WireCatalog]
 
     def fromCatalog(
-        catalog: Catalog,
+        catalog: Map[PlanId, Plan],
     ) = {
 
       def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
-        val plan = catalog.planForId(planId)
+        val plan = catalog(planId)
         WirePlanInfo.fromPlan(plan)
       }
 
