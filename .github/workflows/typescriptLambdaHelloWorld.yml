@@ -21,10 +21,10 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v3
-        working-directory: handlers/TypescriptHelloWorld1
         with:
           node-version-file: 'handlers/TypescriptHelloWorld1/.nvmrc'
           cache: 'yarn'
+          cache-dependency-path: handlers/TypescriptHelloWorld1/yarn.lock
 
       - name: Yarn
         run: |
