@@ -19,5 +19,5 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - greeting-
+        - membership-typescript-lambda-hello-world-
     dependencies: [typescript-lambda-hello-world-cloudformation]
