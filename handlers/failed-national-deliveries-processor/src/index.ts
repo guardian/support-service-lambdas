@@ -3,44 +3,48 @@ import { parse } from 'csv-parse/sync';
 
 export const main = async (): Promise<string> => {
 		
-		const records : FileRow[] = await getFileRows();
+		const failedDeliveryRows : FileRow[] = getFailedDeliveryRowsFromFile();		
+		var requests : Request[] = generateRequestsFromFailedDeliveryRows(failedDeliveryRows);
 		
-		const recordsForCompositeJson : FileRow[] = records.filter(
-			record=>record.reason_code==='F'
-		);
-		
-		const json = generateJson(recordsForCompositeJson);
-		
-		console.log('json:',json);
+		console.log('requests:', JSON.stringify(requests));
 	
 	return Promise.resolve('');
 };
 
-function generateJson(recordsForCompositeJson : FileRow[]) : string {
+function generateRequestsFromFailedDeliveryRows(failedDeliveryRows : FileRow[]) : Request[] {
+	var requests : Request[] = [];
+		
+	failedDeliveryRows.map(
+		failedDeliveryRow => requests.push(generateRequest(failedDeliveryRow))
+	);
+
+	return requests;
+}
+
+function getFailedDeliveryRowsFromFile() : FileRow[]{
+	const records : FileRow[] = await getFileRows();
+		
+	const fileRows : FileRow[] = records.filter(
+		record=>record.reason_code==='F'
+	);
+
+	return fileRows;
+}
+
+function generateRequest(fileRow : FileRow) : Request {
 	
 	var compositeRequests : SubRequest[] = [];
+	const compositeKey : string = generateCompositeKey(fileRow.sub, fileRow['Delivery Date']);
 
-	recordsForCompositeJson.forEach(
-		record => {
-			const compositeKey : string = generateCompositeKey(record.sub, record['Delivery Date']);
-
-			compositeRequests.push(createJsonForPatchDeliveryWithNotes(record.sub, record['Delivery Date'], compositeKey))
-			compositeRequests.push(createJsonForGetSFSubFromDelivery(record.sub, record['Delivery Date'], compositeKey))
-			compositeRequests.push(createJsonForCreateCase(record.sub, record['Delivery Date'], compositeKey))
-			compositeRequests.push(createJsonForUpdateDeliveryWithCase(record.sub, record['Delivery Date'], compositeKey))
-		}
-	); 
+	compositeRequests.push(createJsonForPatchDeliveryWithNotes(fileRow.sub, fileRow['Delivery Date'], compositeKey))
+	compositeRequests.push(createJsonForGetSFSubFromDelivery(fileRow.sub, fileRow['Delivery Date'], compositeKey))
+	compositeRequests.push(createJsonForCreateCase(fileRow.sub, fileRow['Delivery Date'], compositeKey))
+	compositeRequests.push(createJsonForUpdateDeliveryWithCase(fileRow.sub, fileRow['Delivery Date'], compositeKey))
 	
-	return JSON.stringify({
+	return {
 		allOrNone:true, 
 		compositeRequest:compositeRequests
-	});
-}
-function generateReferenceId(prefix : string, compositeKey:string) : string {
-	return prefix + removeInvalidCharsForReferenceId(compositeKey);
-}
-function removeInvalidCharsForReferenceId(compositeKey:string) : string {
-	return compositeKey.replaceAll('-', '_');
+	};
 }
 
 function createJsonForPatchDeliveryWithNotes(subName:string, deliveryDate:string, compositeKey:string) : SubRequest {
@@ -95,18 +99,11 @@ function generateCompositeKey(subName : string, deliveryDate : string) : string 
 	return subName + '-' + year + '-' + month + '-' + day;
 }
 
-function generateCompositeJson(records: string[]){
-	// var myArray :string[] = [];
-
-	// for (const record of records){
-	// 	console.log('record:',record);
-	// 	if(record.reason_code){
-
-	// 	}
-	// 	myArray.push(record);
-	// }
-	// console.log('myArray:',myArray);
-
+function generateReferenceId(prefix : string, compositeKey:string) : string {
+	return prefix + removeInvalidCharsForReferenceId(compositeKey);
+}
+function removeInvalidCharsForReferenceId(compositeKey:string) : string {
+	return compositeKey.replaceAll('-', '_');
 }
 
 
