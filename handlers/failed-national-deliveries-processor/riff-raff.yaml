@@ -1,0 +1,25 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  cloudformation:
+    type: cloud-formation
+    app: failed-national-deliveries-processor
+    parameters:
+      templateStagePaths:
+        CODE: failed-national-deliveries-processor-CODE.template.json
+        PROD: failed-national-deliveries-processor-PROD.template.json
+
+  failed-national-deliveries-processor:
+    type: aws-lambda
+    parameters:
+      fileName: failed-national-deliveries-processor.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - failed-national-deliveries-processor-
+    dependencies: [cloudformation]
