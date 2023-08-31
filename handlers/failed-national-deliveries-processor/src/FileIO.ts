@@ -9,7 +9,7 @@ export async function getFileContents(){
 	);
 }
 
-export async function getFailedDeliveryRowsFromFile(fileRows : FileRow[]) : FileRow[]{
+export function getFailedDeliveryRowsFromFile(fileRows : FileRow[]) : FileRow[]{
 	
 	const failedDeliveryRows : FileRow[] = fileRows.filter(
 		record=>record.reason_code==='F'

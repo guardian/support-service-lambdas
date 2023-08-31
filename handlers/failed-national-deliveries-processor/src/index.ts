@@ -5,7 +5,7 @@ import {generateRequestsFromFailedDeliveryRows} from "./RequestBuilder.js";
 export const main = async (): Promise<string> => {
 	
 	const allFileRows = await getFileContents();
-	const failedDeliveryRows : FileRow[] = await getFailedDeliveryRowsFromFile(allFileRows);		
+	const failedDeliveryRows : FileRow[] = getFailedDeliveryRowsFromFile(allFileRows);		
 	var requests : Request[] = generateRequestsFromFailedDeliveryRows(failedDeliveryRows);
 	
 	requests.forEach(
