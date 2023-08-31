@@ -16,7 +16,7 @@ export const main = async (): Promise<string> => {
 	return Promise.resolve('');
 };
 
-function generateJson(recordsForCompositeJson : FileRow[]){
+function generateJson(recordsForCompositeJson : FileRow[]) : string {
 	
 	var compositeRequests : SubRequest[] = [];
 
@@ -35,11 +35,11 @@ function generateJson(recordsForCompositeJson : FileRow[]){
 	});
 }
 
-function createJsonForPatchDeliveryWithNotes(subName:string, deliveryDate:string){
+function createJsonForPatchDeliveryWithNotes(subName:string, deliveryDate:string) : SubRequest {
 	const compositeKey : string = generateCompositeKey(subName, deliveryDate);
 	const deliveryUpdateUrl : string = generateDeliveryUpdateUrl(compositeKey);
 	const referenceId = 'UpdateDeliveryNotes_'+compositeKey.replace('A-S', '').replaceAll('-', '_');
-	console.log('referenceId:'+referenceId);
+
 	return {
 		method : 'PATCH',
 		url : deliveryUpdateUrl,
@@ -48,7 +48,7 @@ function createJsonForPatchDeliveryWithNotes(subName:string, deliveryDate:string
 	}
 }
 
-function createJsonForGetSFSubFromDelivery(subName:string, deliveryDate:string){
+function createJsonForGetSFSubFromDelivery(subName:string, deliveryDate:string) : SubRequest{
 	const compositeKey : string = generateCompositeKey(subName, deliveryDate);
 	return {
 		method : 'GET',
@@ -57,7 +57,7 @@ function createJsonForGetSFSubFromDelivery(subName:string, deliveryDate:string){
 	}
 }
 
-function createJsonForCreateCase(subName:string, deliveryDate:string){
+function createJsonForCreateCase(subName:string, deliveryDate:string) : SubRequest {
 	const compositeKey : string = generateCompositeKey(subName, deliveryDate);
 	return {
         method : "POST",
@@ -70,7 +70,7 @@ function createJsonForCreateCase(subName:string, deliveryDate:string){
     }
 }
 
-function createJsonForUpdateDeliveryWithCase(subName:string, deliveryDate:string){
+function createJsonForUpdateDeliveryWithCase(subName:string, deliveryDate:string) : SubRequest {
 	const compositeKey : string = generateCompositeKey(subName, deliveryDate);
 	const deliveryUpdateUrl : string = generateDeliveryUpdateUrl(compositeKey);
 	return {
@@ -83,11 +83,11 @@ function createJsonForUpdateDeliveryWithCase(subName:string, deliveryDate:string
     }
 }
 
-function generateDeliveryUpdateUrl(compositeKey : string){
+function generateDeliveryUpdateUrl(compositeKey : string) : string {
 	return '/services/data/v58.0/sobjects/Delivery__c/Composite_Key__c/'+compositeKey;
 }
 
-function generateCompositeKey(subName : string, deliveryDate : string){
+function generateCompositeKey(subName : string, deliveryDate : string) : string {
 	const year = deliveryDate.substring(6,10);
 	const month = deliveryDate.substring(3,5);
 	const day = deliveryDate.substring(0,2);
