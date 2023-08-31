@@ -22,10 +22,12 @@ function generateJson(recordsForCompositeJson : FileRow[]) : string {
 
 	recordsForCompositeJson.forEach(
 		record => {
-			compositeRequests.push(createJsonForPatchDeliveryWithNotes(record.sub, record['Delivery Date']))
-			compositeRequests.push(createJsonForGetSFSubFromDelivery(record.sub, record['Delivery Date']))
-			compositeRequests.push(createJsonForCreateCase(record.sub, record['Delivery Date']))
-			compositeRequests.push(createJsonForUpdateDeliveryWithCase(record.sub, record['Delivery Date']))
+			const compositeKey : string = generateCompositeKey(record.sub, record['Delivery Date']);
+
+			compositeRequests.push(createJsonForPatchDeliveryWithNotes(record.sub, record['Delivery Date'], compositeKey))
+			compositeRequests.push(createJsonForGetSFSubFromDelivery(record.sub, record['Delivery Date'], compositeKey))
+			compositeRequests.push(createJsonForCreateCase(record.sub, record['Delivery Date'], compositeKey))
+			compositeRequests.push(createJsonForUpdateDeliveryWithCase(record.sub, record['Delivery Date'], compositeKey))
 		}
 	); 
 	
@@ -34,34 +36,34 @@ function generateJson(recordsForCompositeJson : FileRow[]) : string {
 		compositeRequest:compositeRequests
 	});
 }
+function generateReferenceId(prefix : string, compositeKey:string) : string {
+	return prefix + removeInvalidCharsForReferenceId(compositeKey);
+}
+function removeInvalidCharsForReferenceId(compositeKey:string) : string {
+	return compositeKey.replaceAll('-', '_');
+}
 
-function createJsonForPatchDeliveryWithNotes(subName:string, deliveryDate:string) : SubRequest {
-	const compositeKey : string = generateCompositeKey(subName, deliveryDate);
-	const deliveryUpdateUrl : string = generateDeliveryUpdateUrl(compositeKey);
-	const referenceId = 'UpdateDeliveryNotes_'+compositeKey.replace('A-S', '').replaceAll('-', '_');
-
+function createJsonForPatchDeliveryWithNotes(subName:string, deliveryDate:string, compositeKey:string) : SubRequest {
 	return {
 		method : 'PATCH',
-		url : deliveryUpdateUrl,
-		referenceId : referenceId,
+		url : generateDeliveryUpdateUrl(compositeKey),
+		referenceId : generateReferenceId('UpdateDeliveryNotes_', removeInvalidCharsForReferenceId(compositeKey)),
 		body : {Notes__c : 'updating ' + compositeKey}
 	}
 }
 
-function createJsonForGetSFSubFromDelivery(subName:string, deliveryDate:string) : SubRequest{
-	const compositeKey : string = generateCompositeKey(subName, deliveryDate);
+function createJsonForGetSFSubFromDelivery(subName:string, deliveryDate:string, compositeKey:string) : SubRequest{
 	return {
 		method : 'GET',
-		referenceId : "GetDelivery_"+compositeKey.replace('A-S', '').replaceAll('-', '_'),
+		referenceId : generateReferenceId('GetDelivery_', removeInvalidCharsForReferenceId(compositeKey)),
         url : "/services/data/v58.0/sobjects/Delivery__c/@{UpdateDeliveryNotes_"+compositeKey.replace('A-S', '').replaceAll('-', '_')+".id}?fields=SF_Subscription__c",
 	}
 }
 
-function createJsonForCreateCase(subName:string, deliveryDate:string) : SubRequest {
-	const compositeKey : string = generateCompositeKey(subName, deliveryDate);
+function createJsonForCreateCase(subName:string, deliveryDate:string, compositeKey:string) : SubRequest {
 	return {
         method : "POST",
-        referenceId : "CreateCase_"+compositeKey.replace('A-S', '').replaceAll('-', '_'),
+        referenceId : generateReferenceId('CreateCase_', removeInvalidCharsForReferenceId(compositeKey)),
         url : "/services/data/v58.0/sobjects/Case",
         body : {  
             description : "Case from composite api",
@@ -70,15 +72,14 @@ function createJsonForCreateCase(subName:string, deliveryDate:string) : SubReque
     }
 }
 
-function createJsonForUpdateDeliveryWithCase(subName:string, deliveryDate:string) : SubRequest {
-	const compositeKey : string = generateCompositeKey(subName, deliveryDate);
+function createJsonForUpdateDeliveryWithCase(subName:string, deliveryDate:string, compositeKey:string) : SubRequest {
 	const deliveryUpdateUrl : string = generateDeliveryUpdateUrl(compositeKey);
 	return {
         method : "PATCH",
         url : deliveryUpdateUrl,
-        referenceId : "UpdateDeliveryCase_"+compositeKey.replace('A-S', '').replaceAll('-', '_'),
+		referenceId : generateReferenceId('UpdateDeliveryCase_', removeInvalidCharsForReferenceId(compositeKey)),
         body : {  
-            Case__c : "@{CreateCase_"+compositeKey.replace('A-S', '').replaceAll('-', '_')+".id}"
+            Case__c : "@{"+generateReferenceId('CreateCase_', removeInvalidCharsForReferenceId(compositeKey))+".id}"
         }
     }
 }
