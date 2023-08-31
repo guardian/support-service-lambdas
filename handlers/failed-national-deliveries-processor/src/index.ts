@@ -17,9 +17,9 @@ export const main = async (): Promise<string> => {
 };
 
 function generateJson(recordsForCompositeJson : FileRow[]){
-
 	
-	var compositeRequests : CompositeRequest[] = [];
+	var compositeRequests : SubRequest[] = [];
+
 	recordsForCompositeJson.forEach(
 		record => {
 			compositeRequests.push(createJsonForPatchDeliveryWithNotes(record.sub, record['Delivery Date']))
@@ -29,13 +29,10 @@ function generateJson(recordsForCompositeJson : FileRow[]){
 		}
 	); 
 	
-	const request : Request = {
+	return JSON.stringify({
 		allOrNone:true, 
 		compositeRequest:compositeRequests
-	};
-
-	const requestJson : string = JSON.stringify(request);
-	return requestJson;
+	});
 }
 
 function createJsonForPatchDeliveryWithNotes(subName:string, deliveryDate:string){
@@ -114,7 +111,7 @@ function generateCompositeJson(records: string[]){
 
 async function getFileRows(){
 	return parse(
-		fs.readFileSync('../gnm_failed_deliveries_11_07_23.csv', 'utf-8'), 
+		fs.readFileSync('./gnm_failed_deliveries_11_07_23.csv', 'utf-8'), 
 		{columns: true, skip_empty_lines: true}
 	);
 }
@@ -133,10 +130,10 @@ type DeliveryUpdate = {
 
 type Request = {
     allOrNone: boolean
-    compositeRequest: CompositeRequest[]
+    compositeRequest: SubRequest[]
 }
 
-type CompositeRequest = {
+type SubRequest = {
     method: string
     url: string
     referenceId: string
