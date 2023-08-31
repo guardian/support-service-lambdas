@@ -67,5 +67,6 @@ jobs:
           contentDirectories: |
             cloudformation:
               - ./cdk/cdk.out/failed-national-deliveries-processor-CODE.template.json
+              - ./cdk/cdk.out/failed-national-deliveries-processor-PROD.template.json
             failed-national-deliveries-processor:
               - handlers/failed-national-deliveries-processor/failed-national-deliveries-processor.zip
