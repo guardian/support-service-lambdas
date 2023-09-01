@@ -33,7 +33,7 @@ function createJsonForGetSFSubFromDelivery(subName:string, deliveryDate:string, 
 	return {
 		method : 'GET',
 		referenceId : generateReferenceId('GetDelivery_', removeInvalidCharsForReferenceId(compositeKey)),
-        url : "/services/data/v58.0/sobjects/Delivery__c/@{UpdateDeliveryNotes_"+compositeKey.replace('A-S', '').replaceAll('-', '_')+".id}?fields=SF_Subscription__c",
+        url : "/services/data/v58.0/sobjects/Delivery__c/@{"+generateReferenceId('UpdateDeliveryNotes_', removeInvalidCharsForReferenceId(compositeKey))+".id}?fields=SF_Subscription__c",
 	}
 }
 
@@ -44,7 +44,7 @@ function createJsonForCreateCase(subName:string, deliveryDate:string, compositeK
         url : "/services/data/v58.0/sobjects/Case",
         body : {  
             description : "Case from composite api",
-            SF_Subscription__c : "@{GetDelivery_"+compositeKey.replace('A-S', '').replaceAll('-', '_')+".SF_Subscription__c}"
+            SF_Subscription__c : "@{"+generateReferenceId('GetDelivery_', removeInvalidCharsForReferenceId(compositeKey))+".SF_Subscription__c}"
         }
     }
 }
