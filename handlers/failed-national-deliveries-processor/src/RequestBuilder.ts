@@ -50,10 +50,9 @@ function createJsonForCreateCase(subName:string, deliveryDate:string, compositeK
 }
 
 function createJsonForUpdateDeliveryWithCase(subName:string, deliveryDate:string, compositeKey:string) : SubRequest {
-	const deliveryUpdateUrl : string = generateDeliveryUpdateUrl(compositeKey);
 	return {
         method : "PATCH",
-        url : deliveryUpdateUrl,
+        url : generateDeliveryUpdateUrl(compositeKey),
 		referenceId : generateReferenceId('UpdateDeliveryCase_', removeInvalidCharsForReferenceId(compositeKey)),
         body : {  
             Case__c : "@{"+generateReferenceId('CreateCase_', removeInvalidCharsForReferenceId(compositeKey))+".id}"
