@@ -18,7 +18,7 @@ export type Body = {
 }
 
 export type FileRow = {
-	sub: string;
+	"Customer Reference": string;
 	"Delivery Quantity": string;
 	"Delivery Date": string;
 	reason_code : string;	
