@@ -17,7 +17,7 @@ export type Body = {
 	Notes__c?: string
 }
 
-type FileRow = {
+export type FileRow = {
 	sub: string;
 	"Delivery Quantity": string;
 	"Delivery Date": string;
