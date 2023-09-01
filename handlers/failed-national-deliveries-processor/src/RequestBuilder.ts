@@ -32,16 +32,16 @@ function createJsonForPatchDeliveryWithNotes(subName:string, deliveryDate:string
 function createJsonForGetSFSubFromDelivery(subName:string, deliveryDate:string, compositeKey:string) : SubRequest{
 	return {
 		method : 'GET',
-		referenceId : generateReferenceId('GetDelivery_', removeInvalidCharsForReferenceId(compositeKey)),
         url : "/services/data/v58.0/sobjects/Delivery__c/@{"+generateReferenceId('UpdateDeliveryNotes_', removeInvalidCharsForReferenceId(compositeKey))+".id}?fields=SF_Subscription__c",
+		referenceId : generateReferenceId('GetDelivery_', removeInvalidCharsForReferenceId(compositeKey))
 	}
 }
 
 function createJsonForCreateCase(subName:string, deliveryDate:string, compositeKey:string) : SubRequest {
 	return {
         method : "POST",
-        referenceId : generateReferenceId('CreateCase_', removeInvalidCharsForReferenceId(compositeKey)),
         url : "/services/data/v58.0/sobjects/Case",
+        referenceId : generateReferenceId('CreateCase_', removeInvalidCharsForReferenceId(compositeKey)),
         body : {  
             description : "Case from composite api",
             SF_Subscription__c : "@{"+generateReferenceId('GetDelivery_', removeInvalidCharsForReferenceId(compositeKey))+".SF_Subscription__c}"
