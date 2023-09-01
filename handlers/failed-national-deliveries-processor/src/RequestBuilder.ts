@@ -1,13 +1,7 @@
 import { Request, SubRequest, FileRow } from "./types";
 
 export function generateRequestsFromFailedDeliveryRows(failedDeliveryRows : FileRow[]) : Request[] {
-	var requests : Request[] = [];
-		
-	failedDeliveryRows.forEach(
-		failedDeliveryRow => requests.push(generateRequest(failedDeliveryRow))
-	);
-
-	return requests;
+	return failedDeliveryRows.map(generateRequest);
 }
 
 function generateRequest(fileRow : FileRow) : Request {
