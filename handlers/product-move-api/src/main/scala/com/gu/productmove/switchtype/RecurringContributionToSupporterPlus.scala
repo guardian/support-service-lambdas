@@ -113,7 +113,7 @@ object RecurringContributionToSupporterPlus {
     OutputBody,
   ] = {
     (for {
-      _ <- ZIO.log("PostData: " + postData.toString)
+      _ <- ZIO.log("RecurringContributionToSupporterPlus PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName)
 
       currentRatePlan <- getSingleOrNotEligible(

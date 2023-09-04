@@ -43,7 +43,7 @@ object ToRecurringContribution {
     OutputBody,
   ] = {
     (for {
-      _ <- ZIO.log("PostData: " + postData.toString)
+      _ <- ZIO.log("ToRecurringContribution PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName)
 
       activeRatePlanAndCharge <- ZIO
