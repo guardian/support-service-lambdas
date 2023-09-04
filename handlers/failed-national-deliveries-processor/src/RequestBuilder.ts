@@ -6,18 +6,15 @@ export function generateRequestsFromFailedDeliveryRows(failedDeliveryRows : File
 }
 
 function generateRequest(fileRow : FileRow) : Request {
-	
-	var compositeRequests : SubRequest[] = [];
 	const compositeKey : string = generateCompositeKey(fileRow["Customer Reference"], fileRow['Delivery Date']);
-
-	compositeRequests.push(createJsonForPatchDeliveryWithNotes(fileRow["Customer Reference"], fileRow['Delivery Date'], compositeKey))
-	compositeRequests.push(createJsonForGetSFSubFromDelivery(fileRow["Customer Reference"], fileRow['Delivery Date'], compositeKey))
-	compositeRequests.push(createJsonForCreateCase(fileRow["Customer Reference"], fileRow['Delivery Date'], compositeKey))
-	compositeRequests.push(createJsonForUpdateDeliveryWithCase(fileRow["Customer Reference"], fileRow['Delivery Date'], compositeKey))
-	
 	return {
-		allOrNone:true, 
-		compositeRequest:compositeRequests
+		allOrNone: true, 
+		compositeRequest: [
+			createJsonForPatchDeliveryWithNotes(fileRow["Customer Reference"], fileRow['Delivery Date'], compositeKey),
+			createJsonForGetSFSubFromDelivery(fileRow["Customer Reference"], fileRow['Delivery Date'], compositeKey),
+			createJsonForCreateCase(fileRow["Customer Reference"], fileRow['Delivery Date'], compositeKey),
+			createJsonForUpdateDeliveryWithCase(fileRow["Customer Reference"], fileRow['Delivery Date'], compositeKey),
+		],
 	};
 }
 
