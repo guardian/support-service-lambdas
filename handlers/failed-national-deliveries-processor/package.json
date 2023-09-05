@@ -7,7 +7,8 @@
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=dist/index.js src/index.ts"
   },
   "devDependencies": {
-    "esbuild": "^0.19.2"
+    "esbuild": "^0.19.2",
+    "aws-sdk": "^2.1450.0"
   },
   "dependencies": {
     "csv-parse": "^5.4.1",
