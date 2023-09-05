@@ -8,5 +8,9 @@
   },
   "devDependencies": {
     "esbuild": "^0.19.2"
+  },
+  "dependencies": {
+    "csv-parse": "^5.4.1",
+    "csv-parser": "^3.0.0"
   }
 }

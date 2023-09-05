@@ -1,5 +1,20 @@
+import {Request, FileRow} from "../src/types.ts";
+import {getFileContents, getFailedDeliveryRowsFromFileContents} from "./FileIO.js";
+import {generateRequestsFromFailedDeliveryRows} from "./RequestBuilder.js";
+
 export const main = async (): Promise<string> => {
-	const message = "hello world";
-	console.debug(message);
-	return Promise.resolve(message);
+	
+	const allFileRows = await getFileContents();
+	const failedDeliveryRows : FileRow[] = getFailedDeliveryRowsFromFileContents(allFileRows);		
+	
+	const requests : Request[] = generateRequestsFromFailedDeliveryRows(failedDeliveryRows);
+	
+	requests.forEach(
+		request => console.log('request: '+ JSON.stringify(request))
+	);
+
+	return Promise.resolve('');
 };
+
+main();
+
