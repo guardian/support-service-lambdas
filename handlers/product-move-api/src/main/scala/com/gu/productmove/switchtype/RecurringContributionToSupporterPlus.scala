@@ -117,8 +117,8 @@ object RecurringContributionToSupporterPlus {
       subscription <- GetSubscription.get(subscriptionName)
 
       currentRatePlan <- getSingleOrNotEligible(
-        subscription.ratePlans,
-        s"Subscription: ${subscriptionName.value} has more than one ratePlan",
+        subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")),
+        s"Subscription: ${subscriptionName.value} has more than one active ratePlan",
       )
       ratePlanCharge <- getSingleOrNotEligible(
         currentRatePlan.ratePlanCharges,
