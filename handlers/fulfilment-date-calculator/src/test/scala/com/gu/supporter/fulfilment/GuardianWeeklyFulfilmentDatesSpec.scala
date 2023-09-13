@@ -140,40 +140,40 @@ class GuardianWeeklyFulfilmentDatesSpec extends AnyFlatSpec with Matchers with D
   }
 
   it should "calculate newSubscriptionEarliestStartDate" in {
-    GuardianWeeklyFulfilmentDates("2019-12-02")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-02")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-13",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-03")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-03")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-13",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-04")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-04")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-13",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-05")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-05")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-20",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-06")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-06")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-20",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-07")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-07")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-20",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-08")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-08")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-20",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-09")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-09")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-20",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-10")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-10")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-20",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-11")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-11")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-20",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-12")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-12")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-27",
     )
-    GuardianWeeklyFulfilmentDates("2019-12-13")("Friday").newSubscriptionEarliestStartDate.get should equalDate(
+    GuardianWeeklyFulfilmentDates("2019-12-13")("Friday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-27",
     )
   }

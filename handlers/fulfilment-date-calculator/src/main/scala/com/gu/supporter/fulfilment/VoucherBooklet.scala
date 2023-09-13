@@ -12,7 +12,7 @@ import scala.collection.immutable.ListMap
 
 object VoucherBookletFulfilmentDates {
 
-  lazy val VoucherHolidayStopNoticePeriodDays = 1
+  lazy val VoucherHolidayStopNoticePeriodDays = 1L
   lazy val FulfilmentCutoffDay = DayOfWeek.WEDNESDAY
   lazy val WeekStartDay = DayOfWeek.MONDAY
 

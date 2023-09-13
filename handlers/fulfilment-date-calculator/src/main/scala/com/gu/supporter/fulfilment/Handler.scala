@@ -13,24 +13,33 @@ import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
 import software.amazon.awssdk.services.s3.model.PutObjectResponse
 
-class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
+object Handler {
 
-  override def handle(todayOverride: Option[String], context: Context) = {
+  def main(args: Array[String]): Unit =
+    println(new Handler().handle(None))
+
+}
+
+class Handler extends Lambda[Option[String], String] with LazyLogging {
+
+  override def handle(todayOverride: Option[String]): Either[Throwable, String] = {
 
     val today = inputToDate(todayOverride)
 
-    implicit val englishBankHolidays: BankHolidays = GovUkBankHolidays().`england-and-wales`
+    val englishBankHolidays: BankHolidays = GovUkBankHolidays().`england-and-wales`
 
     val datesForYesterdayThroughToAFortnight = (-1 to 14).map(_.toLong).map(today.plusDays)
 
     datesForYesterdayThroughToAFortnight.foreach { date =>
       writeToBucket(GuardianWeekly, date, GuardianWeeklyFulfilmentDates(date).asJson.spaces2)
 
-      writeToBucket(NewspaperHomeDelivery, date, HomeDeliveryFulfilmentDates(date).asJson.spaces2)
+      writeToBucket(NewspaperHomeDelivery, date, HomeDeliveryFulfilmentDates(date, englishBankHolidays).asJson.spaces2)
 
       writeToBucket(NewspaperVoucherBook, date, VoucherBookletFulfilmentDates(date).asJson.spaces2)
 
       writeToBucket(NewspaperDigitalVoucher, date, DigitalVoucherFulfilmentDates(date).asJson.spaces2)
+
+      writeToBucket(NewspaperNationalDelivery, date, NationalDeliveryFulfilmentDates(date, englishBankHolidays).asJson.spaces2)
     }
 
     Right(s"Generated Guardian Weekly, Home Delivery and Voucher dates for $datesForYesterdayThroughToAFortnight")

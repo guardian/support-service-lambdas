@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 
 class HomeDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with DateSupport {
 
-  def apply(today: LocalDate) = HomeDeliveryFulfilmentDates.apply(today)(
+  def apply(today: LocalDate) = HomeDeliveryFulfilmentDates.apply(today,
     BankHolidays(Nil), // TODO reuse sampleBankHolidays from LocalDateHelpersSpec with some test cases below
   )
 
@@ -327,123 +327,123 @@ class HomeDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with Dat
   }
 
   "MONDAY HomeDeliveryFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
-    apply( /* Wednesday */ "2019-12-04")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-09")
-    apply( /* Thursday  */ "2019-12-05")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-16")
-    apply( /* Friday    */ "2019-12-06")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-16")
-    apply( /* Saturday  */ "2019-12-07")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-16")
-    apply( /* Sunday    */ "2019-12-08")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-16")
-    apply( /* Monday    */ "2019-12-09")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-16")
-    apply( /* Tuesday   */ "2019-12-10")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-16")
-    apply( /* Wednesday */ "2019-12-11")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-16")
-    apply( /* Thursday  */ "2019-12-12")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-23")
-    apply( /* Friday    */ "2019-12-13")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-23")
-    apply( /* Saturday  */ "2019-12-14")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-23")
+    apply( /* Wednesday */ "2019-12-04")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-09")
+    apply( /* Thursday  */ "2019-12-05")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-16")
+    apply( /* Friday    */ "2019-12-06")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-16")
+    apply( /* Saturday  */ "2019-12-07")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-16")
+    apply( /* Sunday    */ "2019-12-08")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-16")
+    apply( /* Monday    */ "2019-12-09")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-16")
+    apply( /* Tuesday   */ "2019-12-10")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-16")
+    apply( /* Wednesday */ "2019-12-11")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-16")
+    apply( /* Thursday  */ "2019-12-12")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-23")
+    apply( /* Friday    */ "2019-12-13")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-23")
+    apply( /* Saturday  */ "2019-12-14")("Monday").newSubscriptionEarliestStartDate should equalDate("2019-12-23")
   }
 
   "TUESDAY HomeDeliveryFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
-    apply( /* Saturday  */ "2019-12-07")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-17")
-    apply( /* Sunday    */ "2019-12-08")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-17")
-    apply( /* Monday    */ "2019-12-09")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-17")
-    apply( /* Tuesday   */ "2019-12-10")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-17")
-    apply( /* Wednesday */ "2019-12-11")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-17")
-    apply( /* Thursday  */ "2019-12-12")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-24")
-    apply( /* Friday    */ "2019-12-13")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-24")
-    apply( /* Saturday  */ "2019-12-14")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-24")
-    apply( /* Sunday    */ "2019-12-15")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-24")
-    apply( /* Monday    */ "2019-12-16")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-24")
-    apply( /* Tuesday   */ "2019-12-17")("Tuesday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-24")
+    apply( /* Saturday  */ "2019-12-07")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-17")
+    apply( /* Sunday    */ "2019-12-08")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-17")
+    apply( /* Monday    */ "2019-12-09")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-17")
+    apply( /* Tuesday   */ "2019-12-10")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-17")
+    apply( /* Wednesday */ "2019-12-11")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-17")
+    apply( /* Thursday  */ "2019-12-12")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-24")
+    apply( /* Friday    */ "2019-12-13")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-24")
+    apply( /* Saturday  */ "2019-12-14")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-24")
+    apply( /* Sunday    */ "2019-12-15")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-24")
+    apply( /* Monday    */ "2019-12-16")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-24")
+    apply( /* Tuesday   */ "2019-12-17")("Tuesday").newSubscriptionEarliestStartDate should equalDate("2019-12-24")
   }
 
   "WEDNESDAY HomeDeliveryFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
-    apply( /* Sunday    */ "2019-12-01")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Sunday    */ "2019-12-01")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-04",
     )
-    apply( /* Monday    */ "2019-12-02")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Monday    */ "2019-12-02")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-11",
     )
-    apply( /* Tuesday   */ "2019-12-03")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Tuesday   */ "2019-12-03")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-11",
     )
-    apply( /* Wednesday */ "2019-12-04")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Wednesday */ "2019-12-04")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-11",
     )
-    apply( /* Thursday  */ "2019-12-05")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Thursday  */ "2019-12-05")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-11",
     )
-    apply( /* Friday    */ "2019-12-06")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Friday    */ "2019-12-06")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-11",
     )
-    apply( /* Saturday  */ "2019-12-07")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Saturday  */ "2019-12-07")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-11",
     )
-    apply( /* Sunday    */ "2019-12-08")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Sunday    */ "2019-12-08")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-11",
     )
-    apply( /* Monday    */ "2019-12-09")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Monday    */ "2019-12-09")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-18",
     )
-    apply( /* Tuesday   */ "2019-12-10")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Tuesday   */ "2019-12-10")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-18",
     )
-    apply( /* Wednesday */ "2019-12-11")("Wednesday").newSubscriptionEarliestStartDate.get should equalDate(
+    apply( /* Wednesday */ "2019-12-11")("Wednesday").newSubscriptionEarliestStartDate should equalDate(
       "2019-12-18",
     )
   }
 
   "THURSDAY HomeDeliveryFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
-    apply( /* Monday    */ "2019-12-02")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-05")
-    apply( /* Tuesday   */ "2019-12-03")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-12")
-    apply( /* Wednesday */ "2019-12-04")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-12")
-    apply( /* Thursday  */ "2019-12-05")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-12")
-    apply( /* Friday    */ "2019-12-06")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-12")
-    apply( /* Saturday  */ "2019-12-07")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-12")
-    apply( /* Sunday    */ "2019-12-08")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-12")
-    apply( /* Monday    */ "2019-12-09")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-12")
-    apply( /* Tuesday   */ "2019-12-10")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-19")
-    apply( /* Wednesday */ "2019-12-11")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-19")
-    apply( /* Thursday  */ "2019-12-12")("Thursday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-19")
+    apply( /* Monday    */ "2019-12-02")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-05")
+    apply( /* Tuesday   */ "2019-12-03")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-12")
+    apply( /* Wednesday */ "2019-12-04")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-12")
+    apply( /* Thursday  */ "2019-12-05")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-12")
+    apply( /* Friday    */ "2019-12-06")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-12")
+    apply( /* Saturday  */ "2019-12-07")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-12")
+    apply( /* Sunday    */ "2019-12-08")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-12")
+    apply( /* Monday    */ "2019-12-09")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-12")
+    apply( /* Tuesday   */ "2019-12-10")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-19")
+    apply( /* Wednesday */ "2019-12-11")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-19")
+    apply( /* Thursday  */ "2019-12-12")("Thursday").newSubscriptionEarliestStartDate should equalDate("2019-12-19")
   }
 
   "FRIDAY HomeDeliveryFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
-    apply( /* Tuesday   */ "2019-12-03")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-06")
-    apply( /* Wednesday */ "2019-12-04")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-13")
-    apply( /* Thursday  */ "2019-12-05")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-13")
-    apply( /* Friday    */ "2019-12-06")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-13")
-    apply( /* Saturday  */ "2019-12-07")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-13")
-    apply( /* Sunday    */ "2019-12-08")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-13")
-    apply( /* Monday    */ "2019-12-09")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-13")
-    apply( /* Tuesday   */ "2019-12-10")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-13")
-    apply( /* Wednesday */ "2019-12-11")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-20")
-    apply( /* Thursday  */ "2019-12-12")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-20")
-    apply( /* Friday    */ "2019-12-13")("Friday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-20")
+    apply( /* Tuesday   */ "2019-12-03")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-06")
+    apply( /* Wednesday */ "2019-12-04")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-13")
+    apply( /* Thursday  */ "2019-12-05")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-13")
+    apply( /* Friday    */ "2019-12-06")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-13")
+    apply( /* Saturday  */ "2019-12-07")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-13")
+    apply( /* Sunday    */ "2019-12-08")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-13")
+    apply( /* Monday    */ "2019-12-09")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-13")
+    apply( /* Tuesday   */ "2019-12-10")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-13")
+    apply( /* Wednesday */ "2019-12-11")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-20")
+    apply( /* Thursday  */ "2019-12-12")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-20")
+    apply( /* Friday    */ "2019-12-13")("Friday").newSubscriptionEarliestStartDate should equalDate("2019-12-20")
   }
 
   "SATURDAY HomeDeliveryFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
-    apply( /* Wednesday */ "2019-12-04")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-07")
-    apply( /* Thursday  */ "2019-12-05")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-14")
-    apply( /* Friday    */ "2019-12-06")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-14")
-    apply( /* Saturday  */ "2019-12-07")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-14")
-    apply( /* Sunday    */ "2019-12-08")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-14")
-    apply( /* Monday    */ "2019-12-09")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-14")
-    apply( /* Tuesday   */ "2019-12-10")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-14")
-    apply( /* Wednesday */ "2019-12-11")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-14")
-    apply( /* Thursday  */ "2019-12-12")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-21")
-    apply( /* Friday    */ "2019-12-13")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-21")
-    apply( /* Saturday  */ "2019-12-14")("Saturday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-21")
+    apply( /* Wednesday */ "2019-12-04")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-07")
+    apply( /* Thursday  */ "2019-12-05")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-14")
+    apply( /* Friday    */ "2019-12-06")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-14")
+    apply( /* Saturday  */ "2019-12-07")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-14")
+    apply( /* Sunday    */ "2019-12-08")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-14")
+    apply( /* Monday    */ "2019-12-09")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-14")
+    apply( /* Tuesday   */ "2019-12-10")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-14")
+    apply( /* Wednesday */ "2019-12-11")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-14")
+    apply( /* Thursday  */ "2019-12-12")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-21")
+    apply( /* Friday    */ "2019-12-13")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-21")
+    apply( /* Saturday  */ "2019-12-14")("Saturday").newSubscriptionEarliestStartDate should equalDate("2019-12-21")
   }
 
   "SUNDAY HomeDeliveryFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
-    apply( /* Wednesday */ "2019-12-04")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-08")
-    apply( /* Thursday  */ "2019-12-05")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-15")
-    apply( /* Friday    */ "2019-12-06")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-15")
-    apply( /* Saturday  */ "2019-12-07")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-15")
-    apply( /* Sunday    */ "2019-12-08")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-15")
-    apply( /* Monday    */ "2019-12-09")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-15")
-    apply( /* Tuesday   */ "2019-12-10")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-15")
-    apply( /* Wednesday */ "2019-12-11")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-15")
-    apply( /* Thursday  */ "2019-12-12")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-22")
-    apply( /* Friday    */ "2019-12-13")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-22")
-    apply( /* Saturday  */ "2019-12-14")("Sunday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-22")
+    apply( /* Wednesday */ "2019-12-04")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-08")
+    apply( /* Thursday  */ "2019-12-05")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-15")
+    apply( /* Friday    */ "2019-12-06")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-15")
+    apply( /* Saturday  */ "2019-12-07")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-15")
+    apply( /* Sunday    */ "2019-12-08")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-15")
+    apply( /* Monday    */ "2019-12-09")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-15")
+    apply( /* Tuesday   */ "2019-12-10")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-15")
+    apply( /* Wednesday */ "2019-12-11")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-15")
+    apply( /* Thursday  */ "2019-12-12")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-22")
+    apply( /* Friday    */ "2019-12-13")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-22")
+    apply( /* Saturday  */ "2019-12-14")("Sunday").newSubscriptionEarliestStartDate should equalDate("2019-12-22")
   }
 
 }
