@@ -1,8 +1,7 @@
 package com.gu.supporter.fulfilment
 
 import java.time.LocalDate
-
-import com.amazonaws.services.lambda.runtime.Context
+import com.gu.fulfilmentdates.FulfilmentDates
 import com.gu.fulfilmentdates.FulfilmentDatesLocation.fulfilmentDatesFileLocation
 import com.gu.util.config.Stage
 import com.gu.zuora.ZuoraProductTypes._
@@ -16,7 +15,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectResponse
 object Handler {
 
   def main(args: Array[String]): Unit =
-    println(new Handler().handle(None))
+    println(new Handler().writeDates(LocalDate.now, Stage("DEV")))
 
 }
 
@@ -26,23 +25,30 @@ class Handler extends Lambda[Option[String], String] with LazyLogging {
 
     val today = inputToDate(todayOverride)
 
+    Right(writeDates(today, Stage()))
+  }
+
+  private def writeDates(today: LocalDate, stage: Stage): String = {
     val englishBankHolidays: BankHolidays = GovUkBankHolidays().`england-and-wales`
 
     val datesForYesterdayThroughToAFortnight = (-1 to 14).map(_.toLong).map(today.plusDays)
 
     datesForYesterdayThroughToAFortnight.foreach { date =>
-      writeToBucket(GuardianWeekly, date, GuardianWeeklyFulfilmentDates(date).asJson.spaces2)
 
-      writeToBucket(NewspaperHomeDelivery, date, HomeDeliveryFulfilmentDates(date, englishBankHolidays).asJson.spaces2)
+      val writeToBucket = new BucketWrite(date, stage).writeToBucket _
 
-      writeToBucket(NewspaperVoucherBook, date, VoucherBookletFulfilmentDates(date).asJson.spaces2)
+      writeToBucket(GuardianWeekly, GuardianWeeklyFulfilmentDates(date))
 
-      writeToBucket(NewspaperDigitalVoucher, date, DigitalVoucherFulfilmentDates(date).asJson.spaces2)
+      writeToBucket(NewspaperHomeDelivery, HomeDeliveryFulfilmentDates(date, englishBankHolidays))
 
-      writeToBucket(NewspaperNationalDelivery, date, NationalDeliveryFulfilmentDates(date, englishBankHolidays).asJson.spaces2)
+      writeToBucket(NewspaperVoucherBook, VoucherBookletFulfilmentDates(date))
+
+      writeToBucket(NewspaperDigitalVoucher, DigitalVoucherFulfilmentDates(date))
+
+      writeToBucket(NewspaperNationalDelivery, NationalDeliveryFulfilmentDates(date, englishBankHolidays))
     }
 
-    Right(s"Generated Guardian Weekly, Home Delivery and Voucher dates for $datesForYesterdayThroughToAFortnight")
+    s"Generated Guardian Weekly, Home Delivery and Voucher dates for $datesForYesterdayThroughToAFortnight"
   }
 
   private def inputToDate(maybeTodayOverride: Option[String]): LocalDate = {
@@ -52,8 +58,10 @@ class Handler extends Lambda[Option[String], String] with LazyLogging {
     }
   }
 
-  private def writeToBucket(product: ZuoraProductType, date: LocalDate, content: String): PutObjectResponse = {
-    BucketHelpers.write(fulfilmentDatesFileLocation(Stage(), product, date), content)
+  class BucketWrite(date: LocalDate, stage: Stage) {
+    def writeToBucket(product: ZuoraProductType, content: Map[String, FulfilmentDates]): PutObjectResponse = {
+      BucketHelpers.write(fulfilmentDatesFileLocation(stage, product, date), content.asJson.spaces2)
+    }
   }
 
 }
