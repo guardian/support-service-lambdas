@@ -41,7 +41,7 @@ class WorkingDaysSpec extends AnyFlatSpec with Matchers with DateSupport {
   }
 
   "findWorkingDayBefore" should "find the previous working day for normal working days" in {
-    (LocalDate.parse( /* Monday    */ "2019-12-02")) should equalDate("2019-11-29")
+    findWorkingDayBefore(LocalDate.parse( /* Monday    */ "2019-12-02")) should equalDate("2019-11-29")
     findWorkingDayBefore(LocalDate.parse( /* Tuesday   */ "2019-12-03")) should equalDate("2019-12-02")
     findWorkingDayBefore(LocalDate.parse( /* Wednesday */ "2019-12-04")) should equalDate("2019-12-03")
     findWorkingDayBefore(LocalDate.parse( /* Thursday  */ "2019-12-05")) should equalDate("2019-12-04")
