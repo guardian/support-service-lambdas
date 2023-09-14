@@ -3,16 +3,18 @@ package com.gu.newproduct.api.productcatalog
 import java.time.DayOfWeek._
 import java.time.{DayOfWeek, LocalDate}
 import com.gu.i18n.Currency
+import com.gu.newproduct.ResourceLoader
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
 
+import java.net.URL
 import scala.io.Source
 import scala.util.Try
 
-class CatalogWireTest extends AnyFlatSpec with Matchers {
+class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
 
   val today = LocalDate.of(2019, 12, 1)
 
@@ -170,18 +172,6 @@ class CatalogWireTest extends AnyFlatSpec with Matchers {
       case (ProductType.NewspaperNationalDelivery, List(SATURDAY, SUNDAY)) =>
         LocalDate.of(2020, 4, 3)
     }
-  }
-
-  private def getResource(name: String): Option[String] = {
-    for {
-      resourceUrl <- Option(this.getClass.getResource(name))
-      resourceData <- {
-        val source = Source.fromURL(resourceUrl)
-        val maybeData = Try(source.getLines().mkString("\n")).toOption
-        source.close
-        maybeData
-      }
-    } yield resourceData
   }
 
 }
