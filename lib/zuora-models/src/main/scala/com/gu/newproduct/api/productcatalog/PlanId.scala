@@ -175,10 +175,16 @@ object PlanId {
     DigitalVoucherSixday,
     DigitalVoucherSixdayPlus,
   )
+  
+  val enabledNationalDeliveryPlans = List(
+    NationalDeliverySixday,
+    NationalDeliveryEveryday,
+    NationalDeliveryWeekend,
+  )
 
   val supportedPlans: List[PlanId] =
     enabledVoucherPlans ++ enabledSupporterPlusPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
-      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++ enabledDigitalVoucherPlans
+      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++ enabledDigitalVoucherPlans ++ enabledNationalDeliveryPlans
 
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }

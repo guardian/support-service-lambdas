@@ -121,7 +121,8 @@ object WireModel {
     implicit val writes = Json.writes[WireCatalog]
 
     def fromCatalog(
-        catalog: Map[PlanId, Plan],
+      catalog: Map[PlanId, Plan],
+      nationalDeliveryEnabled: Boolean,
     ) = {
 
       def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
@@ -177,16 +178,25 @@ object WireModel {
         enabledForDeliveryCountries = Some(List(Country.UK.name)),
       )
 
-      val availableProductsAndPlans = List(
-        supporterPlusProduct,
-        contributionProduct,
-        voucherProduct,
-        homeDeliveryProduct,
-        digipackProduct,
-        guardianWeeklyDomestic,
-        guardianWeeklyROW,
-        digitalVoucher,
-      ).filterNot(_.plans.isEmpty)
+      val nationalDelivery = WireProduct(
+        label = "National Delivery",
+        plans = PlanId.enabledNationalDeliveryPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = Some(List(Country.UK.name))
+      )
+
+      val availableProductsAndPlans = {
+        val unfiltered = List(
+          supporterPlusProduct,
+          contributionProduct,
+          voucherProduct,
+          homeDeliveryProduct,
+          digipackProduct,
+          guardianWeeklyDomestic,
+          guardianWeeklyROW,
+          digitalVoucher,
+        ) ++ (if (nationalDeliveryEnabled) List(nationalDelivery) else Nil)
+        unfiltered.filter(_.plans.nonEmpty)
+      }
 
       WireCatalog(availableProductsAndPlans)
     }
