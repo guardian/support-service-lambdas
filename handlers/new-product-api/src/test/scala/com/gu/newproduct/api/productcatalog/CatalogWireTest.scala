@@ -10,10 +10,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
 
-import java.net.URL
-import scala.io.Source
-import scala.util.Try
-
 class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
 
   val today = LocalDate.of(2019, 12, 1)
