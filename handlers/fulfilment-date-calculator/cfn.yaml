@@ -88,7 +88,7 @@ Resources:
       Code:
         S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/fulfilment-date-calculator/fulfilment-date-calculator.jar
-      Handler: com.gu.supporter.fulfilment.FulfilmentDateCalculator::handle
+      Handler: com.gu.supporter.fulfilment.Handler::handle
       Environment:
         Variables:
           Stage: !Ref Stage
