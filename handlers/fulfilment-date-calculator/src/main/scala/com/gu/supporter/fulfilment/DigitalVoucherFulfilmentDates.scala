@@ -13,7 +13,7 @@ import scala.collection.immutable.ListMap
 
 object DigitalVoucherFulfilmentDates {
 
-  private final val VoucherHolidayStopNoticePeriodDays: Int = 2
+  private final val VoucherHolidayStopNoticePeriodDays: Long = 2
   private final val FulfilmentCutoffDays: NonEmptyList[DayOfWeek] =
     NonEmptyList.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)
 

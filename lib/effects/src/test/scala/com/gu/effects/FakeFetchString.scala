@@ -91,7 +91,8 @@ object FakeFetchString {
       |    "deliveryAddressChangeEffectiveDate" : "${issueDate.minusDays(2)}",
       |    "holidayStopFirstAvailableDate" : "${issueDate.minusDays(3)}",
       |    "finalFulfilmentFileGenerationDate" : "${issueDate.minusDays(1)}",
-      |    "nextAffectablePublicationDateOnFrontCover" : "${issueDate}"
+      |    "nextAffectablePublicationDateOnFrontCover" : "${issueDate}",
+      |    "newSubscriptionEarliestStartDate": "${issueDate.minusDays(2)}"
       |  }
       |}
       |""".stripMargin

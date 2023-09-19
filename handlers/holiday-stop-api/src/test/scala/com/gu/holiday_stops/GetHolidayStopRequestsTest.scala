@@ -39,7 +39,7 @@ class GetHolidayStopRequestsTest extends AnyFlatSpec {
       holidayStopFirstAvailableDate = fulfilmentDatesFirstAvailableDate,
       holidayStopProcessorTargetDate = None,
       finalFulfilmentFileGenerationDate = None,
-      newSubscriptionEarliestStartDate = None,
+      newSubscriptionEarliestStartDate = fulfilmentDatesFirstAvailableDate,
     ),
   )
 
