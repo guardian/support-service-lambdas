@@ -1,0 +1,224 @@
+{
+  "Resources": {
+    "SfApiUserCredentialsSetterRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "SfApiUserCredentialsSetterPolicy",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "secretsmanager:ListSecrets",
+                    "secretsmanager:DescribeSecret",
+                    "secretsmanager:GetSecretValue",
+                    "secretsmanager:PutSecretValue",
+                    "secretsmanager:UpdateSecretVersionStage",
+                    "secretsmanager:CreateSecret"
+                  ],
+                  "Resource": "*",
+                  "Effect": "Allow"
+                },
+                {
+                  "Action": [
+                    "lambda:InvokeFunction",
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-api-user-credentials-setter-${Stage}:log-stream:*"
+                  },
+                  "Effect": "Allow"
+                }
+              ]
+            }
+          }
+        ],
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "SfApiUserCredentialsSetterLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "support-service-lambdas-dist",
+          "S3Key": {
+            "Fn::Sub": "membership/${Stage}/sf-api-user-credentials-setter/sf-api-user-credentials-setter.jar"
+          }
+        },
+        "FunctionName": {
+          "Fn::Sub": "sf-api-user-credentials-setter-${Stage}"
+        },
+        "MemorySize": 512,
+        "Environment": {
+          "Variables": {
+            "username": {
+              "Fn::Sub": [
+                "{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:username::${SecretsVersion}}}",
+                {
+                  "SecretsVersion": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "SecretsVersion"
+                    ]
+                  }
+                }
+              ]
+            },
+            "clientSecret": {
+              "Fn::Sub": [
+                "{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:clientSecret::${SecretsVersion}}}",
+                {
+                  "SecretsVersion": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "SecretsVersion"
+                    ]
+                  }
+                }
+              ]
+            },
+            "stageName": {
+              "Fn::Sub": [
+                "{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:stageName::${SecretsVersion}}}",
+                {
+                  "SecretsVersion": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "SecretsVersion"
+                    ]
+                  }
+                }
+              ]
+            },
+            "token": {
+              "Fn::Sub": [
+                "{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:token::${SecretsVersion}}}",
+                {
+                  "SecretsVersion": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "SecretsVersion"
+                    ]
+                  }
+                }
+              ]
+            },
+            "clientId": {
+              "Fn::Sub": [
+                "{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:clientId::${SecretsVersion}}}",
+                {
+                  "SecretsVersion": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "SecretsVersion"
+                    ]
+                  }
+                }
+              ]
+            },
+            "authUrl": {
+              "Fn::Sub": [
+                "{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:authUrl::${SecretsVersion}}}",
+                {
+                  "SecretsVersion": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "SecretsVersion"
+                    ]
+                  }
+                }
+              ]
+            },
+            "password": {
+              "Fn::Sub": [
+                "{{resolve:secretsmanager:${Stage}/Salesforce/User/AwsCredentialsSetter:SecretString:password::${SecretsVersion}}}",
+                {
+                  "SecretsVersion": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "SecretsVersion"
+                    ]
+                  }
+                }
+              ]
+            },
+            "Stage": {
+              "Ref": "Stage"
+            }
+          }
+        },
+        "Handler": "com.gu.sfapiusercredentialsetter.Main::handler",
+        "Role": {
+          "Fn::GetAtt": "SfApiUserCredentialsSetterRole.Arn"
+        },
+        "Timeout": 900,
+        "Runtime": "java8",
+        "Description": "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager."
+      },
+      "DependsOn": [
+        "SfApiUserCredentialsSetterRole"
+      ]
+    }
+  },
+  "Description": "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
+  "Parameters": {
+    "Stage": {
+      "Default": "DEV",
+      "Type": "String",
+      "Description": "Stage name",
+      "AllowedValues": [
+        "CODE",
+        "DEV"
+      ]
+    }
+  },
+  "Mappings": {
+    "StageMap": {
+      "CODE": {
+        "SecretsVersion": "84f470bf-a9e5-40a7-a044-6b91dcae7670"
+      },
+      "DEV": {
+        "SecretsVersion": "10741350-3232-40ba-8713-7728bc180170"
+      }
+    }
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "Description": "Remove Billing Accounts and related records from SF",
+  "Parameters": {
+    "Stage": {
+      "Description": "Stage name",
+      "Type": "String"
+    }
+  },
+  "Mappings": {
+    "StageMap": {
+      "CODE": {
+        "SalesforceUrl": "https://test.salesforce.com",
+        "SalesforceConnectedApp": "AwsConnectorSandbox",
+        "SalesforceUser": "BillingAccountRemoverAPIUser",
+        "ZuoraUrl": "https://rest.apisandbox.zuora.com",
+        "ZuoraAccount": "SfSaves",
+        "Schedule": "cron(00 07 * * ? *)"
+      },
+      "PROD": {
+        "SalesforceUrl": "https://gnmtouchpoint.my.salesforce.com",
+        "SalesforceConnectedApp": "BillingAccountRemover",
+        "SalesforceUser": "BillingAccountRemoverAPIUser",
+        "ZuoraUrl": "https://rest.zuora.com",
+        "ZuoraAccount": "SupportServiceLambdas",
+        "Schedule": "cron(00 04,05,06,07,08,09,10 * * ? *)"
+      }
+    }
+  },
+  "Resources": {
+    "SFBillingAccountRemoverRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "SFBillingAccountRemoverPolicy",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction",
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-billing-account-remover-${Stage}:log-stream:*"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "ReadFromSecretsManagerPolicy",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:DescribeSecret",
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": [
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/SubscriptionsZuoraApi-XW49AL",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/SupportServiceLambdas-WeibUa",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "SFBillingAccountRemoverLambda": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": [
+        "SFBillingAccountRemoverRole"
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "support-service-lambdas-dist",
+          "S3Key": {
+            "Fn::Sub": "membership/${Stage}/sf-billing-account-remover/sf-billing-account-remover.jar"
+          }
+        },
+        "Description": "Remove Billing Accounts and related records from Salesforce (via Zuora)",
+        "FunctionName": {
+          "Fn::Sub": "sf-billing-account-remover-${Stage}"
+        },
+        "Handler": "com.gu.sf_billing_account_remover.BillingAccountRemover::lambda",
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": "SFBillingAccountRemoverRole.Arn"
+        },
+        "Runtime": "java11",
+        "Timeout": 900,
+        "Environment": {
+          "Variables": {
+            "Stage": {
+              "Ref": "Stage"
+            },
+            "authUrl": {
+              "Fn::FindInMap": [
+                "StageMap",
+                {
+                  "Ref": "Stage"
+                },
+                "SalesforceUrl"
+              ]
+            },
+            "zuoraInstanceUrl": {
+              "Fn::FindInMap": [
+                "StageMap",
+                {
+                  "Ref": "Stage"
+                },
+                "ZuoraUrl"
+              ]
+            }
+          }
+        },
+        "Tags": [
+          {
+            "Key": "lambda:createdBy",
+            "Value": "SAM"
+          }
+        ]
+      }
+    },
+    "SFBillingAccountRemoverLambdaScheduledRun": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "Runs BillingAccountRemover",
+        "ScheduleExpression": {
+          "Fn::FindInMap": [
+            "StageMap",
+            {
+              "Ref": "Stage"
+            },
+            "Schedule"
+          ]
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SFBillingAccountRemoverLambda",
+                "Arn"
+              ]
+            },
+            "Id": "SFBillingAccountRemoverLambdaScheduledRunLambdaTarget"
+          }
+        ]
+      }
+    },
+    "SFBillingAccountRemoverLambdaScheduledRunPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "SFBillingAccountRemoverLambda"
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "SFBillingAccountRemoverLambdaScheduledRun",
+            "Arn"
+          ]
+        }
+      }
+    }
+  }
+}

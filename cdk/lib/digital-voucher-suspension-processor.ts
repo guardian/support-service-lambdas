@@ -6,7 +6,7 @@ import { CfnInclude } from "aws-cdk-lib/cloudformation-include";
 export class DigitalVoucherSuspensionProcessor extends GuStack {
     constructor(scope: App, id: string, props: GuStackProps) {
         super(scope, id, props);
-        const yamlTemplateFilePath = `${__dirname}/../../handlers/digital-voucher-suspension-processor/cfn.yaml`;
+        const yamlTemplateFilePath = `${__dirname}/../../handlers/digital-voucher-suspension-processor/cfn-processed.yaml`;
         new CfnInclude(this, "YamlTemplate", {
             templateFile: yamlTemplateFilePath,
         });

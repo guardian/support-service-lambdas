@@ -1,0 +1,260 @@
+{
+  "Description": "Suspends fulfilment of digital voucher subscriptions. Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor\n",
+  "Parameters": {
+    "Stage": {
+      "Description": "Stage name",
+      "Type": "String",
+      "AllowedValues": [
+        "PROD",
+        "CODE"
+      ],
+      "Default": "CODE"
+    }
+  },
+  "Mappings": {
+    "StageMap": {
+      "CODE": {
+        "SalesforceUrl": "https://test.salesforce.com",
+        "SalesforceConnectedApp": "AwsConnectorSandbox",
+        "ImovoUrlVersion": 1
+      },
+      "PROD": {
+        "SalesforceUrl": "https://gnmtouchpoint.my.salesforce.com",
+        "SalesforceConnectedApp": "TouchpointUpdate",
+        "ImovoUrlVersion": 3
+      }
+    }
+  },
+  "Resources": {
+    "SuspensionLambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "digital-voucher-suspension-processor"
+          },
+          {
+            "Key": "Stage",
+            "Value": {
+              "Ref": "Stage"
+            }
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership"
+          }
+        ],
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "SuspensionLambdaPolicy",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction",
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/digital-voucher-suspension-processor-${Stage}:log-stream:*"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "ReadFromSecretsManagerPolicy",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:DescribeSecret",
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": [
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/MembersDataAPI-1wX7Rg",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Imovo-MZGuf9",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Imovo-HU0Qij"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "LambdaLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "DependsOn": "SuspensionLambda",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/digital-voucher-suspension-processor-${Stage}"
+        },
+        "RetentionInDays": 90
+      }
+    },
+    "LambdaAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "DependsOn": "SuspensionLambda",
+      "Condition": "IsProd",
+      "Properties": {
+        "AlarmName": "URGENT 9-5 - PROD: Failed to suspend digital voucher subscriptions",
+        "AlarmDescription": "IMPACT: If this goes unaddressed at least one subscription that was supposed to be suspended will be fulfilled. For troubleshooting, see https://github.com/guardian/support-service-lambdas/blob/main/handlers/digital-voucher-suspension-processor/README.md.\n",
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev"
+          }
+        ],
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "SuspensionLambda"
+            }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 3,
+        "TreatMissingData": "ignore"
+      }
+    },
+    "LambdaScheduleRule": {
+      "Type": "AWS::Events::Rule",
+      "DependsOn": "SuspensionLambda",
+      "Properties": {
+        "Description": "Triggers hourly processing of digital voucher suspensions.",
+        "ScheduleExpression": "rate(1 hour)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": "SuspensionLambda.Arn"
+            },
+            "Id": {
+              "Ref": "SuspensionLambda"
+            },
+            "Input": "null"
+          }
+        ]
+      }
+    },
+    "LambdaSchedulePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "DependsOn": [
+        "SuspensionLambda",
+        "LambdaScheduleRule"
+      ],
+      "Properties": {
+        "Action": "lambda:invokeFunction",
+        "FunctionName": {
+          "Ref": "SuspensionLambda"
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": "LambdaScheduleRule.Arn"
+        }
+      }
+    },
+    "SuspensionLambda": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": [
+        "SuspensionLambdaRole"
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "support-service-lambdas-dist",
+          "S3Key": {
+            "Fn::Sub": "membership/${Stage}/digital-voucher-suspension-processor/digital-voucher-suspension-processor.jar"
+          }
+        },
+        "Description": "Suspends fulfilment of digital voucher subscriptions. Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor.\n",
+        "FunctionName": {
+          "Fn::Sub": "digital-voucher-suspension-processor-${Stage}"
+        },
+        "Handler": "com.gu.digitalvouchersuspensionprocessor.Handler::handleRequest",
+        "MemorySize": 1536,
+        "Role": {
+          "Fn::GetAtt": [
+            "SuspensionLambdaRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "java11",
+        "Timeout": 900,
+        "Environment": {
+          "Variables": {
+            "stage": {
+              "Ref": "Stage"
+            },
+            "salesforceUrl": {
+              "Fn::FindInMap": [
+                "StageMap",
+                {
+                  "Ref": "Stage"
+                },
+                "SalesforceUrl"
+              ]
+            },
+            "imovoUrl": {
+              "Fn::Sub": [
+                "{{resolve:ssm:/${Stage}/membership/support-service-lambdas-shared-imovo/imovoBaseUrl:${Version}}}",
+                {
+                  "Version": {
+                    "Fn::FindInMap": [
+                      "StageMap",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "ImovoUrlVersion"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "Tags": [
+          {
+            "Key": "lambda:createdBy",
+            "Value": "SAM"
+          }
+        ]
+      }
+    }
+  },
+  "Conditions": {
+    "IsProd": {
+      "Fn::Equals": [
+        {
+          "Ref": "Stage"
+        },
+        "PROD"
+      ]
+    }
+  }
+}

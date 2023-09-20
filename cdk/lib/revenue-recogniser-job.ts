@@ -6,7 +6,7 @@ import { CfnInclude } from "aws-cdk-lib/cloudformation-include";
 export class RevenueRecogniserJob extends GuStack {
     constructor(scope: App, id: string, props: GuStackProps) {
         super(scope, id, props);
-        const yamlTemplateFilePath = `${__dirname}/../../handlers/revenue-recogniser-job/cfn.yaml`;
+        const yamlTemplateFilePath = `${__dirname}/../../handlers/revenue-recogniser-job/cfn-processed.yaml`;
         new CfnInclude(this, "YamlTemplate", {
             templateFile: yamlTemplateFilePath,
         });

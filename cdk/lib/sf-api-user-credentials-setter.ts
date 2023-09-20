@@ -6,7 +6,7 @@ import { CfnInclude } from "aws-cdk-lib/cloudformation-include";
 export class SfApiUserCredentialsSetter extends GuStack {
     constructor(scope: App, id: string, props: GuStackProps) {
         super(scope, id, props);
-        const yamlTemplateFilePath = `${__dirname}/../../handlers/sf-api-user-credentials-setter/cfn.yaml`;
+        const yamlTemplateFilePath = `${__dirname}/../../handlers/sf-api-user-credentials-setter/cfn-processed.yaml`;
         new CfnInclude(this, "YamlTemplate", {
             templateFile: yamlTemplateFilePath,
         });

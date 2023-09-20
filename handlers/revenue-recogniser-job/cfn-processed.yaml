@@ -1,0 +1,342 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Lambda for distributing revenue on a regular basis",
+  "Parameters": {
+    "Stage": {
+      "Description": "Stage name",
+      "Type": "String",
+      "AllowedValues": [
+        "PROD",
+        "CODE"
+      ],
+      "Default": "CODE"
+    }
+  },
+  "Mappings": {
+    "Stages": {
+      "Schedule": {
+        "CODE": "rate(365 days)",
+        "PROD": "rate(12 hours)"
+      }
+    },
+    "Constants": {
+      "Alarm": {
+        "Process": "See the docs at https://github.com/guardian/support-service-lambdas/tree/main/handlers/revenue-recogniser-job"
+      }
+    }
+  },
+  "Resources": {
+    "LambdaLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "DependsOn": "LambdaFunction",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/revenue-recogniser-job-${Stage}"
+        },
+        "RetentionInDays": 90
+      }
+    },
+    "NotRunningAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Condition": "ProdOnlyResource",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev"
+          }
+        ],
+        "AlarmName": {
+          "Fn::Join": [
+            " ",
+            [
+              "non urgent -",
+              "revenue recogniser job is not running"
+            ]
+          ]
+        },
+        "AlarmDescription": {
+          "Fn::Join": [
+            " ",
+            [
+              "Impact - Accounts team will not see all revenue correctly for manually recognised subs",
+              {
+                "Fn::FindInMap": [
+                  "Constants",
+                  "Alarm",
+                  "Process"
+                ]
+              }
+            ]
+          ]
+        },
+        "Metrics": [
+          {
+            "Id": "total",
+            "Expression": "FILL(m1,0)",
+            "Label": "RunCount"
+          },
+          {
+            "Id": "m1",
+            "ReturnData": false,
+            "MetricStat": {
+              "Metric": {
+                "Namespace": "support-service-lambdas",
+                "MetricName": "job-succeeded",
+                "Dimensions": [
+                  {
+                    "Name": "Stage",
+                    "Value": {
+                      "Ref": "Stage"
+                    }
+                  },
+                  {
+                    "Name": "app",
+                    "Value": "revenue-recogniser-job"
+                  }
+                ]
+              },
+              "Stat": "Sum",
+              "Period": 3600,
+              "Unit": "Count"
+            }
+          }
+        ],
+        "ComparisonOperator": "LessThanThreshold",
+        "Threshold": 1,
+        "EvaluationPeriods": 24,
+        "TreatMissingData": "breaching"
+      }
+    },
+    "FailedRecognitionAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Condition": "ProdOnlyResource",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev"
+          }
+        ],
+        "AlarmName": {
+          "Fn::Join": [
+            " ",
+            [
+              "non urgent -",
+              "revenue recogniser job could not process a record"
+            ]
+          ]
+        },
+        "AlarmDescription": {
+          "Fn::Join": [
+            " ",
+            [
+              "Impact - Accounts team will not see all revenue correctly for manually recognised subs",
+              {
+                "Fn::FindInMap": [
+                  "Constants",
+                  "Alarm",
+                  "Process"
+                ]
+              }
+            ]
+          ]
+        },
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": {
+              "Ref": "Stage"
+            }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "could-not-recognise-revenue",
+        "Namespace": "support-service-lambdas",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching"
+      }
+    },
+    "LambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "support-service-lambdas-dist",
+          "S3Key": {
+            "Fn::Sub": "membership/${Stage}/revenue-recogniser-job/revenue-recogniser-job.jar"
+          }
+        },
+        "Description": "Recognises unrecognised revenue in Zuora",
+        "FunctionName": {
+          "Fn::Sub": "revenue-recogniser-job-${Stage}"
+        },
+        "Handler": "com.gu.recogniser.Handler::handleRequest",
+        "MemorySize": 2048,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "java11",
+        "Timeout": 900,
+        "Environment": {
+          "Variables": {
+            "Stage": {
+              "Ref": "Stage"
+            }
+          }
+        },
+        "Tags": [
+          {
+            "Key": "lambda:createdBy",
+            "Value": "SAM"
+          }
+        ]
+      }
+    },
+    "LambdaFunctionEventInvokeConfig": {
+      "Type": "AWS::Lambda::EventInvokeConfig",
+      "Properties": {
+        "DestinationConfig": {},
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "MaximumRetryAttempts": 2,
+        "Qualifier": "$LATEST"
+      }
+    },
+    "LambdaFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              }
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "LambdaFunctionRolePolicy0",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/revenue-recogniser-job-${Stage}:log-stream:*"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "LambdaFunctionRolePolicy1",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "s3:GetObject",
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "LambdaFunctionRolePolicy2",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "cloudwatch:PutMetricData",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "lambda:createdBy",
+            "Value": "SAM"
+          }
+        ]
+      }
+    },
+    "LambdaFunctionRerunTests": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "Recognises unrecognised revenue in Zuora",
+        "ScheduleExpression": {
+          "Fn::FindInMap": [
+            "Stages",
+            "Schedule",
+            {
+              "Ref": "Stage"
+            }
+          ]
+        },
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaFunction",
+                "Arn"
+              ]
+            },
+            "Id": "LambdaFunctionRerunTestsLambdaTarget"
+          }
+        ]
+      }
+    },
+    "LambdaFunctionRerunTestsPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "LambdaFunctionRerunTests",
+            "Arn"
+          ]
+        }
+      }
+    }
+  },
+  "Conditions": {
+    "ProdOnlyResource": {
+      "Fn::Equals": [
+        {
+          "Ref": "Stage"
+        },
+        "PROD"
+      ]
+    }
+  }
+}
