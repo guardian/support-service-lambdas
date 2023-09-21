@@ -2,6 +2,8 @@ package com.gu.delivery_records_api
 
 import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
+import com.gu.delivery_records_api.service.createproblem.CreateDeliveryProblemServiceImpl
+import com.gu.delivery_records_api.service.getrecords.GetDeliveryRecordsServiceImpl
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.Stage
@@ -33,16 +35,20 @@ object DeliveryRecordsApiApp extends LazyLogging {
     for {
       salesforceClient <- SalesforceClient(sttpBackend, config)
         .leftMap(error => DeliveryRecordsApiError(error.toString))
-    } yield createLogging()(new DeliveryRecordApiRoutes(new DeliveryRecordsServiceImpl(salesforceClient)).routes)
+    } yield {
+      val create = new CreateDeliveryProblemServiceImpl(salesforceClient)
+      val get = new GetDeliveryRecordsServiceImpl(salesforceClient)
+      val routes = new DeliveryRecordApiRoutes(create, get).routes
+      addRequestLogging(routes)
+    }
 
-  private def createLogging(): HttpRoutes[IO] => HttpRoutes[IO] = {
+  private def addRequestLogging(routes: HttpRoutes[IO]): HttpRoutes[IO] =
     Logger.httpRoutes(
       logHeaders = true,
       logBody = true,
       redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey.value == "x-api-key" },
       logAction = Some({ message: String => IO.delay(logger.info(message)) }),
-    )
-  }
+    )(routes)
 
   private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiError, SFAuthConfig] = {
     ConfigLoader

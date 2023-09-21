@@ -1,76 +1,73 @@
 package com.gu.delivery_records_api
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.effect.Effect
-import org.http4s.{EntityEncoder, HttpRoutes, Request, Response}
-import io.circe.generic.auto._
-import org.http4s.circe.CirceEntityEncoder._
 import cats.syntax.all._
+import com.gu.delivery_records_api.service.createproblem.{CreateDeliveryProblem, CreateDeliveryProblemService}
+import com.gu.delivery_records_api.service.getrecords.{DeliveryRecordsApiResponse, GetDeliveryRecordsService}
+import com.gu.delivery_records_api.service.{DeliveryRecordServiceGenericError, DeliveryRecordServiceSubscriptionNotFound}
 import com.gu.salesforce.{Contact, SalesforceHandlerSupport}
-import org.http4s.dsl.Http4sDsl
+import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
+import org.http4s.circe.CirceEntityEncoder._
+import org.http4s.dsl.Http4sDsl
+import org.http4s.{HttpRoutes, Request, Response}
+
+import java.time.LocalDate
 
 case class DeliveryRecordApiRoutesError(message: String)
 
-class DeliveryRecordApiRoutes[F[_]: Effect](deliveryRecordsService: DeliveryRecordsService[F]) {
+class DeliveryRecordApiRoutes[F[_]: Effect](createDeliveryProblemService: CreateDeliveryProblemService[F], getDeliveryRecordsService: GetDeliveryRecordsService[F]) {
 
   private object http4sDsl extends Http4sDsl[F]
   import http4sDsl._
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
 
-    case request @ GET -> Root / "delivery-records" / subscriptionNumber =>
-      toResponse(
-        for {
-          contact <- getContactFromHeaders(request)
-          startDate <- parseDateFromQueryString(request, "startDate")
-          endDate <- parseDateFromQueryString(request, "endDate")
-          records <- getDeliveryRecords(
-            subscriptionNumber,
-            contact,
-            startDate,
-            endDate,
-            None,
-          )
-        } yield records,
-      )
+    case request @ GET -> Root / "delivery-records" / subscriptionNumber => (
+      for {
+        contact <- getContactFromHeaders(request)
+        startDate <- parseDateFromQueryString(request, "startDate")
+        endDate <- parseDateFromQueryString(request, "endDate")
+        records <- getDeliveryRecords(
+          subscriptionNumber,
+          contact,
+          startDate,
+          endDate,
+          None,
+        )
+      } yield Ok(records)).merge.flatten
 
-    case request @ GET -> Root / "delivery-records" / subscriptionNumber / "cancel" =>
-      toResponse(
-        for {
-          contact <- getContactFromHeaders(request)
-          cancellationEffectiveDate <- parseDateFromQueryString(request, "effectiveCancellationDate")
-          records <- getDeliveryRecords(
-            subscriptionNumber,
-            contact,
-            None,
-            None,
-            cancellationEffectiveDate,
-          )
-        } yield records,
-      )
+    case request @ GET -> Root / "delivery-records" / subscriptionNumber / "cancel" => (
+      for {
+        contact <- getContactFromHeaders(request)
+        cancellationEffectiveDate <- parseDateFromQueryString(request, "effectiveCancellationDate")
+        records <- getDeliveryRecords(
+          subscriptionNumber,
+          contact,
+          None,
+          None,
+          cancellationEffectiveDate,
+        )
+      } yield Ok(records)).merge.flatten
 
-    case request @ POST -> Root / "delivery-records" / subscriptionNumber =>
-      toResponse(
-        for {
-          contact <- getContactFromHeaders(request)
-          body <- request
-            .attemptAs[CreateDeliveryProblem]
-            .leftMap(error => BadRequest(DeliveryRecordApiRoutesError(error.getMessage)))
-          _ <- deliveryRecordsService
-            .createDeliveryProblemForSubscription(subscriptionNumber, contact, body)
-            .leftMap(InternalServerError(_))
-          records <- getDeliveryRecords(
-            subscriptionNumber,
-            contact,
-            None,
-            None,
-            None,
-          )
-        } yield records,
-      )
+    case request @ POST -> Root / "delivery-records" / subscriptionNumber => (
+      for {
+        contact <- getContactFromHeaders(request)
+        body <- request
+          .attemptAs[CreateDeliveryProblem]
+          .leftMap(error => BadRequest(DeliveryRecordApiRoutesError(error.getMessage)))
+        _ <- createDeliveryProblemService
+          .createDeliveryProblemForSubscription(subscriptionNumber, contact, body)
+          .leftMap(InternalServerError(_))
+        records <- getDeliveryRecords(
+          subscriptionNumber,
+          contact,
+          None,
+          None,
+          None,
+        )
+      } yield Ok(records)).merge.flatten
 
   }
 
@@ -92,7 +89,7 @@ class DeliveryRecordApiRoutes[F[_]: Effect](deliveryRecordsService: DeliveryReco
     optionalEndDate: Option[LocalDate],
     optionalCancellationEffectiveDate: Option[LocalDate],
   ): EitherT[F, F[Response[F]], DeliveryRecordsApiResponse] =
-    deliveryRecordsService
+    getDeliveryRecordsService
       .getDeliveryRecordsForSubscription(
         subscriptionNumber,
         contact,
@@ -125,11 +122,5 @@ class DeliveryRecordApiRoutes[F[_]: Effect](deliveryRecordsService: DeliveryReco
           )
           .toEitherT
       }
-
-  private def toResponse[A](result: EitherT[F, F[Response[F]], A])(implicit enc: EntityEncoder[F, A]): F[Response[F]] =
-    result.map(Ok(_)).merge.flatten
-
-}
-object DeliveryRecordApiRoutes {
 
 }
