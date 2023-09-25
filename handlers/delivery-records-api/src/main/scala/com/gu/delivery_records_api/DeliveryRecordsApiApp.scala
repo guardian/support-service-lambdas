@@ -1,7 +1,9 @@
 package com.gu.delivery_records_api
 
 import cats.data.EitherT
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
+import com.gu.delivery_records_api.service.createproblem.CreateDeliveryProblemServiceImpl
+import com.gu.delivery_records_api.service.getrecords.GetDeliveryRecordsServiceImpl
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.Stage
@@ -18,33 +20,35 @@ final case class DeliveryRecordsApiError(message: String)
 
 object DeliveryRecordsApiApp extends LazyLogging {
 
-  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
+  private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
-  def apply(sttpBackend: SttpBackend[IO, Any]): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
+  def buildHttpRoutes(sttpBackend: SttpBackend[IO, Any]): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] =
     for {
       config <- loadSalesforceConfig()
-      app <- DeliveryRecordsApiApp(config, sttpBackend)
+      app <- DeliveryRecordsApiApp.httpRoutesFromConfig(config, sttpBackend)
     } yield app
-  }
 
-  def apply[S](
+  def httpRoutesFromConfig[S](
       config: SFAuthConfig,
       sttpBackend: SttpBackend[IO, S],
-  ): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
+  ): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] =
     for {
       salesforceClient <- SalesforceClient(sttpBackend, config)
         .leftMap(error => DeliveryRecordsApiError(error.toString))
-    } yield createLogging()(DeliveryRecordApiRoutes(DeliveryRecordsService(salesforceClient)))
-  }
+    } yield {
+      val create = new CreateDeliveryProblemServiceImpl(salesforceClient)
+      val get = new GetDeliveryRecordsServiceImpl(salesforceClient)
+      val routes = new DeliveryRecordApiRoutes(create, get).routes
+      addRequestLogging(routes)
+    }
 
-  def createLogging(): HttpRoutes[IO] => HttpRoutes[IO] = {
+  private def addRequestLogging(routes: HttpRoutes[IO]): HttpRoutes[IO] =
     Logger.httpRoutes(
       logHeaders = true,
       logBody = true,
       redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey.value == "x-api-key" },
       logAction = Some({ message: String => IO.delay(logger.info(message)) }),
-    )
-  }
+    )(routes)
 
   private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiError, SFAuthConfig] = {
     ConfigLoader
