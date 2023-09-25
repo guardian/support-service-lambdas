@@ -22,7 +22,7 @@ object SendConfirmationEmail extends Logging {
     sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending email sqs message")
   } yield sendMessageResult
 
-  def toPayload[DATA <: EmailData](sfContactId: Option[SfContactId], emailData: DATA): ApiGatewayOp[ETPayload[DATA]] =
+  private def toPayload[DATA <: EmailData](sfContactId: Option[SfContactId], emailData: DATA): ApiGatewayOp[ETPayload[DATA]] =
     emailData.contacts.billTo.email match {
       case Some(email) =>
         val payload = ETPayload(
@@ -39,7 +39,7 @@ object SendConfirmationEmail extends Logging {
         ReturnWithResponse(response)
     }
 
-  def dataExtensionFor(plan: Plan) = DataExtensionName(
+  private def dataExtensionFor(plan: Plan): DataExtensionName = DataExtensionName(
     plan.id match {
       case _: DigitalVoucherPlanId => "paper-subscription-card" // SV_SC_WelcomeDay0
       case _: VoucherPlanId => "paper-voucher"
@@ -49,6 +49,7 @@ object SendConfirmationEmail extends Logging {
       case _: HomeDeliveryPlanId => "paper-delivery"
       case _: GuardianWeeklyDomestic => "guardian-weekly"
       case _: GuardianWeeklyRow => "guardian-weekly"
+      case _: NationalDeliveryPlanId => "paper-national-delivery" // TODO membership-workflow and braze
     },
   )
 }

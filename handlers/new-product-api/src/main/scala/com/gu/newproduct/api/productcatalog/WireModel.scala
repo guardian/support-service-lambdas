@@ -1,11 +1,11 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.{DayOfWeek, LocalDate}
-
-import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
+import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAddressValidator
 import play.api.libs.json.{JsString, Json, Writes}
+
+import java.time.{DayOfWeek, LocalDate}
 
 object WireModel {
 
@@ -121,11 +121,12 @@ object WireModel {
     implicit val writes = Json.writes[WireCatalog]
 
     def fromCatalog(
-        catalog: Catalog,
+      catalog: Map[PlanId, Plan],
+      nationalDeliveryEnabled: Boolean,
     ) = {
 
       def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
-        val plan = catalog.planForId(planId)
+        val plan = catalog(planId)
         WirePlanInfo.fromPlan(plan)
       }
 
@@ -177,16 +178,25 @@ object WireModel {
         enabledForDeliveryCountries = Some(List(Country.UK.name)),
       )
 
-      val availableProductsAndPlans = List(
-        supporterPlusProduct,
-        contributionProduct,
-        voucherProduct,
-        homeDeliveryProduct,
-        digipackProduct,
-        guardianWeeklyDomestic,
-        guardianWeeklyROW,
-        digitalVoucher,
-      ).filterNot(_.plans.isEmpty)
+      val nationalDelivery = WireProduct(
+        label = "National Delivery",
+        plans = PlanId.enabledNationalDeliveryPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = Some(List(Country.UK.name))
+      )
+
+      val availableProductsAndPlans = {
+        val unfiltered = List(
+          supporterPlusProduct,
+          contributionProduct,
+          voucherProduct,
+          homeDeliveryProduct,
+          digipackProduct,
+          guardianWeeklyDomestic,
+          guardianWeeklyROW,
+          digitalVoucher,
+        ) ++ (if (nationalDeliveryEnabled) List(nationalDelivery) else Nil)
+        unfiltered.filter(_.plans.nonEmpty)
+      }
 
       WireCatalog(availableProductsAndPlans)
     }

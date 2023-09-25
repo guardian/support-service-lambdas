@@ -1,29 +1,19 @@
 package com.gu.newproduct.api.addsubscription
 
-import java.io.{InputStream, OutputStream}
-import java.time.LocalDateTime
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.sqs.{AwsSQSSend, SqsAsync}
 import com.gu.effects.sqs.AwsSQSSend.{EmailQueueName, QueueName}
+import com.gu.effects.sqs.{AwsSQSSend, SqsAsync}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.digipack.DigipackAddressValidator
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{
-  GuardianWeeklyDomesticAddressValidator,
-  GuardianWeeklyROWAddressValidator,
-}
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GuardianWeeklyDomesticAddressValidator, GuardianWeeklyROWAddressValidator}
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
-import com.gu.newproduct.api.productcatalog.PlanId.{
-  GuardianWeeklyDomestic6for6,
-  GuardianWeeklyDomesticQuarterly,
-  GuardianWeeklyROW6for6,
-  GuardianWeeklyROWQuarterly,
-}
+import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROW6for6, GuardianWeeklyROWQuarterly}
 import com.gu.newproduct.api.productcatalog._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -36,6 +26,8 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 
+import java.io.{InputStream, OutputStream}
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 object Handler extends Logging {
@@ -73,6 +65,7 @@ object Steps {
       case _: GuardianWeeklyDomestic => addGuardianWeeklyDomesticSub(request)
       case _: GuardianWeeklyRow => addGuardianWeeklyROWSub(request)
       case _: DigitalVoucherPlanId => addPaperSub(request)
+      case _: NationalDeliveryPlanId => addPaperSub(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
@@ -102,7 +95,7 @@ object Steps {
       catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, currentDate())
 
       isValidStartDateForPlan = Function.uncurried(
-        catalog.planForId andThen { plan =>
+        catalog andThen { plan =>
           StartDateValidator.fromRule(validatorFor, plan.startDateRules)
         },
       )

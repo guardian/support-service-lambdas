@@ -4,97 +4,6 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.i18n.Currency
 
-case class Catalog(
-    voucherWeekend: Plan,
-    voucherSaturday: Plan,
-    voucherSunday: Plan,
-    voucherEveryDay: Plan,
-    voucherSixDay: Plan,
-    voucherWeekendPlus: Plan,
-    voucherSaturdayPlus: Plan,
-    voucherSundayPlus: Plan,
-    voucherEveryDayPlus: Plan,
-    voucherSixDayPlus: Plan,
-    monthlySupporterPlus: Plan,
-    annualSupporterPlus: Plan,
-    monthlyContribution: Plan,
-    annualContribution: Plan,
-    homeDeliveryEveryDay: Plan,
-    homeDeliverySixDay: Plan,
-    homeDeliveryWeekend: Plan,
-    homeDeliverySunday: Plan,
-    homeDeliverySaturday: Plan,
-    homeDeliveryEveryDayPlus: Plan,
-    homeDeliverySixDayPlus: Plan,
-    homeDeliveryWeekendPlus: Plan,
-    homeDeliverySundayPlus: Plan,
-    homeDeliverySaturdayPlus: Plan,
-    digipackAnnual: Plan,
-    digipackMonthly: Plan,
-    guardianWeeklyDomesticSixForSix: Plan,
-    guardianWeeklyDomesticQuarterly: Plan,
-    guardianWeeklyDomesticAnnual: Plan,
-    guardianWeeklyROWSixForSix: Plan,
-    guardianWeeklyROWQuarterly: Plan,
-    guardianWeeklyROWAnnual: Plan,
-    digitalVoucherWeekend: Plan,
-    digitalVoucherWeekendPlus: Plan,
-    digitalVoucherEveryday: Plan,
-    digitalVoucherEverydayPlus: Plan,
-    digitalVoucherSaturday: Plan,
-    digitalVoucherSaturdayPlus: Plan,
-    digitalVoucherSunday: Plan,
-    digitalVoucherSundayPlus: Plan,
-    digitalVoucherSixday: Plan,
-    digitalVoucherSixdayPlus: Plan,
-) {
-  val allPlans = List(
-    voucherWeekend,
-    voucherSaturday,
-    voucherSunday,
-    voucherEveryDay,
-    voucherSixDay,
-    voucherWeekendPlus,
-    voucherSaturdayPlus,
-    voucherSundayPlus,
-    voucherEveryDayPlus,
-    voucherSixDayPlus,
-    monthlyContribution,
-    annualContribution,
-    monthlySupporterPlus,
-    annualSupporterPlus,
-    homeDeliveryEveryDay,
-    homeDeliverySixDay,
-    homeDeliverySunday,
-    homeDeliverySaturday,
-    homeDeliveryWeekend,
-    homeDeliveryEveryDayPlus,
-    homeDeliverySixDayPlus,
-    homeDeliveryWeekendPlus,
-    homeDeliverySundayPlus,
-    homeDeliverySaturdayPlus,
-    digipackAnnual,
-    digipackMonthly,
-    guardianWeeklyDomesticSixForSix,
-    guardianWeeklyDomesticQuarterly,
-    guardianWeeklyDomesticAnnual,
-    guardianWeeklyROWSixForSix,
-    guardianWeeklyROWQuarterly,
-    guardianWeeklyROWAnnual,
-    digitalVoucherWeekend,
-    digitalVoucherWeekendPlus,
-    digitalVoucherEveryday,
-    digitalVoucherEverydayPlus,
-    digitalVoucherSaturday,
-    digitalVoucherSaturdayPlus,
-    digitalVoucherSunday,
-    digitalVoucherSundayPlus,
-    digitalVoucherSixday,
-    digitalVoucherSixdayPlus,
-  )
-
-  val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
-}
 sealed trait VoucherPlanId
 sealed trait SupporterPlusPlanId
 sealed trait ContributionPlanId
@@ -103,6 +12,8 @@ sealed trait DigipackPlanId
 sealed trait GuardianWeeklyDomestic
 sealed trait GuardianWeeklyRow
 sealed trait DigitalVoucherPlanId
+sealed trait NationalDeliveryPlanId
+
 sealed abstract class PlanId(val name: String)
 
 object PlanId {
@@ -192,6 +103,13 @@ object PlanId {
 
   case object DigitalVoucherSixdayPlus extends PlanId("digital_voucher_sixday_plus") with DigitalVoucherPlanId
 
+
+  case object NationalDeliveryWeekend extends PlanId("national_delivery_weekend") with NationalDeliveryPlanId
+
+  case object NationalDeliveryEveryday extends PlanId("national_delivery_everyday") with NationalDeliveryPlanId
+
+  case object NationalDeliverySixday extends PlanId("national_delivery_sixday") with NationalDeliveryPlanId
+
   val enabledVoucherPlans = List(
     VoucherEveryDay,
     VoucherEveryDayPlus,
@@ -257,60 +175,19 @@ object PlanId {
     DigitalVoucherSixday,
     DigitalVoucherSixdayPlus,
   )
+  
+  val enabledNationalDeliveryPlans = List(
+    NationalDeliverySixday,
+    NationalDeliveryEveryday,
+    NationalDeliveryWeekend,
+  )
 
   val supportedPlans: List[PlanId] =
     enabledVoucherPlans ++ enabledSupporterPlusPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
-      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++ enabledDigitalVoucherPlans
+      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++ enabledDigitalVoucherPlans ++ enabledNationalDeliveryPlans
 
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
-case class Plan(
-    id: PlanId,
-    description: PlanDescription,
-    startDateRules: StartDateRules,
-    paymentPlans: Map[Currency, PaymentPlan] = Map.empty,
-)
 
-sealed trait BillingPeriod
-object Monthly extends BillingPeriod
-object Quarterly extends BillingPeriod
-object Annual extends BillingPeriod
-object SixWeeks extends BillingPeriod
 
-case class PaymentPlan(
-    currency: Currency,
-    amountMinorUnits: AmountMinorUnits,
-    billingPeriod: BillingPeriod,
-    description: String,
-)
-
-case class PlanDescription(value: String) extends AnyVal
-
-case class DelayDays(value: Int) extends AnyVal
-
-case class WindowSizeDays(value: Int) extends AnyVal
-
-sealed trait DateRule
-
-case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: WindowRule)
-
-case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
-
-case class WindowRule(startDate: LocalDate, maybeSize: Option[WindowSizeDays]) extends DateRule
-
-case class AmountMinorUnits(value: Int) extends AnyVal
-
-/** ProductType Represents the ProductType field on a Product in Zuora
-  */
-case class ProductType(value: String)
-object ProductType {
-  val GuardianWeekly = ProductType("Guardian Weekly")
-  val NewspaperVoucherBook = ProductType("Newspaper - Voucher Book")
-  val NewspaperDigitalVoucher = ProductType("Newspaper - Digital Voucher")
-  val NewspaperHomeDelivery = ProductType("Newspaper - Home Delivery")
-  val DigitalPack = ProductType("Digital Pack")
-  val Contribution = ProductType("Contribution")
-  val SupporterPlus = ProductType("Supporter Plus")
-  val Membership = ProductType("Membership")
-}

@@ -7,13 +7,12 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{Postcode, SoldTo
 import com.gu.newproduct.api.productcatalog.{HomeDeliveryPlanId, PlanId}
 
 object PaperAddressValidator {
-  def apply(planId: PlanId, soldToAddress: SoldToAddress): ValidationResult[Unit] = {
+  def apply(planId: PlanId, soldToAddress: SoldToAddress): ValidationResult[Unit] =
     for {
       _ <-
         (soldToAddress.country == Country.UK) orFailWith s"Invalid country: ${soldToAddress.country.name}, only UK addresses are allowed"
       - <- postCodeValidationFor(planId)(soldToAddress.postcode)
-    } yield soldToAddress
-  }
+    } yield ()
 
   def postCodeValidationFor(planId: PlanId): Option[Postcode] => ValidationResult[Any] = planId match {
     case _: HomeDeliveryPlanId => validatePostCodeForHomeDelivery _

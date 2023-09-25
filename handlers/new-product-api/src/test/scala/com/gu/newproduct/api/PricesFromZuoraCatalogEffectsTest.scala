@@ -1,20 +1,20 @@
 package com.gu.newproduct.api
 
 import com.gu.effects.GetFromS3
+import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.productcatalog.PlanId._
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId, PricesFromZuoraCatalog, ZuoraIds}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PricesFromZuoraCatalog, ZuoraIds}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{Stage, ZuoraEnvironment}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import com.gu.i18n.Currency.GBP
 
 class PricesFromZuoraCatalogEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "load catalog" taggedAs EffectsTest in {
 
     import ProductsData._
-    val expectedProducts = digital ++ voucher ++ hd ++ subsCard ++ gw ++ supporterPlus
+    val expectedProducts = digital ++ voucher ++ hd ++ subsCard ++ gw ++ supporterPlus ++ nationalDelivery
 
     val actual = for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(Stage("CODE"))
@@ -88,5 +88,10 @@ object ProductsData {
   val supporterPlus = Set(
     AnnualSupporterPlus,
     MonthlySupporterPlus,
+  )
+  val nationalDelivery = Set(
+    NationalDeliveryEveryday,
+    NationalDeliverySixday,
+    NationalDeliveryWeekend,
   )
 }

@@ -378,6 +378,8 @@ lazy val `new-product-api` = lambdaProject(
 )
   .settings(
     scalacOptions += "-Ytasty-reader",
+    Test / unmanagedResourceDirectories += (Test / scalaSource).value,
+    Test / unmanagedResources / excludeFilter := "*.scala"
   )
   .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
 

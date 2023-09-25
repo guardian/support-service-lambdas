@@ -1,0 +1,1002 @@
+{
+  "products": [
+    {
+      "label" : "Supporter Plus",
+      "plans" : [ {
+        "id" : "monthly_supporter_plus",
+        "label" : "Monthly",
+        "startDateRules" : {
+          "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+          "selectableWindow" : {
+            "startDate" : "2019-12-01",
+            "sizeInDays" : 1
+          }
+        },
+        "paymentPlans": []
+      }, {
+        "id" : "annual_supporter_plus",
+        "label" : "Annual",
+        "startDateRules" : {
+          "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+          "selectableWindow" : {
+            "startDate" : "2019-12-01",
+            "sizeInDays" : 1
+          }
+        },
+        "paymentPlans": []
+      } ]
+    },
+    {
+      "label": "Contribution",
+      "plans": [
+        {
+          "id": "monthly_contribution",
+          "label": "Monthly",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2019-12-01",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": []
+        },
+        {
+          "id": "annual_contribution",
+          "label": "Annual",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2019-12-01",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": []
+        }
+      ]
+    },
+    {
+      "label": "Voucher",
+      "plans": [
+        {
+          "id": "voucher_everyday",
+          "label": "Everyday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-01",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 47.62 every month"
+            }
+          ],
+          "paymentPlan": "GBP 47.62 every month"
+        },
+        {
+          "id": "voucher_everyday_plus",
+          "label": "Everyday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-01",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 51.96 every month"
+            }
+          ],
+          "paymentPlan": "GBP 51.96 every month"
+        },
+        {
+          "id": "voucher_saturday",
+          "label": "Saturday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-02",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 10.36 every month"
+            }
+          ],
+          "paymentPlan": "GBP 10.36 every month"
+        },
+        {
+          "id": "voucher_saturday_plus",
+          "label": "Saturday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-02",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 21.62 every month"
+            }
+          ],
+          "paymentPlan": "GBP 21.62 every month"
+        },
+        {
+          "id": "voucher_sixday",
+          "label": "Sixday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-01",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 41.12 every month"
+            }
+          ],
+          "paymentPlan": "GBP 41.12 every month"
+        },
+        {
+          "id": "voucher_sixday_plus",
+          "label": "Sixday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-01",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 47.62 every month"
+            }
+          ],
+          "paymentPlan": "GBP 47.62 every month"
+        },
+        {
+          "id": "voucher_sunday",
+          "label": "Sunday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-03",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 10.79 every month"
+            }
+          ],
+          "paymentPlan": "GBP 10.79 every month"
+        },
+        {
+          "id": "voucher_sunday_plus",
+          "label": "Sunday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-03",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 22.06 every month"
+            }
+          ],
+          "paymentPlan": "GBP 22.06 every month"
+        },
+        {
+          "id": "voucher_weekend",
+          "label": "Weekend",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-02",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 20.76 every month"
+            }
+          ],
+          "paymentPlan": "GBP 20.76 every month"
+        },
+        {
+          "id": "voucher_weekend_plus",
+          "label": "Weekend+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-03-02",
+              "sizeInDays": 35
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 29.42 every month"
+            }
+          ],
+          "paymentPlan": "GBP 29.42 every month"
+        }
+      ]
+    },
+    {
+      "label": "Home Delivery",
+      "plans": [
+        {
+          "id": "home_delivery_everyday",
+          "label": "Everyday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-01",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 1.23 every month"
+            }
+          ],
+          "paymentPlan": "GBP 1.23 every month"
+        },
+        {
+          "id": "home_delivery_everyday_plus",
+          "label": "Everyday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-01",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 9.99 every month"
+            }
+          ],
+          "paymentPlan": "GBP 9.99 every month"
+        },
+        {
+          "id": "home_delivery_saturday",
+          "label": "Saturday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-03",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 4.56 every month"
+            }
+          ],
+          "paymentPlan": "GBP 4.56 every month"
+        },
+        {
+          "id": "home_delivery_saturday_plus",
+          "label": "Saturday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-03",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 6.78 every month"
+            }
+          ],
+          "paymentPlan": "GBP 6.78 every month"
+        },
+        {
+          "id": "home_delivery_sixday",
+          "label": "Sixday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-02",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 7.77 every month"
+            }
+          ],
+          "paymentPlan": "GBP 7.77 every month"
+        },
+        {
+          "id": "home_delivery_sixday_plus",
+          "label": "Sixday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-02",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 11.11 every month"
+            }
+          ],
+          "paymentPlan": "GBP 11.11 every month"
+        },
+        {
+          "id": "home_delivery_sunday",
+          "label": "Sunday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-04",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 3.21 every month"
+            }
+          ],
+          "paymentPlan": "GBP 3.21 every month"
+        },
+        {
+          "id": "home_delivery_sunday_plus",
+          "label": "Sunday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-04",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 10.10 every month"
+            }
+          ],
+          "paymentPlan": "GBP 10.10 every month"
+        },
+        {
+          "id": "home_delivery_weekend",
+          "label": "Weekend",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-05",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 8.88 every month"
+            }
+          ],
+          "paymentPlan": "GBP 8.88 every month"
+        },
+        {
+          "id": "home_delivery_weekend_plus",
+          "label": "Weekend+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-02-05",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 22.22 every month"
+            }
+          ],
+          "paymentPlan": "GBP 22.22 every month"
+        }
+      ]
+    },
+    {
+      "label": "Digital Pack",
+      "plans": [
+        {
+          "id": "digipack_annual",
+          "label": "Annual",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2019-12-15",
+              "sizeInDays": 90
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 666.66 every 12 months"
+            },
+            {
+              "currencyCode": "USD",
+              "description": "USD 666.65 every 12 months"
+            }
+          ],
+          "paymentPlan": "GBP 666.66 every 12 months"
+        },
+        {
+          "id": "digipack_monthly",
+          "label": "Monthly",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2019-12-15",
+              "sizeInDays": 90
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 55.55 every month"
+            },
+            {
+              "currencyCode": "USD",
+              "description": "USD 55.54 every month"
+            }
+          ],
+          "paymentPlan": "GBP 55.55 every month"
+        }
+      ]
+    },
+    {
+      "label": "Guardian Weekly - Domestic",
+      "plans": [
+        {
+          "id": "guardian_weekly_domestic_6for6",
+          "label": "GW Oct 18 - Six for Six - Domestic",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Friday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-01-01",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 11111.11 for the first six weeks"
+            },
+            {
+              "currencyCode": "USD",
+              "description": "USD 111111.11 for the first six weeks"
+            }
+          ],
+          "paymentPlan": "GBP 11111.11 for the first six weeks"
+        },
+        {
+          "id": "guardian_weekly_domestic_quarterly",
+          "label": "GW Oct 18 - Quarterly - Domestic",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Friday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-01-01",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 22222.22 every 3 months"
+            },
+            {
+              "currencyCode": "USD",
+              "description": "USD 222222.22 every 3 months"
+            }
+          ],
+          "paymentPlan": "GBP 22222.22 every 3 months"
+        },
+        {
+          "id": "guardian_weekly_domestic_annual",
+          "label": "GW Oct 18 - Annual - Domestic",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Friday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-01-01",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 33333.33 every 12 months"
+            },
+            {
+              "currencyCode": "USD",
+              "description": "USD 333333.33 every 12 months"
+            }
+          ],
+          "paymentPlan": "GBP 33333.33 every 12 months"
+        }
+      ],
+      "enabledForDeliveryCountries": [
+        "Australia", "Kiribati", "Nauru", "Norfolk Island", "Tuvalu", "Canada", "Andorra", "Albania",
+        "Austria", "Bosnia-Herzegovina", "Belgium", "Bulgaria", "Saint Barthélemy", "Switzerland", "Cyprus",
+        "Czech Republic", "Germany", "Denmark", "Estonia", "Spain", "Finland", "Faroe Islands", "France",
+        "French Guiana", "Greenland", "Guadeloupe", "Greece", "Croatia", "Hungary", "Ireland", "Italy",
+        "Liechtenstein", "Lithuania", "Luxembourg", "Latvia", "Monaco", "Montenegro", "Saint Martin",
+        "Iceland", "Martinique", "Malta", "Netherlands", "Norway", "French Polynesia", "Poland",
+        "Saint Pierre & Miquelon", "Portugal", "Réunion", "Romania", "Serbia", "Sweden", "Slovenia",
+        "Svalbard and Jan Mayen", "Slovakia", "San Marino", "French Southern Territories",
+        "Wallis & Futuna", "Mayotte", "Holy See", "Åland Islands", "New Zealand", "Cook Islands",
+        "United Kingdom","Falkland Islands","Gibraltar","Guernsey","Isle of Man","Jersey","Saint Helena",
+        "United States"
+      ]
+    },
+    {
+      "label": "Guardian Weekly - ROW",
+      "plans": [
+        {
+          "id": "guardian_weekly_row_6for6",
+          "label": "GW Oct 18 - Six for Six - ROW",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Friday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-01-01",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 44444.44 for the first six weeks"
+            },
+            {
+              "currencyCode": "USD",
+              "description": "USD 444444.44 for the first six weeks"
+            }
+          ],
+          "paymentPlan": "GBP 44444.44 for the first six weeks"
+        },
+        {
+          "id": "guardian_weekly_row_quarterly",
+          "label": "GW Oct 18 - Quarterly - ROW",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Friday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-01-01",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 55555.55 every 3 months"
+            },
+            {
+              "currencyCode": "USD",
+              "description": "USD 555555.55 every 3 months"
+            }
+          ],
+          "paymentPlan": "GBP 55555.55 every 3 months"
+        },
+        {
+          "id": "guardian_weekly_row_annual",
+          "label": "GW Oct 18 - Annual - ROW",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Friday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-01-01",
+              "sizeInDays": 28
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 66666.66 every 12 months"
+            },
+            {
+              "currencyCode": "USD",
+              "description": "USD 666666.66 every 12 months"
+            }
+          ],
+          "paymentPlan": "GBP 66666.66 every 12 months"
+        }
+      ],
+      "enabledForDeliveryCountries": [
+        "United Arab Emirates", "Afghanistan", "Antigua & Barbuda", "Anguilla", "Armenia", "Angola",
+        "Antarctica", "Argentina", "American Samoa", "Aruba", "Azerbaijan", "Barbados", "Bangladesh",
+        "Burkina Faso", "Bahrain", "Burundi", "Benin", "Bermuda", "Brunei Darussalam", "Bolivia",
+        "Bonaire, Saint Eustatius and Saba", "Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana",
+        "Belarus", "Belize", "Cocos (Keeling) Islands", "Congo (Kinshasa)", "Central African Republic",
+        "Congo (Brazzaville)", "Ivory Coast", "Chile", "Cameroon", "China", "Colombia", "Costa Rica", "Cuba",
+        "Cape Verde Islands", "Curaçao", "Christmas Island", "Djibouti", "Dominica", "Dominican Republic",
+        "Algeria", "Ecuador", "Egypt", "Western Sahara", "Eritrea", "Ethiopia", "Fiji", "Micronesia", "Gabon",
+        "Grenada", "Georgia", "Ghana", "Gambia", "Guinea", "Equatorial Guinea",
+        "South Georgia & The South Sandwich Islands", "Guatemala", "Guam", "Guinea-Bissau", "Guyana",
+        "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Haiti", "Indonesia", "Israel",
+        "India", "British Indian Ocean Territory", "Iraq", "Iran", "Jamaica", "Jordan", "Japan", "Kenya",
+        "Kyrgyzstan", "Cambodia", "Comoros", "Saint Christopher & Nevis", "North Korea", "South Korea",
+        "Kuwait", "Cayman Islands", "Kazakhstan", "Laos", "Lebanon", "Saint Lucia", "Sri Lanka", "Liberia",
+        "Lesotho", "Libya", "Morocco", "Moldova", "Madagascar", "Marshall Islands", "Macedonia", "Mali",
+        "Myanmar", "Mongolia", "Macau", "Northern Mariana Islands", "Mauritania", "Montserrat", "Mauritius",
+        "Maldives", "Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger",
+        "Nigeria", "Nicaragua", "Nepal", "Niue", "Oman", "Panama", "Peru", "Papua New Guinea",
+        "Philippines", "Pakistan", "Pitcairn Islands", "Puerto Rico", "Palestinian Territories",
+        "Palau", "Paraguay", "Qatar", "Russia", "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles",
+        "Sudan", "Singapore", "Sierra Leone", "Senegal", "Somalia", "Suriname", "South Sudan",
+        "Sao Tome & Principe", "El Salvador", "Sint Maarten", "Syria", "Swaziland", "Turks & Caicos Islands",
+        "Chad", "Togo", "Thailand", "Tajikistan", "Tokelau", "East Timor", "Turkmenistan", "Tunisia", "Tonga", "Turkey",
+        "Trinidad & Tobago", "Taiwan", "Tanzania", "Ukraine", "Uganda", "United States Minor Outlying Islands",
+        "Uruguay", "Uzbekistan", "Saint Vincent & The Grenadines", "Venezuela", "British Virgin Islands",
+        "United States Virgin Islands", "Vietnam", "Vanuatu", "Samoa", "Yemen", "South Africa", "Zambia",
+        "Zimbabwe"
+      ]
+    },
+    {
+      "label": "Subscription Card",
+      "plans": [
+        {
+          "id": "digital_voucher_weekend",
+          "label": "Weekend",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-03",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.05 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.05 every month"
+        },
+        {
+          "id": "digital_voucher_weekend_plus",
+          "label": "Weekend+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-03",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.06 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.06 every month"
+        },
+        {
+          "id": "digital_voucher_everyday",
+          "label": "Everyday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-01",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.01 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.01 every month"
+        },
+        {
+          "id": "digital_voucher_everyday_plus",
+          "label": "Everyday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-01",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.02 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.02 every month"
+        },
+        {
+          "id": "digital_voucher_saturday",
+          "label": "Saturday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-04",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.07 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.07 every month"
+        },
+        {
+          "id": "digital_voucher_saturday_plus",
+          "label": "Saturday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-04",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.08 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.08 every month"
+        },
+        {
+          "id": "digital_voucher_sunday",
+          "label": "Sunday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-05",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.09 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.09 every month"
+        },
+        {
+          "id": "digital_voucher_sunday_plus",
+          "label": "Sunday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Sunday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-05",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.10 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.10 every month"
+        },
+        {
+          "id": "digital_voucher_sixday",
+          "label": "Sixday",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-02",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.03 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.03 every month"
+        },
+        {
+          "id": "digital_voucher_sixday_plus",
+          "label": "Sixday+",
+          "startDateRules": {
+            "daysOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "selectableWindow": {
+              "startDate": "2020-04-02",
+              "sizeInDays": 1
+            }
+          },
+          "paymentPlans": [
+            {
+              "currencyCode": "GBP",
+              "description": "GBP 70.04 every month"
+            }
+          ],
+          "paymentPlan": "GBP 70.04 every month"
+        }
+      ],
+      "enabledForDeliveryCountries": [
+        "United Kingdom"
+      ]
+    }
+  ]
+}

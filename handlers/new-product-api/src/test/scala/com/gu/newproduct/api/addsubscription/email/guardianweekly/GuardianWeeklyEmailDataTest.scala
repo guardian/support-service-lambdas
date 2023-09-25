@@ -1,28 +1,20 @@
 package com.gu.newproduct.api.addsubscription.email.guardianweekly
 
-import java.time.LocalDate
-
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.email.{GuardianWeeklyEmailData, PaperEmailData}
+import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
-  BankAccountName,
-  BankAccountNumberMask,
-  DirectDebit,
-  MandateId,
-  NonDirectDebitMethod,
-  SortCode,
-}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog._
-import play.api.libs.json.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.time.LocalDate
 
 class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
 

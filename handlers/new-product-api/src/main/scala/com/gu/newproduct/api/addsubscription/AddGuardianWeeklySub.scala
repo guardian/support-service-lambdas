@@ -1,38 +1,29 @@
 package com.gu.newproduct.api.addsubscription
 
-import java.time.LocalDate
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.guardianweekly.GuardianWeeklyEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, GuardianWeeklyEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{
-  GetGuardianWeeklyCustomerData,
-  GuardianWeeklyAccountValidation,
-  GuardianWeeklyCustomerData,
-}
-import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
-  ChargeOverride,
-  SubscriptionName,
-  ZuoraCreateSubRequest,
-  ZuoraCreateSubRequestRatePlan,
-}
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GetGuardianWeeklyCustomerData, GuardianWeeklyAccountValidation, GuardianWeeklyCustomerData}
+import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidatedAccount, ValidationResult}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetContacts, GetPaymentMethod}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, PlanAndCharge, ProductRatePlanId, ZuoraIds}
-import com.gu.newproduct.api.productcatalog.{Catalog, Plan, PlanId}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, ProductRatePlanId, ZuoraIds}
+import com.gu.newproduct.api.productcatalog.{Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 object AddGuardianWeeklySub {
@@ -77,7 +68,7 @@ object AddGuardianWeeklySub {
   } yield subscriptionName
 
   def wireSteps(
-      catalog: Catalog,
+    catalog: Map[PlanId, Plan],
       zuoraIds: ZuoraIds,
       zuoraClient: Requests,
       isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
@@ -93,7 +84,7 @@ object AddGuardianWeeklySub {
     val sendConfirmationEmail = SendConfirmationEmail(guardianWeeklyBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)
     steps(
-      catalog.planForId,
+      catalog,
       zuoraIds.apiIdToRateplanId.get,
       zuoraIds.apiIdToPlanAndCharge.get,
       validatedCustomerData,
@@ -109,12 +100,12 @@ object AddGuardianWeeklySub {
   def getValidatedCustomerData(zuoraClient: Requests): ZuoraAccountId => ApiGatewayOp[GuardianWeeklyCustomerData] = {
 
     val validateAccount = ValidateAccount.apply _ thenValidate GuardianWeeklyAccountValidation.apply _
-    val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith (
+    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
       validate = validateAccount,
       ifNotFoundReturn = Some("Zuora account id is not valid")
     )
-    val getValidatedPaymentMethod =
-      GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
+    val getValidatedPaymentMethod: GetAccount.PaymentMethodId => ApiGatewayOp[GetPaymentMethod.PaymentMethod] =
+      GetPaymentMethod(zuoraClient.get[PaymentMethodWire])(_).andValidateWith(ValidatePaymentMethod.apply)
     val getContacts: ZuoraAccountId => ApiGatewayOp[GetContacts.Contacts] =
       GetContacts(zuoraClient.get[GetContactsResponse]) _ andThen (_.toApiGatewayOp("getting contacts from Zuora"))
 
