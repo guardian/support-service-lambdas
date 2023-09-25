@@ -9,9 +9,15 @@ on:
 jobs:
   build-single-contribution-record-app:
     runs-on: ubuntu-latest
+
     permissions:
       id-token: write
       contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Build AWS Resources
+        working-directory: cdk
+        run: yarn install
