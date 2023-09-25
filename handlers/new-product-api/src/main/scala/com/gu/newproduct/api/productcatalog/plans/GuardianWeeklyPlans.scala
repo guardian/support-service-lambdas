@@ -5,19 +5,15 @@ import com.gu.newproduct.api.productcatalog._
 
 import java.time.{DayOfWeek, LocalDate}
 
-class GuardianWeeklyPlans(
-    getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate,
-) {
+class GuardianWeeklyPlans(getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate) {
 
-  private val GuardianWeeklySubscriptionStartDateWindowSize = WindowSizeDays(28)
-
-  private val guardianWeeklyIssueDays = List(DayOfWeek.FRIDAY)
-  private val guardianWeeklyStartDateRules =
+  private val issueDays = List(DayOfWeek.FRIDAY)
+  private val startDateRules =
     StartDateRules(
-      daysOfWeekRule = Some(DaysOfWeekRule(guardianWeeklyIssueDays)),
+      daysOfWeekRule = Some(DaysOfWeekRule(issueDays)),
       windowRule = WindowRule(
-        startDate = getStartDateFromFulfilmentFiles(ProductType.GuardianWeekly, guardianWeeklyIssueDays),
-        maybeSize = Some(GuardianWeeklySubscriptionStartDateWindowSize),
+        startDate = getStartDateFromFulfilmentFiles(ProductType.GuardianWeekly, issueDays),
+        maybeSize = Some(WindowSizeDays(28)),
       ),
     )
 
@@ -25,37 +21,37 @@ class GuardianWeeklyPlans(
     (
       GuardianWeeklyDomestic6for6,
       PlanDescription("GW Oct 18 - Six for Six - Domestic"),
-      guardianWeeklyStartDateRules,
+      startDateRules,
       SixWeeks,
     ),
     (
       GuardianWeeklyDomesticQuarterly,
       PlanDescription("GW Oct 18 - Quarterly - Domestic"),
-      guardianWeeklyStartDateRules,
+      startDateRules,
       Quarterly,
     ),
     (
       GuardianWeeklyDomesticAnnual,
       PlanDescription("GW Oct 18 - Annual - Domestic"),
-      guardianWeeklyStartDateRules,
+      startDateRules,
       Annual,
     ),
     (
       GuardianWeeklyROW6for6,
       PlanDescription("GW Oct 18 - Six for Six - ROW"),
-      guardianWeeklyStartDateRules,
+      startDateRules,
       SixWeeks,
     ),
     (
       GuardianWeeklyROWQuarterly,
       PlanDescription("GW Oct 18 - Quarterly - ROW"),
-      guardianWeeklyStartDateRules,
+      startDateRules,
       Quarterly,
     ),
     (
       GuardianWeeklyROWAnnual,
       PlanDescription("GW Oct 18 - Annual - ROW"),
-      guardianWeeklyStartDateRules,
+      startDateRules,
       Annual,
     ),
   )

@@ -5,19 +5,15 @@ import com.gu.newproduct.api.productcatalog._
 
 import java.time.{DayOfWeek, LocalDate}
 
-class DigitalVoucherPlans(
-  getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate
-) {
+class DigitalVoucherPlans(getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate) {
 
   import PaperDays._
-  private val DigitalVoucherStartDateWindowSize = WindowSizeDays(1)
-
-  private def digitalVoucherStartDateRule(daysOfWeek: List[DayOfWeek]) =
+  private def startDateRule(daysOfWeek: List[DayOfWeek]) =
     StartDateRules(
       daysOfWeekRule = Some(DaysOfWeekRule(daysOfWeek)),
       windowRule = WindowRule(
         startDate = getStartDateFromFulfilmentFiles(ProductType.NewspaperDigitalVoucher, daysOfWeek),
-        maybeSize = Some(DigitalVoucherStartDateWindowSize),
+        maybeSize = Some(WindowSizeDays(1)),
       ),
     )
 
@@ -25,61 +21,61 @@ class DigitalVoucherPlans(
     (
       DigitalVoucherWeekend,
       PlanDescription("Weekend"),
-      digitalVoucherStartDateRule(weekendDays),
+      startDateRule(weekendDays),
       Monthly,
     ),
     (
       DigitalVoucherWeekendPlus,
       PlanDescription("Weekend+"),
-      digitalVoucherStartDateRule(weekendDays),
+      startDateRule(weekendDays),
       Monthly,
     ),
     (
       DigitalVoucherEveryday,
       PlanDescription("Everyday"),
-      digitalVoucherStartDateRule(everyDayDays),
+      startDateRule(everyDayDays),
       Monthly,
     ),
     (
       DigitalVoucherEverydayPlus,
       PlanDescription("Everyday+"),
-      digitalVoucherStartDateRule(everyDayDays),
+      startDateRule(everyDayDays),
       Monthly,
     ),
     (
       DigitalVoucherSaturday,
       PlanDescription("Saturday"),
-      digitalVoucherStartDateRule(saturdayDays),
+      startDateRule(saturdayDays),
       Monthly,
     ),
     (
       DigitalVoucherSaturdayPlus,
       PlanDescription("Saturday+"),
-      digitalVoucherStartDateRule(saturdayDays),
+      startDateRule(saturdayDays),
       Monthly,
     ),
     (
       DigitalVoucherSunday,
       PlanDescription("Sunday"),
-      digitalVoucherStartDateRule(sundayDays),
+      startDateRule(sundayDays),
       Monthly,
     ),
     (
       DigitalVoucherSundayPlus,
       PlanDescription("Sunday+"),
-      digitalVoucherStartDateRule(sundayDays),
+      startDateRule(sundayDays),
       Monthly,
     ),
     (
       DigitalVoucherSixday,
       PlanDescription("Sixday"),
-      digitalVoucherStartDateRule(sixDayDays),
+      startDateRule(sixDayDays),
       Monthly,
     ),
     (
       DigitalVoucherSixdayPlus,
       PlanDescription("Sixday+"),
-      digitalVoucherStartDateRule(sixDayDays),
+      startDateRule(sixDayDays),
       Monthly,
     ),
   )

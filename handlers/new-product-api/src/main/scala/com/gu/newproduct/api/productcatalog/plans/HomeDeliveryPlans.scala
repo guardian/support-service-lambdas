@@ -5,43 +5,39 @@ import com.gu.newproduct.api.productcatalog._
 
 import java.time.{DayOfWeek, LocalDate}
 
-class HomeDeliveryPlans(
-    getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate,
-) {
+class HomeDeliveryPlans(getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate) {
 
   import PaperDays._
-  private val HomeDeliverySubscriptionStartDateWindowSize = WindowSizeDays(28)
-
-  private def homeDeliveryWindowRule(issueDays: List[DayOfWeek]) = WindowRule(
+  private def windowRule(issueDays: List[DayOfWeek]) = WindowRule(
     startDate = getStartDateFromFulfilmentFiles(ProductType.NewspaperHomeDelivery, issueDays),
-    maybeSize = Some(HomeDeliverySubscriptionStartDateWindowSize),
+    maybeSize = Some(WindowSizeDays(28)),
   )
 
-  private def homeDeliveryDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(
+  private def dateRules(allowedDays: List[DayOfWeek]) = StartDateRules(
     Some(DaysOfWeekRule(allowedDays)),
-    homeDeliveryWindowRule(allowedDays),
+    windowRule(allowedDays),
   )
 
-  private val homeDeliveryEveryDayRules = homeDeliveryDateRules(
+  private val everyDayRules = dateRules(
     everyDayDays,
   )
 
-  private val homeDeliverySixDayRules = homeDeliveryDateRules(sixDayDays)
-  private val homeDeliverySundayDateRules = homeDeliveryDateRules(sundayDays)
-  private val homeDeliverySaturdayDateRules = homeDeliveryDateRules(saturdayDays)
-  private val homeDeliveryWeekendRules = homeDeliveryDateRules(weekendDays)
+  private val sixDayRules = dateRules(sixDayDays)
+  private val sundayDateRules = dateRules(sundayDays)
+  private val saturdayDateRules = dateRules(saturdayDays)
+  private val weekendRules = dateRules(weekendDays)
 
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
-    (HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules, Monthly),
-    (HomeDeliverySixDay, PlanDescription("Sixday"), homeDeliverySixDayRules, Monthly),
-    (HomeDeliveryWeekend, PlanDescription("Weekend"), homeDeliveryWeekendRules, Monthly),
-    (HomeDeliverySunday, PlanDescription("Sunday"), homeDeliverySundayDateRules, Monthly),
-    (HomeDeliverySaturday, PlanDescription("Saturday"), homeDeliverySaturdayDateRules, Monthly),
-    (HomeDeliveryEveryDayPlus, PlanDescription("Everyday+"), homeDeliveryEveryDayRules, Monthly),
-    (HomeDeliverySixDayPlus, PlanDescription("Sixday+"), homeDeliverySixDayRules, Monthly),
-    (HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules, Monthly),
-    (HomeDeliverySundayPlus, PlanDescription("Sunday+"), homeDeliverySundayDateRules, Monthly),
-    (HomeDeliverySaturdayPlus, PlanDescription("Saturday+"), homeDeliverySaturdayDateRules, Monthly),
+    (HomeDeliveryEveryDay, PlanDescription("Everyday"), everyDayRules, Monthly),
+    (HomeDeliverySixDay, PlanDescription("Sixday"), sixDayRules, Monthly),
+    (HomeDeliveryWeekend, PlanDescription("Weekend"), weekendRules, Monthly),
+    (HomeDeliverySunday, PlanDescription("Sunday"), sundayDateRules, Monthly),
+    (HomeDeliverySaturday, PlanDescription("Saturday"), saturdayDateRules, Monthly),
+    (HomeDeliveryEveryDayPlus, PlanDescription("Everyday+"), everyDayRules, Monthly),
+    (HomeDeliverySixDayPlus, PlanDescription("Sixday+"), sixDayRules, Monthly),
+    (HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), weekendRules, Monthly),
+    (HomeDeliverySundayPlus, PlanDescription("Sunday+"), sundayDateRules, Monthly),
+    (HomeDeliverySaturdayPlus, PlanDescription("Saturday+"), saturdayDateRules, Monthly),
   )
 
 }
