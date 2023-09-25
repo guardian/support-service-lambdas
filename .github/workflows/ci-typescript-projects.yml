@@ -24,14 +24,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build and Deploy Project ${{ matrix.project }}
+      - name: Build AWS Resources for Project ${{ matrix.project }}
         working-directory: cdk
         run: |
           yarn install
           yarn tsc
           yarn lint
           yarn test
-          yarn synth lib/${{ matrix.project }}
+          yarn synth ${{ matrix.project }}-CODE
+          yarn synth ${{ matrix.project }}-PROD
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
