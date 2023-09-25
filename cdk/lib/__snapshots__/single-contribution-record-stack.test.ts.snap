@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The SingleContributionRecordStack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "singlecontributionrecorddlqurl": {
+      "Value": {
+        "Ref": "singlecontributionrecordqueueD9FBF39D",
+      },
+    },
+    "singlecontributionrecordqueueurl": {
+      "Value": {
+        "Ref": "deadletterssinglecontributionrecordqueueCCD7A490",
+      },
+    },
+  },
+  "Resources": {
+    "deadletterssinglecontributionrecordqueueCCD7A490": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "dead-letters-single-contribution-record-queue-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "singlecontributionrecordqueueD9FBF39D": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "single-contribution-record-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadletterssinglecontributionrecordqueueCCD7A490",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 2,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+}
+`;
+
+exports[`The SingleContributionRecordStack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "singlecontributionrecorddlqurl": {
+      "Value": {
+        "Ref": "singlecontributionrecordqueueD9FBF39D",
+      },
+    },
+    "singlecontributionrecordqueueurl": {
+      "Value": {
+        "Ref": "deadletterssinglecontributionrecordqueueCCD7A490",
+      },
+    },
+  },
+  "Resources": {
+    "deadletterssinglecontributionrecordqueueCCD7A490": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "dead-letters-single-contribution-record-queue-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "singlecontributionrecordqueueD9FBF39D": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "single-contribution-record-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadletterssinglecontributionrecordqueueCCD7A490",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 2,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+}
+`;
