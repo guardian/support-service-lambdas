@@ -1,0 +1,15 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  cloudformation:
+    type: cloud-formation
+    app: single-contribution-record
+    parameters:
+      templateStagePaths:
+        CODE: single-contribution-record-CODE.template.json
+        PROD: single-contribution-record-PROD.template.json

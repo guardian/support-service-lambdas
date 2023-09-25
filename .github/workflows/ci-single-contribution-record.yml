@@ -26,3 +26,20 @@ jobs:
           yarn lint
           yarn test
           yarn synth
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+
+      - name: Upload to Riff-Raff
+        uses: guardian/actions-riff-raff@v2
+        with:
+          projectName: support-service-lambdas::single-contribution-record
+          app: single-contribution-record
+          configPath: stacks/single-contribution-record/riff-raff.yaml
+          contentDirectories: |
+            cloudformation:
+              - ./cdk/cdk.out/single-contribution-record-CODE.template.json
+              - ./cdk/cdk.out/single-contribution-record-PROD.template.json
