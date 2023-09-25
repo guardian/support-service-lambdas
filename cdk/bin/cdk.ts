@@ -3,6 +3,7 @@ import { App } from "aws-cdk-lib";
 import { FailedNationalDeliveriesProcessor } from "../lib/failed-national-deliveries-processor";
 import type { NewProductApiProps } from "../lib/new-product-api";
 import { NewProductApi } from "../lib/new-product-api";
+import { APP_NAME as SINGLE_CONTRIBUTION_RECORD_APP_NAME, SingleContributionRecordStack } from "../lib/single-contribution-record";
 
 const app = new App();
 
@@ -30,5 +31,9 @@ export const prodProps: NewProductApiProps = {
 
 new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
+
 new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-CODE", {stack: "membership", stage: "CODE"});
 new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-PROD", {stack: "membership", stage: "PROD"});
+
+new SingleContributionRecordStack(app, `${SINGLE_CONTRIBUTION_RECORD_APP_NAME}-CODE`, {stack: "membership", stage: "CODE"});
+new SingleContributionRecordStack(app, `${SINGLE_CONTRIBUTION_RECORD_APP_NAME}-PROD`, {stack: "membership", stage: "PROD"});
