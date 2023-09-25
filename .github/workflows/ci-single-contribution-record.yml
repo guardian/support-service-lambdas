@@ -20,4 +20,9 @@ jobs:
 
       - name: Build AWS Resources
         working-directory: cdk
-        run: yarn install
+        run: |
+          yarn install
+          yarn tsc
+          yarn lint
+          yarn test
+          yarn synth
