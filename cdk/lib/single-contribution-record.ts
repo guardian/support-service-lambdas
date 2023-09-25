@@ -1,5 +1,7 @@
-import { GuStack, GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { App, CfnOutput } from 'aws-cdk-lib';
+import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
+import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { CfnOutput } from 'aws-cdk-lib';
+import type { App } from 'aws-cdk-lib';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 
 export const APP_NAME = 'single-contribution-record';
