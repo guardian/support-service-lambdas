@@ -1,0 +1,51 @@
+name: build-and-deploy-projects
+
+on:
+  push:
+    paths:
+      - "cdk/**"
+      - "stacks/**"
+      - ".github/workflows/ci-typescript-projects.yml"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    strategy:
+      matrix:
+        project:
+          - single-contribution-record
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build and Deploy Project ${{ matrix.project }}
+        working-directory: cdk
+        run: |
+          yarn install
+          yarn tsc
+          yarn lint
+          yarn test
+          yarn synth
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+
+      - name: Upload to Riff-Raff for Project ${{ matrix.project }}
+        uses: guardian/actions-riff-raff@v2
+        with:
+          projectName: support-service-lambdas::${{ matrix.project }}
+          app: ${{ matrix.project }}
+          configPath: stacks/${{ matrix.project }}/riff-raff.yaml
+          contentDirectories: |
+            cloudformation:
+              - ./cdk/cdk.out/${{ matrix.project }}-CODE.template.json
+              - ./cdk/cdk.out/${{ matrix.project }}-PROD.template.json
