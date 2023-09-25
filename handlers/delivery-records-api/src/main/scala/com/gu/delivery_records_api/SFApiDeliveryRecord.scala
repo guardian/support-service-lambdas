@@ -1,4 +1,4 @@
-package com.gu.delivery_records_api.service.createproblem
+package com.gu.delivery_records_api
 
 import java.time.LocalDate
 

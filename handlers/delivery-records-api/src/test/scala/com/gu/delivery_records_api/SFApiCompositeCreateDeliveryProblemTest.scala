@@ -1,7 +1,5 @@
 package com.gu.delivery_records_api
 
-import com.gu.delivery_records_api.service.createproblem.{CreateDeliveryProblem, DeliveryRecordToLink, SFApiCreateDeliveryProblem, SFApiContactPhoneNumbers}
-
 import java.time.{LocalDate, LocalDateTime}
 import com.gu.salesforce.IdentityId
 import com.gu.salesforce.SalesforceConstants.salesforceApiVersion
@@ -10,14 +8,14 @@ import io.circe.syntax._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class SFApiCreateDeliveryProblemTest extends AnyFlatSpec with Matchers {
+class SFApiCompositeCreateDeliveryProblemTest extends AnyFlatSpec with Matchers {
 
   // because by default circe wraps the inner 'body' fields with the case class name (as a discriminator) - invalid for SF
   it should "encode a SFApiCompositeCreateDeliveryProblem to JSON correctly (for composite request)" in {
 
     val now = LocalDateTime.now()
 
-    SFApiCreateDeliveryProblem.create(
+    SFApiCompositeCreateDeliveryProblem(
       subscriptionNumber = "A-S123456",
       contact = IdentityId("123456789"),
       detail = CreateDeliveryProblem(

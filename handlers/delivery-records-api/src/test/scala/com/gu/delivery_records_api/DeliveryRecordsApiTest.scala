@@ -1,15 +1,13 @@
 package com.gu.delivery_records_api
 
-import cats.effect.{ContextShift, IO}
-import com.gu.delivery_records_api.service.createproblem._
-import com.gu.delivery_records_api.service.getrecords.GetDeliveryRecordsServiceImpl.deliveryRecordsQuery
-import com.gu.delivery_records_api.service.getrecords.{DeliveryProblemCase, DeliveryProblemCredit, DeliveryRecord, DeliveryRecordsApiResponse}
+import cats.effect.IO
+import com.gu.delivery_records_api.DeliveryRecordsService.deliveryRecordsQuery
 import sttp.client3.impl.cats.CatsMonadAsyncError
 import sttp.client3.testing.SttpBackendStub
 import com.gu.salesforce._
 import com.gu.salesforce.sttp.SalesforceStub.implicitSalesforceStub
 import com.gu.salesforce.sttp.{SFApiCompositeResponse, SFApiCompositeResponsePart}
-import io.circe.{Decoder, Json}
+import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
@@ -24,11 +22,11 @@ import scala.concurrent._
 
 class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues {
 
-  private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
-  val config: SFAuthConfig =
+  val config =
     SFAuthConfig("https://salesforceAuthUrl", "sfClientId", "sfClientSecret", "sfUsername", "sfPassword", "sfToken")
-  val auth: SalesforceAuth = SalesforceAuth("salesforce-access-token", "https://salesforceInstanceUrl")
+  val auth = SalesforceAuth("salesforce-access-token", "https://salesforceInstanceUrl")
   val subscriptionNumber = "A-213123"
   val identityId = "identity id"
   val buyerContactId = "contact id"
@@ -47,7 +45,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
   val hasHolidayStop = true
   val doesntHaveHolidayStop = false
   val bulkSuspensionReason = "Covid-19"
-  val sfProblemCase: SFApiDeliveryProblemCase = SFApiDeliveryProblemCase(
+  val sfProblemCase = SFApiDeliveryProblemCase(
     Id = "case_id",
     CaseNumber = "123456",
     Subject = Some("subject"),
@@ -55,9 +53,9 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     Case_Closure_Reason__c = Some("Paper Damaged"),
   )
   val creditAmount = 1.23
-  val invoiceDate: LocalDate = LocalDate.of(2019, 12, 10)
+  val invoiceDate = LocalDate.of(2019, 12, 10)
   val isActioned = true
-  val contactNumbers: SFApiContactPhoneNumbers = SFApiContactPhoneNumbers(
+  val contactNumbers = SFApiContactPhoneNumbers(
     Id = Some("id"),
     Phone = Some("+447654321234"),
     HomePhone = Some("+441234567890"),
@@ -65,7 +63,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     OtherPhone = None,
   )
 
-  val sfDeliveryRecordA: SFApiDeliveryRecord = SFApiDeliveryRecord(
+  val sfDeliveryRecordA = SFApiDeliveryRecord(
     Id = deliveryRecordId,
     Delivery_Date__c = Some(deliveryDate),
     Delivery_Address__c = Some(deliveryAddress1),
@@ -96,7 +94,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     Delivery_Instructions__c = Some(deliveryInstruction2),
   )
 
-  val validSalesforceResponseBody: RecordsWrapperCaseClass[SFApiSubscription] = RecordsWrapperCaseClass(
+  val validSalesforceResponseBody = RecordsWrapperCaseClass(
     List(
       SFApiSubscription(
         Buyer__r = contactNumbers,
@@ -115,7 +113,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     ),
   )
 
-  val expectedDeliveryRecordA: DeliveryRecord = DeliveryRecord(
+  val expectedDeliveryRecordA = DeliveryRecord(
     id = deliveryRecordId,
     deliveryDate = Some(deliveryDate),
     deliveryInstruction = Some(deliveryInstruction1),
@@ -154,7 +152,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     deliveryAddress = Some(deliveryAddress2),
   )
 
-  val expectedValidDeliveryApiResponse: DeliveryRecordsApiResponse = DeliveryRecordsApiResponse(
+  val expectedValidDeliveryApiResponse = DeliveryRecordsApiResponse(
     List(
       expectedDeliveryRecordB,
       expectedDeliveryRecordB.copy(
@@ -177,7 +175,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     contactNumbers.copy(MobilePhone = None),
   )
 
-  val validCompositeResponse: SFApiCompositeResponse = SFApiCompositeResponse(
+  val validCompositeResponse = SFApiCompositeResponse(
     List(
       SFApiCompositeResponsePart(200, "CaseCreation"),
       SFApiCompositeResponsePart(200, "LinkDeliveryRecord-deliveryRecordID"),
@@ -185,7 +183,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     ),
   )
 
-  val failedCompositeResponse: SFApiCompositeResponse = SFApiCompositeResponse(
+  val failedCompositeResponse = SFApiCompositeResponse(
     List(
       SFApiCompositeResponsePart(400, "CaseCreation"),
       SFApiCompositeResponsePart(400, "LinkDeliveryRecord-deliveryRecordID"),
@@ -208,7 +206,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
           headers = Headers.of(Header("x-identity-id", identityId)),
         ),
       )
@@ -235,7 +233,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
           headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
         ),
       )
@@ -271,7 +269,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
         Request(
           method = Method.GET,
           Uri(
-            path = s"/delivery-records/$subscriptionNumber",
+            path = s"/delivery-records/${subscriptionNumber}",
             query = Query("startDate" -> Some(startDate.toString), "endDate" -> Some(endDate.toString)),
           ),
           headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
@@ -299,7 +297,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
           headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
         ),
       )
@@ -310,7 +308,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     response.status.code should equal(404)
   }
 
-  val createDeliveryProblemBody: Json = CreateDeliveryProblem(
+  val createDeliveryProblemBody = CreateDeliveryProblem(
     productName = "Guardian Weekly",
     description = Some("String"),
     problemType = "No Delivery",
@@ -346,7 +344,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.POST,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
           headers = Headers.of(Header("x-identity-id", identityId)),
         ).withEntity(
           createDeliveryProblemBody,
@@ -376,7 +374,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
           headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
         ).withEntity(
           createDeliveryProblemBody,
@@ -406,7 +404,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.POST,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
           headers = Headers.of(Header("x-identity-id", identityId)),
         ).withEntity(
           createDeliveryProblemBody,
@@ -429,7 +427,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
           headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
         ),
       )
@@ -450,7 +448,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = s"/delivery-records/${subscriptionNumber}"),
         ),
       )
       .value
@@ -464,7 +462,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO]).stubFailingAuth
 
-    DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(true)
+    DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(true)
   }
 
   private def getBody[A: Decoder](response: Response[IO]) = {
@@ -478,13 +476,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
   }
 
   private def createApp(salesforceBackendStub: SttpBackendStub[IO, Nothing]) = {
-    Inside.inside(DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync()) { case Right(value) =>
+    Inside.inside(DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync()) { case Right(value) =>
       value
     }
   }
 }
-
-case class SFApiSubscription(
-  Buyer__r: SFApiContactPhoneNumbers,
-  Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]],
-)
