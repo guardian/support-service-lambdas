@@ -1,13 +1,14 @@
-name: build-single-contribution-record-app
+name: ci-single-contribution-record
 
 on:
   push:
     paths:
-      - "cdk/**"
+      - "cdk/lib/single-contribution-record.ts"
+      - "handlers/single-contribution-record/**"
       - ".github/workflows/ci-single-contribution-record.yml"
 
 jobs:
-  build-single-contribution-record-app:
+  ci-single-contribution-record:
     runs-on: ubuntu-latest
 
     permissions:
