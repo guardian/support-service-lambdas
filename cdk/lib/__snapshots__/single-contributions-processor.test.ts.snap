@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The SingleContributionsProcessor matches the snapshot 1`] = `
+exports[`The SingleContributionsProcessor stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
@@ -74,7 +74,7 @@ exports[`The SingleContributionsProcessor matches the snapshot 1`] = `
 }
 `;
 
-exports[`The SingleContributionsProcessor matches the snapshot 2`] = `
+exports[`The SingleContributionsProcessor stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
