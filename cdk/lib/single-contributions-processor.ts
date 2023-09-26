@@ -24,14 +24,5 @@ export class SingleContributionsProcessorStack extends GuStack {
 				maxReceiveCount: 2,
 			},
 		});
-
-		// Outputs
-		new CfnOutput(this, `${APP_NAME}-queue-url`, {
-			value: deadLetterQueue.queueUrl,
-		});
-
-		new CfnOutput(this, `${APP_NAME}-dlq-url`, {
-			value: queue.queueUrl,
-		});
 	}
 }
