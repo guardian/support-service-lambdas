@@ -8,8 +8,8 @@ allowedStages:
 deployments:
   cloudformation:
     type: cloud-formation
-    app: single-contribution-record
+    app: single-contributions-processor
     parameters:
       templateStagePaths:
-        CODE: single-contribution-record-CODE.template.json
-        PROD: single-contribution-record-PROD.template.json
+        CODE: single-contributions-processor-CODE.template.json
+        PROD: single-contributions-processor-PROD.template.json

@@ -11,6 +11,7 @@ jobs:
       matrix:
         subproject:
           - new-product-api
+          - single-contributions-processor
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -28,9 +29,9 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
-          java-version: '11'
-          cache: 'sbt'
+          distribution: "corretto"
+          java-version: "11"
+          cache: "sbt"
 
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
@@ -105,9 +106,9 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
-          java-version: '11'
-          cache: 'sbt'
+          distribution: "corretto"
+          java-version: "11"
+          cache: "sbt"
 
       - name: Build
         run: |

@@ -4,9 +4,9 @@ import { CfnOutput } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 
-export const APP_NAME = 'single-contribution-record';
+export const APP_NAME = 'single-contributions-processor';
 
-export class SingleContributionRecordStack extends GuStack {
+export class SingleContributionsProcessorStack extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 

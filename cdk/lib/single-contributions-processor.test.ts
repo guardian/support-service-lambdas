@@ -2,18 +2,18 @@ import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import {
 	APP_NAME,
-	SingleContributionRecordStack,
-} from './single-contribution-record';
+	SingleContributionsProcessorStack,
+} from './single-contributions-processor';
 
-describe('The SingleContributionRecordStack', () => {
+describe('The SingleContributionsProcessorStack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const codeStack = new SingleContributionRecordStack(
+		const codeStack = new SingleContributionsProcessorStack(
 			app,
 			`${APP_NAME}-CODE`,
 			{ stack: 'membership', stage: 'CODE' },
 		);
-		const prodStack = new SingleContributionRecordStack(
+		const prodStack = new SingleContributionsProcessorStack(
 			app,
 			`${APP_NAME}-PROD`,
 			{ stack: 'membership', stage: 'PROD' },

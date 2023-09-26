@@ -1,28 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The SingleContributionRecordStack matches the snapshot 1`] = `
+exports[`The SingleContributionsProcessorStack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "singlecontributionrecorddlqurl": {
+    "singlecontributionsprocessordlqurl": {
       "Value": {
-        "Ref": "singlecontributionrecordqueueD9FBF39D",
+        "Ref": "singlecontributionsprocessorqueueCF05834A",
       },
     },
-    "singlecontributionrecordqueueurl": {
+    "singlecontributionsprocessorqueueurl": {
       "Value": {
-        "Ref": "deadletterssinglecontributionrecordqueueCCD7A490",
+        "Ref": "deadletterssinglecontributionsprocessorqueueC118704C",
       },
     },
   },
   "Resources": {
-    "deadletterssinglecontributionrecordqueueCCD7A490": {
+    "deadletterssinglecontributionsprocessorqueueC118704C": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "dead-letters-single-contribution-record-queue-CODE",
+        "QueueName": "dead-letters-single-contributions-processor-queue-CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -45,14 +45,14 @@ exports[`The SingleContributionRecordStack matches the snapshot 1`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
-    "singlecontributionrecordqueueD9FBF39D": {
+    "singlecontributionsprocessorqueueCF05834A": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "single-contribution-record-queue-CODE",
+        "QueueName": "single-contributions-processor-queue-CODE",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
-              "deadletterssinglecontributionrecordqueueCCD7A490",
+              "deadletterssinglecontributionsprocessorqueueC118704C",
               "Arn",
             ],
           },
@@ -84,29 +84,29 @@ exports[`The SingleContributionRecordStack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The SingleContributionRecordStack matches the snapshot 2`] = `
+exports[`The SingleContributionsProcessorStack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "singlecontributionrecorddlqurl": {
+    "singlecontributionsprocessordlqurl": {
       "Value": {
-        "Ref": "singlecontributionrecordqueueD9FBF39D",
+        "Ref": "singlecontributionsprocessorqueueCF05834A",
       },
     },
-    "singlecontributionrecordqueueurl": {
+    "singlecontributionsprocessorqueueurl": {
       "Value": {
-        "Ref": "deadletterssinglecontributionrecordqueueCCD7A490",
+        "Ref": "deadletterssinglecontributionsprocessorqueueC118704C",
       },
     },
   },
   "Resources": {
-    "deadletterssinglecontributionrecordqueueCCD7A490": {
+    "deadletterssinglecontributionsprocessorqueueC118704C": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "dead-letters-single-contribution-record-queue-PROD",
+        "QueueName": "dead-letters-single-contributions-processor-queue-PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -129,14 +129,14 @@ exports[`The SingleContributionRecordStack matches the snapshot 2`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
-    "singlecontributionrecordqueueD9FBF39D": {
+    "singlecontributionsprocessorqueueCF05834A": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "single-contribution-record-queue-PROD",
+        "QueueName": "single-contributions-processor-queue-PROD",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
-              "deadletterssinglecontributionrecordqueueCCD7A490",
+              "deadletterssinglecontributionsprocessorqueueC118704C",
               "Arn",
             ],
           },
