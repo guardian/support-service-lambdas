@@ -5,7 +5,7 @@ import {
 	SingleContributionsProcessor,
 } from './single-contributions-processor';
 
-describe('The SingleContributionsProcessor', () => {
+describe('The SingleContributionsProcessor stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 		const codeStack = new SingleContributionsProcessor(
