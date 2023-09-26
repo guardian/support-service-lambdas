@@ -1,22 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The SingleContributionsProcessorStack matches the snapshot 1`] = `
+exports[`The SingleContributionsProcessor matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
-  },
-  "Outputs": {
-    "singlecontributionsprocessordlqurl": {
-      "Value": {
-        "Ref": "singlecontributionsprocessorqueueCF05834A",
-      },
-    },
-    "singlecontributionsprocessorqueueurl": {
-      "Value": {
-        "Ref": "deadletterssinglecontributionsprocessorqueueC118704C",
-      },
-    },
   },
   "Resources": {
     "deadletterssinglecontributionsprocessorqueueC118704C": {
@@ -57,7 +45,7 @@ exports[`The SingleContributionsProcessorStack matches the snapshot 1`] = `
               "Arn",
             ],
           },
-          "maxReceiveCount": 2,
+          "maxReceiveCount": 3,
         },
         "SqsManagedSseEnabled": true,
         "Tags": [
@@ -86,23 +74,11 @@ exports[`The SingleContributionsProcessorStack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The SingleContributionsProcessorStack matches the snapshot 2`] = `
+exports[`The SingleContributionsProcessor matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
-  },
-  "Outputs": {
-    "singlecontributionsprocessordlqurl": {
-      "Value": {
-        "Ref": "singlecontributionsprocessorqueueCF05834A",
-      },
-    },
-    "singlecontributionsprocessorqueueurl": {
-      "Value": {
-        "Ref": "deadletterssinglecontributionsprocessorqueueC118704C",
-      },
-    },
   },
   "Resources": {
     "deadletterssinglecontributionsprocessorqueueC118704C": {
@@ -143,7 +119,7 @@ exports[`The SingleContributionsProcessorStack matches the snapshot 2`] = `
               "Arn",
             ],
           },
-          "maxReceiveCount": 2,
+          "maxReceiveCount": 3,
         },
         "SqsManagedSseEnabled": true,
         "Tags": [
