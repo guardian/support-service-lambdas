@@ -6,7 +6,7 @@ import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
 
 export const APP_NAME = 'single-contributions-processor';
 
-export class SingleContributionsProcessorStack extends GuStack {
+export class SingleContributionsProcessor extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
@@ -21,7 +21,7 @@ export class SingleContributionsProcessorStack extends GuStack {
 			encryption: QueueEncryption.SQS_MANAGED,
 			deadLetterQueue: {
 				queue: deadLetterQueue,
-				maxReceiveCount: 2,
+				maxReceiveCount: 3,
 			},
 		});
 	}

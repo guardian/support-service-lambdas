@@ -1,9 +1,7 @@
 name: Build failed-national-deliveries-processor
 
 on:
-  push:
-    branches:
-      - main  # 
+  - push
 
 jobs:
   CI:
