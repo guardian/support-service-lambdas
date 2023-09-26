@@ -33,5 +33,5 @@ new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
 new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-CODE", {stack: "membership", stage: "CODE"});
 new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-PROD", {stack: "membership", stage: "PROD"});
-new SingleContributionsProcessor(app, `${SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME}-CODE`, {stack: "membership", stage: "PROD"})
+new SingleContributionsProcessor(app, `${SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME}-CODE`, {stack: "membership", stage: "CODE"})
 new SingleContributionsProcessor(app, `${SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME}-PROD`, {stack: "membership", stage: "PROD"})
