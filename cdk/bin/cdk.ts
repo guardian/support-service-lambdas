@@ -3,7 +3,7 @@ import { App } from "aws-cdk-lib";
 import { FailedNationalDeliveriesProcessor } from "../lib/failed-national-deliveries-processor";
 import type { NewProductApiProps } from "../lib/new-product-api";
 import { NewProductApi } from "../lib/new-product-api";
-import { SingleContributionsProcessor, APP_NAME as SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME } from "../lib/single-contributions-processor";
+import { APP_NAME as SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME, SingleContributionsProcessor } from "../lib/single-contributions-processor";
 
 const app = new App();
 
