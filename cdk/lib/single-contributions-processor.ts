@@ -15,7 +15,7 @@ export class SingleContributionsProcessor extends GuStack {
 			encryption: QueueEncryption.SQS_MANAGED,
 		});
 
-		const queue = new Queue(this, `${APP_NAME}-queue`, {
+		new Queue(this, `${APP_NAME}-queue`, {
 			queueName: `${APP_NAME}-queue-${props.stage}`,
 			encryption: QueueEncryption.SQS_MANAGED,
 			deadLetterQueue: {
