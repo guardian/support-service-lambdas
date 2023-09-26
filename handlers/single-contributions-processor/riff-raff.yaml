@@ -6,7 +6,7 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cloudformation:
+  single-contributions-processor-cloudformation:
     type: cloud-formation
     app: single-contributions-processor
     parameters:

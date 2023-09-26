@@ -50,13 +50,13 @@ new FailedNationalDeliveriesProcessor(
 	'failed-national-deliveries-processor-PROD',
 	{ stack: 'membership', stage: 'PROD' },
 );
-// new SingleContributionsProcessorStack(
-// 	app,
-// 	`${SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME}-CODE`,
-// 	{ stack: 'membership', stage: 'CODE' },
-// );
-// new SingleContributionsProcessorStack(
-// 	app,
-// 	`${SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME}-PROD`,
-// 	{ stack: 'membership', stage: 'PROD' },
-// );
+new SingleContributionsProcessorStack(
+	app,
+	`${SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME}-CODE`,
+	{ stack: 'membership', stage: 'CODE' },
+);
+new SingleContributionsProcessorStack(
+	app,
+	`${SINGLE_CONTRIBUTIONS_PROCESSOR_APP_NAME}-PROD`,
+	{ stack: 'membership', stage: 'PROD' },
+);

@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         subproject:
-          # - new-product-api
+          - new-product-api
           - single-contributions-processor
     runs-on: ubuntu-latest
     permissions:
