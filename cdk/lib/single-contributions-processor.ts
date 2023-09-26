@@ -10,7 +10,6 @@ export class SingleContributionsProcessor extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
-		// Resources
 		const deadLetterQueue = new Queue(this, `dead-letters-${APP_NAME}-queue`, {
 			queueName: `dead-letters-${APP_NAME}-queue-${props.stage}`,
 			encryption: QueueEncryption.SQS_MANAGED,
