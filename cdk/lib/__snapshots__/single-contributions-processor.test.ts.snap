@@ -23,6 +23,7 @@ exports[`The SingleContributionsProcessorStack matches the snapshot 1`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "QueueName": "dead-letters-single-contributions-processor-queue-CODE",
+        "SqsManagedSseEnabled": true,
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -58,6 +59,7 @@ exports[`The SingleContributionsProcessorStack matches the snapshot 1`] = `
           },
           "maxReceiveCount": 2,
         },
+        "SqsManagedSseEnabled": true,
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -107,6 +109,7 @@ exports[`The SingleContributionsProcessorStack matches the snapshot 2`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "QueueName": "dead-letters-single-contributions-processor-queue-PROD",
+        "SqsManagedSseEnabled": true,
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -142,6 +145,7 @@ exports[`The SingleContributionsProcessorStack matches the snapshot 2`] = `
           },
           "maxReceiveCount": 2,
         },
+        "SqsManagedSseEnabled": true,
         "Tags": [
           {
             "Key": "gu:cdk:version",
