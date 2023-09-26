@@ -383,6 +383,12 @@ lazy val `new-product-api` = lambdaProject(
   )
   .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
 
+lazy val `single-contributions-processor` = lambdaProject(
+  "single-contributions-processor",
+  "Create a single contribution record in Salesforce",
+  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3, upickle),
+)
+
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
   "find and mark accounts that are out of the retention period",
