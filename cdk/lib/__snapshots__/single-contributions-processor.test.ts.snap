@@ -11,7 +11,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
       "DeletionPolicy": "Delete",
       "Properties": {
         "QueueName": "dead-letters-single-contribution-salesforce-writes-queue-CODE",
-        "SqsManagedSseEnabled": true,
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -47,7 +46,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
           },
           "maxReceiveCount": 3,
         },
-        "SqsManagedSseEnabled": true,
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -85,7 +83,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
       "DeletionPolicy": "Delete",
       "Properties": {
         "QueueName": "dead-letters-single-contribution-salesforce-writes-queue-PROD",
-        "SqsManagedSseEnabled": true,
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -121,7 +118,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
           },
           "maxReceiveCount": 3,
         },
-        "SqsManagedSseEnabled": true,
         "Tags": [
           {
             "Key": "gu:cdk:version",
