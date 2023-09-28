@@ -11,7 +11,7 @@ jobs:
       matrix:
         subproject:
           - new-product-api
-          - single-contributions-processor
+          - single-contribution-salesforce-writes
     runs-on: ubuntu-latest
     permissions:
       id-token: write

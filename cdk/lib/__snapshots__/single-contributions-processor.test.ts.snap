@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The SingleContributionsProcessor stack matches the snapshot 1`] = `
+exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
   },
   "Resources": {
-    "deadletterssinglecontributionsprocessorqueueC118704C": {
+    "deadletterssinglecontributionsalesforcewritesqueueA3CB7F4A": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "dead-letters-single-contributions-processor-queue-CODE",
+        "QueueName": "dead-letters-single-contribution-salesforce-writes-queue-CODE",
         "SqsManagedSseEnabled": true,
         "Tags": [
           {
@@ -34,14 +34,14 @@ exports[`The SingleContributionsProcessor stack matches the snapshot 1`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
-    "singlecontributionsprocessorqueueCF05834A": {
+    "singlecontributionsalesforcewritesqueue227D3F6D": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "single-contributions-processor-queue-CODE",
+        "QueueName": "single-contribution-salesforce-writes-queue-CODE",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
-              "deadletterssinglecontributionsprocessorqueueC118704C",
+              "deadletterssinglecontributionsalesforcewritesqueueA3CB7F4A",
               "Arn",
             ],
           },
@@ -74,17 +74,17 @@ exports[`The SingleContributionsProcessor stack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The SingleContributionsProcessor stack matches the snapshot 2`] = `
+exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
   },
   "Resources": {
-    "deadletterssinglecontributionsprocessorqueueC118704C": {
+    "deadletterssinglecontributionsalesforcewritesqueueA3CB7F4A": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "dead-letters-single-contributions-processor-queue-PROD",
+        "QueueName": "dead-letters-single-contribution-salesforce-writes-queue-PROD",
         "SqsManagedSseEnabled": true,
         "Tags": [
           {
@@ -108,14 +108,14 @@ exports[`The SingleContributionsProcessor stack matches the snapshot 2`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
-    "singlecontributionsprocessorqueueCF05834A": {
+    "singlecontributionsalesforcewritesqueue227D3F6D": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "single-contributions-processor-queue-PROD",
+        "QueueName": "single-contribution-salesforce-writes-queue-PROD",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
-              "deadletterssinglecontributionsprocessorqueueC118704C",
+              "deadletterssinglecontributionsalesforcewritesqueueA3CB7F4A",
               "Arn",
             ],
           },

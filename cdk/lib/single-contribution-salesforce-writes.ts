@@ -3,9 +3,9 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
 
-export const APP_NAME = 'single-contributions-processor';
+export const APP_NAME = 'single-contribution-salesforce-writes';
 
-export class SingleContributionsProcessor extends GuStack {
+export class SingleContributionSalesforceWrites extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
