@@ -49,7 +49,7 @@ object AddContribution {
         request.planId,
         account.currency,
       ).toApiGatewayOp.toAsync
-      acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
+      acceptanceDate = request.startDate
       planAndCharge <- getPlanAndCharge(request.planId)
         .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
         .toAsync
@@ -115,11 +115,6 @@ object AddContribution {
       sendConfirmationEmail = sendConfirmationEmail,
     ) _
 
-  }
-
-  def paymentDelayFor(paymentMethod: PaymentMethod): Long = paymentMethod match {
-    case d: DirectDebit => 10L
-    case _ => 0L
   }
 
   def toContributionEmailData(
