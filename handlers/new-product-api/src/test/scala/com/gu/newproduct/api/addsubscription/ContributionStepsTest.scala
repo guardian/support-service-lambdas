@@ -42,7 +42,7 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
 
     val expectedIn = ZuoraCreateSubRequest(
       ZuoraAccountId("acccc"),
-      LocalDate.of(2018, 7, 28),
+      LocalDate.of(2018, 7, 18),
       CaseId("case"),
       AcquisitionSource("CSR"),
       CreatedByCSR("bob"),

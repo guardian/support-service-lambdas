@@ -16,7 +16,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAcc
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetContacts, GetPaymentMethod}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, ProductRatePlanId, ZuoraIds}
