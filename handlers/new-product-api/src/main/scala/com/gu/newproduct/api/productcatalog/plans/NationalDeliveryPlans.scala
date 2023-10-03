@@ -5,9 +5,7 @@ import com.gu.newproduct.api.productcatalog._
 
 import java.time.{DayOfWeek, LocalDate}
 
-class NationalDeliveryPlans(
-    getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate,
-) {
+class NationalDeliveryPlans(getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate) {
 
   import PaperDays._
   private val SubscriptionStartDateWindowSize = WindowSizeDays(28)

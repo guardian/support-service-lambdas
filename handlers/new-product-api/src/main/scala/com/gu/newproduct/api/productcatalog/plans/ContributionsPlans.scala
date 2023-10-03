@@ -7,18 +7,16 @@ import java.time.LocalDate
 
 class ContributionsPlans(today: LocalDate) {
 
-  private val ContributionStartDateWindowSize = WindowSizeDays(1)
-
-  private val contributionsRule = StartDateRules(
+  private val rule = StartDateRules(
     windowRule = WindowRule(
       startDate = today,
-      maybeSize = Some(ContributionStartDateWindowSize),
+      maybeSize = Some(WindowSizeDays(1)),
     ),
   )
 
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
-    (MonthlyContribution, PlanDescription("Monthly"), contributionsRule, Monthly),
-    (AnnualContribution, PlanDescription("Annual"), contributionsRule, Monthly),
+    (MonthlyContribution, PlanDescription("Monthly"), rule, Monthly),
+    (AnnualContribution, PlanDescription("Annual"), rule, Monthly),
   )
 
 }

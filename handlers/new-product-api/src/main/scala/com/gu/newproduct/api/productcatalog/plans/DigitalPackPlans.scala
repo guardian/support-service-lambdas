@@ -7,21 +7,18 @@ import java.time.LocalDate
 
 class DigitalPackPlans(today: LocalDate) {
 
-  private val DigiPackFreeTrialPeriodDays = 14
-  private val DigiPackStartDateWindowSize = WindowSizeDays(90)
+  private val FreeTrialPeriodDays = 14
 
-  private val digiPackWindowRule = WindowRule(
-    startDate = today.plusDays(DigiPackFreeTrialPeriodDays.toLong),
-    maybeSize = Some(DigiPackStartDateWindowSize),
-  )
-
-  private val digipackStartRules = StartDateRules(
-    windowRule = digiPackWindowRule,
+  private val startRules = StartDateRules(
+    windowRule = WindowRule(
+      startDate = today.plusDays(FreeTrialPeriodDays.toLong),
+      maybeSize = Some(WindowSizeDays(90)),
+    ),
   )
 
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
-    (DigipackAnnual, PlanDescription("Annual"), digipackStartRules, Annual),
-    (DigipackMonthly, PlanDescription("Monthly"), digipackStartRules, Monthly),
+    (DigipackAnnual, PlanDescription("Annual"), startRules, Annual),
+    (DigipackMonthly, PlanDescription("Monthly"), startRules, Monthly),
   )
 
 }

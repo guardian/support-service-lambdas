@@ -16,7 +16,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAcc
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetContacts, GetPaymentMethod}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, ProductRatePlanId, ZuoraIds}
@@ -49,7 +49,7 @@ object AddContribution {
         request.planId,
         account.currency,
       ).toApiGatewayOp.toAsync
-      acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
+      acceptanceDate = request.startDate
       planAndCharge <- getPlanAndCharge(request.planId)
         .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
         .toAsync
@@ -115,11 +115,6 @@ object AddContribution {
       sendConfirmationEmail = sendConfirmationEmail,
     ) _
 
-  }
-
-  def paymentDelayFor(paymentMethod: PaymentMethod): Long = paymentMethod match {
-    case d: DirectDebit => 10L
-    case _ => 0L
   }
 
   def toContributionEmailData(
