@@ -13,3 +13,13 @@ deployments:
       templateStagePaths:
         CODE: single-contribution-salesforce-writes-CODE.template.json
         PROD: single-contribution-salesforce-writes-PROD.template.json
+
+  single-contribution-salesforce-writes:
+    type: aws-lambda
+    parameters:
+      fileName: single-contribution-salesforce-writes.jar
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - single-contribution-salesforce-writes-
+    dependencies: [single-contribution-salesforce-writes-cloudformation]

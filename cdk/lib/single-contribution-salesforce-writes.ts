@@ -1,9 +1,12 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import type { App } from 'aws-cdk-lib';
-import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
+import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
+import { type App, Duration } from 'aws-cdk-lib';
+import { EventBus, Match, Rule } from 'aws-cdk-lib/aws-events';
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 
 export const APP_NAME = 'single-contribution-salesforce-writes';
@@ -14,6 +17,7 @@ export class SingleContributionSalesforceWrites extends GuStack {
 
 		const deadLetterQueue = new Queue(this, `dead-letters-${APP_NAME}-queue`, {
 			queueName: `dead-letters-${APP_NAME}-queue-${props.stage}`,
+			retentionPeriod: Duration.days(14),
 		});
 
 		const queue = new Queue(this, `${APP_NAME}-queue`, {
@@ -23,10 +27,6 @@ export class SingleContributionSalesforceWrites extends GuStack {
 				maxReceiveCount: 3,
 			},
 		});
-
-		enum AcquisitionBusSource {
-			PaymentApi = '{"prefix": "payment-api"}',
-		}
 
 		const acquisitionBusName = `acquisitions-bus-${props.stage}`;
 
@@ -45,14 +45,14 @@ export class SingleContributionSalesforceWrites extends GuStack {
 				eventPattern: {
 					region: [this.region],
 					account: [this.account],
-					source: [AcquisitionBusSource.PaymentApi],
+					source: Match.prefix('payment-api'),
 				},
 				eventBus: acquisitionBus,
 				targets: [new SqsQueue(queue)],
 			},
 		);
 
-		const policyStatement = new PolicyStatement({
+		const sendMessagePolicyStatement = new PolicyStatement({
 			sid: 'Allow acquisition bus to send messages to the single-contribution-salesforce-writes-queue',
 			principals: [new ServicePrincipal('events.amazonaws.com')],
 			effect: Effect.ALLOW,
@@ -65,6 +65,27 @@ export class SingleContributionSalesforceWrites extends GuStack {
 			},
 		});
 
-		queue.addToResourcePolicy(policyStatement);
+		queue.addToResourcePolicy(sendMessagePolicyStatement);
+
+		const lambda = new GuLambdaFunction(this, `${APP_NAME}-lambda`, {
+			app: APP_NAME,
+			runtime: Runtime.JAVA_11,
+			fileName: `${APP_NAME}.jar`,
+			functionName: `${APP_NAME}-${props.stage}`,
+			handler:
+				'com.gu.singleContributionSalesforceWrites.handlers.CreateSalesforceSingleContributionRecordHandler::handleRequest',
+			events: [new SqsEventSource(queue)],
+		});
+
+		const getSecretValuePolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			resources: [
+				`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${props.stage}/Salesforce/User/SingleContributionSalesforceWrites-*`,
+				`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${props.stage}/Salesforce/ConnectedApp/SingleContributionSalesforceWrites-*`,
+			],
+			actions: ['secretsmanager:GetSecretValue'],
+		});
+
+		lambda.addToRolePolicy(getSecretValuePolicyStatement);
 	}
 }
