@@ -23,8 +23,8 @@ object DeliveryCreditProduct {
     )
 
     val NationalDelivery: CreditProduct = CreditProduct(
-      productRatePlanId = "TBD",
-      productRatePlanChargeId = "TBC",
+      productRatePlanId = "8a1299c28aff1e73018b004582a22581",
+      productRatePlanChargeId = "8a1299c28aff1e73018b004583002583",
       productRatePlanChargeName = ratePlanChargeName,
     )
   }
@@ -43,7 +43,6 @@ object DeliveryCreditProduct {
       productRatePlanChargeName = ratePlanChargeName,
     )
 
-    // DO NOT USE MANUALLY: Delivery-problem credit - automated - National Delivery (CODE)
     val NationalDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "8ad08ad58aff62ad018aff6fbea80016",
       productRatePlanChargeId = "8ad08ad58aff62ad018aff6fc5fd005e",

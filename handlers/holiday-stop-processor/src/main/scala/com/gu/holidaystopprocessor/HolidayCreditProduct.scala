@@ -40,8 +40,8 @@ object HolidayCreditProduct {
     )
 
     val NationalDelivery: CreditProduct = CreditProduct(
-      productRatePlanId = "TBD",
-      productRatePlanChargeId = "TBC",
+      productRatePlanId = "8a128e208aff0721018b003d0dfe59d9",
+      productRatePlanChargeId = "8a128e208aff0721018b003d0e5959e0",
       ProductRatePlanChargeName,
     )
   }
@@ -72,7 +72,6 @@ object HolidayCreditProduct {
       ProductRatePlanChargeName,
     )
 
-    // DO NOT USE MANUALLY: Holiday credit - automated - National Delivery (CODE)
     val NationalDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "8ad08f068aff62a4018affd6efc7743c",
       productRatePlanChargeId = "8ad08f068aff62a4018affd6eff97440",
