@@ -12,7 +12,7 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
+import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperNationalDelivery, ZuoraProductType}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._
@@ -64,7 +64,7 @@ object DeliveryCreditProcessor extends Logging {
       }
 
   val processAllProducts: RIO[Clock, List[DeliveryCreditResult]] = {
-    val productTypes = List(NewspaperHomeDelivery, GuardianWeekly)
+    val productTypes = List(NewspaperHomeDelivery, GuardianWeekly, NewspaperNationalDelivery)
     for {
       sfAuthConfig <- sfConfig
       zConfig <- zuoraConfig
