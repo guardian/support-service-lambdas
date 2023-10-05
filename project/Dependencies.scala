@@ -11,7 +11,7 @@ object Dependencies {
   val catsVersion = "2.9.0"
   val catsEffectVersion = "2.5.5"
 
-  val logging = Seq(
+  val logging: Seq[ModuleID] = Seq(
     "ch.qos.logback" % "logback-classic" % "1.4.7",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
@@ -79,7 +79,7 @@ object Dependencies {
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
 
   // Testing
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.8.3" % Test
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.16" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
@@ -88,7 +88,7 @@ object Dependencies {
   val jacksonVersion = "2.13.2"
   val jacksonDatabindVersion = "2.13.2.2"
 
-  val jacksonDependencies = Seq(
+  val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
