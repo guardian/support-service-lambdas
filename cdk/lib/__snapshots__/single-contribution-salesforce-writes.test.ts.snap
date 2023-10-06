@@ -7,6 +7,40 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
     "gu:cdk:version": "TEST",
   },
   "Resources": {
+    "AcquisitionBusToSingleContributionSalesforceWritesQueueRule2CC5A818": {
+      "Properties": {
+        "Description": "Send payment api events to the single-contribution-salesforce-writes-queue",
+        "EventBusName": "acquisitions-bus-CODE",
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+          "region": [
+            {
+              "Ref": "AWS::Region",
+            },
+          ],
+          "source": [
+            "payment-api",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "singlecontributionsalesforcewritesqueue227D3F6D",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "deadletterssinglecontributionsalesforcewritesqueueA3CB7F4A": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -68,6 +102,72 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
+    "singlecontributionsalesforcewritesqueuePolicyDC24ED87": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "AcquisitionBusToSingleContributionSalesforceWritesQueueRule2CC5A818",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "singlecontributionsalesforcewritesqueue227D3F6D",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "AcquisitionBusToSingleContributionSalesforceWritesQueueRule2CC5A818",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "singlecontributionsalesforcewritesqueue227D3F6D",
+                  "Arn",
+                ],
+              },
+              "Sid": "Allow acquisition bus to send messages to the single-contribution-salesforce-writes-queue",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "singlecontributionsalesforcewritesqueue227D3F6D",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
   },
 }
 `;
@@ -79,6 +179,40 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
     "gu:cdk:version": "TEST",
   },
   "Resources": {
+    "AcquisitionBusToSingleContributionSalesforceWritesQueueRule2CC5A818": {
+      "Properties": {
+        "Description": "Send payment api events to the single-contribution-salesforce-writes-queue",
+        "EventBusName": "acquisitions-bus-PROD",
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+          "region": [
+            {
+              "Ref": "AWS::Region",
+            },
+          ],
+          "source": [
+            "payment-api",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "singlecontributionsalesforcewritesqueue227D3F6D",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "deadletterssinglecontributionsalesforcewritesqueueA3CB7F4A": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -139,6 +273,72 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "singlecontributionsalesforcewritesqueuePolicyDC24ED87": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "AcquisitionBusToSingleContributionSalesforceWritesQueueRule2CC5A818",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "singlecontributionsalesforcewritesqueue227D3F6D",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "AcquisitionBusToSingleContributionSalesforceWritesQueueRule2CC5A818",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "singlecontributionsalesforcewritesqueue227D3F6D",
+                  "Arn",
+                ],
+              },
+              "Sid": "Allow acquisition bus to send messages to the single-contribution-salesforce-writes-queue",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "singlecontributionsalesforcewritesqueue227D3F6D",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
     },
   },
 }
