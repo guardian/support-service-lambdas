@@ -23,7 +23,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
             },
           ],
           "source": [
-            "payment-api",
+            "{"prefix": "payment-api"}",
           ],
         },
         "State": "ENABLED",
@@ -195,7 +195,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
             },
           ],
           "source": [
-            "payment-api",
+            "{"prefix": "payment-api"}",
           ],
         },
         "State": "ENABLED",

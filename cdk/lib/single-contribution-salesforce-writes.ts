@@ -25,7 +25,7 @@ export class SingleContributionSalesforceWrites extends GuStack {
 		});
 
 		enum AcquisitionBusSource {
-			PaymentApi = 'payment-api',
+			PaymentApi = '{"prefix": "payment-api"}',
 		}
 
 		const acquisitionBusName = `acquisitions-bus-${props.stage}`;
