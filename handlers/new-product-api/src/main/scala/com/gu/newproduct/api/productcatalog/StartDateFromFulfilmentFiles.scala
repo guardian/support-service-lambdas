@@ -28,6 +28,7 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
     ProductType.NewspaperHomeDelivery,
     ProductType.NewspaperVoucherBook,
     ProductType.NewspaperDigitalVoucher,
+    ProductType.NewspaperNationalDelivery,
   )
 
   def apply(
@@ -39,7 +40,7 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
       fulfilmentFileMap <- fetchFulfilmentFilesFromS3(productTypesWithFulfilmentDateFiles, fetchString, today, stage)
       mappings <- getStartDatesFromFulfillmentFiles(fulfilmentFileMap)
     } yield {
-      logger.info(s"Successfully fetched start date mappings from fulfilment date files: ${mappings}")
+      logger.info(s"Successfully fetched start date mappings from fulfilment date files: $mappings")
       lookupStartDate(mappings) _
     }
   }

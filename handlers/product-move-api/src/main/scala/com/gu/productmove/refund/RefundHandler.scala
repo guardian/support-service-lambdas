@@ -9,8 +9,8 @@ import com.gu.productmove.refund.*
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustmentLive,
   GetInvoiceLive,
-  GetInvoiceItemsForSubscription,
-  GetInvoiceItemsForSubscriptionLive,
+  GetRefundInvoiceDetails,
+  GetRefundInvoiceDetailsLive,
   InvoiceItemAdjustment,
   InvoiceItemAdjustmentLive,
 }
@@ -52,7 +52,7 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
             GuStageLive.layer,
             InvoicingApiRefundLive.layer,
             CreditBalanceAdjustmentLive.layer,
-            GetInvoiceItemsForSubscriptionLive.layer,
+            GetRefundInvoiceDetailsLive.layer,
             GetInvoiceLive.layer,
             InvoiceItemAdjustmentLive.layer,
             SecretsLive.layer,

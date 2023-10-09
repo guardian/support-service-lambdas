@@ -1,14 +1,14 @@
 package com.gu.zuora.subscription
 
 import com.softwaremill.diffx.generic.auto._
-import com.softwaremill.diffx.scalatest.DiffMatcher
+import com.softwaremill.diffx.scalatest.DiffShouldMatcher
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.time.LocalDate
 
-class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher with EitherValues {
+class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMatcher with EitherValues {
 
   it should "extend term of sub if invoice date is later than term end" in {
     val invoiceDate = InvoiceDate(LocalDate.parse("2020-06-14"))
@@ -25,7 +25,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       maybeInvoiceDate = Some(invoiceDate),
     )
 
-    update.value should matchTo(
+    update.value shouldMatchTo(
       SubscriptionUpdate(
         currentTerm = Some(418),
         currentTermPeriodType = Some("Day"),

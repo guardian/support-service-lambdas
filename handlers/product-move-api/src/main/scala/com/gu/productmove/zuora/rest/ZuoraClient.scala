@@ -41,7 +41,7 @@ object ZuoraClientLive {
         secrets <- ZIO.service[Secrets]
         zuoraApiSecrets <- secrets.getZuoraApiUserSecrets
         baseUrl <- ZIO.fromEither(Uri.parse(zuoraApiSecrets.baseUrl + "/").left.map(e => InternalServerError(e)))
-        _ <- ZIO.log("zuoraBaseUrl:   " + baseUrl.toString)
+        _ <- ZIO.logDebug("zuoraBaseUrl:   " + baseUrl.toString)
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield ZuoraClientLive(
         baseUrl,
@@ -110,7 +110,7 @@ object ZuoraRestBody {
             .gen[ZuoraSuccessSize]
             .decodeJson(body)
             .left
-            .map(InternalServerError(_))
+            .map(InternalServerError.apply)
           succeeded = zuoraResponse.size.isEmpty // size field only exists if it's not found.
           isSuccessful <- if (succeeded) Right(()) else Left(InternalServerError(s"size = 0, body: $body"))
         } yield ()
@@ -121,7 +121,7 @@ object ZuoraRestBody {
             .gen[ZuoraSuccessLowercase]
             .decodeJson(body)
             .left
-            .map(InternalServerError(_))
+            .map(InternalServerError.apply)
           _ <-
             if (zuoraResponse.success) Right(())
             else
@@ -140,7 +140,7 @@ object ZuoraRestBody {
             .gen[ZuoraSuccessCapitalised]
             .decodeJson(body)
             .left
-            .map(InternalServerError(_))
+            .map(InternalServerError.apply)
           isSuccessful <-
             if (zuoraResponse.Success) Right(())
             else

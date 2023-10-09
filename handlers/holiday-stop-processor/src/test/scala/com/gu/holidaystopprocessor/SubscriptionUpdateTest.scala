@@ -11,7 +11,7 @@ import com.gu.zuora.subscription.{
   Fixtures => SubscriptionFixtures,
 }
 import com.softwaremill.diffx.generic.auto._
-import com.softwaremill.diffx.scalatest.DiffMatcher
+import com.softwaremill.diffx.scalatest.DiffShouldMatcher
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -19,7 +19,7 @@ import org.scalatest.matchers.should.Matchers
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
-class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher with EitherValues {
+class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMatcher with EitherValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-12")))
   val effectiveStartDate = LocalDate.of(2019, 6, 12)
   val dateCreditIsApplied = effectiveStartDate.plusMonths(3)
@@ -164,7 +164,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       stoppedPublicationDate,
       Some(givenInvoiceDate),
     )
-    update.value should matchTo(
+    update.value shouldMatchTo(
       SubscriptionUpdate(
         currentTerm = Some(536),
         currentTermPeriodType = Some("Day"),

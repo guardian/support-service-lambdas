@@ -21,7 +21,7 @@ Mappings:
       SalesforceUser: BillingAccountRemoverAPIUser
       ZuoraUrl: https://rest.zuora.com
       ZuoraAccount: SupportServiceLambdas
-      Schedule: 'cron(00 07,08,09,10 * * ? *)'
+      Schedule: 'cron(00 04,05,06,07,08,09,10 * * ? *)'
 
 Resources:
   SFBillingAccountRemoverRole:

@@ -1,0 +1,15 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  single-contribution-salesforce-writes-cloudformation:
+    type: cloud-formation
+    app: single-contribution-salesforce-writes
+    parameters:
+      templateStagePaths:
+        CODE: single-contribution-salesforce-writes-CODE.template.json
+        PROD: single-contribution-salesforce-writes-PROD.template.json

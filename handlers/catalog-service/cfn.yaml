@@ -100,7 +100,7 @@ Resources:
     CatalogServiceScheduler:
         Type: "AWS::Events::Rule"
         Properties:
-            Description: Triggers the COFR Catalog Service Lambda on a schedule
+            Description: Triggers the CODE Catalog Service Lambda on a schedule
             Name: !Sub catalog-service-scheduler-zuora-code-${Stage}
             ScheduleExpression: rate(10 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             Targets:

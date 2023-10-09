@@ -3,3 +3,7 @@
 target/
 cdk-cfn.yaml
 metals.sbt
+.metals/
+.vscode/
+project/.bloop/
+project/project/

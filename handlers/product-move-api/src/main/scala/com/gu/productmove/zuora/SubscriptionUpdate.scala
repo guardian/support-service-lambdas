@@ -1,6 +1,5 @@
 package com.gu.productmove.zuora
 
-import com.gu.effects.GetFromS3
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.*
 import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, MonthlySupporterPlus}
@@ -24,7 +23,6 @@ import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
 import com.gu.util.config
-import com.gu.util.config.ZuoraEnvironment
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
@@ -121,7 +119,7 @@ case class SubscriptionUpdateInvoiceItem(
     taxAmount: BigDecimal,
     productRatePlanChargeId: String,
 ) {
-  val totalAmount = chargeAmount + taxAmount
+  val totalAmount: BigDecimal = chargeAmount + taxAmount
 }
 
 case class SubscriptionUpdateInvoice(

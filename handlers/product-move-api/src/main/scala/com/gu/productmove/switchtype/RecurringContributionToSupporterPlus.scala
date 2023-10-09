@@ -67,6 +67,8 @@ import com.gu.productmove.{
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config
 import com.gu.util.config.ZuoraEnvironment
+import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdateResponse
+import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdatePreviewResponse
 import zio.*
 import zio.json.*
 
@@ -111,12 +113,12 @@ object RecurringContributionToSupporterPlus {
     OutputBody,
   ] = {
     (for {
-      _ <- ZIO.log("PostData: " + postData.toString)
+      _ <- ZIO.log("RecurringContributionToSupporterPlus PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName)
 
       currentRatePlan <- getSingleOrNotEligible(
-        subscription.ratePlans,
-        s"Subscription: ${subscriptionName.value} has more than one ratePlan",
+        subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")),
+        s"Subscription: ${subscriptionName.value} has more than one active ratePlan",
       )
       ratePlanCharge <- getSingleOrNotEligible(
         currentRatePlan.ratePlanCharges,
@@ -274,8 +276,6 @@ object RecurringContributionToSupporterPlus {
         )
     }
 
-    given JsonDecoder[SubscriptionUpdatePreviewResponse] = DeriveJsonDecoder.gen[SubscriptionUpdatePreviewResponse]
-
     response <- SubscriptionUpdate
       .update[SubscriptionUpdatePreviewResponse](subscriptionName, updateRequestBody)
 
@@ -366,8 +366,6 @@ object RecurringContributionToSupporterPlus {
           } yield amount
         } else ZIO.succeed(BigDecimal(1))
       collectPayment = !(amountPayableToday > BigDecimal(0) && amountPayableToday < BigDecimal(0.50))
-
-      given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]
 
       updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
         case (addRatePlan, removeRatePlan) =>

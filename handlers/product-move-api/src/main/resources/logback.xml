@@ -7,7 +7,7 @@
 
     <!-- see https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/java-dg-logging.html -->
     <logger name="software.amazon.awssdk" level="WARN"/>
-    <logger name="software.amazon.awssdk.request" level="DEBUG"/>
+    <logger name="software.amazon.awssdk.request" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

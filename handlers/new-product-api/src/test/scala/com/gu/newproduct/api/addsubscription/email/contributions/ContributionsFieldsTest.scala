@@ -1,30 +1,22 @@
 package com.gu.newproduct.api.addsubscription.email.contributions
 
-import java.time.LocalDate
-
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.email.ContributionsEmailData
+import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
-  BankAccountName,
-  BankAccountNumberMask,
-  DirectDebit,
-  MandateId,
-  NonDirectDebitMethod,
-  PaymentMethod,
-  SortCode,
-}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
-import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
-import com.gu.newproduct.api.productcatalog._
-import play.api.libs.json.Json
-import ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
+import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
+import com.gu.newproduct.api.productcatalog._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.Json
+
+import java.time.LocalDate
 class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
 
   val billto = BillToContact(

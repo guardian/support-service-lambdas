@@ -1,6 +1,5 @@
 package com.gu.productmove.endpoint.move
 
-import com.gu.effects.GetFromS3
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{
   ProductRatePlanId,
@@ -8,7 +7,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.{
   ZuoraIds,
   zuoraIdsForStage,
 }
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, PricesFromZuoraCatalog}
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
@@ -23,7 +22,7 @@ import com.gu.productmove.*
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config
-import com.gu.util.config.ZuoraEnvironment
+import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdateResponse
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.*
 import sttp.tapir.json.zio.jsonBody
@@ -44,7 +43,7 @@ object ToRecurringContribution {
     OutputBody,
   ] = {
     (for {
-      _ <- ZIO.log("PostData: " + postData.toString)
+      _ <- ZIO.log("ToRecurringContribution PostData: " + postData.toString)
       subscription <- GetSubscription.get(subscriptionName)
 
       activeRatePlanAndCharge <- ZIO
@@ -213,5 +212,3 @@ object ToRecurringContribution {
   } yield (ratePlan, ratePlanCharge)).headOption
 
 }
-
-given JsonDecoder[SubscriptionUpdateResponse] = DeriveJsonDecoder.gen[SubscriptionUpdateResponse]

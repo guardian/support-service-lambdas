@@ -15,7 +15,7 @@ import scala.deriving.Mirror
 //has to be a separate file due to https://github.com/lampepfl/dotty/issues/12498#issuecomment-973991160
 object UpdateSupporterPlusAmountEndpointTypes {
   case class ExpectedInput(
-      @description("Price of new Supporter Plus subscription") newPaymentAmount: BigDecimal,
+      @description("updated supporter plus amount requested by the supporter") newPaymentAmount: BigDecimal,
   )
 
   given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]

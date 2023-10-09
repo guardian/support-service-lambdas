@@ -1,20 +1,19 @@
 package com.gu.newproduct.api.addsubscription.email
 
-import java.time.LocalDate
-
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherSunday
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
-import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, RuleFixtures}
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-
-import scala.concurrent.Future
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.time.LocalDate
+import scala.concurrent.Future
 
 class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   it should "send confirmation email" in {

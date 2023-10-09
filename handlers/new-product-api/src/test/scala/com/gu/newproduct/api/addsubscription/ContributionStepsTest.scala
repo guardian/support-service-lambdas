@@ -1,37 +1,31 @@
 package com.gu.newproduct.api.addsubscription
 
-import java.time.LocalDate
-
 import com.gu.i18n.Currency
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
-  ChargeOverride,
-  SubscriptionName,
-  ZuoraCreateSubRequest,
-  ZuoraCreateSubRequestRatePlan,
-}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription, PlanId}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription, PlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json._
 
+import java.time.LocalDate
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 
 class ContributionStepsTest extends AnyFlatSpec with Matchers {
 
@@ -48,7 +42,7 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
 
     val expectedIn = ZuoraCreateSubRequest(
       ZuoraAccountId("acccc"),
-      LocalDate.of(2018, 7, 28),
+      LocalDate.of(2018, 7, 18),
       CaseId("case"),
       AcquisitionSource("CSR"),
       CreatedByCSR("bob"),
@@ -83,7 +77,7 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
 
     def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.contributionCustomerData)
 
-    def getPlan(planId: PlanId) = Plan(MonthlyContribution, PlanDescription("some description"), testStartDateRules)
+    def getPlan: Map[PlanId, Plan] = Map().withDefaultValue(Plan(MonthlyContribution, PlanDescription("some description"), testStartDateRules))
 
     def currentDate() = LocalDate.of(2018, 12, 12)
 
@@ -104,7 +98,7 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
 
     val fakeAddContributionSteps = AddContribution.steps(
       getPlan,
-      currentDate,
+      currentDate _,
       getPlanAndCharge,
       fakeGetCustomerData,
       fakeValidateRequest,

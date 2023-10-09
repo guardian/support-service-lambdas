@@ -13,6 +13,7 @@ import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assert}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.collection.immutable.{ListMap, SortedMap}
+import scala.collection.mutable
 
 object GetRefundAmountSpec extends ZIOSpecDefault {
 
@@ -21,38 +22,52 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
       test("finds the right amount for a switched sub") {
 
         for {
-          result <- GetInvoiceItemsForSubscription
+          invoicesForRefund <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00492211"))
             .provide(
-              GetInvoiceItemsForSubscriptionLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
               ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.switchedResponse)),
               ZuoraGetLive.layer,
             )
-          negativeInvoiceId <- result.negativeInvoiceId
-          lastPaidInvoiceId <- result.lastPaidInvoiceId
-          lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
         } yield {
-          assert(negativeInvoiceId)(equalTo("8ad0934e86a19cca0186a817d551251e"))
-          assert(lastPaidInvoiceId)(equalTo("8ad08d2986a18ded0186a811f7e56e01"))
-          assert(lastPaidInvoiceAmount)(equalTo(12.14))
+          assert(invoicesForRefund.negativeInvoiceId)(equalTo("8ad0934e86a19cca0186a817d551251e")) &&
+          assert(invoicesForRefund.refundAmount)(equalTo(12.14))
+        }
+      },
+      test("finds the right amount for a switched sub where tax has been paid") {
+
+        for {
+          invoicesForRefund <- GetRefundInvoiceDetails
+            .get(SubscriptionName("A-S01918489"))
+            .provide(
+              GetRefundInvoiceDetailsLive.layer,
+              ZLayer.succeed(
+                new MockStackedGetInvoicesZuoraClient(
+                  mutable.Stack(
+                    MockGetInvoicesZuoraClient.responseWithTaxToMatchTaxItems,
+                    MockGetInvoicesZuoraClient.taxationItemsResponse,
+                  ),
+                ),
+              ),
+              ZuoraGetLive.layer,
+            )
+        } yield {
+          assert(invoicesForRefund.negativeInvoiceId)(equalTo("8ad08dc989e27bbe0189e40e61110aba")) &&
+          assert(invoicesForRefund.refundAmount)(equalTo(10))
         }
       },
       test("finds the right amount for a regular cancelled sub") {
         for {
-          result <- GetInvoiceItemsForSubscription
+          invoicesForRefund <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00502641"))
             .provide(
-              GetInvoiceItemsForSubscriptionLive.layer,
+              GetRefundInvoiceDetailsLive.layer,
               ZLayer.succeed(new MockGetInvoicesZuoraClient(MockGetInvoicesZuoraClient.standardSubResponse)),
               ZuoraGetLive.layer,
             )
-          negativeInvoiceId <- result.negativeInvoiceId
-          lastPaidInvoiceId <- result.lastPaidInvoiceId
-          lastPaidInvoiceAmount <- result.lastPaidInvoiceAmount
         } yield {
-          assert(negativeInvoiceId)(equalTo("8ad09b2186b5fdb50186b708669f2114"))
-          assert(lastPaidInvoiceId)(equalTo("8ad08c8486b5ec340186b70539871852"))
-          assert(lastPaidInvoiceAmount)(equalTo(20))
+          assert(invoicesForRefund.negativeInvoiceId)(equalTo("8ad09b2186b5fdb50186b708669f2114")) &&
+          assert(invoicesForRefund.refundAmount)(equalTo(20))
         }
       },
     )

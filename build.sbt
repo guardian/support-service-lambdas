@@ -1,7 +1,7 @@
-import Dependencies._
+import Dependencies.*
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.10",
+  ThisBuild / scalaVersion := "2.13.12",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -19,13 +19,14 @@ val scala2Settings = Seq(
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard",
+    "-Ytasty-reader",
   ),
   Test / fork := true,
   autoCompilerPlugins := true,
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.2.2",
+  scalaVersion := "3.3.1",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -43,6 +44,7 @@ val scala3Settings = Seq(
 )
 
 lazy val scalafmtSettings = Seq(
+  scalafmtFilter.withRank(KeyRanks.Invisible) := "diff-dirty",
   (Test / test) := ((Test / test) dependsOn (Test / scalafmtCheckAll)).value,
   (Test / testOnly) := ((Test / testOnly) dependsOn (Test / scalafmtCheckAll)).evaluated,
   (Test / testQuick) := ((Test / testQuick) dependsOn (Test / scalafmtCheckAll)).evaluated,
@@ -215,7 +217,7 @@ lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `config-core` = library(project in file("lib/config-core"))
+lazy val `config-core` = library(project in file("lib/config-core"), scala3Settings)
 
 lazy val `config-cats` = library(project in file("lib/config-cats"))
   .settings(
@@ -269,7 +271,7 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
 lazy val `zuora-models` = library(project in file("lib/zuora-models"), scala3Settings)
   .dependsOn(`config-core`)
   .settings(
-    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.15" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
+    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
   )
 
 lazy val `credit-processor` = library(project in file("lib/credit-processor"))
@@ -365,7 +367,7 @@ lazy val `identity-retention` = lambdaProject(
       case "META-INF/kotlin-stdlib.kotlin_module" => MergeStrategy.discard
       case "META-INF/kotlin-stdlib-common.kotlin_module" => MergeStrategy.discard
       case x =>
-        val oldStrategy = (assemblyMergeStrategy).value
+        val oldStrategy = assemblyMergeStrategy.value
         oldStrategy(x)
     },
   )
@@ -376,9 +378,16 @@ lazy val `new-product-api` = lambdaProject(
   Seq(),
 )
   .settings(
-    scalacOptions += "-Ytasty-reader",
+    Test / unmanagedResourceDirectories += (Test / scalaSource).value,
+    Test / unmanagedResources / excludeFilter := "*.scala"
   )
   .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
+
+lazy val `single-contribution-salesforce-writes` = lambdaProject(
+  "single-contribution-salesforce-writes",
+  "Create a single contribution record in Salesforce",
+  Seq(awsSecretsManager, circe, circeParser, scalajHttp, upickle),
+)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
@@ -584,8 +593,8 @@ lazy val `product-move-api` = lambdaProject(
     // product-move-api needs its own deploy task currently because firstly it's Scala 3 so the jar path is different to
     // other projects and secondly the jar is too large to deploy with the aws cli --zip-file parameter so we need to use S3
     deployTo := {
-      import scala.sys.process._
-      import complete.DefaultParsers._
+      import scala.sys.process.*
+      import complete.DefaultParsers.*
       val jarFile = assembly.value
 
       val Seq(stage) = spaceDelimited("<arg>").parsed
@@ -598,7 +607,7 @@ lazy val `product-move-api` = lambdaProject(
       s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
-  .dependsOn(`zuora-models`, `new-product-api`)
+  .dependsOn(`zuora-models`, `effects-sqs`, `new-product-api`)
 
 lazy val `metric-push-api` =
   lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")
@@ -616,7 +625,7 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
     scalatest,
     diffx,
   ),
-).dependsOn(`effects-s3`, `effects-sqs`,  `config-cats`, `zuora-core`, `http4s-lambda-handler`)
+).dependsOn(`effects-s3`, `effects-sqs`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
 lazy val `fulfilment-date-calculator` = lambdaProject(
   "fulfilment-date-calculator",
@@ -627,13 +636,22 @@ lazy val `fulfilment-date-calculator` = lambdaProject(
 lazy val `delivery-records-api` = lambdaProject(
   "delivery-records-api",
   "API for accessing delivery records in Salesforce",
-  Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest),
+  Seq(
+    http4sDsl,
+    http4sCirce,
+    http4sServer,
+    circe,
+    sttpAsyncHttpClientBackendCats,
+    scalatest,
+    diffx
+  ),
 ).dependsOn(
   `effects-s3`,
   `config-core`,
   `salesforce-sttp-client`,
   `salesforce-sttp-test-stub` % Test,
   `http4s-lambda-handler`,
+  testDep,
 )
 
 lazy val `digital-voucher-api` = lambdaProject(
@@ -726,8 +744,8 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     2. run `deployTo CODE`
    */
   deployTo := {
-    import scala.sys.process._
-    import complete.DefaultParsers._
+    import scala.sys.process.*
+    import complete.DefaultParsers.*
     val jarFile = assembly.value
 
     val Seq(stage) = spaceDelimited("<arg>").parsed
@@ -766,8 +784,8 @@ lazy val deployAwsLambda =
     "Directly update AWS lambda code from your local machine instead of via RiffRaff for faster feedback loop",
   )
 deployAwsLambda := {
-  import scala.sys.process._
-  import complete.DefaultParsers._
+  import scala.sys.process.*
+  import complete.DefaultParsers.*
   val Seq(name, stage) = spaceDelimited("<arg>").parsed
   s"aws lambda update-function-code --function-name $name-$stage --zip-file fileb://handlers/$name/target/scala-2.13/$name.jar --profile membership --region eu-west-1".!
 }

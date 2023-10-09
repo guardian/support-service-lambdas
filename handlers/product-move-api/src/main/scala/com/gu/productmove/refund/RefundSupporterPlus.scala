@@ -4,29 +4,31 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
-import com.gu.productmove.zuora.GetInvoiceItemsForSubscription.InvoiceItemsForSubscription
+import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{
   CreditBalanceAdjustment,
   GetAccountLive,
   GetInvoice,
-  GetInvoiceItemsForSubscription,
+  GetRefundInvoiceDetails,
   GetSubscriptionLive,
   InvoiceItemAdjustment,
+  RefundInvoiceDetails,
   SubscribeLive,
   ZuoraCancel,
   ZuoraCancelLive,
   ZuoraSetCancellationReason,
 }
+import sttp.capabilities.zio.ZioStreams
 import sttp.client3.SttpBackend
-import zio.{Task, ZIO}
+import zio.{Clock, Task, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 case class RefundInput(subscriptionName: SubscriptionName)
 
@@ -45,7 +47,7 @@ object RefundSupporterPlus {
       with Stage
       with SttpBackend[Task, Any]
       with AwsS3
-      with GetInvoiceItemsForSubscription
+      with GetRefundInvoiceDetails
       with GetInvoice
       with InvoiceItemAdjustment,
     ErrorResponse,
@@ -54,50 +56,93 @@ object RefundSupporterPlus {
 
     for {
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
-      invoicesItemsForSub <- GetInvoiceItemsForSubscription.get(refundInput.subscriptionName)
-      amount <- invoicesItemsForSub.lastPaidInvoiceAmount
-      _ <- ZIO.log(s"Amount to refund is $amount")
+      refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
+      _ <- ZIO.log(s"Amount to refund is ${refundInvoiceDetails.refundAmount}")
       _ <- InvoicingApiRefund.refund(
         refundInput.subscriptionName,
-        amount,
+        refundInvoiceDetails.refundAmount,
       )
-      _ <- ensureThatNegativeInvoiceBalanceIsZero(invoicesItemsForSub)
+      _ <- ensureThatNegativeInvoiceBalanceIsZero(refundInvoiceDetails)
     } yield ()
   }
 
-  def ensureThatNegativeInvoiceBalanceIsZero(
-      invoiceItemsForSub: InvoiceItemsForSubscription,
+  private def ensureThatNegativeInvoiceBalanceIsZero(
+      refundInvoiceDetails: RefundInvoiceDetails,
   ): ZIO[GetInvoice with InvoiceItemAdjustment, ErrorResponse, Unit] = for {
-    negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(
-      negativeInvoiceId,
+      refundInvoiceDetails.negativeInvoiceId,
     )
     _ <-
       if (negativeInvoice.balance < 0) {
-        adjustInvoiceBalanceToZero(invoiceItemsForSub, negativeInvoice.balance)
+        adjustInvoiceBalanceToZero(refundInvoiceDetails, negativeInvoice.balance)
       } else {
-        ZIO.log(s"Invoice with id $negativeInvoiceId has zero balance")
+        ZIO.log(s"Invoice with id ${refundInvoiceDetails.negativeInvoiceId} has zero balance")
       }
   } yield ()
 
-  def adjustInvoiceBalanceToZero(
-      invoiceItemsForSub: InvoiceItemsForSubscription,
-      balance: BigDecimal,
+  def checkInvoicesEqualBalance(balance: BigDecimal, invoiceItems: List[InvoiceItemWithTaxDetails]) = {
+    val invoiceItemsTotal = invoiceItems.map(_.amountWithTax).sum
+    if (balance.abs == invoiceItemsTotal.abs)
+      ZIO.succeed(())
+    else
+      ZIO.fail(
+        TransactionError(
+          s"Invoice balance of $balance does not equal sum of invoice items $invoiceItemsTotal, with invoiceItems $invoiceItems",
+        ),
+      )
+  }
+
+  private def adjustInvoiceBalanceToZero(
+      refundInvoiceDetails: RefundInvoiceDetails,
+      negativeInvoiceBalance: BigDecimal,
   ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] =
     for {
-      negativeInvoiceId <- invoiceItemsForSub.negativeInvoiceId
-      invoiceItemId <- invoiceItemsForSub.negativeInvoiceItemId
-      _ <- ZIO.log(s"Invoice with id $negativeInvoiceId still has balance of $balance")
-      _ <- InvoiceItemAdjustment.update(
-        negativeInvoiceId,
-        balance.abs,
-        invoiceItemId,
-        "Charge",
-      )
       _ <- ZIO.log(
-        s"Successfully applied invoice item adjustment of $balance" +
-          s" to invoice item $invoiceItemId of invoice $negativeInvoiceId",
+        s"Invoice with id ${refundInvoiceDetails.negativeInvoiceId} still has balance of $negativeInvoiceBalance",
+      )
+      _ <- checkInvoicesEqualBalance(negativeInvoiceBalance, refundInvoiceDetails.negativeInvoiceItems)
+      invoiceItemAdjustments = buildInvoiceItemAdjustments(refundInvoiceDetails.negativeInvoiceItems)
+      _ <- InvoiceItemAdjustment.batchUpdate(invoiceItemAdjustments)
+      _ <- ZIO.log(
+        s"Successfully applied invoice item adjustments $invoiceItemAdjustments" +
+          s" to invoice ${refundInvoiceDetails.negativeInvoiceId}",
       )
     } yield ()
+
+  def buildInvoiceItemAdjustments(
+      invoiceItems: List[InvoiceItemWithTaxDetails],
+  ): List[InvoiceItemAdjustment.PostBody] = {
+    // If the invoice item has tax paid on it, this needs to be adjusted
+    // in two separate adjustments,
+    // - one for the charge where the SourceType is "InvoiceDetail" and SourceId is the invoice item id
+    // - one for the tax where the SourceType is "Tax" and SourceId is the taxation item id
+    // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
+    invoiceItems.filter(_.amountWithTax != 0).flatMap { invoiceItem =>
+      val chargeAdjustment =
+        List(
+          InvoiceItemAdjustment.PostBody(
+            AdjustmentDate = invoiceItem.chargeDateAsDate,
+            Amount = invoiceItem.ChargeAmount.abs,
+            InvoiceId = invoiceItem.InvoiceId,
+            SourceId = invoiceItem.Id,
+            SourceType = "InvoiceDetail",
+          ),
+        )
+      val taxAdjustment = invoiceItem.TaxDetails match
+        case Some(taxDetails) =>
+          List(
+            InvoiceItemAdjustment.PostBody(
+              AdjustmentDate = invoiceItem.chargeDateAsDate,
+              Amount = taxDetails.amount.abs,
+              InvoiceId = invoiceItem.InvoiceId,
+              SourceId = taxDetails.taxationId,
+              SourceType = "Tax",
+            ),
+          )
+        case None => Nil
+
+      chargeAdjustment ++ taxAdjustment
+    }
+  }
 }
