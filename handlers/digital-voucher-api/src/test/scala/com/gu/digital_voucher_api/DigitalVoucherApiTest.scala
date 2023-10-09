@@ -5,7 +5,7 @@ import com.gu.DevIdentity
 import com.gu.imovo.ImovoStub._
 import com.gu.imovo._
 import com.softwaremill.diffx.generic.auto._
-import com.softwaremill.diffx.scalatest.DiffMatcher
+import com.softwaremill.diffx.scalatest.DiffShouldMatcher
 import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -21,7 +21,7 @@ import sttp.client3.testing.SttpBackendStub
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
-class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with EitherValues {
+class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffShouldMatcher with EitherValues {
 
   private implicit val contextShift = IO.contextShift(ExecutionContext.global)
 
@@ -60,8 +60,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    response.status.code should matchTo(201)
-    getBody[SubscriptionVouchers](response) should matchTo(SubscriptionVouchers("new-card-code", "new-letter-code"))
+    response.status.code shouldMatchTo(201)
+    getBody[SubscriptionVouchers](response) shouldMatchTo(SubscriptionVouchers("new-card-code", "new-letter-code"))
   }
 
   it should "get existing voucher details from imovo if create fails because the vouchers already exist" in {
@@ -105,8 +105,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    response.status.code should matchTo(201)
-    getBody[SubscriptionVouchers](response) should matchTo(
+    response.status.code shouldMatchTo(201)
+    getBody[SubscriptionVouchers](response) shouldMatchTo(
       SubscriptionVouchers("existing-card-code", "existing-letter-code"),
     )
   }
@@ -138,8 +138,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    response.status.code should matchTo(502)
-    getBody[DigitalVoucherApiRoutesError](response) should matchTo(
+    response.status.code shouldMatchTo(502)
+    getBody[DigitalVoucherApiRoutesError](response) shouldMatchTo(
       DigitalVoucherApiRoutesError(
         s"""Imovo failure to create voucher: Imovo create request failed:Request GET ${imovoConfig.imovoBaseUrl}/Subscription/RequestSubscriptionVouchers?SubscriptionId=123456&SchemeName=Guardian7Day&StartDate=$tomorrow failed with response ({
          |  "errorMessages" : [
@@ -172,8 +172,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    response.status.code should matchTo(422)
-    getBody[DigitalVoucherApiRoutesError](response) should matchTo(
+    response.status.code shouldMatchTo(422)
+    getBody[DigitalVoucherApiRoutesError](response) shouldMatchTo(
       DigitalVoucherApiRoutesError(
         "Bad request argument: Rate plan name has no matching scheme name: RatePlanName(HomeDelivery)",
       ),
@@ -212,13 +212,13 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo(
       ReplacementSubscriptionVouchers(
         Some("replaced-card-test-voucher-code"),
         Some("replaced-letter-test-voucher-code"),
       ),
     )
-    response.status.code should matchTo(200)
+    response.status.code shouldMatchTo(200)
   }
 
   it should "return replaced letter details for replace only letter request with subscriptionId" in {
@@ -252,10 +252,10 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo(
       ReplacementSubscriptionVouchers(None, Some("replaced-letter-test-voucher-code")),
     )
-    response.status.code should matchTo(200)
+    response.status.code shouldMatchTo(200)
   }
 
   it should "return replaced card details for replace only card request with subscriptionId" in {
@@ -289,10 +289,10 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo(
       ReplacementSubscriptionVouchers(Some("replaced-card-test-voucher-code"), None),
     )
-    response.status.code should matchTo(200)
+    response.status.code shouldMatchTo(200)
   }
 
   it should "return error response when one imovo replace request fails" in {
@@ -319,7 +319,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    response.status.code should matchTo(500)
+    response.status.code shouldMatchTo(500)
   }
 
   it should "return voucher details for get subscription request" in {
@@ -351,8 +351,8 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .unsafeRunSync()
       .get
 
-    getBody[SubscriptionVouchers](response) should matchTo(SubscriptionVouchers("card-code", "letter-code"))
-    response.status.code should matchTo(200)
+    getBody[SubscriptionVouchers](response) shouldMatchTo(SubscriptionVouchers("card-code", "letter-code"))
+    response.status.code shouldMatchTo(200)
   }
 
   it should "return 200 response for cancel request" in {

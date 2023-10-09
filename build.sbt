@@ -1,7 +1,7 @@
 import Dependencies.*
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.10",
+  ThisBuild / scalaVersion := "2.13.12",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -19,13 +19,14 @@ val scala2Settings = Seq(
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard",
+    "-Ytasty-reader",
   ),
   Test / fork := true,
   autoCompilerPlugins := true,
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.2.2",
+  scalaVersion := "3.3.1",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -216,7 +217,7 @@ lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `config-core` = library(project in file("lib/config-core"))
+lazy val `config-core` = library(project in file("lib/config-core"), scala3Settings)
 
 lazy val `config-cats` = library(project in file("lib/config-cats"))
   .settings(
@@ -377,7 +378,6 @@ lazy val `new-product-api` = lambdaProject(
   Seq(),
 )
   .settings(
-    scalacOptions += "-Ytasty-reader",
     Test / unmanagedResourceDirectories += (Test / scalaSource).value,
     Test / unmanagedResources / excludeFilter := "*.scala"
   )
@@ -636,13 +636,22 @@ lazy val `fulfilment-date-calculator` = lambdaProject(
 lazy val `delivery-records-api` = lambdaProject(
   "delivery-records-api",
   "API for accessing delivery records in Salesforce",
-  Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest),
+  Seq(
+    http4sDsl,
+    http4sCirce,
+    http4sServer,
+    circe,
+    sttpAsyncHttpClientBackendCats,
+    scalatest,
+    diffx
+  ),
 ).dependsOn(
   `effects-s3`,
   `config-core`,
   `salesforce-sttp-client`,
   `salesforce-sttp-test-stub` % Test,
   `http4s-lambda-handler`,
+  testDep,
 )
 
 lazy val `digital-voucher-api` = lambdaProject(
