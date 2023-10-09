@@ -379,7 +379,7 @@ lazy val `new-product-api` = lambdaProject(
 )
   .settings(
     Test / unmanagedResourceDirectories += (Test / scalaSource).value,
-    Test / unmanagedResources / excludeFilter := "*.scala"
+    Test / unmanagedResources / excludeFilter := "*.scala",
   )
   .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
 
@@ -562,7 +562,7 @@ lazy val `product-move-api` = lambdaProject(
     awsSQS,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
-    "dev.zio" %% "zio-logging-slf4j" % "2.1.13",
+    "dev.zio" %% "zio-logging-slf4j" % "2.1.14",
     "dev.zio" %% "zio-test" % zio2Version % Test,
     "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
@@ -643,7 +643,7 @@ lazy val `delivery-records-api` = lambdaProject(
     circe,
     sttpAsyncHttpClientBackendCats,
     scalatest,
-    diffx
+    diffx,
   ),
 ).dependsOn(
   `effects-s3`,
