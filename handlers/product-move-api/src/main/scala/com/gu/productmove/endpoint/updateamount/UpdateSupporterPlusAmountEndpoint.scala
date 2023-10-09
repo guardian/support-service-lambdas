@@ -113,9 +113,7 @@ object UpdateSupporterPlusAmountEndpoint {
         .in(subscriptionNameCapture)
         .in(
           jsonBody[ExpectedInput].copy(info =
-            EndpointIO.Info
-              .empty[ExpectedInput]
-              .copy(description = Some("Definition of the updated total amount of regular payment")),
+            EndpointIO.Info.empty[ExpectedInput].copy(description = Some("Definition of the updated total amount of regular payment")),
           ),
         )
         .out(

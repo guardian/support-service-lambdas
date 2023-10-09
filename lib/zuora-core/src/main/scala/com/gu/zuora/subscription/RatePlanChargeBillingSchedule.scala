@@ -18,22 +18,25 @@ import scala.annotation.tailrec
   * This class is not comprehensive and will only work for RatePlanCharges with a limited set of configurations as
   * follows.
   *
-  * Billing Periods ---------------
+  * Billing Periods
+  * ---------------
   *
   * The billing periods are calculated using RatePlanCharge.effectiveStartDate as a starting point.
   * RatePlanCharge.billingPeriod is used to derive the length of each billing cycle. These are projected into the future
   * until the RatePlanCharge reaches its endpoint.
   *
-  * RatePlanCharge termination --------------------------
+  * RatePlanCharge termination
+  * --------------------------
   *
   * The point in time at which the ratePlanCharge terminates is derived as follows:
   *
-  * RatePlanCharge.endDateCondition = 'Subscription_End' ---------------------------------------------------- This
-  * derives the end point of the RatePlanCharge from the end of the subscription. We currently assume all subscriptions
-  * do not terminate, hence these rate plans run for ever.
+  * RatePlanCharge.endDateCondition = 'Subscription_End'
+  * ---------------------------------------------------- This derives the end point of the RatePlanCharge from the end
+  * of the subscription. We currently assume all subscriptions do not terminate, hence these rate plans run for ever.
   *
-  * RatePlanCharge.endDateCondition = 'Fixed_Period' ------------------------------------------------ This indicates
-  * that the end of the rate plan is derived based on the upToPeriodsType field. See below for details
+  * RatePlanCharge.endDateCondition = 'Fixed_Period'
+  * ------------------------------------------------ This indicates that the end of the rate plan is derived based on
+  * the upToPeriodsType field. See below for details
   *
   *   - RatePlanCharge.upToPeriodsType = 'Billing_Periods' This field/value combination indicates the rate plan end is
   *     based on a fixed number of Billing Periods defined by the RatePlanCharge.upToPeriods field

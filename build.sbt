@@ -1,7 +1,7 @@
 import Dependencies._
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.11",
+  ThisBuild / scalaVersion := "2.13.10",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.3.0",
+  scalaVersion := "3.2.2",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -269,7 +269,7 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
 lazy val `zuora-models` = library(project in file("lib/zuora-models"), scala3Settings)
   .dependsOn(`config-core`)
   .settings(
-    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
+    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.15" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
   )
 
 lazy val `credit-processor` = library(project in file("lib/credit-processor"))
@@ -553,7 +553,7 @@ lazy val `product-move-api` = lambdaProject(
     awsSQS,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
-    "dev.zio" %% "zio-logging-slf4j" % "2.1.14",
+    "dev.zio" %% "zio-logging-slf4j" % "2.1.13",
     "dev.zio" %% "zio-test" % zio2Version % Test,
     "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
@@ -616,7 +616,7 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
     scalatest,
     diffx,
   ),
-).dependsOn(`effects-s3`, `effects-sqs`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
+).dependsOn(`effects-s3`, `effects-sqs`,  `config-cats`, `zuora-core`, `http4s-lambda-handler`)
 
 lazy val `fulfilment-date-calculator` = lambdaProject(
   "fulfilment-date-calculator",

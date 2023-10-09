@@ -68,8 +68,7 @@ object Fixtures {
         6,
         0,
         supporterPlusContributionRatePlanChargeId,
-      ),
-      SubscriptionUpdateInvoiceItem(
+      ), SubscriptionUpdateInvoiceItem(
         LocalDate.parse("2023-04-19"),
         10,
         0,
@@ -83,6 +82,8 @@ object Fixtures {
       ),
     ),
   )
+
+
 
   val invoiceWithTax = SubscriptionUpdateInvoice(
     amount = 202,
