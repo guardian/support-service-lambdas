@@ -127,6 +127,32 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
+    "NewProductApiKeyF900F0A7": {
+      "Properties": {
+        "Description": "Key required to call new product API",
+        "Enabled": true,
+        "Name": "new-product-api-key-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "NewProductBasePathMapping": {
       "Properties": {
         "DomainName": {
@@ -202,6 +228,53 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "NewProductUsagePlanD0202832": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "RestApi0C43BF4B",
+            },
+            "Stage": {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "new-product-api-usage-plan-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "NewProductUsagePlanKey": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "NewProductApiKeyF900F0A7",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "NewProductUsagePlanD0202832",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
     },
     "RestApi0C43BF4B": {
       "Properties": {
@@ -294,7 +367,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50344407816d47702394b8804555dadfdb6": {
+    "RestApiDeployment180EC5036b4eb7b1f664e56e22942fd14ab73daf": {
       "DependsOn": [
         "RestApiaddsubscriptionOPTIONS2806FCEE",
         "RestApiaddsubscriptionPOST9C82CE2B",
@@ -318,7 +391,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50344407816d47702394b8804555dadfdb6",
+          "Ref": "RestApiDeployment180EC5036b4eb7b1f664e56e22942fd14ab73daf",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -443,6 +516,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
     },
     "RestApiaddsubscriptionPOST9C82CE2B": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "POST",
         "Integration": {
@@ -576,6 +650,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
     },
     "RestApiproductcatalogGET3BA62332": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "GET",
         "Integration": {
@@ -1461,6 +1536,32 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
+    "NewProductApiKeyF900F0A7": {
+      "Properties": {
+        "Description": "Key required to call new product API",
+        "Enabled": true,
+        "Name": "new-product-api-key-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "NewProductBasePathMapping": {
       "Properties": {
         "DomainName": {
@@ -1536,6 +1637,53 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "NewProductUsagePlanD0202832": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "RestApi0C43BF4B",
+            },
+            "Stage": {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "new-product-api-usage-plan-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "NewProductUsagePlanKey": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "NewProductApiKeyF900F0A7",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "NewProductUsagePlanD0202832",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
     },
     "RestApi0C43BF4B": {
       "Properties": {
@@ -1628,7 +1776,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503f3c2ec544e65ed3405279ac7fc540907": {
+    "RestApiDeployment180EC50386812ce060e6af3a4e979f38bf629307": {
       "DependsOn": [
         "RestApiaddsubscriptionOPTIONS2806FCEE",
         "RestApiaddsubscriptionPOST9C82CE2B",
@@ -1652,7 +1800,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503f3c2ec544e65ed3405279ac7fc540907",
+          "Ref": "RestApiDeployment180EC50386812ce060e6af3a4e979f38bf629307",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1777,6 +1925,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
     },
     "RestApiaddsubscriptionPOST9C82CE2B": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "POST",
         "Integration": {
@@ -1910,6 +2059,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
     },
     "RestApiproductcatalogGET3BA62332": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "GET",
         "Integration": {
