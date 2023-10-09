@@ -6,9 +6,22 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperAccountValidation, PaperCustomerData}
-import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidatedAccount, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.validation.paper.{
+  GetPaperCustomerData,
+  PaperAccountValidation,
+  PaperCustomerData,
+}
+import com.gu.newproduct.api.addsubscription.validation.{
+  ValidateAccount,
+  ValidatePaymentMethod,
+  ValidatedAccount,
+  ValidationResult,
+}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
@@ -69,7 +82,7 @@ object AddPaperSub {
   } yield subscriptionName
 
   def wireSteps(
-    catalog: Map[PlanId, Plan],
+      catalog: Map[PlanId, Plan],
       zuoraIds: ZuoraIds,
       zuoraClient: Requests,
       isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
@@ -96,10 +109,11 @@ object AddPaperSub {
   def getValidatedCustomerData(zuoraClient: Requests): ZuoraAccountId => ApiGatewayOp[PaperCustomerData] = {
 
     val validateAccount = ValidateAccount.apply _ thenValidate PaperAccountValidation.apply _
-    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
-      validate = validateAccount,
-      ifNotFoundReturn = Some("Zuora account id is not valid")
-    )
+    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] =
+      GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
+        validate = validateAccount,
+        ifNotFoundReturn = Some("Zuora account id is not valid"),
+      )
     val getValidatedPaymentMethod: GetAccount.PaymentMethodId => ApiGatewayOp[GetPaymentMethod.PaymentMethod] =
       GetPaymentMethod(zuoraClient.get[PaymentMethodWire])(_).andValidateWith(ValidatePaymentMethod.apply _)
     val getContacts: ZuoraAccountId => ClientFailableOp[GetContacts.Contacts] = GetContacts(

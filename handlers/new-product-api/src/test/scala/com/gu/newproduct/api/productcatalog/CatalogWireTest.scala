@@ -127,9 +127,9 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
       case (ProductType.GuardianWeekly, List(FRIDAY)) =>
         LocalDate.of(2020, 1, 1)
       case (
-        ProductType.NewspaperHomeDelivery,
-        List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
-        ) =>
+            ProductType.NewspaperHomeDelivery,
+            List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
+          ) =>
         LocalDate.of(2020, 2, 1)
       case (ProductType.NewspaperHomeDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY)) =>
         LocalDate.of(2020, 2, 2)
@@ -146,9 +146,9 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
       case (ProductType.NewspaperVoucherBook, List(SUNDAY)) =>
         LocalDate.of(2020, 3, 3)
       case (
-        ProductType.NewspaperDigitalVoucher,
-        List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
-        ) =>
+            ProductType.NewspaperDigitalVoucher,
+            List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
+          ) =>
         LocalDate.of(2020, 4, 1)
       case (ProductType.NewspaperDigitalVoucher, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY)) =>
         LocalDate.of(2020, 4, 2)
@@ -159,9 +159,9 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
       case (ProductType.NewspaperDigitalVoucher, List(SUNDAY)) =>
         LocalDate.of(2020, 4, 5)
       case (
-        ProductType.NewspaperNationalDelivery,
-        List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
-        ) =>
+            ProductType.NewspaperNationalDelivery,
+            List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
+          ) =>
         LocalDate.of(2020, 4, 1)
       case (ProductType.NewspaperNationalDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY)) =>
         LocalDate.of(2020, 4, 2)

@@ -24,7 +24,7 @@ object SttpClientLive {
 
   private class SttpLogger extends Logger[Task] {
 
-    override def apply(level: logging.LogLevel, message: => String): Task[Unit] = 
+    override def apply(level: logging.LogLevel, message: => String): Task[Unit] =
       ZIO.logDebug("STTP Backend: " + message)
 
     override def apply(level: logging.LogLevel, message: => String, t: Throwable): Task[Unit] =

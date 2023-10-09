@@ -10,7 +10,12 @@ import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.{AmountLimits, _}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  ChargeOverride,
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
@@ -88,7 +93,7 @@ object AddSupporterPlus {
   }
 
   def wireSteps(
-    catalog: Map[PlanId, Plan],
+      catalog: Map[PlanId, Plan],
       zuoraIds: ZuoraIds,
       zuoraClient: Requests,
       isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
@@ -155,10 +160,11 @@ object AddSupporterPlus {
   ): ZuoraAccountId => ApiGatewayOp[SupporterPlusCustomerData] = {
 
     val validateAccount = ValidateAccount.apply _ thenValidate SupporterPlusAccountValidation.apply _
-    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
-      validate = validateAccount,
-      ifNotFoundReturn = Some("Zuora account id is not valid")
-    )
+    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] =
+      GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
+        validate = validateAccount,
+        ifNotFoundReturn = Some("Zuora account id is not valid"),
+      )
     val getValidatedPaymentMethod: GetAccount.PaymentMethodId => ApiGatewayOp[PaymentMethod] =
       GetPaymentMethod(zuoraClient.get[PaymentMethodWire])(_).andValidateWith(ValidatePaymentMethod.apply _)
     val validateSubs =

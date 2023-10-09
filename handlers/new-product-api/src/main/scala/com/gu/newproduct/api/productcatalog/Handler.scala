@@ -27,14 +27,21 @@ object Handler extends Logging {
     }
 
   def runWithEffects(stage: Stage, fetchString: StringFromS3, today: LocalDate): ApiGatewayOp[Operation] = for {
-    zuoraIds <- ZuoraIds.zuoraIdsForStage(stage).toApiGatewayOp(ApiGatewayResponse.internalServerError _).withLogging("zuoraIds")
+    zuoraIds <- ZuoraIds
+      .zuoraIdsForStage(stage)
+      .toApiGatewayOp(ApiGatewayResponse.internalServerError _)
+      .withLogging("zuoraIds")
     zuoraToPlanId = zuoraIds.rateplanIdToApiId.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage).withLogging("zuoraEnv")
-    plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp(
-      "get prices from zuora catalog",
-    ).withLogging("plansWithPrice")
+    plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId)
+      .toApiGatewayOp(
+        "get prices from zuora catalog",
+      )
+      .withLogging("plansWithPrice")
     getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
-    startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOpOr422.withLogging("startDateFromProductType")
+    startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOpOr422.withLogging(
+      "startDateFromProductType",
+    )
   } yield Operation.noHealthcheck { req: ApiGatewayRequest =>
     val nationalDeliveryEnabled = Switches.nationalDeliveryEnabled(req)
     val catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, today).withLogging("catalog")

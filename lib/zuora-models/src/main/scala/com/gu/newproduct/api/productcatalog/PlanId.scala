@@ -103,7 +103,6 @@ object PlanId {
 
   case object DigitalVoucherSixdayPlus extends PlanId("digital_voucher_sixday_plus") with DigitalVoucherPlanId
 
-
   case object NationalDeliveryWeekend extends PlanId("national_delivery_weekend") with NationalDeliveryPlanId
 
   case object NationalDeliveryEveryday extends PlanId("national_delivery_everyday") with NationalDeliveryPlanId
@@ -175,7 +174,7 @@ object PlanId {
     DigitalVoucherSixday,
     DigitalVoucherSixdayPlus,
   )
-  
+
   val enabledNationalDeliveryPlans = List(
     NationalDeliverySixday,
     NationalDeliveryEveryday,
@@ -188,6 +187,3 @@ object PlanId {
 
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
-
-
-

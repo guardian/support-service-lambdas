@@ -84,7 +84,7 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
           ),
         )
         assert(adjustments.length)(equalTo(2)) &&
-          assert(adjustments.head.AdjustmentDate.getDayOfMonth)(equalTo(15))
+        assert(adjustments.head.AdjustmentDate.getDayOfMonth)(equalTo(15))
       },
       test("Deserialisation of the invoice adjustment response works") {
         val responseJson =
