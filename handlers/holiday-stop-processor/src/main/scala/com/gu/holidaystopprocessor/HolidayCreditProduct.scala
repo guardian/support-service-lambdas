@@ -38,6 +38,12 @@ object HolidayCreditProduct {
       productRatePlanChargeId = "2c92a00f7468817d01748bd88f2e1d6e",
       ProductRatePlanChargeName,
     )
+
+    val NationalDelivery: CreditProduct = CreditProduct(
+      productRatePlanId = "8a128e208aff0721018b003d0dfe59d9",
+      productRatePlanChargeId = "8a128e208aff0721018b003d0e5959e0",
+      ProductRatePlanChargeName,
+    )
   }
 
   object Code {
@@ -65,6 +71,12 @@ object HolidayCreditProduct {
       productRatePlanChargeId = "2c92c0f8736c34cb01737160e5fa69e0",
       ProductRatePlanChargeName,
     )
+
+    val NationalDelivery: CreditProduct = CreditProduct(
+      productRatePlanId = "8ad08f068aff62a4018affd6efc7743c",
+      productRatePlanChargeId = "8ad08f068aff62a4018affd6eff97440",
+      ProductRatePlanChargeName,
+    )
   }
 
   /** <p>Determines which CreditProduct is applicable for the given subscription in the given deployment stage.</p>
@@ -88,10 +100,12 @@ object HolidayCreditProduct {
       case (Stage.Prod, "Newspaper Delivery") => Some(HolidayCreditProduct.Prod.HomeDelivery)
       case (Stage.Prod, "Newspaper Voucher") => Some(HolidayCreditProduct.Prod.Voucher)
       case (Stage.Prod, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Prod.DigitalVoucher)
+      case (Stage.Prod, "Newspaper - National Delivery") => Some(HolidayCreditProduct.Prod.NationalDelivery)
       case (Stage.Code, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Code.GuardianWeekly)
       case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
       case (Stage.Code, "Newspaper Voucher") => Some(HolidayCreditProduct.Code.Voucher)
       case (Stage.Code, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.DigitalVoucher)
+      case (Stage.Code, "Newspaper - National Delivery") => Some(HolidayCreditProduct.Code.NationalDelivery)
       case _ => None
     }
 
