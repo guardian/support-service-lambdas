@@ -1,7 +1,7 @@
 import { App } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
-import { codeProps, prodProps } from "../bin/cdk";
-import { NewProductApi } from "./new-product-api";
+import { codeProps, prodProps } from "../../bin/cdk";
+import { NewProductApi } from "../new-product-api";
 
 describe("The NewProductApi stack", () => {
   it("matches the snapshot", () => {
