@@ -1,0 +1,58 @@
+{
+  "Monday" : {
+    "today" : "2023-09-14",
+    "deliveryAddressChangeEffectiveDate" : "2023-09-18",
+    "holidayStopFirstAvailableDate" : "2023-09-25",
+    "holidayStopProcessorTargetDate" : "2023-09-18",
+    "finalFulfilmentFileGenerationDate" : "2023-09-15",
+    "newSubscriptionEarliestStartDate" : "2023-09-25"
+  },
+  "Tuesday" : {
+    "today" : "2023-09-14",
+    "deliveryAddressChangeEffectiveDate" : "2023-09-19",
+    "holidayStopFirstAvailableDate" : "2023-09-19",
+    "holidayStopProcessorTargetDate" : null,
+    "finalFulfilmentFileGenerationDate" : "2023-09-18",
+    "newSubscriptionEarliestStartDate" : "2023-09-26"
+  },
+  "Wednesday" : {
+    "today" : "2023-09-14",
+    "deliveryAddressChangeEffectiveDate" : "2023-09-20",
+    "holidayStopFirstAvailableDate" : "2023-09-20",
+    "holidayStopProcessorTargetDate" : null,
+    "finalFulfilmentFileGenerationDate" : "2023-09-19",
+    "newSubscriptionEarliestStartDate" : "2023-09-20"
+  },
+  "Thursday" : {
+    "today" : "2023-09-14",
+    "deliveryAddressChangeEffectiveDate" : "2023-09-21",
+    "holidayStopFirstAvailableDate" : "2023-09-21",
+    "holidayStopProcessorTargetDate" : null,
+    "finalFulfilmentFileGenerationDate" : "2023-09-20",
+    "newSubscriptionEarliestStartDate" : "2023-09-21"
+  },
+  "Friday" : {
+    "today" : "2023-09-14",
+    "deliveryAddressChangeEffectiveDate" : "2023-09-22",
+    "holidayStopFirstAvailableDate" : "2023-09-22",
+    "holidayStopProcessorTargetDate" : null,
+    "finalFulfilmentFileGenerationDate" : "2023-09-21",
+    "newSubscriptionEarliestStartDate" : "2023-09-22"
+  },
+  "Saturday" : {
+    "today" : "2023-09-14",
+    "deliveryAddressChangeEffectiveDate" : "2023-09-16",
+    "holidayStopFirstAvailableDate" : "2023-09-23",
+    "holidayStopProcessorTargetDate" : "2023-09-16",
+    "finalFulfilmentFileGenerationDate" : "2023-09-15",
+    "newSubscriptionEarliestStartDate" : "2023-09-23"
+  },
+  "Sunday" : {
+    "today" : "2023-09-14",
+    "deliveryAddressChangeEffectiveDate" : "2023-09-17",
+    "holidayStopFirstAvailableDate" : "2023-09-24",
+    "holidayStopProcessorTargetDate" : "2023-09-17",
+    "finalFulfilmentFileGenerationDate" : "2023-09-15",
+    "newSubscriptionEarliestStartDate" : "2023-09-24"
+  }
+}

@@ -1,58 +1,58 @@
 {
   "Monday" : {
-    "today" : "2020-04-27",
+    "today" : "2023-09-14",
     "deliveryAddressChangeEffectiveDate" : null,
-    "holidayStopFirstAvailableDate" : "2020-04-28",
-    "holidayStopProcessorTargetDate" : "2020-04-27",
+    "holidayStopFirstAvailableDate" : "2023-09-15",
+    "holidayStopProcessorTargetDate" : null,
     "finalFulfilmentFileGenerationDate" : null,
-    "newSubscriptionEarliestStartDate" : "2020-05-18"
+    "newSubscriptionEarliestStartDate" : "2023-10-09"
   },
   "Tuesday" : {
-    "today" : "2020-04-27",
+    "today" : "2023-09-14",
     "deliveryAddressChangeEffectiveDate" : null,
-    "holidayStopFirstAvailableDate" : "2020-04-28",
+    "holidayStopFirstAvailableDate" : "2023-09-15",
     "holidayStopProcessorTargetDate" : null,
     "finalFulfilmentFileGenerationDate" : null,
-    "newSubscriptionEarliestStartDate" : "2020-05-19"
+    "newSubscriptionEarliestStartDate" : "2023-10-10"
   },
   "Wednesday" : {
-    "today" : "2020-04-27",
+    "today" : "2023-09-14",
     "deliveryAddressChangeEffectiveDate" : null,
-    "holidayStopFirstAvailableDate" : "2020-04-28",
+    "holidayStopFirstAvailableDate" : "2023-09-15",
     "holidayStopProcessorTargetDate" : null,
     "finalFulfilmentFileGenerationDate" : null,
-    "newSubscriptionEarliestStartDate" : "2020-05-20"
+    "newSubscriptionEarliestStartDate" : "2023-10-11"
   },
   "Thursday" : {
-    "today" : "2020-04-27",
+    "today" : "2023-09-14",
     "deliveryAddressChangeEffectiveDate" : null,
-    "holidayStopFirstAvailableDate" : "2020-04-28",
-    "holidayStopProcessorTargetDate" : null,
+    "holidayStopFirstAvailableDate" : "2023-09-15",
+    "holidayStopProcessorTargetDate" : "2023-09-14",
     "finalFulfilmentFileGenerationDate" : null,
-    "newSubscriptionEarliestStartDate" : "2020-05-21"
+    "newSubscriptionEarliestStartDate" : "2023-10-12"
   },
   "Friday" : {
-    "today" : "2020-04-27",
+    "today" : "2023-09-14",
     "deliveryAddressChangeEffectiveDate" : null,
-    "holidayStopFirstAvailableDate" : "2020-04-28",
+    "holidayStopFirstAvailableDate" : "2023-09-15",
     "holidayStopProcessorTargetDate" : null,
     "finalFulfilmentFileGenerationDate" : null,
-    "newSubscriptionEarliestStartDate" : "2020-05-22"
+    "newSubscriptionEarliestStartDate" : "2023-10-13"
   },
   "Saturday" : {
-    "today" : "2020-04-27",
+    "today" : "2023-09-14",
     "deliveryAddressChangeEffectiveDate" : null,
-    "holidayStopFirstAvailableDate" : "2020-04-28",
+    "holidayStopFirstAvailableDate" : "2023-09-15",
     "holidayStopProcessorTargetDate" : null,
     "finalFulfilmentFileGenerationDate" : null,
-    "newSubscriptionEarliestStartDate" : "2020-05-23"
+    "newSubscriptionEarliestStartDate" : "2023-10-14"
   },
   "Sunday" : {
-    "today" : "2020-04-27",
+    "today" : "2023-09-14",
     "deliveryAddressChangeEffectiveDate" : null,
-    "holidayStopFirstAvailableDate" : "2020-04-28",
+    "holidayStopFirstAvailableDate" : "2023-09-15",
     "holidayStopProcessorTargetDate" : null,
     "finalFulfilmentFileGenerationDate" : null,
-    "newSubscriptionEarliestStartDate" : "2020-05-24"
+    "newSubscriptionEarliestStartDate" : "2023-10-15"
   }
 }

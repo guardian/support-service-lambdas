@@ -2,7 +2,7 @@ package com.gu.deliveryproblemcreditprocessor
 
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.softwaremill.diffx.generic.auto._
-import com.softwaremill.diffx.scalatest.DiffMatcher
+import com.softwaremill.diffx.scalatest.DiffShouldMatcher
 import io.circe.generic.auto._
 import io.circe.parser._
 import org.scalatest.EitherValues
@@ -12,11 +12,11 @@ import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate
 import scala.io.Source
 
-class DeliveryCreditRequestTest extends AnyFlatSpec with Matchers with DiffMatcher with EitherValues {
+class DeliveryCreditRequestTest extends AnyFlatSpec with Matchers with DiffShouldMatcher with EitherValues {
 
   "Json decode" should "decode SF response correctly" in {
     val json = Source.fromResource("sf-credit-request.json").mkString
-    decode[RecordsWrapperCaseClass[DeliveryCreditRequest]](json).value should matchTo(
+    decode[RecordsWrapperCaseClass[DeliveryCreditRequest]](json).value shouldMatchTo(
       RecordsWrapperCaseClass(
         List(
           DeliveryCreditRequest(

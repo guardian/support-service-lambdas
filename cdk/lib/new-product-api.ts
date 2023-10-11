@@ -5,7 +5,7 @@ import {GuStack} from "@guardian/cdk/lib/constructs/core";
 import {GuLambdaFunction} from "@guardian/cdk/lib/constructs/lambda";
 import type {App} from "aws-cdk-lib";
 import {Duration, Fn} from "aws-cdk-lib";
-import {CfnBasePathMapping, CfnDomainName, Cors} from "aws-cdk-lib/aws-apigateway";
+import {ApiKey, CfnBasePathMapping, CfnDomainName, CfnUsagePlanKey, Cors, UsagePlan} from "aws-cdk-lib/aws-apigateway";
 import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {Runtime} from "aws-cdk-lib/aws-lambda";
@@ -74,11 +74,13 @@ export class NewProductApi extends GuStack {
           path: "/add-subscription",
           httpMethod: "POST",
           lambda: addSubscriptionLambda,
+          apiKeyRequired: true,
         },
         {
           path: "/product-catalog",
           httpMethod: "GET",
           lambda: productCatalogLambda,
+          apiKeyRequired: true,
         },
       ],
     })
@@ -124,6 +126,30 @@ export class NewProductApi extends GuStack {
         }
       }),
     });
+
+
+    // ---- Usage plan and API key ---- //
+    const usagePlan = new UsagePlan(this, "NewProductUsagePlan", {
+      name: `new-product-api-usage-plan-${this.stage}`,
+      apiStages: [
+        {
+          api: newProductApi.api,
+          stage: newProductApi.api.deploymentStage
+        }
+      ]
+    })
+
+    const apiKey = new ApiKey(this, "NewProductApiKey", {
+      apiKeyName: `new-product-api-key-${this.stage}`,
+      description: "Key required to call new product API",
+      enabled: true,
+    })
+
+    new CfnUsagePlanKey(this, "NewProductUsagePlanKey", {
+      keyId: apiKey.keyId,
+      keyType: "API_KEY",
+      usagePlanId: usagePlan.usagePlanId,
+    })
 
 
     // ---- DNS ---- //

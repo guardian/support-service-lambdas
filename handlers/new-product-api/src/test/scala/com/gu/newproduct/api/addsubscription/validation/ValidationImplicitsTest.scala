@@ -22,7 +22,7 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
       case Some(value) => Passed(ValidatedTestData(value))
     }
 
-    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
+    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData(_) andValidateWith validationFunc
 
     getValidatedData("testId") shouldBe ContinueProcessing(ValidatedTestData("data for id testId"))
   }
@@ -32,7 +32,7 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
-    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
+    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData(_) andValidateWith validationFunc
 
     getValidatedData("testId") shouldBe ReturnWithResponse(
       ApiGatewayResponse.internalServerError("ignored log message"),
@@ -44,7 +44,7 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
-    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
+    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData(_) andValidateWith validationFunc
 
     getValidatedData("testId") shouldBe ReturnWithResponse(
       ApiGatewayResponse.internalServerError("ignored log message"),
@@ -56,7 +56,7 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
-    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith (
+    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData(_).andValidateWith(
       validate = validationFunc,
       ifNotFoundReturn = Some("invalid test data Id")
     )
@@ -71,7 +71,7 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
     def validationFunc(testData: TestData) = Failed("validation failed!")
 
-    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
+    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData(_) andValidateWith validationFunc
 
     getValidatedData("testId") shouldBe ReturnWithResponse(
       ApiGatewayResponse.messageResponse("422", "validation failed!"),

@@ -245,6 +245,16 @@ object SupportedProduct {
         SupportedRatePlan("Weekend+", weekendCharges),
       ),
     ),
+    SupportedProduct(
+      name = "Newspaper - National Delivery",
+      productType = NewspaperNationalDelivery,
+      annualIssueLimitPerEdition = 6,
+      ratePlans = List(
+        SupportedRatePlan("Weekend", weekendCharges),
+        SupportedRatePlan("Everyday", everyDayCharges),
+        SupportedRatePlan("Sixday", sixDayCharges),
+      ),
+    ),
   )
 
   lazy private val everyDayCharges = List(

@@ -7,32 +7,33 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{Postcode, SoldTo
 import com.gu.newproduct.api.productcatalog.{HomeDeliveryPlanId, PlanId}
 
 object PaperAddressValidator {
-  def apply(planId: PlanId, soldToAddress: SoldToAddress): ValidationResult[Unit] = {
+  def apply(planId: PlanId, soldToAddress: SoldToAddress): ValidationResult[Unit] =
     for {
-      _ <-
-        (soldToAddress.country == Country.UK) orFailWith s"Invalid country: ${soldToAddress.country.name}, only UK addresses are allowed"
-      - <- postCodeValidationFor(planId)(soldToAddress.postcode)
-    } yield soldToAddress
-  }
+      _ <- (soldToAddress.country == Country.UK) orFailWith cantDeliverOutsideUK(soldToAddress)
+      _ <- postCodeValidationFor(planId)(soldToAddress.postcode)
+    } yield ()
 
-  def postCodeValidationFor(planId: PlanId): Option[Postcode] => ValidationResult[Any] = planId match {
+  private def cantDeliverOutsideUK(soldToAddress: SoldToAddress): String =
+    s"Invalid country: ${soldToAddress.country.name}, only UK addresses are allowed"
+
+  private def postCodeValidationFor(planId: PlanId): Option[Postcode] => ValidationResult[Any] = planId match {
     case _: HomeDeliveryPlanId => validatePostCodeForHomeDelivery _
     case _ => (postCode: Option[Postcode]) => Passed(())
   }
 
-  def validatePostCodeForHomeDelivery(postcode: Option[Postcode]): ValidationResult[Postcode] = for {
+  private def validatePostCodeForHomeDelivery(postcode: Option[Postcode]): ValidationResult[Postcode] = for {
     deliveryPostcode <- postcode getOrFailWith ("delivery postcode is required")
     _ <- isWithinM25(
       deliveryPostcode,
     ) orFailWith (s"Invalid postcode ${deliveryPostcode.value}: postcode must be within M25")
   } yield (deliveryPostcode)
 
-  def isWithinM25(postcode: Postcode): Boolean = {
+  private def isWithinM25(postcode: Postcode): Boolean = {
     val normalisedPostCode = postcode.value.toUpperCase.filterNot(_.isWhitespace)
     M25_POSTCODE_PREFIXES.exists(normalisedPostCode.startsWith(_))
   }
 
-  val M25_POSTCODE_PREFIXES = List(
+  private val M25_POSTCODE_PREFIXES = List(
     "BR1",
     "BR2",
     "BR3",

@@ -1,15 +1,12 @@
 package com.gu.newproduct.api.addsubscription.email.paper
 
-import java.time.format.DateTimeFormatter
-
 import com.gu.newproduct.api.addsubscription.email.EmailData.paymentMethodFields
-import com.gu.newproduct.api.addsubscription.email.{EmailData, PaperEmailData}
+import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
-import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
-import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
 import com.gu.newproduct.api.productcatalog.PlanId._
 import play.api.libs.json.{Json, Writes}
+
+import java.time.format.DateTimeFormatter
 
 object PaperEmailDataSerialiser {
   implicit val writes: Writes[PaperEmailData] = (data: PaperEmailData) => {

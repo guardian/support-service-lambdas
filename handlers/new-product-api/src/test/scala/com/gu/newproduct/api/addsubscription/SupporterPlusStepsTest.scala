@@ -2,28 +2,17 @@ package com.gu.newproduct.api.addsubscription
 
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.productcatalog.Monthly
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusValidations.ValidatableFields
-import com.gu.newproduct.api.addsubscription.validation.{Passed, Failed}
+import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
-  ZuoraCreateSubRequestRatePlan,
-  ZuoraCreateSubRequest,
-  SubscriptionName,
-  ChargeOverride,
-}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlySupporterPlus
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{
-  ProductRatePlanChargeId,
-  PlanAndCharge,
-  ProductRatePlanId,
-  PlanAndCharges,
-}
-import com.gu.newproduct.api.productcatalog.{Plan, PaymentPlan, PlanDescription, PlanId, AmountMinorUnits}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharges, ProductRatePlanChargeId, ProductRatePlanId}
+import com.gu.newproduct.api.productcatalog._
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
@@ -33,6 +22,7 @@ import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json._
+
 import java.time.LocalDate
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -52,7 +42,7 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
 
     val expectedIn = ZuoraCreateSubRequest(
       ZuoraAccountId("acccc"),
-      LocalDate.of(2018, 7, 28),
+      LocalDate.of(2018, 7, 18),
       CaseId("case"),
       AcquisitionSource("CSR"),
       CreatedByCSR("bob"),
@@ -113,7 +103,7 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
 
     val fakeAddSupporterPlusSteps = AddSupporterPlus.steps(
       getPlan,
-      currentDate,
+      currentDate _,
       getPlanAndCharge,
       fakeGetCustomerData,
       fakeValidateRequest,
