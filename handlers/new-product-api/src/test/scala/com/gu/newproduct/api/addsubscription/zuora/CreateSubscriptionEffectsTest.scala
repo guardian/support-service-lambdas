@@ -30,6 +30,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
       validCaseIdToAvoidCausingSFErrors,
       AcquisitionSource("sourcesource"),
       CreatedByCSR("csrcsr"),
+      None,
       List(
         ZuoraCreateSubRequestRatePlan(
           productRatePlanId = monthlyContribution.productRatePlanId,

@@ -48,6 +48,7 @@ object CreateSubscription {
         AcquisitionCase__c: String,
         AcquisitionSource__c: String,
         CreatedByCSR__c: String,
+        DeliveryAgent__c: Option[String],
     )
 
     implicit val writesRequest = Json.writes[WireCreateRequest]
@@ -64,6 +65,7 @@ object CreateSubscription {
       AcquisitionCase__c = acquisitionCase.value,
       AcquisitionSource__c = acquisitionSource.value,
       CreatedByCSR__c = createdByCSR.value,
+      DeliveryAgent__c = deliveryAgent.map(_.value),
       subscribeToRatePlans = ratePlans.map { ratePlan =>
         SubscribeToRatePlans(
           productRatePlanId = ratePlan.productRatePlanId.value,
@@ -90,6 +92,7 @@ object CreateSubscription {
       acquisitionCase: CaseId,
       acquisitionSource: AcquisitionSource,
       createdByCSR: CreatedByCSR,
+      deliveryAgent: Option[DeliveryAgent],
       ratePlans: List[ZuoraCreateSubRequestRatePlan],
   )
 
@@ -109,6 +112,7 @@ object CreateSubscription {
       acquisitionCase = request.acquisitionCase,
       acquisitionSource = request.acquisitionSource,
       createdByCSR = request.createdByCSR,
+      deliveryAgent = request.deliveryAgent,
       ratePlans = ratePlans,
     )
   }

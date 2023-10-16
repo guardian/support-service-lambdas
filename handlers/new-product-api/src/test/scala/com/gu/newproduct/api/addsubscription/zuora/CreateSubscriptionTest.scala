@@ -42,6 +42,7 @@ class CreateSubscriptionTest extends AnyFlatSpec with Matchers {
       AcquisitionCase__c = "casecase",
       AcquisitionSource__c = "sourcesource",
       CreatedByCSR__c = "csrcsr",
+      DeliveryAgent__c = None,
       subscribeToRatePlans = List(
         SubscribeToRatePlans(
           productRatePlanId = "hiProductRatePlanId",
@@ -67,6 +68,7 @@ class CreateSubscriptionTest extends AnyFlatSpec with Matchers {
       acquisitionCase = CaseId("casecase"),
       acquisitionSource = AcquisitionSource("sourcesource"),
       createdByCSR = CreatedByCSR("csrcsr"),
+      deliveryAgent = None,
       ratePlans = List(
         ZuoraCreateSubRequestRatePlan(
           productRatePlanId = ids.productRatePlanId,

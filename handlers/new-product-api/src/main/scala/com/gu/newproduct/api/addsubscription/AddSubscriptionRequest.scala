@@ -12,6 +12,7 @@ case class AddSubscriptionRequest(
     zuoraAccountId: ZuoraAccountId,
     startDate: LocalDate,
     acquisitionSource: AcquisitionSource,
+    deliveryAgent: Option[DeliveryAgent],
     createdByCSR: CreatedByCSR,
     amountMinorUnits: Option[AmountMinorUnits],
     acquisitionCase: CaseId,
@@ -20,6 +21,7 @@ case class AddSubscriptionRequest(
 
 case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
+case class DeliveryAgent(value: String) extends AnyVal
 case class CreatedByCSR(value: String) extends AnyVal
 object AddSubscriptionRequest {
 
@@ -27,6 +29,7 @@ object AddSubscriptionRequest {
       zuoraAccountId: String,
       startDate: String,
       acquisitionSource: String,
+      deliveryAgent: Option[String],
       createdByCSR: String,
       amountMinorUnits: Option[Int],
       acquisitionCase: String,
@@ -40,6 +43,7 @@ object AddSubscriptionRequest {
         zuoraAccountId = ZuoraAccountId(zuoraAccountId),
         startDate = parsedDate,
         acquisitionSource = AcquisitionSource(this.acquisitionSource),
+        deliveryAgent = deliveryAgent.map(DeliveryAgent.apply),
         createdByCSR = CreatedByCSR(this.createdByCSR),
         amountMinorUnits = amountMinorUnits.map(AmountMinorUnits.apply),
         CaseId(acquisitionCase),
