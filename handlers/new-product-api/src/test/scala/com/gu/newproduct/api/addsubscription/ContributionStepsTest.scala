@@ -6,7 +6,12 @@ import com.gu.newproduct.api.addsubscription.email.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  ChargeOverride,
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
@@ -41,11 +46,12 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
     def getPlanAndCharge(planId: PlanId) = Some(planAndCharge)
 
     val expectedIn = ZuoraCreateSubRequest(
-      ZuoraAccountId("acccc"),
-      LocalDate.of(2018, 7, 18),
-      CaseId("case"),
-      AcquisitionSource("CSR"),
-      CreatedByCSR("bob"),
+      accountId = ZuoraAccountId("acccc"),
+      acceptanceDate = LocalDate.of(2018, 7, 18),
+      acquisitionCase = CaseId("case"),
+      acquisitionSource = AcquisitionSource("CSR"),
+      createdByCSR = CreatedByCSR("bob"),
+      deliveryAgent = None,
       ratePlans = List(
         ZuoraCreateSubRequestRatePlan(
           productRatePlanId = planAndCharge.productRatePlanId,
@@ -77,7 +83,8 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
 
     def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.contributionCustomerData)
 
-    def getPlan: Map[PlanId, Plan] = Map().withDefaultValue(Plan(MonthlyContribution, PlanDescription("some description"), testStartDateRules))
+    def getPlan: Map[PlanId, Plan] =
+      Map().withDefaultValue(Plan(MonthlyContribution, PlanDescription("some description"), testStartDateRules))
 
     def currentDate() = LocalDate.of(2018, 12, 12)
 

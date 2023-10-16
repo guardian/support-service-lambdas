@@ -109,12 +109,13 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
         request: CreateSubscription.ZuoraCreateSubRequest,
     ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       request shouldBe ZuoraCreateSubRequest(
-        testZuoraAccountId,
-        testFirstPaymentDate,
-        testCaseId,
-        testAcquistionSource,
-        testCSR,
-        List(
+        accountId = testZuoraAccountId,
+        acceptanceDate = testFirstPaymentDate,
+        acquisitionCase = testCaseId,
+        acquisitionSource = testAcquistionSource,
+        createdByCSR = testCSR,
+        deliveryAgent = None,
+        ratePlans = List(
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = quarterlyTestRatePlanZuoraId,
             maybeChargeOverride = None,
@@ -181,12 +182,13 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
         request: CreateSubscription.ZuoraCreateSubRequest,
     ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       request shouldBe ZuoraCreateSubRequest(
-        testZuoraAccountId,
-        monthlySubscriptionStartDate,
-        testCaseId,
-        testAcquistionSource,
-        testCSR,
-        List(
+        accountId = testZuoraAccountId,
+        acceptanceDate = monthlySubscriptionStartDate,
+        acquisitionCase = testCaseId,
+        acquisitionSource = testAcquistionSource,
+        createdByCSR = testCSR,
+        deliveryAgent = None,
+        ratePlans = List(
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = sixForSixTestRatePlanZuoraId,
             maybeChargeOverride = Some(

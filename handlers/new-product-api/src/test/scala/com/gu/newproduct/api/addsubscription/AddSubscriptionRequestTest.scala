@@ -28,6 +28,7 @@ class AddSubscriptionRequestTest extends AnyFlatSpec with Matchers {
       zuoraAccountId = ZuoraAccountId("accountkeyValue"),
       startDate = LocalDate.of(2018, 7, 11),
       acquisitionSource = AcquisitionSource("CSR"),
+      deliveryAgent = None,
       createdByCSR = CreatedByCSR("CSRName"),
       amountMinorUnits = Some(AmountMinorUnits(123)),
       acquisitionCase = CaseId("5006E000005b5cf"),
