@@ -2,9 +2,8 @@ package com.gu.productmove.endpoint.move
 
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
-
 import com.gu.productmove.SecretsLive
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes._
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
@@ -15,16 +14,18 @@ import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{
   GetAccount,
   GetAccountLive,
+  GetInvoiceItems,
+  GetInvoiceItemsLive,
   GetSubscription,
   GetSubscriptionLive,
+  InvoiceItemAdjustment,
+  InvoiceItemAdjustmentLive,
   Subscribe,
   SubscribeLive,
   SubscriptionUpdate,
   SubscriptionUpdateLive,
-  GetInvoiceItems,
-  GetInvoiceItemsLive,
-  InvoiceItemAdjustment,
-  InvoiceItemAdjustmentLive,
+  TermRenewal,
+  TermRenewalLive,
   ZuoraCancel,
   ZuoraCancelLive,
 }
@@ -41,12 +42,12 @@ import com.gu.productmove.{
   SQSLive,
   SttpClientLive,
 }
-import sttp.tapir._
+import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ZuoraIds
 
 import java.time.format.DateTimeFormatter
@@ -186,6 +187,7 @@ object ProductMoveEndpoint {
       ZuoraClientLive.layer,
       ZuoraGetLive.layer,
       SubscriptionUpdateLive.layer,
+      TermRenewalLive.layer,
       SQSLive.layer,
       GetAccountLive.layer,
       InvoiceItemAdjustmentLive.layer,

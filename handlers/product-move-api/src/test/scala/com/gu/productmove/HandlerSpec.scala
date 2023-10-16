@@ -40,6 +40,7 @@ import com.gu.productmove.zuora.GetAccount.{
   PaymentMethodResponse,
   ZuoraSubscription,
 }
+import com.gu.productmove.zuora.{AmendmentResult, AmendmentResponse}
 import com.gu.productmove.zuora.{
   AddRatePlan,
   CancellationResponse,
@@ -59,6 +60,7 @@ import com.gu.productmove.zuora.{
   MockSQS,
   MockSubscribe,
   MockSubscriptionUpdate,
+  MockTermRenewal,
   MockZuoraCancel,
   MockZuoraSetCancellationReason,
   RemoveRatePlan,
@@ -69,7 +71,7 @@ import com.gu.productmove.zuora.{
 }
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
+import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionId, SubscriptionName}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import zio.*
 import zio.test.*
@@ -96,6 +98,10 @@ object HandlerSpec extends ZIOSpecDefault {
       (subscriptionName, expectedRequestBodyPreview2)
     val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse2)
     val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
+    val termRenewalInputsShouldBe: (SubscriptionId, LocalDate) =
+      (SubscriptionId("subscription_id"), LocalDate.now)
+    val termRenewalResponse = AmendmentResponse(List(AmendmentResult(Nil, true)))
+    val termRenewalStubs = Map(termRenewalInputsShouldBe -> termRenewalResponse)
     val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)
     val getAccountStubs2 = Map(AccountNumber("accountNumber") -> getAccountResponse2)
     val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
@@ -149,6 +155,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
@@ -180,6 +187,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
@@ -201,6 +209,7 @@ object HandlerSpec extends ZIOSpecDefault {
 
         val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)) ++
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)) ++
           ZLayer.succeed(new MockSQS(sqsStubs)) ++
           ZLayer.succeed(new MockDynamo(dynamoStubs)) ++
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
@@ -252,6 +261,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse3))),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
@@ -317,6 +327,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs2, getPaymentMethodStubs)),
@@ -346,6 +357,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
@@ -379,6 +391,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),

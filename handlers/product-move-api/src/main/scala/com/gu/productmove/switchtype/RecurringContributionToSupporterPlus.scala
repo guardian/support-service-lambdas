@@ -25,7 +25,7 @@ import com.gu.productmove.move.BuildPreviewResult
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{SubscriptionName, SubscriptionId}
 import com.gu.productmove.zuora.{
   AddRatePlan,
   ChargeOverrides,
@@ -46,9 +46,12 @@ import com.gu.productmove.zuora.{
   SubscriptionUpdateRequest,
   SubscriptionUpdateResponse,
   SwitchProductUpdateRequest,
+  TermRenewal,
   UpdateSubscriptionAmount,
   ZuoraCancel,
   ZuoraCancelLive,
+  given_JsonDecoder_SubscriptionUpdatePreviewResponse,
+  given_JsonDecoder_SubscriptionUpdateResponse,
 }
 import com.gu.productmove.{
   AwsCredentialsLive,
@@ -67,8 +70,6 @@ import com.gu.productmove.{
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config
 import com.gu.util.config.ZuoraEnvironment
-import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdateResponse
-import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdatePreviewResponse
 import zio.*
 import zio.json.*
 
@@ -103,6 +104,7 @@ object RecurringContributionToSupporterPlus {
   ): ZIO[
     GetSubscription
       with SubscriptionUpdate
+      with TermRenewal
       with GetInvoiceItems
       with InvoiceItemAdjustment
       with GetAccount
@@ -331,7 +333,14 @@ object RecurringContributionToSupporterPlus {
       csrUserId: Option[String],
       caseId: Option[String],
   ): ZIO[
-    GetAccount with SubscriptionUpdate with GetInvoiceItems with InvoiceItemAdjustment with SQS with Stage with Dynamo,
+    GetAccount
+      with SubscriptionUpdate
+      with TermRenewal
+      with GetInvoiceItems
+      with InvoiceItemAdjustment
+      with SQS
+      with Stage
+      with Dynamo,
     ErrorResponse,
     OutputBody,
   ] = {
@@ -346,6 +355,10 @@ object RecurringContributionToSupporterPlus {
       )
       stage <- ZIO.service[Stage]
       accountFuture <- GetAccount.get(subscription.accountNumber).fork
+
+      // Start a new term when we do the switch to avoid issues with billing dates
+
+      // _ <- TermRenewal.update(SubscriptionId(subscription.id), subscription.termStartDate)
 
       /*
         If the amount payable today is less than 0.50, we don't want to collect payment. Stripe has a minimum charge of 50 cents.
