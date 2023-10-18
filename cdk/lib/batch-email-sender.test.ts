@@ -1,13 +1,14 @@
 import { App } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
-import {BatchEmailSender, BatchEmailSenderProps} from "./batch-email-sender";
+import {BatchEmailSender} from "./batch-email-sender";
+import {GuStackProps} from "@guardian/cdk/lib/constructs/core";
 
-const codeProps: BatchEmailSenderProps = {
+const codeProps: GuStackProps = {
     stack: "membership",
     stage: "CODE"
 }
 
-const prodProps: BatchEmailSenderProps = {
+const prodProps: GuStackProps = {
     stack: "membership",
     stage: "PROD"
 }
