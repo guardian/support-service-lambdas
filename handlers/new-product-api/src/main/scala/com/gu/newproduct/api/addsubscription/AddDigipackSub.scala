@@ -3,7 +3,7 @@ package com.gu.newproduct.api.addsubscription
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.digipack.DigipackEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.serialisers.DigipackEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.digipack.ValidatedAddress
 import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, EtSqsSend, SendConfirmationEmail, TrialPeriod}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
@@ -20,7 +20,7 @@ import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscr
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
-import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -28,17 +28,18 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
 import scala.concurrent.Future
-object AddDigipackSub {
-  def steps(
-      currentDate: () => LocalDate,
-      getPlan: PlanId => Plan,
-      getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-      getCustomerData: ZuoraAccountId => ApiGatewayOp[DigipackCustomerData],
-      isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-      validateAddress: BillToAddress => ValidationResult[ValidatedAddress],
-      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-      sendConfirmationEmail: (Option[SfContactId], DigipackEmailData) => AsyncApiGatewayOp[Unit],
-  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
+
+class AddDigipackSub(
+  currentDate: () => LocalDate,
+  getPlan: PlanId => Plan,
+  getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
+  getCustomerData: ZuoraAccountId => ApiGatewayOp[DigipackCustomerData],
+  isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
+  validateAddress: BillToAddress => ValidationResult[ValidatedAddress],
+  createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+  sendConfirmationEmail: (Option[SfContactId], DigipackEmailData) => AsyncApiGatewayOp[Unit],
+) extends AddSpecificProduct {
+  override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- isValidStartDateForPlan(request.planId, request.startDate).toApiGatewayOp.toAsync
 
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
@@ -73,6 +74,9 @@ object AddDigipackSub {
     _ <- sendConfirmationEmail(customerData.account.sfContactId, emailData)
       .recoverAndLog("send digiPack confirmation email")
   } yield subscriptionName
+}
+
+object AddDigipackSub {
 
   def wireSteps(
     catalog: Map[PlanId, Plan],
@@ -84,14 +88,14 @@ object AddDigipackSub {
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
       emailQueueName: QueueName,
       currentDate: () => LocalDate,
-  ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
+  ): AddSpecificProduct = {
 
     val digipackPlanIds = zuoraIds.digitalPackIds.byApiPlanId.values.toList
     val digipackSqsSend = awsSQSSend(emailQueueName)
     val digiPackBrazeConfirmationSqsSend = EtSqsSend[DigipackEmailData](digipackSqsSend) _
     val sendConfirmationEmail = SendConfirmationEmail(digiPackBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient, digipackPlanIds)
-    steps(
+    new AddDigipackSub(
       currentDate,
       catalog,
       zuoraIds.apiIdToRateplanId.get,

@@ -1,29 +1,29 @@
-package com.gu.newproduct.api.addsubscription.email.contributions
+package com.gu.newproduct.api.addsubscription.email.serialisers
+
+import com.gu.newproduct.api.addsubscription.Formatters._
+import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
+import com.gu.newproduct.api.productcatalog.Plan
+import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, MonthlySupporterPlus}
+import play.api.libs.json.{Json, Writes}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import com.gu.newproduct.api.addsubscription.Formatters._
-import com.gu.newproduct.api.addsubscription.email.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
-import com.gu.newproduct.api.productcatalog.Plan
-import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
-import play.api.libs.json.{Json, Writes}
-
-object ContributionEmailDataSerialiser {
-  implicit val writes: Writes[ContributionsEmailData] = (data: ContributionsEmailData) => {
-    val fields: Map[String, String] = ContributionFields(data)
+object SupporterPlusEmailDataSerialiser {
+  implicit val writes: Writes[SupporterPlusEmailData] = (data: SupporterPlusEmailData) => {
+    val fields: Map[String, String] = SupporterPlusFields.serialise(data)
     Json.toJson(fields)
   }
 }
 
-object ContributionFields {
+object SupporterPlusFields {
 
   val firstPaymentDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
 
   def productId(plan: Plan) = plan.id match {
-    case AnnualContribution => "annual-contribution"
-    case MonthlyContribution => "monthly-contribution"
+    case AnnualSupporterPlus => "annual-supporter-plus"
+    case MonthlySupporterPlus => "monthly-supporter-plus"
     case other => other.name
   }
 
@@ -41,7 +41,7 @@ object ContributionFields {
 
   }
 
-  def apply(data: ContributionsEmailData): Map[String, String] = Map(
+  def serialise(data: SupporterPlusEmailData): Map[String, String] = Map(
     "EmailAddress" -> data.contacts.billTo.email.map(_.value).getOrElse(""),
     "created" -> data.created.toString,
     "amount" -> data.amountMinorUnits.formatted,

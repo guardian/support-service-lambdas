@@ -6,7 +6,7 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.effects.S3Location
 import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import ZuoraCatalogWireModel._
 import com.gu.i18n.Currency
 
@@ -19,7 +19,7 @@ object ZuoraCatalogWireModel {
   case class Price(price: Option[Double], currency: String)
 
   object Price {
-    implicit val reads = Json.reads[Price]
+    implicit val reads: Reads[Price] = Json.reads[Price]
   }
 
   case class RateplanCharge(
@@ -27,7 +27,7 @@ object ZuoraCatalogWireModel {
   )
 
   object RateplanCharge {
-    implicit val reads = Json.reads[RateplanCharge]
+    implicit val reads: Reads[RateplanCharge] = Json.reads[RateplanCharge]
   }
 
   def toMinorUnits(amount: Double) = AmountMinorUnits((amount * 100).toInt)
@@ -75,7 +75,7 @@ object ZuoraCatalogWireModel {
   }
 
   object Rateplan {
-    implicit val reads = Json.reads[Rateplan]
+    implicit val reads: Reads[Rateplan] = Json.reads[Rateplan]
 
   }
 
@@ -85,7 +85,7 @@ object ZuoraCatalogWireModel {
   )
 
   object Product {
-    implicit val reads = Json.reads[Product]
+    implicit val reads: Reads[Product] = Json.reads[Product]
   }
 
   case class ZuoraCatalog(
@@ -103,7 +103,7 @@ object ZuoraCatalogWireModel {
   }
 
   object ZuoraCatalog {
-    implicit val reads = Json.reads[ZuoraCatalog]
+    implicit val reads: Reads[ZuoraCatalog] = Json.reads[ZuoraCatalog]
   }
 }
 

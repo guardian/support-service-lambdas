@@ -1,7 +1,7 @@
-package com.gu.newproduct.api.addsubscription.email.paper
+package com.gu.newproduct.api.addsubscription.email.serialisers
 
 import com.gu.newproduct.api.addsubscription.email.EmailData.paymentMethodFields
-import com.gu.newproduct.api.addsubscription.email.PaperEmailData
+import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.productcatalog.PlanId._
 import play.api.libs.json.{Json, Writes}
@@ -9,21 +9,25 @@ import play.api.libs.json.{Json, Writes}
 import java.time.format.DateTimeFormatter
 
 object PaperEmailDataSerialiser {
-  implicit val writes: Writes[PaperEmailData] = (data: PaperEmailData) => {
-    val fields: Map[String, String] = PaperEmailFields(data)
-    Json.toJson(fields)
-  }
+  implicit val writes: Writes[PaperEmailData] = (data: PaperEmailData) =>
+    Json.toJson(PaperEmailFields.serialise(data))
 }
 
 object PaperEmailFields {
 
-  val digipackPlans =
+  private val digipackPlans =
     List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
-  val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  private val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
-  def apply(
-      data: PaperEmailData,
-  ) = {
+  def serialise(data: PaperEmailData): Map[String, String] =
+    List(
+      basicFields(data),
+      paymentMethodFields(data.paymentMethod),
+      addressFields(data.contacts),
+      deliveryAgentFields(data.deliveryAgentDetails)
+    ).flatten.toMap
+
+  private def basicFields(data: PaperEmailData) = {
     Map(
       "ZuoraSubscriberId" -> data.subscriptionName.value,
       "SubscriberKey" -> data.contacts.billTo.email.map(_.value).getOrElse(""),
@@ -33,8 +37,23 @@ object PaperEmailFields {
       "date_of_first_payment" -> data.firstPaymentDate.format(dateformat),
       "package" -> data.plan.description.value,
       "subscription_rate" -> data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse(""),
-    ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts)
+    )
   }
+
+  def deliveryAgentFields(maybeDeliveryAgentDetails: Option[DeliveryAgentDetails]): Map[String, String] =
+    maybeDeliveryAgentDetails match {
+      case Some(deliveryAgentDetails) => Map(
+        "delivery_agent_name" -> deliveryAgentDetails.agentName,
+        "delivery_agent_telephone" -> deliveryAgentDetails.telephone,
+        "delivery_agent_email" -> deliveryAgentDetails.email,
+        "delivery_agent_address1" -> deliveryAgentDetails.address1,
+        "delivery_agent_address2" -> deliveryAgentDetails.address2,
+        "delivery_agent_town" -> deliveryAgentDetails.town,
+        "delivery_agent_county" -> deliveryAgentDetails.county,
+        "delivery_agent_postcode" -> deliveryAgentDetails.postcode,
+      )
+      case None => Map.empty
+    }
 
   def addressFields(contacts: Contacts) = {
     val soldTo = contacts.soldTo

@@ -3,7 +3,7 @@ package com.gu.newproduct.api.productcatalog
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAddressValidator
-import play.api.libs.json.{JsString, Json, Writes}
+import play.api.libs.json.{JsString, Json, OWrites, Writes}
 
 import java.time.{DayOfWeek, LocalDate}
 
@@ -35,7 +35,7 @@ object WireModel {
 
   case class WirePaymentPlan(currencyCode: String, description: String)
   object WirePaymentPlan {
-    implicit val writes = Json.writes[WirePaymentPlan]
+    implicit val writes: OWrites[WirePaymentPlan] = Json.writes[WirePaymentPlan]
 
   }
 
@@ -72,7 +72,7 @@ object WireModel {
   }
 
   object WireSelectableWindow {
-    implicit val writes = Json.writes[WireSelectableWindow]
+    implicit val writes: OWrites[WireSelectableWindow] = Json.writes[WireSelectableWindow]
 
     def fromWindowRule(rule: WindowRule) = {
       WireSelectableWindow(rule.startDate, rule.maybeSize.map(_.value))
@@ -80,7 +80,7 @@ object WireModel {
   }
 
   object WireStartDateRules {
-    implicit val writes = Json.writes[WireStartDateRules]
+    implicit val writes: OWrites[WireStartDateRules] = Json.writes[WireStartDateRules]
 
     def fromStartDateRules(rule: StartDateRules): WireStartDateRules = {
       val allowedDays = rule.daysOfWeekRule.map(_.allowedDays) getOrElse DayOfWeek.values.toList
@@ -90,7 +90,7 @@ object WireModel {
   }
 
   object WirePlanInfo {
-    implicit val writes = Json.writes[WirePlanInfo]
+    implicit val writes: OWrites[WirePlanInfo] = Json.writes[WirePlanInfo]
 
     def toWireRules(startDateRules: StartDateRules): WireStartDateRules =
       WireStartDateRules.fromStartDateRules(startDateRules)
@@ -114,11 +114,11 @@ object WireModel {
   }
 
   object WireProduct {
-    implicit val writes = Json.writes[WireProduct]
+    implicit val writes: OWrites[WireProduct] = Json.writes[WireProduct]
   }
 
   object WireCatalog {
-    implicit val writes = Json.writes[WireCatalog]
+    implicit val writes: OWrites[WireCatalog] = Json.writes[WireCatalog]
 
     def fromCatalog(
       catalog: Map[PlanId, Plan],

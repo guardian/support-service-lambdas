@@ -4,14 +4,14 @@ import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
 import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.serialisers.PaperEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, EtSqsSend, PaperEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
-import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDayPlus
+import com.gu.newproduct.api.productcatalog.PlanId.NationalDeliveryWeekend
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog._
 
@@ -22,14 +22,14 @@ import scala.util.Random
 
 object SendVoucherEmailsManualTest {
 
-  def fakeVoucherEmailData(soldToEmail: Email) = {
+  def fakeVoucherEmailData(email: Email) = {
 
     val contacts = Contacts(
       billTo = BillToContact(
         Some(Title("billToTitle")),
         FirstName("billToFirstName"),
         LastName("billToLastName"),
-        Some(Email("billto@email.com")),
+        Some(email),
         BillToAddress(
           Some(Address1("billToAddress1")),
           Some(Address2("billToAddress2")),
@@ -43,7 +43,7 @@ object SendVoucherEmailsManualTest {
         Some(Title("soldToTitle")),
         FirstName("soldToFirstName"),
         LastName("soldToLastName"),
-        Some(soldToEmail),
+        Some(email),
         SoldToAddress(
           Some(Address1("soldToAddress1")),
           Some(Address2("soldToAddress2")),
@@ -57,10 +57,21 @@ object SendVoucherEmailsManualTest {
 
     val randomSubName = "T-" + Random.alphanumeric.take(10).mkString
 
+    val deliveryAgentDetails = DeliveryAgentDetails(
+      "my name",
+      "my telephone",
+      "my email",
+      "my address1",
+      "my address2",
+      "my town",
+      "my county",
+      "my postcode",
+    )
+
     PaperEmailData(
       plan = Plan(
-        VoucherEveryDayPlus,
-        PlanDescription("Everyday+"),
+        NationalDeliveryWeekend,
+        PlanDescription("Weekend"),
         testStartDateRules,
         Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(3112), Monthly, "GBP 32.12 every month")),
       ),
@@ -76,23 +87,22 @@ object SendVoucherEmailsManualTest {
         MandateId("MandateId"),
       ),
       currency = GBP,
+      Some(deliveryAgentDetails),
     )
   }
 
   def main(args: Array[String]): Unit = {
-    val result = for {
-      email <- args.headOption.map(Email.apply)
-      sqsSend = SqsAsync.send(SqsAsync.buildClient)(EmailQueueName) _
-      voucherSqsSend = EtSqsSend[PaperEmailData](sqsSend) _
-      sendConfirmationEmail = SendConfirmationEmail(voucherSqsSend) _
-      data = fakeVoucherEmailData(email)
-      sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), fakeVoucherEmailData(email))
-    } yield sendResult
-    result match {
+    args.headOption match {
       case None =>
         println("please input a parameter which is your email address for SES emails to be sent")
-      case Some(op) =>
-        val opresult = Await.result(op.underlying, Duration.Inf)
+      case Some(rawEmail) =>
+        val sqsSend = SqsAsync.send(SqsAsync.buildClient)(EmailQueueName) _
+        val voucherSqsSend = EtSqsSend[PaperEmailData](sqsSend) _
+        val sendConfirmationEmail = SendConfirmationEmail(voucherSqsSend) _
+        val data = fakeVoucherEmailData(Email(rawEmail))
+        val devContactId = SfContactId("0039E00001pSvOHQA0")
+        val sendResult = sendConfirmationEmail(Some(devContactId), data)
+        val opresult = Await.result(sendResult.underlying, Duration.Inf)
         println(s"op result: $opresult")
     }
   }

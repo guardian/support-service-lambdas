@@ -54,9 +54,9 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
 
-    // todo separate the tests properly so that we don't need this anymore (and the same in the contributionStepsTest)
-    val dummySteps = (req: AddSubscriptionRequest) => {
-      fail("unexpected execution of contribution steps while processing voucher request!")
+    val dummySteps = new AddSpecificProduct {
+      override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] =
+        fail("unexpected execution of voucher steps while processing contribution request!")
     }
 
     val expectedIn = ZuoraCreateSubRequest(
@@ -93,7 +93,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
     def fakeSendEmail(sfContactId: Option[SfContactId], paperData: PaperEmailData) = ContinueProcessing(()).toAsync
 
     def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"), testStartDateRules)
-    val fakeAddVoucherSteps = AddPaperSub.steps(
+    val fakeAddVoucherSteps = new AddPaperSub(
       fakeGetPlan,
       fakeGetZuoraId,
       fakeGetVoucherCustomerData,
@@ -101,9 +101,9 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
       fakeValidateAddress,
       fakeCreate,
       fakeSendEmail,
-    ) _
+    )
 
-    val futureActual = Steps.handleRequest(
+    val futureActual = new handleRequest(
       addSupporterPlus = dummySteps,
       addContribution = dummySteps,
       addPaperSub = fakeAddVoucherSteps,

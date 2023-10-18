@@ -4,7 +4,7 @@ import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 object GetAccountSubscriptions {
 
@@ -25,9 +25,9 @@ object GetAccountSubscriptions {
       productRateplanIds = zuoraSubscription.ratePlans.map(rp => ProductRatePlanId(rp.productRatePlanId)).toSet,
     )
 
-    implicit val zuoraRateplanReads = Json.reads[ZuoraRatePlan]
-    implicit val zuoraSubscriptionReads = Json.reads[ZuoraSubscription]
-    implicit val zuoraSubscriptionsResponseReads = Json.reads[ZuoraSubscriptionsResponse]
+    implicit val zuoraRateplanReads: Reads[ZuoraRatePlan] = Json.reads[ZuoraRatePlan]
+    implicit val zuoraSubscriptionReads: Reads[ZuoraSubscription] = Json.reads[ZuoraSubscription]
+    implicit val zuoraSubscriptionsResponseReads: Reads[ZuoraSubscriptionsResponse] = Json.reads[ZuoraSubscriptionsResponse]
   }
 
   import WireModel._

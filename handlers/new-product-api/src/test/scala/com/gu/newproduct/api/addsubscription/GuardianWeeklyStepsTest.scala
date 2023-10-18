@@ -100,8 +100,9 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
     }
   }
 
-  val dummySteps = (req: AddSubscriptionRequest) => {
-    fail("unexpected execution of contribution steps while processing voucher request!")
+  val dummySteps = new AddSpecificProduct {
+    override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] =
+      fail("unexpected execution of voucher steps while processing contribution request!")
   }
 
   it should "create subscription for non 6-for-6 rate plan" in {
@@ -125,7 +126,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       ClientSuccess(SubscriptionName(newSubscriptionName))
     }
 
-    val stubAddVoucherSteps = AddGuardianWeeklySub.steps(
+    val stubAddVoucherSteps = new AddGuardianWeeklySub(
       stubGetPlan,
       stubGetZuoraId,
       stubGetPlanAndCharge,
@@ -136,9 +137,9 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       stubSendEmail(quarterlyRatePlan),
       GuardianWeeklyDomestic6for6,
       GuardianWeeklyDomesticQuarterly,
-    ) _
+    )
 
-    val futureActual = Steps.handleRequest(
+    val futureActual = new handleRequest(
       addSupporterPlus = dummySteps,
       addContribution = dummySteps,
       addPaperSub = dummySteps,
@@ -208,7 +209,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       ClientSuccess(SubscriptionName(newSubscriptionName))
     }
 
-    val stubAddVoucherSteps = AddGuardianWeeklySub.steps(
+    val stubAddVoucherSteps = new AddGuardianWeeklySub(
       stubGetPlan,
       stubGetZuoraId,
       stubGetPlanAndCharge,
@@ -219,9 +220,9 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       stubSendEmail(sixForSixRatePlan),
       GuardianWeeklyDomestic6for6,
       GuardianWeeklyDomesticQuarterly,
-    ) _
+    )
 
-    val futureActual = Steps.handleRequest(
+    val futureActual = new handleRequest(
       addSupporterPlus = dummySteps,
       addContribution = dummySteps,
       addPaperSub = dummySteps,

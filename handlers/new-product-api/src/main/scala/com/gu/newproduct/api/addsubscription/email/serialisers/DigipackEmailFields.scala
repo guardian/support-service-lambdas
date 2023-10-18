@@ -1,6 +1,4 @@
-package com.gu.newproduct.api.addsubscription.email.digipack
-
-import java.time.format.DateTimeFormatter
+package com.gu.newproduct.api.addsubscription.email.serialisers
 
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.addsubscription.email.DigipackEmailData
@@ -9,12 +7,14 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
 import com.gu.newproduct.api.productcatalog.PlanId._
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, Quarterly, SixWeeks}
+import com.gu.newproduct.api.productcatalog._
 import play.api.libs.json.{Json, Writes}
+
+import java.time.format.DateTimeFormatter
 
 object DigipackEmailDataSerialiser {
   implicit val writes: Writes[DigipackEmailData] = (data: DigipackEmailData) => {
-    val fields: Map[String, String] = DigipackEmailFields(data)
+    val fields: Map[String, String] = DigipackEmailFields.serialise(data)
     Json.toJson(fields)
   }
 }
@@ -31,7 +31,7 @@ object DigipackEmailFields {
     case Quarterly => "quarter"
     case SixWeeks => "six weeks"
   }
-  def apply(
+  def serialise(
       data: DigipackEmailData,
   ): Map[String, String] = {
 

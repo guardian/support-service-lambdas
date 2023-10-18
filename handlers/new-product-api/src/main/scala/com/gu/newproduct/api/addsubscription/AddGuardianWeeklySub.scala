@@ -2,8 +2,9 @@ package com.gu.newproduct.api.addsubscription
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
+import com.gu.newproduct.api.addsubscription.AddGuardianWeeklySub.createCreateSubRequest
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.guardianweekly.GuardianWeeklyEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.serialisers.GuardianWeeklyEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, GuardianWeeklyEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GetGuardianWeeklyCustomerData, GuardianWeeklyAccountValidation, GuardianWeeklyCustomerData}
@@ -18,7 +19,7 @@ import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetContacts, Get
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
-import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -26,19 +27,19 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import java.time.LocalDate
 import scala.concurrent.Future
 
-object AddGuardianWeeklySub {
-  def steps(
-      getPlan: PlanId => Plan,
-      getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-      getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
-      getCustomerData: ZuoraAccountId => ApiGatewayOp[GuardianWeeklyCustomerData],
-      validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
-      validateAddress: (BillToAddress, SoldToAddress) => ValidationResult[Unit],
-      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-      sendConfirmationEmail: (Option[SfContactId], GuardianWeeklyEmailData) => AsyncApiGatewayOp[Unit],
-      sixForSixPlanId: PlanId,
-      quarterlyPlanId: PlanId,
-  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
+class AddGuardianWeeklySub(
+  getPlan: PlanId => Plan,
+  getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
+  getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
+  getCustomerData: ZuoraAccountId => ApiGatewayOp[GuardianWeeklyCustomerData],
+  validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
+  validateAddress: (BillToAddress, SoldToAddress) => ValidationResult[Unit],
+  createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+  sendConfirmationEmail: (Option[SfContactId], GuardianWeeklyEmailData) => AsyncApiGatewayOp[Unit],
+  sixForSixPlanId: PlanId,
+  quarterlyPlanId: PlanId,
+) extends AddSpecificProduct {
+  override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
 
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
@@ -66,6 +67,9 @@ object AddGuardianWeeklySub {
     _ <- sendConfirmationEmail(customerData.account.sfContactId, guardianWeeklyEmailData)
       .recoverAndLog("send guardian weekly confirmation email")
   } yield subscriptionName
+}
+
+object AddGuardianWeeklySub {
 
   def wireSteps(
     catalog: Map[PlanId, Plan],
@@ -78,12 +82,12 @@ object AddGuardianWeeklySub {
       emailQueueName: QueueName,
       sixForSixPlanId: PlanId,
       quarterlyPlanId: PlanId,
-  ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
+  ): AddSpecificProduct = {
     val guardianWeeklySqsQueueSend = awsSQSSend(emailQueueName)
     val guardianWeeklyBrazeConfirmationSqsSend = EtSqsSend[GuardianWeeklyEmailData](guardianWeeklySqsQueueSend) _
     val sendConfirmationEmail = SendConfirmationEmail(guardianWeeklyBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)
-    steps(
+    new AddGuardianWeeklySub(
       catalog,
       zuoraIds.apiIdToRateplanId.get,
       zuoraIds.apiIdToPlanAndCharge.get,

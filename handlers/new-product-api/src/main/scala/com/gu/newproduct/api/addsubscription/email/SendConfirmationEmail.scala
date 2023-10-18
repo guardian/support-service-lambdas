@@ -49,7 +49,7 @@ object SendConfirmationEmail extends Logging {
       case _: HomeDeliveryPlanId => "paper-delivery"
       case _: GuardianWeeklyDomestic => "guardian-weekly"
       case _: GuardianWeeklyRow => "guardian-weekly"
-      case _: NationalDeliveryPlanId => "paper-national-delivery" // TODO membership-workflow and braze
+      case _: NationalDeliveryPlanId => "paper-national-delivery"
     },
   )
 }

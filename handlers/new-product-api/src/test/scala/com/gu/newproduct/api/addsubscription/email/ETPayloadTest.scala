@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.addsubscription.email
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OWrites}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -9,7 +9,7 @@ class ETPayloadTest extends AnyFlatSpec with Matchers {
   case class TestPayload(data: String)
 
   object TestPayload {
-    implicit val writes = Json.writes[TestPayload]
+    implicit val writes: OWrites[TestPayload] = Json.writes[TestPayload]
   }
 
   it should "serialise payload to json" in {

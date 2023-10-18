@@ -1,26 +1,19 @@
 package com.gu.newproduct.api.addsubscription.email.paper
 
 import java.time.LocalDate
-
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.email.PaperEmailData
+import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
-  BankAccountName,
-  BankAccountNumberMask,
-  DirectDebit,
-  MandateId,
-  NonDirectDebitMethod,
-  SortCode,
-}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog._
 import com.gu.newproduct.api.productcatalog.PlanId._
 import play.api.libs.json.Json
-import PaperEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.serialisers.PaperEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.serialisers.PaperEmailFields
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -76,6 +69,7 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       MandateId("MandateId"),
     ),
     currency = GBP,
+    deliveryAgentDetails = None,
   )
   it should "generate json payload for voucher data with direct debit fields" in {
 
@@ -128,14 +122,14 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
 
     val directDebitFieldNames = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
 
-    PaperEmailFields(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
+    PaperEmailFields.serialise(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
   }
 
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
     val allPlansVoucherData = ids.map(planId =>
       directDebitVoucherData.copy(plan = Plan(planId, PlanDescription("test plan"), testStartDateRules)),
     )
-    allPlansVoucherData.map(PaperEmailFields(_))
+    allPlansVoucherData.map(PaperEmailFields.serialise)
   }
 
   it should "IncludesDigipack should be false for non plus plans " in {
@@ -157,4 +151,39 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
 
     allDigipackPlanFields.forall(_.get("IncludesDigipack").contains("true"))
   }
+
+  it should "include the delivery agent details where supplied" in {
+    val deliveryAgentDetails = DeliveryAgentDetails(
+      "my name",
+      "my telephone",
+      "my email",
+      "my address1",
+      "my address2",
+      "my town",
+      "my county",
+      "my postcode",
+    )
+    val testData = directDebitVoucherData.copy(deliveryAgentDetails = Some(deliveryAgentDetails))
+
+    val actual = PaperEmailFields.serialise(testData)
+
+    val filtered = actual.collect({
+      case (key, value) if key.startsWith("delivery_agent_") =>
+        (key.replaceFirst("delivery_agent_", ""), value)
+    })
+
+    val expected = Seq(
+      "name" -> "my name",
+      "telephone" -> "my telephone",
+      "email" -> "my email",
+      "address1" -> "my address1",
+      "address2" -> "my address2",
+      "town" -> "my town",
+      "county" -> "my county",
+      "postcode" -> "my postcode",
+    )
+
+    filtered.toList.sorted should be(expected.toList.sorted)
+  }
+
 }

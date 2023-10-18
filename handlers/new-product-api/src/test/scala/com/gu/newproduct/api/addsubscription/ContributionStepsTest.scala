@@ -103,7 +103,7 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
 
-    val fakeAddContributionSteps = AddContribution.steps(
+    val fakeAddContributionSteps = new AddContribution(
       getPlan,
       currentDate _,
       getPlanAndCharge,
@@ -111,13 +111,14 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
       fakeValidateRequest,
       fakeCreate,
       fakeSendEmails,
-    ) _
-    // todo separate the tests properly so that we don't need this anymore (and the same in the PaperStepsTest)
+    )
 
-    val dummySteps = (req: AddSubscriptionRequest) => {
-      fail("unexpected execution of voucher steps while processing contribution request!")
+    val dummySteps = new AddSpecificProduct {
+      override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] =
+        fail("unexpected execution of voucher steps while processing contribution request!")
     }
-    val futureActual = Steps.handleRequest(
+
+    val futureActual = new handleRequest(
       addSupporterPlus = dummySteps,
       addContribution = fakeAddContributionSteps,
       addPaperSub = dummySteps,

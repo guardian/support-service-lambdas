@@ -1,26 +1,19 @@
 package com.gu.newproduct.api.addsubscription.email.digipack
 
 import java.time.LocalDate
-
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, TrialPeriod}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
-  BankAccountName,
-  BankAccountNumberMask,
-  DirectDebit,
-  MandateId,
-  NonDirectDebitMethod,
-  SortCode,
-}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog._
 import play.api.libs.json.Json
-import DigipackEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.serialisers.DigipackEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.serialisers.DigipackEmailFields
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -117,13 +110,13 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
 
     val directDebitFieldNames = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
 
-    DigipackEmailFields(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
+    DigipackEmailFields.serialise(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
   }
 
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
     val allPlansVoucherData =
       ids.map(planId => directDebitData.copy(plan = Plan(planId, PlanDescription("test plan"), testStartDateRules)))
-    allPlansVoucherData.map(DigipackEmailFields(_))
+    allPlansVoucherData.map(DigipackEmailFields.serialise)
   }
 
 }
