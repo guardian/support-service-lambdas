@@ -89,62 +89,6 @@ class AddSupporterPlus(
 }
 
 object AddSupporterPlus {
-//  def steps(
-//      getPlan: PlanId => Plan,
-//      getCurrentDate: () => LocalDate,
-//      getPlanAndCharge: PlanId => Option[PlanAndCharges],
-//      getCustomerData: ZuoraAccountId => ApiGatewayOp[SupporterPlusCustomerData],
-//      supporterPlusValidations: (
-//          SupporterPlusValidations.ValidatableFields,
-//          PlanId,
-//          Currency,
-//      ) => ValidationResult[AmountMinorUnits],
-//      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-//      sendConfirmationEmail: (Option[SfContactId], SupporterPlusEmailData) => AsyncApiGatewayOp[Unit],
-//  ): SubscriptionAdd = new SubscriptionAdd {
-//    override def apply(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] =
-//    for {
-//      customerData <- getCustomerData(request.zuoraAccountId).toAsync
-//      SupporterPlusCustomerData(account, paymentMethod, subscriptions, contacts) = customerData
-//      validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
-//      amountMinorUnits <- supporterPlusValidations(
-//        validatableFields,
-//        request.planId,
-//        account.currency,
-//      ).toApiGatewayOp.toAsync
-//      acceptanceDate = request.startDate
-//      plan = getPlan(request.planId)
-//      planAndCharge <- getPlanAndCharge(request.planId)
-//        .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
-//        .toAsync
-//      contributionAmount = getContributionAmount(amountMinorUnits, account.currency, plan)
-//      chargeOverride = ChargeOverride(Some(contributionAmount), planAndCharge.contributionProductRatePlanChargeId, None)
-//      zuoraCreateSubRequest = ZuoraCreateSubRequest(
-//        request = request,
-//        acceptanceDate = acceptanceDate,
-//        ratePlans = List(
-//          ZuoraCreateSubRequestRatePlan(
-//            productRatePlanId = planAndCharge.productRatePlanId,
-//            maybeChargeOverride = Some(chargeOverride),
-//          ),
-//        ),
-//      )
-//      subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly supporter plus")
-//      supporterPlusEmailData = toSupporterPlusEmailData(
-//        request = request,
-//        currency = account.currency,
-//        paymentMethod = paymentMethod,
-//        firstPaymentDate = acceptanceDate,
-//        contacts = contacts,
-//        amountMinorUnits = amountMinorUnits,
-//        plan = plan,
-//        currentDate = getCurrentDate(),
-//      )
-//      _ <- sendConfirmationEmail(account.sfContactId, supporterPlusEmailData).recoverAndLog(
-//        "send supporter plus confirmation email",
-//      )
-//    } yield subscriptionName
-//  }
 
   def wireSteps(
     catalog: Map[PlanId, Plan],
