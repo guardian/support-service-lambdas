@@ -1,23 +1,24 @@
 stacks:
-- membership
+  - membership
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  cloudformation:
     type: cloud-formation
     app: batch-email-sender
     parameters:
-      templatePath: cfn.yaml
-
+      templateStagePaths:
+        CODE: batch-email-sender-CODE.template.json
+        PROD: batch-email-sender-PROD.template.json
   batch-email-sender:
     type: aws-lambda
     parameters:
       fileName: batch-email-sender.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - batch-email-sender-
-    dependencies: [cfn]
+    dependencies: [cloudformation]
