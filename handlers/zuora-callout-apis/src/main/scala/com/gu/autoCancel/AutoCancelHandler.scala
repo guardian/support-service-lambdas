@@ -30,7 +30,7 @@ object AutoCancelHandler extends App with Logging {
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
     for {
-      zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      zuoraRestConfig <- loadConfigModule.load[ZuoraRestConfig].toApiGatewayOp("load zuora config")
     } yield {
       val zuoraRequest = ZuoraRestRequestMaker(response, zuoraRestConfig)
 
@@ -48,7 +48,7 @@ object AutoCancelHandler extends App with Logging {
           EmailSendSteps(awsSQSSend(EmailQueueName)),
           ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig)),
         ),
-      ).prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
+      ).prependRequestValidationToSteps(Auth(loadConfigModule.load[TrustedApiConfig]))
     }
   }
 

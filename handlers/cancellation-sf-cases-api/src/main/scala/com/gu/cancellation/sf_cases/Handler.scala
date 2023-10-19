@@ -60,7 +60,7 @@ object Handler extends Logging {
   ): ApiGatewayOp[Operation] = {
 
     for {
-      sfConfig <- LoadConfigModule(stage, fetchString)(SFAuthConfig.location, sfAuthConfigReads).toApiGatewayOp(
+      sfConfig <- LoadConfigModule(stage, fetchString).load(SFAuthConfig.location, sfAuthConfigReads).toApiGatewayOp(
         "load SF config",
       )
       sfClient <- SalesforceClient(response, sfConfig).value.toApiGatewayOp("Failed to authenticate with Salesforce")

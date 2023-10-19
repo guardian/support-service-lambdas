@@ -43,8 +43,8 @@ trait ZuoraHandler[Req, Res] {
 object Handler {
 
   def handleSar(input: InputStream, output: OutputStream): Either[ConfigFailure, Unit] = {
-    val loadZuoraSarConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
-    loadZuoraSarConfig[ZuoraSarConfig].map(config => {
+    val loadConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+    loadConfig.load[ZuoraSarConfig].map(config => {
       val sarLambda = ZuoraSarHandler(S3Helper, config)
       sarLambda.handleRequest(input, output)
     })
@@ -54,13 +54,12 @@ object Handler {
       input: InputStream,
       output: OutputStream,
   ): Either[ConfigFailure, Unit] = {
-    val loadZuoraSarConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
-    val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+    val loadConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val response = RawEffects.response
     val downloadResponse = RawEffects.downloadResponse
     for {
-      zuoraSarConfig <- loadZuoraSarConfig[ZuoraSarConfig]
-      batonZuoraRestConfig <- loadZuoraRestConfig[BatonZuoraRestConfig]
+      zuoraSarConfig <- loadConfig.load[ZuoraSarConfig]
+      batonZuoraRestConfig <- loadConfig.load[BatonZuoraRestConfig]
       zuoraRestConfig = toZuoraRestConfig(batonZuoraRestConfig)
       requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)

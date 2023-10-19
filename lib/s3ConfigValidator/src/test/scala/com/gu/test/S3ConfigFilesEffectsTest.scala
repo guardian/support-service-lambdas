@@ -72,7 +72,7 @@ class S3ConfigFilesEffectsTest extends AnyFlatSpec with Matchers {
   )
   def validate[CONF](stage: String)(implicit loc: ConfigLocation[CONF], r: Reads[CONF]) = {
     val configLoader = configLoaders(stage)
-    val config = configLoader[CONF]
+    val config = configLoader.load[CONF]
     config.isRight shouldBe (true)
   }
 }

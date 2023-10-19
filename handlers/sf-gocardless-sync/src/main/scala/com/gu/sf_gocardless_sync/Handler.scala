@@ -34,7 +34,7 @@ object Handler extends Logging {
   case class GcGet(get: HttpOp[RestRequestMaker.GetRequest, JsValue]) extends AnyVal
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = for {
-    goCardlessConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)[GoCardlessConfig]
+    goCardlessConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString).load[GoCardlessConfig]
     goCardlessClient = GoCardlessClient(RawEffects.response, goCardlessConfig)
     sfClient <- prepareSfClient
     sfGet = sfClient.wrapWith(JsonHttp.get)
@@ -51,7 +51,7 @@ object Handler extends Logging {
       logger.info("No mandate events to process")
 
   def prepareSfClient = for {
-    sfConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)[SFAuthConfig]
+    sfConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString).load[SFAuthConfig]
     sfClient <- SalesforceClient(RawEffects.response, sfConfig).value.toDisjunction
   } yield sfClient
 

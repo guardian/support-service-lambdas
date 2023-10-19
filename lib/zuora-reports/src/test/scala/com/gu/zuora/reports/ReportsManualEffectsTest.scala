@@ -11,7 +11,7 @@ import play.api.libs.json.Json
 object ReportsManualEffectsTest extends App {
 
   def getZuoraRequest(response: Request => Response) = for {
-    zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
+    zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
     zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, zuoraRestConfig)
   } yield zuoraRequests
 

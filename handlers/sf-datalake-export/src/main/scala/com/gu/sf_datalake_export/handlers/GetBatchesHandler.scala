@@ -101,7 +101,7 @@ object GetBatchesHandler {
     val jobId = JobId(request.jobId)
 
     for {
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
+      sfConfig <- loadConfig.load[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       getJobBatchesOp = sfClient.wrapWith(GetJobBatches.wrapper)
       batches <- getJobBatchesOp.runRequest(jobId).toTry

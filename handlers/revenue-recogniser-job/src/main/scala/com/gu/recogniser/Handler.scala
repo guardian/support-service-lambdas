@@ -29,7 +29,7 @@ object Handler extends RequestStreamHandler {
 
     val loadConfig = LoadConfigModule(stage, GetFromS3.fetchString)
     val maybeSuccess = for {
-      zuoraRestConfig <- loadConfig[ZuoraRestConfig]
+      zuoraRestConfig <- loadConfig.load[ZuoraRestConfig]
       steps = Steps(
         log,
         error(stage, _),

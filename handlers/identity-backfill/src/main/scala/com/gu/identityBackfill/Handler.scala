@@ -120,9 +120,9 @@ object Handler {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
     val fOperation = for {
-      zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
-      identityConfig <- loadConfig[IdentityConfig].toApiGatewayOp("load identity config")
+      zuoraRestConfig <- loadConfig.load[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      sfAuthConfig <- loadConfig.load[SFAuthConfig].toApiGatewayOp("load sfAuth config")
+      identityConfig <- loadConfig.load[IdentityConfig].toApiGatewayOp("load identity config")
       configuredOp = operation(zuoraRestConfig, sfAuthConfig, identityConfig)
 
     } yield configuredOp

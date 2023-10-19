@@ -4,23 +4,20 @@ import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
-  SubscriptionName,
-  ZuoraCreateSubRequest,
-  ZuoraCreateSubRequestRatePlan,
-}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
+import com.gu.paperround.client.GetAgents
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types
-import com.gu.util.resthttp.Types.ClientSuccess
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json._
@@ -81,6 +78,10 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
       ClientSuccess(SubscriptionName("well done"))
     }
 
+    def fakeGetAgents = new GetAgents {
+      override def getAgents(): Types.ClientFailableOp[List[GetAgents.DeliveryAgentRecord]] = GenericError("oops")
+    }
+
     val fakeGetZuoraId = (planId: PlanId) => {
       planId shouldBe VoucherEveryDay
       Some(ratePlanId)
@@ -101,6 +102,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers {
       fakeValidateAddress,
       fakeCreate,
       fakeSendEmail,
+      fakeGetAgents,
     )
 
     val futureActual = new handleRequest(

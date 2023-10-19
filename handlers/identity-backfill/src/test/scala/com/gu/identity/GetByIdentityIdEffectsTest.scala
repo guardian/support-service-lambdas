@@ -15,7 +15,7 @@ class GetByIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
   it should "successfully run the health check using the local code against real backend" taggedAs EffectsTest in {
 
     val actual = for {
-      identityConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[IdentityConfig]
+      identityConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[IdentityConfig]
 
       response = RawEffects.response
       identityClient = IdentityClient(response, identityConfig)

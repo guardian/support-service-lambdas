@@ -23,7 +23,7 @@ class GetZuoraEmailsForAccountsEffectsTest extends AnyFlatSpec with Matchers {
     val testData = NonEmptyList(CodeZuora.account1, List(CodeZuora.account2))
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
         .toApiGatewayOp("parse config")
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))
       getZuoraEmailsForAccounts = GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier)

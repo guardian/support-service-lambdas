@@ -30,7 +30,7 @@ object Config {
   ): Either[OverallFailure, T] = {
     val loadConfigModule = LoadConfigModule(Stage(stage), fetchString)
     loadConfigModule
-      .apply[T](ConfigLocation(filePrefix, 1), reads)
+      .load[T](ConfigLocation(filePrefix, 1), reads)
       .left
       .map(failure => OverallFailure(failure.error))
   }

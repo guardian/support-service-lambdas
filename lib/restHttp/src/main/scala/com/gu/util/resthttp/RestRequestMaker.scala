@@ -158,8 +158,9 @@ object RestRequestMaker extends LazyLogging {
         skipCheck: IsCheckNeeded = WithCheck,
     ): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
+      val headersWithContentType = headers + ("Content-Type" -> "application/json") + ("accept" -> "application/json")
       for {
-        bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.post(body)), getResponse).map(Json.parse)
+        bodyAsJson <- sendRequest(buildRequest(headersWithContentType, baseUrl + path, _.post(body)), getResponse).map(Json.parse)
         _ <- if (skipCheck == WithoutCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel

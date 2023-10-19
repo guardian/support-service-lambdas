@@ -38,7 +38,7 @@ class GoCardlessDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
   it should "fetch a set of mandate events from GoCardless, with accompanying mandate detail" taggedAs EffectsTest in {
 
     val actual = for {
-      goCardlessConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[GoCardlessConfig]
+      goCardlessConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[GoCardlessConfig]
       goCardlessClient = GoCardlessClient(RawEffects.response, goCardlessConfig)
       wiredOp = GetEventsSince(goCardlessClient.wrapWith(JsonHttp.get), 2)
     } yield wiredOp(GoCardlessMandateEventID("EV002140EW1YFZ"))
@@ -98,7 +98,7 @@ class GoCardlessDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
   it should "fetch bank details given a customer_account_id" taggedAs EffectsTest in {
 
     val actual = for {
-      goCardlessConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[GoCardlessConfig]
+      goCardlessConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[GoCardlessConfig]
       response = RawEffects.response
       goCardlessClient = GoCardlessClient(response, goCardlessConfig)
       wiredOp = GetBankDetail(goCardlessClient.wrapWith(JsonHttp.get))

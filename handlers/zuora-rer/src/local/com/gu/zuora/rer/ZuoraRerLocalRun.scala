@@ -39,12 +39,11 @@ object ZuoraRerLocalRun extends App {
   }
 
   private def runTestPerformZuoraRer(request: RerRequest): Unit = {
-    val loadZuoraRerConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
-    val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+    val loadConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val streams = requestStreams(request)
     for {
-      zuoraRerConfig <- loadZuoraRerConfig[ZuoraRerConfig]
-      zuoraRestConfig <- loadZuoraRestConfig[BatonZuoraRestConfig]
+      zuoraRerConfig <- loadConfig.load[ZuoraRerConfig]
+      zuoraRestConfig <- loadConfig.load[BatonZuoraRestConfig]
       requests = ZuoraRestRequestMaker(RawEffects.response, toZuoraRestConfig(zuoraRestConfig))
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraRerService(requests, zuoraQuerier)

@@ -38,13 +38,13 @@ object DeliveryCreditProcessor extends Logging {
   private lazy val sfConfig: Task[SFAuthConfig] =
     config(
       LoadConfigModule(stage, GetFromS3.fetchString)
-        .apply[SFAuthConfig](ConfigLocation("sfAuth", 1), SFAuthConfig.reads),
+        .load[SFAuthConfig](ConfigLocation("sfAuth", 1), SFAuthConfig.reads),
     )
 
   private lazy val zuoraConfig: Task[HolidayStopProcessorZuoraConfig] =
     config(
       LoadConfigModule(stage, GetFromS3.fetchString)
-        .apply[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads),
+        .load[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads),
     )
 
   private def config[A](a: Either[ConfigFailure, A]): Task[A] = {

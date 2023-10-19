@@ -14,7 +14,7 @@ class SalesforceAuthenticateEffectsTest extends AnyFlatSpec with Matchers {
   it should "get auth SF correctly" taggedAs EffectsTest in {
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       identityId <- SalesforceAuthenticate.apply(RawEffects.response)(sfConfig).value.toDisjunction
     } yield {
       identityId

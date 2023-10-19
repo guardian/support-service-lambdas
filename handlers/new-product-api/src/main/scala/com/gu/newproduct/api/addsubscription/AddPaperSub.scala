@@ -4,7 +4,7 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.serialisers.PaperEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, EtSqsSend, PaperEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperAccountValidation, PaperCustomerData}
 import com.gu.newproduct.api.addsubscription.validation._
@@ -17,11 +17,15 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMetho
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetContacts, GetPaymentMethod}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{NationalDeliveryPlanId, Plan, PlanId}
+import com.gu.paperround.client.GetAgents
+import com.gu.paperround.client.GetAgents.DeliveryAgentRecord
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.AsyncTypes._
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.typesafe.scalalogging.LazyLogging
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -34,7 +38,8 @@ class AddPaperSub(
   validateAddress: (PlanId, SoldToAddress) => ValidationResult[Unit],
   createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
   sendConfirmationEmail: (Option[SfContactId], PaperEmailData) => AsyncApiGatewayOp[Unit],
-) extends AddSpecificProduct {
+  getAgents: GetAgents,
+) extends AddSpecificProduct with LazyLogging {
   override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     _ <- ((request.planId, request.deliveryAgent) match {
@@ -61,6 +66,19 @@ class AddPaperSub(
     )
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create paper subscription")
     plan = getPlan(request.planId)
+    deliveryAgentRecord <- request.deliveryAgent.map { inputDeliveryAgent =>
+      for {
+        matchingAgents <- getAgents.getAgents().map {
+          _.filter(cur => cur.deliveryAgent == inputDeliveryAgent)
+        }.toApiGatewayOp("get delivery details")
+        singleMatchingAgent <- matchingAgents match {
+          case value :: Nil => ContinueProcessing(value)
+          case _ =>
+            logger.error(s"wrong number of responses from getAgents: $matchingAgents")
+            ReturnWithResponse(internalServerError("internal API error"))
+        }
+      } yield Some(singleMatchingAgent)
+    }.map(_.toAsync).getOrElse(ClientSuccess(None).toAsyncApiGatewayOp("skip getAgents call"))
     paperEmailData = PaperEmailData(
       plan = plan,
       firstPaymentDate = request.startDate,
@@ -69,7 +87,10 @@ class AddPaperSub(
       contacts = customerData.contacts,
       paymentMethod = customerData.paymentMethod,
       currency = customerData.account.currency,
-      deliveryAgentDetails = None // TODO go out to PPR to get the agent info then pass in below
+      deliveryAgentDetails = deliveryAgentRecord.map { record =>
+        import record._
+        DeliveryAgentDetails(agentName, telephone, email, address1, address2, town, county, postcode)
+      }
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, paperEmailData)
       .recoverAndLog("send paper confirmation email")
@@ -80,13 +101,14 @@ object AddPaperSub {
 
   def wireSteps(
     catalog: Map[PlanId, Plan],
-      zuoraIds: ZuoraIds,
-      zuoraClient: Requests,
-      isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-      isValidAddressForPlan: (PlanId, SoldToAddress) => ValidationResult[Unit],
-      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-      awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-      emailQueueName: QueueName,
+    zuoraIds: ZuoraIds,
+    zuoraClient: Requests,
+    isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
+    isValidAddressForPlan: (PlanId, SoldToAddress) => ValidationResult[Unit],
+    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
+    emailQueueName: QueueName,
+    getAgents: GetAgents,
   ): AddSpecificProduct = {
     val paperSqsQueueSend = awsSQSSend(emailQueueName)
     val paperBrazeConfirmationSqsSend = EtSqsSend[PaperEmailData](paperSqsQueueSend) _
@@ -100,6 +122,7 @@ object AddPaperSub {
       isValidAddressForPlan,
       createSubscription,
       sendConfirmationEmail,
+      getAgents,
     )
   }
 
