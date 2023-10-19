@@ -148,6 +148,48 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Resource",
     },
+    "BatchEmailSenderApiKey": {
+      "DependsOn": [
+        "BatchEmailSenderApi",
+        "BatchEmailSenderApiStage",
+      ],
+      "Properties": {
+        "Description": "Key required to call batch email sender API",
+        "Enabled": true,
+        "Name": {
+          "Fn::Sub": "batch-email-sender-api-key-\${Stage}",
+        },
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "BatchEmailSenderApi",
+            },
+            "StageName": {
+              "Fn::Sub": "\${Stage}",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "BatchEmailSenderApiKey7802AC02": {
       "Properties": {
         "Description": "Key required to call batch email sender API",
@@ -489,6 +531,46 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "BatchEmailSenderUsagePlan": {
+      "DependsOn": [
+        "BatchEmailSenderApi",
+        "BatchEmailSenderApiStage",
+      ],
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "BatchEmailSenderApi",
+            },
+            "Stage": {
+              "Ref": "BatchEmailSenderApiStage",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": {
+          "Fn::Sub": "batch-email-sender-api-usage-plan-\${Stage}",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
     },
     "BatchEmailSenderUsagePlan01358D74": {
       "Properties": {
@@ -1272,6 +1354,48 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Resource",
     },
+    "BatchEmailSenderApiKey": {
+      "DependsOn": [
+        "BatchEmailSenderApi",
+        "BatchEmailSenderApiStage",
+      ],
+      "Properties": {
+        "Description": "Key required to call batch email sender API",
+        "Enabled": true,
+        "Name": {
+          "Fn::Sub": "batch-email-sender-api-key-\${Stage}",
+        },
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "BatchEmailSenderApi",
+            },
+            "StageName": {
+              "Fn::Sub": "\${Stage}",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "BatchEmailSenderApiKey7802AC02": {
       "Properties": {
         "Description": "Key required to call batch email sender API",
@@ -1613,6 +1737,46 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "BatchEmailSenderUsagePlan": {
+      "DependsOn": [
+        "BatchEmailSenderApi",
+        "BatchEmailSenderApiStage",
+      ],
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "BatchEmailSenderApi",
+            },
+            "Stage": {
+              "Ref": "BatchEmailSenderApiStage",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": {
+          "Fn::Sub": "batch-email-sender-api-usage-plan-\${Stage}",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
     },
     "BatchEmailSenderUsagePlan01358D74": {
       "Properties": {
