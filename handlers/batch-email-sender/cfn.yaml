@@ -175,36 +175,36 @@ Resources:
     DependsOn:
       - BatchEmailMethod
 
-  BatchEmailSenderApiKey:
-    Type: AWS::ApiGateway::ApiKey
-    Properties:
-      Description: Key required to call batch email sender API
-      Enabled: true
-      Name: !Sub batch-email-sender-api-key-${Stage}
-      StageKeys:
-        - RestApiId: !Ref BatchEmailSenderApi
-          StageName: !Sub ${Stage}
-    DependsOn:
-    - BatchEmailSenderApi
-    - BatchEmailSenderApiStage
-
-  BatchEmailSenderUsagePlan:
-    Type: "AWS::ApiGateway::UsagePlan"
-    Properties:
-      UsagePlanName: !Sub batch-email-sender-api-usage-plan-${Stage}
-      ApiStages:
-      - ApiId: !Ref BatchEmailSenderApi
-        Stage: !Ref BatchEmailSenderApiStage
-    DependsOn:
-    - BatchEmailSenderApi
-    - BatchEmailSenderApiStage
-
-  BatchEmailSenderUsagePlanKey:
-    Type: "AWS::ApiGateway::UsagePlanKey"
-    Properties:
-      KeyId: !Ref BatchEmailSenderApiKey
-      KeyType: API_KEY
-      UsagePlanId: !Ref BatchEmailSenderUsagePlan
-    DependsOn:
-    - BatchEmailSenderApiKey
-    - BatchEmailSenderUsagePlan
+#  BatchEmailSenderApiKey:
+#    Type: AWS::ApiGateway::ApiKey
+#    Properties:
+#      Description: Key required to call batch email sender API
+#      Enabled: true
+#      Name: !Sub batch-email-sender-api-key-${Stage}
+#      StageKeys:
+#        - RestApiId: !Ref BatchEmailSenderApi
+#          StageName: !Sub ${Stage}
+#    DependsOn:
+#    - BatchEmailSenderApi
+#    - BatchEmailSenderApiStage
+#
+#  BatchEmailSenderUsagePlan:
+#    Type: "AWS::ApiGateway::UsagePlan"
+#    Properties:
+#      UsagePlanName: !Sub batch-email-sender-api-usage-plan-${Stage}
+#      ApiStages:
+#      - ApiId: !Ref BatchEmailSenderApi
+#        Stage: !Ref BatchEmailSenderApiStage
+#    DependsOn:
+#    - BatchEmailSenderApi
+#    - BatchEmailSenderApiStage
+#
+#  BatchEmailSenderUsagePlanKey:
+#    Type: "AWS::ApiGateway::UsagePlanKey"
+#    Properties:
+#      KeyId: !Ref BatchEmailSenderApiKey
+#      KeyType: API_KEY
+#      UsagePlanId: !Ref BatchEmailSenderUsagePlan
+#    DependsOn:
+#    - BatchEmailSenderApiKey
+#    - BatchEmailSenderUsagePlan
