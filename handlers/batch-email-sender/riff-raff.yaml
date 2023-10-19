@@ -6,7 +6,7 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cloudformation:
+  batch-email-sender-cloudformation:
     type: cloud-formation
     app: batch-email-sender
     parameters:
@@ -21,4 +21,4 @@ deployments:
       prefixStack: false
       functionNames:
       - batch-email-sender-
-    dependencies: [cloudformation]
+    dependencies: [batch-email-sender-cloudformation]

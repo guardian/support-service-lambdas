@@ -1,5 +1,6 @@
 import "source-map-support/register";
 import { App } from "aws-cdk-lib";
+import { BatchEmailSender } from "../lib/batch-email-sender";
 import { FailedNationalDeliveriesProcessor } from "../lib/failed-national-deliveries-processor";
 import type { NewProductApiProps } from "../lib/new-product-api";
 import { NewProductApi } from "../lib/new-product-api";
@@ -29,6 +30,8 @@ export const prodProps: NewProductApiProps = {
     fulfilmentDateCalculatorS3Resource: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
 };
 
+new BatchEmailSender(app, "batch-email-sender-CODE", {stack: "membership", stage: "CODE"});
+new BatchEmailSender(app, "batch-email-sender-PROD", {stack: "membership", stage: "PROD"});
 new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
 new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-CODE", {stack: "membership", stage: "CODE"});
