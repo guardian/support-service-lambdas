@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import com.gu.newproduct.TestData
-import com.gu.newproduct.api.addsubscription.email.PaperEmailData
+import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
@@ -18,7 +18,7 @@ import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher
-import org.scalatest.Inside
+import org.scalatest.{Assertion, Inside}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json._
@@ -54,7 +54,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
         fail("unexpected execution of voucher steps while processing contribution request!")
     }
 
-    val fakeAddVoucherSteps = buildAddPaperSteps(VoucherEveryDay, None)
+    val fakeAddVoucherSteps = buildAddPaperSteps(VoucherEveryDay, None, _ => succeed)
 
     val futureActual = new handleRequest(
       addSupporterPlus = dummySteps,
@@ -72,7 +72,13 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
 
   it should "run paper steps with a delivery agent" in {
 
-    val addVoucherSteps: AddPaperSub = buildAddPaperSteps(NationalDeliveryWeekend, Some(DeliveryAgent("helloAgent")))
+    val addVoucherSteps: AddPaperSub = buildAddPaperSteps(
+      NationalDeliveryWeekend,
+      Some(DeliveryAgent("helloAgent")),
+      { paperEmailData =>
+        paperEmailData.deliveryAgentDetails shouldMatchTo None//TODO in next PR Some(DeliveryAgentDetails(...))
+      }
+    )
 
     val requestInput = AddSubscriptionRequest(
       zuoraAccountId = ZuoraAccountId("acccc"),
@@ -94,7 +100,12 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
 
   }
 
-  private def buildAddPaperSteps(expectedPlanId: PlanId, expectedDeliveryAgent: Option[DeliveryAgent]): AddPaperSub = {
+  private def buildAddPaperSteps(
+    expectedPlanId: PlanId,
+    expectedDeliveryAgent: Option[DeliveryAgent],
+    checkPaperEmailData: PaperEmailData => Assertion
+  ): AddPaperSub = {
+
     val ratePlanId = ProductRatePlanId("ratePlanId")
 
     def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.voucherCustomerData)
@@ -130,7 +141,10 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
 
     def fakeValidateAddress(id: PlanId, a: SoldToAddress) = Passed(())
 
-    def fakeSendEmail(sfContactId: Option[SfContactId], paperData: PaperEmailData) = ContinueProcessing(()).toAsync
+    def fakeSendEmail(sfContactId: Option[SfContactId], paperData: PaperEmailData) = {
+      checkPaperEmailData(paperData)
+      ContinueProcessing(()).toAsync
+    }
 
     def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"), testStartDateRules)
 
