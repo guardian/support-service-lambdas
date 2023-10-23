@@ -1,5 +1,6 @@
 package com.gu.paperround.client
 
+import com.gu.effects.Http
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{FormBody, Request, Response}
@@ -16,11 +17,12 @@ class FormRequestMaker(getResponse: Request => Response, headers: Map[String, St
         builder.add(key, value)
       })
       .build()
+    val url = baseUrl + path
     val request = headers
       .foldLeft(new Request.Builder())({ case (builder, (header, value)) =>
         builder.addHeader(header, value)
       })
-      .url(baseUrl + path)
+      .url(url)
       .addHeader("Content-type", formType)
       .addHeader("Accept", "application/json")
       .post(requestBody)
@@ -28,7 +30,7 @@ class FormRequestMaker(getResponse: Request => Response, headers: Map[String, St
     val response = getResponse(request)
     val code = response.code()
     val responseBody = response.body().string()
-    logger.info("response body: " + responseBody)
+    logger.info(s"response body for $url:\n" + Http.summariseBody(responseBody))
     (code / 100) match {
       case 2 => ClientSuccess(Json.parse(responseBody).as[RESP])
       case _ =>

@@ -47,27 +47,22 @@ object GetAgents {
     postcode: String,
     address2: String,
     email: String,
-//    enddate: LocalDate,//": "2100-01-01",
-//    startdate: LocalDate,//": "2022-01-01",
     address1: String,
     agentname: String,
     refid: Int,
     county: String,
-//    refgroupid: Int,
   )
 
   private[client] implicit val responseDataReads: Reads[WireResponseData] = Json.reads
 
   private[client] case class WireResponseData(
-      agents: List[WireResponseAgent],
+    agents: List[WireResponseAgent],
   )
 
   private[client] implicit val responseReads: Reads[WireResponse] = Json.reads
 
   private[client] case class WireResponse(
-      //    status_code: Int,
-      data: WireResponseData,
-      //    message: String,
+    data: WireResponseData,
   )
 
   case class DeliveryAgentRecord(

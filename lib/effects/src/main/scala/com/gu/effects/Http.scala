@@ -22,7 +22,7 @@ object Http extends Logging {
       val buffer = new Buffer()
       requestBody.writeTo(buffer)
       val body = buffer.readString(UTF_8)
-      (body.length, body.take(500) + (if (body.length > 500) "..." else ""))
+      summariseBody(body)
     }
 
     { request: Request =>
@@ -37,6 +37,9 @@ object Http extends Logging {
       response
     }
   }
+
+  def summariseBody(body: String): String =
+    (body.length, body.take(500) + (if (body.length > 500) "..." else "")).toString
 
   val downloadResponse: Request => Response = {
     val restClient = new OkHttpClient()

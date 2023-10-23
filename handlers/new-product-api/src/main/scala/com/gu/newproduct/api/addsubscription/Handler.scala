@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend.{EmailQueueName, QueueName}
 import com.gu.effects.sqs.{AwsSQSSend, SqsAsync}
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.paperround.client.PaperRoundConfig.ApiKey
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.digipack.DigipackAddressValidator
 import com.gu.newproduct.api.addsubscription.validation._
@@ -22,12 +21,11 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage, ZuoraEnvironment}
+import com.gu.util.config.{LoadConfigModule, Stage, ZuoraEnvironment}
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Json, Reads}
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
