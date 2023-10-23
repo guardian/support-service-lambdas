@@ -4,7 +4,7 @@ import type { GuStackProps} from "@guardian/cdk/lib/constructs/core";
 import {GuStack} from "@guardian/cdk/lib/constructs/core";
 import {GuLambdaFunction} from "@guardian/cdk/lib/constructs/lambda";
 import type {App} from "aws-cdk-lib";
-import {Duration} from "aws-cdk-lib";
+import {Duration, Fn} from "aws-cdk-lib";
 import {ApiKey, CfnUsagePlanKey, Cors, UsagePlan} from "aws-cdk-lib/aws-apigateway";
 import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
@@ -36,6 +36,7 @@ export class BatchEmailSender extends GuStack {
             timeout: Duration.seconds(300),
             environment: {
                 "Stage": this.stage,
+                "EmailQueueName": Fn.importValue(`comms-${this.stage}-EmailQueueName`)
             },
         });
 

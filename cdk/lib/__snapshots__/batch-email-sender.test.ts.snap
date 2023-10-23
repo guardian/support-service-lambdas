@@ -338,6 +338,9 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "batch-email-sender",
+            "EmailQueueName": {
+              "Fn::ImportValue": "comms-CODE-EmailQueueName",
+            },
             "STACK": "membership",
             "STAGE": "CODE",
             "Stage": "CODE",
@@ -1640,6 +1643,9 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "batch-email-sender",
+            "EmailQueueName": {
+              "Fn::ImportValue": "comms-PROD-EmailQueueName",
+            },
             "STACK": "membership",
             "STAGE": "PROD",
             "Stage": "PROD",
