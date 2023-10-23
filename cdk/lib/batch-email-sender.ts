@@ -7,6 +7,7 @@ import type {App} from "aws-cdk-lib";
 import {Duration} from "aws-cdk-lib";
 import {ApiKey, CfnUsagePlanKey, Cors, UsagePlan} from "aws-cdk-lib/aws-apigateway";
 import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
+import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {Runtime} from "aws-cdk-lib/aws-lambda";
 import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 
@@ -126,6 +127,39 @@ export class BatchEmailSender extends GuStack {
 
 
         // ---- Apply policies ---- //
-        // TODO
+        const cloudwatchLogsInlinePolicy: Policy = new Policy(this, "cloudwatch-logs-inline-policy", {
+            statements: [
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: [
+                        "logs:CreateLogGroup",
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents",
+                        "lambda:InvokeFunction"
+                    ],
+                    resources: [
+                        `arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/batch-email-sender-${this.stage}:log-stream:*`,
+                    ]
+                }),
+            ],
+        })
+
+        const sqsInlinePolicy: Policy = new Policy(this, "sqs-inline-policy", {
+            statements: [
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: [
+                        "sqs:GetQueueUrl",
+                        "sqs:SendMessage",
+                    ],
+                    resources: [
+                        `arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+                    ]
+                }),
+            ],
+        })
+
+        batchEmailSenderLambda.role?.attachInlinePolicy(cloudwatchLogsInlinePolicy)
+        batchEmailSenderLambda.role?.attachInlinePolicy(sqsInlinePolicy)
     }
 }
