@@ -88,8 +88,8 @@ export class BatchEmailSender extends GuStack {
         // ---- Alarms ---- //
         new GuAlarm(this, 'FailedEmailApiAlarm', {
             app,
-            alarmName: "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - 5XXError (CDK)",
-            alarmDescription: "API responded with 5xx to Salesforce meaning some emails failed to send. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/",
+            alarmName: `URGENT 9-5 - ${this.stage}: Failed to send email triggered by Salesforce - 5XXError (CDK)`,
+            alarmDescription: `API responded with 5xx to Salesforce meaning some emails failed to send. Logs at /aws/lambda/batch-email-sender-${this.stage} repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/`,
             evaluationPeriods: 1,
             threshold: 1,
             actionsEnabled: isProd,
@@ -108,8 +108,8 @@ export class BatchEmailSender extends GuStack {
 
         new GuAlarm(this, 'FailedEmailLambdaAlarm', {
             app,
-            alarmName: "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - Lambda crash (CDK)",
-            alarmDescription: "Lambda crashed unexpectedely meaning email message sent from Salesforce to the Service Layer could not be processed. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/",
+            alarmName: `URGENT 9-5 - ${this.stage}: Failed to send email triggered by Salesforce - Lambda crash (CDK)`,
+            alarmDescription: `Lambda crashed unexpectedely meaning email message sent from Salesforce to the Service Layer could not be processed. Logs at /aws/lambda/batch-email-sender-${this.stage} repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/`,
             evaluationPeriods: 1,
             threshold: 1,
             actionsEnabled: isProd,
