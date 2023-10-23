@@ -29,7 +29,7 @@ export class BatchEmailSender extends GuStack {
         const batchEmailSenderLambda = new GuLambdaFunction(this, "BatchEmailSenderLambda", {
             app,
             handler: "com.gu.batchemailsender.api.batchemail.Handler::apply",
-            functionName: `batch-email-sender-${this.stage}`,
+            functionName: `batch-email-sender-${this.stage}-CDK`,
             runtime: Runtime.JAVA_11,
             fileName: "batch-email-sender.jar",
             memorySize: 1536,
@@ -72,12 +72,12 @@ export class BatchEmailSender extends GuStack {
         })
 
         const apiKey = new ApiKey(this, "BatchEmailSenderApiKey", {
-            apiKeyName: `batch-email-sender-api-key-${this.stage}`,
+            apiKeyName: `batch-email-sender-api-key-${this.stage}-CDK`,
             description: "Key required to call batch email sender API",
             enabled: true,
         })
 
-        new CfnUsagePlanKey(this, "BatchEmailSenderUsagePlanKey", {
+        new CfnUsagePlanKey(this, "BatchEmailSenderUsagePlanKey-CDK", {
             keyId: apiKey.keyId,
             keyType: "API_KEY",
             usagePlanId: usagePlan.usagePlanId,
@@ -87,7 +87,7 @@ export class BatchEmailSender extends GuStack {
         // ---- Alarms ---- //
         new GuAlarm(this, 'FailedEmailApiAlarm', {
             app,
-            alarmName: "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - 5XXError",
+            alarmName: "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - 5XXError (CDK)",
             alarmDescription: "API responded with 5xx to Salesforce meaning some emails failed to send. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/",
             evaluationPeriods: 1,
             threshold: 1,
@@ -107,7 +107,7 @@ export class BatchEmailSender extends GuStack {
 
         new GuAlarm(this, 'FailedEmailLambdaAlarm', {
             app,
-            alarmName: "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - Lambda crash",
+            alarmName: "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - Lambda crash (CDK)",
             alarmDescription: "Lambda crashed unexpectedely meaning email message sent from Salesforce to the Service Layer could not be processed. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/",
             evaluationPeriods: 1,
             threshold: 1,

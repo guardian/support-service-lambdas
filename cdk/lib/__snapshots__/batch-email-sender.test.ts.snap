@@ -194,7 +194,7 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
       "Properties": {
         "Description": "Key required to call batch email sender API",
         "Enabled": true,
-        "Name": "batch-email-sender-api-key-CODE",
+        "Name": "batch-email-sender-api-key-CODE-CDK",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -343,7 +343,7 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "batch-email-sender-CODE",
+        "FunctionName": "batch-email-sender-CODE-CDK",
         "Handler": "com.gu.batchemailsender.api.batchemail.Handler::apply",
         "MemorySize": 1536,
         "Role": {
@@ -608,6 +608,22 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::UsagePlan",
     },
     "BatchEmailSenderUsagePlanKey": {
+      "DependsOn": [
+        "BatchEmailSenderApiKey",
+        "BatchEmailSenderUsagePlan",
+      ],
+      "Properties": {
+        "KeyId": {
+          "Ref": "BatchEmailSenderApiKey",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "BatchEmailSenderUsagePlan",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "BatchEmailSenderUsagePlanKeyCDK": {
       "Properties": {
         "KeyId": {
           "Ref": "BatchEmailSenderApiKey7802AC02",
@@ -679,7 +695,7 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "API responded with 5xx to Salesforce meaning some emails failed to send. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/",
-        "AlarmName": "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - 5XXError",
+        "AlarmName": "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - 5XXError (CDK)",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -750,7 +766,7 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "Lambda crashed unexpectedely meaning email message sent from Salesforce to the Service Layer could not be processed. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/",
-        "AlarmName": "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - Lambda crash",
+        "AlarmName": "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - Lambda crash (CDK)",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -939,7 +955,7 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50320c7740981cb8798219e620f08263bf5": {
+    "RestApiDeployment180EC503338ce94a0fc5fd6309ea5dd02cab4176": {
       "DependsOn": [
         "RestApiemailbatchOPTIONS53263E0B",
         "RestApiemailbatchPOSTE3D979FC",
@@ -960,7 +976,7 @@ exports[`The BatchEmailSender stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50320c7740981cb8798219e620f08263bf5",
+          "Ref": "RestApiDeployment180EC503338ce94a0fc5fd6309ea5dd02cab4176",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1480,7 +1496,7 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
       "Properties": {
         "Description": "Key required to call batch email sender API",
         "Enabled": true,
-        "Name": "batch-email-sender-api-key-PROD",
+        "Name": "batch-email-sender-api-key-PROD-CDK",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -1629,7 +1645,7 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "batch-email-sender-PROD",
+        "FunctionName": "batch-email-sender-PROD-CDK",
         "Handler": "com.gu.batchemailsender.api.batchemail.Handler::apply",
         "MemorySize": 1536,
         "Role": {
@@ -1894,6 +1910,22 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::UsagePlan",
     },
     "BatchEmailSenderUsagePlanKey": {
+      "DependsOn": [
+        "BatchEmailSenderApiKey",
+        "BatchEmailSenderUsagePlan",
+      ],
+      "Properties": {
+        "KeyId": {
+          "Ref": "BatchEmailSenderApiKey",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "BatchEmailSenderUsagePlan",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "BatchEmailSenderUsagePlanKeyCDK": {
       "Properties": {
         "KeyId": {
           "Ref": "BatchEmailSenderApiKey7802AC02",
@@ -1965,7 +1997,7 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "API responded with 5xx to Salesforce meaning some emails failed to send. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/",
-        "AlarmName": "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - 5XXError",
+        "AlarmName": "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - 5XXError (CDK)",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -2036,7 +2068,7 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "Lambda crashed unexpectedely meaning email message sent from Salesforce to the Service Layer could not be processed. Logs at /aws/lambda/batch-email-sender-PROD repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/",
-        "AlarmName": "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - Lambda crash",
+        "AlarmName": "URGENT 9-5 - PROD: Failed to send email triggered by Salesforce - Lambda crash (CDK)",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -2225,7 +2257,7 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50385e7143a774f2dcac01e1b70c06b0ece": {
+    "RestApiDeployment180EC50320c00c3abae4ea075e8b0fa9a0edb377": {
       "DependsOn": [
         "RestApiemailbatchOPTIONS53263E0B",
         "RestApiemailbatchPOSTE3D979FC",
@@ -2246,7 +2278,7 @@ exports[`The BatchEmailSender stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50385e7143a774f2dcac01e1b70c06b0ece",
+          "Ref": "RestApiDeployment180EC50320c00c3abae4ea075e8b0fa9a0edb377",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",

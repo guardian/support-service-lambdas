@@ -199,12 +199,12 @@ Resources:
     - BatchEmailSenderApi
     - BatchEmailSenderApiStage
 
-#  BatchEmailSenderUsagePlanKey:
-#    Type: "AWS::ApiGateway::UsagePlanKey"
-#    Properties:
-#      KeyId: !Ref BatchEmailSenderApiKey
-#      KeyType: API_KEY
-#      UsagePlanId: !Ref BatchEmailSenderUsagePlan
-#    DependsOn:
-#    - BatchEmailSenderApiKey
-#    - BatchEmailSenderUsagePlan
+  BatchEmailSenderUsagePlanKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    Properties:
+      KeyId: !Ref BatchEmailSenderApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref BatchEmailSenderUsagePlan
+    DependsOn:
+    - BatchEmailSenderApiKey
+    - BatchEmailSenderUsagePlan
