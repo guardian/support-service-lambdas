@@ -70,7 +70,7 @@ export class BatchEmailSender extends GuStack {
 
         // ---- Usage plan and API key ---- //
         const usagePlan = new UsagePlan(this, "BatchEmailSenderUsagePlan", {
-            name: `batch-email-sender-api-usage-plan-${this.stage}`,
+            name: `batch-email-sender-api-usage-plan-${this.stage}-CDK`,
             apiStages: [
                 {
                     api: batchEmailSenderApi.api,
