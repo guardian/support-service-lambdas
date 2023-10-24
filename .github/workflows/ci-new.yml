@@ -30,7 +30,7 @@ jobs:
             name: cfn-templates
             path: ./cdk/cdk.out
 
-  build-subprojects:
+  build-and-upload-subproject:
     permissions:
       id-token: write
       contents: read
@@ -56,7 +56,7 @@ jobs:
         id: download
         with:
           name: cfn-templates
-          path: ./cdk/cdk.out
+          path: ./cfn-templates
 
       - name: Echo download path
         run: echo ${{steps.download.outputs.download-path}}
