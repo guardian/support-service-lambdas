@@ -9,8 +9,8 @@ import {ApiKey, CfnBasePathMapping, CfnDomainName, CfnUsagePlanKey, Cors, UsageP
 import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {Runtime} from "aws-cdk-lib/aws-lambda";
-import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
+import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 
 export interface BatchEmailSenderProps extends GuStackProps {
     certificateId: string;
