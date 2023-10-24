@@ -31,31 +31,31 @@ jobs:
         - name: Generate CFN templates from GuCDK
           run: bash ./script/cfn.sh
 
-  build:
-    needs: setup
-    permissions:
-      id-token: write
-      contents: read
-    strategy:
-      matrix:
-        subproject:
-          - batch-email-sender
-          - new-product-api
-          - single-contribution-salesforce-writes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run tests and build subproject JAR
-        run: sbt "project ${{ matrix.subproject }}" test assembly
-
-      - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v2
-        with:
-          projectName: support-service-lambdas::${{ matrix.subproject }}
-          buildNumberOffset: 7000
-          configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
-          contentDirectories: |
-            ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
-              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
-            ${{ matrix.subproject }}:
-              - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
+#  build:
+#    needs: setup
+#    permissions:
+#      id-token: write
+#      contents: read
+#    strategy:
+#      matrix:
+#        subproject:
+#          - batch-email-sender
+#          - new-product-api
+#          - single-contribution-salesforce-writes
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Run tests and build subproject JAR
+#        run: sbt "project ${{ matrix.subproject }}" test assembly
+#
+#      - name: Upload to Riff-Raff
+#        uses: guardian/actions-riff-raff@v2
+#        with:
+#          projectName: support-service-lambdas::${{ matrix.subproject }}
+#          buildNumberOffset: 7000
+#          configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
+#          contentDirectories: |
+#            ${{ matrix.subproject }}-cloudformation:
+#              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
+#              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
+#            ${{ matrix.subproject }}:
+#              - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
