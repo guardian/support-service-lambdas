@@ -2,14 +2,13 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
 import com.gu.newproduct.api.addsubscription._
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.util.resthttp.ClientFailableOpLogging.LogImplicit2
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{Json, OWrites, Reads}
 
 object CreateSubscription {
   val SpecificDateTriggerEventId = "USD"
@@ -27,14 +26,14 @@ object CreateSubscription {
         triggerEvent: Option[String],
     )
 
-    implicit val writesCharge = Json.writes[ChargeOverrides]
+    implicit val writesCharge: OWrites[ChargeOverrides] = Json.writes[ChargeOverrides]
 
     case class SubscribeToRatePlans(
         productRatePlanId: String,
         chargeOverrides: List[ChargeOverrides],
     )
 
-    implicit val writesSubscribe = Json.writes[SubscribeToRatePlans]
+    implicit val writesSubscribe: OWrites[SubscribeToRatePlans] = Json.writes[SubscribeToRatePlans]
 
     case class WireCreateRequest(
         accountKey: String,
@@ -51,7 +50,7 @@ object CreateSubscription {
         DeliveryAgent__c: Option[String],
     )
 
-    implicit val writesRequest = Json.writes[WireCreateRequest]
+    implicit val writesRequest: OWrites[WireCreateRequest] = Json.writes[WireCreateRequest]
   }
 
   import WireModel._

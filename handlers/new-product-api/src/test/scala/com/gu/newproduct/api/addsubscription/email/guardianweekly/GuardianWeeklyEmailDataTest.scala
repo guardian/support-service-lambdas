@@ -3,6 +3,7 @@ package com.gu.newproduct.api.addsubscription.email.guardianweekly
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
+import com.gu.newproduct.api.addsubscription.email.serialisers.GuardianWeeklyFields
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
@@ -69,7 +70,7 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
     currency = GBP,
   )
   it should "generate email fields with direct debit fields" in {
-    GuardianWeeklyFields(directDebitEmailData) should equal(
+    GuardianWeeklyFields.serialise(directDebitEmailData) should equal(
       Map(
         "EmailAddress" -> "bill@contact.com",
         "ZuoraSubscriberId" -> "A-S000SubId",
@@ -97,6 +98,6 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
     val cardVoucherData =
       directDebitEmailData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
     val directDebitFieldNames = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
-    GuardianWeeklyFields(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
+    GuardianWeeklyFields.serialise(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
   }
 }

@@ -1,6 +1,4 @@
-package com.gu.newproduct.api.addsubscription.email.guardianweekly
-
-import java.time.format.DateTimeFormatter
+package com.gu.newproduct.api.addsubscription.email.serialisers
 
 import com.gu.newproduct.api.addsubscription.email.EmailData.paymentMethodFields
 import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
@@ -8,9 +6,11 @@ import com.gu.newproduct.api.productcatalog.Plan
 import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
 import play.api.libs.json.{Json, Writes}
 
+import java.time.format.DateTimeFormatter
+
 object GuardianWeeklyEmailDataSerialiser {
   implicit val writes: Writes[GuardianWeeklyEmailData] = (data: GuardianWeeklyEmailData) => {
-    val fields: Map[String, String] = GuardianWeeklyFields(data)
+    val fields: Map[String, String] = GuardianWeeklyFields.serialise(data)
     Json.toJson(fields)
   }
 }
@@ -24,7 +24,7 @@ object GuardianWeeklyFields {
     case other => other.name
   }
 
-  def apply(data: GuardianWeeklyEmailData): Map[String, String] = Map(
+  def serialise(data: GuardianWeeklyEmailData): Map[String, String] = Map(
     "EmailAddress" -> data.contacts.billTo.email.map(_.value).getOrElse(""),
     "first_name" -> data.contacts.soldTo.firstName.value,
     "last_name" -> data.contacts.soldTo.lastName.value,

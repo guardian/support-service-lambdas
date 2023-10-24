@@ -3,8 +3,9 @@ package com.gu.newproduct.api.addsubscription
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.AddContribution.toContributionEmailData
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.serialisers.ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{ContributionsEmailData, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation._
@@ -22,7 +23,7 @@ import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
-import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -30,16 +31,16 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import java.time.LocalDate
 import scala.concurrent.Future
 
-object AddContribution {
-  def steps(
-      getPlan: Map[PlanId, Plan],
-      getCurrentDate: () => LocalDate,
-      getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
-      getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
-      contributionValidations: (ValidatableFields, PlanId, Currency) => ValidationResult[AmountMinorUnits],
-      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-      sendConfirmationEmail: (Option[SfContactId], ContributionsEmailData) => AsyncApiGatewayOp[Unit],
-  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = {
+class AddContribution(
+  getPlan: Map[PlanId, Plan],
+  getCurrentDate: () => LocalDate,
+  getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
+  getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
+  contributionValidations: (ValidatableFields, PlanId, Currency) => ValidationResult[AmountMinorUnits],
+  createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+  sendConfirmationEmail: (Option[SfContactId], ContributionsEmailData) => AsyncApiGatewayOp[Unit],
+) extends AddSpecificProduct {
+  override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] =
     for {
       customerData <- getCustomerData(request.zuoraAccountId).toAsync
       ContributionCustomerData(account, paymentMethod, subscriptions, contacts) = customerData
@@ -79,7 +80,9 @@ object AddContribution {
         "send contribution confirmation email",
       )
     } yield subscriptionName
-  }
+}
+
+object AddContribution {
 
   def wireSteps(
     catalog: Map[PlanId, Plan],
@@ -90,7 +93,7 @@ object AddContribution {
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
       emailQueueName: QueueName,
       currentDate: () => LocalDate,
-  ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
+  ): AddSpecificProduct = {
 
     val planAndChargeForContributionPlanId = zuoraIds.apiIdToPlanAndCharge.get _
     val contributionIds = List(
@@ -105,7 +108,7 @@ object AddContribution {
     val contributionsBrazeConfirmationSqsSend = EtSqsSend[ContributionsEmailData](contributionSqsSend) _
     val sendConfirmationEmail = SendConfirmationEmail(contributionsBrazeConfirmationSqsSend) _
 
-    AddContribution.steps(
+    new AddContribution(
       getPlan = catalog,
       getCurrentDate = currentDate,
       getPlanAndCharge = planAndChargeForContributionPlanId,
@@ -113,7 +116,7 @@ object AddContribution {
       contributionValidations = validateRequest,
       createSubscription = createSubscription,
       sendConfirmationEmail = sendConfirmationEmail,
-    ) _
+    )
 
   }
 

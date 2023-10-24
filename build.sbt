@@ -375,7 +375,7 @@ lazy val `identity-retention` = lambdaProject(
 lazy val `new-product-api` = lambdaProject(
   "new-product-api",
   "Add subscription to account",
-  Seq(),
+  Seq(diffx),
 )
   .settings(
     Test / unmanagedResourceDirectories += (Test / scalaSource).value,

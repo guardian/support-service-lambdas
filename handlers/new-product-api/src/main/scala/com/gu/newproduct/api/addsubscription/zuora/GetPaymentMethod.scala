@@ -54,7 +54,7 @@ object GetPaymentMethod {
   private def toStatus(statusString: String) =
     if (statusString == "Active") ActivePaymentMethod else NotActivePaymentMethod
 
-  implicit val wireReads = Json.reads[PaymentMethodWire]
+  implicit val wireReads: Reads[PaymentMethodWire] = Json.reads[PaymentMethodWire]
 
   sealed trait PaymentMethod {
     def status: PaymentMethodStatus

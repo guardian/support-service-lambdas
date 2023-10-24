@@ -25,7 +25,19 @@ case class PaperEmailData(
     contacts: Contacts,
     paymentMethod: PaymentMethod,
     currency: Currency,
+    deliveryAgentDetails: Option[DeliveryAgentDetails], // only for national delivery
 ) extends EmailData
+
+case class DeliveryAgentDetails(
+  agentName: String,
+  telephone: String,
+  email: String,
+  address1: String,
+  address2: String,
+  town: String,
+  county: String,
+  postcode: String,
+)
 
 case class TrialPeriod(days: Int)
 

@@ -44,30 +44,37 @@ object Handler extends Logging {
     }
 }
 
-object Steps {
-  def handleRequest(
-      addSupporterPlus: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-      addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-      addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-      addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-      addGuardianWeeklyDomesticSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-      addGuardianWeeklyROWSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-  )(
-      apiGatewayRequest: ApiGatewayRequest,
-  ): Future[ApiResponse] = (for {
+trait AddSpecificProduct {
+  def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName]
+}
+
+class handleRequest(
+  addSupporterPlus: AddSpecificProduct,
+  addContribution: AddSpecificProduct,
+  addPaperSub: AddSpecificProduct,
+  addDigipackSub: AddSpecificProduct,
+  addGuardianWeeklyDomesticSub: AddSpecificProduct,
+  addGuardianWeeklyROWSub: AddSpecificProduct,
+) {
+  def apply(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse]
+  = (for {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
-    subscriptionName <- request.planId match {
-      case _: SupporterPlusPlanId => addSupporterPlus(request)
-      case _: ContributionPlanId => addContribution(request)
-      case _: VoucherPlanId => addPaperSub(request)
-      case _: HomeDeliveryPlanId => addPaperSub(request)
-      case _: DigipackPlanId => addDigipackSub(request)
-      case _: GuardianWeeklyDomestic => addGuardianWeeklyDomesticSub(request)
-      case _: GuardianWeeklyRow => addGuardianWeeklyROWSub(request)
-      case _: DigitalVoucherPlanId => addPaperSub(request)
-      case _: NationalDeliveryPlanId => addPaperSub(request)
+    addSpecificProduct = request.planId match {
+      case _: SupporterPlusPlanId => addSupporterPlus
+      case _: ContributionPlanId => addContribution
+      case _: VoucherPlanId => addPaperSub
+      case _: HomeDeliveryPlanId => addPaperSub
+      case _: DigipackPlanId => addDigipackSub
+      case _: GuardianWeeklyDomestic => addGuardianWeeklyDomesticSub
+      case _: GuardianWeeklyRow => addGuardianWeeklyROWSub
+      case _: DigitalVoucherPlanId => addPaperSub
+      case _: NationalDeliveryPlanId => addPaperSub
     }
+    subscriptionName <- addSpecificProduct.addProduct(request)
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
+}
+
+object Steps {
 
   def operationForEffects(
       response: Request => Response,
@@ -172,17 +179,17 @@ object Steps {
         GuardianWeeklyROWQuarterly,
       )
 
-      addSubSteps = handleRequest(
+      addSubSteps = new handleRequest(
         addSupporterPlus = supporterPlusSteps,
         addContribution = contributionSteps,
         addPaperSub = paperSteps,
         addDigipackSub = digipackSteps,
         addGuardianWeeklyDomesticSub = guardianWeeklyDomesticStep,
         addGuardianWeeklyROWSub = guardianWeeklyROWStep,
-      ) _
+      )
 
       configuredOp = Operation.async(
-        steps = addSubSteps,
+        steps = addSubSteps.apply,
         healthcheck =
           () => HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage)),
       )

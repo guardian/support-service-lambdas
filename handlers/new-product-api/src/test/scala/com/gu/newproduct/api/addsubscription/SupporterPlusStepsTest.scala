@@ -107,7 +107,7 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
 
-    val fakeAddSupporterPlusSteps = AddSupporterPlus.steps(
+    val fakeAddSupporterPlusSteps = new AddSupporterPlus(
       getPlan,
       currentDate _,
       getPlanAndCharge,
@@ -115,12 +115,13 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
       fakeValidateRequest,
       fakeCreate,
       fakeSendEmails,
-    ) _
+    )
 
-    val dummySteps = (req: AddSubscriptionRequest) => {
-      fail("unexpected execution of voucher steps while processing contribution request!")
+    val dummySteps = new AddSpecificProduct {
+      override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] =
+        fail("unexpected execution of voucher steps while processing contribution request!")
     }
-    val futureActual = Steps.handleRequest(
+    val futureActual = new handleRequest(
       addSupporterPlus = fakeAddSupporterPlusSteps,
       addContribution = dummySteps,
       addPaperSub = dummySteps,

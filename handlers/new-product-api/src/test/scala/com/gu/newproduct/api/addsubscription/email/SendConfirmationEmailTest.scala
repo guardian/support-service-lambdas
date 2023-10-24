@@ -66,6 +66,7 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
     contacts = TestData.contacts,
     paymentMethod = TestData.directDebitPaymentMethod,
     currency = GBP,
+    None,
   )
 
 }

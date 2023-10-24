@@ -4,7 +4,7 @@ import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithoutCheck}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 object GetAccount {
 
@@ -19,7 +19,7 @@ object GetAccount {
         Currency: String,
     )
 
-    implicit val zaReadsZuoraAccount = Json.reads[ZuoraAccount]
+    implicit val zaReadsZuoraAccount: Reads[ZuoraAccount] = Json.reads[ZuoraAccount]
 
     def fromWire(zuoraAccount: ZuoraAccount): ClientFailableOp[Account] =
       Currency.fromString(zuoraAccount.Currency) match {

@@ -4,7 +4,7 @@ import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
 import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.{Country, Currency}
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.serialisers.ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.email.{ContributionsEmailData, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._

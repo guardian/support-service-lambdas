@@ -6,7 +6,7 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 object GetContacts {
 
@@ -94,9 +94,9 @@ object GetContacts {
 
     case class GetContactsResponse(billToContact: ZuoraBillTo, soldToContact: ZuoraSoldTo)
 
-    implicit val ZuoraBillToReads = Json.reads[ZuoraBillTo]
-    implicit val ZuoraSoldToReads = Json.reads[ZuoraSoldTo]
-    implicit val ZuoraContactsReads = Json.reads[GetContactsResponse]
+    implicit val ZuoraBillToReads: Reads[ZuoraBillTo] = Json.reads[ZuoraBillTo]
+    implicit val ZuoraSoldToReads: Reads[ZuoraSoldTo] = Json.reads[ZuoraSoldTo]
+    implicit val ZuoraContactsReads: Reads[GetContactsResponse] = Json.reads[GetContactsResponse]
 
     def fromWireContacts(zuoraAccount: GetContactsResponse): ClientFailableOp[Contacts] = for {
       billTo <- zuoraAccount.billToContact.toBillToContact
