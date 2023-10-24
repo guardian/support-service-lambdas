@@ -208,6 +208,7 @@ export class NewProductApi extends GuStack {
           ],
           resources: [
             `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${this.stage}/zuoraRest-${this.stage}*.json`,
+            `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${this.stage}/paperround-${this.stage}*.json`,
           ]
         }),
       ],

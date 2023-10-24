@@ -1069,7 +1069,10 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE*.json",
+              "Resource": [
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE*.json",
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/paperround-CODE*.json",
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -2478,7 +2481,10 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD*.json",
+              "Resource": [
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD*.json",
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/paperround-PROD*.json",
+              ],
             },
           ],
           "Version": "2012-10-17",
