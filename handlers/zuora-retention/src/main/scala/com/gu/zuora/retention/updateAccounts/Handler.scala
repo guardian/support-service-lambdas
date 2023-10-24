@@ -32,7 +32,7 @@ object Handler {
       stage: Stage,
       fetchString: StringFromS3,
   ): Try[Requests] = for {
-    zuoraRestConfig <- toTry(LoadConfigModule(stage, fetchString)[ZuoraRestConfig])
+    zuoraRestConfig <- toTry(LoadConfigModule(stage, fetchString).load[ZuoraRestConfig])
   } yield ZuoraRestRequestMaker(response, zuoraRestConfig)
 
   def operation(

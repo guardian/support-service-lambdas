@@ -76,7 +76,7 @@ object Handler extends RequestStreamHandler {
     val downloadResponse = RawEffects.downloadResponse
     val stage = RawEffects.stage
     val maybeSuccess = for {
-      zuoraRestConfig <- loadConfig[ZuoraRestConfig]
+      zuoraRestConfig <- loadConfig.load[ZuoraRestConfig]
       requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       cancelSub = CancelSub(log, requests)
       cancelAccount = CancelAccount(log, requests)

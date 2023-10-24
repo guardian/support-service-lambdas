@@ -86,7 +86,7 @@ object StartJobHandler {
   )(request: WireRequest): Try[WireResponse] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
+      sfConfig <- loadConfig.load[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       createJobOp = sfClient.wrapWith(JsonHttp.postWithHeaders).wrapWith(CreateJob.wrapper).runRequest _
       addQueryToJobOp = sfClient.wrapWith(AddQueryToJob.wrapper).runRequest _

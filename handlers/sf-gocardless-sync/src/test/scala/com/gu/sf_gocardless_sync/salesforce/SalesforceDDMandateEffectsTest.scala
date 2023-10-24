@@ -26,7 +26,7 @@ class SalesforceDDMandateEffectsTest extends AnyFlatSpec with Matchers {
   it should "create a 'DD Mandate' in salesforce" taggedAs EffectsTest in {
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       wiredOp = SalesforceDDMandate.Create(sfAuth.wrapWith(JsonHttp.post))
@@ -52,7 +52,7 @@ class SalesforceDDMandateEffectsTest extends AnyFlatSpec with Matchers {
   it should "event an existing 'DD Mandate' in salesforce" taggedAs EffectsTest in {
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       wiredOp = SalesforceDDMandate.Update(sfAuth.wrapWith(JsonHttp.patch))(MandateSfId("a2q6E0000007XgS"))
@@ -74,7 +74,7 @@ class SalesforceDDMandateEffectsTest extends AnyFlatSpec with Matchers {
   it should "fetch the PaymentMethod and BillingAccount IDs from salesforce given a list of GoCardless References" taggedAs EffectsTest in {
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       wiredOp = SalesforceDDMandate.GetPaymentMethodsEtc(sfAuth.wrapWith(JsonHttp.get))
@@ -91,7 +91,7 @@ class SalesforceDDMandateEffectsTest extends AnyFlatSpec with Matchers {
   it should "fetch the DD Mandate from salesforce given a GoCardless mandate ID" taggedAs EffectsTest in {
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       wiredOp = SalesforceDDMandate.LookupAll(sfAuth.wrapWith(JsonHttp.get))

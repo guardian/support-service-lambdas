@@ -28,7 +28,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
     val contact = IdentityId("100004814") // must exist in CODE SalesForce
 
     val actual = for {
-      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[SFAuthConfig]
+      sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
 

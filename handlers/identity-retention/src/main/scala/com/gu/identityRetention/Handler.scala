@@ -34,7 +34,7 @@ object Handler {
       fetchString: StringFromS3,
   ): ApiGatewayOp[Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
-    loadConfig[BigQueryConfig].toApiGatewayOp("load bigquery config").map { bigQueryConfig =>
+    loadConfig.load[BigQueryConfig].toApiGatewayOp("load bigquery config").map { bigQueryConfig =>
       val bigQueryHelper = BigQueryHelper(bigQueryConfig)
       IdentityRetentionSteps(bigQueryHelper)
     }

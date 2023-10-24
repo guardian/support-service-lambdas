@@ -52,6 +52,8 @@ object ZuoraEnvironment extends Logging {
 
 object ConfigReads {
 
-  case class ConfigFailure(error: String) extends Throwable
+  case class ConfigFailure(error: String) extends Throwable {
+    override def toString: String = s"${getClass.getName}($error)"
+  }
 
 }

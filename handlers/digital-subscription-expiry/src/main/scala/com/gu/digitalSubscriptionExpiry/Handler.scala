@@ -47,8 +47,8 @@ object Handler extends Logging {
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
-      zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      emergencyTokensConfig <- loadConfig[EmergencyTokensConfig].toApiGatewayOp("load emergency tokens config")
+      zuoraRestConfig <- loadConfig.load[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      emergencyTokensConfig <- loadConfig.load[EmergencyTokensConfig].toApiGatewayOp("load emergency tokens config")
     } yield {
       val emergencyTokens = EmergencyTokens(emergencyTokensConfig)
       val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)

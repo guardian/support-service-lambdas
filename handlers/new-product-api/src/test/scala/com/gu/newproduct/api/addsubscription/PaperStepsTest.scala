@@ -10,6 +10,8 @@ import com.gu.newproduct.api.productcatalog.PlanId.{NationalDeliveryWeekend, Vou
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
+import com.gu.paperround.client.GetAgents
+import com.gu.paperround.client.GetAgents.DeliveryAgentRecord
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
@@ -18,9 +20,9 @@ import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher
-import org.scalatest.{Assertion, Inside}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Assertion, Inside}
 import play.api.libs.json._
 
 import java.time.LocalDate
@@ -31,6 +33,8 @@ import scala.language.postfixOps
 class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShouldMatcher {
 
   case class ExpectedOut(subscriptionNumber: String)
+
+  private val exampleDeliveryAgent: DeliveryAgent = DeliveryAgent("helloAgent")
 
   it should "run end to end with fakes" in {
 
@@ -74,9 +78,10 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
 
     val addVoucherSteps: AddPaperSub = buildAddPaperSteps(
       NationalDeliveryWeekend,
-      Some(DeliveryAgent("helloAgent")),
+      Some(exampleDeliveryAgent),
       { paperEmailData =>
-        paperEmailData.deliveryAgentDetails shouldMatchTo None//TODO in next PR Some(DeliveryAgentDetails(...))
+        val expectedDeliveryAgentDetails = DeliveryAgentDetails("agentName1", "telephone1", "email1", "address11", "address21", "town1", "county1", "postcode1")
+        paperEmailData.deliveryAgentDetails shouldMatchTo Some(expectedDeliveryAgentDetails)
       }
     )
 
@@ -84,7 +89,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
       zuoraAccountId = ZuoraAccountId("acccc"),
       startDate = LocalDate.of(2018, 7, 18),
       acquisitionSource = AcquisitionSource("CSR"),
-      deliveryAgent = Some(DeliveryAgent("helloAgent")),
+      deliveryAgent = Some(exampleDeliveryAgent),
       createdByCSR = CreatedByCSR("bob"),
       amountMinorUnits = None,
       acquisitionCase = CaseId("case"),
@@ -132,6 +137,45 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
       ClientSuccess(SubscriptionName("well done"))
     }
 
+    def fakeGetAgents = new GetAgents {
+      override def getAgents(): Types.ClientFailableOp[List[GetAgents.DeliveryAgentRecord]] =
+        ClientSuccess(List(
+          DeliveryAgentRecord(
+            DeliveryAgent("differentAgentHere"),
+            "agentName2",
+            "telephone2",
+            "town2",
+            "postcode2",
+            "address22",
+            "email2",
+            "address12",
+            "county2",
+          ),
+          DeliveryAgentRecord(
+            exampleDeliveryAgent,
+            "agentName1",
+            "telephone1",
+            "town1",
+            "postcode1",
+            "address21",
+            "email1",
+            "address11",
+            "county1",
+          ),
+          DeliveryAgentRecord(
+            DeliveryAgent("anotherDifferentAgentHere"),
+            "agentName3",
+            "telephone3",
+            "town3",
+            "postcode3",
+            "address23",
+            "email3",
+            "address13",
+            "county3",
+          ),
+        ))
+    }
+
     val fakeGetZuoraId = (planId: PlanId) => {
       planId shouldMatchTo expectedPlanId
       Some(ratePlanId)
@@ -156,6 +200,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
       fakeValidateAddress,
       fakeCreate,
       fakeSendEmail,
+      fakeGetAgents,
     )
   }
 }

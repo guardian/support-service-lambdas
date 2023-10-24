@@ -25,15 +25,15 @@ object Lambda {
 
     ApiGatewayHandler(lambdaIO) {
       for {
-        zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-        stripeConfig <- loadConfigModule[StripeConfig].toApiGatewayOp("load stripe config")
+        zuoraRestConfig <- loadConfigModule.load[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+        stripeConfig <- loadConfigModule.load[StripeConfig].toApiGatewayOp("load stripe config")
         zuoraClient = ZuoraRestRequestMaker(response, zuoraRestConfig)
         stripeChecker = StripeDeps(stripeConfig, new StripeSignatureChecker)
         configuredOp = CardUpdatedSteps(
           zuoraClient,
           stripeChecker,
         )
-      } yield configuredOp.prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
+      } yield configuredOp.prependRequestValidationToSteps(Auth(loadConfigModule.load[TrustedApiConfig]))
     }
 
   }

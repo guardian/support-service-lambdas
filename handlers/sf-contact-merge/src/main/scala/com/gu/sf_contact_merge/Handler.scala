@@ -46,11 +46,11 @@ object Handler {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
 
-      zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
+      zuoraRestConfig <- loadConfig.load[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
       requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
 
-      sfConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load trusted Api config")
+      sfConfig <- loadConfig.load[SFAuthConfig].toApiGatewayOp("load trusted Api config")
       sfAuth <- SalesforceClient(getResponse, sfConfig).value.toApiGatewayOp("Failed to authenticate with Salesforce")
 
     } yield Operation.noHealthcheck {

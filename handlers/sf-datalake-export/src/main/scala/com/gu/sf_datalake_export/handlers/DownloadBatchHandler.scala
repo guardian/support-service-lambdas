@@ -102,7 +102,7 @@ object DownloadBatchHandler extends LazyLogging {
   )(request: WireState): Try[WireState] = {
     val loadConfig = LoadConfigModule(stage, getFromS3)
     for {
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
+      sfConfig <- loadConfig.load[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _

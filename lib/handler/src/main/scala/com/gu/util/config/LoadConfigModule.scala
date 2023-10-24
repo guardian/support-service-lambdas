@@ -20,8 +20,8 @@ object LoadConfigModule extends Logging {
   val bucketName = "gu-reader-revenue-private"
 
   // we need this extra class here because otherwise we cannot partially apply the LoadConfig apply method without specifying the generic param
-  class PartialApply(stage: Stage, fetchString: StringFromS3) {
-    def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): Either[ConfigFailure, CONF] = {
+  class LoadConfigModule(stage: Stage, fetchString: StringFromS3) {
+    def load[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): Either[ConfigFailure, CONF] = {
       logger.info(s"Attempting to load config in $stage")
       val s3Location = S3Location(bucket = bucketName, key = configLocation.toPath(stage))
       for {
@@ -33,7 +33,7 @@ object LoadConfigModule extends Logging {
     }
   }
 
-  def apply(stage: Stage, fetchString: StringFromS3) = new PartialApply(stage = stage, fetchString = fetchString)
+  def apply(stage: Stage, fetchString: StringFromS3) = new LoadConfigModule(stage = stage, fetchString = fetchString)
 
   def validateStage(jsValue: JsValue, expectedStage: Stage): Either[ConfigFailure, Unit] = {
     jsValue.validate[ConfigWithStage] match {

@@ -15,6 +15,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAcc
 import com.gu.newproduct.api.addsubscription.zuora._
 import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROW6for6, GuardianWeeklyROWQuarterly}
 import com.gu.newproduct.api.productcatalog._
+import com.gu.paperround.client.{GetAgents, PaperRoundConfig, PaperRoundRestRequestMaker}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -85,12 +86,14 @@ object Steps {
   ): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage).toApiGatewayOp(ApiGatewayResponse.internalServerError _)
-      zuoraConfig <- {
-        val loadConfig = LoadConfigModule(stage, fetchString)
-        loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      }
+      loadConfig = LoadConfigModule(stage, fetchString)
+      zuoraConfig <- loadConfig.load[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       currentDate = () => currentDatetime().toLocalDate
+
+      paperRoundConfig <- loadConfig.load[PaperRoundConfig].toApiGatewayOp("load zuora config")
+      paperRoundClient = PaperRoundRestRequestMaker(response, paperRoundConfig)
+      getAgents = GetAgents(paperRoundClient)
 
       validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
       zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
@@ -139,6 +142,7 @@ object Steps {
         createSubscription,
         awsSQSSend,
         EmailQueueName,
+        getAgents,
       )
 
       digipackSteps = AddDigipackSub.wireSteps(

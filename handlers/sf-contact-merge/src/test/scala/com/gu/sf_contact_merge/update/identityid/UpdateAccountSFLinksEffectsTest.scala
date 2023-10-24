@@ -27,7 +27,7 @@ class UpdateAccountSFLinksEffectsTest extends AnyFlatSpec with Matchers {
     val unique = s"${Random.nextInt(10000)}"
 
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
         .toApiGatewayOp("load config")
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       update = UpdateAccountSFLinks(zuoraDeps.put)

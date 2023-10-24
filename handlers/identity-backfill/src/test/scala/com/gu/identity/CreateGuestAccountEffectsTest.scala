@@ -22,7 +22,7 @@ class CreateGuestAccountEffectsTest extends AnyFlatSpec with Matchers {
     val testContact = EmailAddress(s"sx.CreateGuestAccountEffectsTest+$unique@gu.com")
 
     val actual = for {
-      identityConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[IdentityConfig]
+      identityConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[IdentityConfig]
       response = RawEffects.response
       identityClient = IdentityClient(response, identityConfig)
       createGuestAccount = identityClient.wrapWith(JsonHttp.post).wrapWith(CreateGuestAccount.wrapper)

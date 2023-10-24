@@ -42,8 +42,8 @@ trait ZuoraHandler[Req, Res] {
 object Handler {
 
   def handleRer(input: InputStream, output: OutputStream): Either[ConfigFailure, Unit] = {
-    val loadZuoraRerConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
-    loadZuoraRerConfig[ZuoraRerConfig].map(config => {
+    val loadConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+    loadConfig.load[ZuoraRerConfig].map(config => {
       val rerLambda = ZuoraRerHandler(S3Helper, config)
       rerLambda.handleRequest(input, output)
     })
@@ -53,12 +53,11 @@ object Handler {
       input: InputStream,
       output: OutputStream,
   ): Either[ConfigFailure, Unit] = {
-    val loadZuoraRerConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
-    val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+    val loadConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val response = RawEffects.response
     for {
-      zuoraRerConfig <- loadZuoraRerConfig[ZuoraRerConfig]
-      batonZuoraRestConfig <- loadZuoraRestConfig[BatonZuoraRestConfig]
+      zuoraRerConfig <- loadConfig.load[ZuoraRerConfig]
+      batonZuoraRestConfig <- loadConfig.load[BatonZuoraRestConfig]
       requests = ZuoraRestRequestMaker(response, toZuoraRestConfig(batonZuoraRestConfig))
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraRerService(requests, zuoraQuerier)

@@ -15,7 +15,7 @@ class GetAccountSubscriptionsEffectsTest extends AnyFlatSpec with Matchers {
 
   it should "get payment details" taggedAs EffectsTest in {
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       res <- GetAccountSubscriptions(zuoraDeps.get[ZuoraSubscriptionsResponse])(
         ZuoraAccountId("8ad095b882f7aaa60182f9c2a69a043a"),

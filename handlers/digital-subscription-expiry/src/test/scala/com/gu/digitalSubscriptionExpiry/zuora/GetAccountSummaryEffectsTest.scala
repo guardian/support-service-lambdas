@@ -16,7 +16,7 @@ class GetAccountSummaryEffectsTest extends AnyFlatSpec with Matchers {
     val testAccountId = AccountId("2c92c0f86078c4d4016079e1402d6536")
 
     val actual: ApiGatewayOp[AccountSummaryResult] = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
         .toApiGatewayOp("parse config")
 
       zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)

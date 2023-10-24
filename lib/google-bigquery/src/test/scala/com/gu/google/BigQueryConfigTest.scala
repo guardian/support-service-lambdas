@@ -27,7 +27,7 @@ class BigQueryConfigTest extends AnyFlatSpec with Matchers {
         |""".stripMargin)
 
     val loadConfig = LoadConfigModule(Stage("DEV"), config)
-    val maybeConfig = loadConfig[BigQueryConfig]
+    val maybeConfig = loadConfig.load[BigQueryConfig]
     maybeConfig match {
       case Left(error) => fail(error.toString)
       case Right(config) =>
@@ -45,7 +45,7 @@ class BigQueryConfigTest extends AnyFlatSpec with Matchers {
         |""".stripMargin)
 
     val loadConfig = LoadConfigModule(Stage("DEV"), config)
-    val maybeConfig = loadConfig[BigQueryConfig]
+    val maybeConfig = loadConfig.load[BigQueryConfig]
     maybeConfig match {
       case Left(error) =>
         error shouldBe a[ConfigFailure]

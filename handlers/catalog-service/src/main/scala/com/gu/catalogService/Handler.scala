@@ -33,7 +33,7 @@ object Handler extends Logging {
       s3Write: (PutObjectRequest, RequestBody) => Try[PutObjectResponse],
   ): Unit = {
     val attempt = for {
-      zuoraRestConfig <- LoadConfigModule(zuoraEnvironment.stageToLoad, fetchString)[ZuoraRestConfig].left.map(_.error)
+      zuoraRestConfig <- LoadConfigModule(zuoraEnvironment.stageToLoad, fetchString).load[ZuoraRestConfig].left.map(_.error)
       zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).toDisjunction.left.map(_.message)
       _ <- S3UploadCatalog(stage, zuoraEnvironment, fetchCatalogAttempt, s3Write)

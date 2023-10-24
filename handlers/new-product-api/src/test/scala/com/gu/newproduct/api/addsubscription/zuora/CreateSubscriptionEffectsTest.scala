@@ -45,7 +45,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
       ),
     )
     val actual = for {
-      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
       res <- CreateSubscription(post, currentDate)(request).toDisjunction
