@@ -30,8 +30,21 @@ export const prodProps: NewProductApiProps = {
     fulfilmentDateCalculatorS3Resource: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
 };
 
-new BatchEmailSender(app, "batch-email-sender-CODE", {stack: "membership", stage: "CODE"});
-new BatchEmailSender(app, "batch-email-sender-PROD", {stack: "membership", stage: "PROD"});
+new BatchEmailSender(app, "batch-email-sender-CODE", {
+    domainName: "batch-email-sender-code.membership.guardianapis.com",
+    hostedZoneId: "Z1E4V12LQGXFEC",
+    certificateId: "c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+    stack: "membership",
+    stage: "CODE"
+});
+new BatchEmailSender(app, "batch-email-sender-PROD", {
+    domainName: "batch-email-sender-prod.membership.guardianapis.com",
+    hostedZoneId: "Z1E4V12LQGXFEC",
+    certificateId: "c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+    stack: "membership",
+    stage: "PROD"
+});
+
 new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
 new FailedNationalDeliveriesProcessor(app, "failed-national-deliveries-processor-CODE", {stack: "membership", stage: "CODE"});
