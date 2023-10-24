@@ -6,33 +6,31 @@ on:
     branches:
       - main
 jobs:
-#  setup:
-#    runs-on: ubuntu-latest
-#    permissions:
-#      id-token: write
-#      contents: read
-#      steps:
-#        - name: Checkout
-#          uses: actions/checkout@v4
-#
-#        - name: Configure AWS credentials
-#          uses: aws-actions/configure-aws-credentials@v4
-#          with:
-#            role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-#            aws-region: eu-west-1
-#
-#        - name: Setup Java
-#          uses: actions/setup-java@v3
-#          with:
-#            distribution: 'corretto'
-#            java-version: '11'
-#            cache: 'sbt'
-#
-#        - name: Generate CFN templates from GuCDK
-#          run: bash ./script/cfn.sh
+  build-cfn-templates:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
 
-  build:
-#    needs: setup
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+            aws-region: eu-west-1
+
+        - name: Generate CFN templates from GuCDK
+          run: bash ./script/cfn.sh
+
+        - name: Upload generated CFN templates
+          uses: actions/upload-artifact@v3
+          with:
+            name: cfn-templates
+            path: ./cdk/cdk.out
+
+  build-subprojects:
     permissions:
       id-token: write
       contents: read
@@ -53,6 +51,16 @@ jobs:
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           aws-region: eu-west-1
 
+      - name: Download generated CFN templates
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: cfn-templates
+          path: ./cdk/cdk.out
+
+      - name: Echo download path
+        run: echo ${{steps.download.outputs.download-path}}
+
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -60,11 +68,11 @@ jobs:
           java-version: '11'
           cache: 'sbt'
 
-      - name: Generate CFN templates from GuCDK
-        run: bash ./script/cfn.sh
-
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
+
+      - name: Generate CFN templates from GuCDK
+        run: bash ./script/cfn.sh
 
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v2
