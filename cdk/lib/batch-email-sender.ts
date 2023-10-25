@@ -5,14 +5,21 @@ import {GuStack} from "@guardian/cdk/lib/constructs/core";
 import {GuLambdaFunction} from "@guardian/cdk/lib/constructs/lambda";
 import type {App} from "aws-cdk-lib";
 import {Duration, Fn} from "aws-cdk-lib";
-import {ApiKey, CfnUsagePlanKey, Cors, UsagePlan} from "aws-cdk-lib/aws-apigateway";
+import {ApiKey, CfnBasePathMapping, CfnDomainName, CfnUsagePlanKey, Cors, UsagePlan} from "aws-cdk-lib/aws-apigateway";
 import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {Runtime} from "aws-cdk-lib/aws-lambda";
+import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
 import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 
+export interface BatchEmailSenderProps extends GuStackProps {
+    certificateId: string;
+    domainName: string;
+    hostedZoneId: string;
+}
+
 export class BatchEmailSender extends GuStack {
-    constructor(scope: App, id: string, props: GuStackProps) {
+    constructor(scope: App, id: string, props: BatchEmailSenderProps) {
         super(scope, id, props);
         const yamlTemplateFilePath = `${__dirname}/../../handlers/batch-email-sender/cfn.yaml`;
         new CfnInclude(this, "YamlTemplate", {
@@ -63,7 +70,7 @@ export class BatchEmailSender extends GuStack {
 
         // ---- Usage plan and API key ---- //
         const usagePlan = new UsagePlan(this, "BatchEmailSenderUsagePlan", {
-            name: `batch-email-sender-api-usage-plan-${this.stage}`,
+            name: `batch-email-sender-api-usage-plan-${this.stage}-CDK`,
             apiStages: [
                 {
                     api: batchEmailSenderApi.api,
@@ -124,6 +131,34 @@ export class BatchEmailSender extends GuStack {
                     FunctionName: batchEmailSenderLambda.functionName,
                 }
             }),
+        });
+
+
+        // ---- DNS ---- //
+        const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
+
+        const cfnDomainName = new CfnDomainName(this, "DomainName", {
+            domainName: props.domainName,
+            regionalCertificateArn: certificateArn,
+            endpointConfiguration: {
+                types: ["REGIONAL"]
+            }
+        });
+
+        new CfnBasePathMapping(this, "BasePathMapping", {
+            domainName: cfnDomainName.ref,
+            restApiId: batchEmailSenderApi.api.restApiId,
+            stage: batchEmailSenderApi.api.deploymentStage.stageName,
+        });
+
+        new CfnRecordSet(this, "DNSRecord", {
+            name: props.domainName,
+            type: "CNAME",
+            hostedZoneId: props.hostedZoneId,
+            ttl: "60",
+            resourceRecords: [
+                cfnDomainName.attrRegionalDomainName
+            ],
         });
 
 
