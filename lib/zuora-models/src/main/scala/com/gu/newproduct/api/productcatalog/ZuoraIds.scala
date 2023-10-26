@@ -304,9 +304,9 @@ object ZuoraIds {
           sixDayPlus = ProductRatePlanId("2c92a00870ec598001710740c4582ead"),
         ),
         NationalDeliveryZuoraIds(
-          everyday = ProductRatePlanId("TODO TBC when created"),
-          weekend = ProductRatePlanId("TODO TBC when created"),
-          sixDay = ProductRatePlanId("TODO TBC when created"),
+          everyday = ProductRatePlanId("8a12999f8a268c57018a27ebe31414a4"),
+          weekend = ProductRatePlanId("8a12999f8a268c57018a27ebe868150c"),
+          sixDay = ProductRatePlanId("8a12999f8a268c57018a27ebfd721883"),
         ),
       ),
       Stage("CODE") -> ZuoraIds(
