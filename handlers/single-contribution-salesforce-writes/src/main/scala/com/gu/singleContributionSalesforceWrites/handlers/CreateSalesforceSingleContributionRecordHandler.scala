@@ -50,7 +50,7 @@ object CreateSalesforceSingleContributionRecordHandler extends RequestHandler[SQ
   }
 
   def processMessage(contribution: PaymentApiMessageDetail): Unit = {
-    val stage = sys.env.getOrElse("Stage", "CODE")
+    val stage = sys.env.getOrElse("STAGE", "CODE")
 
     val result = for {
       accessToken <- GetAccessToken(stage)
