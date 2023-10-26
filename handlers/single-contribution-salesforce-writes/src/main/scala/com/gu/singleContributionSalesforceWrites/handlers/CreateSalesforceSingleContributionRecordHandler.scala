@@ -17,8 +17,8 @@ case class PaymentApiMessageDetail(
     identityId: String,
     paymentId: String,
     paymentProvider: String,
-    postalCode: String,
-    state: String,
+    postalCode: Option[String],
+    state: Option[String],
     email: String,
 )
 
