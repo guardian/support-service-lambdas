@@ -386,8 +386,8 @@ lazy val `new-product-api` = lambdaProject(
 lazy val `single-contribution-salesforce-writes` = lambdaProject(
   "single-contribution-salesforce-writes",
   "Create a single contribution record in Salesforce",
-  Seq(awsSecretsManager, circe, circeParser, scalajHttp, upickle),
-)
+  Seq(circe, circeParser, awsEvents, scalajHttp, awsSecretsManager),
+).dependsOn(handler, testDep)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",

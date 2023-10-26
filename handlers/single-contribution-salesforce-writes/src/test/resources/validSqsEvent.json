@@ -1,0 +1,20 @@
+{
+  "Records": [
+    {
+      "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
+      "receiptHandle": "MessageReceiptHandle",
+      "body": "{\n  \"version\": \"0\",\n  \"id\": \"cae7dcfc-dab5-aaf3-5bef-36147509b9f1\",\n  \"detail-type\": \"AcquisitionsEvent\",\n  \"source\": \"payment-api\",\n  \"account\": \"865473395570\",\n  \"time\": \"2023-09-29T09:01:33Z\",\n  \"region\": \"eu-west-1\",\n  \"resources\": [],\n  \"detail\": {\n    \"eventTimeStamp\": \"2023-09-29T09:01:33.735Z\",\n    \"product\": \"CONTRIBUTION\",\n    \"amount\": 60,\n    \"country\": \"US\",\n    \"currency\": \"GBP\",\n    \"componentId\": null,\n    \"componentType\": null,\n    \"campaignCode\": \"\",\n    \"source\": null,\n    \"referrerUrl\": null,\n    \"abTests\": [\n      {\n        \"name\": \"twoStepCheckout\",\n        \"variant\": \"variant_b\"\n      }\n    ],\n    \"paymentFrequency\": \"ONE_OFF\",\n    \"paymentProvider\": \"STRIPE\",\n    \"printOptions\": null,\n    \"browserId\": null,\n    \"identityId\": \"200155957\",\n    \"pageViewId\": \"ln4dj00x0racwrt4r06a\",\n    \"referrerPageViewId\": \"\",\n    \"labels\": [],\n    \"promoCode\": null,\n    \"reusedExistingPaymentMethod\": false,\n    \"readerType\": \"Direct\",\n    \"acquisitionType\": \"Purchase\",\n    \"zuoraSubscriptionNumber\": null,\n    \"contributionId\": \"fc4414de-49de-4bf4-bae5-773d7127dcfa\",\n    \"paymentId\": \"ch_3NvcZiCbpG0cQtlb1fgEy47p\",\n    \"queryParameters\": [],\n    \"platform\": \"SUPPORT\",\n    \"postalCode\": \"SE1 4PU\",\n    \"state\": \"CMD\",\n    \"email\": \"test@test.com\"\n  }\n}\n",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1523232000000",
+        "SenderId": "123456789012",
+        "ApproximateFirstReceiveTimestamp": "1523232000001"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "{{{md5_of_body}}}",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
+      "awsRegion": "us-east-1"
+    }
+  ]
+}

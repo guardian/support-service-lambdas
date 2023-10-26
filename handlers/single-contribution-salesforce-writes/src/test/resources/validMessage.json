@@ -1,0 +1,48 @@
+{
+  "version": "0",
+  "id": "cae7dcfc-dab5-aaf3-5bef-36147509b9f1",
+  "detail-type": "AcquisitionsEvent",
+  "source": "payment-api",
+  "account": "865473395570",
+  "time": "2023-09-29T09:01:33Z",
+  "region": "eu-west-1",
+  "resources": [],
+  "detail": {
+    "eventTimeStamp": "2023-09-29T09:01:33.735Z",
+    "product": "CONTRIBUTION",
+    "amount": 60,
+    "country": "US",
+    "currency": "GBP",
+    "componentId": null,
+    "componentType": null,
+    "campaignCode": "",
+    "source": null,
+    "referrerUrl": null,
+    "abTests": [
+      {
+        "name": "twoStepCheckout",
+        "variant": "variant_b"
+      }
+    ],
+    "paymentFrequency": "ONE_OFF",
+    "paymentProvider": "STRIPE",
+    "printOptions": null,
+    "browserId": null,
+    "identityId": "200155957",
+    "pageViewId": "ln4dj00x0racwrt4r06a",
+    "referrerPageViewId": "",
+    "labels": [],
+    "promoCode": null,
+    "reusedExistingPaymentMethod": false,
+    "readerType": "Direct",
+    "acquisitionType": "Purchase",
+    "zuoraSubscriptionNumber": null,
+    "contributionId": "fc4414de-49de-4bf4-bae5-773d7127dcfa",
+    "paymentId": "ch_3NvcZiCbpG0cQtlb1fgEy47p",
+    "queryParameters": [],
+    "platform": "SUPPORT",
+    "postalCode": "SE1 4PU",
+    "state": "CMD",
+    "email": "test@test.com"
+  }
+}

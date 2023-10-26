@@ -7,3 +7,5 @@ metals.sbt
 .vscode/
 project/.bloop/
 project/project/
+.bloop/
+.DS_Store

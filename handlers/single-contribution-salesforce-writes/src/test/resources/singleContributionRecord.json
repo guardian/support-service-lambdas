@@ -1,0 +1,13 @@
+{
+  "Amount__c": 10.0,
+  "Contribution_ID__c": "12345-67890-ABCDEF",
+  "Country_Code__c": "US",
+  "Country_Subdivision_Code__c": "NY",
+  "Currency__c": "USD",
+  "Email__c": "test@theguardian.com",
+  "Identity_ID__c": "200012345",
+  "Payment_Date__c": "2014-01-01T14:30:00.000+0000",
+  "Payment_ID__c": "ch_3Lum8rA8qYLe3nOe1WF3l4D3",
+  "Payment_Provider__c": "Stripe",
+  "Payment_Status__c": "Paid"
+}
