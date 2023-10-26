@@ -14,7 +14,7 @@ import scala.util.{Try, Success, Failure}
 case class CreateSingleContributionRecordRequestData(
     Amount__c: Double,
     Country_Code__c: String,
-    Country_Subdivision_Code__c: String,
+    Country_Subdivision_Code__c: Option[String],
     Currency__c: String,
     Email__c: String,
     Identity_ID__c: String,
@@ -22,7 +22,7 @@ case class CreateSingleContributionRecordRequestData(
     Payment_ID__c: String,
     Payment_Provider__c: String,
     Payment_Status__c: String,
-    Postal_Code__c: String,
+    Postal_Code__c: Option[String],
 )
 
 case class CreateSingleContributionRecordResponseData(
