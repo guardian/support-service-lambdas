@@ -1,8 +1,6 @@
-package com.gu.singleContributionSalesforceWrites.services.salesforce
+package com.gu.singleContributionSalesforceWrites.services
 
 import com.gu.singleContributionSalesforceWrites.models.{HandlerError, HttpRequestError}
-import com.gu.singleContributionSalesforceWrites.services._
-import com.gu.singleContributionSalesforceWrites.services.jsonDecoder.DecodeJson
 import com.gu.util.Logging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
@@ -95,7 +93,7 @@ object GetAccessToken extends Logging {
     } match {
       case Success(httpResponse) if httpResponse.is2xx => {
         logger.info("Auth access token successfully retrieved from Salesforce")
-        DecodeJson[GetAccessTokenResponseData](httpResponse.body)
+        JsonDecoder.decodeJson[GetAccessTokenResponseData](httpResponse.body)
       }
       case Success(httpResponse) => Left(HttpRequestError(httpResponse.body))
       case Failure(exception) => Left(HttpRequestError(exception.getMessage))

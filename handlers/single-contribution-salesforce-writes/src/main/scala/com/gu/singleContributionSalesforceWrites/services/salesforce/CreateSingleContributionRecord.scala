@@ -2,7 +2,7 @@ package com.gu.singleContributionSalesforceWrites.services.salesforce
 
 import com.gu.singleContributionSalesforceWrites.models.{HandlerError, HttpRequestError}
 import com.gu.singleContributionSalesforceWrites.handlers.PaymentApiMessageDetail
-import com.gu.singleContributionSalesforceWrites.services.jsonDecoder.DecodeJson
+import com.gu.singleContributionSalesforceWrites.services._
 import com.gu.util.Logging
 import io.circe.Decoder
 import io.circe.generic.auto.exportEncoder
@@ -89,7 +89,7 @@ object CreateSingleContributionRecord extends Logging {
     } match {
       case Success(httpResponse) if httpResponse.is2xx => {
         logger.info(s"Record successfully created / updated in Salesforce: ${httpResponse.body}")
-        DecodeJson[CreateSingleContributionRecordResponseData](httpResponse.body)
+        JsonDecoder.decodeJson[CreateSingleContributionRecordResponseData](httpResponse.body)
       }
       case Success(httpResponse) => Left(HttpRequestError(httpResponse.body))
       case Failure(exception) => Left(HttpRequestError(exception.getMessage))
