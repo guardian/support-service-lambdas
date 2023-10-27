@@ -1,13 +1,14 @@
 package com.gu.singleContributionSalesforceWrites.services.salesforce
 
-import com.gu.singleContributionSalesforceWrites.models.{HttpRequestError, HandlerError}
-import com.gu.singleContributionSalesforceWrites.services.awsSecretsManager.GetSecretValue
+import com.gu.singleContributionSalesforceWrites.models.{HandlerError, HttpRequestError}
+import com.gu.singleContributionSalesforceWrites.services._
 import com.gu.singleContributionSalesforceWrites.services.jsonDecoder.DecodeJson
 import com.gu.util.Logging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import scalaj.http.Http
-import scala.util.{Try, Success, Failure}
+
+import scala.util.{Failure, Success, Try}
 
 case class GetAccessTokenRequestData(
     grant_type: String,
@@ -27,20 +28,21 @@ case class GetAccessTokenResponseData(
 )
 
 case class SalesforceUser(
-  username: String,
-  password: String
+    username: String,
+    password: String,
 )
 
 case class SalesforceConnectedApp(
-  client_id: String,
-  client_secret: String
+    client_id: String,
+    client_secret: String,
 )
 
 object GetAccessToken extends Logging {
 
   implicit val salesforceUserDecoder: Decoder[SalesforceUser] = deriveDecoder[SalesforceUser]
   implicit val salesforceConnectedAppDecoder: Decoder[SalesforceConnectedApp] = deriveDecoder[SalesforceConnectedApp]
-  implicit val getAccessTokenResponseDataDecoder: Decoder[GetAccessTokenResponseData] = deriveDecoder[GetAccessTokenResponseData]
+  implicit val getAccessTokenResponseDataDecoder: Decoder[GetAccessTokenResponseData] =
+    deriveDecoder[GetAccessTokenResponseData]
 
   def apply(stage: String): Either[HandlerError, String] = {
     for {
@@ -52,14 +54,18 @@ object GetAccessToken extends Logging {
 
   private def getAuthCredentials(stage: String): Either[HandlerError, GetAccessTokenRequestData] = {
     for {
-      user <- GetSecretValue[SalesforceUser](s"${stage}/Salesforce/User/SingleContributionSalesforceWrites")
-      connectedApp <- GetSecretValue[SalesforceConnectedApp](s"${stage}/Salesforce/ConnectedApp/SingleContributionSalesforceWrites")
+      user <- SecretsManager.getSecretValue[SalesforceUser](
+        s"${stage}/Salesforce/User/SingleContributionSalesforceWrites",
+      )
+      connectedApp <- SecretsManager.getSecretValue[SalesforceConnectedApp](
+        s"${stage}/Salesforce/ConnectedApp/SingleContributionSalesforceWrites",
+      )
     } yield GetAccessTokenRequestData(
       grant_type = "password",
       client_id = connectedApp.client_id,
       client_secret = connectedApp.client_secret,
       username = user.username,
-      password = user.password
+      password = user.password,
     )
   }
 

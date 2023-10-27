@@ -29,7 +29,7 @@ case class CreateSingleContributionRecordResponseData(
     id: String,
     success: Boolean,
     created: Boolean,
-    errors: List[String]
+    errors: List[String],
 )
 
 object CreateSingleContributionRecord extends Logging {
@@ -50,7 +50,7 @@ object CreateSingleContributionRecord extends Logging {
 
   private def getEndpoint(stage: String, contributionId: String): String = {
     val domain = GetApiDomain(stage)
-    val path =  s"/services/data/v57.0/sobjects/Single_Contribution__c/Contribution_ID__c/${contributionId}"
+    val path = s"/services/data/v57.0/sobjects/Single_Contribution__c/Contribution_ID__c/${contributionId}"
     s"$domain$path"
   }
 
