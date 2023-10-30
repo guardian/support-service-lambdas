@@ -24,6 +24,11 @@ jobs:
       - name: Generate CFN templates from GuCDK
         run: bash ./script/cfn.sh
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: cfn-templates
+          path: ./cdk/cdk.out
+
   gu-cdk-build:
     needs: build-cfn-templates
     strategy:
@@ -56,18 +61,24 @@ jobs:
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
 
-      - name: Generate CFN templates from GuCDK
-        run: bash ./script/cfn.sh
-
-      - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v2
+      - uses: actions/download-artifact@v3
         with:
-          projectName: support-service-lambdas::${{ matrix.subproject }}
-          buildNumberOffset: 7000
-          configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
-          contentDirectories: |
-            ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
-              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
-            ${{ matrix.subproject }}:
-              - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
+          name: cfn-templates
+          path: ./cdk/cdk.out
+
+      - name: list cdk.out contents
+        run: ls -R
+        working-directory: ./cdk/cdk.out
+
+#      - name: Upload to Riff-Raff
+#        uses: guardian/actions-riff-raff@v2
+#        with:
+#          projectName: support-service-lambdas::${{ matrix.subproject }}
+#          buildNumberOffset: 7000
+#          configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
+#          contentDirectories: |
+#            ${{ matrix.subproject }}-cloudformation:
+#              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
+#              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
+#            ${{ matrix.subproject }}:
+#              - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
