@@ -14,25 +14,12 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
 
   val today = LocalDate.of(2019, 12, 1)
 
-  it should "serialise catalog without national delivery" in {
+  it should "serialise catalog" in {
 
     val expected = getResource("catalogWireTest.json")
 
     val wireCatalog = WireCatalog.fromCatalog(
       NewProductApi.catalog(fakePricesFor, stubGetFirstAvailableStartDate, today),
-      nationalDeliveryEnabled = false,
-    )
-
-    Json.prettyPrint(Json.toJson(wireCatalog)) shouldBe Json.prettyPrint(Json.parse(expected.get))
-  }
-
-  it should "serialise catalog with national delivery" in {
-
-    val expected = getResource("catalogWireTest-nationalDelivery.json")
-
-    val wireCatalog = WireCatalog.fromCatalog(
-      NewProductApi.catalog(fakePricesFor, stubGetFirstAvailableStartDate, today),
-      nationalDeliveryEnabled = true,
     )
 
     Json.prettyPrint(Json.toJson(wireCatalog)) shouldBe Json.prettyPrint(Json.parse(expected.get))

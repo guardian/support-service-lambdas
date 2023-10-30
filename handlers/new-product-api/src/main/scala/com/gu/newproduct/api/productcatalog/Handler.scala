@@ -36,9 +36,8 @@ object Handler extends Logging {
     getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
     startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOpOr422.withLogging("startDateFromProductType")
   } yield Operation.noHealthcheck { req: ApiGatewayRequest =>
-    val nationalDeliveryEnabled = Switches.nationalDeliveryEnabled(req)
     val catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, today).withLogging("catalog")
-    val wireCatalog = WireCatalog.fromCatalog(catalog, nationalDeliveryEnabled)
+    val wireCatalog = WireCatalog.fromCatalog(catalog)
     ApiGatewayResponse(body = wireCatalog, statusCode = "200")
   }
 
@@ -51,9 +50,4 @@ object Handler extends Logging {
     )
     println(result.map(_.steps(ApiGatewayRequest(None, None, None, None, None, None))))
   }
-}
-
-object Switches {
-  def nationalDeliveryEnabled(req: ApiGatewayRequest): Boolean =
-    req.queryStringParameters.getOrElse(Map.empty).get("nationalDelivery").contains("true")
 }

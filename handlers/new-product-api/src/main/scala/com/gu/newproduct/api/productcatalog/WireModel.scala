@@ -120,10 +120,7 @@ object WireModel {
   object WireCatalog {
     implicit val writes: OWrites[WireCatalog] = Json.writes[WireCatalog]
 
-    def fromCatalog(
-      catalog: Map[PlanId, Plan],
-      nationalDeliveryEnabled: Boolean,
-    ) = {
+    def fromCatalog(catalog: Map[PlanId, Plan]) = {
 
       def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
         val plan = catalog(planId)
@@ -194,7 +191,8 @@ object WireModel {
           guardianWeeklyDomestic,
           guardianWeeklyROW,
           digitalVoucher,
-        ) ++ (if (nationalDeliveryEnabled) List(nationalDelivery) else Nil)
+          nationalDelivery,
+        )
         unfiltered.filter(_.plans.nonEmpty)
       }
 
