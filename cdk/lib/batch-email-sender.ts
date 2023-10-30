@@ -10,7 +10,6 @@ import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {Runtime} from "aws-cdk-lib/aws-lambda";
 import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
-import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 
 export interface BatchEmailSenderProps extends GuStackProps {
     certificateId: string;
@@ -21,10 +20,6 @@ export interface BatchEmailSenderProps extends GuStackProps {
 export class BatchEmailSender extends GuStack {
     constructor(scope: App, id: string, props: BatchEmailSenderProps) {
         super(scope, id, props);
-        const yamlTemplateFilePath = `${__dirname}/../../handlers/batch-email-sender/cfn.yaml`;
-        new CfnInclude(this, "YamlTemplate", {
-            templateFile: yamlTemplateFilePath,
-        });
 
 
         // ---- Miscellaneous constants ---- //
