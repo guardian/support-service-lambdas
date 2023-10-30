@@ -997,6 +997,55 @@
       "enabledForDeliveryCountries": [
         "United Kingdom"
       ]
+    }, {
+      "label" : "National Delivery",
+      "plans" : [ {
+        "id" : "national_delivery_sixday",
+        "label" : "Sixday",
+        "startDateRules" : {
+          "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ],
+          "selectableWindow" : {
+            "startDate" : "2020-04-02",
+            "sizeInDays" : 28
+          }
+        },
+        "paymentPlans" : [ {
+          "currencyCode" : "GBP",
+          "description" : "GBP 71.01 every month"
+        } ],
+        "paymentPlan" : "GBP 71.01 every month"
+      }, {
+        "id" : "national_delivery_everyday",
+        "label" : "Everyday",
+        "startDateRules" : {
+          "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+          "selectableWindow" : {
+            "startDate" : "2020-04-01",
+            "sizeInDays" : 28
+          }
+        },
+        "paymentPlans" : [ {
+          "currencyCode" : "GBP",
+          "description" : "GBP 71.00 every month"
+        } ],
+        "paymentPlan" : "GBP 71.00 every month"
+      }, {
+        "id" : "national_delivery_weekend",
+        "label" : "Weekend",
+        "startDateRules" : {
+          "daysOfWeek" : [ "Saturday", "Sunday" ],
+          "selectableWindow" : {
+            "startDate" : "2020-04-03",
+            "sizeInDays" : 28
+          }
+        },
+        "paymentPlans" : [ {
+          "currencyCode" : "GBP",
+          "description" : "GBP 71.02 every month"
+        } ],
+        "paymentPlan" : "GBP 71.02 every month"
+      } ],
+      "enabledForDeliveryCountries" : [ "United Kingdom" ]
     }
   ]
 }
