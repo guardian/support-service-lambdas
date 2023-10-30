@@ -31,7 +31,7 @@ export class BatchEmailSender extends GuStack {
         const batchEmailSenderLambda = new GuLambdaFunction(this, "BatchEmailSenderLambda", {
             app,
             handler: "com.gu.batchemailsender.api.batchemail.Handler::apply",
-            functionName: `batch-email-sender-${this.stage}-CDK`,
+            functionName: `batch-email-sender-${this.stage}`,
             runtime: Runtime.JAVA_11,
             fileName: "batch-email-sender.jar",
             memorySize: 1536,
@@ -65,7 +65,7 @@ export class BatchEmailSender extends GuStack {
 
         // ---- Usage plan and API key ---- //
         const usagePlan = new UsagePlan(this, "BatchEmailSenderUsagePlan", {
-            name: `batch-email-sender-api-usage-plan-${this.stage}-CDK`,
+            name: `batch-email-sender-api-usage-plan-${this.stage}`,
             apiStages: [
                 {
                     api: batchEmailSenderApi.api,
@@ -75,12 +75,12 @@ export class BatchEmailSender extends GuStack {
         })
 
         const apiKey = new ApiKey(this, "BatchEmailSenderApiKey", {
-            apiKeyName: `batch-email-sender-api-key-${this.stage}-CDK`,
+            apiKeyName: `batch-email-sender-api-key-${this.stage}`,
             description: "Key required to call batch email sender API",
             enabled: true,
         })
 
-        new CfnUsagePlanKey(this, "BatchEmailSenderUsagePlanKey-CDK", {
+        new CfnUsagePlanKey(this, "BatchEmailSenderUsagePlanKey", {
             keyId: apiKey.keyId,
             keyType: "API_KEY",
             usagePlanId: usagePlan.usagePlanId,
