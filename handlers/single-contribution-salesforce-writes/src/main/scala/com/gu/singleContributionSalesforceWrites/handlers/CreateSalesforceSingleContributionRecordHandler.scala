@@ -2,9 +2,8 @@ package com.gu.singleContributionSalesforceWrites.handlers
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
-import com.gu.singleContributionSalesforceWrites.models.{AwsSecretsManagerError, JsonDecodeError, HttpRequestError}
-import com.gu.singleContributionSalesforceWrites.services.jsonDecoder.DecodeJson
-import com.gu.singleContributionSalesforceWrites.services.salesforce.{GetAccessToken, CreateSingleContributionRecord}
+import com.gu.singleContributionSalesforceWrites.models._
+import com.gu.singleContributionSalesforceWrites.services._
 import com.gu.util.Logging
 import io.circe.generic.auto.exportDecoder
 
@@ -36,7 +35,7 @@ object CreateSalesforceSingleContributionRecordHandler extends RequestHandler[SQ
         sqsEvent.getRecords.forEach { sqsRecord =>
           logger.info(s"Processing message: ${sqsRecord.getBody}")
 
-          DecodeJson[PaymentApiMessage](sqsRecord.getBody) match {
+          JsonDecoder.decodeJson[PaymentApiMessage](sqsRecord.getBody) match {
             case Right(message) => {
               processMessage(message.detail)
             }
@@ -53,8 +52,8 @@ object CreateSalesforceSingleContributionRecordHandler extends RequestHandler[SQ
     val stage = sys.env.getOrElse("STAGE", "CODE")
 
     val result = for {
-      accessToken <- GetAccessToken(stage)
-      response <- CreateSingleContributionRecord(stage, accessToken, contribution)
+      accessToken <- SalesforceCredentials.getAccessToken(stage)
+      response <- Salesforce.createSingleContributionRecord(stage, accessToken, contribution)
     } yield response
 
     result match {

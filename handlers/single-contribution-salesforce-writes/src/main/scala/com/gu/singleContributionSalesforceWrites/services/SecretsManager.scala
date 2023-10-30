@@ -1,18 +1,18 @@
-package com.gu.singleContributionSalesforceWrites.services.awsSecretsManager
+package com.gu.singleContributionSalesforceWrites.services
 
 import io.circe.Decoder
 import com.gu.singleContributionSalesforceWrites.models.{AwsSecretsManagerError, HandlerError}
-import com.gu.singleContributionSalesforceWrites.services.jsonDecoder.DecodeJson
 import scala.util.{Try, Success, Failure}
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
 
-object GetSecretValue {
-  def apply[T: Decoder](secretId: String): Either[HandlerError, T] = {
+object SecretsManager {
+
+  def getSecretValue[T: Decoder](secretId: String): Either[HandlerError, T] = {
     Try {
       val secretsClient = SecretsManagerClient.create()
       val jsonString = getJsonString(secretId, secretsClient)
-      DecodeJson[T](jsonString)
+      JsonDecoder.decodeJson[T](jsonString)
     } match {
       case Success(Right(data)) => Right(data)
       case Success(Left(jsonError)) => Left(jsonError)
