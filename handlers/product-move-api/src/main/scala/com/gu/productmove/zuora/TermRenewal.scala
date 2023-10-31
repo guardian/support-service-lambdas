@@ -128,5 +128,7 @@ given JsonEncoder[AmendTermLengthRequest] = DeriveJsonEncoder.gen[AmendTermLengt
 given JsonEncoder[Amendment] = DeriveJsonEncoder.gen[Amendment]
 given JsonEncoder[AmendmentRequest] = DeriveJsonEncoder.gen[AmendmentRequest]
 given JsonDecoder[AmendmentResult] = DeriveJsonDecoder.gen[AmendmentResult]
-given JsonDecoder[RenewalResponse] = DeriveJsonDecoder.gen[RenewalResponse]
+object RenewalResponse {
+  given JsonDecoder[RenewalResponse] = DeriveJsonDecoder.gen[RenewalResponse]
+}
 given JsonEncoder[RenewalRequest] = DeriveJsonEncoder.gen[RenewalRequest]

@@ -25,7 +25,7 @@ import com.gu.productmove.move.BuildPreviewResult
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
-import com.gu.productmove.zuora.model.{SubscriptionName, SubscriptionId}
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.{
   AddRatePlan,
   ChargeOverrides,
@@ -36,6 +36,7 @@ import com.gu.productmove.zuora.{
   GetSubscriptionLive,
   InvoiceItemAdjustment,
   RemoveRatePlan,
+  RenewalResponse,
   Subscribe,
   SubscribeLive,
   SubscriptionUpdate,
@@ -105,6 +106,7 @@ object RecurringContributionToSupporterPlus {
     GetSubscription
       with SubscriptionUpdate
       with TermRenewal
+      with GetSubscription
       with GetInvoiceItems
       with InvoiceItemAdjustment
       with GetAccount
@@ -336,6 +338,7 @@ object RecurringContributionToSupporterPlus {
     GetAccount
       with SubscriptionUpdate
       with TermRenewal
+      with GetSubscription
       with GetInvoiceItems
       with InvoiceItemAdjustment
       with SQS
@@ -355,10 +358,6 @@ object RecurringContributionToSupporterPlus {
       )
       stage <- ZIO.service[Stage]
       accountFuture <- GetAccount.get(subscription.accountNumber).fork
-
-      // Start a new term when we do the switch to avoid issues with billing dates
-
-      // _ <- TermRenewal.update(SubscriptionId(subscription.id), subscription.termStartDate)
 
       /*
         If the amount payable today is less than 0.50, we don't want to collect payment. Stripe has a minimum charge of 50 cents.
@@ -390,6 +389,9 @@ object RecurringContributionToSupporterPlus {
             preview = Some(false),
           )
       }
+
+      // Start a new term when we do the switch to avoid issues with billing dates
+      _ <- TermRenewal.update[RenewalResponse](subscriptionName)
 
       updateResponse <- SubscriptionUpdate
         .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
