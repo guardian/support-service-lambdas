@@ -98,8 +98,8 @@ object HandlerSpec extends ZIOSpecDefault {
       (subscriptionName, expectedRequestBodyPreview2)
     val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse2)
     val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
-    val termRenewalInputsShouldBe: (SubscriptionId, LocalDate) =
-      (SubscriptionId("subscription_id"), LocalDate.now)
+    val termRenewalInputsShouldBe: SubscriptionName =
+      SubscriptionName("subscription_name")
     val termRenewalResponse = AmendmentResponse(List(AmendmentResult(Nil, true)))
     val termRenewalStubs = Map(termRenewalInputsShouldBe -> termRenewalResponse)
     val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)

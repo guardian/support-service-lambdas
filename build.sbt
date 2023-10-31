@@ -306,7 +306,7 @@ def lambdaProject(
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
     .configs(EffectsTest, HealthCheckTest)
-    .settings(scalaSettings, testSettings)
+    .settings(scalaSettings, testSettings, scalafmtSettings)
     .settings(
       name := projectName,
       description := projectDescription,

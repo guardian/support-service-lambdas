@@ -6,32 +6,31 @@ import com.gu.productmove.GuStageLive
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.{GetSubscription, SubscriptionUpdatePreviewResponse}
-import com.gu.productmove.zuora.model.SubscriptionId
+import com.gu.productmove.zuora.model.SubscriptionName
 import zio.json.JsonDecoder
 import zio.{IO, ZIO}
 
 import java.time.LocalDate
 
 class MockTermRenewal(
-    update: Map[(SubscriptionId, LocalDate), AmendmentResponse],
+    update: Map[(SubscriptionName), AmendmentResponse],
 ) extends TermRenewal {
 
-  private var mutableStore: List[(SubscriptionId, LocalDate)] =
+  private var mutableStore: List[(SubscriptionName)] =
     Nil // we need to remember the side effects
 
   def requests = mutableStore.reverse
 
   override def update[R: JsonDecoder](
-      subscriptionId: SubscriptionId,
-      termStartDate: LocalDate,
+      subscriptionName: SubscriptionName,
   ): ZIO[Any, ErrorResponse, R] = {
-    mutableStore = (subscriptionId, termStartDate) :: mutableStore
+    mutableStore = (subscriptionName) :: mutableStore
 
     ZIO.succeed(AmendmentResponse(List(AmendmentResult(Nil, true))).asInstanceOf[R])
   }
 }
 
 object MockTermRenewal {
-  def requests: ZIO[MockTermRenewal, Nothing, List[(SubscriptionId, LocalDate)]] =
+  def requests: ZIO[MockTermRenewal, Nothing, List[(SubscriptionName)]] =
     ZIO.serviceWith[MockTermRenewal](_.requests)
 }

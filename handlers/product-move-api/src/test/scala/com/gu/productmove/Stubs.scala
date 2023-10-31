@@ -64,6 +64,7 @@ val getSubscriptionResponse = GetSubscriptionResponse(
   "A-S00339056",
   "zuoraAccountId",
   AccountNumber("accountNumber"),
+  termStartDate = LocalDate.of(2023, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",
@@ -116,6 +117,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
   id = "8ad0823f841cf4e601841e61f6aa8923",
   accountNumber = AccountNumber("A00433231"),
   accountId = "8ad0823f841cf4e601841e61f6aads87",
+  termStartDate = LocalDate.of(2023, 10, 2),
   ratePlans = List(
     RatePlan(
       productName = "Contributor",
@@ -166,6 +168,7 @@ val getSubscriptionResponse3 = GetSubscriptionResponse(
   "A-S00339056",
   "zuoraAccountId",
   AccountNumber("accountNumber"),
+  termStartDate = LocalDate.of(2023, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",
@@ -179,9 +182,10 @@ val getSubscriptionResponse3 = GetSubscriptionResponse(
 )
 
 val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
-  "subscriptionName",
-  "zuoraAccountId",
-  AccountNumber("accountNumber"),
+  id = "subscriptionName",
+  accountId = "zuoraAccountId",
+  accountNumber = AccountNumber("accountNumber"),
+  termStartDate = LocalDate.of(2023, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "R1",
