@@ -32,7 +32,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 trait TermRenewal:
-  def update[R: JsonDecoder](
+  def startNewTermFromToday[R: JsonDecoder](
       subscriptionName: SubscriptionName,
   ): ZIO[Stage with GetSubscription, ErrorResponse, R]
 
@@ -52,7 +52,7 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
   Then renew the subscription using https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription/
    */
 
-  override def update[R: JsonDecoder](
+  override def startNewTermFromToday[R: JsonDecoder](
       subscriptionName: SubscriptionName,
   ): ZIO[Stage with GetSubscription, ErrorResponse, R] = for {
     subscription <- GetSubscription.get(subscriptionName)
@@ -101,10 +101,10 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
   }
 
 object TermRenewal {
-  def update[R: JsonDecoder](
+  def startNewTermFromToday[R: JsonDecoder](
       subscriptionName: SubscriptionName,
   ): ZIO[TermRenewal with Stage with GetSubscription, ErrorResponse, R] =
-    ZIO.serviceWithZIO[TermRenewal](_.update[R](subscriptionName))
+    ZIO.serviceWithZIO[TermRenewal](_.startNewTermFromToday[R](subscriptionName))
 }
 case class AmendmentRequest(Amendments: List[Amendment])
 case class Amendment(

@@ -13,10 +13,10 @@ import java.time.{LocalDate, ZoneOffset}
 object TermRenewalSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("TermRenewal")(
-      test("Run TermRenewal locally") {
+      test("Run startNewTermFromToday locally") {
         for {
           _ <- TermRenewal
-            .update[RenewalResponse](SubscriptionName("A-S00688596"))
+            .startNewTermFromToday[RenewalResponse](SubscriptionName("A-S00688596"))
             .provide(
               ZuoraClientLive.layer,
               SttpClientLive.layer,

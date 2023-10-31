@@ -391,7 +391,7 @@ object RecurringContributionToSupporterPlus {
       }
 
       // Start a new term when we do the switch to avoid issues with billing dates
-      _ <- TermRenewal.update[RenewalResponse](subscriptionName)
+      _ <- TermRenewal.startNewTermFromToday[RenewalResponse](subscriptionName)
 
       updateResponse <- SubscriptionUpdate
         .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
