@@ -16,16 +16,16 @@ object TypeConvert {
 
   implicit class TypeConvertClientOp[A](clientOp: ClientFailableOp[A]) {
 
-    def failureHandler(clientFailure: ClientFailure) = clientFailure match {
+    private def failureHandler(action: String, clientFailure: ClientFailure) = clientFailure match {
       case PaymentError(_) => ApiGatewayResponse.paymentRequired
-      case _ => ApiGatewayResponse.internalServerError(s"unknown error: ${clientFailure.message}")
+      case _ => ApiGatewayResponse.internalServerError(s"unknown error during: $action: ${clientFailure.message}")
     }
 
-    def toApiGatewayOp(action: String): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp(failureHandler(_))
+    def toApiGatewayOp(action: String): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp(failureHandler(action, _))
   }
 
   implicit class TypeConvertClientOpAsync[A](clientOp: ClientFailableOp[A]) {
-    def toAsyncApiGatewayOp(action: String) = {
+    def toAsyncApiGatewayOp(action: String): AsyncApiGatewayOp[A] = {
       val apiGatewayOp = Future.successful(clientOp.toApiGatewayOp(action))
       AsyncApiGatewayOp(apiGatewayOp)
     }
