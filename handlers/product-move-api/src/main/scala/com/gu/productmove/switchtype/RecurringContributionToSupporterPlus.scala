@@ -390,9 +390,6 @@ object RecurringContributionToSupporterPlus {
           )
       }
 
-      // Start a new term when we do the switch to avoid issues with billing dates
-      _ <- TermRenewal.startNewTermFromToday[RenewalResponse](subscriptionName)
-
       updateResponse <- SubscriptionUpdate
         .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
 
@@ -405,6 +402,9 @@ object RecurringContributionToSupporterPlus {
         subscriptionName,
         amountPayableToday,
       )
+
+      // Start a new term when we do the switch to avoid issues with billing dates
+      _ <- TermRenewal.startNewTermFromToday[RenewalResponse](subscriptionName)
 
       account <- accountFuture.join
 
