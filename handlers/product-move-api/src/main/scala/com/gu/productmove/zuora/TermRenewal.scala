@@ -40,16 +40,21 @@ object TermRenewalLive:
   val layer: URLayer[ZuoraGet, TermRenewal] = ZLayer.fromFunction(TermRenewalLive(_))
 
 private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
-
   /*
   Start a new term for this subscription from today.
   This is to avoid problems with charges not aligning correctly with the term and resulting in unpredictable
-  billing dates and amounts
+  billing dates and amounts.
 
-  To do this we need to adjust the current term length so that it ends today using an amend call
+  To do this we need to adjust the current term length so that it ends today using an amend call:
   https://www.zuora.com/developer/api-references/older-api/operation/Action_POSTamend/
 
   Then renew the subscription using https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription/
+
+  During this process two invoices will be generated - a negative one for the full amount which represents the fact
+  that we have reduced the current term to zero days from today's payment and then a positive one for the full amount
+  which covers the new 12 month term.
+
+  In order to balance these out, we can use the `applyCreditBalance` parameter in the renewal request.
    */
 
   override def startNewTermFromToday[R: JsonDecoder](
@@ -124,7 +129,7 @@ case class AmendmentResponse(results: List[AmendmentResult])
 case class AmendmentResult(AmendmentIds: List[String], Success: Boolean)
 case class RenewalRequest(
     contractEffectiveDate: LocalDate,
-    applyCreditBalance: Boolean = true,
+    applyCreditBalance: Boolean = true, // When we shorten
     runBilling: Boolean = true,
 )
 case class RenewalResponse(success: Option[Boolean])
