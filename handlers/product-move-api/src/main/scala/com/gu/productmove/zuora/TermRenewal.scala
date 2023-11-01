@@ -122,7 +122,7 @@ case class AmendTermLengthRequest(
 )
 case class AmendmentResponse(results: List[AmendmentResult])
 case class AmendmentResult(AmendmentIds: List[String], Success: Boolean)
-case class RenewalRequest(contractEffectiveDate: LocalDate)
+case class RenewalRequest(contractEffectiveDate: LocalDate, collect: Boolean = true)
 case class RenewalResponse(success: Option[Boolean])
 given JsonEncoder[AmendTermLengthRequest] = DeriveJsonEncoder.gen[AmendTermLengthRequest]
 given JsonEncoder[Amendment] = DeriveJsonEncoder.gen[Amendment]
