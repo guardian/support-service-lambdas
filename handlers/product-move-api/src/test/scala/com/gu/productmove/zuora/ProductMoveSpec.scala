@@ -20,8 +20,14 @@ object ProductMoveSpec extends ZIOSpecDefault {
         for {
           _ <- TestClock.setTime(Instant.now())
           _ <- RecurringContributionToSupporterPlus(
-            SubscriptionName("A-S00487531"),
-            ExpectedInput(20, false, false, None, None),
+            SubscriptionName("A-S00660620"),
+            ExpectedInput(
+              price = 120,
+              preview = false,
+              checkChargeAmountBeforeUpdate = true,
+              csrUserId = None,
+              caseId = None,
+            ),
           )
             .provide(
               GetSubscriptionLive.layer,

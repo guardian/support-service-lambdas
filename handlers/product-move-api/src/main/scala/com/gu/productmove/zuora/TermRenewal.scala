@@ -124,7 +124,7 @@ case class AmendmentResponse(results: List[AmendmentResult])
 case class AmendmentResult(AmendmentIds: List[String], Success: Boolean)
 case class RenewalRequest(
     contractEffectiveDate: LocalDate,
-    collect: Boolean = true,
+    applyCreditBalance: Boolean = true,
     runBilling: Boolean = true,
 )
 case class RenewalResponse(success: Option[Boolean])
