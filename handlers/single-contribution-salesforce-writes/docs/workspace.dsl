@@ -5,7 +5,7 @@ workspace {
         
         group "Guardian Organisation" {
             csr = person "Customer Service Staff" "Customer service staff within the Guardian."
-            developer = person "Guardian Developer" "Software Developer within the Guardian."
+            developer = person "Guardian Developer" "Software Developer within the Guardian Supporter Revenue Engine Team."
             internetCheckoutSystem = softwareSystem "Internet Checkout System" "Allows readers to view contribution options and make payments."
 
             singleContributionSalesforceWrites = softwareSystem "Asynchronous Processing System" "Processes single contributions made via payment-api and creates records in Salesforce." "My Software System" {

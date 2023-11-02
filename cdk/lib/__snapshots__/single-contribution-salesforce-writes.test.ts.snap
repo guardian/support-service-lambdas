@@ -6,6 +6,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -79,6 +80,66 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "singlecontributionsalesforcewritesalarm02E37F08": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":",
+                {
+                  "Fn::GetAtt": [
+                    "singlecontributionsalesforcewritestopicD1E1FC97",
+                    "TopicName",
+                  ],
+                },
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "Impact: customer service representative cannot see single contribution in Salesforce. Fix: check logs for lambda ",
+              {
+                "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
+              },
+            ],
+          ],
+        },
+        "AlarmName": "CODE: Failed to sync single contribution to Salesforce",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadletterssinglecontributionsalesforcewritesqueueA3CB7F4A",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 24,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 0,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "singlecontributionsalesforcewriteslambda1B9830FE": {
       "DependsOn": [
@@ -457,6 +518,40 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
       },
       "Type": "AWS::SQS::QueuePolicy",
     },
+    "singlecontributionsalesforcewritestopicD1E1FC97": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "TopicName": "single-contribution-salesforce-writes-topic-CODE",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "singlecontributionsalesforcewritestopicsupporterrevenueengineguardiancouk88BB94BA": {
+      "Properties": {
+        "Endpoint": "supporter.revenue.engine@guardian.co.uk",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "singlecontributionsalesforcewritestopicD1E1FC97",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
   },
 }
 `;
@@ -467,6 +562,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -540,6 +636,66 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "singlecontributionsalesforcewritesalarm02E37F08": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":",
+                {
+                  "Fn::GetAtt": [
+                    "singlecontributionsalesforcewritestopicD1E1FC97",
+                    "TopicName",
+                  ],
+                },
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "Impact: customer service representative cannot see single contribution in Salesforce. Fix: check logs for lambda ",
+              {
+                "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
+              },
+            ],
+          ],
+        },
+        "AlarmName": "PROD: Failed to sync single contribution to Salesforce",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadletterssinglecontributionsalesforcewritesqueueA3CB7F4A",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 24,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 0,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "singlecontributionsalesforcewriteslambda1B9830FE": {
       "DependsOn": [
@@ -917,6 +1073,40 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
         ],
       },
       "Type": "AWS::SQS::QueuePolicy",
+    },
+    "singlecontributionsalesforcewritestopicD1E1FC97": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TopicName": "single-contribution-salesforce-writes-topic-PROD",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "singlecontributionsalesforcewritestopicsupporterrevenueengineguardiancouk88BB94BA": {
+      "Properties": {
+        "Endpoint": "supporter.revenue.engine@guardian.co.uk",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "singlecontributionsalesforcewritestopicD1E1FC97",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
   },
 }
