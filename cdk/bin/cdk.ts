@@ -9,11 +9,12 @@ import { APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME, SingleContr
 const app = new App();
 const hostedZoneId = "Z1E4V12LQGXFEC"
 const certificateId = "c1efc564-9ff8-4a03-be48-d1990a3d79d2"
+const membershipApisDomain = "membership.guardianapis.com"
 
 export const codeProps: NewProductApiProps = {
     stack: "membership",
     stage: "CODE",
-    domainName: "new-product-api-code.membership.guardianapis.com",
+    domainName: `new-product-api-code.${membershipApisDomain}`,
     hostedZoneId,
     certificateId,
     apiGatewayTargetDomainName: "d-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com",
@@ -23,7 +24,7 @@ export const codeProps: NewProductApiProps = {
 export const prodProps: NewProductApiProps = {
     stack: "membership",
     stage: "PROD",
-    domainName: "new-product-api-prod.membership.guardianapis.com",
+    domainName: `new-product-api-prod.${membershipApisDomain}`,
     hostedZoneId,
     certificateId,
     apiGatewayTargetDomainName: "d-yyh9pmqphi.execute-api.eu-west-1.amazonaws.com",
@@ -32,14 +33,14 @@ export const prodProps: NewProductApiProps = {
 };
 
 new BatchEmailSender(app, "batch-email-sender-CODE", {
-    domainName: "batch-email-sender-code.membership.guardianapis.com",
+    domainName: `batch-email-sender-code.${membershipApisDomain}`,
     hostedZoneId,
     certificateId,
     stack: "membership",
     stage: "CODE"
 });
 new BatchEmailSender(app, "batch-email-sender-PROD", {
-    domainName: "batch-email-sender-prod.membership.guardianapis.com",
+    domainName: `batch-email-sender-prod.${membershipApisDomain}`,
     hostedZoneId,
     certificateId,
     stack: "membership",
@@ -49,14 +50,14 @@ new BatchEmailSender(app, "batch-email-sender-PROD", {
 new CancellationSfCasesApi(app, "cancellation-sf-cases-api-CODE", {
     stack: "membership",
     stage: "CODE",
-    domainName: "cancellation-sf-cases-api-code.guardianapis.com",
+    domainName: `cancellation-sf-cases-api-code.${membershipApisDomain}`,
     certificateId,
     hostedZoneId,
 });
 new CancellationSfCasesApi(app, "cancellation-sf-cases-api-PROD", {
     stack: "membership",
     stage: "PROD",
-    domainName: "cancellation-sf-cases-api-prod.guardianapis.com",
+    domainName: `cancellation-sf-cases-api-prod.${membershipApisDomain}`,
     certificateId,
     hostedZoneId,
 });
