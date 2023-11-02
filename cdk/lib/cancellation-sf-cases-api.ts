@@ -36,7 +36,7 @@ export class CancellationSfCasesApi extends GuStack {
         const cancellationSFCasesApiLambda = new GuLambdaFunction(this, "CancellationSFCasesApiLambda-CDK", {
             app,
             handler: "com.gu.cancellation.sf_cases.Handler::handle",
-            functionName: `cancellation-sf-cases-api-${this.stage}`,
+            functionName: `cancellation-sf-cases-api-CDK-${this.stage}`,
             runtime: Runtime.JAVA_11,
             fileName: "cancellation-sf-cases-api.jar",
             memorySize: 1536,
