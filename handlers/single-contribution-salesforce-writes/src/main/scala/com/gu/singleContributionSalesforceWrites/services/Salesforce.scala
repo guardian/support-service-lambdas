@@ -17,7 +17,7 @@ case class CreateSingleContributionRecordRequestData(
     Country_Subdivision_Code__c: Option[String],
     Currency__c: String,
     Email__c: String,
-    Identity_ID__c: String,
+    Identity_ID__c: Option[String],
     Payment_Date__c: String,
     Payment_ID__c: String,
     Payment_Provider__c: String,
