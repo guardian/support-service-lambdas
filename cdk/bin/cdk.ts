@@ -4,6 +4,7 @@ import { BatchEmailSender } from "../lib/batch-email-sender";
 import type { NewProductApiProps } from "../lib/new-product-api";
 import { NewProductApi } from "../lib/new-product-api";
 import { APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME, SingleContributionSalesforceWrites } from "../lib/single-contribution-salesforce-writes";
+import {CancellationSfCasesApi} from "../lib/cancellation-sf-cases-api";
 
 const app = new App();
 
@@ -17,7 +18,6 @@ export const codeProps: NewProductApiProps = {
     zuoraCatalogLocation: "arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-UAT/catalog.json",
     fulfilmentDateCalculatorS3Resource: "arn:aws:s3:::fulfilment-date-calculator-code/*"
 };
-
 export const prodProps: NewProductApiProps = {
     stack: "membership",
     stage: "PROD",
@@ -44,6 +44,8 @@ new BatchEmailSender(app, "batch-email-sender-PROD", {
     stage: "PROD"
 });
 
+new CancellationSfCasesApi(app, "cancellation-sf-cases-api-CODE", {stack: "membership", stage: "CODE"});
+new CancellationSfCasesApi(app, "cancellation-sf-cases-api-PROD", {stack: "membership", stage: "PROD"});
 new NewProductApi(app, "new-product-api-CODE", codeProps);
 new NewProductApi(app, "new-product-api-PROD", prodProps);
 new SingleContributionSalesforceWrites(app, `${SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME}-CODE`, {stack: "membership", stage: "CODE"})

@@ -6,18 +6,20 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  cancellation-sf-cases-api-cloudformation:
     type: cloud-formation
     app: cancellation-sf-cases-api
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: cancellation-sf-cases-api-CODE.template.json
+        PROD: cancellation-sf-cases-api-PROD.template.json
 
   cancellation-sf-cases-api:
     type: aws-lambda
     parameters:
       fileName: cancellation-sf-cases-api.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - cancellation-sf-cases-api-
-    dependencies: [cfn]
+    dependencies: [cancellation-sf-cases-api-cloudformation]
