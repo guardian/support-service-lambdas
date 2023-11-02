@@ -33,7 +33,7 @@ export class CancellationSfCasesApi extends GuStack {
 
 
         // ---- API-triggered lambda functions ---- //
-        const cancellationSFCasesApiLambda = new GuLambdaFunction(this, "CancellationSFCasesApiLambda", {
+        const cancellationSFCasesApiLambda = new GuLambdaFunction(this, "CancellationSFCasesApiLambda-CDK", {
             app,
             handler: "com.gu.cancellation.sf_cases.Handler::handle",
             functionName: `cancellation-sf-cases-api-${this.stage}`,
@@ -68,8 +68,8 @@ export class CancellationSfCasesApi extends GuStack {
 
 
         // ---- Usage plan and API key ---- //
-        const cancellationSFCasesApiUsagePlan = new UsagePlan(this, "CancellationSFCasesApiUsagePlan", {
-            name: `cancellation-sf-cases-api-${this.stage}`,
+        const cancellationSFCasesApiUsagePlan = new UsagePlan(this, "CancellationSFCasesApiUsagePlan-CDK", {
+            name: `cancellation-sf-cases-api-${this.stage}-CDK`,
             apiStages: [
                 {
                     api: cancellationSFCasesApi.api,
@@ -78,13 +78,13 @@ export class CancellationSfCasesApi extends GuStack {
             ]
         })
 
-        const cancellationSFCasesApiKey = new ApiKey(this, "CancellationSFCasesApiKey", {
-            apiKeyName: `cancellation-sf-cases-api-key-${this.stage}`,
+        const cancellationSFCasesApiKey = new ApiKey(this, "CancellationSFCasesApiKey-CDK", {
+            apiKeyName: `cancellation-sf-cases-api-key-${this.stage}-CDK`,
             description: "Used by manage-frontend",
             enabled: true,
         })
 
-        new CfnUsagePlanKey(this, "CancellationSFCasesApiUsagePlanKey", {
+        new CfnUsagePlanKey(this, "CancellationSFCasesApiUsagePlanKey-CDK", {
             keyId: cancellationSFCasesApiKey.keyId,
             keyType: "API_KEY",
             usagePlanId: cancellationSFCasesApiUsagePlan.usagePlanId,
@@ -92,9 +92,9 @@ export class CancellationSfCasesApi extends GuStack {
 
 
         // ---- Alarms ---- //
-        new GuAlarm(this, '5xxApiAlarm', {
+        new GuAlarm(this, 'Api5xxAlarm-CDK', {
             app,
-            alarmName: `5XX from cancellation-sf-cases-api-${this.stage}`,
+            alarmName: `5XX from cancellation-sf-cases-api-${this.stage}-CDK`,
             evaluationPeriods: 1,
             threshold: 1,
             actionsEnabled: isProd,
@@ -115,7 +115,7 @@ export class CancellationSfCasesApi extends GuStack {
         // ---- DNS ---- //
         const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
 
-        const cfnDomainName = new CfnDomainName(this, "DomainName", {
+        const cfnDomainName = new CfnDomainName(this, "DomainName-CDK", {
             domainName: props.domainName,
             regionalCertificateArn: certificateArn,
             endpointConfiguration: {
@@ -123,13 +123,13 @@ export class CancellationSfCasesApi extends GuStack {
             }
         });
 
-        new CfnBasePathMapping(this, "BasePathMapping", {
+        new CfnBasePathMapping(this, "BasePathMapping-CDK", {
             domainName: cfnDomainName.ref,
             restApiId: cancellationSFCasesApi.api.restApiId,
             stage: cancellationSFCasesApi.api.deploymentStage.stageName,
         });
 
-        new CfnRecordSet(this, "DNSRecord", {
+        new CfnRecordSet(this, "DNSRecord-CDK", {
             name: props.domainName,
             type: "CNAME",
             hostedZoneId: props.hostedZoneId,
@@ -141,7 +141,7 @@ export class CancellationSfCasesApi extends GuStack {
 
 
         // ---- Apply policies ---- //
-        const lambdaPolicy: Policy = new Policy(this, "lambda-policy", {
+        const lambdaPolicy: Policy = new Policy(this, "LambdaPolicy-CDK", {
             statements: [
                 new PolicyStatement({
                     effect: Effect.ALLOW,
@@ -158,7 +158,7 @@ export class CancellationSfCasesApi extends GuStack {
             ],
         })
 
-        const readPrivateCredentials: Policy = new Policy(this, "read-private-credentials", {
+        const readPrivateCredentials: Policy = new Policy(this, "ReadPrivateCredentials-CDK", {
             statements: [
                 new PolicyStatement({
                     effect: Effect.ALLOW,
