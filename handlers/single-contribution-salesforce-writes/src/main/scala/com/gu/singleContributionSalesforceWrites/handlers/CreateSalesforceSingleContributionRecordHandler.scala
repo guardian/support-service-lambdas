@@ -13,7 +13,7 @@ case class PaymentApiMessageDetail(
     country: String,
     currency: String,
     eventTimeStamp: String,
-    identityId: String,
+    identityId: Option[String],
     paymentId: String,
     paymentProvider: String,
     postalCode: Option[String],
