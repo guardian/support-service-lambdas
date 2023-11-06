@@ -87,7 +87,6 @@ jobs:
           - zuora-callout-apis
           - zuora-datalake-export
           - zuora-rer
-          - zuora-retention
           - zuora-sar
     runs-on: ubuntu-latest
     permissions:
