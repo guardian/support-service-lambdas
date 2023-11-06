@@ -1,12 +1,16 @@
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
+import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { EventBus, Match, Rule } from 'aws-cdk-lib/aws-events';
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 
 export const APP_NAME = 'single-contribution-salesforce-writes';
@@ -87,5 +91,27 @@ export class SingleContributionSalesforceWrites extends GuStack {
 		});
 
 		lambda.addToRolePolicy(getSecretValuePolicyStatement);
+
+		const snsTopic = new Topic(this, `${APP_NAME}-topic`, {
+			topicName: `${APP_NAME}-topic-${props.stage}`,
+		});
+
+		snsTopic.addSubscription(
+			new EmailSubscription('supporter.revenue.engine@guardian.co.uk'),
+		);
+
+		new GuAlarm(this, `${APP_NAME}-alarm`, {
+			app: APP_NAME,
+			snsTopicName: snsTopic.topicName,
+			alarmName: `${this.stage}: Failed to sync single contribution to Salesforce`,
+			alarmDescription: `Impact: customer service representative cannot see single contribution in Salesforce. Fix: check logs for lambda ${lambda.functionName}`,
+			metric: deadLetterQueue
+				.metric('ApproximateNumberOfMessagesVisible')
+				.with({ statistic: 'Sum', period: Duration.hours(1) }),
+			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+			threshold: 0,
+			evaluationPeriods: 24,
+			actionsEnabled: this.stage === 'PROD',
+		});
 	}
 }
