@@ -87,17 +87,27 @@ object ZuoraRestBody {
   // the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success property, and instead returns `size: "0"` if nothing was found
   // Zuora either returns a "success" property with a lower or upper case starting letter, hence the need for SuccessCheckLowercase and SuccessCheckCapitalised enums
   enum ZuoraSuccessCheck:
-    case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised, None
+    case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised, SuccessCheckResultsArray, None
 
   case class Reason(
       code: Int,
       message: String,
   )
   given JsonDecoder[Reason] = DeriveJsonDecoder.gen
+  given JsonDecoder[ZuoraResultsArrayItem] = DeriveJsonDecoder.gen
 
-  case class ZuoraSuccessCapitalised(Success: Boolean, reasons: Option[List[Reason]])
-  case class ZuoraSuccessLowercase(success: Boolean, reasons: Option[List[Reason]])
-  case class ZuoraSuccessSize(size: Option[Int])
+  sealed trait ZuoraSuccessCheckResponse
+  case class ZuoraSuccessCapitalised(Success: Boolean, reasons: Option[List[Reason]]) extends ZuoraSuccessCheckResponse
+  case class ZuoraSuccessLowercase(success: Boolean, reasons: Option[List[Reason]]) extends ZuoraSuccessCheckResponse
+  case class ZuoraSuccessSize(size: Option[Int]) extends ZuoraSuccessCheckResponse
+  case class ZuoraResultsArray(results: List[ZuoraResultsArrayItem]) extends ZuoraSuccessCheckResponse
+  case class ZuoraResultsArrayItem(Success: Boolean)
+
+  def attemptDecode[A <: ZuoraSuccessCheckResponse](body: String) = DeriveJsonDecoder
+    .gen[A]
+    .decodeJson(body)
+    .left
+    .map(InternalServerError.apply)
 
   def parseIfSuccessful[A: JsonDecoder](
       body: String,
@@ -106,22 +116,14 @@ object ZuoraRestBody {
     val isSuccessful: Either[ErrorResponse, Unit] = zuoraSuccessCheck match {
       case ZuoraSuccessCheck.SuccessCheckSize =>
         for {
-          zuoraResponse <- DeriveJsonDecoder
-            .gen[ZuoraSuccessSize]
-            .decodeJson(body)
-            .left
-            .map(InternalServerError.apply)
+          zuoraResponse <- attemptDecode[ZuoraSuccessSize](body)
           succeeded = zuoraResponse.size.isEmpty // size field only exists if it's not found.
           isSuccessful <- if (succeeded) Right(()) else Left(InternalServerError(s"size = 0, body: $body"))
         } yield ()
 
       case ZuoraSuccessCheck.SuccessCheckLowercase =>
         for {
-          zuoraResponse <- DeriveJsonDecoder
-            .gen[ZuoraSuccessLowercase]
-            .decodeJson(body)
-            .left
-            .map(InternalServerError.apply)
+          zuoraResponse <- attemptDecode[ZuoraSuccessLowercase](body)
           _ <-
             if (zuoraResponse.success) Right(())
             else
@@ -136,11 +138,7 @@ object ZuoraRestBody {
 
       case ZuoraSuccessCheck.SuccessCheckCapitalised =>
         for {
-          zuoraResponse <- DeriveJsonDecoder
-            .gen[ZuoraSuccessCapitalised]
-            .decodeJson(body)
-            .left
-            .map(InternalServerError.apply)
+          zuoraResponse <- attemptDecode[ZuoraSuccessCapitalised](body)
           isSuccessful <-
             if (zuoraResponse.Success) Right(())
             else
@@ -152,6 +150,17 @@ object ZuoraRestBody {
                 case None => Left(InternalServerError(s"success = false, body: $body"))
               }
         } yield ()
+
+      case ZuoraSuccessCheck.SuccessCheckResultsArray =>
+        for {
+          zuoraResponse <- attemptDecode[ZuoraResultsArray](body)
+          isSuccessful <-
+            if (zuoraResponse.results.forall(_.Success)) Right(())
+            else
+              Left(InternalServerError(s"success = false, body: $body"))
+
+        } yield ()
+
       case ZuoraSuccessCheck.None => Right(())
     }
 

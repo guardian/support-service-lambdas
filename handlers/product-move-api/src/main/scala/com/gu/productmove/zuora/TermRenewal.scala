@@ -90,7 +90,7 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
     zuoraGet.put[AmendTermLengthRequest, R](
       relativeUrl = uri"action/amend",
       input = requestBody,
-      zuoraSuccessCheck = ZuoraSuccessCheck.None,
+      zuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckResultsArray,
     )
   }
 
