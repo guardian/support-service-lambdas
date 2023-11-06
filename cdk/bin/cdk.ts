@@ -50,16 +50,10 @@ new BatchEmailSender(app, "batch-email-sender-PROD", {
 new CancellationSfCasesApi(app, "cancellation-sf-cases-api-CODE", {
     stack: "membership",
     stage: "CODE",
-    domainName: `cancellation-sf-cases-api-code.${membershipApisDomain}`,
-    certificateId,
-    hostedZoneId,
 });
 new CancellationSfCasesApi(app, "cancellation-sf-cases-api-PROD", {
     stack: "membership",
     stage: "PROD",
-    domainName: `cancellation-sf-cases-api-prod.${membershipApisDomain}`,
-    certificateId,
-    hostedZoneId,
 });
 
 new NewProductApi(app, "new-product-api-CODE", codeProps);
