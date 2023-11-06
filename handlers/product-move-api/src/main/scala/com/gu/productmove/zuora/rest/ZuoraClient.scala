@@ -94,20 +94,21 @@ object ZuoraRestBody {
       message: String,
   )
   given JsonDecoder[Reason] = DeriveJsonDecoder.gen
-  given JsonDecoder[ZuoraResultsArrayItem] = DeriveJsonDecoder.gen
 
   sealed trait ZuoraSuccessCheckResponse
-  case class ZuoraSuccessCapitalised(Success: Boolean, reasons: Option[List[Reason]]) extends ZuoraSuccessCheckResponse
-  case class ZuoraSuccessLowercase(success: Boolean, reasons: Option[List[Reason]]) extends ZuoraSuccessCheckResponse
-  case class ZuoraSuccessSize(size: Option[Int]) extends ZuoraSuccessCheckResponse
-  case class ZuoraResultsArray(results: List[ZuoraResultsArrayItem]) extends ZuoraSuccessCheckResponse
+  case class ZuoraSuccessCapitalised(Success: Boolean, reasons: Option[List[Reason]])
+  given JsonDecoder[ZuoraSuccessCapitalised] = DeriveJsonDecoder.gen
+  case class ZuoraSuccessLowercase(success: Boolean, reasons: Option[List[Reason]])
+  given JsonDecoder[ZuoraSuccessLowercase] = DeriveJsonDecoder.gen
+  case class ZuoraSuccessSize(size: Option[Int])
+  given JsonDecoder[ZuoraSuccessSize] = DeriveJsonDecoder.gen
+  case class ZuoraSuccessResultsArray(results: List[ZuoraResultsArrayItem])
+  given JsonDecoder[ZuoraSuccessResultsArray] = DeriveJsonDecoder.gen
   case class ZuoraResultsArrayItem(Success: Boolean)
+  given JsonDecoder[ZuoraResultsArrayItem] = DeriveJsonDecoder.gen
 
-  def attemptDecode[A <: ZuoraSuccessCheckResponse](body: String) = DeriveJsonDecoder
-    .gen[A]
-    .decodeJson(body)
-    .left
-    .map(InternalServerError.apply)
+  def attemptDecode[A](body: String)(implicit decoder: JsonDecoder[A]) =
+    body.fromJson[A].left.map(InternalServerError.apply)
 
   def parseIfSuccessful[A: JsonDecoder](
       body: String,
@@ -153,7 +154,7 @@ object ZuoraRestBody {
 
       case ZuoraSuccessCheck.SuccessCheckResultsArray =>
         for {
-          zuoraResponse <- attemptDecode[ZuoraResultsArray](body)
+          zuoraResponse <- attemptDecode[ZuoraSuccessResultsArray](body)
           isSuccessful <-
             if (zuoraResponse.results.forall(_.Success)) Right(())
             else

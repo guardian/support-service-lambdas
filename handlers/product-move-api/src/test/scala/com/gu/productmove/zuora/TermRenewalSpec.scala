@@ -16,7 +16,7 @@ object TermRenewalSpec extends ZIOSpecDefault {
       test("Run startNewTermFromToday locally") {
         for {
           _ <- TermRenewal
-            .startNewTermFromToday[RenewalResponse](SubscriptionName("A-S00688596"))
+            .startNewTermFromToday(SubscriptionName("A-S00688596"))
             .provide(
               ZuoraClientLive.layer,
               SttpClientLive.layer,

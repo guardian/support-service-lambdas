@@ -21,12 +21,12 @@ class MockTermRenewal(
 
   def requests = mutableStore.reverse
 
-  override def startNewTermFromToday[R: JsonDecoder](
+  override def startNewTermFromToday(
       subscriptionName: SubscriptionName,
-  ): ZIO[Any, ErrorResponse, R] = {
+  ): ZIO[Any, ErrorResponse, Unit] = {
     mutableStore = (subscriptionName) :: mutableStore
 
-    ZIO.succeed(AmendmentResponse(List(AmendmentResult(Nil, true))).asInstanceOf[R])
+    ZIO.succeed(())
   }
 }
 

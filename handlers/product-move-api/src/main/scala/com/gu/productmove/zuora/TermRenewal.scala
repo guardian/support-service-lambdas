@@ -15,7 +15,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse,
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.{SubscriptionId, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraGet
-import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck
+import com.gu.productmove.zuora.rest.ZuoraRestBody.{ZuoraSuccessResultsArray, ZuoraSuccessCheck, ZuoraSuccessLowercase}
 import com.gu.util.config
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
@@ -32,9 +32,9 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 trait TermRenewal:
-  def startNewTermFromToday[R: JsonDecoder](
+  def startNewTermFromToday(
       subscriptionName: SubscriptionName,
-  ): ZIO[Stage with GetSubscription, ErrorResponse, R]
+  ): ZIO[Stage with GetSubscription, ErrorResponse, Unit]
 
 object TermRenewalLive:
   val layer: URLayer[ZuoraGet, TermRenewal] = ZLayer.fromFunction(TermRenewalLive(_))
@@ -57,20 +57,20 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
   In order to balance these out, we can use the `applyCreditBalance` parameter in the renewal request.
    */
 
-  override def startNewTermFromToday[R: JsonDecoder](
+  override def startNewTermFromToday(
       subscriptionName: SubscriptionName,
-  ): ZIO[Stage with GetSubscription, ErrorResponse, R] = for {
+  ): ZIO[Stage with GetSubscription, ErrorResponse, Unit] = for {
     today <- Clock.currentDateTime.map(_.toLocalDate)
     subscription <- GetSubscription.get(subscriptionName)
     _ <- amendTermEndDateToToday(SubscriptionId(subscription.id), today, subscription.termStartDate)
     response <- renewSubscription(subscriptionName)
-  } yield response
+  } yield ()
 
-  private def amendTermEndDateToToday[R: JsonDecoder](
+  private def amendTermEndDateToToday(
       subscriptionId: SubscriptionId,
       today: LocalDate,
       termStartDate: LocalDate,
-  ): ZIO[Stage, ErrorResponse, R] = {
+  ): ZIO[Stage, ErrorResponse, Unit] = {
     val newLength =
       ChronoUnit.DAYS.between(termStartDate, today).toInt
     val requestBody = AmendTermLengthRequest(
@@ -87,16 +87,18 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
         ),
       ),
     )
-    zuoraGet.put[AmendTermLengthRequest, R](
-      relativeUrl = uri"action/amend",
-      input = requestBody,
-      zuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckResultsArray,
-    )
+    zuoraGet
+      .put[AmendTermLengthRequest, ZuoraSuccessResultsArray](
+        relativeUrl = uri"action/amend",
+        input = requestBody,
+        zuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckResultsArray,
+      )
+      .unit
   }
 
-  private def renewSubscription[R: JsonDecoder](
+  private def renewSubscription(
       subscriptionName: SubscriptionName,
-  ): ZIO[Stage, ErrorResponse, R] = {
+  ): ZIO[Stage, ErrorResponse, Unit] = {
     val today = LocalDate.now
     val requestBody = RenewalRequest(
       today,
@@ -105,18 +107,20 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
       applyCreditBalance = true,
       runBilling = true,
     )
-    zuoraGet.put[RenewalRequest, R](
-      relativeUrl = uri"subscriptions/${subscriptionName.value}/renew",
-      input = requestBody,
-      zuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-    )
+    zuoraGet
+      .put[RenewalRequest, ZuoraSuccessLowercase](
+        relativeUrl = uri"subscriptions/${subscriptionName.value}/renew",
+        input = requestBody,
+        zuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
+      )
+      .unit
   }
 
 object TermRenewal {
-  def startNewTermFromToday[R: JsonDecoder](
+  def startNewTermFromToday(
       subscriptionName: SubscriptionName,
-  ): ZIO[TermRenewal with Stage with GetSubscription, ErrorResponse, R] =
-    ZIO.serviceWithZIO[TermRenewal](_.startNewTermFromToday[R](subscriptionName))
+  ): ZIO[TermRenewal with Stage with GetSubscription, ErrorResponse, Unit] =
+    ZIO.serviceWithZIO[TermRenewal](_.startNewTermFromToday(subscriptionName))
 }
 case class AmendmentRequest(Amendments: List[Amendment])
 case class Amendment(
