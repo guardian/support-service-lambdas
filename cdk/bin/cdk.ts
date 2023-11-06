@@ -33,18 +33,18 @@ export const prodProps: NewProductApiProps = {
 };
 
 new BatchEmailSender(app, "batch-email-sender-CODE", {
+    stack: "membership",
+    stage: "CODE",
     domainName: `batch-email-sender-code.${membershipApisDomain}`,
     hostedZoneId,
     certificateId,
-    stack: "membership",
-    stage: "CODE"
 });
 new BatchEmailSender(app, "batch-email-sender-PROD", {
+    stack: "membership",
+    stage: "PROD",
     domainName: `batch-email-sender-prod.${membershipApisDomain}`,
     hostedZoneId,
     certificateId,
-    stack: "membership",
-    stage: "PROD"
 });
 
 new CancellationSfCasesApi(app, "cancellation-sf-cases-api-CODE", {
