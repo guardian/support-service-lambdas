@@ -60,16 +60,17 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
   override def startNewTermFromToday[R: JsonDecoder](
       subscriptionName: SubscriptionName,
   ): ZIO[Stage with GetSubscription, ErrorResponse, R] = for {
+    today <- Clock.currentDateTime.map(_.toLocalDate)
     subscription <- GetSubscription.get(subscriptionName)
-    _ <- amendTermEndDateToToday(SubscriptionId(subscription.id), subscription.termStartDate)
+    _ <- amendTermEndDateToToday(SubscriptionId(subscription.id), today, subscription.termStartDate)
     response <- renewSubscription(subscriptionName)
   } yield response
 
   private def amendTermEndDateToToday[R: JsonDecoder](
       subscriptionId: SubscriptionId,
+      today: LocalDate,
       termStartDate: LocalDate,
   ): ZIO[Stage, ErrorResponse, R] = {
-    val today = LocalDate.now
     val newLength =
       ChronoUnit.DAYS.between(termStartDate, today).toInt
     val requestBody = AmendTermLengthRequest(
