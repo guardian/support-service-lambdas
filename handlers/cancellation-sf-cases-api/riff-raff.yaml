@@ -22,5 +22,4 @@ deployments:
       prefixStack: false
       functionNames:
       - cancellation-sf-cases-api-
-      - cancellation-sf-cases-api-CDK-
     dependencies: [cancellation-sf-cases-api-cloudformation]
