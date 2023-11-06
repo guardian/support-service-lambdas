@@ -193,7 +193,7 @@ object SupportedProduct {
     SupportedProduct(
       name = "Newspaper Delivery",
       productType = NewspaperHomeDelivery,
-      annualIssueLimitPerEdition = 6,
+      annualIssueLimitPerEdition = 5,
       ratePlans = List(
         SupportedRatePlan("Echo-Legacy", everyDayCharges),
         SupportedRatePlan("Everyday", everyDayCharges),
@@ -214,7 +214,7 @@ object SupportedProduct {
     SupportedProduct(
       name = "Newspaper Voucher",
       productType = NewspaperVoucherBook,
-      annualIssueLimitPerEdition = 6,
+      annualIssueLimitPerEdition = 5,
       ratePlans = List(
         SupportedRatePlan("Everyday", everyDayCharges),
         SupportedRatePlan("Everyday+", everyDayCharges),
@@ -231,7 +231,7 @@ object SupportedProduct {
     SupportedProduct(
       name = "Newspaper Digital Voucher",
       productType = NewspaperDigitalVoucher,
-      annualIssueLimitPerEdition = 6,
+      annualIssueLimitPerEdition = 5,
       ratePlans = List(
         SupportedRatePlan("Everyday", everyDayCharges),
         SupportedRatePlan("Everyday+", everyDayCharges),
@@ -248,7 +248,7 @@ object SupportedProduct {
     SupportedProduct(
       name = "Newspaper - National Delivery",
       productType = NewspaperNationalDelivery,
-      annualIssueLimitPerEdition = 6,
+      annualIssueLimitPerEdition = 5,
       ratePlans = List(
         SupportedRatePlan("Weekend", weekendCharges),
         SupportedRatePlan("Everyday", everyDayCharges),
