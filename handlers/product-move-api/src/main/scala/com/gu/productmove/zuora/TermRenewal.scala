@@ -98,7 +98,13 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
       subscriptionName: SubscriptionName,
   ): ZIO[Stage, ErrorResponse, R] = {
     val today = LocalDate.now
-    val requestBody = RenewalRequest(today)
+    val requestBody = RenewalRequest(
+      today,
+      // When we shorten the existing term and then renew we end up with a negative and a positive
+      // invoice for the same amount. Setting applyCreditBalance to true cancels them out against each other
+      applyCreditBalance = true,
+      runBilling = true,
+    )
     zuoraGet.put[RenewalRequest, R](
       relativeUrl = uri"subscriptions/${subscriptionName.value}/renew",
       input = requestBody,
@@ -130,8 +136,8 @@ case class AmendmentResponse(results: List[AmendmentResult])
 case class AmendmentResult(AmendmentIds: List[String], Success: Boolean)
 case class RenewalRequest(
     contractEffectiveDate: LocalDate,
-    applyCreditBalance: Boolean = true, // When we shorten
-    runBilling: Boolean = true,
+    applyCreditBalance: Boolean,
+    runBilling: Boolean,
 )
 case class RenewalResponse(success: Option[Boolean])
 given JsonEncoder[AmendTermLengthRequest] = DeriveJsonEncoder.gen[AmendTermLengthRequest]
