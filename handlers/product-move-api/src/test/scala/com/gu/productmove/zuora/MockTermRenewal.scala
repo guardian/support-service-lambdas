@@ -13,7 +13,7 @@ import zio.{IO, ZIO}
 import java.time.LocalDate
 
 class MockTermRenewal(
-    update: Map[(SubscriptionName), AmendmentResponse],
+    update: Map[SubscriptionName, RenewalResponse],
 ) extends TermRenewal {
 
   private var mutableStore: List[(SubscriptionName)] =
@@ -21,16 +21,22 @@ class MockTermRenewal(
 
   def requests = mutableStore.reverse
 
-  override def startNewTermFromToday(
+  override def renewSubscription(
       subscriptionName: SubscriptionName,
-  ): ZIO[Any, ErrorResponse, Unit] = {
-    mutableStore = (subscriptionName) :: mutableStore
+      collectPayment: Boolean,
+  ): ZIO[Any, ErrorResponse, RenewalResponse] = {
+    mutableStore = subscriptionName :: mutableStore
 
-    ZIO.succeed(())
+    ZIO.succeed(
+      RenewalResponse(
+        success = Some(true),
+        invoiceId = Some("invoiceId"),
+      ),
+    )
   }
 }
 
 object MockTermRenewal {
-  def requests: ZIO[MockTermRenewal, Nothing, List[(SubscriptionName)]] =
+  def requests: ZIO[MockTermRenewal, Nothing, List[SubscriptionName]] =
     ZIO.serviceWith[MockTermRenewal](_.requests)
 }

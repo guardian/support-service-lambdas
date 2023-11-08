@@ -40,7 +40,6 @@ import com.gu.productmove.zuora.GetAccount.{
   PaymentMethodResponse,
   ZuoraSubscription,
 }
-import com.gu.productmove.zuora.{AmendmentResult, AmendmentResponse}
 import com.gu.productmove.zuora.{
   AddRatePlan,
   CancellationResponse,
@@ -64,6 +63,7 @@ import com.gu.productmove.zuora.{
   MockZuoraCancel,
   MockZuoraSetCancellationReason,
   RemoveRatePlan,
+  RenewalResponse,
   SubscriptionUpdatePreviewResponse,
   SubscriptionUpdateRequest,
   SubscriptionUpdateResponse,
@@ -100,7 +100,7 @@ object HandlerSpec extends ZIOSpecDefault {
     val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
     val termRenewalInputsShouldBe: SubscriptionName =
       SubscriptionName("subscription_name")
-    val termRenewalResponse = AmendmentResponse(List(AmendmentResult(Nil, true)))
+    val termRenewalResponse = RenewalResponse(Some(true), Some("invoiceId"))
     val termRenewalStubs = Map(termRenewalInputsShouldBe -> termRenewalResponse)
     val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)
     val getAccountStubs2 = Map(AccountNumber("accountNumber") -> getAccountResponse2)

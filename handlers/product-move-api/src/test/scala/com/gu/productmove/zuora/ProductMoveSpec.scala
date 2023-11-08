@@ -20,11 +20,11 @@ object ProductMoveSpec extends ZIOSpecDefault {
         for {
           _ <- TestClock.setTime(Instant.now())
           _ <- RecurringContributionToSupporterPlus(
-            SubscriptionName("A-S00660620"),
+            SubscriptionName("A-S00716552"),
             ExpectedInput(
-              price = 120,
+              price = 95,
               preview = false,
-              checkChargeAmountBeforeUpdate = true,
+              checkChargeAmountBeforeUpdate = false,
               csrUserId = None,
               caseId = None,
             ),
@@ -48,13 +48,13 @@ object ProductMoveSpec extends ZIOSpecDefault {
         } yield {
           assert(true)(equalTo(true))
         }
-      } @@ TestAspect.ignore,
+      },
       test("Run product switch preview locally") {
         for {
           _ <- TestClock.setTime(Instant.now())
           output <- RecurringContributionToSupporterPlus(
-            SubscriptionName("A-S00217859"),
-            ExpectedInput(50, true, false, None, None),
+            SubscriptionName("A-S00716446"),
+            ExpectedInput(95, true, false, None, None),
           )
             .provide(
               GetSubscriptionLive.layer,

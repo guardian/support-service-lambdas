@@ -76,6 +76,7 @@ import zio.json.*
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 case class SupporterPlusRatePlanIds(
     ratePlanId: String,
@@ -298,30 +299,37 @@ object RecurringContributionToSupporterPlus {
    */
   private def adjustNonCollectedInvoices(
       collectPayment: Boolean,
-      updateResponse: SubscriptionUpdateResponse,
+      invoiceId: String,
       supporterPlusRatePlanIds: SupporterPlusRatePlanIds,
       subscriptionName: SubscriptionName,
       amountPayableToday: BigDecimal,
-  ) =
+  ): ZIO[InvoiceItemAdjustment with GetInvoiceItems, ErrorResponse, Unit] =
     if (!collectPayment) {
       for {
-        invoiceResponse <- GetInvoiceItems.get(updateResponse.invoiceId.get)
+        _ <- ZIO.log("collectPayment is false, attempting to adjust invoice")
+        invoiceResponse <- GetInvoiceItems.get(invoiceId)
         invoiceItems = invoiceResponse.invoiceItems
         invoiceItem <- ZIO
           .fromOption(
             invoiceItems.find(_.productRatePlanChargeId == supporterPlusRatePlanIds.subscriptionRatePlanChargeId),
           )
           .orElseFail(
-            InternalServerError(s"Could not find invoice item for rateplanchargeid ${subscriptionName.value}"),
+            InternalServerError(s"Could not find invoice item for ratePlanChargeId ${subscriptionName.value}"),
           )
         _ <- InvoiceItemAdjustment.update(
-          updateResponse.invoiceId.get,
+          invoiceId,
           amountPayableToday,
           invoiceItem.id,
           "Credit",
         )
       } yield ()
-    } else ZIO.succeed(())
+    } else {
+      println("collectPayment is true, invoice does not need adjusting")
+      ZIO.succeed(())
+    }
+
+  private def getNewTermLengthInDays(today: LocalDate, termStartDate: LocalDate): String =
+    Math.max(ChronoUnit.DAYS.between(termStartDate, today).toInt, 1).toString
 
   private def doUpdate(
       subscriptionName: SubscriptionName,
@@ -357,6 +365,7 @@ object RecurringContributionToSupporterPlus {
         s"checkChargeAmountBeforeUpdate is $checkChargeAmountBeforeUpdate for subscription ${subscriptionName.value}",
       )
       stage <- ZIO.service[Stage]
+      today <- Clock.currentDateTime.map(_.toLocalDate)
       accountFuture <- GetAccount.get(subscription.accountNumber).fork
 
       /*
@@ -377,15 +386,30 @@ object RecurringContributionToSupporterPlus {
             amount = previewResponse.asInstanceOf[PreviewResult].amountPayableToday
           } yield amount
         } else ZIO.succeed(BigDecimal(1))
-      collectPayment = !(amountPayableToday > BigDecimal(0) && amountPayableToday < BigDecimal(0.50))
+      collectPayment = amountPayableToday < 0 || amountPayableToday > 0.5
+      _ <- ZIO.log(
+        s"Amount payable today is $amountPayableToday so collectPayment is $collectPayment",
+      )
+
+      subscription <- GetSubscription.get(subscriptionName)
+
+      // To avoid problems with charges not aligning correctly with the term and resulting in unpredictable
+      // billing dates and amounts, we need to start a new term for the new subscription version.
+      // To do this we reduce the the current term length so that it ends today in the update subscription request
+      // and then renew the sub using a separate request
+
+      newTermLength = getNewTermLengthInDays(today, subscription.termStartDate)
+      _ <- ZIO.log(s"newTermLength is $newTermLength days")
 
       updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlan.id, price).map {
         case (addRatePlan, removeRatePlan) =>
           SwitchProductUpdateRequest(
             add = addRatePlan,
             remove = removeRatePlan,
-            collect = Some(collectPayment),
-            runBilling = Some(true),
+            collect = None,
+            currentTerm = Some(newTermLength),
+            currentTermPeriodType = Some("Day"),
+            runBilling = Some(false),
             preview = Some(false),
           )
       }
@@ -393,18 +417,24 @@ object RecurringContributionToSupporterPlus {
       updateResponse <- SubscriptionUpdate
         .update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
 
+      _ <- ZIO.log(s"updateResponse is $updateResponse for subscription ${subscriptionName.value}")
+
       productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
+
+      // Renew the subscription
+      renewalResult <- TermRenewal.renewSubscription(subscriptionName, collectPayment)
+
+      invoiceId <- ZIO
+        .fromOption(renewalResult.invoiceId)
+        .orElseFail(InternalServerError("invoiceId was null in the response from term renewal"))
 
       _ <- adjustNonCollectedInvoices(
         collectPayment,
-        updateResponse,
+        invoiceId,
         productSwitchRatePlanIds.supporterPlusRatePlanIds,
         subscriptionName,
         amountPayableToday,
       )
-
-      // Start a new term when we do the switch to avoid issues with billing dates
-      _ <- TermRenewal.startNewTermFromToday(subscriptionName)
 
       account <- accountFuture.join
 
