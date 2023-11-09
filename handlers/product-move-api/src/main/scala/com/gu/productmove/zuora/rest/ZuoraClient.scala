@@ -87,7 +87,7 @@ object ZuoraRestBody {
   // the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success property, and instead returns `size: "0"` if nothing was found
   // Zuora either returns a "success" property with a lower or upper case starting letter, hence the need for SuccessCheckLowercase and SuccessCheckCapitalised enums
   enum ZuoraSuccessCheck:
-    case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised, SuccessCheckResultsArray, None
+    case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised, None
 
   case class Reason(
       code: Int,
@@ -95,17 +95,12 @@ object ZuoraRestBody {
   )
   given JsonDecoder[Reason] = DeriveJsonDecoder.gen
 
-  sealed trait ZuoraSuccessCheckResponse
   case class ZuoraSuccessCapitalised(Success: Boolean, reasons: Option[List[Reason]])
   given JsonDecoder[ZuoraSuccessCapitalised] = DeriveJsonDecoder.gen
   case class ZuoraSuccessLowercase(success: Boolean, reasons: Option[List[Reason]])
   given JsonDecoder[ZuoraSuccessLowercase] = DeriveJsonDecoder.gen
   case class ZuoraSuccessSize(size: Option[Int])
   given JsonDecoder[ZuoraSuccessSize] = DeriveJsonDecoder.gen
-  case class ZuoraSuccessResultsArray(results: List[ZuoraResultsArrayItem])
-  given JsonDecoder[ZuoraSuccessResultsArray] = DeriveJsonDecoder.gen
-  case class ZuoraResultsArrayItem(Success: Boolean)
-  given JsonDecoder[ZuoraResultsArrayItem] = DeriveJsonDecoder.gen
 
   def attemptDecode[A](body: String)(implicit decoder: JsonDecoder[A]) =
     body.fromJson[A].left.map(InternalServerError.apply)
@@ -151,17 +146,6 @@ object ZuoraRestBody {
                 case None => Left(InternalServerError(s"success = false, body: $body"))
               }
         } yield ()
-
-      case ZuoraSuccessCheck.SuccessCheckResultsArray =>
-        for {
-          zuoraResponse <- attemptDecode[ZuoraSuccessResultsArray](body)
-          isSuccessful <-
-            if (zuoraResponse.results.forall(_.Success)) Right(())
-            else
-              Left(InternalServerError(s"success = false, body: $body"))
-
-        } yield ()
-
       case ZuoraSuccessCheck.None => Right(())
     }
 

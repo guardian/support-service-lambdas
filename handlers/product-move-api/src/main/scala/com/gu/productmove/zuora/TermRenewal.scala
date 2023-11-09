@@ -15,7 +15,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse,
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.{SubscriptionId, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraGet
-import com.gu.productmove.zuora.rest.ZuoraRestBody.{ZuoraSuccessResultsArray, ZuoraSuccessCheck, ZuoraSuccessLowercase}
+import com.gu.productmove.zuora.rest.ZuoraRestBody.{ZuoraSuccessCheck, ZuoraSuccessLowercase}
 import com.gu.util.config
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
