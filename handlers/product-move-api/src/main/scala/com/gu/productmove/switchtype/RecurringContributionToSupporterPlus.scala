@@ -107,7 +107,6 @@ object RecurringContributionToSupporterPlus {
     GetSubscription
       with SubscriptionUpdate
       with TermRenewal
-      with GetSubscription
       with GetInvoiceItems
       with InvoiceItemAdjustment
       with GetAccount
