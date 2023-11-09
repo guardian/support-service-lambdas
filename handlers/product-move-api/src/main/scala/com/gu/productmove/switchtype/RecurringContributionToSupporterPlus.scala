@@ -386,7 +386,7 @@ object RecurringContributionToSupporterPlus {
             amount = previewResponse.asInstanceOf[PreviewResult].amountPayableToday
           } yield amount
         } else ZIO.succeed(BigDecimal(1))
-      collectPayment = amountPayableToday < 0 || amountPayableToday > 0.5
+      collectPayment = amountPayableToday < 0 || amountPayableToday >= 0.5
       _ <- ZIO.log(
         s"Amount payable today is $amountPayableToday so collectPayment is $collectPayment",
       )
