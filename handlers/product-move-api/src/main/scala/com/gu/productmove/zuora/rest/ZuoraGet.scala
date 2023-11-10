@@ -27,7 +27,9 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): IO[ErrorResponse, Response] =
     for {
+      _ <- ZIO.log(s"Sending POST to $relativeUrl with body ${input.toJson}")
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).post(relativeUrl))
+      _ <- ZIO.log(s"Response is $response")
       parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck))
     } yield parsedBody
 

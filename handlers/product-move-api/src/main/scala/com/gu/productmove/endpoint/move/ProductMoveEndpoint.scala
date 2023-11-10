@@ -12,10 +12,12 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{
+  CreatePaymentLive,
   GetAccount,
   GetAccountLive,
   GetInvoiceItems,
   GetInvoiceItemsLive,
+  GetInvoiceLive,
   GetSubscription,
   GetSubscriptionLive,
   InvoiceItemAdjustment,
@@ -194,6 +196,8 @@ object ProductMoveEndpoint {
       GuStageLive.layer,
       DynamoLive.layer,
       GetInvoiceItemsLive.layer,
+      GetInvoiceLive.layer,
+      CreatePaymentLive.layer,
       SecretsLive.layer,
     )
 }

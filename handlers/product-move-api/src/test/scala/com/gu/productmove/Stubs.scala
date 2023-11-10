@@ -20,6 +20,7 @@ import com.gu.productmove.zuora.Fixtures.{
   subscriptionsPreviewResponse2,
   subscriptionsPreviewResponse3,
 }
+import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
 import com.gu.productmove.{EmailMessage, EmailPayload, RCtoSPEmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
@@ -216,6 +217,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
 //-----------------------------------------------------
 val getAccountResponse = GetAccountResponse(
   BasicInfo(
+    "id",
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     Some("12345"),
     "sfContactId",
@@ -228,6 +230,7 @@ val getAccountResponse = GetAccountResponse(
 
 val getAccountResponse2 = GetAccountResponse(
   BasicInfo(
+    "id",
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     None,
     "sfContactId",
@@ -240,6 +243,7 @@ val getAccountResponse2 = GetAccountResponse(
 
 val directDebitGetAccountResponse = GetAccountResponse(
   BasicInfo(
+    "id",
     DefaultPaymentMethod("paymentMethodId", None),
     None,
     "sfContactId",
@@ -675,3 +679,8 @@ val getInvoiceItemsResponse = GetInvoiceItemsResponse(
     ),
   ),
 )
+
+//-----------------------------------------------------
+// Stubs for GetInvoice service
+//-----------------------------------------------------
+val getInvoiceResponse = GetInvoiceResponse(balance = 5)

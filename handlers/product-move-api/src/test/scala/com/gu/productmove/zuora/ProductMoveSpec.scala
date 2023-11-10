@@ -20,9 +20,9 @@ object ProductMoveSpec extends ZIOSpecDefault {
         for {
           _ <- TestClock.setTime(Instant.now())
           _ <- RecurringContributionToSupporterPlus(
-            SubscriptionName("A-S00716552"),
+            SubscriptionName("A-S00716308"),
             ExpectedInput(
-              price = 95,
+              price = 120,
               preview = false,
               checkChargeAmountBeforeUpdate = false,
               csrUserId = None,
@@ -42,13 +42,15 @@ object ProductMoveSpec extends ZIOSpecDefault {
               GuStageLive.layer,
               DynamoLive.layer,
               GetInvoiceItemsLive.layer,
+              GetInvoiceLive.layer,
+              CreatePaymentLive.layer,
               InvoiceItemAdjustmentLive.layer,
               SecretsLive.layer,
             )
         } yield {
           assert(true)(equalTo(true))
         }
-      } @@ TestAspect.ignore,
+      },
       test("Run product switch preview locally") {
         for {
           _ <- TestClock.setTime(Instant.now())
@@ -69,7 +71,9 @@ object ProductMoveSpec extends ZIOSpecDefault {
               GuStageLive.layer,
               DynamoLive.layer,
               GetInvoiceItemsLive.layer,
+              GetInvoiceLive.layer,
               InvoiceItemAdjustmentLive.layer,
+              CreatePaymentLive.layer,
               SecretsLive.layer,
             )
         } yield {

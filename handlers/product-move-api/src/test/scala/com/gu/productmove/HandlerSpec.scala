@@ -44,14 +44,17 @@ import com.gu.productmove.zuora.{
   AddRatePlan,
   CancellationResponse,
   ChargeOverrides,
+  CreatePaymentResponse,
   CreateSubscriptionResponse,
   DefaultPaymentMethod,
   GetAccount,
   GetCatalogue,
   GetSubscription,
   MockCatalogue,
+  MockCreatePayment,
   MockDynamo,
   MockGetAccount,
+  MockGetInvoice,
   MockGetInvoiceItems,
   MockGetSubscription,
   MockGetSubscriptionToCancel,
@@ -116,6 +119,7 @@ object HandlerSpec extends ZIOSpecDefault {
       invoiceItemAdjustmentInputs -> List(InvoiceItemAdjustmentResult(true, "source_id")),
     )
     val getInvoiceItemsStubs = Map("89ad8casd9c0asdcaj89sdc98as" -> getInvoiceItemsResponse)
+    val getInvoiceStubs = Map("89ad8casd9c0asdcaj89sdc98as" -> getInvoiceResponse)
 
     suite("HandlerSpec")(
       test("productMove endpoint completes switch when charge amount is below 50 cents") {
@@ -160,7 +164,9 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
@@ -192,7 +198,9 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
@@ -215,6 +223,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)) ++
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)) ++
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)) ++
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))) ++
           ZLayer.succeed(Stage.valueOf("PROD"))
 
         (for {
@@ -267,6 +277,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
@@ -333,6 +345,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetAccount(getAccountStubs2, getPaymentMethodStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
@@ -363,6 +377,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
@@ -397,6 +413,8 @@ object HandlerSpec extends ZIOSpecDefault {
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked

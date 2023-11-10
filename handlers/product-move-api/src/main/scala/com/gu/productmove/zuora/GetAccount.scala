@@ -57,6 +57,7 @@ object GetAccount {
   )
 
   case class BasicInfo(
+      id: String,
       defaultPaymentMethod: DefaultPaymentMethod,
       IdentityId__c: Option[String],
       sfContactId__c: String,
@@ -72,6 +73,7 @@ object GetAccount {
 
   object BasicInfo {
     private case class BasicInfoWire(
+        id: String,
         defaultPaymentMethod: DefaultPaymentMethod,
         IdentityId__c: Option[String],
         sfContactId__c: String,
@@ -80,35 +82,26 @@ object GetAccount {
     )
 
     given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen[BasicInfoWire].map {
-      case BasicInfoWire(defaultPaymentMethod, identityId, sfContactId__c, balance, currency) =>
+      case BasicInfoWire(id, defaultPaymentMethod, identityId, sfContactId__c, balance, currency) =>
         identityId match {
-          case None =>
+          case Some(someIdentityId) if someIdentityId == "" =>
             BasicInfo(
-              defaultPaymentMethod,
-              None,
-              sfContactId__c,
-              (balance.toDouble * 100).toInt,
-              currencyCodetoObject(currency),
+              id = id,
+              defaultPaymentMethod = defaultPaymentMethod,
+              IdentityId__c = None,
+              sfContactId__c = sfContactId__c,
+              balance = (balance.toDouble * 100).toInt,
+              currency = currencyCodetoObject(currency),
             )
-          case Some(id) =>
-            id match {
-              case "" =>
-                BasicInfo(
-                  defaultPaymentMethod,
-                  None,
-                  sfContactId__c,
-                  (balance.toDouble * 100).toInt,
-                  currencyCodetoObject(currency),
-                )
-              case _ =>
-                BasicInfo(
-                  defaultPaymentMethod,
-                  Some(id),
-                  sfContactId__c,
-                  (balance.toDouble * 100).toInt,
-                  currencyCodetoObject(currency),
-                )
-            }
+          case _ =>
+            BasicInfo(
+              id = id,
+              defaultPaymentMethod = defaultPaymentMethod,
+              IdentityId__c = identityId,
+              sfContactId__c = sfContactId__c,
+              balance = (balance.toDouble * 100).toInt,
+              currency = currencyCodetoObject(currency),
+            )
         }
     }
   }
