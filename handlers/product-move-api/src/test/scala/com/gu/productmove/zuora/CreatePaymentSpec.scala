@@ -29,8 +29,6 @@ object CreatePaymentSpec extends ZIOSpecDefault {
               ZuoraGetLive.layer,
               ZuoraClientLive.layer,
               CreatePaymentLive.layer,
-              GuStageLive.layer,
-              GetSubscriptionLive.layer,
               SttpClientLive.layer,
               SecretsLive.layer,
             )

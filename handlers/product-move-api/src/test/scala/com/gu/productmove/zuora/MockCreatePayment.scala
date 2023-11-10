@@ -21,7 +21,7 @@ class MockCreatePayment(
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
-  ): ZIO[Stage with GetSubscription, ErrorResponse, CreatePaymentResponse] = {
+  ): IO[ErrorResponse, CreatePaymentResponse] = {
     mutableStore = invoiceId :: mutableStore
     ZIO.succeed(response)
   }

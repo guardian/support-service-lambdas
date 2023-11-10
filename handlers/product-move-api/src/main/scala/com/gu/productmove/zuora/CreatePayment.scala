@@ -12,7 +12,6 @@ import com.gu.newproduct.api.productcatalog.*
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
-import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.{SubscriptionId, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraGet
 import com.gu.productmove.zuora.rest.ZuoraRestBody.{ZuoraSuccessCheck, ZuoraSuccessLowercase}
@@ -38,7 +37,7 @@ trait CreatePayment:
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
-  ): ZIO[Stage with GetSubscription, ErrorResponse, CreatePaymentResponse]
+  ): IO[ErrorResponse, CreatePaymentResponse]
 
 object CreatePaymentLive:
   val layer: URLayer[ZuoraGet, CreatePayment] = ZLayer.fromFunction(CreatePaymentLive(_))
@@ -58,7 +57,7 @@ private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment:
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
-  ): ZIO[Stage with GetSubscription, ErrorResponse, CreatePaymentResponse] = for {
+  ): IO[ErrorResponse, CreatePaymentResponse] = for {
     _ <- ZIO.log(
       s"Attempting to create payment on account $accountId, invoice $invoiceId, paymentMethodId $paymentMethodId for amount $amount",
     )
@@ -86,7 +85,7 @@ object CreatePayment {
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
-  ): ZIO[CreatePayment with Stage with GetSubscription, ErrorResponse, CreatePaymentResponse] =
+  ): ZIO[CreatePayment, ErrorResponse, CreatePaymentResponse] =
     ZIO.serviceWithZIO[CreatePayment](_.create(accountId, invoiceId, paymentMethodId, amount, today))
 }
 case class CreatePaymentRequest(
