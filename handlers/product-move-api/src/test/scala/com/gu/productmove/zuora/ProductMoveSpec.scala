@@ -50,7 +50,7 @@ object ProductMoveSpec extends ZIOSpecDefault {
         } yield {
           assert(true)(equalTo(true))
         }
-      },
+      } @@ TestAspect.ignore,
       test("Run product switch preview locally") {
         for {
           _ <- TestClock.setTime(Instant.now())
