@@ -410,7 +410,7 @@ object RecurringContributionToSupporterPlus {
             remove = removeRatePlan,
             currentTerm = Some(newTermLength),
             currentTermPeriodType = Some("Day"),
-            // We will run the billing during the renewal call to reduce the number of invoices
+            // We will run the billing during the renewal call to ensure there's exactly one invoice produced for the switch
             runBilling = Some(false),
             // We will collect via a separate create payment call if the amount payable is not too small
             collect = None,
