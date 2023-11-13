@@ -34,7 +34,7 @@ import java.time.temporal.ChronoUnit
 trait TermRenewal:
   def renewSubscription(
       subscriptionName: SubscriptionName,
-      collectPayment: Boolean,
+      runBilling: Boolean,
   ): ZIO[Stage with GetSubscription, ErrorResponse, RenewalResponse]
 
 object TermRenewalLive:
@@ -51,23 +51,23 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
 
   override def renewSubscription(
       subscriptionName: SubscriptionName,
-      collectPayment: Boolean,
+      runBilling: Boolean,
   ): ZIO[Stage with GetSubscription, ErrorResponse, RenewalResponse] = for {
     _ <- ZIO.log(s"Attempting to renew subscription $subscriptionName")
     today <- Clock.currentDateTime.map(_.toLocalDate)
-    response <- renewSubscription(subscriptionName, today, collectPayment)
+    response <- renewSubscription(subscriptionName, today, runBilling)
     _ <- ZIO.log(s"Successfully renewed subscription $subscriptionName")
   } yield response
 
   private def renewSubscription(
       subscriptionName: SubscriptionName,
       contractEffectiveDate: LocalDate,
-      collectPayment: Boolean,
+      runBilling: Boolean,
   ): ZIO[Stage, ErrorResponse, RenewalResponse] = {
     val requestBody = RenewalRequest(
       contractEffectiveDate,
-      collect = if (collectPayment) Some(true) else None,
-      runBilling = true,
+      collect = None,
+      runBilling = runBilling,
     )
     zuoraGet
       .put[RenewalRequest, RenewalResponse](
@@ -80,9 +80,9 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
 object TermRenewal {
   def renewSubscription(
       subscriptionName: SubscriptionName,
-      collectPayment: Boolean,
+      runBilling: Boolean,
   ): ZIO[TermRenewal with Stage with GetSubscription, ErrorResponse, RenewalResponse] =
-    ZIO.serviceWithZIO[TermRenewal](_.renewSubscription(subscriptionName, collectPayment))
+    ZIO.serviceWithZIO[TermRenewal](_.renewSubscription(subscriptionName, runBilling))
 }
 case class RenewalRequest(
     contractEffectiveDate: LocalDate,

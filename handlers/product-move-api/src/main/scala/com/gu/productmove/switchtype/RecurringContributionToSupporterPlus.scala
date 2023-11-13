@@ -377,8 +377,8 @@ object RecurringContributionToSupporterPlus {
             remove = removeRatePlan,
             currentTerm = None,
             currentTermPeriodType = None,
-            // We will run the billing after all changes are made to reduce the number of invoices
-            runBilling = Some(false),
+            // Run the billing here as this is the only change being made
+            runBilling = Some(true),
             // We will collect via a separate create payment call if the amount payable is not too small
             collect = None,
             preview = Some(false),
@@ -410,7 +410,7 @@ object RecurringContributionToSupporterPlus {
             remove = removeRatePlan,
             currentTerm = Some(newTermLength),
             currentTermPeriodType = Some("Day"),
-            // We will run the billing after all changes are made to reduce the number of invoices
+            // We will run the billing during the renewal call to reduce the number of invoices
             runBilling = Some(false),
             // We will collect via a separate create payment call if the amount payable is not too small
             collect = None,
@@ -418,7 +418,11 @@ object RecurringContributionToSupporterPlus {
           )
       }
       updateResponse <- SubscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
-      renewalResult <- TermRenewal.renewSubscription(subscriptionName, collectPayment = false)
+      renewalResult <- TermRenewal.renewSubscription(
+        subscriptionName,
+        // Run billing here as this is the last change being made
+        runBilling = true,
+      )
       invoiceId <- ZIO
         .fromOption(renewalResult.invoiceId)
         .orElseFail(InternalServerError("invoiceId was null in the response from term renewal"))
