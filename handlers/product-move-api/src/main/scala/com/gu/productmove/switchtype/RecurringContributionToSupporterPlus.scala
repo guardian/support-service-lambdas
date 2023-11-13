@@ -420,7 +420,7 @@ object RecurringContributionToSupporterPlus {
       updateResponse <- SubscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
       renewalResult <- TermRenewal.renewSubscription(
         subscriptionName,
-        // Run billing here as this is the last change being made
+        // this is the last change so run billing to get one invoice to cover all the changes
         runBilling = true,
       )
       invoiceId <- ZIO
