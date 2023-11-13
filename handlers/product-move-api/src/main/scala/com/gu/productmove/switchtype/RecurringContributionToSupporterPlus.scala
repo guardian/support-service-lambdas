@@ -556,7 +556,7 @@ object RecurringContributionToSupporterPlus {
     productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
   } yield productSwitchRatePlanIds.supporterPlusRatePlanIds
   private def getNewTermLengthInDays(today: LocalDate, termStartDate: LocalDate): String =
-    Math.max(ChronoUnit.DAYS.between(termStartDate, today).toInt, 1).toString
+    ChronoUnit.DAYS.between(termStartDate, today).toInt.toString
   private def getSingleOrNotEligible[A](list: List[A], message: String): IO[ErrorResponse, A] =
     list.length match {
       case 1 => ZIO.succeed(list.head)
