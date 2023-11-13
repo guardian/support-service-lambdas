@@ -154,7 +154,6 @@ object RecurringContributionToSupporterPlus {
           doUpdate(
             subscriptionName,
             postData.price,
-            postData.checkChargeAmountBeforeUpdate,
             BigDecimal(ratePlanCharge.price.get),
             ratePlanCharge,
             currency,
@@ -402,7 +401,6 @@ object RecurringContributionToSupporterPlus {
   private def doUpdate(
       subscriptionName: SubscriptionName,
       price: BigDecimal,
-      checkChargeAmountBeforeUpdate: Boolean,
       previousAmount: BigDecimal,
       ratePlanCharge: RatePlanCharge,
       currency: Currency,
@@ -430,9 +428,6 @@ object RecurringContributionToSupporterPlus {
     for {
       _ <- ZIO.log(
         s"Performing product move update with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
-      )
-      _ <- ZIO.log(
-        s"checkChargeAmountBeforeUpdate is $checkChargeAmountBeforeUpdate for subscription ${subscriptionName.value}",
       )
 
       today <- Clock.currentDateTime.map(_.toLocalDate)

@@ -20,11 +20,10 @@ object ProductMoveSpec extends ZIOSpecDefault {
         for {
           _ <- TestClock.setTime(Instant.now())
           _ <- RecurringContributionToSupporterPlus(
-            SubscriptionName("A-S00716308"),
+            SubscriptionName("A-S00702950"),
             ExpectedInput(
               price = 120,
               preview = false,
-              checkChargeAmountBeforeUpdate = false,
               csrUserId = None,
               caseId = None,
             ),
@@ -56,7 +55,7 @@ object ProductMoveSpec extends ZIOSpecDefault {
           _ <- TestClock.setTime(Instant.now())
           output <- RecurringContributionToSupporterPlus(
             SubscriptionName("A-S00716446"),
-            ExpectedInput(95, true, false, None, None),
+            ExpectedInput(95, true, None, None),
           )
             .provide(
               GetSubscriptionLive.layer,

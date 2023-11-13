@@ -123,7 +123,7 @@ object HandlerSpec extends ZIOSpecDefault {
 
     suite("HandlerSpec")(
       test("productMove endpoint completes switch when charge amount is below 50 cents") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, true, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
@@ -171,7 +171,7 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test("productMove endpoint is successful for monthly sub (upsell)") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
@@ -207,7 +207,7 @@ object HandlerSpec extends ZIOSpecDefault {
       test(
         "productMove endpoint is successful if customer neither pays nor is refunded on switch (monthly sub, upsell)",
       ) {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
@@ -252,7 +252,7 @@ object HandlerSpec extends ZIOSpecDefault {
        */
 
       test("productMove endpoint completes if subscription is being switched early in morning on renewal date") {
-        val endpointJsonInputBody = ExpectedInput(15.00, true, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse2)
 
         (for {
@@ -285,7 +285,7 @@ object HandlerSpec extends ZIOSpecDefault {
       test(
         "(MembershipToRecurringContribution) productMove endpoint is successful",
       ) {
-        val endpointJsonInputBody = ExpectedInput(5.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(5.00, false, None, None)
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
           (subscriptionName, expectedRequestBody2)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
@@ -318,7 +318,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(layers)
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test("productMove endpoint returns 500 error if identityId does not exist") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("identityId is null for subscription name A-S00339056")
         (for {
@@ -351,7 +351,7 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
-        val endpointJsonInputBody = ExpectedInput(50.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
         (for {
@@ -383,7 +383,7 @@ object HandlerSpec extends ZIOSpecDefault {
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test("preview endpoint is successful (monthly sub, upsell)") {
-        val endpointJsonInputBody = ExpectedInput(15.00, true, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
           (subscriptionName, expectedRequestBodyPreview)
         val subscriptionUpdatePreviewStubs =

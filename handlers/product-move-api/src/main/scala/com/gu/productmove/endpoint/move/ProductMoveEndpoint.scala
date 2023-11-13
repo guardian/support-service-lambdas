@@ -64,7 +64,7 @@ object ProductMoveEndpoint {
     run(
       SubscriptionName("A-S00448793"),
       SwitchType.RecurringContributionToSupporterPlus,
-      ExpectedInput(1, false, false, None, None),
+      ExpectedInput(1, false, None, None),
     ),
   )
 

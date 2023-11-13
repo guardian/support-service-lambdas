@@ -43,14 +43,6 @@ object CreatePaymentLive:
   val layer: URLayer[ZuoraGet, CreatePayment] = ZLayer.fromFunction(CreatePaymentLive(_))
 
 private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment:
-  /*
-  Start a new term for this subscription from today.
-  This is to avoid problems with charges not aligning correctly with the term and resulting in unpredictable
-  billing dates and amounts.
-
-  Uses https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription/
-   */
-
   override def create(
       accountId: String,
       invoiceId: String,
