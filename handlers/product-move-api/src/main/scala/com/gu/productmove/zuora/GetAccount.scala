@@ -83,26 +83,14 @@ object GetAccount {
 
     given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen[BasicInfoWire].map {
       case BasicInfoWire(id, defaultPaymentMethod, identityId, sfContactId__c, balance, currency) =>
-        identityId match {
-          case Some(someIdentityId) if someIdentityId == "" =>
-            BasicInfo(
-              id = id,
-              defaultPaymentMethod = defaultPaymentMethod,
-              IdentityId__c = None,
-              sfContactId__c = sfContactId__c,
-              balance = (balance.toDouble * 100).toInt,
-              currency = currencyCodetoObject(currency),
-            )
-          case _ =>
-            BasicInfo(
-              id = id,
-              defaultPaymentMethod = defaultPaymentMethod,
-              IdentityId__c = identityId,
-              sfContactId__c = sfContactId__c,
-              balance = (balance.toDouble * 100).toInt,
-              currency = currencyCodetoObject(currency),
-            )
-        }
+        BasicInfo(
+          id = id,
+          defaultPaymentMethod = defaultPaymentMethod,
+          IdentityId__c = identityId.filter(_ != ""),
+          sfContactId__c = sfContactId__c,
+          balance = (balance.toDouble * 100).toInt,
+          currency = currencyCodetoObject(currency),
+        )
     }
   }
 

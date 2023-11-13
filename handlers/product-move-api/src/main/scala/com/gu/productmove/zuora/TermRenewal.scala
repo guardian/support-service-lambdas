@@ -55,11 +55,11 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
   ): ZIO[Stage with GetSubscription, ErrorResponse, RenewalResponse] = for {
     _ <- ZIO.log(s"Attempting to renew subscription $subscriptionName")
     today <- Clock.currentDateTime.map(_.toLocalDate)
-    response <- renewSubscription(subscriptionName, today, runBilling)
+    response <- renewSubscriptionFromDate(subscriptionName, today, runBilling)
     _ <- ZIO.log(s"Successfully renewed subscription $subscriptionName")
   } yield response
 
-  private def renewSubscription(
+  private def renewSubscriptionFromDate(
       subscriptionName: SubscriptionName,
       contractEffectiveDate: LocalDate,
       runBilling: Boolean,
