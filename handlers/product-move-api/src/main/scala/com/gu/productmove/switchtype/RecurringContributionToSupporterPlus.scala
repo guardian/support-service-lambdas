@@ -95,13 +95,6 @@ case class ProductSwitchRatePlanIds(
 )
 
 object RecurringContributionToSupporterPlus {
-
-  private def getSingleOrNotEligible[A](list: List[A], message: String): IO[ErrorResponse, A] =
-    list.length match {
-      case 1 => ZIO.succeed(list.head)
-      case _ => ZIO.fail(InternalServerError(message))
-    }
-
   def apply(
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
@@ -165,100 +158,6 @@ object RecurringContributionToSupporterPlus {
     } yield result).fold(error => error, success => success)
   }
 
-  private def getProductSwitchRatePlanIds(
-      stage: Stage,
-      billingPeriod: BillingPeriod,
-  ): Either[ErrorResponse, ProductSwitchRatePlanIds] = {
-    zuoraIdsForStage(config.Stage(stage.toString)).left
-      .map(err => InternalServerError(err))
-      .flatMap { zuoraIds =>
-        import zuoraIds.supporterPlusZuoraIds.{annualV2, monthlyV2}
-        import zuoraIds.contributionsZuoraIds.{annual, monthly}
-
-        billingPeriod match {
-          case Monthly =>
-            Right(
-              ProductSwitchRatePlanIds(
-                SupporterPlusRatePlanIds(
-                  monthlyV2.productRatePlanId.value,
-                  monthlyV2.productRatePlanChargeId.value,
-                  monthlyV2.contributionProductRatePlanChargeId.value,
-                ),
-                RecurringContributionRatePlanIds(monthly.productRatePlanChargeId.value),
-              ),
-            )
-          case Annual =>
-            Right(
-              ProductSwitchRatePlanIds(
-                SupporterPlusRatePlanIds(
-                  annualV2.productRatePlanId.value,
-                  annualV2.productRatePlanChargeId.value,
-                  annualV2.contributionProductRatePlanChargeId.value,
-                ),
-                RecurringContributionRatePlanIds(annual.productRatePlanChargeId.value),
-              ),
-            )
-          case _ => Left(InternalServerError(s"Error when matching on billingPeriod $billingPeriod"))
-        }
-      }
-  }
-
-  private def getSubscriptionPriceInMinorUnits(
-      stage: Stage,
-      catalogPlanId: PlanId,
-      currency: Currency,
-  ): Either[String, AmountMinorUnits] =
-    for {
-      ratePlanToApiId <- zuoraIdsForStage(config.Stage(stage.toString)).map(_.rateplanIdToApiId)
-      prices <- PricesFromZuoraCatalog(
-        ZuoraEnvironment(stage.toString),
-        GetFromS3.fetchString,
-        ratePlanToApiId.get,
-      ).toDisjunction.left.map(_.message)
-    } yield prices(catalogPlanId)(currency)
-
-  private def getContributionAmount(
-      stage: Stage,
-      price: BigDecimal,
-      currency: Currency,
-      billingPeriod: BillingPeriod,
-  ): IO[ErrorResponse, BigDecimal] =
-    // work out how much of what the user is paying can be treated as a contribution (total amount - cost of sub)
-    val catalogPlanId =
-      if (billingPeriod == Monthly)
-        MonthlySupporterPlus
-      else
-        AnnualSupporterPlus
-    ZIO
-      .fromEither(
-        getSubscriptionPriceInMinorUnits(stage, catalogPlanId, currency)
-          .map(subscriptionChargePrice => price - (subscriptionChargePrice.value / 100)),
-      )
-      .mapError(x => InternalServerError(x))
-
-  def getRatePlans(
-      billingPeriod: BillingPeriod,
-      currency: Currency,
-      ratePlanIdToRemove: String,
-      price: BigDecimal,
-  ): ZIO[Stage, ErrorResponse, (List[AddRatePlan], List[RemoveRatePlan])] =
-    for {
-      date <- Clock.currentDateTime.map(_.toLocalDate)
-      stage <- ZIO.service[Stage]
-      productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
-      overrideAmount <- getContributionAmount(stage, price, currency, billingPeriod)
-      chargeOverride = ChargeOverrides(
-        price = Some(overrideAmount),
-        productRatePlanChargeId = productSwitchRatePlanIds.supporterPlusRatePlanIds.contributionRatePlanChargeId,
-      )
-      addRatePlan = AddRatePlan(
-        date,
-        productSwitchRatePlanIds.supporterPlusRatePlanIds.ratePlanId,
-        chargeOverrides = List(chargeOverride),
-      )
-      removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
-    } yield (List(addRatePlan), List(removeRatePlan))
-
   private def doPreview(
       subscriptionName: SubscriptionName,
       price: BigDecimal,
@@ -296,108 +195,6 @@ object RecurringContributionToSupporterPlus {
     )
   } yield previewResult
 
-  /*
-     This function is used to adjust the invoice item for the subscription charge
-   */
-  private def adjustNonCollectedInvoice(
-      invoiceId: String,
-      supporterPlusRatePlanIds: SupporterPlusRatePlanIds,
-      subscriptionName: SubscriptionName,
-      balanceToAdjust: BigDecimal,
-  ): ZIO[InvoiceItemAdjustment with GetInvoiceItems, ErrorResponse, Unit] =
-    for {
-      _ <- ZIO.log(s"Attempting to adjust invoice $invoiceId")
-      invoiceResponse <- GetInvoiceItems.get(invoiceId)
-      invoiceItems = invoiceResponse.invoiceItems
-      invoiceItem <- ZIO
-        .fromOption(
-          invoiceItems.find(
-            _.productRatePlanChargeId == supporterPlusRatePlanIds.subscriptionRatePlanChargeId,
-          ),
-        )
-        .orElseFail(
-          InternalServerError(s"Could not find invoice item for ratePlanChargeId ${subscriptionName.value}"),
-        )
-      _ <- InvoiceItemAdjustment.update(
-        invoiceId,
-        balanceToAdjust,
-        invoiceItem.id,
-        "Credit",
-      )
-    } yield ()
-
-  private def getSupporterPlusRatePlanIds(billingPeriod: BillingPeriod) = for {
-    stage <- ZIO.service[Stage]
-    productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
-  } yield productSwitchRatePlanIds.supporterPlusRatePlanIds
-  private def getNewTermLengthInDays(today: LocalDate, termStartDate: LocalDate): String =
-    Math.max(ChronoUnit.DAYS.between(termStartDate, today).toInt, 1).toString
-
-  private def updateWithExistingTerm(
-      subscriptionName: SubscriptionName,
-      billingPeriod: BillingPeriod,
-      currency: Currency,
-      currentRatePlanId: String,
-      price: BigDecimal,
-  ) = {
-    for {
-      updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
-        case (addRatePlan, removeRatePlan) =>
-          SwitchProductUpdateRequest(
-            add = addRatePlan,
-            remove = removeRatePlan,
-            collect = None,
-            currentTerm = None,
-            currentTermPeriodType = None,
-            runBilling = Some(true),
-            preview = Some(false),
-          )
-      }
-      updateResponse <- SubscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
-      invoiceId <- ZIO
-        .fromOption(updateResponse.invoiceId)
-        .orElseFail(InternalServerError("invoiceId was null in the response from subscription update"))
-    } yield invoiceId
-  }
-
-  private def updateWithTermRenewal(
-      // stage: Stage,
-      today: LocalDate,
-      termStartDate: LocalDate,
-      subscriptionName: SubscriptionName,
-      billingPeriod: BillingPeriod,
-      currency: Currency,
-      currentRatePlanId: String,
-      price: BigDecimal,
-  ): ZIO[TermRenewal with Stage with GetSubscription with SubscriptionUpdate, ErrorResponse, String] = {
-    val newTermLength = getNewTermLengthInDays(today, termStartDate)
-    for {
-      updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
-        case (addRatePlan, removeRatePlan) =>
-          SwitchProductUpdateRequest(
-            add = addRatePlan,
-            remove = removeRatePlan,
-            collect = None,
-            currentTerm = Some(newTermLength),
-            currentTermPeriodType = Some("Day"),
-            runBilling = Some(false),
-            preview = Some(false),
-          )
-      }
-      updateResponse <- SubscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
-
-      // productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
-
-      // Renew the subscription
-      renewalResult <- TermRenewal.renewSubscription(subscriptionName, collectPayment = false)
-
-      invoiceId <- ZIO
-        .fromOption(renewalResult.invoiceId)
-        .orElseFail(InternalServerError("invoiceId was null in the response from term renewal"))
-    } yield invoiceId
-
-  }
-
   private def doUpdate(
       subscriptionName: SubscriptionName,
       price: BigDecimal,
@@ -424,7 +221,6 @@ object RecurringContributionToSupporterPlus {
     OutputBody,
   ] = {
     import ratePlanCharge.billingPeriod
-
     for {
       _ <- ZIO.log(
         s"Performing product move update with switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
@@ -436,12 +232,9 @@ object RecurringContributionToSupporterPlus {
       subscription <- GetSubscription.get(subscriptionName)
 
       // To avoid problems with charges not aligning correctly with the term and resulting in unpredictable
-      // billing dates and amounts, we need to start a new term for the new subscription version.
-      // To do this we reduce the the current term length so that it ends today in the update subscription request
-      // and then renew the sub using a separate request
-
+      // billing dates and amounts, we need to start a new term subscriptions which are switched on any day other
+      // than a term start date.
       termStartedToday = subscription.termStartDate.isEqual(today)
-
       invoiceId <-
         if (termStartedToday)
           updateWithExistingTerm(
@@ -462,15 +255,14 @@ object RecurringContributionToSupporterPlus {
             price,
           )
 
-      _ <- ZIO.log(s"Invoice id is $invoiceId")
-
-      // Get invoice with invoice id
-      invoiceBalance <- GetInvoice.get(invoiceId).map(_.balance)
-
       account <- accountFuture.join
 
+      // Get the amount of the invoice with which was created by the product switch
+      _ <- ZIO.log(s"Invoice generated by update has id of $invoiceId")
+      invoiceBalance <- GetInvoice.get(invoiceId).map(_.balance)
+
       /*
-        If the amount payable today is less than 0.50, we don't want to collect payment. Stripe has a minimum charge of 50 cents.
+        If the amount payable today is less than 0.50, we don't want to collect payment because Stripe has a minimum charge of 50 cents.
         Instead we write-off the invoices in the `adjustNonCollectedInvoices` function.
        */
       paidAmount <-
@@ -494,10 +286,11 @@ object RecurringContributionToSupporterPlus {
           ).as(BigDecimal(0))
         }
 
+      _ <- ZIO.log(s"The amount paid on switch by the customer was $paidAmount")
+
       identityId <- ZIO
         .fromOption(account.basicInfo.IdentityId__c)
         .orElseFail(InternalServerError(s"identityId is null for subscription name ${subscriptionName.value}"))
-
       billingPeriodValue <- billingPeriod.value
 
       emailFuture <- SQS
@@ -568,6 +361,201 @@ object RecurringContributionToSupporterPlus {
       s"Product move completed successfully with subscription number ${subscriptionName.value} and switch type ${SwitchType.RecurringContributionToSupporterPlus.id}",
     )
   }
+
+  private def updateWithExistingTerm(
+      subscriptionName: SubscriptionName,
+      billingPeriod: BillingPeriod,
+      currency: Currency,
+      currentRatePlanId: String,
+      price: BigDecimal,
+  ) = {
+    for {
+      updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
+        case (addRatePlan, removeRatePlan) =>
+          SwitchProductUpdateRequest(
+            add = addRatePlan,
+            remove = removeRatePlan,
+            collect = None,
+            currentTerm = None,
+            currentTermPeriodType = None,
+            runBilling = Some(true),
+            preview = Some(false),
+          )
+      }
+      updateResponse <- SubscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
+      invoiceId <- ZIO
+        .fromOption(updateResponse.invoiceId)
+        .orElseFail(InternalServerError("invoiceId was null in the response from subscription update"))
+    } yield invoiceId
+  }
+  private def updateWithTermRenewal(
+      today: LocalDate,
+      termStartDate: LocalDate,
+      subscriptionName: SubscriptionName,
+      billingPeriod: BillingPeriod,
+      currency: Currency,
+      currentRatePlanId: String,
+      price: BigDecimal,
+  ): ZIO[TermRenewal with Stage with GetSubscription with SubscriptionUpdate, ErrorResponse, String] = {
+    // To start a new term for this subscription we reduce the the current term length so that it ends today in
+    // the update subscription request, and then renew the sub using a separate request
+    val newTermLength = getNewTermLengthInDays(today, termStartDate)
+    for {
+      updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
+        case (addRatePlan, removeRatePlan) =>
+          SwitchProductUpdateRequest(
+            add = addRatePlan,
+            remove = removeRatePlan,
+            collect = None,
+            currentTerm = Some(newTermLength),
+            currentTermPeriodType = Some("Day"),
+            runBilling =
+              Some(false), // We will run the billing after all changes are made to reduce the number of invoices
+            preview = Some(false),
+          )
+      }
+      updateResponse <- SubscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
+      renewalResult <- TermRenewal.renewSubscription(subscriptionName, collectPayment = false)
+      invoiceId <- ZIO
+        .fromOption(renewalResult.invoiceId)
+        .orElseFail(InternalServerError("invoiceId was null in the response from term renewal"))
+    } yield invoiceId
+  }
+  private def getProductSwitchRatePlanIds(
+      stage: Stage,
+      billingPeriod: BillingPeriod,
+  ): Either[ErrorResponse, ProductSwitchRatePlanIds] = {
+    zuoraIdsForStage(config.Stage(stage.toString)).left
+      .map(err => InternalServerError(err))
+      .flatMap { zuoraIds =>
+        import zuoraIds.supporterPlusZuoraIds.{annualV2, monthlyV2}
+        import zuoraIds.contributionsZuoraIds.{annual, monthly}
+
+        billingPeriod match {
+          case Monthly =>
+            Right(
+              ProductSwitchRatePlanIds(
+                SupporterPlusRatePlanIds(
+                  monthlyV2.productRatePlanId.value,
+                  monthlyV2.productRatePlanChargeId.value,
+                  monthlyV2.contributionProductRatePlanChargeId.value,
+                ),
+                RecurringContributionRatePlanIds(monthly.productRatePlanChargeId.value),
+              ),
+            )
+          case Annual =>
+            Right(
+              ProductSwitchRatePlanIds(
+                SupporterPlusRatePlanIds(
+                  annualV2.productRatePlanId.value,
+                  annualV2.productRatePlanChargeId.value,
+                  annualV2.contributionProductRatePlanChargeId.value,
+                ),
+                RecurringContributionRatePlanIds(annual.productRatePlanChargeId.value),
+              ),
+            )
+          case _ => Left(InternalServerError(s"Error when matching on billingPeriod $billingPeriod"))
+        }
+      }
+  }
+  private def getSubscriptionPriceInMinorUnits(
+      stage: Stage,
+      catalogPlanId: PlanId,
+      currency: Currency,
+  ): Either[String, AmountMinorUnits] =
+    for {
+      ratePlanToApiId <- zuoraIdsForStage(config.Stage(stage.toString)).map(_.rateplanIdToApiId)
+      prices <- PricesFromZuoraCatalog(
+        ZuoraEnvironment(stage.toString),
+        GetFromS3.fetchString,
+        ratePlanToApiId.get,
+      ).toDisjunction.left.map(_.message)
+    } yield prices(catalogPlanId)(currency)
+
+  private def getContributionAmount(
+      stage: Stage,
+      price: BigDecimal,
+      currency: Currency,
+      billingPeriod: BillingPeriod,
+  ): IO[ErrorResponse, BigDecimal] =
+    // work out how much of what the user is paying can be treated as a contribution (total amount - cost of sub)
+    val catalogPlanId =
+      if (billingPeriod == Monthly)
+        MonthlySupporterPlus
+      else
+        AnnualSupporterPlus
+    ZIO
+      .fromEither(
+        getSubscriptionPriceInMinorUnits(stage, catalogPlanId, currency)
+          .map(subscriptionChargePrice => price - (subscriptionChargePrice.value / 100)),
+      )
+      .mapError(x => InternalServerError(x))
+
+  def getRatePlans(
+      billingPeriod: BillingPeriod,
+      currency: Currency,
+      ratePlanIdToRemove: String,
+      price: BigDecimal,
+  ): ZIO[Stage, ErrorResponse, (List[AddRatePlan], List[RemoveRatePlan])] =
+    for {
+      date <- Clock.currentDateTime.map(_.toLocalDate)
+      stage <- ZIO.service[Stage]
+      productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
+      overrideAmount <- getContributionAmount(stage, price, currency, billingPeriod)
+      chargeOverride = ChargeOverrides(
+        price = Some(overrideAmount),
+        productRatePlanChargeId = productSwitchRatePlanIds.supporterPlusRatePlanIds.contributionRatePlanChargeId,
+      )
+      addRatePlan = AddRatePlan(
+        date,
+        productSwitchRatePlanIds.supporterPlusRatePlanIds.ratePlanId,
+        chargeOverrides = List(chargeOverride),
+      )
+      removeRatePlan = RemoveRatePlan(date, ratePlanIdToRemove)
+    } yield (List(addRatePlan), List(removeRatePlan))
+
+  /*
+     This function is used to adjust the invoice item for the supporter plus subscription charge
+   */
+  private def adjustNonCollectedInvoice(
+      invoiceId: String,
+      supporterPlusRatePlanIds: SupporterPlusRatePlanIds,
+      subscriptionName: SubscriptionName,
+      balanceToAdjust: BigDecimal,
+  ): ZIO[InvoiceItemAdjustment with GetInvoiceItems, ErrorResponse, Unit] =
+    for {
+      _ <- ZIO.log(s"Attempting to adjust invoice $invoiceId")
+      invoiceResponse <- GetInvoiceItems.get(invoiceId)
+      invoiceItems = invoiceResponse.invoiceItems
+      invoiceItem <- ZIO
+        .fromOption(
+          invoiceItems.find(
+            _.productRatePlanChargeId == supporterPlusRatePlanIds.subscriptionRatePlanChargeId,
+          ),
+        )
+        .orElseFail(
+          InternalServerError(s"Could not find invoice item for ratePlanChargeId ${subscriptionName.value}"),
+        )
+      _ <- InvoiceItemAdjustment.update(
+        invoiceId,
+        balanceToAdjust,
+        invoiceItem.id,
+        "Credit",
+      )
+    } yield ()
+
+  private def getSupporterPlusRatePlanIds(billingPeriod: BillingPeriod) = for {
+    stage <- ZIO.service[Stage]
+    productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(stage, billingPeriod))
+  } yield productSwitchRatePlanIds.supporterPlusRatePlanIds
+  private def getNewTermLengthInDays(today: LocalDate, termStartDate: LocalDate): String =
+    Math.max(ChronoUnit.DAYS.between(termStartDate, today).toInt, 1).toString
+  private def getSingleOrNotEligible[A](list: List[A], message: String): IO[ErrorResponse, A] =
+    list.length match {
+      case 1 => ZIO.succeed(list.head)
+      case _ => ZIO.fail(InternalServerError(message))
+    }
+
 }
 given JsonDecoder[SubscriptionUpdateInvoice] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoice]
 given JsonDecoder[SubscriptionUpdateInvoiceItem] = DeriveJsonDecoder.gen[SubscriptionUpdateInvoiceItem]
