@@ -262,8 +262,8 @@ object RecurringContributionToSupporterPlus {
       invoiceBalance <- GetInvoice.get(invoiceId).map(_.balance)
 
       /*
-        If the amount payable today is less than 0.50, we don't want to collect payment because Stripe has a minimum charge of 50 cents.
-        Instead we write-off the invoices in the `adjustNonCollectedInvoices` function.
+        If the amount payable today is less than 0.50, we don't want to collect payment because Stripe has a minimum
+        charge of 50 cents. Instead we write-off the invoices in the `adjustNonCollectedInvoices` function.
        */
       paidAmount <-
         if (invoiceBalance < 0 || invoiceBalance >= 0.5) {
@@ -375,10 +375,12 @@ object RecurringContributionToSupporterPlus {
           SwitchProductUpdateRequest(
             add = addRatePlan,
             remove = removeRatePlan,
-            collect = None,
             currentTerm = None,
             currentTermPeriodType = None,
-            runBilling = Some(true),
+            // We will run the billing after all changes are made to reduce the number of invoices
+            runBilling = Some(false),
+            // We will collect via a separate create payment call if the amount payable is not too small
+            collect = None,
             preview = Some(false),
           )
       }
@@ -406,11 +408,12 @@ object RecurringContributionToSupporterPlus {
           SwitchProductUpdateRequest(
             add = addRatePlan,
             remove = removeRatePlan,
-            collect = None,
             currentTerm = Some(newTermLength),
             currentTermPeriodType = Some("Day"),
-            runBilling =
-              Some(false), // We will run the billing after all changes are made to reduce the number of invoices
+            // We will run the billing after all changes are made to reduce the number of invoices
+            runBilling = Some(false),
+            // We will collect via a separate create payment call if the amount payable is not too small
+            collect = None,
             preview = Some(false),
           )
       }

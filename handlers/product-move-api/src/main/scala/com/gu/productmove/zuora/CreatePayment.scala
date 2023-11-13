@@ -61,6 +61,7 @@ private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment:
       AppliedInvoiceAmount = amount,
       EffectiveDate = today,
     )
+    // https://developer.zuora.com/api-references/older-api/operation/Object_POSTPayment/
     response <- zuoraGet
       .post[CreatePaymentRequest, CreatePaymentResponse](
         relativeUrl = uri"object/payment",
