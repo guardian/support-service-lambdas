@@ -27,18 +27,21 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): IO[ErrorResponse, Response] =
     for {
+      _ <- ZIO.log(s"Sending POST to $relativeUrl with body ${input.toJson}")
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).post(relativeUrl))
+      _ <- ZIO.log(s"Response is $response")
       parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck))
     } yield parsedBody
 
   override def put[Request: JsonEncoder, Response: JsonDecoder](
       relativeUrl: Uri,
       input: Request,
+      zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): IO[ErrorResponse, Response] =
     for {
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).put(relativeUrl))
       parsedBody <- ZIO.fromEither(
-        ZuoraRestBody.parseIfSuccessful[Response](response, ZuoraSuccessCheck.SuccessCheckLowercase),
+        ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck),
       )
     } yield parsedBody
 
@@ -52,7 +55,11 @@ trait ZuoraGet:
       input: Request,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): IO[ErrorResponse, Response]
-  def put[Request: JsonEncoder, Response: JsonDecoder](relativeUrl: Uri, input: Request): IO[ErrorResponse, Response]
+  def put[Request: JsonEncoder, Response: JsonDecoder](
+      relativeUrl: Uri,
+      input: Request,
+      zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
+  ): IO[ErrorResponse, Response]
 
 object ZuoraGet {
   def get[T: JsonDecoder](
@@ -71,6 +78,7 @@ object ZuoraGet {
   def put[Request: JsonEncoder, Response: JsonDecoder](
       relativeUrl: Uri,
       input: Request,
+      zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): ZIO[ZuoraGet, ErrorResponse, Response] =
-    ZIO.serviceWithZIO[ZuoraGet](_.put(relativeUrl, input))
+    ZIO.serviceWithZIO[ZuoraGet](_.put(relativeUrl, input, zuoraSuccessCheck))
 }

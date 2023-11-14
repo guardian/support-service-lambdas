@@ -20,7 +20,6 @@ object ProductMoveEndpointTypes {
   case class ExpectedInput(
       @description("Price of new Supporter Plus subscription") price: BigDecimal,
       @description("Whether to preview the move or to carry it out") preview: Boolean,
-      checkChargeAmountBeforeUpdate: Boolean,
       @description(
         "The User Id of the CSR performing the Switch. Populated only if the request comes from Salesforce",
       ) csrUserId: Option[String],

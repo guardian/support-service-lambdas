@@ -44,14 +44,17 @@ import com.gu.productmove.zuora.{
   AddRatePlan,
   CancellationResponse,
   ChargeOverrides,
+  CreatePaymentResponse,
   CreateSubscriptionResponse,
   DefaultPaymentMethod,
   GetAccount,
   GetCatalogue,
   GetSubscription,
   MockCatalogue,
+  MockCreatePayment,
   MockDynamo,
   MockGetAccount,
+  MockGetInvoice,
   MockGetInvoiceItems,
   MockGetSubscription,
   MockGetSubscriptionToCancel,
@@ -59,9 +62,11 @@ import com.gu.productmove.zuora.{
   MockSQS,
   MockSubscribe,
   MockSubscriptionUpdate,
+  MockTermRenewal,
   MockZuoraCancel,
   MockZuoraSetCancellationReason,
   RemoveRatePlan,
+  RenewalResponse,
   SubscriptionUpdatePreviewResponse,
   SubscriptionUpdateRequest,
   SubscriptionUpdateResponse,
@@ -69,7 +74,7 @@ import com.gu.productmove.zuora.{
 }
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
+import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionId, SubscriptionName}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import zio.*
 import zio.test.*
@@ -96,6 +101,10 @@ object HandlerSpec extends ZIOSpecDefault {
       (subscriptionName, expectedRequestBodyPreview2)
     val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse2)
     val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
+    val termRenewalInputsShouldBe: SubscriptionName =
+      SubscriptionName("subscription_name")
+    val termRenewalResponse = RenewalResponse(Some(true), Some("invoiceId"))
+    val termRenewalStubs = Map(termRenewalInputsShouldBe -> termRenewalResponse)
     val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)
     val getAccountStubs2 = Map(AccountNumber("accountNumber") -> getAccountResponse2)
     val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
@@ -110,10 +119,11 @@ object HandlerSpec extends ZIOSpecDefault {
       invoiceItemAdjustmentInputs -> List(InvoiceItemAdjustmentResult(true, "source_id")),
     )
     val getInvoiceItemsStubs = Map("89ad8casd9c0asdcaj89sdc98as" -> getInvoiceItemsResponse)
+    val getInvoiceStubs = Map("89ad8casd9c0asdcaj89sdc98as" -> getInvoiceResponse)
 
     suite("HandlerSpec")(
       test("productMove endpoint completes switch when charge amount is below 50 cents") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, true, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
@@ -149,16 +159,19 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test("productMove endpoint is successful for monthly sub (upsell)") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
@@ -180,18 +193,21 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test(
         "productMove endpoint is successful if customer neither pays nor is refunded on switch (monthly sub, upsell)",
       ) {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
@@ -201,11 +217,14 @@ object HandlerSpec extends ZIOSpecDefault {
 
         val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)) ++
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)) ++
           ZLayer.succeed(new MockSQS(sqsStubs)) ++
           ZLayer.succeed(new MockDynamo(dynamoStubs)) ++
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)) ++
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)) ++
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)) ++
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))) ++
           ZLayer.succeed(Stage.valueOf("PROD"))
 
         (for {
@@ -233,7 +252,7 @@ object HandlerSpec extends ZIOSpecDefault {
        */
 
       test("productMove endpoint completes if subscription is being switched early in morning on renewal date") {
-        val endpointJsonInputBody = ExpectedInput(15.00, true, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse2)
 
         (for {
@@ -252,18 +271,21 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse3))),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test(
         "(MembershipToRecurringContribution) productMove endpoint is successful",
       ) {
-        val endpointJsonInputBody = ExpectedInput(5.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(5.00, false, None, None)
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
           (subscriptionName, expectedRequestBody2)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
@@ -296,7 +318,7 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(layers)
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test("productMove endpoint returns 500 error if identityId does not exist") {
-        val endpointJsonInputBody = ExpectedInput(15.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("identityId is null for subscription name A-S00339056")
         (for {
@@ -317,16 +339,19 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs2, getPaymentMethodStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
-        val endpointJsonInputBody = ExpectedInput(50.00, false, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
         (for {
@@ -346,16 +371,19 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("PROD")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test("preview endpoint is successful (monthly sub, upsell)") {
-        val endpointJsonInputBody = ExpectedInput(15.00, true, false, None, None)
+        val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
           (subscriptionName, expectedRequestBodyPreview)
         val subscriptionUpdatePreviewStubs =
@@ -379,11 +407,14 @@ object HandlerSpec extends ZIOSpecDefault {
         }).provide(
           ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
           ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
+          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
           ZLayer.succeed(new MockSQS(sqsStubs)),
           ZLayer.succeed(new MockDynamo(dynamoStubs)),
           ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
           ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
           ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
+          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
+          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
           ZLayer.succeed(Stage.valueOf("CODE")),
         )
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked

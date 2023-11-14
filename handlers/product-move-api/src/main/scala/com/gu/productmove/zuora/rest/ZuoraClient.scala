@@ -96,8 +96,14 @@ object ZuoraRestBody {
   given JsonDecoder[Reason] = DeriveJsonDecoder.gen
 
   case class ZuoraSuccessCapitalised(Success: Boolean, reasons: Option[List[Reason]])
+  given JsonDecoder[ZuoraSuccessCapitalised] = DeriveJsonDecoder.gen
   case class ZuoraSuccessLowercase(success: Boolean, reasons: Option[List[Reason]])
+  given JsonDecoder[ZuoraSuccessLowercase] = DeriveJsonDecoder.gen
   case class ZuoraSuccessSize(size: Option[Int])
+  given JsonDecoder[ZuoraSuccessSize] = DeriveJsonDecoder.gen
+
+  def attemptDecode[A](body: String)(implicit decoder: JsonDecoder[A]) =
+    body.fromJson[A].left.map(InternalServerError.apply)
 
   def parseIfSuccessful[A: JsonDecoder](
       body: String,
@@ -106,22 +112,14 @@ object ZuoraRestBody {
     val isSuccessful: Either[ErrorResponse, Unit] = zuoraSuccessCheck match {
       case ZuoraSuccessCheck.SuccessCheckSize =>
         for {
-          zuoraResponse <- DeriveJsonDecoder
-            .gen[ZuoraSuccessSize]
-            .decodeJson(body)
-            .left
-            .map(InternalServerError.apply)
+          zuoraResponse <- attemptDecode[ZuoraSuccessSize](body)
           succeeded = zuoraResponse.size.isEmpty // size field only exists if it's not found.
           isSuccessful <- if (succeeded) Right(()) else Left(InternalServerError(s"size = 0, body: $body"))
         } yield ()
 
       case ZuoraSuccessCheck.SuccessCheckLowercase =>
         for {
-          zuoraResponse <- DeriveJsonDecoder
-            .gen[ZuoraSuccessLowercase]
-            .decodeJson(body)
-            .left
-            .map(InternalServerError.apply)
+          zuoraResponse <- attemptDecode[ZuoraSuccessLowercase](body)
           _ <-
             if (zuoraResponse.success) Right(())
             else
@@ -136,11 +134,7 @@ object ZuoraRestBody {
 
       case ZuoraSuccessCheck.SuccessCheckCapitalised =>
         for {
-          zuoraResponse <- DeriveJsonDecoder
-            .gen[ZuoraSuccessCapitalised]
-            .decodeJson(body)
-            .left
-            .map(InternalServerError.apply)
+          zuoraResponse <- attemptDecode[ZuoraSuccessCapitalised](body)
           isSuccessful <-
             if (zuoraResponse.Success) Right(())
             else

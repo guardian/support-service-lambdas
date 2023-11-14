@@ -20,8 +20,13 @@ object ProductMoveSpec extends ZIOSpecDefault {
         for {
           _ <- TestClock.setTime(Instant.now())
           _ <- RecurringContributionToSupporterPlus(
-            SubscriptionName("A-S00487531"),
-            ExpectedInput(20, false, false, None, None),
+            SubscriptionName("A-S00702950"),
+            ExpectedInput(
+              price = 120,
+              preview = false,
+              csrUserId = None,
+              caseId = None,
+            ),
           )
             .provide(
               GetSubscriptionLive.layer,
@@ -30,11 +35,14 @@ object ProductMoveSpec extends ZIOSpecDefault {
               ZuoraClientLive.layer,
               ZuoraGetLive.layer,
               SubscriptionUpdateLive.layer,
+              TermRenewalLive.layer,
               SQSLive.layer,
               GetAccountLive.layer,
               GuStageLive.layer,
               DynamoLive.layer,
               GetInvoiceItemsLive.layer,
+              GetInvoiceLive.layer,
+              CreatePaymentLive.layer,
               InvoiceItemAdjustmentLive.layer,
               SecretsLive.layer,
             )
@@ -46,8 +54,8 @@ object ProductMoveSpec extends ZIOSpecDefault {
         for {
           _ <- TestClock.setTime(Instant.now())
           output <- RecurringContributionToSupporterPlus(
-            SubscriptionName("A-S00217859"),
-            ExpectedInput(50, true, false, None, None),
+            SubscriptionName("A-S00716446"),
+            ExpectedInput(95, true, None, None),
           )
             .provide(
               GetSubscriptionLive.layer,
@@ -56,12 +64,15 @@ object ProductMoveSpec extends ZIOSpecDefault {
               ZuoraClientLive.layer,
               ZuoraGetLive.layer,
               SubscriptionUpdateLive.layer,
+              TermRenewalLive.layer,
               SQSLive.layer,
               GetAccountLive.layer,
               GuStageLive.layer,
               DynamoLive.layer,
               GetInvoiceItemsLive.layer,
+              GetInvoiceLive.layer,
               InvoiceItemAdjustmentLive.layer,
+              CreatePaymentLive.layer,
               SecretsLive.layer,
             )
         } yield {

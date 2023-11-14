@@ -20,6 +20,7 @@ import com.gu.productmove.zuora.Fixtures.{
   subscriptionsPreviewResponse2,
   subscriptionsPreviewResponse3,
 }
+import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
 import com.gu.productmove.{EmailMessage, EmailPayload, RCtoSPEmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
@@ -64,6 +65,7 @@ val getSubscriptionResponse = GetSubscriptionResponse(
   "A-S00339056",
   "zuoraAccountId",
   AccountNumber("accountNumber"),
+  termStartDate = LocalDate.of(2023, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",
@@ -116,6 +118,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
   id = "8ad0823f841cf4e601841e61f6aa8923",
   accountNumber = AccountNumber("A00433231"),
   accountId = "8ad0823f841cf4e601841e61f6aads87",
+  termStartDate = LocalDate.of(2022, 10, 28),
   ratePlans = List(
     RatePlan(
       productName = "Contributor",
@@ -166,6 +169,7 @@ val getSubscriptionResponse3 = GetSubscriptionResponse(
   "A-S00339056",
   "zuoraAccountId",
   AccountNumber("accountNumber"),
+  termStartDate = LocalDate.of(2023, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",
@@ -179,9 +183,10 @@ val getSubscriptionResponse3 = GetSubscriptionResponse(
 )
 
 val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
-  "subscriptionName",
-  "zuoraAccountId",
-  AccountNumber("accountNumber"),
+  id = "subscriptionName",
+  accountId = "zuoraAccountId",
+  accountNumber = AccountNumber("accountNumber"),
+  termStartDate = LocalDate.of(2023, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "R1",
@@ -212,6 +217,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
 //-----------------------------------------------------
 val getAccountResponse = GetAccountResponse(
   BasicInfo(
+    "id",
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     Some("12345"),
     "sfContactId",
@@ -224,6 +230,7 @@ val getAccountResponse = GetAccountResponse(
 
 val getAccountResponse2 = GetAccountResponse(
   BasicInfo(
+    "id",
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     None,
     "sfContactId",
@@ -236,6 +243,7 @@ val getAccountResponse2 = GetAccountResponse(
 
 val directDebitGetAccountResponse = GetAccountResponse(
   BasicInfo(
+    "id",
     DefaultPaymentMethod("paymentMethodId", None),
     None,
     "sfContactId",
@@ -671,3 +679,8 @@ val getInvoiceItemsResponse = GetInvoiceItemsResponse(
     ),
   ),
 )
+
+//-----------------------------------------------------
+// Stubs for GetInvoice service
+//-----------------------------------------------------
+val getInvoiceResponse = GetInvoiceResponse(balance = 5)
