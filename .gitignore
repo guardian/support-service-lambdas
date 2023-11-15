@@ -9,3 +9,4 @@ project/.bloop/
 project/project/
 .bloop/
 .DS_Store
+node_modules/
