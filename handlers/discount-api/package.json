@@ -4,6 +4,6 @@
     "test": "jest",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
-    "package": "cd dist; zip -qr ../cdk/failed-national-delivery-processor/failed-national-delivery-processor.zip ./*"
+    "package": "cd target; zip -qr discount-api.zip ./*.js"
   }
 }

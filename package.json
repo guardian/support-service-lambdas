@@ -1,7 +1,7 @@
 {
 	"scripts": {
 		"build": "pnpm --stream -r run build",
-		"bundle": "pnpm --stream -r run bundle",
+		"package": "pnpm --stream -r run package",
 		"type-check": "pnpm --stream -r run type-check",
 		"clean": "rm -rf .parcel-cache && pnpm -r run clean"
 	},
@@ -9,7 +9,9 @@
 		"@guardian/eslint-config-typescript": "^7.0.0",
 		"esbuild": "^0.19.5",
 		"eslint": "^8.53.0",
-		"typescript": "^4.7.3"
+		"typescript": "^4.7.3",
+		"@types/aws-lambda": "^8.10.126",
+		"@types/node": "^20.9.0"
 	},
 	"dependencies": {
 		"@aws-sdk/client-lambda": "^3.451.0",
