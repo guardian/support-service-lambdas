@@ -81,7 +81,7 @@ new SingleContributionSalesforceWrites(
 new DiscountApi(app, 'discount-api-CODE', {
 	stack: 'membership',
 	stage: 'CODE',
-	domainName: `discount-api.code.${membershipApisDomain}`,
+	domainName: `discount-api-code.${membershipApisDomain}`,
 	hostedZoneId,
 	certificateId,
 });
