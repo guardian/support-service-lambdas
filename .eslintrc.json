@@ -1,0 +1,3 @@
+{
+	"extends": "@guardian/eslint-config-typescript"
+}
