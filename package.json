@@ -8,15 +8,15 @@
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "^7.0.0",
-		"esbuild": "^0.19.5",
-		"eslint": "^8.53.0",
-		"typescript": "^4.7.3",
+		"@guardian/prettier": "^5.0.0",
+		"prettier": "^3.1.0",
+		"typescript": "^5.2.2",
 		"@types/aws-lambda": "^8.10.126",
-		"@types/node": "^20.9.0"
+		"@types/node": "^20.9.0",
+		"esbuild": "^0.19.5",
+		"eslint": "^8.53.0"
 	},
 	"dependencies": {
-		"@aws-sdk/client-lambda": "^3.451.0",
-		"@guardian/prettier": "^5.0.0",
-		"prettier": "^3.1.0"
+		"@aws-sdk/client-lambda": "^3.451.0"
 	}
 }

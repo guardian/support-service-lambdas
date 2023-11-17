@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The Acquisition Events API stack matches the snapshot 1`] = `
+exports[`The Discount API stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -873,7 +873,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The Acquisition Events API stack matches the snapshot 2`] = `
+exports[`The Discount API stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [

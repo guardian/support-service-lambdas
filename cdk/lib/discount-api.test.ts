@@ -3,7 +3,7 @@ import { Template } from 'aws-cdk-lib/assertions';
 import { certificateId, hostedZoneId, membershipApisDomain } from '../bin/cdk';
 import { DiscountApi } from './discount-api';
 
-describe('The Acquisition Events API stack', () => {
+describe('The Discount API stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 		const codeStack = new DiscountApi(app, 'discount-api-CODE', {
