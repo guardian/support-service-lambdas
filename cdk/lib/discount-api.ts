@@ -22,7 +22,7 @@ export class DiscountApi extends GuStack {
 	constructor(scope: App, id: string, props: DiscountApiProps) {
 		super(scope, id, props);
 
-		const app = 'acquisition-events-api';
+		const app = 'discount-api';
 
 		const commonEnvironmentVariables = {
 			App: app,
@@ -34,19 +34,19 @@ export class DiscountApi extends GuStack {
 		const discountApiLambda = new GuApiLambda(this, 'discount-api-lambda', {
 			description:
 				'A lambda that enables the addition of discounts to existing subscriptions',
-			functionName: `${app}-cdk-${this.stage}`,
+			functionName: `${app}-${this.stage}`,
 			fileName: `${app}.zip`,
-			handler: 'com.gu.discountApi.Lambda::handler',
-			runtime: Runtime.JAVA_8,
+			handler: 'index.handler',
+			runtime: Runtime.NODEJS_18_X,
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
 			// Create an alarm
 			monitoringConfiguration: {
 				http5xxAlarm: { tolerated5xxPercentage: 5 },
-				snsTopicName: 'conversion-dev',
+				snsTopicName: 'retention-dev',
 			},
-			app: 'acquisition-events-api',
+			app: 'discount-api',
 			api: {
 				id: `${app}-${this.stage}`,
 				description: 'API Gateway created by CDK',
@@ -55,7 +55,7 @@ export class DiscountApi extends GuStack {
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
-			`ACQUISITION-EVENTS-API-CDK- ${this.stage} ${shortDescription}`;
+			`DISCOUNT-API-${this.stage} ${shortDescription}`;
 
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
@@ -64,11 +64,11 @@ export class DiscountApi extends GuStack {
 			app,
 			alarmName: alarmName('API gateway 4XX response'),
 			alarmDescription: alarmDescription(
-				'Acquisition Events API received an invalid request',
+				'Discount API received an invalid request',
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
-			snsTopicName: 'contributions-dev',
+			snsTopicName: 'retention-dev',
 			actionsEnabled: this.stage === 'PROD',
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
@@ -94,12 +94,8 @@ export class DiscountApi extends GuStack {
 
 		new CfnBasePathMapping(this, 'BasePathMapping', {
 			domainName: cfnDomainName.ref,
-			// Uncomment the lines below to reroute traffic to the new API Gateway instance
 			restApiId: discountApiLambda.api.restApiId,
 			stage: discountApiLambda.api.deploymentStage.stageName,
-			// Uncomment the lines below to reroute traffic to the old (existing) API Gateway instance
-			// restApiId: yamlDefinedResources.getResource("ServerlessRestApi").ref,
-			// stage: props.stage,
 		});
 
 		new CfnRecordSet(this, 'DNSRecord', {
@@ -111,17 +107,17 @@ export class DiscountApi extends GuStack {
 		});
 
 		// ---- Apply policies ---- //
-		const ssmInlinePolicy: Policy = new Policy(this, 'SSM inline policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['ssm:GetParametersByPath'],
-					resources: [
-						`arn:aws:ssm:${this.region}:${this.account}:parameter/acquisition-events-api/bigquery-config/${props.stage}/*`,
-					],
-				}),
-			],
-		});
+		// const ssmInlinePolicy: Policy = new Policy(this, 'SSM inline policy', {
+		// 	statements: [
+		// 		new PolicyStatement({
+		// 			effect: Effect.ALLOW,
+		// 			actions: ['ssm:GetParametersByPath'],
+		// 			resources: [
+		// 				`arn:aws:ssm:${this.region}:${this.account}:parameter/discount-api/bigquery-config/${props.stage}/*`,
+		// 			],
+		// 		}),
+		// 	],
+		// });
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [
@@ -133,7 +129,7 @@ export class DiscountApi extends GuStack {
 			],
 		});
 
-		discountApiLambda.role?.attachInlinePolicy(ssmInlinePolicy);
+		//discountApiLambda.role?.attachInlinePolicy(ssmInlinePolicy);
 		discountApiLambda.role?.attachInlinePolicy(s3InlinePolicy);
 	}
 }
