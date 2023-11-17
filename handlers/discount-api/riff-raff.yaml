@@ -17,7 +17,7 @@ deployments:
   discount-api:
     type: aws-lambda
     parameters:
-      fileName: discount-api.jar
+      fileName: discount-api.zip
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
