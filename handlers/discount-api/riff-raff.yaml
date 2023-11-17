@@ -10,7 +10,9 @@ deployments:
     type: cloud-formation
     app: discount-api
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: discount-api-CODE.template.json
+        PROD: discount-api-PROD.template.json
 
   discount-api:
     type: aws-lambda
