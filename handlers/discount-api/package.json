@@ -4,6 +4,7 @@
     "test": "jest",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
-    "package": "pnpm run build && cd target; zip -qr discount-api.zip ./*.js"
+    "lint": "eslint src/**/*.ts",
+    "package": "pnpm type-check && pnpm lint && pnpm build && cd target; zip -qr discount-api.zip ./*.js"
   }
 }

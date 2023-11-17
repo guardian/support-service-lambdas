@@ -106,19 +106,6 @@ export class DiscountApi extends GuStack {
 			resourceRecords: [cfnDomainName.attrRegionalDomainName],
 		});
 
-		// ---- Apply policies ---- //
-		// const ssmInlinePolicy: Policy = new Policy(this, 'SSM inline policy', {
-		// 	statements: [
-		// 		new PolicyStatement({
-		// 			effect: Effect.ALLOW,
-		// 			actions: ['ssm:GetParametersByPath'],
-		// 			resources: [
-		// 				`arn:aws:ssm:${this.region}:${this.account}:parameter/discount-api/bigquery-config/${props.stage}/*`,
-		// 			],
-		// 		}),
-		// 	],
-		// });
-
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [
 				new PolicyStatement({
@@ -129,7 +116,6 @@ export class DiscountApi extends GuStack {
 			],
 		});
 
-		//discountApiLambda.role?.attachInlinePolicy(ssmInlinePolicy);
 		discountApiLambda.role?.attachInlinePolicy(s3InlinePolicy);
 	}
 }
