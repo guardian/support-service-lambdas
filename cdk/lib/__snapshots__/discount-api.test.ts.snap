@@ -12,14 +12,14 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "discountapilambdaacquisitioneventsapiCODEEndpoint8CC7C02E": {
+    "discountapilambdadiscountapiCODEEndpointB74B96D0": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+              "Ref": "discountapilambdadiscountapiCODEE1E5C869",
             },
             ".execute-api.",
             {
@@ -31,7 +31,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
             },
             "/",
             {
-              "Ref": "discountapilambdaacquisitioneventsapiCODEDeploymentStageprod4BE37FE1",
+              "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
             },
             "/",
           ],
@@ -63,18 +63,18 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":contributions-dev",
+                ":retention-dev",
               ],
             ],
           },
         ],
-        "AlarmDescription": "Impact - Acquisition Events API received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "ACQUISITION-EVENTS-API-CDK- CODE API gateway 4XX response",
+        "AlarmDescription": "Impact - Discount API received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "DISCOUNT-API-CODE API gateway 4XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "acquisition-events-api-CODE",
+            "Value": "discount-api-CODE",
           },
         ],
         "EvaluationPeriods": 1,
@@ -86,7 +86,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "ApiGatewayHigh5xxPercentageAlarmAcquisitioneventsapi36134E2A": {
+    "ApiGatewayHigh5xxPercentageAlarmDiscountapi1042173C": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -102,20 +102,20 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":retention-dev",
               ],
             ],
           },
         ],
-        "AlarmDescription": "acquisition-events-api exceeded 5% error rate",
-        "AlarmName": "High 5XX error % from acquisition-events-api (ApiGateway) in CODE",
+        "AlarmDescription": "discount-api exceeded 5% error rate",
+        "AlarmName": "High 5XX error % from discount-api (ApiGateway) in CODE",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
           {
             "Expression": "100*m1/m2",
             "Id": "expr_1",
-            "Label": "% of 5XX responses served for acquisition-events-api",
+            "Label": "% of 5XX responses served for discount-api",
           },
           {
             "Id": "m1",
@@ -124,7 +124,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-acquisition-events-api-CODE",
+                    "Value": "membership-CODE-discount-api-CODE",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -142,7 +142,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-acquisition-events-api-CODE",
+                    "Value": "membership-CODE-discount-api-CODE",
                   },
                 ],
                 "MetricName": "Count",
@@ -165,10 +165,10 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
         },
         "Stage": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEDeploymentStageprod4BE37FE1",
+          "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -252,42 +252,6 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SSMinlinepolicyB56CB2A2": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/acquisition-events-api/bigquery-config/CODE/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SSMinlinepolicyB56CB2A2",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "discountapilambda972ABED6": {
       "DependsOn": [
         "discountapilambdaServiceRoleDefaultPolicy91B9A9BA",
@@ -298,21 +262,21 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/acquisition-events-api/acquisition-events-api.zip",
+          "S3Key": "membership/CODE/discount-api/discount-api.zip",
         },
         "Description": "A lambda that enables the addition of discounts to existing subscriptions",
         "Environment": {
           "Variables": {
-            "APP": "acquisition-events-api",
-            "App": "acquisition-events-api",
+            "APP": "discount-api",
+            "App": "discount-api",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stack": "membership",
             "Stage": "CODE",
           },
         },
-        "FunctionName": "acquisition-events-api-cdk-CODE",
-        "Handler": "com.gu.discountApi.Lambda::handler",
+        "FunctionName": "discount-api-CODE",
+        "Handler": "index.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -320,11 +284,11 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "java8",
+        "Runtime": "nodejs18.x",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -378,7 +342,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -439,7 +403,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/acquisition-events-api/acquisition-events-api.zip",
+                      "/membership/CODE/discount-api/discount-api.zip",
                     ],
                   ],
                 },
@@ -460,7 +424,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/acquisition-events-api",
+                    ":parameter/CODE/membership/discount-api",
                   ],
                 ],
               },
@@ -483,7 +447,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/acquisition-events-api/*",
+                    ":parameter/CODE/membership/discount-api/*",
                   ],
                 ],
               },
@@ -500,85 +464,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "discountapilambdaacquisitioneventsapiCODEANYApiPermissionTestdiscountapiCODEdiscountapilambdaacquisitioneventsapiCODE7FDA8393ANY965AF6DA": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdaacquisitioneventsapiCODEANYApiPermissiondiscountapiCODEdiscountapilambdaacquisitioneventsapiCODE7FDA8393ANY6AA25813": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
-              },
-              "/",
-              {
-                "Ref": "discountapilambdaacquisitioneventsapiCODEDeploymentStageprod4BE37FE1",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdaacquisitioneventsapiCODEANYC4C0BE3D": {
+    "discountapilambdadiscountapiCODEANY827A81C0": {
       "Properties": {
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
@@ -611,25 +497,103 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
         },
         "ResourceId": {
           "Fn::GetAtt": [
-            "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+            "discountapilambdadiscountapiCODEE1E5C869",
             "RootResourceId",
           ],
         },
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "discountapilambdaacquisitioneventsapiCODEAccountACC2500D": {
+    "discountapilambdadiscountapiCODEANYApiPermissionTestdiscountapiCODEdiscountapilambdadiscountapiCODED838DA36ANY16D9E550": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiCODEANYApiPermissiondiscountapiCODEdiscountapilambdadiscountapiCODED838DA36ANYCB9FC3A2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiCODEAccountA5347E04": {
       "DeletionPolicy": "Retain",
       "DependsOn": [
-        "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+        "discountapilambdadiscountapiCODEE1E5C869",
       ],
       "Properties": {
         "CloudWatchRoleArn": {
           "Fn::GetAtt": [
-            "discountapilambdaacquisitioneventsapiCODECloudWatchRole579CEC55",
+            "discountapilambdadiscountapiCODECloudWatchRoleC5981708",
             "Arn",
           ],
         },
@@ -637,36 +601,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::Account",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdaacquisitioneventsapiCODEBE52DC33": {
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "membership-CODE-acquisition-events-api-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "acquisition-events-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "discountapilambdaacquisitioneventsapiCODECloudWatchRole579CEC55": {
+    "discountapilambdadiscountapiCODECloudWatchRoleC5981708": {
       "DeletionPolicy": "Retain",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -698,7 +633,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -721,36 +656,36 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdaacquisitioneventsapiCODEDeployment3D9F96002af3bec98f576c79c3b94b5f05e3c38b": {
+    "discountapilambdadiscountapiCODEDeployment15948B74ea30bdfd5f924dcebb5902027e797f66": {
       "DependsOn": [
-        "discountapilambdaacquisitioneventsapiCODEproxyANY88476B63",
-        "discountapilambdaacquisitioneventsapiCODEproxyB11F0BA4",
-        "discountapilambdaacquisitioneventsapiCODEANYC4C0BE3D",
+        "discountapilambdadiscountapiCODEproxyANY3023C5CD",
+        "discountapilambdadiscountapiCODEproxyDA26EBF1",
+        "discountapilambdadiscountapiCODEANY827A81C0",
       ],
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
         },
       },
       "Type": "AWS::ApiGateway::Deployment",
     },
-    "discountapilambdaacquisitioneventsapiCODEDeploymentStageprod4BE37FE1": {
+    "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA": {
       "DependsOn": [
-        "discountapilambdaacquisitioneventsapiCODEAccountACC2500D",
+        "discountapilambdadiscountapiCODEAccountA5347E04",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEDeployment3D9F96002af3bec98f576c79c3b94b5f05e3c38b",
+          "Ref": "discountapilambdadiscountapiCODEDeployment15948B74ea30bdfd5f924dcebb5902027e797f66",
         },
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
         },
         "StageName": "prod",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -772,7 +707,36 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "discountapilambdaacquisitioneventsapiCODEproxyANY88476B63": {
+    "discountapilambdadiscountapiCODEE1E5C869": {
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "Name": "membership-CODE-discount-api-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "discountapilambdadiscountapiCODEproxyANY3023C5CD": {
       "Properties": {
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
@@ -804,15 +768,15 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
           },
         },
         "ResourceId": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEproxyB11F0BA4",
+          "Ref": "discountapilambdadiscountapiCODEproxyDA26EBF1",
         },
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "discountapilambdaacquisitioneventsapiCODEproxyANYApiPermissionTestdiscountapiCODEdiscountapilambdaacquisitioneventsapiCODE7FDA8393ANYproxy0AF6FCE5": {
+    "discountapilambdadiscountapiCODEproxyANYApiPermissionTestdiscountapiCODEdiscountapilambdadiscountapiCODED838DA36ANYproxy857B2C35": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -840,7 +804,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
               },
               ":",
               {
-                "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
               },
               "/test-invoke-stage/*/*",
             ],
@@ -849,7 +813,7 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "discountapilambdaacquisitioneventsapiCODEproxyANYApiPermissiondiscountapiCODEdiscountapilambdaacquisitioneventsapiCODE7FDA8393ANYproxyA40B4D00": {
+    "discountapilambdadiscountapiCODEproxyANYApiPermissiondiscountapiCODEdiscountapilambdadiscountapiCODED838DA36ANYproxyF796F806": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -877,11 +841,11 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
               },
               ":",
               {
-                "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
               },
               "/",
               {
-                "Ref": "discountapilambdaacquisitioneventsapiCODEDeploymentStageprod4BE37FE1",
+                "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
               },
               "/*/*",
             ],
@@ -890,17 +854,17 @@ exports[`The Acquisition Events API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "discountapilambdaacquisitioneventsapiCODEproxyB11F0BA4": {
+    "discountapilambdadiscountapiCODEproxyDA26EBF1": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
-            "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+            "discountapilambdadiscountapiCODEE1E5C869",
             "RootResourceId",
           ],
         },
         "PathPart": "{proxy+}",
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiCODEBE52DC33",
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
@@ -921,14 +885,14 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "discountapilambdaacquisitioneventsapiPRODEndpoint30763F53": {
+    "discountapilambdadiscountapiPRODEndpoint341D3591": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+              "Ref": "discountapilambdadiscountapiPROD4E9716BA",
             },
             ".execute-api.",
             {
@@ -940,7 +904,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
             },
             "/",
             {
-              "Ref": "discountapilambdaacquisitioneventsapiPRODDeploymentStageprod39AD0729",
+              "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
             },
             "/",
           ],
@@ -972,18 +936,18 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":contributions-dev",
+                ":retention-dev",
               ],
             ],
           },
         ],
-        "AlarmDescription": "Impact - Acquisition Events API received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "ACQUISITION-EVENTS-API-CDK- PROD API gateway 4XX response",
+        "AlarmDescription": "Impact - Discount API received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "DISCOUNT-API-PROD API gateway 4XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "acquisition-events-api-PROD",
+            "Value": "discount-api-PROD",
           },
         ],
         "EvaluationPeriods": 1,
@@ -995,7 +959,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "ApiGatewayHigh5xxPercentageAlarmAcquisitioneventsapi36134E2A": {
+    "ApiGatewayHigh5xxPercentageAlarmDiscountapi1042173C": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1011,20 +975,20 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":retention-dev",
               ],
             ],
           },
         ],
-        "AlarmDescription": "acquisition-events-api exceeded 5% error rate",
-        "AlarmName": "High 5XX error % from acquisition-events-api (ApiGateway) in PROD",
+        "AlarmDescription": "discount-api exceeded 5% error rate",
+        "AlarmName": "High 5XX error % from discount-api (ApiGateway) in PROD",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
           {
             "Expression": "100*m1/m2",
             "Id": "expr_1",
-            "Label": "% of 5XX responses served for acquisition-events-api",
+            "Label": "% of 5XX responses served for discount-api",
           },
           {
             "Id": "m1",
@@ -1033,7 +997,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-acquisition-events-api-PROD",
+                    "Value": "membership-PROD-discount-api-PROD",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -1051,7 +1015,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-acquisition-events-api-PROD",
+                    "Value": "membership-PROD-discount-api-PROD",
                   },
                 ],
                 "MetricName": "Count",
@@ -1074,10 +1038,10 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
         },
         "Stage": {
-          "Ref": "discountapilambdaacquisitioneventsapiPRODDeploymentStageprod39AD0729",
+          "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -1161,42 +1125,6 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SSMinlinepolicyB56CB2A2": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/acquisition-events-api/bigquery-config/PROD/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SSMinlinepolicyB56CB2A2",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "discountapilambda972ABED6": {
       "DependsOn": [
         "discountapilambdaServiceRoleDefaultPolicy91B9A9BA",
@@ -1207,21 +1135,21 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/acquisition-events-api/acquisition-events-api.zip",
+          "S3Key": "membership/PROD/discount-api/discount-api.zip",
         },
         "Description": "A lambda that enables the addition of discounts to existing subscriptions",
         "Environment": {
           "Variables": {
-            "APP": "acquisition-events-api",
-            "App": "acquisition-events-api",
+            "APP": "discount-api",
+            "App": "discount-api",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stack": "membership",
             "Stage": "PROD",
           },
         },
-        "FunctionName": "acquisition-events-api-cdk-PROD",
-        "Handler": "com.gu.discountApi.Lambda::handler",
+        "FunctionName": "discount-api-PROD",
+        "Handler": "index.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -1229,11 +1157,11 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
             "Arn",
           ],
         },
-        "Runtime": "java8",
+        "Runtime": "nodejs18.x",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1287,7 +1215,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1348,7 +1276,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/acquisition-events-api/acquisition-events-api.zip",
+                      "/membership/PROD/discount-api/discount-api.zip",
                     ],
                   ],
                 },
@@ -1369,7 +1297,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/acquisition-events-api",
+                    ":parameter/PROD/membership/discount-api",
                   ],
                 ],
               },
@@ -1392,7 +1320,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/acquisition-events-api/*",
+                    ":parameter/PROD/membership/discount-api/*",
                   ],
                 ],
               },
@@ -1409,14 +1337,14 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "discountapilambdaacquisitioneventsapiPROD4FC0F3B9": {
+    "discountapilambdadiscountapiPROD4E9716BA": {
       "Properties": {
         "Description": "API Gateway created by CDK",
-        "Name": "membership-PROD-acquisition-events-api-PROD",
+        "Name": "membership-PROD-discount-api-PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1438,85 +1366,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "discountapilambdaacquisitioneventsapiPRODANYApiPermissionTestdiscountapiPRODdiscountapilambdaacquisitioneventsapiPROD8D8DB043ANYD60E3127": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdaacquisitioneventsapiPRODANYApiPermissiondiscountapiPRODdiscountapilambdaacquisitioneventsapiPROD8D8DB043ANY60F9937B": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
-              },
-              "/",
-              {
-                "Ref": "discountapilambdaacquisitioneventsapiPRODDeploymentStageprod39AD0729",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdaacquisitioneventsapiPRODANYC0B4150E": {
+    "discountapilambdadiscountapiPRODANY1101E911": {
       "Properties": {
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
@@ -1549,25 +1399,103 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
         },
         "ResourceId": {
           "Fn::GetAtt": [
-            "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+            "discountapilambdadiscountapiPROD4E9716BA",
             "RootResourceId",
           ],
         },
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "discountapilambdaacquisitioneventsapiPRODAccount7786F6DC": {
+    "discountapilambdadiscountapiPRODANYApiPermissionTestdiscountapiPRODdiscountapilambdadiscountapiPROD571B732AANY9D5AC707": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODANYApiPermissiondiscountapiPRODdiscountapilambdadiscountapiPROD571B732AANYD38D41FE": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODAccount4DA1D227": {
       "DeletionPolicy": "Retain",
       "DependsOn": [
-        "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+        "discountapilambdadiscountapiPROD4E9716BA",
       ],
       "Properties": {
         "CloudWatchRoleArn": {
           "Fn::GetAtt": [
-            "discountapilambdaacquisitioneventsapiPRODCloudWatchRole50BA9441",
+            "discountapilambdadiscountapiPRODCloudWatchRole3CC6EB11",
             "Arn",
           ],
         },
@@ -1575,7 +1503,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::Account",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdaacquisitioneventsapiPRODCloudWatchRole50BA9441": {
+    "discountapilambdadiscountapiPRODCloudWatchRole3CC6EB11": {
       "DeletionPolicy": "Retain",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -1607,7 +1535,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1630,36 +1558,36 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdaacquisitioneventsapiPRODDeploymentB9178D8Fe68843e96a4884571a4f319b273f48c8": {
+    "discountapilambdadiscountapiPRODDeploymentF304491Bbb79dfd76f5d828b8128e30fc7610d47": {
       "DependsOn": [
-        "discountapilambdaacquisitioneventsapiPRODproxyANY38F7C8F9",
-        "discountapilambdaacquisitioneventsapiPRODproxy383AC6EA",
-        "discountapilambdaacquisitioneventsapiPRODANYC0B4150E",
+        "discountapilambdadiscountapiPRODproxyANY177F9076",
+        "discountapilambdadiscountapiPRODproxy2CE9F043",
+        "discountapilambdadiscountapiPRODANY1101E911",
       ],
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
         },
       },
       "Type": "AWS::ApiGateway::Deployment",
     },
-    "discountapilambdaacquisitioneventsapiPRODDeploymentStageprod39AD0729": {
+    "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA": {
       "DependsOn": [
-        "discountapilambdaacquisitioneventsapiPRODAccount7786F6DC",
+        "discountapilambdadiscountapiPRODAccount4DA1D227",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdaacquisitioneventsapiPRODDeploymentB9178D8Fe68843e96a4884571a4f319b273f48c8",
+          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bbb79dfd76f5d828b8128e30fc7610d47",
         },
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
         },
         "StageName": "prod",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisition-events-api",
+            "Value": "discount-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1681,22 +1609,22 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "discountapilambdaacquisitioneventsapiPRODproxy383AC6EA": {
+    "discountapilambdadiscountapiPRODproxy2CE9F043": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
-            "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+            "discountapilambdadiscountapiPROD4E9716BA",
             "RootResourceId",
           ],
         },
         "PathPart": "{proxy+}",
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "discountapilambdaacquisitioneventsapiPRODproxyANY38F7C8F9": {
+    "discountapilambdadiscountapiPRODproxyANY177F9076": {
       "Properties": {
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
@@ -1728,15 +1656,15 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
           },
         },
         "ResourceId": {
-          "Ref": "discountapilambdaacquisitioneventsapiPRODproxy383AC6EA",
+          "Ref": "discountapilambdadiscountapiPRODproxy2CE9F043",
         },
         "RestApiId": {
-          "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "discountapilambdaacquisitioneventsapiPRODproxyANYApiPermissionTestdiscountapiPRODdiscountapilambdaacquisitioneventsapiPROD8D8DB043ANYproxyFC8542D5": {
+    "discountapilambdadiscountapiPRODproxyANYApiPermissionTestdiscountapiPRODdiscountapilambdadiscountapiPROD571B732AANYproxy0E5E46FA": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1764,7 +1692,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
               },
               ":",
               {
-                "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
               },
               "/test-invoke-stage/*/*",
             ],
@@ -1773,7 +1701,7 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "discountapilambdaacquisitioneventsapiPRODproxyANYApiPermissiondiscountapiPRODdiscountapilambdaacquisitioneventsapiPROD8D8DB043ANYproxy19AB5984": {
+    "discountapilambdadiscountapiPRODproxyANYApiPermissiondiscountapiPRODdiscountapilambdadiscountapiPROD571B732AANYproxy04B39808": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1801,11 +1729,11 @@ exports[`The Acquisition Events API stack matches the snapshot 2`] = `
               },
               ":",
               {
-                "Ref": "discountapilambdaacquisitioneventsapiPROD4FC0F3B9",
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
               },
               "/",
               {
-                "Ref": "discountapilambdaacquisitioneventsapiPRODDeploymentStageprod39AD0729",
+                "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
               },
               "/*/*",
             ],
