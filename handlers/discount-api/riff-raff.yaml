@@ -8,16 +8,16 @@ allowedStages:
 deployments:
   cfn:
     type: cloud-formation
-    app: digital-voucher-api
+    app: discount-api
     parameters:
       templatePath: cfn.yaml
 
   discount-api:
     type: aws-lambda
     parameters:
-      fileName: digital-voucher-api.jar
+      fileName: discount-api.jar
       bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
-      - digital-voucher-api-
+      - discount-api-
     dependencies: [cfn]
