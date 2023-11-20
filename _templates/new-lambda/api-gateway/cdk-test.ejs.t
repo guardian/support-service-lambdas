@@ -2,6 +2,7 @@
 # This template creates a CDK test file for the new lambda
 
 to: cdk/lib/<%=lambdaName%>.test.ts
+sh: git add cdk/lib/<%=lambdaName%>.test.ts
 ---
 <% PascalCase = h.changeCase.pascal(lambdaName) %>
 import { App } from 'aws-cdk-lib';
