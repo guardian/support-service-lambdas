@@ -12,7 +12,8 @@ Please keep all the various README in this project up to date, and improve them!
 There should be one in each project and anywhere else you think it would help.
 
 ## Getting Started - Typescript
-We use [pnpm](https://pnpm.io/) as a package manager so make sure you have it [installed](https://pnpm.io/installation), `brew install pnpm` is a simple way to do this.
+We use [pnpm](https://pnpm.io/) as a package manager so make sure you have it [installed](https://pnpm.io/installation), 
+`brew install pnpm` is a simple way to do this, then run `pnpm install` from the root of the repo to install all dependencies.
 
 Each lambda is a separate [pnpm workspace](https://pnpm.io/workspaces) which allows us to define common settings and
 dependencies for all projects, add dependencies between projects build all projects at once and generally facilitates 
@@ -33,18 +34,26 @@ for instance each lambda should override the `rootdir` setting through a local `
 }
 ```
 
-Dependencies can also be managed either at the root workspace level or in individual lambdas. To add to the workspace
-use:
-```shell
-pnpm --workspace-root add dayjs
-```
-this should only be used for dependencies which really are necessary for all sub-projects.
-To add dependencies to a specific sub-project you can use [pnpm filtering](https://pnpm.io/filtering): 
+Dependencies can also be managed either at the root workspace level or in individual lambdas.
+To add dependencies to a specific sub-project you can use [pnpm filtering](https://pnpm.io/filtering):
 ```shell
 pnpm --filter discount-api add dayjs
 ```
+or simply run the add command in the root directory of the subproject
+```shell
+pnpm add dayjs
+```
+To add dependencies to the workspace so that they are available to all project you can use:
+```shell
+pnpm --workspace-root add dayjs
+```
+however this should only be used for dependencies which really are necessary for all sub-projects.
 
-Filtering can also be used to run builds or any other command on a particular sub-project
+
+Filtering can also be used to run builds or any other command on a particular sub-project, for instance:
+```shell
+pnpm --filter discount-api package
+```
 ## Getting Started - Scala
 
 1. Open the project in Intellij with Scala plugin installed
