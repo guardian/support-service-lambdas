@@ -1,4 +1,6 @@
 ---
+# This template creates a CDK test file for the new lambda
+
 to: cdk/lib/<%=lambdaName%>.test.ts
 ---
 <% PascalCase = h.changeCase.pascal(lambdaName) %>

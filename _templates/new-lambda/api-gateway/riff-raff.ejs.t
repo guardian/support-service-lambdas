@@ -1,4 +1,6 @@
 ---
+# This template creates a riff-raff.yaml for the new lambda
+
 to: handlers/<%=lambdaName%>/riff-raff.yaml
 ---
 stacks:

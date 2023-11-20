@@ -1,4 +1,6 @@
 ---
+# This template creates a CDK definition the new lambda
+
 to: cdk/lib/<%=lambdaName%>.ts
 ---
 <% PascalCase = h.changeCase.pascal(lambdaName) %>

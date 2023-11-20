@@ -1,4 +1,6 @@
 ---
+# This template adds the new lambda into the root cdk.ts file
+
 inject: true
 to: cdk/bin/cdk.ts
 append: true

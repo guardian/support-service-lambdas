@@ -5,7 +5,7 @@
 		"type-check": "pnpm --stream -r run type-check",
 		"lint": "pnpm --stream -r run lint",
 		"clean": "rm -rf .parcel-cache && pnpm -r run clean",
-		"new-lambda": "pnpm hygen new-lambda new && cd ./cdk && yarn lint --fix"
+		"new-lambda": "pnpm hygen new-lambda api-gateway && cd ./cdk && yarn lint --fix"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "^7.0.0",

@@ -1,4 +1,6 @@
 ---
+# This template creates the main index.ts file of the new lambda
+
 to: handlers/<%=lambdaName%>/src/index.ts
 ---
 import type {
