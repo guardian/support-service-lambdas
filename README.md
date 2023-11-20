@@ -1,13 +1,51 @@
 # support-service-lambdas [![Codacy Badge](https://api.codacy.com/project/badge/Grade/df83c14325bc4c29aeae7e529f49f8a9)](https://app.codacy.com/app/johnduffell/support-service-lambdas?utm_source=github.com&utm_medium=referral&utm_content=guardian/support-service-lambdas&utm_campaign=badger)
 
-This is the reader revenue lambda API/orchestration layer.
+This is the reader revenue lambda API/orchestration layer. It is made up of lambdas, defined in the `/handlers` directory and
+libraries defined in the `/libs` directory. Code in the repo is mostly Scala but for new lambdas prefer to use Typescript 
+for the following reasons:
+- There is a wider pool of experienced Typescript developers both within the Guardian and outside making it easier to find 
+devs to work on the codebase
+- It enables us to share code between server side applications, client side applications and infrastructure definitions (CDK)
+- Cold start times for Typescript lambdas are typically faster than for Scala ones
 
 Please keep all the various README in this project up to date, and improve them!
 There should be one in each project and anywhere else you think it would help.
 
-## Getting Started
+## Getting Started - Typescript
+We use [pnpm](https://pnpm.io/) as a package manager so make sure you have it [installed](https://pnpm.io/installation), `brew install pnpm` is a simple way to do this.
 
-This is only up to date by people using it and hitting problems!  So please edit this ReadMe if something is not clear for you.
+Each lambda is a separate [pnpm workspace](https://pnpm.io/workspaces) which allows us to define common settings and
+dependencies for all projects, add dependencies between projects build all projects at once and generally facilitates 
+the management of a monorepo
+
+
+Linting rules (`.eslintrc.json`), formatting rules (`.prettierrc`) and Typescript configuration (`tsconfig.json`) are all defined at the root
+of the repository and use standard Guardian configuration where available. 
+
+These can also be overridden at a per workspace level,
+for instance each lambda should override the `rootdir` setting through a local `tsconfig.json` file as follows:   
+```json
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src"
+  }
+}
+```
+
+Dependencies can also be managed either at the root workspace level or in individual lambdas. To add to the workspace
+use:
+```shell
+pnpm --workspace-root add dayjs
+```
+this should only be used for dependencies which really are necessary for all sub-projects.
+To add dependencies to a specific sub-project you can use [pnpm filtering](https://pnpm.io/filtering): 
+```shell
+pnpm --filter discount-api add dayjs
+```
+
+Filtering can also be used to run builds or any other command on a particular sub-project
+## Getting Started - Scala
 
 1. Open the project in Intellij with Scala plugin installed
 1. Open Intellij->Settings->sbt (search for it)
@@ -33,3 +71,7 @@ The PROD health checks are [called by blazemeter](https://www.runscope.com/radar
 ## Generating CloudFormation templates:
 
 See the [docs](./cdk/README.md) for setup and running guides.
+
+
+## Adding a new lambda:
+See [this doc](./handlers/HOWTO-create-lambda.md)
