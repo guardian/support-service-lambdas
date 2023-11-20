@@ -188,3 +188,34 @@ Resources:
         Statistic: Sum
         Threshold: 2
         TreatMissingData: notBreaching
+
+    DeliveryRecordsApiDomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: # only for *.membership.guardianapis.com
+          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    DeliveryRecordsApiBasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref DeliveryRecordsApi
+        DomainName: !Ref DeliveryRecordsApiDomainName
+        Stage: !Sub ${Stage}
+      DependsOn:
+        - DeliveryRecordsApi
+        - DeliveryRecordsApiDomainName
+        - DeliveryRecordsApiStage
+
+    DeliveryRecordsApiDNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: membership.guardianapis.com.
+        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+          - !GetAtt DeliveryRecordsApiDomainName.RegionalDomainName
