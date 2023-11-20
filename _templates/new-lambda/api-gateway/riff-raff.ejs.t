@@ -12,7 +12,7 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  discount-api-cloudformation:
+<%=lambdaName%>-cloudformation:
     type: cloud-formation
     app: <%=lambdaName%>
     parameters:
@@ -20,10 +20,10 @@ deployments:
         CODE: <%=lambdaName%>-CODE.template.json
         PROD: <%=lambdaName%>-PROD.template.json
 
-  discount-api:
+<%=lambdaName%>:
     type: aws-lambda
     parameters:
-      fileName: discount-api.zip
+      fileName: <%=lambdaName%>.zip
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
