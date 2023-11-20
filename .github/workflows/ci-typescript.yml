@@ -1,0 +1,51 @@
+name: CI-Typescript
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+jobs:
+  gu-cdk-build:
+    strategy:
+      matrix:
+        subproject:
+          - discount-api
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm package
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Generate CFN templates from GuCDK
+        run: bash ./script/cfn.sh
+
+      - name: Upload to Riff-Raff
+        uses: guardian/actions-riff-raff@v2
+        with:
+          projectName: support-service-lambdas::${{ matrix.subproject }}
+          buildNumberOffset: 7000
+          configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
+          contentDirectories: |
+            ${{ matrix.subproject }}-cloudformation:
+              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
+              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
+            ${{ matrix.subproject }}:
+              - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
+
