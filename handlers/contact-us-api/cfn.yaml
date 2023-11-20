@@ -16,6 +16,7 @@ Mappings:
       AppName: TouchpointUpdate
       AppSecretsVersion: d338b761-cb81-4adf-aca4-163678e65a59
       UserSecretsVersion: dfbf9eba-5215-4cb8-91f1-ff5bcbbf5201
+      DomainName: contact-us-api-prod.membership.guardianapis.com
     CODE:
       authDomain: test.salesforce.com
       reqDomain: gnmtouchpoint--DEV1.sandbox.my.salesforce.com
@@ -23,6 +24,7 @@ Mappings:
       AppName: AwsConnectorSandbox
       AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
       UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
+      DomainName: contact-us-api-code.membership.guardianapis.com
 Resources:
   ContactUsApiGateway:
     Type: AWS::ApiGateway::RestApi
@@ -291,6 +293,37 @@ Resources:
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/MembersDataAPI-1wX7Rg
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA
+
+  ContactUsApiDomainName:
+    Type: "AWS::ApiGateway::DomainName"
+    Properties:
+      RegionalCertificateArn: # only for *.membership.guardianapis.com
+        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+      DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  ContactUsApiBasePathMapping:
+    Type: "AWS::ApiGateway::BasePathMapping"
+    Properties:
+      RestApiId: !Ref ContactUsApiGateway
+      DomainName: !Ref ContactUsApiDomainName
+      Stage: !Sub ${Stage}
+    DependsOn:
+      - ContactUsApiGateway
+      - ContactUsApiDomainName
+      - ContactUsApiGatewayStage
+
+  ContactUsApiDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: membership.guardianapis.com.
+      Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+      Type: CNAME
+      TTL: '120'
+      ResourceRecords:
+        - !GetAtt ContactUsApiDomainName.RegionalDomainName
 Conditions:
   IsProd:
     Fn::Equals:
