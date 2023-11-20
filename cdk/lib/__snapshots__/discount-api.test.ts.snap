@@ -175,8 +175,8 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     },
     "DNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z1E4V12LQGXFEC",
-        "Name": "discount-api.code.membership.guardianapis.com",
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "discount-api.code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -192,7 +192,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "discount-api.code.membership.guardianapis.com",
+        "DomainName": "discount-api.code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -206,7 +206,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
             ],
           ],
         },
@@ -1048,8 +1048,8 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     },
     "DNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z1E4V12LQGXFEC",
-        "Name": "discount-api.membership.guardianapis.com",
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "discount-api.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1065,7 +1065,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "discount-api.membership.guardianapis.com",
+        "DomainName": "discount-api.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1079,7 +1079,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
             ],
           ],
         },

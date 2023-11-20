@@ -11,16 +11,19 @@ import {
 } from '../lib/single-contribution-salesforce-writes';
 
 const app = new App();
-export const hostedZoneId = 'Z1E4V12LQGXFEC';
-export const certificateId = 'c1efc564-9ff8-4a03-be48-d1990a3d79d2';
-export const membershipApisDomain = 'membership.guardianapis.com';
+const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
+const membershipCertificateId = 'c1efc564-9ff8-4a03-be48-d1990a3d79d2';
+const membershipApisDomain = 'membership.guardianapis.com';
+export const supportHostedZoneId = 'Z3KO35ELNWZMSX';
+export const supportCertificateId = 'b384a6a0-2f54-4874-b99b-96eeff96c009';
+export const supportApisDomain = 'support.guardianapis.com';
 
 export const codeProps: NewProductApiProps = {
 	stack: 'membership',
 	stage: 'CODE',
 	domainName: `new-product-api-code.${membershipApisDomain}`,
-	hostedZoneId,
-	certificateId,
+	hostedZoneId: membershipHostedZoneId,
+	certificateId: membershipCertificateId,
 	apiGatewayTargetDomainName:
 		'd-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com',
 	zuoraCatalogLocation:
@@ -32,8 +35,8 @@ export const prodProps: NewProductApiProps = {
 	stack: 'membership',
 	stage: 'PROD',
 	domainName: `new-product-api-prod.${membershipApisDomain}`,
-	hostedZoneId,
-	certificateId,
+	hostedZoneId: membershipHostedZoneId,
+	certificateId: membershipCertificateId,
 	apiGatewayTargetDomainName:
 		'd-yyh9pmqphi.execute-api.eu-west-1.amazonaws.com',
 	zuoraCatalogLocation:
@@ -46,15 +49,15 @@ new BatchEmailSender(app, 'batch-email-sender-CODE', {
 	stack: 'membership',
 	stage: 'CODE',
 	domainName: `batch-email-sender-code.${membershipApisDomain}`,
-	hostedZoneId,
-	certificateId,
+	hostedZoneId: membershipHostedZoneId,
+	certificateId: membershipCertificateId,
 });
 new BatchEmailSender(app, 'batch-email-sender-PROD', {
 	stack: 'membership',
 	stage: 'PROD',
 	domainName: `batch-email-sender-prod.${membershipApisDomain}`,
-	hostedZoneId,
-	certificateId,
+	hostedZoneId: membershipHostedZoneId,
+	certificateId: membershipCertificateId,
 });
 
 new CancellationSfCasesApi(app, 'cancellation-sf-cases-api-CODE', {
@@ -81,14 +84,14 @@ new SingleContributionSalesforceWrites(
 new DiscountApi(app, 'discount-api-CODE', {
 	stack: 'membership',
 	stage: 'CODE',
-	domainName: `discount-api-code.${membershipApisDomain}`,
-	hostedZoneId,
-	certificateId,
+	domainName: `discount-api-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
 });
 new DiscountApi(app, 'discount-api-PROD', {
 	stack: 'membership',
 	stage: 'PROD',
-	domainName: `discount-api.${membershipApisDomain}`,
-	hostedZoneId,
-	certificateId,
+	domainName: `discount-api.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
 });
