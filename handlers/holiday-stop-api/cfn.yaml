@@ -400,3 +400,34 @@ Resources:
         Statistic: Sum
         Threshold: 5
         TreatMissingData: notBreaching
+
+    HolidayStopApiDomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: # only for *.membership.guardianapis.com
+          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    HolidayStopApiBasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref HolidayStopApi
+        DomainName: !Ref HolidayStopApiDomainName
+        Stage: !Sub ${Stage}
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiDomainName
+        - HolidayStopApiStage
+
+    HolidayStopApiDNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: membership.guardianapis.com.
+        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+          - !GetAtt HolidayStopApiDomainName.RegionalDomainName
