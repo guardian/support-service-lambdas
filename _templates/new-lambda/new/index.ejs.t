@@ -1,5 +1,5 @@
 ---
-to: handlers/<=%lambda-name%>/src/index.js
+to: handlers/<%=lambdaName%>/src/index.ts
 ---
 import type {
 	APIGatewayProxyEvent,

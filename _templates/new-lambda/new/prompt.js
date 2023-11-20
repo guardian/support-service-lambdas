@@ -4,7 +4,7 @@
 module.exports = [
 	{
 		type: 'input',
-		name: 'lambda-name',
+		name: 'lambdaName',
 		message: 'Enter new lambda name',
 	},
 ];

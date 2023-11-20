@@ -1,5 +1,5 @@
 packages:
   # lambdas
-  - 'handlers/discount-api'
+  - 'handlers/*'
   # exclude cdk directory for now
   - '!**/**/cdk'

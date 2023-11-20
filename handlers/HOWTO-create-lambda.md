@@ -9,11 +9,12 @@ Hopefully we can make this process easier in future (code generation or ideally 
 
 ## Typescript lambdas
 ### Api Gateway with a custom domain name
-1. copy the discount-api lambda and the associated CDK file discount-api.ts
-1. add the new project to [pnpm-workspace.yaml](https://github.com/guardian/support-service-lambdas/blob/647299d94b471d0065030bce692a4631078346bb/pnpm-workspace.yaml) so that it can be built from the root of the project
+1. ~~copy the discount-api lambda and the associated CDK file discount-api.ts~~
+1. ~~add the new project to [pnpm-workspace.yaml](https://github.com/guardian/support-service-lambdas/blob/647299d94b471d0065030bce692a4631078346bb/pnpm-workspace.yaml) so that it can be built from the root of the project~~
+1. add the new project to cdk.ts
 1. add the new project to [ci-typescript.yml](https://github.com/guardian/support-service-lambdas/blob/647299d94b471d0065030bce692a4631078346bb/.github/workflows/ci-typescript.yml)
-1. delete all the code from the handler (index.ts) that you don't need
-1. search and replace all discount-api in the code/packages/cdk with your chosen name
+1. write your lambda in index.ts
+1. ~~search and replace all discount-api in the code/packages/cdk with your chosen name~~
 1. push the branch and deploy to code
 
 ## Scala lambdas
