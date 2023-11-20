@@ -16,8 +16,10 @@ Conditions:
 Mappings:
     StageMap:
         CODE:
+            DomainName: delivery-records-api-code.membership.guardianapis.com
             ApiName: delivery-records-api-CODE
         PROD:
+            DomainName: delivery-records-api-prod.membership.guardianapis.com
             ApiName: delivery-records-api-PROD
 
 Resources:

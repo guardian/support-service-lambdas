@@ -18,9 +18,11 @@ Mappings:
         CODE:
             ApiName: holiday-stop-api-CODE
             FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code/*"
+            DomainName: holiday-stop-api-code.membership.guardianapis.com
         PROD:
             ApiName: holiday-stop-api-PROD
             FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
+            DomainName: holiday-stop-api-prod.membership.guardianapis.com
 
 Resources:
     HolidayStopApiRole:

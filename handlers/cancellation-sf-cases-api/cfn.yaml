@@ -10,6 +10,13 @@ Parameters:
       - CODE
     Default: CODE
 
+Mappings:
+  StageMap:
+    PROD:
+      DomainName: cancellation-sf-cases-prod.membership.guardianapis.com
+    CODE:
+      DomainName: cancellation-sf-cases-code.membership.guardianapis.com
+
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
 
