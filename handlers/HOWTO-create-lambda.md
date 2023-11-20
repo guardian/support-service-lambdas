@@ -9,13 +9,27 @@ Hopefully we can make this process easier in future (code generation or ideally 
 
 ## Typescript lambdas
 ### Api Gateway with a custom domain name
-1. ~~copy the discount-api lambda and the associated CDK file discount-api.ts~~
-1. ~~add the new project to [pnpm-workspace.yaml](https://github.com/guardian/support-service-lambdas/blob/647299d94b471d0065030bce692a4631078346bb/pnpm-workspace.yaml) so that it can be built from the root of the project~~
-1. add the new project to cdk.ts
+We have a code generation script (using [Hygen](https://www.hygen.io/)) which will generate a scaffold for new lambdas 
+with an API Gateway front end and a custom domain name. To use it run `pnpm new-lambda` at the root of the repo, you will be prompted to provide a name for 
+your new lambda - the convention is to use a hyphenated name such as `my-new-lambda`.
+
+This will carry out the following actions:
+1. create a new subdirectory of `\handlers` with the name of your new lambda
+1. add a `package.json` a `riff-raff.yaml`, a `tsconfig.json` and a `src\index.ts` file to this directory
+1. add a new CDK lib definition for your new lambda and the related infrastructure into the `cdk\libs` directory
+1. create a new instance of that lib in [cdk.ts](https://github.com/guardian/support-service-lambdas/blob/1d30b16d34554d780f2e21018bf7ab6ac02209e4/cdk/bin/cdk.ts)
 1. add the new project to [ci-typescript.yml](https://github.com/guardian/support-service-lambdas/blob/647299d94b471d0065030bce692a4631078346bb/.github/workflows/ci-typescript.yml)
-1. write your lambda in index.ts
-1. ~~search and replace all discount-api in the code/packages/cdk with your chosen name~~
-1. push the branch and deploy to code
+so that it is built in Github
+
+You can test this has worked by pushing your branch and deploying to code (take note of important deployment note above).
+You should then be able to call your lambda with cUrl 
+```shell
+curl --location 'https://my-new-lambda-code.membership.guardianapis.com/prod'
+```
+and receive a 200 response with the body 'Hello World'.
+
+You can then go ahead and write your lambda in `my-new-lambda\index.ts`
+
 
 ## Scala lambdas
 ### Api Gateway with a custom domain name

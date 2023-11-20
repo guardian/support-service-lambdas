@@ -1,5 +1,5 @@
 ---
-# This template creates a CDK definition the new lambda
+# This template creates a CDK definition for the new lambda
 
 to: cdk/lib/<%=lambdaName%>.ts
 ---
