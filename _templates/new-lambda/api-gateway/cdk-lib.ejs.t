@@ -2,6 +2,7 @@
 # This template creates a CDK definition for the new lambda
 
 to: cdk/lib/<%=lambdaName%>.ts
+sh: git add cdk/lib/<%=lambdaName%>.ts
 ---
 <% PascalCase = h.changeCase.pascal(lambdaName) %>
 import { GuApiLambda } from '@guardian/cdk';

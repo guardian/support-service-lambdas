@@ -2,6 +2,7 @@
 # This template creates a package.json for the new lambda
 
 to: handlers/<%=lambdaName%>/package.json
+sh: git add handlers/<%=lambdaName%>/package.json
 ---
 {
   "name": "<%=lambdaName%>",
