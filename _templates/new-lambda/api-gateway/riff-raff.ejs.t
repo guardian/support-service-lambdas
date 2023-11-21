@@ -12,7 +12,7 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-<%=lambdaName%>-cloudformation:
+  <%=lambdaName%>-cloudformation:
     type: cloud-formation
     app: <%=lambdaName%>
     parameters:
@@ -20,7 +20,7 @@ deployments:
         CODE: <%=lambdaName%>-CODE.template.json
         PROD: <%=lambdaName%>-PROD.template.json
 
-<%=lambdaName%>:
+  <%=lambdaName%>:
     type: aws-lambda
     parameters:
       fileName: <%=lambdaName%>.zip
