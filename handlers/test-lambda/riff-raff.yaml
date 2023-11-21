@@ -6,7 +6,7 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-test-lambda-cloudformation:
+  test-lambda-cloudformation:
     type: cloud-formation
     app: test-lambda
     parameters:
@@ -14,7 +14,7 @@ test-lambda-cloudformation:
         CODE: test-lambda-CODE.template.json
         PROD: test-lambda-PROD.template.json
 
-test-lambda:
+  test-lambda:
     type: aws-lambda
     parameters:
       fileName: test-lambda.zip
