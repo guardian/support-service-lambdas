@@ -5,7 +5,7 @@ to: handlers/<%=lambdaName%>/riff-raff.yaml
 sh: git add handlers/<%=lambdaName%>/riff-raff.yaml
 ---
 stacks:
-- membership
+- support
 regions:
 - eu-west-1
 allowedStages:
