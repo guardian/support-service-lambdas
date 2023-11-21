@@ -16,7 +16,7 @@ Mappings:
       AppName: TouchpointUpdate
       AppSecretsVersion: d338b761-cb81-4adf-aca4-163678e65a59
       UserSecretsVersion: dfbf9eba-5215-4cb8-91f1-ff5bcbbf5201
-      DomainName: contact-us-api-prod.membership.guardianapis.com
+      DomainName: contact-us-api-prod.support.guardianapis.com
     CODE:
       authDomain: test.salesforce.com
       reqDomain: gnmtouchpoint--DEV1.sandbox.my.salesforce.com
@@ -24,7 +24,7 @@ Mappings:
       AppName: AwsConnectorSandbox
       AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
       UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
-      DomainName: contact-us-api-code.membership.guardianapis.com
+      DomainName: contact-us-api-code.support.guardianapis.com
 Resources:
   ContactUsApiGateway:
     Type: AWS::ApiGateway::RestApi
@@ -297,8 +297,8 @@ Resources:
   ContactUsApiDomainName:
     Type: "AWS::ApiGateway::DomainName"
     Properties:
-      RegionalCertificateArn: # only for *.membership.guardianapis.com
-        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+      RegionalCertificateArn: # only for *.support.guardianapis.com
+        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009
       DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
       EndpointConfiguration:
         Types:

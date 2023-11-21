@@ -13,9 +13,9 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      DomainName: cancellation-sf-cases-prod.membership.guardianapis.com
+      DomainName: cancellation-sf-cases-prod.support.guardianapis.com
     CODE:
-      DomainName: cancellation-sf-cases-code.membership.guardianapis.com
+      DomainName: cancellation-sf-cases-code.support.guardianapis.com
 
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
@@ -189,8 +189,8 @@ Resources:
   CancellationSFCasesApiDomainName:
     Type: "AWS::ApiGateway::DomainName"
     Properties:
-      RegionalCertificateArn: # only for *.membership.guardianapis.com
-        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+      RegionalCertificateArn: # only for *.support.guardianapis.com
+        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009
       DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
       EndpointConfiguration:
         Types:

@@ -21,9 +21,9 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      DomainName: product-move-api-prod.membership.guardianapis.com
+      DomainName: product-move-api-prod.support.guardianapis.com
     CODE:
-      DomainName: product-move-api-code.membership.guardianapis.com
+      DomainName: product-move-api-code.support.guardianapis.com
 
 Resources:
   ProductMovementFailureAlarm:
@@ -517,8 +517,8 @@ Resources:
   ProductMoveApiDomainName:
     Type: "AWS::ApiGateway::DomainName"
     Properties:
-      RegionalCertificateArn: # only for *.membership.guardianapis.com
-        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+      RegionalCertificateArn: # only for *.support.guardianapis.com
+        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009
       DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
       EndpointConfiguration:
         Types:

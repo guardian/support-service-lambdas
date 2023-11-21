@@ -16,10 +16,10 @@ Conditions:
 Mappings:
     StageMap:
         CODE:
-            DomainName: delivery-records-api-code.membership.guardianapis.com
+            DomainName: delivery-records-api-code.support.guardianapis.com
             ApiName: delivery-records-api-CODE
         PROD:
-            DomainName: delivery-records-api-prod.membership.guardianapis.com
+            DomainName: delivery-records-api-prod.support.guardianapis.com
             ApiName: delivery-records-api-PROD
 
 Resources:
@@ -194,8 +194,8 @@ Resources:
     DeliveryRecordsApiDomainName:
       Type: "AWS::ApiGateway::DomainName"
       Properties:
-        RegionalCertificateArn: # only for *.membership.guardianapis.com
-          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+        RegionalCertificateArn: # only for *.support.guardianapis.com
+          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009
         DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
         EndpointConfiguration:
           Types:
