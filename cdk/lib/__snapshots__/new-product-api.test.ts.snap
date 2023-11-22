@@ -367,7 +367,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5036b4eb7b1f664e56e22942fd14ab73daf": {
+    "RestApiDeployment180EC503991d144d25f27b1f3f96662b68df1612": {
       "DependsOn": [
         "RestApiaddsubscriptionOPTIONS2806FCEE",
         "RestApiaddsubscriptionPOST9C82CE2B",
@@ -391,7 +391,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5036b4eb7b1f664e56e22942fd14ab73daf",
+          "Ref": "RestApiDeployment180EC503991d144d25f27b1f3f96662b68df1612",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -420,6 +420,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
     },
     "RestApiOPTIONS6AA64D2D": {
       "Properties": {
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
         "Integration": {
@@ -477,6 +478,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
     },
     "RestApiaddsubscriptionOPTIONS2806FCEE": {
       "Properties": {
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
         "Integration": {
@@ -769,6 +771,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
     },
     "RestApiproductcatalogOPTIONS7EB8EF88": {
       "Properties": {
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
         "Integration": {
@@ -1779,7 +1782,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50386812ce060e6af3a4e979f38bf629307": {
+    "RestApiDeployment180EC503138d5318ff0a6199403dc19d189f1cbc": {
       "DependsOn": [
         "RestApiaddsubscriptionOPTIONS2806FCEE",
         "RestApiaddsubscriptionPOST9C82CE2B",
@@ -1803,7 +1806,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50386812ce060e6af3a4e979f38bf629307",
+          "Ref": "RestApiDeployment180EC503138d5318ff0a6199403dc19d189f1cbc",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1832,6 +1835,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
     },
     "RestApiOPTIONS6AA64D2D": {
       "Properties": {
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
         "Integration": {
@@ -1889,6 +1893,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
     },
     "RestApiaddsubscriptionOPTIONS2806FCEE": {
       "Properties": {
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
         "Integration": {
@@ -2181,6 +2186,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
     },
     "RestApiproductcatalogOPTIONS7EB8EF88": {
       "Properties": {
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
         "Integration": {

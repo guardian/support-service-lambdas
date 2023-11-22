@@ -108,7 +108,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "discount-api exceeded 5% error rate",
-        "AlarmName": "High 5XX error % from discount-api (ApiGateway) in CODE",
+        "AlarmName": "High 5XX error percentage from discount-api (ApiGateway) in CODE",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
@@ -238,7 +238,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/*",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/discount-api/",
             },
           ],
           "Version": "2012-10-17",
@@ -981,7 +981,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "discount-api exceeded 5% error rate",
-        "AlarmName": "High 5XX error % from discount-api (ApiGateway) in PROD",
+        "AlarmName": "High 5XX error percentage from discount-api (ApiGateway) in PROD",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
@@ -1111,7 +1111,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/*",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/discount-api/",
             },
           ],
           "Version": "2012-10-17",
