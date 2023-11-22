@@ -9,6 +9,7 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import { TestLambda } from '../lib/test-lambda';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -95,3 +96,18 @@ new DiscountApi(app, 'discount-api-PROD', {
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 });
+new TestLambda(app, 'test-lambda-CODE', {
+    stack: 'support',
+    stage: 'CODE',
+    domainName: `test-lambda-code.${supportApisDomain}`,
+    hostedZoneId: supportHostedZoneId,
+    certificateId: supportCertificateId,
+});
+new TestLambda(app, 'test-lambda-PROD', {
+    stack: 'support',
+    stage: 'PROD',
+    domainName: `test-lambda.${supportApisDomain}`,
+    hostedZoneId: supportHostedZoneId,
+    certificateId: supportCertificateId,
+});
+
