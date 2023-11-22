@@ -118,7 +118,7 @@ export class <%= PascalCase %> extends GuStack {
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
-					resources: ['arn:aws:s3::*:membership-dist/*'],
+					resources: [`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`],
 				}),
 			],
 		});
