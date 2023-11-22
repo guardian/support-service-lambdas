@@ -22,7 +22,7 @@ Mappings:
         PROD:
             ApiName: holiday-stop-api-PROD
             FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
-            DomainName: holiday-stop-api-prod.support.guardianapis.com
+            DomainName: holiday-stop-api.support.guardianapis.com
 
 Resources:
     HolidayStopApiRole:

@@ -21,7 +21,7 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      DomainName: product-move-api-prod.support.guardianapis.com
+      DomainName: product-move-api.support.guardianapis.com
     CODE:
       DomainName: product-move-api-code.support.guardianapis.com
 

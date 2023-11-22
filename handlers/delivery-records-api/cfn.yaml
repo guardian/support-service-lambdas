@@ -19,7 +19,7 @@ Mappings:
             DomainName: delivery-records-api-code.support.guardianapis.com
             ApiName: delivery-records-api-CODE
         PROD:
-            DomainName: delivery-records-api-prod.support.guardianapis.com
+            DomainName: delivery-records-api.support.guardianapis.com
             ApiName: delivery-records-api-PROD
 
 Resources:

@@ -16,7 +16,7 @@ Mappings:
       AppName: TouchpointUpdate
       AppSecretsVersion: d338b761-cb81-4adf-aca4-163678e65a59
       UserSecretsVersion: dfbf9eba-5215-4cb8-91f1-ff5bcbbf5201
-      DomainName: contact-us-api-prod.support.guardianapis.com
+      DomainName: contact-us-api.support.guardianapis.com
     CODE:
       authDomain: test.salesforce.com
       reqDomain: gnmtouchpoint--DEV1.sandbox.my.salesforce.com

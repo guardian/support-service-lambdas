@@ -13,7 +13,7 @@ Parameters:
 Mappings:
   StageMap:
     PROD:
-      DomainName: cancellation-sf-cases-prod.support.guardianapis.com
+      DomainName: cancellation-sf-cases.support.guardianapis.com
     CODE:
       DomainName: cancellation-sf-cases-code.support.guardianapis.com
 
