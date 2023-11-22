@@ -30,6 +30,7 @@ export class <%= PascalCase %> extends GuStack {
 		super(scope, id, props);
 
 		const app = '<%= lambdaName %>';
+		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
 			App: app,
@@ -41,7 +42,7 @@ export class <%= PascalCase %> extends GuStack {
 		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
 				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
-			functionName: `${app}-${this.stage}`,
+			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: Runtime.NODEJS_18_X,
@@ -55,7 +56,8 @@ export class <%= PascalCase %> extends GuStack {
 			},
 			app: app,
 			api: {
-				id: `${app}-${this.stage}`,
+				id: nameWithStage,
+				restApiName: nameWithStage,
 				description: 'API Gateway created by CDK',
 			},
 		});
@@ -84,7 +86,7 @@ export class <%= PascalCase %> extends GuStack {
 				statistic: 'Sum',
 				period: Duration.seconds(300),
 				dimensionsMap: {
-					ApiName: `${app}-${this.stage}`,
+					ApiName: nameWithStage,
 				},
 			}),
 		});

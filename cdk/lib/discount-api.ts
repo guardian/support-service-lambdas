@@ -23,6 +23,7 @@ export class DiscountApi extends GuStack {
 		super(scope, id, props);
 
 		const app = 'discount-api';
+		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
 			App: app,
@@ -34,7 +35,7 @@ export class DiscountApi extends GuStack {
 		const discountApiLambda = new GuApiLambda(this, 'discount-api-lambda', {
 			description:
 				'A lambda that enables the addition of discounts to existing subscriptions',
-			functionName: `${app}-${this.stage}`,
+			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: Runtime.NODEJS_18_X,
@@ -48,7 +49,8 @@ export class DiscountApi extends GuStack {
 			},
 			app: 'discount-api',
 			api: {
-				id: `${app}-${this.stage}`,
+				id: nameWithStage,
+				restApiName: nameWithStage,
 				description: 'API Gateway created by CDK',
 			},
 		});
@@ -77,7 +79,7 @@ export class DiscountApi extends GuStack {
 				statistic: 'Sum',
 				period: Duration.seconds(300),
 				dimensionsMap: {
-					ApiName: `${app}-${this.stage}`,
+					ApiName: nameWithStage,
 				},
 			}),
 		});

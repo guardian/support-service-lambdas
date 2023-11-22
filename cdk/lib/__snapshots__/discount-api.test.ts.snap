@@ -124,7 +124,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-discount-api-CODE",
+                    "Value": "discount-api-CODE",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -142,7 +142,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-discount-api-CODE",
+                    "Value": "discount-api-CODE",
                   },
                 ],
                 "MetricName": "Count",
@@ -656,7 +656,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiCODEDeployment15948B74ea30bdfd5f924dcebb5902027e797f66": {
+    "discountapilambdadiscountapiCODEDeployment15948B74bff2426dd072e8f5564d12faf68040ca": {
       "DependsOn": [
         "discountapilambdadiscountapiCODEproxyANY3023C5CD",
         "discountapilambdadiscountapiCODEproxyDA26EBF1",
@@ -676,7 +676,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiCODEDeployment15948B74ea30bdfd5f924dcebb5902027e797f66",
+          "Ref": "discountapilambdadiscountapiCODEDeployment15948B74bff2426dd072e8f5564d12faf68040ca",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiCODEE1E5C869",
@@ -710,7 +710,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "discountapilambdadiscountapiCODEE1E5C869": {
       "Properties": {
         "Description": "API Gateway created by CDK",
-        "Name": "membership-CODE-discount-api-CODE",
+        "Name": "discount-api-CODE",
         "Tags": [
           {
             "Key": "App",
@@ -997,7 +997,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-discount-api-PROD",
+                    "Value": "discount-api-PROD",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -1015,7 +1015,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-discount-api-PROD",
+                    "Value": "discount-api-PROD",
                   },
                 ],
                 "MetricName": "Count",
@@ -1340,7 +1340,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "discountapilambdadiscountapiPROD4E9716BA": {
       "Properties": {
         "Description": "API Gateway created by CDK",
-        "Name": "membership-PROD-discount-api-PROD",
+        "Name": "discount-api-PROD",
         "Tags": [
           {
             "Key": "App",
@@ -1558,7 +1558,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiPRODDeploymentF304491Bbb79dfd76f5d828b8128e30fc7610d47": {
+    "discountapilambdadiscountapiPRODDeploymentF304491Bee186d2237d7da338814bd1fd4fb824e": {
       "DependsOn": [
         "discountapilambdadiscountapiPRODproxyANY177F9076",
         "discountapilambdadiscountapiPRODproxy2CE9F043",
@@ -1578,7 +1578,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bbb79dfd76f5d828b8128e30fc7610d47",
+          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bee186d2237d7da338814bd1fd4fb824e",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiPROD4E9716BA",
