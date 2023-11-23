@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The Discount API stack matches the snapshot 1`] = `
+exports[`The Discount api stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -68,7 +68,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "AlarmDescription": "Impact - Discount API received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmDescription": "Impact - Discount api received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
         "AlarmName": "DISCOUNT-API-CODE API gateway 4XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -264,7 +264,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/discount-api/discount-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "discount-api",
@@ -873,7 +873,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The Discount API stack matches the snapshot 2`] = `
+exports[`The Discount api stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -941,7 +941,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "Impact - Discount API received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmDescription": "Impact - Discount api received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
         "AlarmName": "DISCOUNT-API-PROD API gateway 4XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1137,7 +1137,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/discount-api/discount-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "discount-api",

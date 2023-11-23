@@ -1,3 +1,4 @@
+
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import {
@@ -7,7 +8,7 @@ import {
 } from '../bin/cdk';
 import { DiscountApi } from './discount-api';
 
-describe('The Discount API stack', () => {
+describe('The Discount api stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 		const codeStack = new DiscountApi(app, 'discount-api-CODE', {

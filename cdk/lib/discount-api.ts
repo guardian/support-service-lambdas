@@ -32,7 +32,7 @@ export class DiscountApi extends GuStack {
 		};
 
 		// ---- API-triggered lambda functions ---- //
-		const discountApiLambda = new GuApiLambda(this, 'discount-api-lambda', {
+		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
 				'A lambda that enables the addition of discounts to existing subscriptions',
 			functionName: nameWithStage,
@@ -47,7 +47,7 @@ export class DiscountApi extends GuStack {
 				http5xxAlarm: { tolerated5xxPercentage: 5 },
 				snsTopicName: 'retention-dev',
 			},
-			app: 'discount-api',
+			app: app,
 			api: {
 				id: nameWithStage,
 				restApiName: nameWithStage,
@@ -66,7 +66,7 @@ export class DiscountApi extends GuStack {
 			app,
 			alarmName: alarmName('API gateway 4XX response'),
 			alarmDescription: alarmDescription(
-				'Discount API received an invalid request',
+				'Discount api received an invalid request',
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
@@ -96,8 +96,8 @@ export class DiscountApi extends GuStack {
 
 		new CfnBasePathMapping(this, 'BasePathMapping', {
 			domainName: cfnDomainName.ref,
-			restApiId: discountApiLambda.api.restApiId,
-			stage: discountApiLambda.api.deploymentStage.stageName,
+			restApiId: lambda.api.restApiId,
+			stage: lambda.api.deploymentStage.stageName,
 		});
 
 		new CfnRecordSet(this, 'DNSRecord', {
@@ -120,6 +120,6 @@ export class DiscountApi extends GuStack {
 			],
 		});
 
-		discountApiLambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 	}
 }
