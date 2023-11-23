@@ -108,7 +108,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "discount-api exceeded 5% error rate",
-        "AlarmName": "High 5XX error % from discount-api (ApiGateway) in CODE",
+        "AlarmName": "High 5XX error percentage from discount-api (ApiGateway) in CODE",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
@@ -124,7 +124,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-discount-api-CODE",
+                    "Value": "discount-api-CODE",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -142,7 +142,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-discount-api-CODE",
+                    "Value": "discount-api-CODE",
                   },
                 ],
                 "MetricName": "Count",
@@ -175,8 +175,8 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     },
     "DNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z1E4V12LQGXFEC",
-        "Name": "discount-api.code.membership.guardianapis.com",
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "discount-api.code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -192,7 +192,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "discount-api.code.membership.guardianapis.com",
+        "DomainName": "discount-api.code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -206,7 +206,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
             ],
           ],
         },
@@ -238,7 +238,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/*",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/discount-api/",
             },
           ],
           "Version": "2012-10-17",
@@ -656,7 +656,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiCODEDeployment15948B74ea30bdfd5f924dcebb5902027e797f66": {
+    "discountapilambdadiscountapiCODEDeployment15948B74bff2426dd072e8f5564d12faf68040ca": {
       "DependsOn": [
         "discountapilambdadiscountapiCODEproxyANY3023C5CD",
         "discountapilambdadiscountapiCODEproxyDA26EBF1",
@@ -676,7 +676,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiCODEDeployment15948B74ea30bdfd5f924dcebb5902027e797f66",
+          "Ref": "discountapilambdadiscountapiCODEDeployment15948B74bff2426dd072e8f5564d12faf68040ca",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiCODEE1E5C869",
@@ -710,7 +710,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "discountapilambdadiscountapiCODEE1E5C869": {
       "Properties": {
         "Description": "API Gateway created by CDK",
-        "Name": "membership-CODE-discount-api-CODE",
+        "Name": "discount-api-CODE",
         "Tags": [
           {
             "Key": "App",
@@ -981,7 +981,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "discount-api exceeded 5% error rate",
-        "AlarmName": "High 5XX error % from discount-api (ApiGateway) in PROD",
+        "AlarmName": "High 5XX error percentage from discount-api (ApiGateway) in PROD",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
@@ -997,7 +997,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-discount-api-PROD",
+                    "Value": "discount-api-PROD",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -1015,7 +1015,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-discount-api-PROD",
+                    "Value": "discount-api-PROD",
                   },
                 ],
                 "MetricName": "Count",
@@ -1048,8 +1048,8 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     },
     "DNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z1E4V12LQGXFEC",
-        "Name": "discount-api.membership.guardianapis.com",
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "discount-api.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1065,7 +1065,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "discount-api.membership.guardianapis.com",
+        "DomainName": "discount-api.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1079,7 +1079,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
             ],
           ],
         },
@@ -1111,7 +1111,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/*",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/discount-api/",
             },
           ],
           "Version": "2012-10-17",
@@ -1340,7 +1340,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "discountapilambdadiscountapiPROD4E9716BA": {
       "Properties": {
         "Description": "API Gateway created by CDK",
-        "Name": "membership-PROD-discount-api-PROD",
+        "Name": "discount-api-PROD",
         "Tags": [
           {
             "Key": "App",
@@ -1558,7 +1558,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiPRODDeploymentF304491Bbb79dfd76f5d828b8128e30fc7610d47": {
+    "discountapilambdadiscountapiPRODDeploymentF304491Bee186d2237d7da338814bd1fd4fb824e": {
       "DependsOn": [
         "discountapilambdadiscountapiPRODproxyANY177F9076",
         "discountapilambdadiscountapiPRODproxy2CE9F043",
@@ -1578,7 +1578,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bbb79dfd76f5d828b8128e30fc7610d47",
+          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bee186d2237d7da338814bd1fd4fb824e",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiPROD4E9716BA",

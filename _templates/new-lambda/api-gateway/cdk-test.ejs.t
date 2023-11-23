@@ -1,3 +1,10 @@
+---
+# This template creates a CDK test file for the new lambda
+
+to: cdk/lib/<%=lambdaName%>.test.ts
+sh: git add cdk/lib/<%=lambdaName%>.test.ts
+---
+<% PascalCase = h.changeCase.pascal(lambdaName) %>
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import {
@@ -5,22 +12,22 @@ import {
 	supportCertificateId,
 	supportHostedZoneId,
 } from '../bin/cdk';
-import { DiscountApi } from './discount-api';
+import { <%= PascalCase %> } from './<%= lambdaName %>';
 
-describe('The Discount API stack', () => {
+describe('The <%= h.changeCase.sentenceCase(lambdaName) %> stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const codeStack = new DiscountApi(app, 'discount-api-CODE', {
+		const codeStack = new <%= PascalCase %>(app, '<%= lambdaName %>-CODE', {
 			stack: 'membership',
 			stage: 'CODE',
-			domainName: `discount-api.code.${supportApisDomain}`,
+			domainName: `<%= lambdaName %>.code.${supportApisDomain}`,
 			hostedZoneId: supportHostedZoneId,
 			certificateId: supportCertificateId,
 		});
-		const prodStack = new DiscountApi(app, 'discount-api-PROD', {
+		const prodStack = new <%= PascalCase %>(app, '<%= lambdaName %>-PROD', {
 			stack: 'membership',
 			stage: 'PROD',
-			domainName: `discount-api.${supportApisDomain}`,
+			domainName: `<%= lambdaName %>.${supportApisDomain}`,
 			hostedZoneId: supportHostedZoneId,
 			certificateId: supportCertificateId,
 		});

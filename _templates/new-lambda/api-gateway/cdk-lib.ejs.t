@@ -1,3 +1,10 @@
+---
+# This template creates a CDK definition for the new lambda
+
+to: cdk/lib/<%=lambdaName%>.ts
+sh: git add cdk/lib/<%=lambdaName%>.ts
+---
+<% PascalCase = h.changeCase.pascal(lambdaName) %>
 import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
@@ -10,7 +17,7 @@ import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 
-export interface DiscountApiProps extends GuStackProps {
+export interface <%= PascalCase %>Props extends GuStackProps {
 	stack: string;
 	stage: string;
 	certificateId: string;
@@ -18,11 +25,11 @@ export interface DiscountApiProps extends GuStackProps {
 	hostedZoneId: string;
 }
 
-export class DiscountApi extends GuStack {
-	constructor(scope: App, id: string, props: DiscountApiProps) {
+export class <%= PascalCase %> extends GuStack {
+	constructor(scope: App, id: string, props: <%= PascalCase %>Props) {
 		super(scope, id, props);
 
-		const app = 'discount-api';
+		const app = '<%= lambdaName %>';
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
@@ -32,9 +39,9 @@ export class DiscountApi extends GuStack {
 		};
 
 		// ---- API-triggered lambda functions ---- //
-		const discountApiLambda = new GuApiLambda(this, 'discount-api-lambda', {
+		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
-				'A lambda that enables the addition of discounts to existing subscriptions',
+				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
@@ -47,7 +54,7 @@ export class DiscountApi extends GuStack {
 				http5xxAlarm: { tolerated5xxPercentage: 5 },
 				snsTopicName: 'retention-dev',
 			},
-			app: 'discount-api',
+			app: app,
 			api: {
 				id: nameWithStage,
 				restApiName: nameWithStage,
@@ -57,7 +64,7 @@ export class DiscountApi extends GuStack {
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
-			`DISCOUNT-API-${this.stage} ${shortDescription}`;
+			`<%= h.changeCase.kebabCase(lambdaName).toUpperCase() %>-${this.stage} ${shortDescription}`;
 
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
@@ -66,7 +73,7 @@ export class DiscountApi extends GuStack {
 			app,
 			alarmName: alarmName('API gateway 4XX response'),
 			alarmDescription: alarmDescription(
-				'Discount API received an invalid request',
+				'<%= h.changeCase.sentenceCase(lambdaName) %> received an invalid request',
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
@@ -96,8 +103,8 @@ export class DiscountApi extends GuStack {
 
 		new CfnBasePathMapping(this, 'BasePathMapping', {
 			domainName: cfnDomainName.ref,
-			restApiId: discountApiLambda.api.restApiId,
-			stage: discountApiLambda.api.deploymentStage.stageName,
+			restApiId: lambda.api.restApiId,
+			stage: lambda.api.deploymentStage.stageName,
 		});
 
 		new CfnRecordSet(this, 'DNSRecord', {
@@ -113,13 +120,11 @@ export class DiscountApi extends GuStack {
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
-					resources: [
-						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-					],
+					resources: [`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`],
 				}),
 			],
 		});
 
-		discountApiLambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 	}
 }
