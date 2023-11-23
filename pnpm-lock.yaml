@@ -54,6 +54,12 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.456.0
         version: 3.456.0
+      '@aws-sdk/credential-provider-node':
+        specifier: ^3.451.0
+        version: 3.451.0
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
 
 packages:
 
@@ -285,7 +291,7 @@ packages:
       '@smithy/node-http-handler': 2.1.9
       '@smithy/protocol-http': 3.0.9
       '@smithy/smithy-client': 2.1.15
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       '@smithy/url-parser': 2.0.13
       '@smithy/util-base64': 2.0.1
       '@smithy/util-body-length-browser': 2.0.0
@@ -410,7 +416,7 @@ packages:
     dependencies:
       '@aws-sdk/types': 3.451.0
       '@smithy/property-provider': 2.0.14
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       tslib: 2.6.2
     dev: false
 
@@ -426,7 +432,7 @@ packages:
       '@smithy/credential-provider-imds': 2.1.1
       '@smithy/property-provider': 2.0.14
       '@smithy/shared-ini-file-loader': 2.2.4
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
@@ -445,7 +451,7 @@ packages:
       '@smithy/credential-provider-imds': 2.1.1
       '@smithy/property-provider': 2.0.14
       '@smithy/shared-ini-file-loader': 2.2.4
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
@@ -458,7 +464,7 @@ packages:
       '@aws-sdk/types': 3.451.0
       '@smithy/property-provider': 2.0.14
       '@smithy/shared-ini-file-loader': 2.2.4
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       tslib: 2.6.2
     dev: false
 
@@ -471,7 +477,7 @@ packages:
       '@aws-sdk/types': 3.451.0
       '@smithy/property-provider': 2.0.14
       '@smithy/shared-ini-file-loader': 2.2.4
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
@@ -483,7 +489,7 @@ packages:
     dependencies:
       '@aws-sdk/types': 3.451.0
       '@smithy/property-provider': 2.0.14
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       tslib: 2.6.2
     dev: false
 
@@ -669,7 +675,7 @@ packages:
       '@smithy/protocol-http': 3.0.9
       '@smithy/shared-ini-file-loader': 2.2.4
       '@smithy/smithy-client': 2.1.15
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       '@smithy/url-parser': 2.0.13
       '@smithy/util-base64': 2.0.1
       '@smithy/util-body-length-browser': 2.0.0
@@ -1732,7 +1738,7 @@ packages:
     dependencies:
       '@smithy/node-config-provider': 2.1.5
       '@smithy/property-provider': 2.0.14
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       '@smithy/url-parser': 2.0.13
       tslib: 2.6.2
     dev: false
@@ -1741,7 +1747,7 @@ packages:
     resolution: {integrity: sha512-CExbelIYp+DxAHG8RIs0l9QL7ElqhG4ym9BNoSpkPa4ptBQfzJdep3LbOSVJIE2VUdBAeObdeL6EDB3Jo85n3g==}
     dependencies:
       '@aws-crypto/crc32': 3.0.0
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       '@smithy/util-hex-encoding': 2.0.0
       tslib: 2.6.2
     dev: false
@@ -1918,7 +1924,7 @@ packages:
     resolution: {integrity: sha512-k3D2qp9o6imTrLaXRj6GdLYEJr1sXqS99nLhzq8fYmJjSVOeMg/G+1KVAAc7Oxpu71rlZ2f8SSZxcSxkevuR0A==}
     engines: {node: '>=14.0.0'}
     dependencies:
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       tslib: 2.6.2
     dev: false
 
@@ -1958,7 +1964,7 @@ packages:
     resolution: {integrity: sha512-9dRknGgvYlRIsoTcmMJXuoR/3ekhGwhRq4un3ns2/byre4Ql5hyUN4iS0x8eITohjU90YOnUCsbRwZRvCkbRfw==}
     engines: {node: '>=14.0.0'}
     dependencies:
-      '@smithy/types': 2.5.0
+      '@smithy/types': 2.6.0
       tslib: 2.6.2
     dev: false
 
@@ -5718,3 +5724,7 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+  /zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
+    dev: false
