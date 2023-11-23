@@ -568,6 +568,7 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
     awsSecretsManager,
     upickle,

@@ -14,8 +14,7 @@ import sttp.client3.quick.basicRequest
 import sttp.client3.ziojson.*
 import sttp.client3.*
 import zio.json.*
-import zio.{Task, ZIO, ZLayer}
-
+import zio.{RLayer, Task, ZIO, ZLayer}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.SecretsError
 
 object InvoicingApiRefundLive {
@@ -26,12 +25,12 @@ object InvoicingApiRefundLive {
     given JsonDecoder[InvoicingApiConfig] = DeriveJsonDecoder.gen[InvoicingApiConfig]
   }
 
-  val layer: ZLayer[SttpBackend[Task, Any] with AwsS3 with Secrets, ErrorResponse, InvoicingApiRefundLive] =
+  val layer: RLayer[SttpBackend[Task, Any] with AwsS3 with Secrets, InvoicingApiRefundLive] =
     ZLayer {
       for {
         secrets <- ZIO.service[Secrets]
         invoicingAPISecrets <- secrets.getInvoicingAPISecrets.tapError(ex =>
-          ZIO.fail(SecretsError(s"Failed to get InvoicingApi secrets because: $ex")),
+          ZIO.fail(new Throwable(s"Failed to get InvoicingApi secrets because", ex)),
         )
         invoicingApiUrl = invoicingAPISecrets.InvoicingApiUrl
         invoicingApiKey = invoicingAPISecrets.InvoicingApiKey

@@ -5,7 +5,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes._
+import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.*
 import com.gu.productmove.{
   AwsCredentialsLive,
   AwsS3,
@@ -19,7 +19,7 @@ import com.gu.productmove.{
   SQSLive,
   SttpClientLive,
 }
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import zio.{Clock, IO, RIO, Task, ZIO}
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
@@ -30,9 +30,9 @@ import com.gu.productmove.zuora.{
   GetAccount,
   GetAccountLive,
   GetInvoice,
+  GetInvoiceLive,
   GetRefundInvoiceDetails,
   GetRefundInvoiceDetailsLive,
-  GetInvoiceLive,
   InvoiceItemAdjustment,
   InvoiceItemAdjustmentLive,
   ZuoraCancel,
@@ -45,7 +45,6 @@ import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.json.zio.jsonBody
 import sttp.client3.SttpBackend
-import zio.{Clock, IO, Task, ZIO}
 import com.gu.productmove.refund.*
 import RefundType.*
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
@@ -71,7 +70,7 @@ object SubscriptionCancelEndpoint {
     Unit,
     OutputBody,
     Any,
-    ZIOApiGatewayRequestHandler.TIO,
+    Task,
   ] = {
     val subscriptionNameCapture: EndpointInput.PathCapture[String] =
       EndpointInput.PathCapture[String](
@@ -112,10 +111,10 @@ object SubscriptionCancelEndpoint {
           """Cancels the existing subscription at the default/soonest date.
             |Also manages all the service comms associated with the cancellation.""".stripMargin,
         )
-    endpointDescription.serverLogic[TIO](run)
+    endpointDescription.serverLogic[Task](run)
   }
 
-  private def run(subscriptionName: String, postData: ExpectedInput): TIO[Right[Nothing, OutputBody]] = for {
+  private def run(subscriptionName: String, postData: ExpectedInput): Task[Right[Nothing, OutputBody]] = for {
     _ <- ZIO.log(s"INPUT: $subscriptionName: $postData")
     res <- subscriptionCancel(SubscriptionName(subscriptionName), postData)
       .provide(
@@ -134,46 +133,8 @@ object SubscriptionCancelEndpoint {
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res)
 
-  def asSingle[A](list: List[A], message: String): IO[ErrorResponse, A] =
-    list match {
-      case singlePlan :: Nil => ZIO.succeed(singlePlan)
-      case wrongNumber =>
-        ZIO.fail(
-          InternalServerError(
-            s"Subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber",
-          ),
-        )
-    }
-
-  def asNonEmptyList[A](list: List[A], message: String): IO[ErrorResponse, NonEmptyList[A]] =
-    NonEmptyList.fromList(list) match {
-      case Some(nel) => ZIO.succeed(nel)
-      case None => ZIO.fail(InternalServerError(s"Subscription can't be cancelled as the charge list is empty"))
-    }
-
-  private def getSupporterPlusCharge(
-      charges: NonEmptyList[RatePlanCharge],
-      ids: SupporterPlusZuoraIds,
-  ): ZIO[Any, ErrorResponse, RatePlanCharge] = {
-    val supporterPlusCharge = charges.find(charge =>
-      charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.monthlyV2.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.annualV2.productRatePlanChargeId.value,
-    )
-    supporterPlusCharge
-      .map(ZIO.succeed(_))
-      .getOrElse(
-        ZIO.fail(InternalServerError("Subscription cannot be cancelled as it was not a Supporter Plus subscription")),
-      )
-  }
-
-  private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
-    now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
-
-  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
+  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): RIO[
     GetSubscriptionToCancel with ZuoraCancel with GetAccount with SQS with Stage with ZuoraSetCancellationReason,
-    ErrorResponse,
     OutputBody,
   ] = {
     (for {
@@ -247,4 +208,41 @@ object SubscriptionCancelEndpoint {
       _ => Success(s"Subscription ${subscriptionName.value} was successfully cancelled"),
     )
   }
+
+  def asSingle[A](list: List[A], message: String): IO[ErrorResponse, A] =
+    list match {
+      case singlePlan :: Nil => ZIO.succeed(singlePlan)
+      case wrongNumber =>
+        ZIO.fail(
+          InternalServerError(
+            s"Subscription can't be cancelled as we didn't have a single $message: ${wrongNumber.length}: $wrongNumber",
+          ),
+        )
+    }
+
+  def asNonEmptyList[A](list: List[A], message: String): IO[ErrorResponse, NonEmptyList[A]] =
+    NonEmptyList.fromList(list) match {
+      case Some(nel) => ZIO.succeed(nel)
+      case None => ZIO.fail(InternalServerError(s"Subscription can't be cancelled as the charge list is empty"))
+    }
+
+  private def getSupporterPlusCharge(
+      charges: NonEmptyList[RatePlanCharge],
+      ids: SupporterPlusZuoraIds,
+  ): ZIO[Any, ErrorResponse, RatePlanCharge] = {
+    val supporterPlusCharge = charges.find(charge =>
+      charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
+        charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value ||
+        charge.productRatePlanChargeId == ids.monthlyV2.productRatePlanChargeId.value ||
+        charge.productRatePlanChargeId == ids.annualV2.productRatePlanChargeId.value,
+    )
+    supporterPlusCharge
+      .map(ZIO.succeed(_))
+      .getOrElse(
+        ZIO.fail(InternalServerError("Subscription cannot be cancelled as it was not a Supporter Plus subscription")),
+      )
+  }
+
+  private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
+    now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 }

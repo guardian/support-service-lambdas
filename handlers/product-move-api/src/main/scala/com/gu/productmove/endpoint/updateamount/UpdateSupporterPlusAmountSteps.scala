@@ -16,13 +16,12 @@ import com.gu.productmove.zuora.*
 import com.gu.productmove.{EmailMessage, SQS}
 import com.gu.util.config
 import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdateResponse
-import zio.{IO, ZIO}
+import zio.{IO, RIO, ZIO}
 
 object UpdateSupporterPlusAmountSteps {
 
-  private[updateamount] def subscriptionUpdateAmount(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
+  private[updateamount] def subscriptionUpdateAmount(subscriptionName: SubscriptionName, postData: ExpectedInput): RIO[
     GetSubscription with GetAccount with SubscriptionUpdate with SQS with Stage,
-    ErrorResponse,
     OutputBody,
   ] = {
     (for {
@@ -83,8 +82,8 @@ object UpdateSupporterPlusAmountSteps {
   }
 
   private def getSupporterPlusData(
-    subscription: GetSubscriptionResponse,
-    ids: SupporterPlusZuoraIds,
+      subscription: GetSubscriptionResponse,
+      ids: SupporterPlusZuoraIds,
   ): ZIO[Any, ErrorResponse, SupporterPlusCharges] =
     for {
       ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
@@ -94,7 +93,8 @@ object UpdateSupporterPlusAmountSteps {
           case (id, NonEmptyList(charge, Nil)) => Right((id, charge))
           case multiple => Left(multiple.toString)
         }
-        if (errors.nonEmpty) ZIO.fail(InternalServerError("subscription had duplicate charges")).logError(s"errors: $errors")
+        if (errors.nonEmpty)
+          ZIO.fail(InternalServerError("subscription had duplicate charges")).logError(s"errors: $errors")
         else ZIO.succeed(chargesById.toMap)
       }
       chargeIdsOfInterest = {
@@ -122,29 +122,44 @@ object UpdateSupporterPlusAmountSteps {
     } yield supporterPlusCharges
 
   private def getSupporterPlusIds: ZIO[Stage, InternalServerError, SupporterPlusZuoraIds] = {
-    ZIO.serviceWithZIO[Stage](stage =>
-      ZIO.fromEither(
-        ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError.apply),
-      ),
-    )
-    .map(_.supporterPlusZuoraIds)
+    ZIO
+      .serviceWithZIO[Stage](stage =>
+        ZIO.fromEither(
+          ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError.apply),
+        ),
+      )
+      .map(_.supporterPlusZuoraIds)
   }
 
-  private def validateNewAmount(currency: com.gu.i18n.Currency, amount: BigDecimal, isAnnual: Boolean): ZIO[Any, ErrorResponse, Unit] = {
+  private def validateNewAmount(
+      currency: com.gu.i18n.Currency,
+      amount: BigDecimal,
+      isAnnual: Boolean,
+  ): ZIO[Any, ErrorResponse, Unit] = {
     val limitsForCurrency = AmountLimits.supporterPlusLimitsfor(currency)
     val limits = if (isAnnual) limitsForCurrency.annual else limitsForCurrency.monthly
     for {
-      _ <- ZIO.unless((amount * 100) <= limits.max)(ZIO.fail(BadRequest(s"amount must not be more than $currency ${AmountLimits.fromMinorToMajor(limits.max)}")))
-      _ <- ZIO.unless((amount * 100) >= limits.min)(ZIO.fail(BadRequest(s"amount must be at least $currency ${AmountLimits.fromMinorToMajor(limits.min)}")))
+      _ <- ZIO.unless((amount * 100) <= limits.max)(
+        ZIO.fail(BadRequest(s"amount must not be more than $currency ${AmountLimits.fromMinorToMajor(limits.max)}")),
+      )
+      _ <- ZIO.unless((amount * 100) >= limits.min)(
+        ZIO.fail(BadRequest(s"amount must be at least $currency ${AmountLimits.fromMinorToMajor(limits.min)}")),
+      )
     } yield ()
   }
 
-  private case class SupporterPlusCharges(ratePlanId: String, contributionCharge: RatePlanCharge, isAnnual: Boolean, basePrice: BigDecimal)
+  private case class SupporterPlusCharges(
+      ratePlanId: String,
+      contributionCharge: RatePlanCharge,
+      isAnnual: Boolean,
+      basePrice: BigDecimal,
+  )
 
 }
 
 extension (currency: Currency)
-  def toI18nCurrency: ZIO[Any, InternalServerError, i18n.Currency] = ZIO.fromOption(com.gu.i18n.Currency.fromString(currency.code)).orElseFail(InternalServerError("incorrect currency"))
+  def toI18nCurrency: ZIO[Any, InternalServerError, i18n.Currency] =
+    ZIO.fromOption(com.gu.i18n.Currency.fromString(currency.code)).orElseFail(InternalServerError("incorrect currency"))
 
 extension (billingPeriod: BillingPeriod)
   def value: IO[ErrorResponse, String] =
@@ -153,4 +168,3 @@ extension (billingPeriod: BillingPeriod)
       case Annual => ZIO.succeed("annual")
       case _ => ZIO.fail(InternalServerError(s"Unrecognised billing period $billingPeriod"))
     }
-

@@ -44,11 +44,11 @@ object SQS {
 }
 
 object SQSLive {
-  val layer: ZLayer[AwsCredentialsProvider with Stage, ErrorResponse, SQS] =
+  val layer: RLayer[AwsCredentialsProvider & Stage, SQS] =
     ZLayer.scoped(for {
       stage <- ZIO.service[Stage]
       sqsClient <- initializeSQSClient().mapError(ex =>
-        InternalServerError(s"Failed to initialize SQS Client with error: $ex"),
+        new Throwable(s"Failed to initialize SQS Client with error", ex),
       )
       emailQueueName = EmailQueueName.value
       emailQueueUrlResponse <- getQueue(emailQueueName, sqsClient)
@@ -154,14 +154,14 @@ object SQSLive {
   private def getQueue(
       queueName: String,
       sqsAsyncClient: SqsAsyncClient,
-  ): ZIO[Any, ErrorResponse, GetQueueUrlResponse] =
+  ): Task[GetQueueUrlResponse] =
     val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
 
     ZIO
       .fromCompletableFuture(
         sqsAsyncClient.getQueueUrl(queueUrl),
       )
-      .mapError { ex => InternalServerError(s"Failed to get sqs queue name: $queueName, error: ${ex.getMessage}") }
+      .mapError { ex => new Throwable(s"Failed to get sqs queue name: $queueName", ex) }
 
   private def impl(creds: AwsCredentialsProvider): SqsAsyncClient =
     SqsAsyncClient.builder

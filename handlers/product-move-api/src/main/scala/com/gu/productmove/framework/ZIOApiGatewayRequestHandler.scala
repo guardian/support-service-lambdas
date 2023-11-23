@@ -8,7 +8,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent.Reques
 import com.gu.productmove
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{BadRequest, InternalServerError, OutputBody}
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import zio.Task
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import software.amazon.awssdk.auth.credentials.*
@@ -31,7 +31,9 @@ import sttp.tapir.server.interceptor.reject.RejectInterceptor
 import sttp.tapir.server.interceptor.{CustomiseInterceptors, RequestResult}
 import sttp.tapir.server.interpreter.*
 import sttp.tapir.serverless.aws.lambda.*
+import sttp.tapir.serverless.aws.ziolambda.AwsZioServerInterpreter
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
+import sttp.tapir.ztapir.RIOMonadError
 import sttp.tapir.{AttributeKey, AttributeMap, CodecFormat, RawBodyType, WebSocketBodyOutput}
 import zio.ZIO.attemptBlocking
 import zio.json.*
@@ -48,7 +50,7 @@ import scala.util.{Success, Try}
 
 object ZIOApiGatewayRequestHandler {
 
-  type TIO[+A] = ZIO[Any, Any, A] // Succeed with an `A`, may fail with anything`, no requirements.
+//  type (was TIO) Task[+A] = ZIO[Any, Throwable, A] // Succeed with an `A`, may fail with anything`, no requirements.
 
 }
 
@@ -82,7 +84,7 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
     )
   }
 
-  val server: List[ServerEndpoint[Any, TIO]]
+  val server: List[ServerEndpoint[Any, Task]]
 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
   override def handleRequest(
@@ -109,10 +111,12 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
   }
 
   private def handleWithLoggerAndErrorHandling(awsRequest: AwsRequest, context: Context): AwsResponse = {
-    val swaggerEndpoints = SwaggerInterpreter().fromServerEndpoints[TIO](server, "My App", "1.0")
+    val swaggerEndpoints = SwaggerInterpreter().fromServerEndpoints[Task](server, "My App", "1.0")
 
-    val route: Route[TIO] = TIOInterpreter().toRoute(server ++ swaggerEndpoints)
-    val routedTask: TIO[AwsResponse] = route(awsRequest)
+    implicit val m: RIOMonadError[Any] = new RIOMonadError[Any]
+
+    val route: Route[Task] = AwsZioServerInterpreter().toRoute(server ++ swaggerEndpoints)
+    val routedTask: Task[AwsResponse] = route(awsRequest)
     val runtime = Runtime.default
     Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
@@ -122,7 +126,7 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
       ) match
         case Exit.Success(value) => value
         case Exit.Failure(cause) =>
-          context.getLogger.log("Failed with: " + cause.toString)
+          context.getLogger.log("Failed with: " + cause.prettyPrint)
           AwsResponse(false, 500, Map.empty, "")
     }
   }

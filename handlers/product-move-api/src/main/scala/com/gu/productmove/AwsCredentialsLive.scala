@@ -13,8 +13,8 @@ object AwsCredentialsLive {
 
   private val ProfileName = "membership"
 
-  val layer: Layer[String, AwsCredentialsProvider] =
-    ZLayer.scoped(ZIO.fromAutoCloseable(ZIO.attempt(impl))).mapError(_.toString)
+  val layer: Layer[Throwable, AwsCredentialsProvider] =
+    ZLayer.scoped(ZIO.fromAutoCloseable(ZIO.attempt(impl)))
 
   private def impl: AwsCredentialsProviderChain =
     AwsCredentialsProviderChain

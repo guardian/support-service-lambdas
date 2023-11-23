@@ -8,7 +8,7 @@ import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
 import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, ProductMoveEndpointTypes}
 import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpoint
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import zio.Task
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
 import software.amazon.awssdk.auth.credentials.*
@@ -65,8 +65,18 @@ object Handler extends ZIOApiGatewayRequestHandler {
     )
   }
 
+  @main
+  // this will output the HTML to the console
+  def testDocsHtml(): Unit = {
+    Handler.runTest(
+      "GET",
+      "/docs/",
+      None,
+    )
+  }
+
   // this represents all the routes for the server
-  override val server: List[ServerEndpoint[Any, TIO]] = List(
+  override val server: List[ServerEndpoint[Any, Task]] = List(
     AvailableProductMovesEndpoint.server,
     ProductMoveEndpoint.server,
     UpdateSupporterPlusAmountEndpoint.server,

@@ -98,7 +98,7 @@ object RecurringContributionToSupporterPlus {
   def apply(
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
-  ): ZIO[
+  ): RIO[
     GetSubscription
       with SubscriptionUpdate
       with TermRenewal
@@ -110,7 +110,6 @@ object RecurringContributionToSupporterPlus {
       with SQS
       with Dynamo
       with Stage,
-    ErrorResponse,
     OutputBody,
   ] = {
     (for {
