@@ -1,58 +1,16 @@
 package com.gu.productmove.framework
 
-import cats.effect.Sync
-import cats.effect.kernel.{CancelScope, Poll}
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.*
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent.RequestContext
 import com.gu.productmove
-import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{BadRequest, InternalServerError, OutputBody}
-import zio.Task
-import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.zuora.{GetSubscription, GetSubscriptionLive}
-import software.amazon.awssdk.auth.credentials.*
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.{GetObjectRequest, S3Exception}
-import software.amazon.awssdk.utils.SdkAutoCloseable
-import sttp.capabilities
-import sttp.capabilities.WebSockets
-import sttp.capabilities.zio.ZioStreams
-import sttp.client3.*
-import sttp.client3.httpclient.zio.HttpClientZioBackend
-import sttp.client3.logging.{Logger, LoggingBackend}
-import sttp.model.*
-import sttp.monad.MonadError
-import sttp.tapir.capabilities.NoStreams
-import sttp.tapir.model.{ConnectionInfo, ServerRequest}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.server.interceptor.reject.RejectInterceptor
-import sttp.tapir.server.interceptor.{CustomiseInterceptors, RequestResult}
-import sttp.tapir.server.interpreter.*
 import sttp.tapir.serverless.aws.lambda.*
 import sttp.tapir.serverless.aws.ziolambda.AwsZioServerInterpreter
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
 import sttp.tapir.ztapir.RIOMonadError
-import sttp.tapir.{AttributeKey, AttributeMap, CodecFormat, RawBodyType, WebSocketBodyOutput}
-import zio.ZIO.attemptBlocking
-import zio.json.*
-import zio.{IO, Runtime, ZIO, *}
+import zio.{IO, Runtime, Task, ZIO, *}
 
-import java.io.{ByteArrayInputStream, InputStream, OutputStream}
-import java.net.{InetSocketAddress, URLDecoder}
-import java.nio.ByteBuffer
-import java.nio.charset.Charset
-import java.util.Base64
-import scala.concurrent.Future
 import scala.jdk.CollectionConverters.*
-import scala.util.{Success, Try}
-
-object ZIOApiGatewayRequestHandler {
-
-//  type (was TIO) Task[+A] = ZIO[Any, Throwable, A] // Succeed with an `A`, may fail with anything`, no requirements.
-
-}
 
 trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEvent, APIGatewayV2WebSocketResponse] {
 
@@ -87,6 +45,7 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
   val server: List[ServerEndpoint[Any, Task]]
 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
+  // TODO most of this can probably be replaced with https://github.com/softwaremill/tapir/blob/9ac47f0d2ce4b3a91aeba97221a7ee6cd94e0bfe/serverless/aws/lambda-zio/src/main/scala/sttp/tapir/serverless/aws/ziolambda/ZioLambdaHandler.scala
   override def handleRequest(
       javaRequest: APIGatewayV2WebSocketEvent,
       context: Context,
@@ -113,7 +72,7 @@ trait ZIOApiGatewayRequestHandler extends RequestHandler[APIGatewayV2WebSocketEv
   private def handleWithLoggerAndErrorHandling(awsRequest: AwsRequest, context: Context): AwsResponse = {
     val swaggerEndpoints = SwaggerInterpreter().fromServerEndpoints[Task](server, "My App", "1.0")
 
-    implicit val m: RIOMonadError[Any] = new RIOMonadError[Any]
+    given RIOMonadError[Any] = new RIOMonadError[Any]
 
     val route: Route[Task] = AwsZioServerInterpreter().toRoute(server ++ swaggerEndpoints)
     val routedTask: Task[AwsResponse] = route(awsRequest)

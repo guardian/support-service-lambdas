@@ -79,9 +79,8 @@ object AvailableProductMovesEndpoint {
       }
   }
 
-  // sub to test on: "A-S00334930"
   private def run(subscriptionName: String): Task[OutputBody] =
-    runWithEnvironment(SubscriptionName("A-S00334930")).provide(
+    runWithEnvironment(SubscriptionName(subscriptionName)).provide(
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
@@ -131,7 +130,7 @@ object AvailableProductMovesEndpoint {
     }
 
   extension [R, E, A](zio: ZIO[R, E, A])
-    def mapErrorTo500(message: String) = zio.catchAll { error =>
+    private def mapErrorTo500(message: String) = zio.catchAll { error =>
       ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
 
