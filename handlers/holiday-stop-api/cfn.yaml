@@ -18,9 +18,11 @@ Mappings:
         CODE:
             ApiName: holiday-stop-api-CODE
             FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code/*"
+            DomainName: holiday-stop-api-code.support.guardianapis.com
         PROD:
             ApiName: holiday-stop-api-PROD
             FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
+            DomainName: holiday-stop-api.support.guardianapis.com
 
 Resources:
     HolidayStopApiRole:
@@ -400,3 +402,34 @@ Resources:
         Statistic: Sum
         Threshold: 5
         TreatMissingData: notBreaching
+
+    HolidayStopApiDomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: # only for *.support.guardianapis.com
+          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009
+        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    HolidayStopApiBasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref HolidayStopApi
+        DomainName: !Ref HolidayStopApiDomainName
+        Stage: !Sub ${Stage}
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiDomainName
+        - HolidayStopApiStage
+
+    HolidayStopApiDNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: support.guardianapis.com.
+        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+          - !GetAtt HolidayStopApiDomainName.RegionalDomainName

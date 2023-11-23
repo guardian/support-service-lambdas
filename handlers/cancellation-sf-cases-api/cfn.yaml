@@ -10,6 +10,13 @@ Parameters:
       - CODE
     Default: CODE
 
+Mappings:
+  StageMap:
+    PROD:
+      DomainName: cancellation-sf-cases.support.guardianapis.com
+    CODE:
+      DomainName: cancellation-sf-cases-code.support.guardianapis.com
+
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
 
@@ -178,3 +185,34 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+
+  CancellationSFCasesApiDomainName:
+    Type: "AWS::ApiGateway::DomainName"
+    Properties:
+      RegionalCertificateArn: # only for *.support.guardianapis.com
+        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009
+      DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  CancellationSFCasesApiBasePathMapping:
+    Type: "AWS::ApiGateway::BasePathMapping"
+    Properties:
+      RestApiId: !Ref CancellationSFCasesApi
+      DomainName: !Ref CancellationSFCasesApiDomainName
+      Stage: !Sub ${Stage}
+    DependsOn:
+      - CancellationSFCasesApi
+      - CancellationSFCasesApiDomainName
+      - CancellationSFCasesApiStage
+
+  CancellationSFCasesApiDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: support.guardianapis.com.
+      Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+      Type: CNAME
+      TTL: '120'
+      ResourceRecords:
+        - !GetAtt CancellationSFCasesApiDomainName.RegionalDomainName

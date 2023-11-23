@@ -1,5 +1,4 @@
-Transform: AWS::Serverless-2016-10-31
-
+---
 Parameters:
   Stage:
     Description: Stage name
@@ -8,10 +7,6 @@ Parameters:
       - PROD
       - CODE
     Default: CODE
-
-Conditions:
-  IsProd: !Equals [ !Ref Stage, PROD ]
-
 Mappings:
   StageMap:
     PROD:
@@ -21,6 +16,7 @@ Mappings:
       AppName: TouchpointUpdate
       AppSecretsVersion: d338b761-cb81-4adf-aca4-163678e65a59
       UserSecretsVersion: dfbf9eba-5215-4cb8-91f1-ff5bcbbf5201
+      DomainName: contact-us-api.support.guardianapis.com
     CODE:
       authDomain: test.salesforce.com
       reqDomain: gnmtouchpoint--DEV1.sandbox.my.salesforce.com
@@ -28,22 +24,232 @@ Mappings:
       AppName: AwsConnectorSandbox
       AppSecretsVersion: abaa595b-e6c8-4d13-81e0-2d02627536c7
       UserSecretsVersion: 4a0eabf6-7940-47ef-87d0-36c3ef7f5741
-
+      DomainName: contact-us-api-code.support.guardianapis.com
 Resources:
-
   ContactUsApiGateway:
-    Type: AWS::Serverless::Api
+    Type: AWS::ApiGateway::RestApi
     Properties:
-      OpenApiVersion: '2.0'
-      Name: !Sub contact-us-api-${Stage}-ApiGateway
-      StageName: !Sub ${Stage}
-      Auth:
-        ApiKeyRequired: true
-        UsagePlan:
-          CreateUsagePlan: PER_API
-          UsagePlanName: !Sub contact-us-api-${Stage}-UsagePlan
-          Description: !Sub Usage plan for contact-us-api-${Stage}
+      Body:
+        info:
+          version: '1.0'
+          title:
+            Ref: AWS::StackName
+        paths:
+          "/":
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ContactUsLambda.Arn}/invocations
+              security:
+                - api_key: []
+              responses: {}
+        swagger: '2.0'
+        securityDefinitions:
+          api_key:
+            type: apiKey
+            name: x-api-key
+            in: header
+      Name:
+        Fn::Sub: contact-us-api-${Stage}-ApiGateway
+  ContactUsApiGatewayDeployment18d4f4d63b:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: 'RestApi deployment id: 18d4f4d63b13b7bad95a556b1a598aebc104f418'
+      RestApiId:
+        Ref: ContactUsApiGateway
+  4xxApiAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - ContactUsApiGateway
+    Properties:
+      AlarmActions:
+        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName:
+        Fn::Sub: 4XX rate from contact-us-api-${Stage}
+      AlarmDescription: 'See https://github.com/guardian/support-service-lambdas/blob/main/handlers/contact-us-api/README.md#4XX-Errors
+        for possible causes, impacts and fixes.
 
+        '
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value:
+            Fn::Sub: contact-us-api-${Stage}-ApiGateway
+        - Name: Stage
+          Value:
+            Fn::Sub: "${Stage}"
+      EvaluationPeriods: 1
+      MetricName: 4XXError
+      Namespace: AWS/ApiGateway
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  5xxApiAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - ContactUsApiGateway
+    Properties:
+      AlarmActions:
+        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName:
+        Fn::Sub: 5XX rate from contact-us-api-${Stage}
+      AlarmDescription: 'See https://github.com/guardian/support-service-lambdas/blob/main/handlers/contact-us-api/README.md#5XX-Errors
+        for possible causes, impacts and fixes.
+
+        '
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value:
+            Fn::Sub: contact-us-api-${Stage}-ApiGateway
+        - Name: Stage
+          Value:
+            Fn::Sub: "${Stage}"
+      EvaluationPeriods: 1
+      MetricName: 5XXError
+      Namespace: AWS/ApiGateway
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  ContactUsLambda:
+    Type: AWS::Lambda::Function
+    DependsOn:
+      - ContactUsLambdaRole
+    Properties:
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key:
+          Fn::Sub: membership/${Stage}/contact-us-api/contact-us-api.jar
+      FunctionName:
+        Fn::Sub: contact-us-api-${Stage}
+      Handler: com.gu.contact_us_api.Handler
+      MemorySize: 1024
+      Role:
+        Fn::GetAtt:
+          - ContactUsLambdaRole
+          - Arn
+      Runtime: java11
+      Timeout: 60
+      Environment:
+        Variables:
+          stage:
+            Ref: Stage
+          authDomain:
+            Fn::FindInMap:
+              - StageMap
+              - Ref: Stage
+              - authDomain
+          reqDomain:
+            Fn::FindInMap:
+              - StageMap
+              - Ref: Stage
+              - reqDomain
+      Tags:
+        - Key: lambda:createdBy
+          Value: SAM
+  ContactUsLambdaApiEventPermissionStage:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: ContactUsLambda
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub:
+          - arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/POST/
+          - __ApiId__:
+              Ref: ContactUsApiGateway
+            __Stage__: "*"
+  ContactUsApiGatewayUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    DependsOn:
+      - ContactUsApiGateway
+    Properties:
+      ApiStages:
+        - ApiId:
+            Ref: ContactUsApiGateway
+          Stage:
+            Ref: ContactUsApiGatewayStage
+      Description:
+        Fn::Sub: Usage plan for contact-us-api-PROD
+      UsagePlanName:
+        Fn::Sub: contact-us-api-PROD-UsagePlan
+  ContactUsApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId:
+        Ref: ContactUsApiGatewayDeployment18d4f4d63b
+      RestApiId:
+        Ref: ContactUsApiGateway
+      StageName:
+        Fn::Sub: "${Stage}"
+  ContactUsApiGatewayApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    DependsOn:
+      - ContactUsApiGatewayUsagePlan
+    Properties:
+      Enabled: true
+      StageKeys:
+        - RestApiId:
+            Ref: ContactUsApiGateway
+          StageName:
+            Ref: ContactUsApiGatewayStage
+  ContactUsApiGatewayUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    DependsOn:
+      - ContactUsApiGatewayApiKey
+    Properties:
+      KeyId:
+        Ref: ContactUsApiGatewayApiKey
+      KeyType: API_KEY
+      UsagePlanId:
+        Ref: ContactUsApiGatewayUsagePlan
+  noRequestsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - ContactUsApiGateway
+    Properties:
+      AlarmActions:
+        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+      AlarmName:
+        Fn::Sub: No requests coming into contact-us-api-${Stage}
+      AlarmDescription: 'This is a last line catch-all alarm. It means no requests
+        were received in the last 6 hours. It might mean something''s (silently) gone
+        wrong with a part of the system that sends these requests (eg. MMA client
+        or server-side). Or it could mean our users are happy and don''t need to contact
+        us. :)
+
+        '
+      ComparisonOperator: LessThanThreshold
+      Threshold: 1
+      EvaluationPeriods: 12
+      Metrics:
+        - Id: actualCount
+          Expression: FILL(rawCount, 0)
+        - Id: rawCount
+          ReturnData: false
+          MetricStat:
+            Metric:
+              MetricName: Count
+              Namespace: AWS/ApiGateway
+              Dimensions:
+                - Name: ApiName
+                  Value:
+                    Fn::Sub: contact-us-api-${Stage}-ApiGateway
+                - Name: Stage
+                  Value:
+                    Fn::Sub: "${Stage}"
+            Period: 3600
+            Stat: Sum
+            Unit: Count
+      TreatMissingData: breaching
   ContactUsLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -53,7 +259,7 @@ Resources:
             Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-        Version: "2012-10-17"
+        Version: '2012-10-17'
       Tags:
         - Key: App
           Value: contact-us-api
@@ -62,7 +268,7 @@ Resources:
             Ref: Stage
         - Key: Stack
           Value: membership
-      Path: /
+      Path: "/"
       Policies:
         - PolicyName: ContactUsLambdaPolicy
           PolicyDocument:
@@ -73,7 +279,8 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/contact-us-api-${Stage}:log-stream:*
+                Resource:
+                  Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/contact-us-api-${Stage}:log-stream:*
         - PolicyName: ReadFromSecretsManagerPolicy
           PolicyDocument:
             Statement:
@@ -82,125 +289,43 @@ Resources:
                   - secretsmanager:DescribeSecret
                   - secretsmanager:GetSecretValue
                 Resource:
-                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP"
-                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl"
-                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/MembersDataAPI-1wX7Rg"
-                  - "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA"
+                  - arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP
+                  - arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl
+                  - arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/MembersDataAPI-1wX7Rg
+                  - arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/MembersDataAPI-xpUthA
 
-  ContactUsLambda:
-    Type: AWS::Serverless::Function
+  ContactUsApiDomainName:
+    Type: "AWS::ApiGateway::DomainName"
     Properties:
-      FunctionName: !Sub contact-us-api-${Stage}
-      Handler: com.gu.contact_us_api.Handler
-      Runtime: java11
-      CodeUri:
-        Bucket: support-service-lambdas-dist
-        Key: !Sub membership/${Stage}/contact-us-api/contact-us-api.jar
-      Timeout: 60
-      MemorySize: 1024
-      Environment:
-        Variables:
-          stage: !Ref Stage
-          authDomain: !FindInMap [ StageMap, !Ref Stage, authDomain ]
-          reqDomain: !FindInMap [ StageMap, !Ref Stage, reqDomain ]
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /
-            Method: POST
-            RestApiId:
-              Ref: ContactUsApiGateway
-      Role:
-        Fn::GetAtt:
-          - ContactUsLambdaRole
-          - Arn
-    DependsOn:
-      - ContactUsLambdaRole
+      RegionalCertificateArn: # only for *.support.guardianapis.com
+        !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009
+      DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
 
-  4xxApiAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsProd
+  ContactUsApiBasePathMapping:
+    Type: "AWS::ApiGateway::BasePathMapping"
+    Properties:
+      RestApiId: !Ref ContactUsApiGateway
+      DomainName: !Ref ContactUsApiDomainName
+      Stage: !Sub ${Stage}
     DependsOn:
       - ContactUsApiGateway
-    Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub 4XX rate from contact-us-api-${Stage}
-      AlarmDescription: >
-        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/contact-us-api/README.md#4XX-Errors
-        for possible causes, impacts and fixes.
-      ComparisonOperator: GreaterThanThreshold
-      Dimensions:
-        - Name: ApiName
-          Value: !Sub contact-us-api-${Stage}-ApiGateway
-        - Name: Stage
-          Value: !Sub ${Stage}
-      EvaluationPeriods: 1
-      MetricName: 4XXError
-      Namespace: AWS/ApiGateway
-      Period: 3600
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
+      - ContactUsApiDomainName
+      - ContactUsApiGatewayStage
 
-  5xxApiAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsProd
-    DependsOn:
-      - ContactUsApiGateway
+  ContactUsApiDNSRecord:
+    Type: AWS::Route53::RecordSet
     Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub 5XX rate from contact-us-api-${Stage}
-      AlarmDescription: >
-        See https://github.com/guardian/support-service-lambdas/blob/main/handlers/contact-us-api/README.md#5XX-Errors
-        for possible causes, impacts and fixes.
-      ComparisonOperator: GreaterThanThreshold
-      Dimensions:
-        - Name: ApiName
-          Value: !Sub contact-us-api-${Stage}-ApiGateway
-        - Name: Stage
-          Value: !Sub ${Stage}
-      EvaluationPeriods: 1
-      MetricName: 5XXError
-      Namespace: AWS/ApiGateway
-      Period: 3600
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
-
-  noRequestsAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsProd
-    DependsOn:
-      - ContactUsApiGateway
-    Properties:
-      AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName: !Sub No requests coming into contact-us-api-${Stage}
-      AlarmDescription: >
-        This is a last line catch-all alarm. It means no requests were received in the last 6 hours.
-        It might mean something's (silently) gone wrong with a part of the system that sends these requests (eg. MMA client or server-side).
-        Or it could mean our users are happy and don't need to contact us. :)
-      ComparisonOperator: LessThanThreshold
-      Threshold: 1
-      EvaluationPeriods: 12
-      Metrics:
-        - Id: actualCount
-          Expression: "FILL(rawCount, 0)"
-        - Id: rawCount
-          ReturnData: false
-          MetricStat:
-            Metric:
-              MetricName: Count
-              Namespace: AWS/ApiGateway
-              Dimensions:
-                - Name: ApiName
-                  Value: !Sub contact-us-api-${Stage}-ApiGateway
-                - Name: Stage
-                  Value: !Sub ${Stage}
-            Period: 3600
-            Stat: Sum
-            Unit: Count
-      TreatMissingData: breaching
+      HostedZoneName: support.guardianapis.com.
+      Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+      Type: CNAME
+      TTL: '120'
+      ResourceRecords:
+        - !GetAtt ContactUsApiDomainName.RegionalDomainName
+Conditions:
+  IsProd:
+    Fn::Equals:
+      - Ref: Stage
+      - PROD

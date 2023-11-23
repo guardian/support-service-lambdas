@@ -16,8 +16,10 @@ Conditions:
 Mappings:
     StageMap:
         CODE:
+            DomainName: delivery-records-api-code.support.guardianapis.com
             ApiName: delivery-records-api-CODE
         PROD:
+            DomainName: delivery-records-api.support.guardianapis.com
             ApiName: delivery-records-api-PROD
 
 Resources:
@@ -188,3 +190,34 @@ Resources:
         Statistic: Sum
         Threshold: 2
         TreatMissingData: notBreaching
+
+    DeliveryRecordsApiDomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: # only for *.support.guardianapis.com
+          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009
+        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    DeliveryRecordsApiBasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref DeliveryRecordsApi
+        DomainName: !Ref DeliveryRecordsApiDomainName
+        Stage: !Sub ${Stage}
+      DependsOn:
+        - DeliveryRecordsApi
+        - DeliveryRecordsApiDomainName
+        - DeliveryRecordsApiStage
+
+    DeliveryRecordsApiDNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: support.guardianapis.com.
+        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+          - !GetAtt DeliveryRecordsApiDomainName.RegionalDomainName
