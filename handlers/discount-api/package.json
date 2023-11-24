@@ -1,15 +1,20 @@
 {
   "name": "discount-api",
   "scripts": {
-    "test": "jest",
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
     "lint": "eslint src/**/*.ts",
     "package": "pnpm type-check && pnpm lint && pnpm build && cd target; zip -qr discount-api.zip ./*.js"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.456.0",
-    "@aws-sdk/credential-provider-node": "^3.451.0",
+    "@aws-sdk/client-s3": "3.451.0",
+    "@aws-sdk/client-secrets-manager": "3.451.0",
+    "@aws-sdk/credential-provider-node": "3.451.0",
     "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "jest-runner-groups": "^2.2.0"
   }
 }

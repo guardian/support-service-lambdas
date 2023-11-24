@@ -1570,12 +1570,12 @@
               "discountClass": null,
               "productDiscountApplyDetails": [
                 {
-                  "appliedProductRatePlanId": "8ad09fc281de1ce70181de3b251736a4",
-                  "appliedProductRatePlanChargeId": "8ad09fc281de1ce70181de3b253e36a6"
-                },
-                {
                   "appliedProductRatePlanId": "8ad09fc281de1ce70181de3b28ee3783",
                   "appliedProductRatePlanChargeId": "8ad09fc281de1ce70181de3b29223787"
+                },
+                {
+                  "appliedProductRatePlanId": "8ad09fc281de1ce70181de3b251736a4",
+                  "appliedProductRatePlanChargeId": "8ad09fc281de1ce70181de3b253e36a6"
                 }
               ],
               "endDateCondition": "Subscription_End",
@@ -14141,12 +14141,12 @@
               "discountClass": null,
               "productDiscountApplyDetails": [
                 {
-                  "appliedProductRatePlanId": "8ad08e018499b108018499f163ac32e3",
-                  "appliedProductRatePlanChargeId": "8ad08e018499b108018499f163e132ef"
-                },
-                {
                   "appliedProductRatePlanId": "8ad08e018499b108018499f1644d32ff",
                   "appliedProductRatePlanChargeId": "8ad08e018499b108018499f164633304"
+                },
+                {
+                  "appliedProductRatePlanId": "8ad08e018499b108018499f163ac32e3",
+                  "appliedProductRatePlanChargeId": "8ad08e018499b108018499f163e132ef"
                 }
               ],
               "endDateCondition": "Fixed_Period",

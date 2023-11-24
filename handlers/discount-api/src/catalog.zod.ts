@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+export type Catalog = z.infer<typeof catalogSchema>;
 export const catalogSchema = z.object({
 	products: z.array(
 		z.object({
@@ -39,5 +40,3 @@ export const catalogSchema = z.object({
 		}),
 	),
 });
-
-export type Catalog = z.infer<typeof catalogSchema>;
