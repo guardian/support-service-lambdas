@@ -3,7 +3,7 @@ import {
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
-import type { Stage } from '../../../modules/Stage';
+import type { Stage } from '../../../../modules/Stage';
 import { zuoraCredentialsSchema } from './zuora.zod';
 
 export const getCredentials = async (stage: Stage) => {
