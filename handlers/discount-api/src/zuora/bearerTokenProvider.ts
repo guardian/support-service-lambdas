@@ -1,5 +1,5 @@
 import { zuoraServerUrl } from './common';
-import type { ZuoraBearerToken, ZuoraCredentials } from './zuoraSchemas';
+import type { OAuthClientCredentials, ZuoraBearerToken } from './zuoraSchemas';
 import { zuoraBearerTokenSchema } from './zuoraSchemas';
 
 export class BearerTokenProvider {
@@ -8,7 +8,7 @@ export class BearerTokenProvider {
 
 	constructor(
 		private stage: string,
-		private credentials: ZuoraCredentials,
+		private credentials: OAuthClientCredentials,
 	) {}
 
 	private tokenIsExpired = () => {

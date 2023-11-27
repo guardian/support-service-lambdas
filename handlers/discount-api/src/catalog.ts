@@ -15,15 +15,12 @@ export async function getCatalogFromS3(stage: Stage) {
 		Key: `PROD/Zuora-${stage}/catalog.json`,
 	});
 
-	try {
-		const response = await client.send(command);
-		const body = await response.Body?.transformToString();
-		if (!body) {
-			throw new Error('Catalog is undefined');
-		}
-		return catalogSchema.parse(JSON.parse(body));
-	} catch (err) {
-		console.error(err);
-		throw err;
+	const response = await client.send(command);
+	const body = await response.Body?.transformToString();
+	if (!body) {
+		throw new Error(
+			'Response body was undefined when fetching the Catalog from S3',
+		);
 	}
+	return catalogSchema.parse(JSON.parse(body));
 }
