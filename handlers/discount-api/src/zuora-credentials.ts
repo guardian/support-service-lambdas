@@ -4,9 +4,9 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import type { Stage } from '../../../modules/Stage';
-import { zuoraSecretsSchema } from './zuora-secrets.zod';
+import { zuoraCredentialsSchema } from './zuora.zod';
 
-export const getSecrets = async (stage: Stage) => {
+export const getCredentials = async (stage: Stage) => {
 	const client = new SecretsManagerClient({
 		region: 'eu-west-1',
 		credentials: defaultProvider({ profile: 'membership' }),
@@ -19,7 +19,7 @@ export const getSecrets = async (stage: Stage) => {
 	try {
 		const response = await client.send(command);
 		if (!response.SecretString) throw new Error('No secret string');
-		return zuoraSecretsSchema.parse(JSON.parse(response.SecretString));
+		return zuoraCredentialsSchema.parse(JSON.parse(response.SecretString));
 	} catch (error) {
 		// For a list of exceptions thrown, see
 		// https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
