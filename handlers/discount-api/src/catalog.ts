@@ -1,7 +1,7 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import type { Stage } from '../../../modules/Stage';
-import { catalogSchema } from './catalog.zod';
+import { catalogSchema } from './catalogSchema';
 
 const client = new S3Client({
 	region: 'eu-west-1',

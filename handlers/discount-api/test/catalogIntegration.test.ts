@@ -5,7 +5,7 @@
  */
 
 import { getCatalogFromS3 } from '../src/catalog';
-import type { Catalog } from '../src/catalog.zod';
+import type { Catalog } from '../src/catalogSchema';
 
 test('getCatalogFromS3', async () => {
 	const codeCatalog: Catalog = await getCatalogFromS3('CODE');

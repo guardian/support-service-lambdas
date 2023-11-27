@@ -12,3 +12,10 @@ export const zuoraBearerTokenSchema = z.object({
 	access_token: z.string(),
 	expires_in: z.number(),
 });
+
+export const zuoraSubscriptionSchema = z.object({
+	id: z.string(),
+	accountId: z.string(),
+});
+
+export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
