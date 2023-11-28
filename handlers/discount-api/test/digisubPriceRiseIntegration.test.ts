@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import { BearerTokenProvider } from '../src/zuora/bearerTokenProvider';
 import { zuoraServerUrl } from '../src/zuora/common';
 import { getOAuthClientCredentials } from '../src/zuora/oAuthCredentials';
-import { zuoraSubscriptionSchema } from '../src/zuora/zuoraSchemas';
+import { zuoraSubscribeResponseSchema } from '../src/zuora/zuoraSchemas';
 import { digisubSubscribeBody } from './fixtures/digisub-subscribe-body';
 
 const createPriceRiseSubscription = async () => {
@@ -31,7 +31,7 @@ const createPriceRiseSubscription = async () => {
 		});
 		const json = await response.json();
 		console.log('Response from Zuora was: ', json);
-		return zuoraSubscriptionSchema.parse(json);
+		return zuoraSubscribeResponseSchema.parse(json);
 	} catch (error) {
 		console.log('Error from Zuora was: ', error);
 		throw error;
@@ -39,6 +39,6 @@ const createPriceRiseSubscription = async () => {
 };
 
 test('createPriceRiseSubscription', async () => {
-	const subscription = await createPriceRiseSubscription();
-	expect(subscription.id.length).toBeGreaterThan(0);
+	const subscribeResponse = await createPriceRiseSubscription();
+	expect(subscribeResponse.length).toEqual(1);
 });

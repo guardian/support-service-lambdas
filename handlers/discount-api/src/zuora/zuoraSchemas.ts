@@ -59,3 +59,15 @@ export const zuoraSubscriptionSchema = z.object({
 });
 
 export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
+
+export const zuoraSubscribeResponseSchema = z.array(
+	z.object({
+		Success: z.boolean(),
+		SubscriptionNumber: z.string(),
+		AccountNumber: z.string(),
+	}),
+);
+
+export type ZuoraSubscribeResponse = z.infer<
+	typeof zuoraSubscribeResponseSchema
+>;
