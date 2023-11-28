@@ -28,7 +28,7 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
 
   private val handler = ZioLambdaHandler.default[Any](allEndpoints)
 
-  given Decoder[AwsRequest] = deriveDecoder
+  given Decoder[AwsRequestV1] = deriveDecoder
   given Encoder[AwsResponse] = deriveEncoder
 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
@@ -43,11 +43,11 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
             str = new String(allBytes, StandardCharsets.UTF_8)
             _ <- ZIO.log("input: " + str)
             loggedOutputStream = new ByteArrayOutputStream()
-            result <- handler.process[AwsRequest](new ByteArrayInputStream(allBytes), loggedOutputStream)
+            _ <- handler.process[AwsRequestV1](new ByteArrayInputStream(allBytes), loggedOutputStream)
             _ <- ZIO.log("output: " + new String(loggedOutputStream.toByteArray, StandardCharsets.UTF_8))
             _ = output.write(loggedOutputStream.toByteArray)
             _ = output.close()
-          } yield result,
+          } yield ()
         )
         .getOrThrowFiberFailure()
     }
