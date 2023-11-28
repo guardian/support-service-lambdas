@@ -1,0 +1,64 @@
+import type { Dayjs } from 'dayjs';
+
+export const digisubSubscribeBody = (subscriptionDate: Dayjs) => {
+	return {
+		subscribes: [
+			{
+				Account: {
+					Name: '0019E00002QSysUQAT',
+					Currency: 'GBP',
+					CrmId: '0019E00002QSysUQAT',
+					IdentityId__c: '200175946',
+					PaymentGateway: 'GoCardless',
+					CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
+					BillCycleDay: 0,
+					AutoPay: false,
+					PaymentTerm: 'Due Upon Receipt',
+					BcdSettingOption: 'AutoSet',
+					Batch: 'Batch1',
+					InvoiceTemplateId: '2c92c0f849369b8801493bf7db7e450e',
+					sfContactId__c: '0039E00001rm02wQAA',
+				},
+				BillToContact: {
+					FirstName: 'Test',
+					LastName: 'User',
+					WorkEmail: 'test.user@thegulocal.com',
+					Country: 'GB',
+				},
+				SubscriptionData: {
+					RatePlanData: [
+						{
+							RatePlan: {
+								ProductRatePlanId: '2c92c0f84bbfec8b014bc655f4852d9d',
+							},
+							RatePlanChargeData: [],
+							SubscriptionProductFeatureList: [],
+						},
+					],
+					Subscription: {
+						ContractEffectiveDate: subscriptionDate.format('YYYY-MM-DD'),
+						ContractAcceptanceDate: subscriptionDate
+							.add(16, 'day')
+							.format('YYYY-MM-DD'),
+						TermStartDate: subscriptionDate.format('YYYY-MM-DD'),
+						AutoRenew: true,
+						InitialTermPeriodType: 'Month',
+						InitialTerm: 24,
+						RenewalTerm: 12,
+						TermType: 'TERMED',
+						ReaderType__c: 'Direct',
+						CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
+					},
+				},
+				SubscribeOptions: {
+					GenerateInvoice: true,
+					ProcessPayments: true,
+				},
+				PreviewOptions: {
+					EnablePreviewMode: true,
+					NumberOfPeriods: 13,
+				},
+			},
+		],
+	};
+};
