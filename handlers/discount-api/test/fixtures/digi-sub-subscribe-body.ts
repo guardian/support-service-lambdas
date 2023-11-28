@@ -1,6 +1,6 @@
 import type { Dayjs } from 'dayjs';
 
-export const digisubSubscribeBody = (subscriptionDate: Dayjs) => {
+export const digiSubSubscribeBody = (subscriptionDate: Dayjs) => {
 	return {
 		subscribes: [
 			{

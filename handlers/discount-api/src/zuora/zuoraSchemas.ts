@@ -31,7 +31,7 @@ export const zuoraSubscriptionSchema = z.object({
 	ratePlans: z.array(
 		z.object({
 			id: z.string(),
-			lastChangeType: z.string(),
+			lastChangeType: z.optional(z.string()),
 			productId: z.string(),
 			productName: z.string(),
 			productRatePlanId: z.string(),
@@ -71,3 +71,9 @@ export const zuoraSubscribeResponseSchema = z.array(
 export type ZuoraSubscribeResponse = z.infer<
 	typeof zuoraSubscribeResponseSchema
 >;
+
+export const zuoraSuccessResponseSchema = z.object({
+	success: z.boolean(),
+});
+
+export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
