@@ -28,7 +28,7 @@ object Http extends Logging {
     { request: Request =>
       val maybeBodySummary = Option(request.body).map(bodySummary)
       logger.info(
-        s"HTTP request: ${request.method} ${request.url} ${request.headers().asScala.mkString("\n")}" + maybeBodySummary
+        s"HTTP request: ${request.method} ${request.url}" + maybeBodySummary
           .map(summary => s", body:  $summary")
           .getOrElse(""),
       )
