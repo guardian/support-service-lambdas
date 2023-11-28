@@ -71,7 +71,7 @@ object SecretsLive extends Secrets {
   implicit val reader2: Reader[ZuoraApiUserSecrets] = macroRW
   implicit val reader3: Reader[SalesforceSSLSecrets] = macroRW
   private lazy val secretsClient = SecretsManagerClient.builder().credentialsProvider(credentialsProvider).build()
-  val credentialsProvider = AwsCredentialsProviderChain
+  lazy val credentialsProvider = AwsCredentialsProviderChain
     .builder()
     .credentialsProviders(
       ProfileCredentialsProvider.create(ProfileName),
