@@ -78,17 +78,7 @@ object SecretsLive extends Secrets {
       EnvironmentVariableCredentialsProvider.create(),
     )
     .build()
-  val layer: ULayer[Secrets] = ZLayer.succeed(SecretsLive)
   private val ProfileName = "membership"
-
-  def getInvoicingAPISecrets: Task[InvoicingAPISecrets] = {
-    for {
-      stg <- getStage
-      secretId: String = s"${stg}/InvoicingApi"
-      secretJsonString = getJSONString(secretId)
-      secrets <- parseInvoicingAPISecretsJSONString(secretJsonString)
-    } yield secrets
-  }
 
   def getJSONString(secretId: String): String = {
     secretsClient.getSecretValue(GetSecretValueRequest.builder().secretId(secretId).build()).secretString()
@@ -104,6 +94,29 @@ object SecretsLive extends Secrets {
     }
   }
 
+  def parseZuoraApiUserSecretsJSONString(str: String): Task[ZuoraApiUserSecrets] = {
+    Try(read[ZuoraApiUserSecrets](str)) match {
+      case Success(x) => ZIO.succeed(x)
+      case Failure(s) => ZIO.fail(new Throwable(s"Failure while parsing json string: ${s}"))
+    }
+  }
+
+  def parseSalesforceSSLSecretsJSONString(str: String): Task[SalesforceSSLSecrets] = {
+    Try(read[SalesforceSSLSecrets](str)) match {
+      case Success(x) => ZIO.succeed(x)
+      case Failure(s) => ZIO.fail(new Throwable(s"Failure while parsing json string: ${s}"))
+    }
+  }
+
+  def getInvoicingAPISecrets: Task[InvoicingAPISecrets] = {
+    for {
+      stg <- getStage
+      secretId: String = s"${stg}/InvoicingApi"
+      secretJsonString = getJSONString(secretId)
+      secrets <- parseInvoicingAPISecretsJSONString(secretJsonString)
+    } yield secrets
+  }
+
   def getZuoraApiUserSecrets: Task[ZuoraApiUserSecrets] = {
     for {
       stg <- getStage
@@ -111,13 +124,6 @@ object SecretsLive extends Secrets {
       secretJsonString = getJSONString(secretId)
       secrets <- parseZuoraApiUserSecretsJSONString(secretJsonString)
     } yield secrets
-  }
-
-  def parseZuoraApiUserSecretsJSONString(str: String): Task[ZuoraApiUserSecrets] = {
-    Try(read[ZuoraApiUserSecrets](str)) match {
-      case Success(x) => ZIO.succeed(x)
-      case Failure(s) => ZIO.fail(new Throwable(s"Failure while parsing json string: ${s}"))
-    }
   }
 
   def getSalesforceSSLSecrets: Task[SalesforceSSLSecrets] = {
@@ -129,10 +135,6 @@ object SecretsLive extends Secrets {
     } yield secrets
   }
 
-  def parseSalesforceSSLSecretsJSONString(str: String): Task[SalesforceSSLSecrets] = {
-    Try(read[SalesforceSSLSecrets](str)) match {
-      case Success(x) => ZIO.succeed(x)
-      case Failure(s) => ZIO.fail(new Throwable(s"Failure while parsing json string: ${s}"))
-    }
-  }
+  val layer: ULayer[Secrets] = ZLayer.succeed(SecretsLive)
+
 }

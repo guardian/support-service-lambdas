@@ -72,6 +72,14 @@ import scala.collection.immutable
 // this is the description for just the one endpoint
 object UpdateSupporterPlusAmountEndpoint {
 
+  // run this to test locally via console with some hard coded data
+  def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
+    run(
+      "A-S00609043",
+      ExpectedInput(BigDecimal(20)),
+    ),
+  )
+
   val server: sttp.tapir.server.ServerEndpoint.Full[
     Unit,
     Unit,
@@ -127,14 +135,6 @@ object UpdateSupporterPlusAmountEndpoint {
         )
     endpointDescription.serverLogic[Task](run)
   }
-
-  // run this to test locally via console with some hard coded data
-  def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run(
-      "A-S00609043",
-      ExpectedInput(BigDecimal(20)),
-    ),
-  )
 
   private def run(subscriptionName: String, postData: ExpectedInput): Task[Right[Nothing, OutputBody]] = for {
     _ <- ZIO.log(s"INPUT: $subscriptionName: $postData")

@@ -34,10 +34,10 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
   override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
     val runtime = Runtime.default
-    Unsafe.unsafe { implicit unsafe => // TODO log the input and output stream
+    Unsafe.unsafe { implicit unsafe =>
       runtime.unsafe
         .run(
-          (for {
+          for {
             allBytes <- ZIO.attempt(input.readAllBytes())
             _ = input.close()
             str = new String(allBytes, StandardCharsets.UTF_8)
@@ -47,25 +47,10 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
             _ <- ZIO.log("output: " + new String(loggedOutputStream.toByteArray, StandardCharsets.UTF_8))
             _ = output.write(loggedOutputStream.toByteArray)
             _ = output.close()
-          } yield result)
-            .provideLayer(Runtime.removeDefaultLoggers) // TODO these logger things still needed?
-            .provideLayer(Runtime.addLogger(new AwsLambdaLogger(context.getLogger))),
+          } yield result,
         )
         .getOrThrowFiberFailure()
     }
   }
 
-}
-
-class AwsLambdaLogger(lambdaLogger: LambdaLogger) extends ZLogger[String, Unit] {
-  override def apply(
-      trace: Trace,
-      fiberId: FiberId,
-      logLevel: LogLevel,
-      message: () => String,
-      cause: Cause[Any],
-      context: FiberRefs,
-      spans: List[LogSpan],
-      annotations: Map[String, String],
-  ): Unit = lambdaLogger.log(message())
 }
