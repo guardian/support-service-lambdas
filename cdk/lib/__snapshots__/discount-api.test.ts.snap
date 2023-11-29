@@ -264,7 +264,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/discount-api/discount-api.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
         "Environment": {
           "Variables": {
             "APP": "discount-api",
@@ -1137,7 +1137,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/discount-api/discount-api.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
         "Environment": {
           "Variables": {
             "APP": "discount-api",
