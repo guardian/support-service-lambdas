@@ -52,6 +52,7 @@ export class DiscountApi extends GuStack {
 				id: nameWithStage,
 				restApiName: nameWithStage,
 				description: 'API Gateway created by CDK',
+				proxy: true,
 			},
 		});
 
