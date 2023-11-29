@@ -60,6 +60,8 @@ export const zuoraSubscriptionSchema = z.object({
 
 export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
 
+export type RatePlan = ZuoraSubscription['ratePlans'][number];
+
 export const zuoraSubscribeResponseSchema = z.array(
 	z.object({
 		Success: z.boolean(),

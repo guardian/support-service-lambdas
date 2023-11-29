@@ -1,7 +1,9 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
-import type { Stage } from '../../../modules/Stage';
+import type { Stage } from '../../../modules/stage';
+import type { Product, ProductRatePlan } from './catalogSchema';
 import { catalogSchema } from './catalogSchema';
+import { checkDefined } from './zuora/common';
 
 const client = new S3Client({
 	region: 'eu-west-1',
@@ -24,3 +26,14 @@ export async function getCatalogFromS3(stage: Stage) {
 	}
 	return catalogSchema.parse(JSON.parse(body));
 }
+
+export const getProductRatePlan = async (
+	stage: Stage,
+	productRatePlanId: string,
+) => {
+	const catalog = await getCatalogFromS3(stage);
+
+	return catalog.products
+		.flatMap((product: Product) => product.productRatePlans)
+		.find((ratePlan: ProductRatePlan) => ratePlan.id === productRatePlanId);
+};

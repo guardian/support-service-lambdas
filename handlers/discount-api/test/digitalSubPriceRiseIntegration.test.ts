@@ -6,7 +6,7 @@
 
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { Stage } from '../../../modules/Stage';
+import type { Stage } from '../../../modules/stage';
 import { BearerTokenProvider } from '../src/zuora/bearerTokenProvider';
 import { cancelSubscription } from '../src/zuora/cancelSubscription';
 import { getSubscription } from '../src/zuora/getSubscription';
@@ -21,7 +21,7 @@ import {
 	zuoraSubscribeResponseSchema,
 	zuoraSuccessResponseSchema,
 } from '../src/zuora/zuoraSchemas';
-import { digiSubSubscribeBody } from './fixtures/digi-sub-subscribe-body-old-price';
+import { digiSubSubscribeBody } from './fixtures/digitalSub-subscribe-body-old-price';
 import { updateSubscriptionBody } from './fixtures/update-subscription-body';
 
 const stage: Stage = 'CODE';

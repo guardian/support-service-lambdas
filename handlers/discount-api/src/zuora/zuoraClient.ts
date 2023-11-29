@@ -1,8 +1,14 @@
 import type { z } from 'zod';
-import type { Stage } from '../../../../modules/Stage';
-import type { BearerTokenProvider } from './bearerTokenProvider';
+import type { Stage } from '../../../../modules/stage';
+import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
+import { getOAuthClientCredentials } from './oAuthCredentials';
 
+export const createZuoraClient = async (stage: Stage) => {
+	const credentials = await getOAuthClientCredentials(stage);
+	const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
+	return new ZuoraClient(stage, bearerTokenProvider);
+};
 export class ZuoraClient {
 	private zuoraServerUrl: string;
 	constructor(
