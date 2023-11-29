@@ -1,4 +1,5 @@
 import type { Dayjs } from 'dayjs';
+import { zuoraDateFormat } from '../../src/zuora/common';
 
 export const updateSubscriptionBody = (
 	contractEffectiveDate: Dayjs,
@@ -7,13 +8,13 @@ export const updateSubscriptionBody = (
 	return {
 		add: [
 			{
-				contractEffectiveDate: `${contractEffectiveDate.format('YYYY-MM-DD')}`,
+				contractEffectiveDate: `${zuoraDateFormat(contractEffectiveDate)}`,
 				productRatePlanId: '2c92c0f84bbfec8b014bc655f4852d9d',
 			},
 		],
 		remove: [
 			{
-				contractEffectiveDate: `${contractEffectiveDate.format('YYYY-MM-DD')}`,
+				contractEffectiveDate: `${zuoraDateFormat(contractEffectiveDate)}`,
 				ratePlanId,
 			},
 		],

@@ -1,6 +1,23 @@
 import type { Dayjs } from 'dayjs';
+import { zuoraDateFormat } from '../../src/zuora/common';
 
-export const digiSubSubscribeBody = (subscriptionDate: Dayjs) => {
+export const digiSubSubscribeBody = (
+	subscriptionDate: Dayjs,
+	createWithOldPrice: boolean,
+) => {
+	const chargeOverride = createWithOldPrice
+		? {
+				RatePlanChargeData: [
+					{
+						RatePlanCharge: {
+							ProductRatePlanChargeId: '2c92c0f84bbfec58014bc6a2c37e1f15',
+							Price: 11.99,
+							EndDateCondition: 'SubscriptionEnd',
+						},
+					},
+				],
+		  }
+		: {};
 	return {
 		subscribes: [
 			{
@@ -42,24 +59,16 @@ export const digiSubSubscribeBody = (subscriptionDate: Dayjs) => {
 							RatePlan: {
 								ProductRatePlanId: '2c92c0f84bbfec8b014bc655f4852d9d',
 							},
-							RatePlanChargeData: [
-								{
-									RatePlanCharge: {
-										ProductRatePlanChargeId: '2c92c0f84bbfec58014bc6a2c37e1f15',
-										Price: 11.99,
-										EndDateCondition: 'SubscriptionEnd',
-									},
-								},
-							],
+							...chargeOverride,
 							SubscriptionProductFeatureList: [],
 						},
 					],
 					Subscription: {
-						ContractEffectiveDate: subscriptionDate.format('YYYY-MM-DD'),
-						ContractAcceptanceDate: subscriptionDate
-							.add(16, 'day')
-							.format('YYYY-MM-DD'),
-						TermStartDate: subscriptionDate.format('YYYY-MM-DD'),
+						ContractEffectiveDate: zuoraDateFormat(subscriptionDate),
+						ContractAcceptanceDate: zuoraDateFormat(
+							subscriptionDate.add(16, 'day'),
+						),
+						TermStartDate: zuoraDateFormat(subscriptionDate),
 						AutoRenew: true,
 						InitialTermPeriodType: 'Month',
 						InitialTerm: 12,

@@ -8,6 +8,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/Stage';
 import { BearerTokenProvider } from '../src/zuora/bearerTokenProvider';
+import { cancelSubscription } from '../src/zuora/cancelSubscription';
 import { getSubscription } from '../src/zuora/getSubscription';
 import { getOAuthClientCredentials } from '../src/zuora/oAuthCredentials';
 import { ZuoraClient } from '../src/zuora/zuoraClient';
@@ -28,7 +29,7 @@ const subscribeDate = dayjs().add(-3, 'weeks');
 const nextBillingDate = subscribeDate.add(1, 'month');
 const createDigitalSubscription = async (zuoraClient: ZuoraClient) => {
 	const path = `/v1/action/subscribe`;
-	const body = JSON.stringify(digiSubSubscribeBody(subscribeDate));
+	const body = JSON.stringify(digiSubSubscribeBody(subscribeDate, true));
 
 	return zuoraClient.post<ZuoraSubscribeResponse>(
 		path,
@@ -81,4 +82,13 @@ test('createPriceRiseSubscription', async () => {
 	);
 
 	expect(priceRisen.success).toEqual(true);
+
+	console.log('Cancelling the subscription');
+	const cancelled = await cancelSubscription(
+		zuoraClient,
+		subscriptionNumber,
+		nextBillingDate,
+	);
+
+	expect(cancelled.success).toEqual(true);
 }, 30000);
