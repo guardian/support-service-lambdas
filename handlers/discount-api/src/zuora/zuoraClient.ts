@@ -30,24 +30,25 @@ export class ZuoraClient {
 		schema: z.ZodType<T>,
 		body?: string,
 	): Promise<T> {
-		try {
-			const bearerToken = await this.tokenProvider.getBearerToken();
-			const url = `${this.zuoraServerUrl}/${path.replace(/^\//, '')}`;
-			console.log(`${method} ${url} ${body ? `with body ${body}` : ''}`);
-			const response = await fetch(url, {
-				method,
-				headers: {
-					Authorization: `Bearer ${bearerToken.access_token}`,
-					'Content-Type': 'application/json',
-				},
-				body,
-			});
-			const json = await response.json();
-			console.log('Response from Zuora was: ', json);
+		const bearerToken = await this.tokenProvider.getBearerToken();
+		const url = `${this.zuoraServerUrl}/${path.replace(/^\//, '')}`;
+		console.log(`${method} ${url} ${body ? `with body ${body}` : ''}`);
+		const response = await fetch(url, {
+			method,
+			headers: {
+				Authorization: `Bearer ${bearerToken.access_token}`,
+				'Content-Type': 'application/json',
+			},
+			body,
+		});
+		const json = await response.json();
+		console.log('Response from Zuora was: ', JSON.stringify(json));
+		if (response.ok) {
 			return schema.parse(json);
-		} catch (error) {
-			console.log('Error from Zuora was: ', error);
-			throw error;
+		} else {
+			throw new Error(
+				`Error in ZuoraClient.fetch: ${response.status} ${response.statusText}`,
+			);
 		}
 	}
 }

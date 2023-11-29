@@ -42,7 +42,15 @@ export const digiSubSubscribeBody = (subscriptionDate: Dayjs) => {
 							RatePlan: {
 								ProductRatePlanId: '2c92c0f84bbfec8b014bc655f4852d9d',
 							},
-							RatePlanChargeData: [],
+							RatePlanChargeData: [
+								{
+									RatePlanCharge: {
+										ProductRatePlanChargeId: '2c92c0f84bbfec58014bc6a2c37e1f15',
+										Price: 11.99,
+										EndDateCondition: 'SubscriptionEnd',
+									},
+								},
+							],
 							SubscriptionProductFeatureList: [],
 						},
 					],

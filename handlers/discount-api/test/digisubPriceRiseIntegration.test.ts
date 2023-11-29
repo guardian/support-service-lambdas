@@ -20,7 +20,7 @@ import {
 	zuoraSubscribeResponseSchema,
 	zuoraSuccessResponseSchema,
 } from '../src/zuora/zuoraSchemas';
-import { digiSubSubscribeBody } from './fixtures/digi-sub-subscribe-body';
+import { digiSubSubscribeBody } from './fixtures/digi-sub-subscribe-body-old-price';
 import { updateSubscriptionBody } from './fixtures/update-subscription-body';
 
 const stage: Stage = 'CODE';
