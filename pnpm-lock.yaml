@@ -60,6 +60,9 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.129
+        version: 8.10.129
       jest-runner-groups:
         specifier: ^2.2.0
         version: 2.2.0(jest-docblock@29.7.0)(jest-runner@29.7.0)
@@ -2088,6 +2091,10 @@ packages:
       '@smithy/types': 2.6.0
       tslib: 2.6.2
     dev: false
+
+  /@types/aws-lambda@8.10.129:
+    resolution: {integrity: sha512-0Rl7CpTPVws5cp0Ui1gZh4Q+TXC65bXVwTOGoI2RKW45dxWzyZGbjIX0uFjFYdIJ8vnD45y584rIIqvD2vBBfQ==}
+    dev: true
 
   /@types/babel__core@7.20.5:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}

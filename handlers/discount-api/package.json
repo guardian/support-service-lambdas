@@ -16,6 +16,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.129",
     "jest-runner-groups": "^2.2.0"
   }
 }
