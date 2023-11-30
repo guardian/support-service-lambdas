@@ -39,6 +39,7 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
             SalesforceClientLive.layer,
             CreateRecordLive.layer,
             SecretsLive.layer,
+            AwsCredentialsLive.layer,
           ),
       ) match
         case Exit.Success(value) => value

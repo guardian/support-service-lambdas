@@ -29,6 +29,7 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               ZuoraClientLive.layer,
               SttpClientLive.layer,
               SecretsLive.layer,
+              AwsCredentialsLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,
@@ -49,6 +50,7 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               ZuoraClientLive.layer,
               SttpClientLive.layer,
               SecretsLive.layer,
+              AwsCredentialsLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,
