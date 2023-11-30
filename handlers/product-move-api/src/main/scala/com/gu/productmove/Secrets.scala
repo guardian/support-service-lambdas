@@ -1,10 +1,7 @@
 package com.gu.productmove
 
-import software.amazon.awssdk.auth.credentials.{
-  AwsCredentialsProviderChain,
-  EnvironmentVariableCredentialsProvider,
-  ProfileCredentialsProvider,
-}
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProvider, AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider}
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.secretsmanager.*
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
 import upickle.default.*
@@ -65,20 +62,11 @@ object Secrets {
   def getSalesforceSSLSecrets: RIO[Secrets, SalesforceSSLSecrets] =
     ZIO.environmentWithZIO[Secrets](_.get.getSalesforceSSLSecrets)
 }
-object SecretsLive extends Secrets {
+class SecretsLive(secretsClient: SecretsManagerClient) extends Secrets {
 
   implicit val reader1: Reader[InvoicingAPISecrets] = macroRW
   implicit val reader2: Reader[ZuoraApiUserSecrets] = macroRW
   implicit val reader3: Reader[SalesforceSSLSecrets] = macroRW
-  private lazy val secretsClient = SecretsManagerClient.builder().credentialsProvider(credentialsProvider).build()
-  lazy val credentialsProvider = AwsCredentialsProviderChain
-    .builder()
-    .credentialsProviders(
-      ProfileCredentialsProvider.create(ProfileName),
-      EnvironmentVariableCredentialsProvider.create(),
-    )
-    .build()
-  private val ProfileName = "membership"
 
   def getJSONString(secretId: String): String = {
     secretsClient.getSecretValue(GetSecretValueRequest.builder().secretId(secretId).build()).secretString()
@@ -135,6 +123,23 @@ object SecretsLive extends Secrets {
     } yield secrets
   }
 
-  val layer: ULayer[Secrets] = ZLayer.succeed(SecretsLive)
+}
+  
+  object SecretsLive {
+
+  val layer: ZLayer[AwsCredentialsProvider, Throwable, Secrets] =
+    ZLayer.scoped {
+      for {
+        creds <- ZIO.service[AwsCredentialsProvider]
+        s3Client <- ZIO.fromAutoCloseable(ZIO.attempt(impl(creds)))
+      } yield SecretsLive(s3Client)
+    }
+
+  private def impl(creds: AwsCredentialsProvider): SecretsManagerClient =
+    SecretsManagerClient
+      .builder()
+      .region(Region.EU_WEST_1)
+      .credentialsProvider(creds)
+      .build()
 
 }
