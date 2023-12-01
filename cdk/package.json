@@ -15,7 +15,7 @@
     "@guardian/cdk": "52.2.1",
     "@guardian/eslint-config-typescript": "5.0.0",
     "@guardian/prettier": "2.1.5",
-    "@types/jest": "^29.5.7",
+    "@types/jest": "^29.5.10",
     "@types/node": "20.8.10",
     "aws-cdk": "2.109.0",
     "aws-cdk-lib": "2.109.0",
