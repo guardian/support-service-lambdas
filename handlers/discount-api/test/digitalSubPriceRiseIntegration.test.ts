@@ -8,6 +8,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/stage';
 import { checkDefined } from '../src/nullAndUndefined';
+import { addDiscount } from '../src/zuora/addDiscount';
 import { getSubscription } from '../src/zuora/getSubscription';
 import type { ZuoraClient } from '../src/zuora/zuoraClient';
 import { createZuoraClient } from '../src/zuora/zuoraClient';
@@ -92,6 +93,15 @@ test('createPriceRiseSubscription', async () => {
 	);
 
 	expect(priceRisen.success).toEqual(true);
+
+	const discounted = await addDiscount(
+		zuoraClient,
+		subscriptionNumber,
+		nextBillingDate,
+		'8ad09be48b23d33f018b23e53afd522d',
+	);
+
+	expect(discounted.success).toEqual(true);
 
 	// console.log('Cancelling the subscription');
 	// const cancelled = await cancelSubscription(

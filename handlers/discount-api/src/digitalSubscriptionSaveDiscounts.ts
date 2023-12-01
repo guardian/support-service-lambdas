@@ -1,22 +1,15 @@
 import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/stage';
-import {
-	getCatalogFromS3,
-	getCatalogPriceForCurrency,
-	getDiscountProductRatePlans,
-} from './catalog';
-import type { Catalog, ProductRatePlan } from './catalogSchema';
+import { sum } from './arrayFunctions';
+import type { ZuoraCatalog } from './catalog/catalog';
+import { getZuoraCatalog } from './catalog/catalog';
 import { checkDefined } from './nullAndUndefined';
 import { digitalSubSaveRequestSchema } from './requestSchema';
-import { getBillingPreview } from './zuora/billingPreview';
+import { getBillingPreview, getNextInvoice } from './zuora/billingPreview';
 import { getSubscription } from './zuora/getSubscription';
 import type { ZuoraClient } from './zuora/zuoraClient';
 import { createZuoraClient } from './zuora/zuoraClient';
-import type {
-	RatePlan,
-	RatePlanCharge,
-	ZuoraSubscription,
-} from './zuora/zuoraSchemas';
+import type { RatePlan, ZuoraSubscription } from './zuora/zuoraSchemas';
 
 export const digiSubProductRatePlanIds: {
 	[K in Stage]: { monthly: string; annual: string; quarterly: string };
@@ -33,114 +26,51 @@ export const digiSubProductRatePlanIds: {
 	},
 };
 export const createDigitalSubscriptionSaveDiscount = async (stage: Stage) => {
-	const catalog = await getCatalogFromS3(stage);
-	const catalogProductRatePlans: ProductRatePlan[] = catalog.products
-		.flatMap((product) => product.productRatePlans)
-		.filter((productRatePlan) => {
-			return Object.values(digiSubProductRatePlanIds[stage]).includes(
-				productRatePlan.id,
-			);
-		});
-	return new DigitalSubscriptionSaveDiscount(stage, catalog);
+	const catalog = await getZuoraCatalog(stage);
+	const zuoraClient = await createZuoraClient(stage);
+
+	return new DigitalSubscriptionSaveDiscount(stage, catalog, zuoraClient);
 };
 export class DigitalSubscriptionSaveDiscount {
 	constructor(
 		private stage: Stage,
-		private catalog: Catalog,
+		private catalog: ZuoraCatalog,
+		private zuoraClient: ZuoraClient,
 	) {}
 	async applyDiscount(body: string) {
 		const requestBody = digitalSubSaveRequestSchema.parse(JSON.parse(body));
-		const zuoraClient = await createZuoraClient(this.stage);
 
 		console.log('Getting the subscription details from Zuora');
 		const subscription = await getSubscription(
-			zuoraClient,
+			this.zuoraClient,
 			requestBody.subscriptionNumber,
 		);
 		console.log('Subscription details: ', JSON.stringify(subscription));
 
-		this.checkEligibility(subscription, zuoraClient);
+		await this.checkEligibility(subscription);
 	}
 
-	digitalSubProductRatePlansFromCatalog = () =>
-		this.catalog.products
-			.flatMap((product) => product.productRatePlans)
-			.filter((productRatePlan) => {
-				return Object.values(digiSubProductRatePlanIds[this.stage]).includes(
-					productRatePlan.id,
-				);
-			});
+	// digitalSubProductRatePlansFromCatalog = () =>
+	// 	this.catalog.products
+	// 		.flatMap((product) => product.productRatePlans)
+	// 		.filter((productRatePlan) => {
+	// 			return Object.values(digiSubProductRatePlanIds[this.stage]).includes(
+	// 				productRatePlan.id,
+	// 			);
+	// 		});
 
-	checkEligibility = (
-		subscription: ZuoraSubscription,
-		zuoraClient: ZuoraClient,
-	) => {
+	checkEligibility = async (subscription: ZuoraSubscription) => {
 		// Check that the subscription is a digital subscription
 		const digitalSubRatePlan: RatePlan = checkDefined(
 			this.findLatestDigitalSubRatePlan(subscription),
 			'No digital subscription rate plan charge found on subscription',
 		);
 
-		// Check that the subscription is not already discounted
-		this.checkSubscriptionIsNotAlreadyDiscounted(
-			digitalSubRatePlan,
-			subscription,
-			zuoraClient,
-		);
-
-		// Check that the subscription is or will be on the new price
-		this.checkSubscriptionIsOrWillBeOnNewPrice(digitalSubRatePlan);
-	};
-
-	checkSubscriptionIsNotAlreadyDiscounted = (
-		subscriptionRatePlan: RatePlan,
-		subscription: ZuoraSubscription,
-		zuoraClient: ZuoraClient,
-	) => {
-		const currency = checkDefined(
-			subscriptionRatePlan.ratePlanCharges[0]?.currency,
-			'Currency was missing from rate plan charge',
-		);
-		const catalogPrice = getCatalogPriceForCurrency(
-			this.catalog,
-			subscriptionRatePlan.productRatePlanId,
-			currency,
-		);
-		const billingPreview = await getBillingPreview(
-			zuoraClient,
-			dayjs().add(13, 'month'),
+		// Check that the next payment is at least at the catalog price
+		await this.checkNextPaymentIsAtCatalogPrice(
 			subscription.accountNumber,
+			digitalSubRatePlan,
 		);
-	};
-
-	checkSubscriptionIsOrWillBeOnNewPrice = (
-		digitalSubRatePlanCharge: RatePlanCharge,
-	) => {
-		const currency = digitalSubRatePlanCharge.currency;
-		const catalogRatePlan = checkDefined(
-			this.digitalSubProductRatePlansFromCatalog().find(
-				(productRatePlan) =>
-					productRatePlan.id === digitalSubRatePlanCharge.productRatePlanId,
-			),
-			`No matching rate plan found in catalog for product rate plan 
-			id ${digitalSubRatePlanCharge.productRatePlanId}`,
-		);
-		const catalogPrice = checkDefined(
-			catalogRatePlan.productRatePlanCharges[0]?.pricing.find(
-				(pricing) => pricing.currency === currency,
-			)?.price,
-			`No matching price found in catalog for currency ${currency}`,
-		);
-		const currentPrice = checkDefined(
-			digitalSubRatePlanCharge.price,
-			'Price was null on existing rate plan charge',
-		);
-		if (currentPrice < catalogPrice) {
-			throw new Error(
-				`Subscription is ineligible because the current price is less than the new price: 
-				current price is ${currency}${currentPrice} and new price is ${currency}${catalogPrice}`,
-			);
-		}
 	};
 
 	findLatestDigitalSubRatePlan = (subscription: ZuoraSubscription) => {
@@ -154,5 +84,38 @@ export class DigitalSubscriptionSaveDiscount {
 					idsForStage.includes(ratePlan.productRatePlanId),
 				)
 		);
+	};
+
+	checkNextPaymentIsAtCatalogPrice = async (
+		accountNumber: string,
+		ratePlan: RatePlan,
+	) => {
+		// Work out the catalog price of the rate plan
+		const currency = checkDefined(
+			ratePlan.ratePlanCharges[0]?.currency,
+			'No currency found on rate plan charge',
+		);
+		const prices = this.catalog.getCatalogPriceForCurrency(
+			ratePlan.productRatePlanId,
+			currency,
+		);
+		const totalPrice = sum(prices, (i) => i);
+
+		// Work out how much the cost of the next invoice will be
+		const billingPreview = await getBillingPreview(
+			this.zuoraClient,
+			dayjs().add(13, 'months'),
+			accountNumber,
+		);
+		const nextInvoice = getNextInvoice(billingPreview);
+		const nextInvoiceTotal =
+			(nextInvoice?.chargeAmount ?? 0) + (nextInvoice?.taxAmount ?? 0);
+
+		if (nextInvoiceTotal < totalPrice) {
+			throw new Error(
+				'Next invoice is less than the current catalog price of the ' +
+					'subscription, so it is not eligible for a discount',
+			);
+		}
 	};
 }

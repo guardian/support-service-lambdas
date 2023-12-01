@@ -4,11 +4,11 @@
  * @group integration
  */
 
-import { BearerTokenProvider } from '../src/zuora/bearerTokenProvider';
-import { getOAuthClientCredentials } from '../src/zuora/oAuthCredentials';
-import { ZuoraClient } from '../src/zuora/zuoraClient';
-import type { ZuoraSubscription } from '../src/zuora/zuoraSchemas';
-import { zuoraSubscriptionSchema } from '../src/zuora/zuoraSchemas';
+import { BearerTokenProvider } from '../../src/zuora/bearerTokenProvider';
+import { getOAuthClientCredentials } from '../../src/zuora/oAuthCredentials';
+import { ZuoraClient } from '../../src/zuora/zuoraClient';
+import type { ZuoraSubscription } from '../../src/zuora/zuoraSchemas';
+import { zuoraSubscriptionSchema } from '../../src/zuora/zuoraSchemas';
 
 test('ZuoraClient', async () => {
 	const stage = 'CODE';
