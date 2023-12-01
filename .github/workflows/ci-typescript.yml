@@ -37,7 +37,7 @@ jobs:
         run: bash ./script/cfn.sh
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v2
+        uses: guardian/actions-riff-raff@v3
         with:
           projectName: support-service-lambdas::${{ matrix.subproject }}
           buildNumberOffset: 7000
