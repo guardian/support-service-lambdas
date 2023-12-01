@@ -4,6 +4,10 @@ export type Catalog = z.infer<typeof catalogSchema>;
 export type Product = Catalog['products'][number];
 export type ProductRatePlan =
 	Catalog['products'][number]['productRatePlans'][number];
+export type ProductRatePlanCharge =
+	ProductRatePlan['productRatePlanCharges'][number];
+export type Pricing = ProductRatePlanCharge['pricing'][number];
+
 export const catalogSchema = z.object({
 	products: z.array(
 		z.object({

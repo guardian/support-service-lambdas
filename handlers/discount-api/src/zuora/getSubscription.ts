@@ -3,7 +3,6 @@ import type { ZuoraSubscription } from './zuoraSchemas';
 import { zuoraSubscriptionSchema } from './zuoraSchemas';
 
 export const getSubscription = async (
-	stage: string,
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 ): Promise<ZuoraSubscription> => {

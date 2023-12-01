@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from '../../src/zuora/common';
+import { zuoraDateFormat } from '../../../src/zuora/common';
 
 export const digiSubSubscribeBody = (
 	subscriptionDate: Dayjs,

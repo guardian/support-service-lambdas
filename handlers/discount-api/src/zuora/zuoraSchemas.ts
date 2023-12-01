@@ -62,6 +62,7 @@ export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
 
 export type RatePlan = ZuoraSubscription['ratePlans'][number];
 
+export type RatePlanCharge = RatePlan['ratePlanCharges'][number];
 export const zuoraSubscribeResponseSchema = z.array(
 	z.object({
 		Success: z.boolean(),
@@ -79,3 +80,30 @@ export const zuoraSuccessResponseSchema = z.object({
 });
 
 export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
+
+export const billingPreviewSchema = z.object({
+	accountId: z.string(),
+	invoiceItems: z.array(
+		z.object({
+			id: z.string(),
+			subscriptionId: z.string(),
+			subscriptionNumber: z.string(),
+			serviceStartDate: z.coerce.date(),
+			serviceEndDate: z.coerce.date(),
+			chargeAmount: z.number(),
+			chargeDescription: z.string(),
+			chargeName: z.string(),
+			chargeNumber: z.string(),
+			chargeId: z.string(),
+			productName: z.string(),
+			quantity: z.number(),
+			taxAmount: z.number(),
+			chargeDate: z.coerce.date(),
+			chargeType: z.string(),
+			processingType: z.string(),
+		}),
+	),
+});
+
+export type BillingPreview = z.infer<typeof billingPreviewSchema>;
+export type InvoiceItem = BillingPreview['invoiceItems'][number];

@@ -8,13 +8,3 @@ export const zuoraServerUrl = (stage: string) => {
 };
 
 export const zuoraDateFormat = (date: Dayjs) => date.format('YYYY-MM-DD');
-
-export const checkDefined = <T>(
-	value: T | undefined | null,
-	errorMessage: string,
-): T => {
-	if (!value) {
-		throw new Error(errorMessage);
-	}
-	return value;
-};

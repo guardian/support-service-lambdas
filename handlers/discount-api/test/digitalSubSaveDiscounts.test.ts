@@ -1,6 +1,6 @@
-import { findDigisubProductRatePlan } from '../src/digitalSubSaveDiscounts';
+import { findDigisubProductRatePlan } from '../src/digitalSubscriptionSaveDiscounts';
 import { zuoraSubscriptionSchema } from '../src/zuora/zuoraSchemas';
-import digitalSubResponse from './fixtures/digitalSub-response.json';
+import digitalSubResponse from './fixtures/digital-subscriptions/annual-new-price.json';
 
 test('findDigisubProductRatePlan', () => {
 	const subscription = zuoraSubscriptionSchema.parse(digitalSubResponse);

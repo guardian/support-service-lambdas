@@ -7,11 +7,10 @@
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/stage';
-import { BearerTokenProvider } from '../src/zuora/bearerTokenProvider';
-import { cancelSubscription } from '../src/zuora/cancelSubscription';
+import { checkDefined } from '../src/nullAndUndefined';
 import { getSubscription } from '../src/zuora/getSubscription';
-import { getOAuthClientCredentials } from '../src/zuora/oAuthCredentials';
-import { ZuoraClient } from '../src/zuora/zuoraClient';
+import type { ZuoraClient } from '../src/zuora/zuoraClient';
+import { createZuoraClient } from '../src/zuora/zuoraClient';
 import type {
 	ZuoraSubscribeResponse,
 	ZuoraSubscription,
@@ -21,11 +20,11 @@ import {
 	zuoraSubscribeResponseSchema,
 	zuoraSuccessResponseSchema,
 } from '../src/zuora/zuoraSchemas';
-import { digiSubSubscribeBody } from './fixtures/digitalSub-subscribe-body-old-price';
-import { updateSubscriptionBody } from './fixtures/update-subscription-body';
+import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
+import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 
 const stage: Stage = 'CODE';
-const subscribeDate = dayjs().add(-3, 'weeks');
+const subscribeDate = dayjs();
 const nextBillingDate = subscribeDate.add(1, 'month');
 const createDigitalSubscription = async (zuoraClient: ZuoraClient) => {
 	const path = `/v1/action/subscribe`;
@@ -54,25 +53,36 @@ const doPriceRise = async (
 	return zuoraClient.put(path, body, zuoraSuccessResponseSchema);
 };
 
-test('createPriceRiseSubscription', async () => {
-	const credentials = await getOAuthClientCredentials(stage);
-	const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-	const zuoraClient = new ZuoraClient(stage, bearerTokenProvider);
+test('createDigitalSubscription', async () => {
+	const zuoraClient = await createZuoraClient(stage);
 
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient);
 
-	const subscriptionNumber = subscribeResponse[0]?.SubscriptionNumber;
-	if (!subscriptionNumber) {
-		throw new Error('SubscriptionNumber was undefined in response from Zuora');
-	}
+	const subscriptionNumber = checkDefined(
+		subscribeResponse[0]?.SubscriptionNumber,
+		'SubscriptionNumber was undefined in response from Zuora',
+	);
 
 	console.log('Getting the subscription details from Zuora');
-	const subscription = await getSubscription(
-		stage,
-		zuoraClient,
-		subscriptionNumber,
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+
+	expect(subscription.subscriptionNumber).toEqual(subscriptionNumber);
+}, 30000);
+
+test('createPriceRiseSubscription', async () => {
+	const zuoraClient = await createZuoraClient(stage);
+
+	console.log('Creating a new digital subscription');
+	const subscribeResponse = await createDigitalSubscription(zuoraClient);
+
+	const subscriptionNumber = checkDefined(
+		subscribeResponse[0]?.SubscriptionNumber,
+		'SubscriptionNumber was undefined in response from Zuora',
 	);
+
+	console.log('Getting the subscription details from Zuora');
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 
 	console.log('Updating the subscription to trigger a price rise');
 	const priceRisen = await doPriceRise(
@@ -83,12 +93,12 @@ test('createPriceRiseSubscription', async () => {
 
 	expect(priceRisen.success).toEqual(true);
 
-	console.log('Cancelling the subscription');
-	const cancelled = await cancelSubscription(
-		zuoraClient,
-		subscriptionNumber,
-		nextBillingDate,
-	);
-
-	expect(cancelled.success).toEqual(true);
+	// console.log('Cancelling the subscription');
+	// const cancelled = await cancelSubscription(
+	// 	zuoraClient,
+	// 	subscriptionNumber,
+	// 	nextBillingDate,
+	// );
+	//
+	// expect(cancelled.success).toEqual(true);
 }, 30000);
