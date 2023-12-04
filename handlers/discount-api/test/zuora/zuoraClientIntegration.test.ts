@@ -16,7 +16,7 @@ test('ZuoraClient', async () => {
 	const credentials = await getOAuthClientCredentials(stage);
 	const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
 	const zuoraClient = new ZuoraClient(stage, bearerTokenProvider);
-	const path = `/subscriptions/${subscriptionNumber}`;
+	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const subscription = await zuoraClient.get<ZuoraSubscription>(
 		path,
 		zuoraSubscriptionSchema,

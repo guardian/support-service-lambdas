@@ -32,7 +32,7 @@ test('GetSubscription', async () => {
 		credentials,
 	);
 	const zuoraClient = new ZuoraClient(stage, provider);
-	const response = await getSubscription(stage, zuoraClient, 'A-S00663703');
+	const response = await getSubscription(zuoraClient, 'A-S00663703');
 	expect(response.id.length).toBeGreaterThan(0);
 	const expectedDate = new Date('2023-09-08');
 	expect(response.contractEffectiveDate).toEqual(expectedDate);

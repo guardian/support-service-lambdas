@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-export const digitalSubSaveRequestSchema = z.object({
+export const applyDiscountSchema = z.object({
 	subscriptionNumber: z.string(),
+	discountProductRatePlanId: z.string(),
 });
 
-export type DigisubSaveRequest = z.infer<typeof digitalSubSaveRequestSchema>;
+export type ApplyDiscountRequestBody = z.infer<typeof applyDiscountSchema>;
