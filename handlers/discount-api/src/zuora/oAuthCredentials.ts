@@ -10,7 +10,7 @@ import { oAuthClientCredentialsSchema } from './zuoraSchemas';
 export const getOAuthClientCredentials = async (
 	stage: Stage,
 ): Promise<OAuthClientCredentials> => {
-	const isRunningLocally = !!process.env.LAMBDA_TASK_ROOT;
+	const isRunningLocally = !process.env.LAMBDA_TASK_ROOT;
 	const credentials = isRunningLocally
 		? defaultProvider({
 				profile: 'membership',
