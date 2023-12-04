@@ -121,6 +121,23 @@ export class DiscountApi extends GuStack {
 			],
 		});
 
+		const secretsManagerPolicy: Policy = new Policy(
+			this,
+			'Secrets Manager policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas`,
+						],
+					}),
+				],
+			},
+		);
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 	}
 }
