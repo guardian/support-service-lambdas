@@ -24,7 +24,8 @@ export class DiscountApplicator {
 		private eligibilityChecker: EligibilityChecker,
 		private zuoraClient: ZuoraClient,
 	) {}
-	public async applyDiscount(requestBody: ApplyDiscountRequestBody) {
+
+	public async checkEligibility(requestBody: ApplyDiscountRequestBody) {
 		console.log('Getting the subscription details from Zuora');
 		const subscription = await getSubscription(
 			this.zuoraClient,
@@ -33,11 +34,19 @@ export class DiscountApplicator {
 		console.log('Subscription details: ', JSON.stringify(subscription));
 
 		console.log('Checking this subscription is eligible for the discount');
+
 		const nextBillingDate =
 			await this.eligibilityChecker.getNextBillingDateIfEligible(
 				subscription,
 				requestBody.discountProductRatePlanId,
 			);
+
+		console.log('Subscription is eligible for the discount');
+
+		return nextBillingDate;
+	}
+	public async applyDiscount(requestBody: ApplyDiscountRequestBody) {
+		const nextBillingDate = await this.checkEligibility(requestBody);
 
 		console.log('Apply a discount to the subscription');
 		const discounted = await addDiscount(

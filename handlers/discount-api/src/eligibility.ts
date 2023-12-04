@@ -2,13 +2,20 @@ import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/stage';
 import { sum } from './arrayFunctions';
 import type { ZuoraCatalog } from './catalog/catalog';
+import { getZuoraCatalog } from './catalog/catalog';
 import { checkDefined } from './nullAndUndefined';
 import { ProductToDiscountMapping } from './productToDiscountMapping';
 import { getBillingPreview, getNextInvoice } from './zuora/billingPreview';
 import type { ZuoraClient } from './zuora/zuoraClient';
+import { createZuoraClient } from './zuora/zuoraClient';
 import type { RatePlan, ZuoraSubscription } from './zuora/zuoraSchemas';
 
 export class EligibilityChecker {
+	static create = async (stage: Stage) => {
+		const catalog = await getZuoraCatalog(stage);
+		const zuoraClient = await createZuoraClient(stage);
+		return new EligibilityChecker(stage, catalog, zuoraClient);
+	};
 	constructor(
 		private stage: Stage,
 		private catalog: ZuoraCatalog,
@@ -32,7 +39,7 @@ export class EligibilityChecker {
 		);
 	};
 
-	getEligibleRatePlanFromSubscription = (
+	private getEligibleRatePlanFromSubscription = (
 		subscription: ZuoraSubscription,
 		discountProductRatePlanId: string,
 	): RatePlan => {
@@ -62,7 +69,7 @@ export class EligibilityChecker {
 		return eligibleRatePlans[0];
 	};
 
-	checkNextPaymentIsAtCatalogPrice = async (
+	private checkNextPaymentIsAtCatalogPrice = async (
 		accountNumber: string,
 		ratePlan: RatePlan,
 	) => {

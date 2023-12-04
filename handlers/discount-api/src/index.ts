@@ -4,7 +4,10 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import { stageFromEnvironment } from '../../../modules/stage';
-import { applyDiscountResponse } from './endpoints/applyDiscountResponse';
+import {
+	applyDiscountResponse,
+	checkEligibilityResponse,
+} from './endpoints/applyDiscountResponse';
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
@@ -16,11 +19,14 @@ export const handler: Handler = async (
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				return applyDiscountResponse(stage, event);
 			}
+			case event.path === '/check-eligibility' && event.httpMethod === 'POST': {
+				return checkEligibilityResponse(stage, event);
+			}
 			default:
-				return await Promise.resolve({
-					body: 'Hello World',
-					statusCode: 200,
-				});
+				return {
+					body: 'Not found',
+					statusCode: 404,
+				};
 		}
 	} catch (error) {
 		console.log(error);
