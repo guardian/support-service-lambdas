@@ -13,8 +13,7 @@ export const handler: Handler = async (
 		console.log(`Input is ${JSON.stringify(event)}`);
 		const stage = stageFromEnvironment();
 		switch (true) {
-			case event.path === '/apply-digitalSub-discount' &&
-				event.httpMethod === 'POST': {
+			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				return applyDiscountResponse(stage, event);
 			}
 			default:
