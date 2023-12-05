@@ -1,3 +1,6 @@
+/**
+ * @group integration
+ */
 import { DiscountApplicator } from '../src/discountApplicator';
 import { ValidationError } from '../src/errors';
 
