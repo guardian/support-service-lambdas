@@ -1,6 +1,6 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import type { Stage } from '../../../../modules/stage';
+import { awsConfig } from '../aws/config';
 import { checkDefined, isNotNull } from '../nullAndUndefined';
 import type {
 	Catalog,
@@ -10,10 +10,7 @@ import type {
 } from './catalogSchema';
 import { catalogSchema } from './catalogSchema';
 
-const client = new S3Client({
-	region: 'eu-west-1',
-	credentials: defaultProvider({ profile: 'membership' }),
-});
+const client = new S3Client(awsConfig);
 
 export async function getCatalogFromS3(stage: Stage): Promise<Catalog> {
 	console.log('getCatalogFromS3');

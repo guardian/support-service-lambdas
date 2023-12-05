@@ -63,6 +63,7 @@ export class DiscountApi extends GuStack {
 					actions: ['s3:GetObject'],
 					resources: [
 						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/`,
 					],
 				}),
 			],
@@ -85,17 +86,7 @@ export class DiscountApi extends GuStack {
 		);
 
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
-		//lambda.role?.attachInlinePolicy(secretsManagerPolicy);
-
-		const getSecretValuePolicyStatement = new PolicyStatement({
-			effect: Effect.ALLOW,
-			resources: [
-				`arn:aws:secretsmanager:${this.region}:${this.account}:secret:*`, //TODO: restrict to only the secrets we need
-			],
-			actions: ['secretsmanager:GetSecretValue'],
-		});
-
-		lambda.addToRolePolicy(getSecretValuePolicyStatement);
+		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
