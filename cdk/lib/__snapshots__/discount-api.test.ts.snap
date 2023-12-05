@@ -252,42 +252,6 @@ exports[`The Discount api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "discountapilambda972ABED6": {
       "DependsOn": [
         "discountapilambdaServiceRoleDefaultPolicy91B9A9BA",
@@ -484,6 +448,26 @@ exports[`The Discount api stack matches the snapshot 1`] = `
                       "Ref": "AWS::AccountId",
                     },
                     ":parameter/CODE/membership/discount-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:*",
                   ],
                 ],
               },
@@ -1161,42 +1145,6 @@ exports[`The Discount api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "discountapilambda972ABED6": {
       "DependsOn": [
         "discountapilambdaServiceRoleDefaultPolicy91B9A9BA",
@@ -1393,6 +1341,26 @@ exports[`The Discount api stack matches the snapshot 2`] = `
                       "Ref": "AWS::AccountId",
                     },
                     ":parameter/PROD/membership/discount-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:*",
                   ],
                 ],
               },

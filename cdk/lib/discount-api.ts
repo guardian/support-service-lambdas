@@ -56,6 +56,47 @@ export class DiscountApi extends GuStack {
 			},
 		});
 
+		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['s3:GetObject'],
+					resources: [
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+					],
+				}),
+			],
+		});
+
+		const secretsManagerPolicy: Policy = new Policy(
+			this,
+			'Secrets Manager policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas`,
+						],
+					}),
+				],
+			},
+		);
+
+		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		//lambda.role?.attachInlinePolicy(secretsManagerPolicy);
+
+		const getSecretValuePolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			resources: [
+				`arn:aws:secretsmanager:${this.region}:${this.account}:secret:*`, //TODO: restrict to only the secrets we need
+			],
+			actions: ['secretsmanager:GetSecretValue'],
+		});
+
+		lambda.addToRolePolicy(getSecretValuePolicyStatement);
+
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
 			`DISCOUNT-API-${this.stage} ${shortDescription}`;
@@ -108,36 +149,5 @@ export class DiscountApi extends GuStack {
 			ttl: '120',
 			resourceRecords: [cfnDomainName.attrRegionalDomainName],
 		});
-
-		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['s3:GetObject'],
-					resources: [
-						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-					],
-				}),
-			],
-		});
-
-		const secretsManagerPolicy: Policy = new Policy(
-			this,
-			'Secrets Manager policy',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas`,
-						],
-					}),
-				],
-			},
-		);
-
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
-		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 	}
 }
