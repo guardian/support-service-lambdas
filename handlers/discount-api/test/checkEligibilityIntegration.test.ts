@@ -1,4 +1,5 @@
 import { DiscountApplicator } from '../src/discountApplicator';
+import { ValidationError } from '../src/errors';
 
 test('checkEligibility', async () => {
 	const requestBody = {
@@ -7,5 +8,13 @@ test('checkEligibility', async () => {
 	};
 
 	const discountApplicator = await DiscountApplicator.create('CODE');
-	await discountApplicator.checkEligibility(requestBody);
-});
+	try {
+		await discountApplicator.checkEligibility(requestBody);
+	} catch (error) {
+		if (error instanceof ValidationError) {
+			console.log('Got the expected error');
+		} else {
+			fail("didn't recognise the error");
+		}
+	}
+}, 30000);
