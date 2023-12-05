@@ -27,9 +27,14 @@ import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscri
 const stage: Stage = 'CODE';
 const subscribeDate = dayjs();
 const nextBillingDate = subscribeDate.add(1, 'month');
-const createDigitalSubscription = async (zuoraClient: ZuoraClient) => {
+const createDigitalSubscription = async (
+	zuoraClient: ZuoraClient,
+	createWithOldPrice: boolean,
+) => {
 	const path = `/v1/action/subscribe`;
-	const body = JSON.stringify(digiSubSubscribeBody(subscribeDate, true));
+	const body = JSON.stringify(
+		digiSubSubscribeBody(subscribeDate, createWithOldPrice),
+	);
 
 	return zuoraClient.post<ZuoraSubscribeResponse>(
 		path,
@@ -58,7 +63,7 @@ test('createDigitalSubscription', async () => {
 	const zuoraClient = await createZuoraClient(stage);
 
 	console.log('Creating a new digital subscription');
-	const subscribeResponse = await createDigitalSubscription(zuoraClient);
+	const subscribeResponse = await createDigitalSubscription(zuoraClient, false);
 
 	const subscriptionNumber = checkDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
@@ -75,7 +80,7 @@ test('createPriceRiseSubscription', async () => {
 	const zuoraClient = await createZuoraClient(stage);
 
 	console.log('Creating a new digital subscription');
-	const subscribeResponse = await createDigitalSubscription(zuoraClient);
+	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
 
 	const subscriptionNumber = checkDefined(
 		subscribeResponse[0]?.SubscriptionNumber,

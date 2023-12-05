@@ -4,7 +4,7 @@ export const checkDefined = <T>(
 	errorMessage: string,
 ): T => {
 	if (!value) {
-		throw new Error(errorMessage);
+		throw new ReferenceError(errorMessage);
 	}
 	return value;
 };

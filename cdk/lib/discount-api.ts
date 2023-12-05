@@ -63,7 +63,7 @@ export class DiscountApi extends GuStack {
 					actions: ['s3:GetObject'],
 					resources: [
 						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/`,
+						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/*`,
 					],
 				}),
 			],
@@ -79,6 +79,7 @@ export class DiscountApi extends GuStack {
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas`,
+							`arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l`,
 						],
 					}),
 				],

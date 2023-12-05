@@ -3,6 +3,7 @@ import type { Stage } from '../../../modules/stage';
 import { sum } from './arrayFunctions';
 import type { ZuoraCatalog } from './catalog/catalog';
 import { getZuoraCatalog } from './catalog/catalog';
+import { ValidationError } from './errors';
 import { checkDefined } from './nullAndUndefined';
 import { ProductToDiscountMapping } from './productToDiscountMapping';
 import { getBillingPreview, getNextInvoice } from './zuora/billingPreview';
@@ -61,8 +62,9 @@ export class EligibilityChecker {
 		}
 
 		if (eligibleRatePlans.length === 0 || !eligibleRatePlans[0]) {
-			throw new Error(
-				`Subscription ${subscription.subscriptionNumber} is not eligible for discount ${discountProductRatePlanId}`,
+			throw new ValidationError(
+				`Subscription ${subscription.subscriptionNumber} is not eligible for discount 
+				${discountProductRatePlanId} as it does not contain any eligible rate plans`,
 			);
 		}
 
@@ -97,9 +99,9 @@ export class EligibilityChecker {
 		const nextInvoiceTotal = nextInvoice.chargeAmount + nextInvoice.taxAmount;
 
 		if (nextInvoiceTotal < totalPrice) {
-			throw new Error(
-				'Next invoice is less than the current catalog price of the ' +
-					'subscription, so it is not eligible for a discount',
+			throw new ValidationError(
+				`Amount payable for next invoice (${nextInvoiceTotal} ${currency}) is less than the current 
+				catalog price of the subscription (${totalPrice} ${currency}), so it is not eligible for a discount`,
 			);
 		}
 		return nextInvoice.serviceStartDate;

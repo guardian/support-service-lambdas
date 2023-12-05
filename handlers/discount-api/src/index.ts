@@ -6,8 +6,9 @@ import type {
 import { stageFromEnvironment } from '../../../modules/stage';
 import {
 	applyDiscountResponse,
-	checkEligibilityResponse,
+	checkEligibility,
 } from './endpoints/applyDiscountResponse';
+import { ValidationError } from './errors';
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
@@ -20,7 +21,7 @@ export const handler: Handler = async (
 				return applyDiscountResponse(stage, event);
 			}
 			case event.path === '/check-eligibility' && event.httpMethod === 'POST': {
-				return checkEligibilityResponse(stage, event);
+				return checkEligibility(stage, event);
 			}
 			default:
 				return {
@@ -30,9 +31,16 @@ export const handler: Handler = async (
 		}
 	} catch (error) {
 		console.log(error);
-		return {
-			body: JSON.stringify(error),
-			statusCode: 500,
-		};
+		if (error instanceof ValidationError) {
+			return {
+				body: error.message,
+				statusCode: 400,
+			};
+		} else {
+			return {
+				body: JSON.stringify(error),
+				statusCode: 500,
+			};
+		}
 	}
 };
