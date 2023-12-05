@@ -11,16 +11,17 @@ export const getOAuthClientCredentials = async (
 	stage: Stage,
 ): Promise<OAuthClientCredentials> => {
 	const isRunningLocally = !process.env.LAMBDA_TASK_ROOT;
-	const credentials = isRunningLocally
-		? defaultProvider({
-				profile: 'membership',
-		  })
-		: defaultProvider();
+	console.log('isRunningLocally is ', isRunningLocally);
+	const config = isRunningLocally
+		? {
+				region: 'eu-west-1',
+				credentials: defaultProvider({
+					profile: 'membership',
+				}),
+		  }
+		: {};
 
-	const client = new SecretsManagerClient({
-		region: 'eu-west-1',
-		credentials,
-	});
+	const client = new SecretsManagerClient(config);
 
 	const command = new GetSecretValueCommand({
 		SecretId: `${stage}/Zuora-OAuth/SupportServiceLambdas`,
