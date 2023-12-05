@@ -5,7 +5,7 @@ import { ValidationError } from '../errors';
 import { checkDefined } from '../nullAndUndefined';
 import { applyDiscountSchema } from '../requestSchema';
 
-export const applyDiscountResponse = async (
+export const applyDiscountEndpoint = async (
 	stage: Stage,
 	event: APIGatewayProxyEvent,
 ) => {
@@ -29,7 +29,7 @@ const checkEligibilityResponse = (eligible: boolean) => {
 	};
 };
 
-export const checkEligibility = async (
+export const checkEligibilityEndpoint = async (
 	stage: Stage,
 	event: APIGatewayProxyEvent,
 ) => {

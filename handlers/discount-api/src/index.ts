@@ -5,9 +5,9 @@ import type {
 } from 'aws-lambda';
 import { stageFromEnvironment } from '../../../modules/stage';
 import {
-	applyDiscountResponse,
-	checkEligibility,
-} from './endpoints/applyDiscountResponse';
+	applyDiscountEndpoint,
+	checkEligibilityEndpoint,
+} from './endpoints/applyDiscountEndpoint';
 import { ValidationError } from './errors';
 
 export const handler: Handler = async (
@@ -18,10 +18,10 @@ export const handler: Handler = async (
 		const stage = stageFromEnvironment();
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
-				return applyDiscountResponse(stage, event);
+				return applyDiscountEndpoint(stage, event);
 			}
 			case event.path === '/check-eligibility' && event.httpMethod === 'POST': {
-				return checkEligibility(stage, event);
+				return checkEligibilityEndpoint(stage, event);
 			}
 			default:
 				return {

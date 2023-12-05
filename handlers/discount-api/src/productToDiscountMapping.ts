@@ -11,7 +11,7 @@ export const ProductToDiscountMapping: {
 } = {
 	CODE: [
 		{
-			discountProductRatePlanId: '2c92c0f84bbfec8b014bc655f4852d9d',
+			discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			effectiveStartDate: '2018-04-01',
 			effectiveEndDate: '2099-03-08',
