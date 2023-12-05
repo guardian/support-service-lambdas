@@ -240,7 +240,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3::*:membership-dist/membership/CODE/discount-api/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/",
+                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/*",
               ],
             },
           ],
@@ -262,22 +262,25 @@ exports[`The Discount api stack matches the snapshot 1`] = `
             {
               "Action": "secretsmanager:GetSecretValue",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/Zuora-OAuth/SupportServiceLambdas",
+                    ],
                   ],
-                ],
-              },
+                },
+                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l",
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -1152,7 +1155,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3::*:membership-dist/membership/PROD/discount-api/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/",
+                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/*",
               ],
             },
           ],
@@ -1174,22 +1177,25 @@ exports[`The Discount api stack matches the snapshot 2`] = `
             {
               "Action": "secretsmanager:GetSecretValue",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Zuora-OAuth/SupportServiceLambdas",
+                    ],
                   ],
-                ],
-              },
+                },
+                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l",
+              ],
             },
           ],
           "Version": "2012-10-17",
