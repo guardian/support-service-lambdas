@@ -149,7 +149,7 @@ object SubscriptionCancelEndpoint {
   def asNonEmptyList[A](list: List[A], message: String): IO[ErrorResponse, NonEmptyList[A]] =
     NonEmptyList.fromList(list) match {
       case Some(nel) => ZIO.succeed(nel)
-      case None => ZIO.fail(InternalServerError(s"Subscription can't be cancelled as the charge list is empty"))
+      case None => ZIO.fail(InternalServerError(message))
     }
 
   private def getSupporterPlusCharge(
@@ -189,13 +189,18 @@ object SubscriptionCancelEndpoint {
         case _ => ZIO.fail(BadRequest(s"Subscription $subscriptionName cannot be cancelled as it is not active"))
       }
 
-      // check sub info to make sure it's a supporter plus
-      // should look at the relevant charge, members data api looks for the Paid Plan.
-      // initially this will only apply to new prop which won't have multiple plans or charges.
+      // check sub info to make sure it's a supporter plus subscription
       zuoraIds <- ZIO
         .fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError.apply))
-      ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
-      charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
+      // We have fetched the subscription with the charge-detail=current-segment query param described here:
+      // https://developer.zuora.com/api-references/api/operation/GET_SubscriptionsByKey/#!in=query&path=charge-detail&t=request
+      // this means that only the currently active rate plan will contain charge information (even if it has a
+      // lastChangeType of 'Remove')
+      ratePlan <- asSingle(subscription.ratePlans.filter(!_.ratePlanCharges.empty), "ratePlan")
+      charges <- asNonEmptyList(
+        ratePlan.ratePlanCharges,
+        s"Subscription can't be cancelled as the charge list is empty",
+      )
       supporterPlusCharge <- getSupporterPlusCharge(charges, zuoraIds.supporterPlusZuoraIds)
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
