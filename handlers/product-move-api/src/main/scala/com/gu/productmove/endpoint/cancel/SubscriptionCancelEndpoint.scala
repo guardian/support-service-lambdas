@@ -3,28 +3,65 @@ package com.gu.productmove.endpoint.cancel
 import cats.data.NonEmptyList
 import com.gu.newproduct.api.productcatalog.ZuoraIds
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
+import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.*
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, *}
-import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.RatePlanCharge
-import com.gu.productmove.endpoint.zuora.{GetSubscriptionToCancel, GetSubscriptionToCancelLive}
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler
+import com.gu.productmove.{
+  AwsCredentialsLive,
+  AwsS3,
+  AwsS3Live,
+  EmailMessage,
+  EmailPayload,
+  EmailPayloadCancellationAttributes,
+  EmailPayloadContactAttributes,
+  GuStageLive,
+  SQS,
+  SQSLive,
+  SttpClientLive,
+}
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
-import com.gu.productmove.invoicingapi.InvoicingApiRefund
+import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
-import com.gu.productmove.refund.*
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
 import com.gu.productmove.zuora.rest.*
-import com.gu.productmove.zuora.*
-import com.gu.productmove.{endpoint, *}
+import com.gu.productmove.zuora.{
+  CreditBalanceAdjustment,
+  CreditBalanceAdjustmentLive,
+  GetAccount,
+  GetAccountLive,
+  GetInvoice,
+  GetInvoiceLive,
+  GetRefundInvoiceDetails,
+  GetRefundInvoiceDetailsLive,
+  InvoiceItemAdjustment,
+  InvoiceItemAdjustmentLive,
+  ZuoraCancel,
+  ZuoraCancelLive,
+  ZuoraSetCancellationReason,
+  ZuoraSetCancellationReasonLive,
+}
 import com.gu.util.config
-import sttp.client3.SttpBackend
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.json.zio.jsonBody
+import sttp.client3.SttpBackend
 import zio.{Clock, IO, Task, ZIO}
+import com.gu.productmove.refund.*
+import RefundType.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  BadRequest,
+  ErrorResponse,
+  InternalServerError,
+  OutputBody,
+  Success,
+}
+import com.gu.productmove.endpoint.zuora.{GetSubscriptionToCancel, GetSubscriptionToCancelLive}
+import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.{GetSubscriptionToCancelResponse, RatePlanCharge}
+import com.gu.productmove.zuora.model.SubscriptionName
+import org.joda.time.format.DateTimeFormat
 
 import java.time.LocalDate
+import scala.concurrent.Future
 
 // this is the description for just the one endpoint
 object SubscriptionCancelEndpoint {
