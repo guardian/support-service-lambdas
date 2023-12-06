@@ -3,64 +3,28 @@ package com.gu.productmove.endpoint.cancel
 import cats.data.NonEmptyList
 import com.gu.newproduct.api.productcatalog.ZuoraIds
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
-import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes._
-import com.gu.productmove.{
-  AwsCredentialsLive,
-  AwsS3,
-  AwsS3Live,
-  EmailMessage,
-  EmailPayload,
-  EmailPayloadCancellationAttributes,
-  EmailPayloadContactAttributes,
-  GuStageLive,
-  SQS,
-  SQSLive,
-  SttpClientLive,
-}
+import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, *}
+import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.RatePlanCharge
+import com.gu.productmove.endpoint.zuora.{GetSubscriptionToCancel, GetSubscriptionToCancelLive}
+import com.gu.productmove.framework.ZIOApiGatewayRequestHandler
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
-import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
+import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
-import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
+import com.gu.productmove.refund.*
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.*
-import com.gu.productmove.zuora.{
-  CreditBalanceAdjustment,
-  CreditBalanceAdjustmentLive,
-  GetAccount,
-  GetAccountLive,
-  GetInvoice,
-  GetRefundInvoiceDetails,
-  GetRefundInvoiceDetailsLive,
-  GetInvoiceLive,
-  InvoiceItemAdjustment,
-  InvoiceItemAdjustmentLive,
-  ZuoraCancel,
-  ZuoraCancelLive,
-  ZuoraSetCancellationReason,
-  ZuoraSetCancellationReasonLive,
-}
+import com.gu.productmove.zuora.*
+import com.gu.productmove.{endpoint, *}
 import com.gu.util.config
+import sttp.client3.SttpBackend
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.json.zio.jsonBody
-import sttp.client3.SttpBackend
 import zio.{Clock, IO, Task, ZIO}
-import com.gu.productmove.refund.*
-import RefundType.*
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
-  ErrorResponse,
-  InternalServerError,
-  OutputBody,
-  Success,
-}
-import com.gu.productmove.endpoint.zuora.{GetSubscriptionToCancel, GetSubscriptionToCancelLive}
-import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.{GetSubscriptionToCancelResponse, RatePlanCharge}
-import com.gu.productmove.zuora.model.SubscriptionName
-import org.joda.time.format.DateTimeFormat
 
 import java.time.LocalDate
-import scala.concurrent.Future
 
 // this is the description for just the one endpoint
 object SubscriptionCancelEndpoint {
@@ -183,11 +147,16 @@ object SubscriptionCancelEndpoint {
       subscription <- GetSubscriptionToCancel.get(subscriptionName)
       _ <- ZIO.log(s"Subscription is $subscription")
 
+      _ <- subscription.status match {
+        case "Active" => ZIO.succeed(())
+        case _ => ZIO.fail(BadRequest(s"Subscription $subscriptionName cannot be cancelled as it is not active"))
+      }
+
       // check sub info to make sure it's a supporter plus
       // should look at the relevant charge, members data api looks for the Paid Plan.
       // initially this will only apply to new prop which won't have multiple plans or charges.
       zuoraIds <- ZIO
-        .fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError(_)))
+        .fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError.apply))
       ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
       supporterPlusCharge <- getSupporterPlusCharge(charges, zuoraIds.supporterPlusZuoraIds)
@@ -207,7 +176,7 @@ object SubscriptionCancelEndpoint {
         )
         .orElseFail(
           InternalServerError(
-            s"Subscription charged through date is null is for supporter plus subscription ${subscriptionName.value}. " +
+            s"Subscription charged through date is null for supporter plus subscription ${subscriptionName.value}. " +
               s"This is an error because we expect to be able to use the charged through date to work out the effective cancellation date",
           ),
         )
