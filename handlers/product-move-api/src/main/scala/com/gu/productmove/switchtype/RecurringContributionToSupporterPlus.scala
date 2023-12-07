@@ -404,11 +404,25 @@ object RecurringContributionToSupporterPlus {
     // the update subscription request, and then renew the sub using a separate request
     val newTermLength = getNewTermLengthInDays(today, termStartDate)
     for {
-      updateRequestBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
+      _ <- ZIO.log(s"Reducing existing term for subscription $subscriptionName to $newTermLength day(s)")
+      updateRatePlansBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
         case (addRatePlan, removeRatePlan) =>
           SwitchProductUpdateRequest(
             add = addRatePlan,
             remove = removeRatePlan,
+            // We will run the billing during the renewal call to ensure there's exactly one invoice produced for the switch
+            runBilling = Some(false),
+            // We will collect via a separate create payment call if the amount payable is not too small
+            collect = None,
+            preview = Some(false),
+          )
+      }
+      updateRatePlansResponse <- SubscriptionUpdate
+        .update[SubscriptionUpdateResponse](subscriptionName, updateRatePlansBody)
+
+      updateTermBody <- getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
+        case (addRatePlan, removeRatePlan) =>
+          SwitchProductUpdateRequest(
             currentTerm = Some(newTermLength),
             currentTermPeriodType = Some("Day"),
             // We will run the billing during the renewal call to ensure there's exactly one invoice produced for the switch
@@ -418,7 +432,9 @@ object RecurringContributionToSupporterPlus {
             preview = Some(false),
           )
       }
-      updateResponse <- SubscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
+      updateTermResponse <- SubscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateTermBody)
+
+      _ <- ZIO.log(s"Renewing subscription $subscriptionName")
       renewalResult <- TermRenewal.renewSubscription(
         subscriptionName,
         // this is the last change so run billing to get one invoice to cover all the changes

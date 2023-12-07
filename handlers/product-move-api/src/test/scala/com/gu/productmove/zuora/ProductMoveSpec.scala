@@ -1,16 +1,20 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
-import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, RecurringContributionToSupporterPlus}
+import com.gu.productmove.endpoint.move.{
+  ProductMoveEndpoint,
+  ProductMoveEndpointTypes,
+  RecurringContributionToSupporterPlus,
+}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.SecretsLive
-import com.gu.productmove._
-import zio._
-import zio.test.Assertion._
-import zio.test._
+import com.gu.productmove.*
+import zio.*
+import zio.test.Assertion.*
+import zio.test.*
 
-import java.time._
+import java.time.*
 
 object ProductMoveSpec extends ZIOSpecDefault {
 
@@ -19,10 +23,10 @@ object ProductMoveSpec extends ZIOSpecDefault {
       test("Run product switch lambda locally") {
         for {
           _ <- TestClock.setTime(Instant.now())
-          _ <- RecurringContributionToSupporterPlus(
-            SubscriptionName("A-S00702950"),
+          result <- RecurringContributionToSupporterPlus(
+            SubscriptionName("A-S00746184"),
             ExpectedInput(
-              price = 120,
+              price = 95,
               preview = false,
               csrUserId = None,
               caseId = None,
@@ -47,9 +51,15 @@ object ProductMoveSpec extends ZIOSpecDefault {
               SecretsLive.layer,
             )
         } yield {
-          assert(true)(equalTo(true))
+          result match {
+            case ProductMoveEndpointTypes.Success(_) => assert(true)(equalTo(true))
+            case ProductMoveEndpointTypes.InternalServerError(message) =>
+              println(message)
+              assert(false)(equalTo(true))
+            case _ => assert(false)(equalTo(true))
+          }
         }
-      } @@ TestAspect.ignore,
+      },
       test("Run product switch preview locally") {
         for {
           _ <- TestClock.setTime(Instant.now())
