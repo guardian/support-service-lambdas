@@ -5,7 +5,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes._
+import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.*
 import com.gu.productmove.{
   AwsCredentialsLive,
   AwsS3,
@@ -30,9 +30,9 @@ import com.gu.productmove.zuora.{
   GetAccount,
   GetAccountLive,
   GetInvoice,
+  GetInvoiceLive,
   GetRefundInvoiceDetails,
   GetRefundInvoiceDetailsLive,
-  GetInvoiceLive,
   InvoiceItemAdjustment,
   InvoiceItemAdjustmentLive,
   ZuoraCancel,
@@ -49,6 +49,7 @@ import zio.{Clock, IO, Task, ZIO}
 import com.gu.productmove.refund.*
 import RefundType.*
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  BadRequest,
   ErrorResponse,
   InternalServerError,
   OutputBody,
@@ -183,11 +184,16 @@ object SubscriptionCancelEndpoint {
       subscription <- GetSubscriptionToCancel.get(subscriptionName)
       _ <- ZIO.log(s"Subscription is $subscription")
 
+      _ <- subscription.status match {
+        case "Active" => ZIO.succeed(())
+        case _ => ZIO.fail(BadRequest(s"Subscription $subscriptionName cannot be cancelled as it is not active"))
+      }
+
       // check sub info to make sure it's a supporter plus
       // should look at the relevant charge, members data api looks for the Paid Plan.
       // initially this will only apply to new prop which won't have multiple plans or charges.
       zuoraIds <- ZIO
-        .fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError(_)))
+        .fromEither(ZuoraIds.zuoraIdsForStage(config.Stage(stage.toString)).left.map(InternalServerError.apply))
       ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
       supporterPlusCharge <- getSupporterPlusCharge(charges, zuoraIds.supporterPlusZuoraIds)
@@ -207,7 +213,7 @@ object SubscriptionCancelEndpoint {
         )
         .orElseFail(
           InternalServerError(
-            s"Subscription charged through date is null is for supporter plus subscription ${subscriptionName.value}. " +
+            s"Subscription charged through date is null for supporter plus subscription ${subscriptionName.value}. " +
               s"This is an error because we expect to be able to use the charged through date to work out the effective cancellation date",
           ),
         )

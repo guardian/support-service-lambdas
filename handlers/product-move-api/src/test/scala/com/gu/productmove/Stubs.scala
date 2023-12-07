@@ -81,6 +81,7 @@ val getSubscriptionResponse = GetSubscriptionResponse(
 val getSubscriptionForCancelResponse = GetSubscriptionToCancelResponse(
   id = "A-S00339056",
   version = 1,
+  status = "Active",
   contractEffectiveDate = LocalDate.of(2020, 11, 29),
   accountId = "zuoraAccountId",
   accountNumber = AccountNumber("anAccountNumber"),

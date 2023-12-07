@@ -33,6 +33,7 @@ object GetSubscriptionToCancel {
 
   case class GetSubscriptionToCancelResponse(
       id: String,
+      status: String,
       version: Int,
       contractEffectiveDate: LocalDate,
       accountId: String,
