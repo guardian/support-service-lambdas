@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/stage';
 import { getZuoraCatalog } from './catalog/catalog';
-import { EligibilityChecker } from './eligibility';
+import { EligibilityChecker } from './eligibilityChecker';
 import type { ApplyDiscountRequestBody } from './requestSchema';
 import { addDiscount } from './zuora/addDiscount';
 import { getSubscription } from './zuora/getSubscription';

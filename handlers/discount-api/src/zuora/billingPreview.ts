@@ -1,4 +1,6 @@
 import type { Dayjs } from 'dayjs';
+import { groupBy } from '../arrayFunctions';
+import { checkDefined } from '../nullAndUndefined';
 import { zuoraDateFormat } from './common';
 import type { ZuoraClient } from './zuoraClient';
 import type { BillingPreview, InvoiceItem } from './zuoraSchemas';
@@ -19,11 +21,24 @@ export const getBillingPreview = async (
 	return zuoraClient.post<BillingPreview>(path, body, billingPreviewSchema);
 };
 
-export const getNextInvoice = (
+export const getNextInvoiceItems = (
 	billingPreview: BillingPreview,
-): InvoiceItem | undefined => {
-	const nextInvoice = billingPreview.invoiceItems.sort((a, b) => {
+): InvoiceItem[] => {
+	const sorted = billingPreview.invoiceItems.sort((a, b) => {
 		return a.serviceStartDate < b.serviceStartDate ? -1 : 1;
-	})[0];
-	return nextInvoice;
+	});
+	const nextInvoiceDate = checkDefined(
+		sorted[0]?.serviceStartDate.toISOString(),
+		'No invoice items found in response from Zuora',
+	);
+
+	const groupedInvoiceItems = groupBy(billingPreview.invoiceItems, (item) =>
+		item.serviceStartDate.toISOString(),
+	);
+	const nextInvoiceItems = checkDefined(
+		groupedInvoiceItems[nextInvoiceDate],
+		'No invoice items found for next invoice date',
+	);
+
+	return [...nextInvoiceItems];
 };

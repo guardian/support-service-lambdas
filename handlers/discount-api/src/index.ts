@@ -18,10 +18,10 @@ export const handler: Handler = async (
 		const stage = stageFromEnvironment();
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
-				return applyDiscountEndpoint(stage, event);
+				return applyDiscountEndpoint(stage, event.body);
 			}
 			case event.path === '/check-eligibility' && event.httpMethod === 'POST': {
-				return checkEligibilityEndpoint(stage, event);
+				return checkEligibilityEndpoint(stage, event.body);
 			}
 			default:
 				return {

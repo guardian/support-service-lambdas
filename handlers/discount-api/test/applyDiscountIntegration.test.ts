@@ -4,60 +4,17 @@
  * @group integration
  */
 
-import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/stage';
 import { checkDefined } from '../src/nullAndUndefined';
 import { addDiscount } from '../src/zuora/addDiscount';
 import { getSubscription } from '../src/zuora/getSubscription';
-import type { ZuoraClient } from '../src/zuora/zuoraClient';
 import { createZuoraClient } from '../src/zuora/zuoraClient';
-import type {
-	ZuoraSubscribeResponse,
-	ZuoraSubscription,
-	ZuoraSuccessResponse,
-} from '../src/zuora/zuoraSchemas';
-import {
-	zuoraSubscribeResponseSchema,
-	zuoraSuccessResponseSchema,
-} from '../src/zuora/zuoraSchemas';
-import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
-import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
+import { createDigitalSubscription, doPriceRise } from './helpers';
 
 const stage: Stage = 'CODE';
 const subscribeDate = dayjs();
 const nextBillingDate = subscribeDate.add(1, 'month');
-const createDigitalSubscription = async (
-	zuoraClient: ZuoraClient,
-	createWithOldPrice: boolean,
-) => {
-	const path = `/v1/action/subscribe`;
-	const body = JSON.stringify(
-		digiSubSubscribeBody(subscribeDate, createWithOldPrice),
-	);
-
-	return zuoraClient.post<ZuoraSubscribeResponse>(
-		path,
-		body,
-		zuoraSubscribeResponseSchema,
-	);
-};
-
-const doPriceRise = async (
-	zuoraClient: ZuoraClient,
-	subscription: ZuoraSubscription,
-	contractEffectiveDate: Dayjs,
-): Promise<ZuoraSuccessResponse> => {
-	const path = `/v1/subscriptions/${subscription.subscriptionNumber}`;
-	const ratePlanId = subscription.ratePlans[0]?.id;
-	if (!ratePlanId) {
-		throw new Error('RatePlanId was undefined in response from Zuora');
-	}
-	const body = JSON.stringify(
-		updateSubscriptionBody(contractEffectiveDate, ratePlanId),
-	);
-	return zuoraClient.put(path, body, zuoraSuccessResponseSchema);
-};
 
 test('createDigitalSubscription', async () => {
 	const zuoraClient = await createZuoraClient(stage);

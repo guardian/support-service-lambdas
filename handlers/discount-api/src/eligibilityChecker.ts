@@ -6,7 +6,7 @@ import { getZuoraCatalog } from './catalog/catalog';
 import { ValidationError } from './errors';
 import { checkDefined } from './nullAndUndefined';
 import { ProductToDiscountMapping } from './productToDiscountMapping';
-import { getBillingPreview, getNextInvoice } from './zuora/billingPreview';
+import { getBillingPreview, getNextInvoiceItems } from './zuora/billingPreview';
 import type { ZuoraClient } from './zuora/zuoraClient';
 import { createZuoraClient } from './zuora/zuoraClient';
 import type { RatePlan, ZuoraSubscription } from './zuora/zuoraSchemas';
@@ -92,18 +92,24 @@ export class EligibilityChecker {
 			dayjs().add(13, 'months'),
 			accountNumber,
 		);
-		const nextInvoice = checkDefined(
-			getNextInvoice(billingPreview),
+		const nextInvoiceItems = checkDefined(
+			getNextInvoiceItems(billingPreview),
 			`No next invoice found for account ${accountNumber}`,
 		);
-		const nextInvoiceTotal = nextInvoice.chargeAmount + nextInvoice.taxAmount;
+		const nextInvoiceTotal = sum(
+			nextInvoiceItems,
+			(item) => item.chargeAmount + item.taxAmount,
+		);
 
-		if (nextInvoiceTotal < totalPrice) {
+		if (nextInvoiceTotal <= totalPrice) {
 			throw new ValidationError(
 				`Amount payable for next invoice (${nextInvoiceTotal} ${currency}) is less than the current 
 				catalog price of the subscription (${totalPrice} ${currency}), so it is not eligible for a discount`,
 			);
 		}
-		return nextInvoice.serviceStartDate;
+		return checkDefined(
+			nextInvoiceItems[0]?.serviceStartDate,
+			'No next invoice date found in next invoice items',
+		);
 	};
 }

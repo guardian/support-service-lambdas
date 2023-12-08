@@ -1,4 +1,3 @@
-import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { Stage } from '../../../../modules/stage';
 import { DiscountApplicator } from '../discountApplicator';
 import { ValidationError } from '../errors';
@@ -7,10 +6,10 @@ import { applyDiscountSchema } from '../requestSchema';
 
 export const applyDiscountEndpoint = async (
 	stage: Stage,
-	event: APIGatewayProxyEvent,
+	body: string | null,
 ) => {
 	const applyDiscountBody = applyDiscountSchema.parse(
-		JSON.parse(checkDefined(event.body, 'No body was provided')),
+		JSON.parse(checkDefined(body, 'No body was provided')),
 	);
 	const discountApplicator = await DiscountApplicator.create(stage);
 	await discountApplicator.applyDiscount(applyDiscountBody);
@@ -31,10 +30,10 @@ const checkEligibilityResponse = (eligible: boolean) => {
 
 export const checkEligibilityEndpoint = async (
 	stage: Stage,
-	event: APIGatewayProxyEvent,
+	body: string | null,
 ) => {
 	const applyDiscountBody = applyDiscountSchema.parse(
-		JSON.parse(checkDefined(event.body, 'No body was provided')),
+		JSON.parse(checkDefined(body, 'No body was provided')),
 	);
 	const discountApplicator = await DiscountApplicator.create(stage);
 	try {

@@ -1,9 +1,10 @@
-import { getNextInvoice } from '../src/zuora/billingPreview';
+import { getNextInvoiceItems } from '../src/zuora/billingPreview';
 import { billingPreviewSchema } from '../src/zuora/zuoraSchemas';
-import billingPreview from './fixtures/billing-preview.json';
+import billingPreview from './fixtures/billing-preview-with-discount.json';
 
 test('getNextPayment', () => {
 	const parsedBillingPreview = billingPreviewSchema.parse(billingPreview);
-	const nextInvoice = getNextInvoice(parsedBillingPreview);
-	expect(nextInvoice?.serviceStartDate).toEqual(new Date('2023-12-17'));
+	const nextInvoiceItems = getNextInvoiceItems(parsedBillingPreview);
+	expect(nextInvoiceItems[0]?.serviceStartDate).toEqual(new Date('2023-12-19'));
+	expect(nextInvoiceItems.length).toEqual(3);
 });
