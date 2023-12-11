@@ -5,7 +5,7 @@ import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.productmove.SecretsLive
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import zio.Task
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
@@ -75,7 +75,7 @@ object ProductMoveEndpoint {
     Unit,
     ProductMoveEndpointTypes.OutputBody,
     Any,
-    ZIOApiGatewayRequestHandler.TIO,
+    Task,
   ] = {
     val subscriptionNameCapture: EndpointInput.PathCapture[String] = {
       EndpointInput.PathCapture[String](
@@ -151,7 +151,7 @@ object ProductMoveEndpoint {
             |Also manages all the service comms associated with the movement.""".stripMargin,
         )
     endpointDescription
-      .serverLogic[TIO] { (switchTypeStr, subscriptionName, postData) =>
+      .serverLogic[Task] { (switchTypeStr, subscriptionName, postData) =>
         SwitchType.fromId(switchTypeStr) match {
           case Some(switchType) =>
             run(SubscriptionName(subscriptionName), switchType, postData)
@@ -176,7 +176,7 @@ object ProductMoveEndpoint {
       subscriptionName: SubscriptionName,
       switchType: SwitchType,
       postData: ExpectedInput,
-  ): TIO[OutputBody] =
+  ): Task[OutputBody] =
     (switchType match {
       case SwitchType.RecurringContributionToSupporterPlus =>
         RecurringContributionToSupporterPlus(subscriptionName, postData)

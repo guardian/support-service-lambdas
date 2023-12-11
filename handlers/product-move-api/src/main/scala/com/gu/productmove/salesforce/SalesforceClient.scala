@@ -13,7 +13,7 @@ import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.ziojson.*
 import sttp.model.Uri
 import zio.json.*
-import zio.{IO, RIO, Task, ZIO, ZLayer}
+import zio.{IO, RIO, RLayer, Task, ZIO, ZLayer}
 
 import java.time.LocalDate
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -50,7 +50,7 @@ object SalesforceClient {
 
 object SalesforceClientLive {
 
-  val layer: ZLayer[SttpBackend[Task, Any] with Secrets, ErrorResponse, SalesforceClient] =
+  val layer: RLayer[SttpBackend[Task, Any] with Secrets, SalesforceClient] =
     ZLayer.fromZIO(
       for {
         secrets <- ZIO.service[Secrets]
@@ -88,8 +88,7 @@ object SalesforceClientLive {
             response.body
           }
           .absolve
-          .mapError(e => InternalServerError(e.toString))
-        base_uri <- ZIO.fromEither(Uri.parse(auth.instance_url).left.map(e => InternalServerError(e)))
+        base_uri <- ZIO.fromEither(Uri.parse(auth.instance_url).left.map(e => new Throwable(s"url parsing error: $e")))
 
       } yield new SalesforceClient {
 

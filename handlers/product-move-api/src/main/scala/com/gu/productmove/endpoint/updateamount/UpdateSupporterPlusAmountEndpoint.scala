@@ -4,17 +4,55 @@ import cats.data.NonEmptyList
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.productmove.SecretsLive
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{BadRequest, ErrorResponse, InternalServerError, OutputBody, Success}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
+  BadRequest,
+  ErrorResponse,
+  InternalServerError,
+  OutputBody,
+  Success,
+}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import zio.Task
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.util.config
-import com.gu.productmove.zuora.{ChargeUpdateDetails, GetAccount, GetAccountLive, GetInvoiceItems, GetInvoiceItemsLive, GetSubscription, GetSubscriptionLive, InvoiceItemAdjustment, InvoiceItemAdjustmentLive, Subscribe, SubscribeLive, SubscriptionUpdate, SubscriptionUpdateLive, SubscriptionUpdateRequest, SubscriptionUpdateResponse, UpdateSubscriptionAmount, UpdateSubscriptionAmountItem, ZuoraCancel, ZuoraCancelLive}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, Dynamo, DynamoLive, EmailMessage, EmailPayload, EmailPayloadContactAttributes, GuStageLive, SQS, SQSLive, SttpClientLive}
+import com.gu.productmove.zuora.{
+  ChargeUpdateDetails,
+  GetAccount,
+  GetAccountLive,
+  GetInvoiceItems,
+  GetInvoiceItemsLive,
+  GetSubscription,
+  GetSubscriptionLive,
+  InvoiceItemAdjustment,
+  InvoiceItemAdjustmentLive,
+  Subscribe,
+  SubscribeLive,
+  SubscriptionUpdate,
+  SubscriptionUpdateLive,
+  SubscriptionUpdateRequest,
+  SubscriptionUpdateResponse,
+  UpdateSubscriptionAmount,
+  UpdateSubscriptionAmountItem,
+  ZuoraCancel,
+  ZuoraCancelLive,
+}
+import com.gu.productmove.{
+  AwsCredentialsLive,
+  AwsS3Live,
+  Dynamo,
+  DynamoLive,
+  EmailMessage,
+  EmailPayload,
+  EmailPayloadContactAttributes,
+  GuStageLive,
+  SQS,
+  SQSLive,
+  SttpClientLive,
+}
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.Schema
@@ -49,7 +87,7 @@ object UpdateSupporterPlusAmountEndpoint {
     Unit,
     OutputBody,
     Any,
-    ZIOApiGatewayRequestHandler.TIO,
+    Task,
   ] = {
     val subscriptionNameCapture: EndpointInput.PathCapture[String] = {
       EndpointInput.PathCapture[String](
@@ -95,12 +133,13 @@ object UpdateSupporterPlusAmountEndpoint {
         .description(
           """Updates the charge amount on the contribution rate plan charge of a supporter plus subscription.""".stripMargin,
         )
-    endpointDescription.serverLogic[TIO](run)
+    endpointDescription.serverLogic[Task](run)
   }
 
-  private def run(subscriptionName: String, postData: ExpectedInput): TIO[Right[Nothing, OutputBody]] = for {
+  private def run(subscriptionName: String, postData: ExpectedInput): Task[Right[Nothing, OutputBody]] = for {
     _ <- ZIO.log(s"INPUT: $subscriptionName: $postData")
-    res <- UpdateSupporterPlusAmountSteps.subscriptionUpdateAmount(SubscriptionName(subscriptionName), postData)
+    res <- UpdateSupporterPlusAmountSteps
+      .subscriptionUpdateAmount(SubscriptionName(subscriptionName), postData)
       .provide(
         AwsCredentialsLive.layer,
         SttpClientLive.layer,

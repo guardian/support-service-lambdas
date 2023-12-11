@@ -35,12 +35,12 @@ object ZuoraClientLive {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
 
-  val layer: ZLayer[SttpBackend[Task, Any] with Secrets, ErrorResponse, ZuoraClient] =
+  val layer: ZLayer[SttpBackend[Task, Any] with Secrets, Throwable, ZuoraClient] =
     ZLayer {
       for {
         secrets <- ZIO.service[Secrets]
         zuoraApiSecrets <- secrets.getZuoraApiUserSecrets
-        baseUrl <- ZIO.fromEither(Uri.parse(zuoraApiSecrets.baseUrl + "/").left.map(e => InternalServerError(e)))
+        baseUrl <- ZIO.fromEither(Uri.parse(zuoraApiSecrets.baseUrl + "/").left.map(e => new Throwable(e)))
         _ <- ZIO.logDebug("zuoraBaseUrl:   " + baseUrl.toString)
         sttpClient <- ZIO.service[SttpBackend[Task, Any]]
       } yield ZuoraClientLive(

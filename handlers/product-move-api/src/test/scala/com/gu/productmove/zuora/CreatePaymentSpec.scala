@@ -31,6 +31,7 @@ object CreatePaymentSpec extends ZIOSpecDefault {
               CreatePaymentLive.layer,
               SttpClientLive.layer,
               SecretsLive.layer,
+              AwsCredentialsLive.layer,
             )
 
         } yield {

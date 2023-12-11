@@ -19,7 +19,7 @@ import com.gu.productmove.{
   SQSLive,
   SttpClientLive,
 }
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import zio.{Clock, IO, RIO, Task, ZIO}
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
@@ -45,7 +45,6 @@ import sttp.tapir.*
 import sttp.tapir.EndpointIO.Example
 import sttp.tapir.json.zio.jsonBody
 import sttp.client3.SttpBackend
-import zio.{Clock, IO, Task, ZIO}
 import com.gu.productmove.refund.*
 import RefundType.*
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
@@ -72,7 +71,7 @@ object SubscriptionCancelEndpoint {
     Unit,
     OutputBody,
     Any,
-    ZIOApiGatewayRequestHandler.TIO,
+    Task,
   ] = {
     val subscriptionNameCapture: EndpointInput.PathCapture[String] =
       EndpointInput.PathCapture[String](
@@ -113,10 +112,10 @@ object SubscriptionCancelEndpoint {
           """Cancels the existing subscription at the default/soonest date.
             |Also manages all the service comms associated with the cancellation.""".stripMargin,
         )
-    endpointDescription.serverLogic[TIO](run)
+    endpointDescription.serverLogic[Task](run)
   }
 
-  private def run(subscriptionName: String, postData: ExpectedInput): TIO[Right[Nothing, OutputBody]] = for {
+  private def run(subscriptionName: String, postData: ExpectedInput): Task[Right[Nothing, OutputBody]] = for {
     _ <- ZIO.log(s"INPUT: $subscriptionName: $postData")
     res <- subscriptionCancel(SubscriptionName(subscriptionName), postData)
       .provide(
@@ -172,9 +171,8 @@ object SubscriptionCancelEndpoint {
   private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
     now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
 
-  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): ZIO[
+  private[productmove] def subscriptionCancel(subscriptionName: SubscriptionName, postData: ExpectedInput): RIO[
     GetSubscriptionToCancel with ZuoraCancel with GetAccount with SQS with Stage with ZuoraSetCancellationReason,
-    ErrorResponse,
     OutputBody,
   ] = {
     (for {
@@ -258,4 +256,5 @@ object SubscriptionCancelEndpoint {
       _ => Success(s"Subscription ${subscriptionName.value} was successfully cancelled"),
     )
   }
+
 }

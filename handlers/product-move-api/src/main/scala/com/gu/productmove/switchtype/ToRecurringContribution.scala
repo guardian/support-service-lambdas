@@ -10,7 +10,8 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.{
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import zio.Task
+import zio.RIO
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
@@ -37,9 +38,8 @@ object ToRecurringContribution {
   def apply(
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
-  ): ZIO[
+  ): RIO[
     GetSubscription with SubscriptionUpdate with GetAccount with SQS with Stage,
-    ErrorResponse,
     OutputBody,
   ] = {
     (for {

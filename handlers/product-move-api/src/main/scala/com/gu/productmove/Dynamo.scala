@@ -29,7 +29,7 @@ object DynamoLive {
       case Stage.PROD => PROD
   }
 
-  val layer: ZLayer[Stage, ErrorResponse, Dynamo] =
+  val layer: RLayer[Stage, Dynamo] =
     ZLayer.scoped {
       ZIO.service[Stage].map { stage =>
         val dynamoService = SupporterDataDynamoService(getStage(stage))

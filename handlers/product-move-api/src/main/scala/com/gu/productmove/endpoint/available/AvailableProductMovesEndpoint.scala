@@ -5,7 +5,7 @@ import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.*
 import com.gu.productmove.endpoint.available.Currency.GBP
-import com.gu.productmove.framework.ZIOApiGatewayRequestHandler.TIO
+import zio.Task
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.*
@@ -40,7 +40,7 @@ object AvailableProductMovesEndpoint {
     Unit,
     OutputBody,
     Any,
-    ZIOApiGatewayRequestHandler.TIO,
+    Task,
   ] = {
     val subscriptionNameCapture: EndpointInput.PathCapture[String] =
       EndpointInput.PathCapture[String](
@@ -74,14 +74,13 @@ object AvailableProductMovesEndpoint {
       .description("""Returns an array of eligible products that the given subscription could be moved to,
           |which will be empty if there aren't any for the given subscription.
           |""".stripMargin)
-      .serverLogic[TIO] { subscriptionName =>
+      .serverLogic[Task] { subscriptionName =>
         run(subscriptionName).tapEither(result => ZIO.log("result tapped: " + result)).map(Right.apply)
       }
   }
 
-  // sub to test on: "A-S00334930"
-  private def run(subscriptionName: String): TIO[OutputBody] =
-    runWithEnvironment(SubscriptionName("A-S00334930")).provide(
+  private def run(subscriptionName: String): Task[OutputBody] =
+    runWithEnvironment(SubscriptionName(subscriptionName)).provide(
       AwsS3Live.layer,
       AwsCredentialsLive.layer,
       SttpClientLive.layer,
@@ -131,7 +130,7 @@ object AvailableProductMovesEndpoint {
     }
 
   extension [R, E, A](zio: ZIO[R, E, A])
-    def mapErrorTo500(message: String) = zio.catchAll { error =>
+    private def mapErrorTo500(message: String) = zio.catchAll { error =>
       ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
     }
 
