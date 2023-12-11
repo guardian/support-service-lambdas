@@ -64,7 +64,7 @@ export class DiscountApi extends GuStack {
 			},
 		});
 
-		lambda.api.addUsagePlan('UsagePlan', {
+		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
 			description: 'REST endpoints for discount api',
 			apiStages: [
@@ -74,6 +74,15 @@ export class DiscountApi extends GuStack {
 				},
 			],
 		});
+
+		// create api key
+		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`);
+
+		// associate api key to plan
+		usagePlan.addApiKey(apiKey);
+
+		// associate stage with plan
+		usagePlan.addApiStage({ stage: lambda.api.deploymentStage });
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [

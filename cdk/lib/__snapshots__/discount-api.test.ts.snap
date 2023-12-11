@@ -792,6 +792,15 @@ exports[`The Discount api stack matches the snapshot 1`] = `
             },
             "Throttle": {},
           },
+          {
+            "ApiId": {
+              "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+            },
+            "Stage": {
+              "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+            },
+            "Throttle": {},
+          },
         ],
         "Description": "REST endpoints for discount api",
         "Tags": [
@@ -819,6 +828,56 @@ exports[`The Discount api stack matches the snapshot 1`] = `
         "UsagePlanName": "discount-api-CODE",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "discountapilambdadiscountapiCODEUsagePlanUsagePlanKeyResourcediscountapiCODEdiscountapilambdadiscountapiCODEdiscountapikeyCODE79A377D3268125D6": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "discountapilambdadiscountapiCODEdiscountapikeyCODED9ED34AC",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "discountapilambdadiscountapiCODEUsagePlanA450E53C",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "discountapilambdadiscountapiCODEdiscountapikeyCODED9ED34AC": {
+      "Properties": {
+        "Enabled": true,
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+            },
+            "StageName": {
+              "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
     },
     "discountapilambdadiscountapiCODEproxyANY3023C5CD": {
       "Properties": {
@@ -1750,6 +1809,15 @@ exports[`The Discount api stack matches the snapshot 2`] = `
             },
             "Throttle": {},
           },
+          {
+            "ApiId": {
+              "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+            },
+            "Stage": {
+              "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+            },
+            "Throttle": {},
+          },
         ],
         "Description": "REST endpoints for discount api",
         "Tags": [
@@ -1777,6 +1845,56 @@ exports[`The Discount api stack matches the snapshot 2`] = `
         "UsagePlanName": "discount-api-PROD",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "discountapilambdadiscountapiPRODUsagePlanUsagePlanKeyResourcediscountapiPRODdiscountapilambdadiscountapiPRODdiscountapikeyPRODAC63086E69120D8D": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "discountapilambdadiscountapiPRODdiscountapikeyPROD0198BD73",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "discountapilambdadiscountapiPRODUsagePlan2FAE5187",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "discountapilambdadiscountapiPRODdiscountapikeyPROD0198BD73": {
+      "Properties": {
+        "Enabled": true,
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+            },
+            "StageName": {
+              "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
     },
     "discountapilambdadiscountapiPRODproxy2CE9F043": {
       "Properties": {
