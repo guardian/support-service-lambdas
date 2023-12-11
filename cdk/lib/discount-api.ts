@@ -4,7 +4,11 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ApiKeySourceType,
+	CfnBasePathMapping,
+	CfnDomainName,
+} from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -53,7 +57,22 @@ export class DiscountApi extends GuStack {
 				restApiName: nameWithStage,
 				description: 'API Gateway created by CDK',
 				proxy: true,
+				apiKeySourceType: ApiKeySourceType.HEADER,
+				defaultMethodOptions: {
+					apiKeyRequired: true,
+				},
 			},
+		});
+
+		lambda.api.addUsagePlan('UsagePlan', {
+			name: nameWithStage,
+			description: 'REST endpoints for discount api',
+			apiStages: [
+				{
+					stage: lambda.api.deploymentStage,
+					api: lambda.api,
+				},
+			],
 		});
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {

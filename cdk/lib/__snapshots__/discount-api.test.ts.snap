@@ -508,6 +508,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
     },
     "discountapilambdadiscountapiCODEANY827A81C0": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -698,7 +699,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiCODEDeployment15948B74bff2426dd072e8f5564d12faf68040ca": {
+    "discountapilambdadiscountapiCODEDeployment15948B741b868ab49ec282f04008c03e43e51ea1": {
       "DependsOn": [
         "discountapilambdadiscountapiCODEproxyANY3023C5CD",
         "discountapilambdadiscountapiCODEproxyDA26EBF1",
@@ -718,7 +719,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiCODEDeployment15948B74bff2426dd072e8f5564d12faf68040ca",
+          "Ref": "discountapilambdadiscountapiCODEDeployment15948B741b868ab49ec282f04008c03e43e51ea1",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiCODEE1E5C869",
@@ -751,6 +752,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
     },
     "discountapilambdadiscountapiCODEE1E5C869": {
       "Properties": {
+        "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
         "Name": "discount-api-CODE",
         "Tags": [
@@ -778,8 +780,49 @@ exports[`The Discount api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
+    "discountapilambdadiscountapiCODEUsagePlanA450E53C": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+            },
+            "Stage": {
+              "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for discount api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "discount-api-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
     "discountapilambdadiscountapiCODEproxyANY3023C5CD": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -1423,6 +1466,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
     },
     "discountapilambdadiscountapiPROD4E9716BA": {
       "Properties": {
+        "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
         "Name": "discount-api-PROD",
         "Tags": [
@@ -1452,6 +1496,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
     },
     "discountapilambdadiscountapiPRODANY1101E911": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -1642,7 +1687,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiPRODDeploymentF304491Bee186d2237d7da338814bd1fd4fb824e": {
+    "discountapilambdadiscountapiPRODDeploymentF304491Bf7c4b8003729caa5febbf7e71a1bc84f": {
       "DependsOn": [
         "discountapilambdadiscountapiPRODproxyANY177F9076",
         "discountapilambdadiscountapiPRODproxy2CE9F043",
@@ -1662,7 +1707,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bee186d2237d7da338814bd1fd4fb824e",
+          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bf7c4b8003729caa5febbf7e71a1bc84f",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiPROD4E9716BA",
@@ -1693,6 +1738,46 @@ exports[`The Discount api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
+    "discountapilambdadiscountapiPRODUsagePlan2FAE5187": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+            },
+            "Stage": {
+              "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for discount api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "discount-api-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
     "discountapilambdadiscountapiPRODproxy2CE9F043": {
       "Properties": {
         "ParentId": {
@@ -1710,6 +1795,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
     },
     "discountapilambdadiscountapiPRODproxyANY177F9076": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
