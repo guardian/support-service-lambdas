@@ -534,7 +534,7 @@ object RecurringContributionToSupporterPlus {
       balanceToAdjust: BigDecimal,
   ): ZIO[InvoiceItemAdjustment with GetInvoiceItems, ErrorResponse, Unit] =
     for {
-      _ <- ZIO.log(s" Attempting to adjust invoice $invoiceId")
+      _ <- ZIO.log(s"Attempting to adjust invoice $invoiceId")
       invoiceResponse <- GetInvoiceItems.get(invoiceId)
       invoiceItems = invoiceResponse.invoiceItems
       invoiceItem <- ZIO
