@@ -76,13 +76,12 @@ export class DiscountApi extends GuStack {
 		});
 
 		// create api key
-		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`);
+		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
+			apiKeyName: `${app}-key-${this.stage}`,
+		});
 
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
-
-		// associate stage with plan
-		usagePlan.addApiStage({ stage: lambda.api.deploymentStage });
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [

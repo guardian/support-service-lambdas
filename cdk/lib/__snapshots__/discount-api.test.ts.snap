@@ -792,15 +792,6 @@ exports[`The Discount api stack matches the snapshot 1`] = `
             },
             "Throttle": {},
           },
-          {
-            "ApiId": {
-              "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-            },
-            "Stage": {
-              "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
-            },
-            "Throttle": {},
-          },
         ],
         "Description": "REST endpoints for discount api",
         "Tags": [
@@ -844,6 +835,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
     "discountapilambdadiscountapiCODEdiscountapikeyCODED9ED34AC": {
       "Properties": {
         "Enabled": true,
+        "Name": "discount-api-key-CODE",
         "StageKeys": [
           {
             "RestApiId": {
@@ -1809,15 +1801,6 @@ exports[`The Discount api stack matches the snapshot 2`] = `
             },
             "Throttle": {},
           },
-          {
-            "ApiId": {
-              "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-            },
-            "Stage": {
-              "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
-            },
-            "Throttle": {},
-          },
         ],
         "Description": "REST endpoints for discount api",
         "Tags": [
@@ -1861,6 +1844,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
     "discountapilambdadiscountapiPRODdiscountapikeyPROD0198BD73": {
       "Properties": {
         "Enabled": true,
+        "Name": "discount-api-key-PROD",
         "StageKeys": [
           {
             "RestApiId": {
