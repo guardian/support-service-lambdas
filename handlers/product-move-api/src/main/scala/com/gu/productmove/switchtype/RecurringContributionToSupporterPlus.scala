@@ -266,8 +266,10 @@ object RecurringContributionToSupporterPlus {
         charge of 50 cents. Instead we write-off the invoices in the `adjustNonCollectedInvoices` function.
        */
       paidAmount <-
-        // not clear why we would want to create a negative payment, but this logic was already in place
-        if (invoiceBalance < 0 || invoiceBalance >= 0.5) {
+        if (invoiceBalance == 0) {
+          ZIO.succeed(BigDecimal(0))
+        } else if (invoiceBalance < 0 || invoiceBalance >= 0.5) {
+          // not clear why we would want to create a negative payment, but this logic was already in place
           import account._
           CreatePayment
             .create(
