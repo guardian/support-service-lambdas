@@ -40,6 +40,7 @@ export const checkEligibilityEndpoint = async (
 		await discountApplicator.checkEligibility(applyDiscountBody);
 	} catch (error) {
 		if (error instanceof ValidationError) {
+			console.log(`Validation failure: ${error.message}`);
 			return checkEligibilityResponse(false);
 		} else {
 			throw error;
