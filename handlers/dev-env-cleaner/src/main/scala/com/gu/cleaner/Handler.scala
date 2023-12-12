@@ -173,7 +173,7 @@ class Steps(log: String => Unit) {
         .sequence
       _ <- queryResults(accounts_to_cancel).map { 
         case id :: creditBalance :: Nil => 
-        creditBalance.toInt match {
+        creditBalance.toDouble match {
           case 0 => cancelAccount.run(id)
           case _ => removeAccountCrm.run(id) //can't cancel an account with a credit balance, so just remove the CRMId
         } 
