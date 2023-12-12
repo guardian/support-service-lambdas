@@ -106,7 +106,7 @@ export class EligibilityChecker {
 			(item) => item.chargeAmount + item.taxAmount,
 		);
 
-		if (nextInvoiceTotal <= totalPrice) {
+		if (nextInvoiceTotal < totalPrice) {
 			throw new ValidationError(
 				`Amount payable for next invoice (${nextInvoiceTotal} ${currency}) is less than the current 
 				catalog price of the subscription (${totalPrice} ${currency}), so it is not eligible for a discount`,
