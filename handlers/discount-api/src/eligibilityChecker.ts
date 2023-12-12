@@ -7,6 +7,7 @@ import { ValidationError } from './errors';
 import { checkDefined } from './nullAndUndefined';
 import { ProductToDiscountMapping } from './productToDiscountMapping';
 import { getBillingPreview, getNextInvoiceItems } from './zuora/billingPreview';
+import { getSubscription } from './zuora/getSubscription';
 import type { ZuoraClient } from './zuora/zuoraClient';
 import { createZuoraClient } from './zuora/zuoraClient';
 import type { RatePlan, ZuoraSubscription } from './zuora/zuoraSchemas';
@@ -24,10 +25,17 @@ export class EligibilityChecker {
 	) {}
 
 	getNextBillingDateIfEligible = async (
-		subscription: ZuoraSubscription,
+		subscriptionNumber: string,
 		discountProductRatePlanId: string,
 	) => {
-		// Check that subscription is eligible for the discount
+		console.log('Getting the subscription details from Zuora');
+		const subscription = await getSubscription(
+			this.zuoraClient,
+			subscriptionNumber,
+		);
+
+		console.log('Checking this subscription is eligible for the discount');
+
 		if (subscription.status !== 'Active') {
 			throw new ValidationError(
 				`Subscription ${subscription.subscriptionNumber} has status ${subscription.status}`,
@@ -38,11 +46,16 @@ export class EligibilityChecker {
 			discountProductRatePlanId,
 		);
 
-		// Check that the next payment is at least at the catalog price
-		return await this.checkNextPaymentIsAtCatalogPrice(
+		console.log(
+			'Checking that the next payment is at least at the catalog price',
+		);
+		const nextBillingDate = await this.checkNextPaymentIsAtCatalogPrice(
 			subscription.accountNumber,
 			eligibleRatePlan,
 		);
+
+		console.log('Subscription is eligible for the discount');
+		return nextBillingDate;
 	};
 
 	private getEligibleRatePlanFromSubscription = (

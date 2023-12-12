@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
-export const eligibilityCheckSchema = z.object({
+export const previewDiscountSchema = z.object({
 	valid: z.boolean(),
+	discountedPrice: z.number().optional(),
 });
 
 export type EligibilityCheckResponseBody = z.infer<
-	typeof eligibilityCheckSchema
+	typeof previewDiscountSchema
 >;

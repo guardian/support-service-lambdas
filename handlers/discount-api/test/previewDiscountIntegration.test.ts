@@ -3,9 +3,9 @@
  */
 import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/stage';
-import { checkEligibilityEndpoint } from '../src/endpoints/applyDiscountEndpoint';
+import { previewDiscountEndpoint } from '../src/endpoints/previewDiscountEndpoint';
 import { checkDefined } from '../src/nullAndUndefined';
-import { eligibilityCheckSchema } from '../src/responseSchema';
+import { previewDiscountSchema } from '../src/responseSchema';
 import { cancelSubscription } from '../src/zuora/cancelSubscription';
 import { createZuoraClient } from '../src/zuora/zuoraClient';
 import { createDigitalSubscription } from './helpers';
@@ -17,7 +17,7 @@ test('checkEligibility', async () => {
 		discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 	};
 
-	const result = await checkEligibilityEndpoint(
+	const result = await previewDiscountEndpoint(
 		'CODE',
 		JSON.stringify(requestBody),
 	);
@@ -41,11 +41,11 @@ test('Subscriptions on the old price are not eligible', async () => {
 		discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 	};
 
-	const result = await checkEligibilityEndpoint(
+	const result = await previewDiscountEndpoint(
 		stage,
 		JSON.stringify(requestBody),
 	);
-	const eligibilityCheckResult = eligibilityCheckSchema.parse(
+	const eligibilityCheckResult = previewDiscountSchema.parse(
 		JSON.parse(result.body),
 	);
 	expect(eligibilityCheckResult.valid).toEqual(false);
@@ -75,14 +75,15 @@ test('Subscriptions on the new price are eligible', async () => {
 		discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 	};
 
-	const result = await checkEligibilityEndpoint(
+	const result = await previewDiscountEndpoint(
 		stage,
 		JSON.stringify(requestBody),
 	);
-	const eligibilityCheckResult = eligibilityCheckSchema.parse(
+	const eligibilityCheckResult = previewDiscountSchema.parse(
 		JSON.parse(result.body),
 	);
-	expect(eligibilityCheckResult.valid).toEqual(false);
+	expect(eligibilityCheckResult.valid).toEqual(true);
+	expect(eligibilityCheckResult.discountedPrice).toEqual(11.24);
 
 	console.log('Cancelling the subscription');
 	const cancellationResult = await cancelSubscription(

@@ -5,10 +5,10 @@ import { zuoraSuccessResponseSchema } from './zuoraSchemas';
 
 export const cancelSubscription = async (
 	zuoraClient: ZuoraClient,
-	subscriptionId: string,
+	subscriptionNumber: string,
 	contractEffectiveDate: Dayjs,
 ) => {
-	const path = `/v1/subscriptions/${subscriptionId}/cancel`;
+	const path = `/v1/subscriptions/${subscriptionNumber}/cancel`;
 	const body = JSON.stringify({
 		cancellationEffectiveDate: zuoraDateFormat(contractEffectiveDate),
 		cancellationPolicy: 'SpecificDate',

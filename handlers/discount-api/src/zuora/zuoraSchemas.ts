@@ -86,23 +86,34 @@ export const billingPreviewSchema = z.object({
 	accountId: z.string(),
 	invoiceItems: z.array(
 		z.object({
-			id: z.string(),
-			subscriptionId: z.string(),
-			subscriptionNumber: z.string(),
+			id: z.optional(z.string()),
 			serviceStartDate: z.coerce.date(),
 			serviceEndDate: z.coerce.date(),
 			chargeAmount: z.number(),
 			chargeName: z.string(),
-			chargeNumber: z.string(),
-			chargeId: z.string(),
-			productName: z.string(),
-			quantity: z.number(),
 			taxAmount: z.number(),
-			chargeType: z.string(),
-			processingType: z.string(),
 		}),
 	),
 });
 
 export type BillingPreview = z.infer<typeof billingPreviewSchema>;
 export type InvoiceItem = BillingPreview['invoiceItems'][number];
+
+export const addDiscountPreviewSchema = z.object({
+	success: z.boolean(),
+	invoiceItems: z.array(
+		// This looks the same as the invoice items object in billingPreviewSchema, but the call returns
+		// fewer fields, so I'm defining it separately in case someone wants to add the missing fields to
+		// the other object later.
+		z.object({
+			id: z.optional(z.string()),
+			serviceStartDate: z.coerce.date(),
+			serviceEndDate: z.coerce.date(),
+			chargeAmount: z.number(),
+			chargeName: z.string(),
+			taxAmount: z.number(),
+		}),
+	),
+});
+
+export type AddDiscountPreview = z.infer<typeof addDiscountPreviewSchema>;

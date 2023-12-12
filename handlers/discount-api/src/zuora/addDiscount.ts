@@ -1,15 +1,18 @@
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from './common';
 import type { ZuoraClient } from './zuoraClient';
-import { zuoraSuccessResponseSchema } from './zuoraSchemas';
+import {
+	addDiscountPreviewSchema,
+	zuoraSuccessResponseSchema,
+} from './zuoraSchemas';
 
 export const addDiscount = async (
 	zuoraClient: ZuoraClient,
-	subscriptionId: string,
+	subscriptionNumber: string,
 	contractEffectiveDate: Dayjs,
 	discountProductRatePlanId: string,
 ) => {
-	const path = `/v1/subscriptions/${subscriptionId}`;
+	const path = `/v1/subscriptions/${subscriptionNumber}`;
 	const body = JSON.stringify({
 		add: [
 			{
@@ -19,4 +22,24 @@ export const addDiscount = async (
 		],
 	});
 	return zuoraClient.put(path, body, zuoraSuccessResponseSchema);
+};
+
+export const previewDiscount = async (
+	zuoraClient: ZuoraClient,
+	subscriptionNumber: string,
+	contractEffectiveDate: Dayjs,
+	discountProductRatePlanId: string,
+) => {
+	const path = `/v1/subscriptions/${subscriptionNumber}`;
+	const body = JSON.stringify({
+		add: [
+			{
+				contractEffectiveDate: zuoraDateFormat(contractEffectiveDate),
+				productRatePlanId: discountProductRatePlanId,
+			},
+		],
+		preview: 'true',
+		invoiceTargetDate: zuoraDateFormat(contractEffectiveDate),
+	});
+	return zuoraClient.put(path, body, addDiscountPreviewSchema);
 };
