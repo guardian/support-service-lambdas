@@ -266,7 +266,7 @@ object RemoveAccountCrm {
   case class RemoveAccountCrmRequest(
       CrmId: String = "",
   )
-  implicit val writes = Json.writes[CancelAccountRequest]
+  implicit val writes = Json.writes[RemoveAccountCrmRequest]
 
 }
 case class RemoveAccountCrm(log: String => Unit, restRequestMaker: RestRequestMaker.Requests) {
