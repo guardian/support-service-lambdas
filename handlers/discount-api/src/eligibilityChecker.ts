@@ -28,6 +28,11 @@ export class EligibilityChecker {
 		discountProductRatePlanId: string,
 	) => {
 		// Check that subscription is eligible for the discount
+		if (subscription.status !== 'Active') {
+			throw new ValidationError(
+				`Subscription ${subscription.subscriptionNumber} has status ${subscription.status}`,
+			);
+		}
 		const eligibleRatePlan = this.getEligibleRatePlanFromSubscription(
 			subscription,
 			discountProductRatePlanId,

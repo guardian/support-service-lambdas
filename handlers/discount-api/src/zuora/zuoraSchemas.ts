@@ -20,6 +20,7 @@ export const zuoraSubscriptionSchema = z.object({
 	id: z.string(),
 	accountNumber: z.string(),
 	subscriptionNumber: z.string(),
+	status: z.string(),
 	contractEffectiveDate: z.coerce.date(),
 	serviceActivationDate: z.coerce.date(),
 	customerAcceptanceDate: z.coerce.date(),
