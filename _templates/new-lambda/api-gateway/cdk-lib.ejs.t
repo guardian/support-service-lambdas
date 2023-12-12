@@ -59,6 +59,9 @@ export class <%= PascalCase %> extends GuStack {
 				id: nameWithStage,
 				restApiName: nameWithStage,
 				description: 'API Gateway created by CDK',
+				deployOptions: {
+					stageName: this.stage,
+				},
 			},
 		});
 

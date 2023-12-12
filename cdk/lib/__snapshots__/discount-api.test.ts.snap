@@ -31,7 +31,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
             },
             "/",
             {
-              "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+              "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
             },
             "/",
           ],
@@ -168,7 +168,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
           "Ref": "discountapilambdadiscountapiCODEE1E5C869",
         },
         "Stage": {
-          "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+          "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -619,7 +619,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
               },
               "/",
               {
-                "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+                "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
               },
               "/*/",
             ],
@@ -713,7 +713,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Deployment",
     },
-    "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA": {
+    "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9": {
       "DependsOn": [
         "discountapilambdadiscountapiCODEAccountA5347E04",
       ],
@@ -724,7 +724,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiCODEE1E5C869",
         },
-        "StageName": "prod",
+        "StageName": "CODE",
         "Tags": [
           {
             "Key": "App",
@@ -788,7 +788,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
               "Ref": "discountapilambdadiscountapiCODEE1E5C869",
             },
             "Stage": {
-              "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+              "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
             },
             "Throttle": {},
           },
@@ -842,7 +842,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
               "Ref": "discountapilambdadiscountapiCODEE1E5C869",
             },
             "StageName": {
-              "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+              "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
             },
           },
         ],
@@ -981,7 +981,7 @@ exports[`The Discount api stack matches the snapshot 1`] = `
               },
               "/",
               {
-                "Ref": "discountapilambdadiscountapiCODEDeploymentStageprodB9767CEA",
+                "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
               },
               "/*/*",
             ],
@@ -1040,7 +1040,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
             },
             "/",
             {
-              "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+              "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
             },
             "/",
           ],
@@ -1177,7 +1177,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
           "Ref": "discountapilambdadiscountapiPROD4E9716BA",
         },
         "Stage": {
-          "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+          "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -1658,7 +1658,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
               },
               "/",
               {
-                "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+                "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
               },
               "/*/",
             ],
@@ -1752,7 +1752,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Deployment",
     },
-    "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA": {
+    "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6": {
       "DependsOn": [
         "discountapilambdadiscountapiPRODAccount4DA1D227",
       ],
@@ -1763,7 +1763,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiPROD4E9716BA",
         },
-        "StageName": "prod",
+        "StageName": "PROD",
         "Tags": [
           {
             "Key": "App",
@@ -1797,7 +1797,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
               "Ref": "discountapilambdadiscountapiPROD4E9716BA",
             },
             "Stage": {
-              "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+              "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
             },
             "Throttle": {},
           },
@@ -1851,7 +1851,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
               "Ref": "discountapilambdadiscountapiPROD4E9716BA",
             },
             "StageName": {
-              "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+              "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
             },
           },
         ],
@@ -2005,7 +2005,7 @@ exports[`The Discount api stack matches the snapshot 2`] = `
               },
               "/",
               {
-                "Ref": "discountapilambdadiscountapiPRODDeploymentStageprodD31183FA",
+                "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
               },
               "/*/*",
             ],
