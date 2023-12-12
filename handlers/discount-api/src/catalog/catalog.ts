@@ -41,7 +41,7 @@ export class ZuoraCatalog {
 			?.productRatePlans;
 	};
 
-	public getCatalogPriceForCurrency = (
+	public getCatalogPriceOfCharges = (
 		productRatePlanId: string,
 		currency: string,
 	) => {
