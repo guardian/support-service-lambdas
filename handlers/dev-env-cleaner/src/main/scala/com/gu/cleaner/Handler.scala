@@ -8,6 +8,7 @@ import com.amazonaws.services.lambda.runtime._
 import com.gu.aws.AwsCloudWatch
 import com.gu.aws.AwsCloudWatch._
 import com.gu.cleaner.CancelAccount.CancelAccountRequest
+import com.gu.cleaner.RemoveAccountCrm.RemoveAccountCrmRequest
 import com.gu.cleaner.CancelSub._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -80,6 +81,7 @@ object Handler extends RequestStreamHandler {
       requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       cancelSub = CancelSub(log, requests)
       cancelAccount = CancelAccount(log, requests)
+      removeAccountCrm = RemoveAccountCrm(log, requests)
       downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
       aquaQuerier = Querier.lowLevel(downloadRequests) _
       getJobResult = GetJobResult(downloadRequests.get[AquaJobResponse]) _
@@ -89,6 +91,7 @@ object Handler extends RequestStreamHandler {
         downloadRequests,
         cancelSub,
         cancelAccount,
+        removeAccountCrm,
         () => RawEffects.now().toLocalDate,
       )
     } yield ()
@@ -128,6 +131,7 @@ class Steps(log: String => Unit) {
       downloadRequests: RestRequestMaker.Requests,
       cancelSub: CancelSub,
       cancelAccount: CancelAccount,
+      removeAccountCrm: RemoveAccountCrm,
       today: () => LocalDate,
   ): Either[Throwable, Unit] = {
     val subs_to_cancel = "subs_to_cancel"
@@ -141,7 +145,7 @@ class Steps(log: String => Unit) {
     val accounts_to_cancel = "accounts_to_cancel"
     val accountsQuery = AquaQuery(
       accounts_to_cancel,
-      """select Id
+      """select Id, CreditBalance
         |from Account
         |where (billtocontact.WorkEmail LIKE '%@thegulocal.com' OR (billtocontact.WorkEmail LIKE 'test%' AND billtocontact.WorkEmail LIKE '@theguardian.com')) and Status = 'Active'
         |""".stripMargin,
@@ -167,7 +171,13 @@ class Steps(log: String => Unit) {
         .map { case id :: termEndDate :: Nil => cancelSub.run(id, dateToCancel(LocalDate.parse(termEndDate), today())) }
         .toList
         .sequence
-      _ <- queryResults(accounts_to_cancel).map { case id :: Nil => cancelAccount.run(id) }.toList.sequence
+      _ <- queryResults(accounts_to_cancel).map { 
+        case id :: creditBalance :: Nil => 
+        creditBalance match {
+          case 0 => cancelAccount.run(id)
+          case _ => removeAccountCrm.run(id) //can't cancel an account with a credit balance, so just remove the CRMId
+        } 
+      }.toList.sequence
     } yield ()
     zRes.toDisjunction.leftMap(failure =>
       new RuntimeException(s"one of the preceding requests has failed: ${failure.toString}"),
@@ -248,6 +258,21 @@ case class CancelAccount(log: String => Unit, restRequestMaker: RestRequestMaker
   def run(accountId: String): ClientFailableOp[Unit] = {
     println(s"CANCEL ACC: $accountId")
     restRequestMaker.put[CancelAccountRequest, Unit](CancelAccountRequest(), s"object/account/$accountId")
+  }
+
+}
+
+object RemoveAccountCrm {
+  case class RemoveAccountCrmRequest(
+      CrmId: String = "",
+  )
+  implicit val writes = Json.writes[CancelAccountRequest]
+
+}
+case class RemoveAccountCrm(log: String => Unit, restRequestMaker: RestRequestMaker.Requests) {
+  def run(accountId: String): ClientFailableOp[Unit] = {
+    println(s"UNLINK ACC: $accountId")
+    restRequestMaker.put[RemoveAccountCrmRequest, Unit](RemoveAccountCrmRequest(), s"object/account/$accountId")
   }
 
 }
