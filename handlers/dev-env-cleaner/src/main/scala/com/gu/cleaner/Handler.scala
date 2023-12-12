@@ -143,7 +143,7 @@ class Steps(log: String => Unit) {
       accounts_to_cancel,
       """select Id
         |from Account
-        |where where (billtocontact.WorkEmail LIKE '%@thegulocal.com' OR (billtocontact.WorkEmail LIKE 'test%' AND billtocontact.WorkEmail LIKE '@theguardian.com')) and Status = 'Active'
+        |where (billtocontact.WorkEmail LIKE '%@thegulocal.com' OR (billtocontact.WorkEmail LIKE 'test%' AND billtocontact.WorkEmail LIKE '@theguardian.com')) and Status = 'Active'
         |""".stripMargin,
     )
     val request = AquaQueryRequest(
