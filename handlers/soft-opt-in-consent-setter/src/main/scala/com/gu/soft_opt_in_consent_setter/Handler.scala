@@ -187,13 +187,29 @@ object Handler extends LazyLogging {
       consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
-      if (consents.nonEmpty)
+      // This function was used to send requests to the Identity API to turn some consents off (to false)
+      // as part of processing a cancellation event. It originally used the consentsCalculator to determined which
+      // consent to turn off during a request to update the identity set of consents. The original code is
+      // commented out below.
+
+      /*
+      if (consents.nonEmpty) {
         sendConsentsReq(
           identityId,
           consentsCalculator.buildConsentsBody(consents, state = false),
         )
-      else
+      } else {
         Right(())
+      }
+       */
+
+      // In Dec 2023, following legal advise we decided to no longer execute that function and not turn the consent
+      // off (we now have another mechanism to turn the consent off at a later date). Consequently we just
+      // return the Unit.
+
+      // These comments and the function itself and its call can be removed later.
+
+      Right(())
     }
 
     Metrics.put(event = "cancellations_to_process", cancelledSubs.size)
