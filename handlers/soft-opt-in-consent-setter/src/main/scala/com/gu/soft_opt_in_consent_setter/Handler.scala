@@ -203,9 +203,8 @@ object Handler extends LazyLogging {
       }
        */
 
-      // In Dec 2023, following legal advise we decided to no longer execute that function and not turn the consent
-      // off (we now have another mechanism to turn the consent off at a later date). Consequently we just
-      // return the Unit.
+      // We stopped doing this in December 2023 because we migrated to use a more universal
+      // mechanism that also handles switching off Single Contributions.
 
       // These comments and the function itself and its call can be removed later.
 
