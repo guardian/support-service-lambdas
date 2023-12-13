@@ -4,7 +4,11 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ApiKeySourceType,
+	CfnBasePathMapping,
+	CfnDomainName,
+} from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -32,7 +36,7 @@ export class DiscountApi extends GuStack {
 		};
 
 		// ---- API-triggered lambda functions ---- //
-		const discountApiLambda = new GuApiLambda(this, 'discount-api-lambda', {
+		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
 				'A lambda that enables the addition of discounts to existing subscriptions',
 			functionName: nameWithStage,
@@ -47,13 +51,73 @@ export class DiscountApi extends GuStack {
 				http5xxAlarm: { tolerated5xxPercentage: 5 },
 				snsTopicName: 'retention-dev',
 			},
-			app: 'discount-api',
+			app: app,
 			api: {
 				id: nameWithStage,
 				restApiName: nameWithStage,
 				description: 'API Gateway created by CDK',
+				proxy: true,
+				deployOptions: {
+					stageName: this.stage,
+				},
+				apiKeySourceType: ApiKeySourceType.HEADER,
+				defaultMethodOptions: {
+					apiKeyRequired: true,
+				},
 			},
 		});
+
+		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
+			name: nameWithStage,
+			description: 'REST endpoints for discount api',
+			apiStages: [
+				{
+					stage: lambda.api.deploymentStage,
+					api: lambda.api,
+				},
+			],
+		});
+
+		// create api key
+		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
+			apiKeyName: `${app}-key-${this.stage}`,
+		});
+
+		// associate api key to plan
+		usagePlan.addApiKey(apiKey);
+
+		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['s3:GetObject'],
+					resources: [
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/*`,
+					],
+				}),
+			],
+		});
+
+		const secretsManagerPolicy: Policy = new Policy(
+			this,
+			'Secrets Manager policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas`,
+							`arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l`,
+						],
+					}),
+				],
+			},
+		);
+
+		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
@@ -66,7 +130,7 @@ export class DiscountApi extends GuStack {
 			app,
 			alarmName: alarmName('API gateway 4XX response'),
 			alarmDescription: alarmDescription(
-				'Discount API received an invalid request',
+				'Discount api received an invalid request',
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
@@ -96,8 +160,8 @@ export class DiscountApi extends GuStack {
 
 		new CfnBasePathMapping(this, 'BasePathMapping', {
 			domainName: cfnDomainName.ref,
-			restApiId: discountApiLambda.api.restApiId,
-			stage: discountApiLambda.api.deploymentStage.stageName,
+			restApiId: lambda.api.restApiId,
+			stage: lambda.api.deploymentStage.stageName,
 		});
 
 		new CfnRecordSet(this, 'DNSRecord', {
@@ -107,19 +171,5 @@ export class DiscountApi extends GuStack {
 			ttl: '120',
 			resourceRecords: [cfnDomainName.attrRegionalDomainName],
 		});
-
-		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['s3:GetObject'],
-					resources: [
-						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-					],
-				}),
-			],
-		});
-
-		discountApiLambda.role?.attachInlinePolicy(s3InlinePolicy);
 	}
 }

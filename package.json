@@ -5,20 +5,21 @@
 		"type-check": "pnpm --stream -r run type-check",
 		"lint": "pnpm --stream -r run lint",
 		"clean": "rm -rf .parcel-cache && pnpm -r run clean",
+		"test": "pnpm --stream -r run test",
+		"it-test": "pnpm --stream -r run it-test",
 		"new-lambda": "pnpm hygen new-lambda api-gateway && cd ./cdk && yarn lint --fix && yarn test -u && git add ./lib/__snapshots__/*.test.ts.snap"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "^7.0.0",
 		"@guardian/prettier": "^5.0.0",
-		"@types/aws-lambda": "^8.10.126",
+		"@types/jest": "^29.5.10",
 		"@types/node": "^20.9.0",
 		"esbuild": "^0.19.5",
 		"eslint": "^8.53.0",
 		"hygen": "^6.2.11",
+		"jest": "^29.7.0",
 		"prettier": "^3.1.0",
+		"ts-jest": "^29.1.1",
 		"typescript": "^5.2.2"
-	},
-	"dependencies": {
-		"@aws-sdk/client-lambda": "^3.451.0"
 	}
 }
