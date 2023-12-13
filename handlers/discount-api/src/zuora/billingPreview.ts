@@ -35,10 +35,8 @@ export const getNextInvoiceItems = (
 	const groupedInvoiceItems = groupBy(billingPreview.invoiceItems, (item) =>
 		item.serviceStartDate.toISOString(),
 	);
-	const nextInvoiceItems = checkDefined(
+	return checkDefined(
 		groupedInvoiceItems[nextInvoiceDate],
 		'No invoice items found for next invoice date',
 	);
-
-	return [...nextInvoiceItems];
 };
