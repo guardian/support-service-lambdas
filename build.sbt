@@ -379,7 +379,7 @@ lazy val `new-product-api` = lambdaProject(
 )
   .settings(
     Test / unmanagedResourceDirectories += (Test / scalaSource).value,
-    Test / unmanagedResources / excludeFilter := "*.scala",
+    Test / unmanagedResources / excludeFilter := "*.scala"
   )
   .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
 
@@ -643,7 +643,7 @@ lazy val `delivery-records-api` = lambdaProject(
     circe,
     sttpAsyncHttpClientBackendCats,
     scalatest,
-    diffx,
+    diffx
   ),
 ).dependsOn(
   `effects-s3`,

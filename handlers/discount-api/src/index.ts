@@ -16,15 +16,17 @@ export const handler: Handler = async (
 	console.log(`Response is ${JSON.stringify(response)}`);
 	return response;
 };
-const routeRequest = (event: APIGatewayProxyEvent) => {
+const routeRequest = async (event: APIGatewayProxyEvent) => {
 	try {
 		const stage = stageFromEnvironment();
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
-				return applyDiscountEndpoint(stage, event.body);
+				console.log('Applying a discount');
+				return await applyDiscountEndpoint(stage, event.body);
 			}
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
-				return previewDiscountEndpoint(stage, event.body);
+				console.log('Previewing discount');
+				return await previewDiscountEndpoint(stage, event.body);
 			}
 			default:
 				return {
@@ -33,7 +35,7 @@ const routeRequest = (event: APIGatewayProxyEvent) => {
 				};
 		}
 	} catch (error) {
-		console.log(error);
+		console.log('Caught error in index.ts ', error);
 		if (error instanceof ValidationError) {
 			return {
 				body: error.message,
