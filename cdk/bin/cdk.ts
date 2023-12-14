@@ -82,14 +82,14 @@ new SingleContributionSalesforceWrites(
 	{ stack: 'membership', stage: 'PROD' },
 );
 new DiscountApi(app, 'discount-api-CODE', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'CODE',
 	domainName: `discount-api-code.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 });
 new DiscountApi(app, 'discount-api-PROD', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'PROD',
 	domainName: `discount-api.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
