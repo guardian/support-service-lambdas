@@ -3,7 +3,7 @@
  */
 import dayjs from 'dayjs';
 import type { Stage } from '../../../modules/stage';
-import { previewDiscountEndpoint } from '../src/endpoints/previewDiscountEndpoint';
+import { discountEndpoint } from '../src/endpoints/discountEndpoint';
 import { checkDefined } from '../src/nullAndUndefined';
 import { previewDiscountSchema } from '../src/responseSchema';
 import { cancelSubscription } from '../src/zuora/cancelSubscription';
@@ -11,18 +11,6 @@ import { ZuoraClient } from '../src/zuora/zuoraClient';
 import { createDigitalSubscription } from './helpers';
 
 const stage: Stage = 'CODE';
-test('checkEligibility', async () => {
-	const requestBody = {
-		subscriptionNumber: 'A-S00711320',
-	};
-
-	const result = await previewDiscountEndpoint(
-		stage,
-		JSON.stringify(requestBody),
-	);
-	expect(result.statusCode).toBe(200);
-	expect(result.body).toBe(JSON.stringify({ valid: false }));
-}, 30000);
 
 test('Subscriptions on the old price are not eligible', async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
@@ -37,16 +25,12 @@ test('Subscriptions on the old price are not eligible', async () => {
 
 	const requestBody = {
 		subscriptionNumber: subscriptionNumber,
+		preview: true,
 	};
 
-	const result = await previewDiscountEndpoint(
-		stage,
-		JSON.stringify(requestBody),
-	);
-	const eligibilityCheckResult = previewDiscountSchema.parse(
-		JSON.parse(result.body),
-	);
-	expect(eligibilityCheckResult.valid).toEqual(false);
+	await expect(async () => {
+		await discountEndpoint(stage, JSON.stringify(requestBody));
+	}).rejects.toThrow('it is not eligible for a discount');
 
 	console.log('Cancelling the subscription');
 	const cancellationResult = await cancelSubscription(
@@ -70,17 +54,15 @@ test('Subscriptions on the new price are eligible', async () => {
 
 	const requestBody = {
 		subscriptionNumber: subscriptionNumber,
+		preview: true,
 	};
 
-	const result = await previewDiscountEndpoint(
-		stage,
-		JSON.stringify(requestBody),
-	);
+	const result = await discountEndpoint(stage, JSON.stringify(requestBody));
 	const eligibilityCheckResult = previewDiscountSchema.parse(
 		JSON.parse(result.body),
 	);
-	expect(eligibilityCheckResult.valid).toEqual(true);
 	expect(eligibilityCheckResult.discountedPrice).toEqual(11.24);
+	expect(eligibilityCheckResult.upToPeriodsType).toEqual('Months');
 
 	console.log('Cancelling the subscription');
 	const cancellationResult = await cancelSubscription(

@@ -3,7 +3,7 @@ import type { Stage } from '../../../modules/stage';
 import { checkDefined } from './nullAndUndefined';
 import type { ZuoraSubscription } from './zuora/zuoraSchemas';
 
-export const getDiscountProductRatePlanIdFromSubscription = (
+export const getDiscountFromSubscription = (
 	stage: Stage,
 	subscription: ZuoraSubscription,
 ) => {
@@ -11,8 +11,7 @@ export const getDiscountProductRatePlanIdFromSubscription = (
 		subscription.ratePlans[0]?.ratePlanCharges[0]?.billingPeriod,
 		`No billing period found on subscription ${subscription.subscriptionNumber}`,
 	);
-	return ProductToDiscountMapping[stage][billingPeriod]
-		.discountProductRatePlanId;
+	return ProductToDiscountMapping[stage][billingPeriod];
 };
 
 export const getEligibleProductRatePlanIdsForDiscount = (
@@ -20,13 +19,15 @@ export const getEligibleProductRatePlanIdsForDiscount = (
 ) => {
 	return Object.values(ProductToDiscountMapping)
 		.flatMap((_) => Object.values(_))
-		.filter((_) => _.discountProductRatePlanId === discountProductRatePlanId)
+		.filter((_) => _.productRatePlanId === discountProductRatePlanId)
 		.flatMap((_) => _.eligibleProductRatePlanIds);
 };
 
-type Discount = {
-	discountProductRatePlanId: string;
+export type Discount = {
+	productRatePlanId: string;
 	name: string;
+	upToPeriods: number;
+	upToPeriodsType: string;
 	effectiveStartDate: string;
 	effectiveEndDate: string;
 	eligibleProductRatePlanIds: string[];
@@ -38,8 +39,10 @@ const ProductToDiscountMapping: {
 } = {
 	CODE: {
 		Month: {
-			discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
+			productRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
+			upToPeriods: 3,
+			upToPeriodsType: 'Months',
 			effectiveStartDate: '2018-04-01',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
@@ -48,8 +51,10 @@ const ProductToDiscountMapping: {
 			],
 		},
 		Quarter: {
-			discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
+			productRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
+			upToPeriods: 3,
+			upToPeriodsType: 'Months',
 			effectiveStartDate: '2018-04-01',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
@@ -58,8 +63,10 @@ const ProductToDiscountMapping: {
 			],
 		},
 		Annual: {
-			discountProductRatePlanId: '8ad08f068b5b9ca2018b5cadf0897ed3',
+			productRatePlanId: '8ad08f068b5b9ca2018b5cadf0897ed3',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
+			upToPeriods: 12,
+			upToPeriodsType: 'Months',
 			effectiveStartDate: '2023-10-23',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: ['2c92c0f94bbffaaa014bc6a4212e205b'],
@@ -67,8 +74,10 @@ const ProductToDiscountMapping: {
 	},
 	PROD: {
 		Month: {
-			discountProductRatePlanId: '2c92a0ff64176cd40164232c8ec97661',
+			productRatePlanId: '2c92a0ff64176cd40164232c8ec97661',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
+			upToPeriods: 3,
+			upToPeriodsType: 'Months',
 			effectiveStartDate: '2018-06-22',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
@@ -77,8 +86,10 @@ const ProductToDiscountMapping: {
 			],
 		},
 		Quarter: {
-			discountProductRatePlanId: '2c92a0ff64176cd40164232c8ec97661',
+			productRatePlanId: '2c92a0ff64176cd40164232c8ec97661',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
+			upToPeriods: 3,
+			upToPeriodsType: 'Months',
 			effectiveStartDate: '2018-06-22',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
@@ -87,8 +98,10 @@ const ProductToDiscountMapping: {
 			],
 		},
 		Annual: {
-			discountProductRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
+			productRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
+			upToPeriods: 12,
+			upToPeriodsType: 'Months',
 			effectiveStartDate: '2023-10-26',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: ['2c92a0fb4edd70c8014edeaa4e972204'],

@@ -18,8 +18,6 @@ export class EligibilityChecker {
 		billingPreview: BillingPreview,
 		discountProductRatePlanId: string,
 	) => {
-		console.log('Checking this subscription is eligible for the discount');
-
 		if (subscription.status !== 'Active') {
 			throw new ValidationError(
 				`Subscription ${subscription.subscriptionNumber} has status ${subscription.status}`,

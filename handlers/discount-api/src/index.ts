@@ -5,7 +5,7 @@ import type {
 } from 'aws-lambda';
 import type { Stage } from '../../../modules/stage';
 import { applyDiscountEndpoint } from './endpoints/applyDiscountEndpoint';
-import { previewDiscountEndpoint } from './endpoints/previewDiscountEndpoint';
+import { discountEndpoint } from './endpoints/discountEndpoint';
 import { ValidationError } from './errors';
 
 const stage = process.env.STAGE as Stage;
@@ -27,7 +27,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 			}
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
 				console.log('Previewing discount');
-				return await previewDiscountEndpoint(stage, event.body);
+				return await discountEndpoint(stage, event.body);
 			}
 			default:
 				return {
@@ -38,6 +38,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 	} catch (error) {
 		console.log('Caught error in index.ts ', error);
 		if (error instanceof ValidationError) {
+			console.log(`Validation failure: ${error.message}`);
 			return {
 				body: error.message,
 				statusCode: 400,
