@@ -1,39 +1,23 @@
-import dayjs from 'dayjs';
-import type { Stage } from '../../../modules/stage';
 import { sum } from './arrayFunctions';
 import type { ZuoraCatalog } from './catalog/catalog';
-import { getZuoraCatalog } from './catalog/catalog';
 import { ValidationError } from './errors';
 import { checkDefined } from './nullAndUndefined';
-import { ProductToDiscountMapping } from './productToDiscountMapping';
-import { getBillingPreview, getNextInvoiceItems } from './zuora/billingPreview';
-import { getSubscription } from './zuora/getSubscription';
-import type { ZuoraClient } from './zuora/zuoraClient';
-import { createZuoraClient } from './zuora/zuoraClient';
-import type { RatePlan, ZuoraSubscription } from './zuora/zuoraSchemas';
+import { getEligibleProductRatePlanIdsForDiscount } from './productToDiscountMapping';
+import { getNextInvoiceItems } from './zuora/billingPreview';
+import type {
+	BillingPreview,
+	RatePlan,
+	ZuoraSubscription,
+} from './zuora/zuoraSchemas';
 
 export class EligibilityChecker {
-	static create = async (stage: Stage) => {
-		const catalog = await getZuoraCatalog(stage);
-		const zuoraClient = await createZuoraClient(stage);
-		return new EligibilityChecker(stage, catalog, zuoraClient);
-	};
-	constructor(
-		private stage: Stage,
-		private catalog: ZuoraCatalog,
-		private zuoraClient: ZuoraClient,
-	) {}
+	constructor(private catalog: ZuoraCatalog) {}
 
-	getNextBillingDateIfEligible = async (
-		subscriptionNumber: string,
+	getNextBillingDateIfEligible = (
+		subscription: ZuoraSubscription,
+		billingPreview: BillingPreview,
 		discountProductRatePlanId: string,
 	) => {
-		console.log('Getting the subscription details from Zuora');
-		const subscription = await getSubscription(
-			this.zuoraClient,
-			subscriptionNumber,
-		);
-
 		console.log('Checking this subscription is eligible for the discount');
 
 		if (subscription.status !== 'Active') {
@@ -49,8 +33,8 @@ export class EligibilityChecker {
 		console.log(
 			'Checking that the next payment is at least at the catalog price',
 		);
-		const nextBillingDate = await this.checkNextPaymentIsAtCatalogPrice(
-			subscription.accountNumber,
+		const nextBillingDate = this.checkNextPaymentIsAtCatalogPrice(
+			billingPreview,
 			eligibleRatePlan,
 		);
 
@@ -62,14 +46,13 @@ export class EligibilityChecker {
 		subscription: ZuoraSubscription,
 		discountProductRatePlanId: string,
 	): RatePlan => {
-		const eligibleProductRatePlans = ProductToDiscountMapping[this.stage].find(
-			(discount) =>
-				discount.discountProductRatePlanId === discountProductRatePlanId,
-		)?.eligibleProductRatePlanIds;
+		const eligibleProductRatePlans = getEligibleProductRatePlanIdsForDiscount(
+			discountProductRatePlanId,
+		);
 
 		const eligibleRatePlans: RatePlan[] = subscription.ratePlans.filter(
 			(ratePlan) =>
-				eligibleProductRatePlans?.includes(ratePlan.productRatePlanId),
+				eligibleProductRatePlans.includes(ratePlan.productRatePlanId),
 		);
 
 		if (eligibleRatePlans.length > 1) {
@@ -89,8 +72,8 @@ export class EligibilityChecker {
 		return eligibleRatePlans[0];
 	};
 
-	private checkNextPaymentIsAtCatalogPrice = async (
-		accountNumber: string,
+	private checkNextPaymentIsAtCatalogPrice = (
+		billingPreview: BillingPreview,
 		ratePlan: RatePlan,
 	) => {
 		// Work out the catalog price of the rate plan
@@ -105,14 +88,9 @@ export class EligibilityChecker {
 		const totalPrice = sum(chargePrices, (i) => i);
 
 		// Work out how much the cost of the next invoice will be
-		const billingPreview = await getBillingPreview(
-			this.zuoraClient,
-			dayjs().add(13, 'months'),
-			accountNumber,
-		);
 		const nextInvoiceItems = checkDefined(
 			getNextInvoiceItems(billingPreview),
-			`No next invoice found for account ${accountNumber}`,
+			`No next invoice found for account ${billingPreview.accountId}`,
 		);
 		const nextInvoiceTotal = sum(
 			nextInvoiceItems,

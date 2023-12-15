@@ -7,18 +7,17 @@ import { previewDiscountEndpoint } from '../src/endpoints/previewDiscountEndpoin
 import { checkDefined } from '../src/nullAndUndefined';
 import { previewDiscountSchema } from '../src/responseSchema';
 import { cancelSubscription } from '../src/zuora/cancelSubscription';
-import { createZuoraClient } from '../src/zuora/zuoraClient';
+import { ZuoraClient } from '../src/zuora/zuoraClient';
 import { createDigitalSubscription } from './helpers';
 
 const stage: Stage = 'CODE';
 test('checkEligibility', async () => {
 	const requestBody = {
 		subscriptionNumber: 'A-S00711320',
-		discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 	};
 
 	const result = await previewDiscountEndpoint(
-		'CODE',
+		stage,
 		JSON.stringify(requestBody),
 	);
 	expect(result.statusCode).toBe(200);
@@ -26,7 +25,7 @@ test('checkEligibility', async () => {
 }, 30000);
 
 test('Subscriptions on the old price are not eligible', async () => {
-	const zuoraClient = await createZuoraClient(stage);
+	const zuoraClient = await ZuoraClient.create(stage);
 
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
@@ -38,7 +37,6 @@ test('Subscriptions on the old price are not eligible', async () => {
 
 	const requestBody = {
 		subscriptionNumber: subscriptionNumber,
-		discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 	};
 
 	const result = await previewDiscountEndpoint(
@@ -60,7 +58,7 @@ test('Subscriptions on the old price are not eligible', async () => {
 }, 30000);
 
 test('Subscriptions on the new price are eligible', async () => {
-	const zuoraClient = await createZuoraClient(stage);
+	const zuoraClient = await ZuoraClient.create(stage);
 
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, false);
@@ -72,7 +70,6 @@ test('Subscriptions on the new price are eligible', async () => {
 
 	const requestBody = {
 		subscriptionNumber: subscriptionNumber,
-		discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 	};
 
 	const result = await previewDiscountEndpoint(

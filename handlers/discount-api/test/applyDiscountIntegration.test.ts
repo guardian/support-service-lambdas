@@ -9,7 +9,7 @@ import type { Stage } from '../../../modules/stage';
 import { checkDefined } from '../src/nullAndUndefined';
 import { addDiscount } from '../src/zuora/addDiscount';
 import { getSubscription } from '../src/zuora/getSubscription';
-import { createZuoraClient } from '../src/zuora/zuoraClient';
+import { ZuoraClient } from '../src/zuora/zuoraClient';
 import { createDigitalSubscription, doPriceRise } from './helpers';
 
 const stage: Stage = 'CODE';
@@ -17,7 +17,7 @@ const subscribeDate = dayjs();
 const nextBillingDate = subscribeDate.add(1, 'month');
 
 test('createDigitalSubscription', async () => {
-	const zuoraClient = await createZuoraClient(stage);
+	const zuoraClient = await ZuoraClient.create(stage);
 
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, false);
@@ -34,7 +34,7 @@ test('createDigitalSubscription', async () => {
 }, 30000);
 
 test('createPriceRiseSubscription', async () => {
-	const zuoraClient = await createZuoraClient(stage);
+	const zuoraClient = await ZuoraClient.create(stage);
 
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
