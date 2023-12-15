@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BillingPeriodValues } from '../../../../modules/billingPeriod';
 
 export type OAuthClientCredentials = z.infer<
 	typeof oAuthClientCredentialsSchema
@@ -47,6 +48,7 @@ export const zuoraSubscriptionSchema = z.object({
 					currency: z.string(),
 					effectiveStartDate: z.coerce.date(),
 					effectiveEndDate: z.coerce.date(),
+					billingPeriod: z.enum(BillingPeriodValues),
 					processedThroughDate: z.coerce.date(),
 					chargedThroughDate: z.coerce.date(),
 					upToPeriodsType: z.nullable(z.string()),

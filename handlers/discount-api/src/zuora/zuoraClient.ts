@@ -4,12 +4,12 @@ import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
 
-export const createZuoraClient = async (stage: Stage) => {
-	const credentials = await getOAuthClientCredentials(stage);
-	const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-	return new ZuoraClient(stage, bearerTokenProvider);
-};
 export class ZuoraClient {
+	static async create(stage: Stage) {
+		const credentials = await getOAuthClientCredentials(stage);
+		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
+		return new ZuoraClient(stage, bearerTokenProvider);
+	}
 	private zuoraServerUrl: string;
 	constructor(
 		stage: Stage,

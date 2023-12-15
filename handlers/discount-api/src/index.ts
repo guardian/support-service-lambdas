@@ -3,11 +3,12 @@ import type {
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { stageFromEnvironment } from '../../../modules/stage';
+import type { Stage } from '../../../modules/stage';
 import { applyDiscountEndpoint } from './endpoints/applyDiscountEndpoint';
 import { previewDiscountEndpoint } from './endpoints/previewDiscountEndpoint';
 import { ValidationError } from './errors';
 
+const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
@@ -16,9 +17,9 @@ export const handler: Handler = async (
 	console.log(`Response is ${JSON.stringify(response)}`);
 	return response;
 };
+
 const routeRequest = async (event: APIGatewayProxyEvent) => {
 	try {
-		const stage = stageFromEnvironment();
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				console.log('Applying a discount');
