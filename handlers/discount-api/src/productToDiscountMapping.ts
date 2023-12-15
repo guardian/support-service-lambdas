@@ -1,3 +1,4 @@
+import type { BillingPeriod } from '../../../modules/billingPeriod';
 import type { Stage } from '../../../modules/stage';
 import { checkDefined } from './nullAndUndefined';
 import type { ZuoraSubscription } from './zuora/zuoraSchemas';
@@ -22,26 +23,31 @@ export const getEligibleProductRatePlanIdsForDiscount = (
 		.filter((_) => _.discountProductRatePlanId === discountProductRatePlanId)
 		.flatMap((_) => _.eligibleProductRatePlanIds);
 };
-export const ProductToDiscountMapping: {
+
+type Discount = {
+	discountProductRatePlanId: string;
+	name: string;
+	effectiveStartDate: string;
+	effectiveEndDate: string;
+	eligibleProductRatePlanIds: string[];
+};
+const ProductToDiscountMapping: {
 	[K in Stage]: {
-		Month: {
-			discountProductRatePlanId: string;
-			name: string;
-			effectiveStartDate: string;
-			effectiveEndDate: string;
-			eligibleProductRatePlanIds: string[];
-		};
-		Annual: {
-			discountProductRatePlanId: string;
-			name: string;
-			effectiveStartDate: string;
-			effectiveEndDate: string;
-			eligibleProductRatePlanIds: string[];
-		};
+		[K in BillingPeriod]: Discount;
 	};
 } = {
 	CODE: {
 		Month: {
+			discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
+			name: 'Cancellation Save Discount - 25% off for 3 months',
+			effectiveStartDate: '2018-04-01',
+			effectiveEndDate: '2099-03-08',
+			eligibleProductRatePlanIds: [
+				'2c92c0f84bbfec8b014bc655f4852d9d',
+				'2c92c0f84bbfec58014bc6a2d43a1f5b',
+			],
+		},
+		Quarter: {
 			discountProductRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			effectiveStartDate: '2018-04-01',
@@ -61,6 +67,16 @@ export const ProductToDiscountMapping: {
 	},
 	PROD: {
 		Month: {
+			discountProductRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
+			name: 'Cancellation Save Discount - 25% off for 12 months',
+			effectiveStartDate: '2023-10-26',
+			effectiveEndDate: '2099-03-08',
+			eligibleProductRatePlanIds: [
+				'2c92a0fb4edd70c8014edeaa4eae220a',
+				'2c92a0fb4edd70c8014edeaa4e8521fe',
+			],
+		},
+		Quarter: {
 			discountProductRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			effectiveStartDate: '2023-10-26',
