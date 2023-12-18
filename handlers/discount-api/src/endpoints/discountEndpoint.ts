@@ -3,6 +3,7 @@ import type { Stage } from '../../../../modules/stage';
 import { sum } from '../arrayFunctions';
 import { getZuoraCatalog } from '../catalog/catalog';
 import { EligibilityChecker } from '../eligibilityChecker';
+import { ValidationError } from '../errors';
 import { checkDefined } from '../nullAndUndefined';
 import type { Discount } from '../productToDiscountMapping';
 import { getDiscountFromSubscription } from '../productToDiscountMapping';
@@ -30,6 +31,12 @@ export const discountEndpoint = async (
 		zuoraClient,
 		applyDiscountBody.subscriptionNumber,
 	);
+
+	if (subscription.status !== 'Active') {
+		throw new ValidationError(
+			`Subscription ${subscription.subscriptionNumber} has status ${subscription.status}`,
+		);
+	}
 
 	console.log('Getting billing preview for the subscription');
 	const billingPreview = await getBillingPreview(
