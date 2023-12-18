@@ -12,7 +12,11 @@ import { getBillingPreview } from '../zuora/billingPreview';
 import { getSubscription } from '../zuora/getSubscription';
 import { ZuoraClient } from '../zuora/zuoraClient';
 
-export const discountEndpoint = async (stage: Stage, body: string | null) => {
+export const discountEndpoint = async (
+	stage: Stage,
+	preview: boolean,
+	body: string | null,
+) => {
 	const zuoraClient = await ZuoraClient.create(stage);
 	const catalog = await getZuoraCatalog(stage);
 	const eligibilityChecker = new EligibilityChecker(catalog);
@@ -44,7 +48,7 @@ export const discountEndpoint = async (stage: Stage, body: string | null) => {
 		discount.productRatePlanId,
 	);
 
-	if (applyDiscountBody.preview) {
+	if (preview) {
 		console.log('Preview the new price once the discount has been applied');
 		return getDiscountPreview(
 			zuoraClient,

@@ -4,7 +4,6 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import type { Stage } from '../../../modules/stage';
-import { applyDiscountEndpoint } from './endpoints/applyDiscountEndpoint';
 import { discountEndpoint } from './endpoints/discountEndpoint';
 import { ValidationError } from './errors';
 
@@ -23,11 +22,11 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				console.log('Applying a discount');
-				return await applyDiscountEndpoint(stage, event.body);
+				return await discountEndpoint(stage, false, event.body);
 			}
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
 				console.log('Previewing discount');
-				return await discountEndpoint(stage, event.body);
+				return await discountEndpoint(stage, true, event.body);
 			}
 			default:
 				return {

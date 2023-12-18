@@ -29,7 +29,7 @@ test('Subscriptions on the old price are not eligible', async () => {
 	};
 
 	await expect(async () => {
-		await discountEndpoint(stage, JSON.stringify(requestBody));
+		await discountEndpoint(stage, true, JSON.stringify(requestBody));
 	}).rejects.toThrow('it is not eligible for a discount');
 
 	console.log('Cancelling the subscription');
@@ -57,7 +57,11 @@ test('Subscriptions on the new price are eligible', async () => {
 		preview: true,
 	};
 
-	const result = await discountEndpoint(stage, JSON.stringify(requestBody));
+	const result = await discountEndpoint(
+		stage,
+		true,
+		JSON.stringify(requestBody),
+	);
 	const eligibilityCheckResult = previewDiscountSchema.parse(
 		JSON.parse(result.body),
 	);
