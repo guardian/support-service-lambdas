@@ -1,3 +1,4 @@
+import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import type { Stage } from '../../../../modules/stage';
 import { sum } from '../arrayFunctions';
@@ -10,26 +11,34 @@ import { getDiscountFromSubscription } from '../productToDiscountMapping';
 import { applyDiscountSchema } from '../requestSchema';
 import { addDiscount, previewDiscount } from '../zuora/addDiscount';
 import { getBillingPreview } from '../zuora/billingPreview';
+import { getAccount } from '../zuora/getAccount';
 import { getSubscription } from '../zuora/getSubscription';
 import { ZuoraClient } from '../zuora/zuoraClient';
+import type { ZuoraSubscription } from '../zuora/zuoraSchemas';
 
 export const discountEndpoint = async (
 	stage: Stage,
 	preview: boolean,
+	headers: APIGatewayProxyEventHeaders,
 	body: string | null,
 ) => {
 	const zuoraClient = await ZuoraClient.create(stage);
 	const catalog = await getZuoraCatalog(stage);
 	const eligibilityChecker = new EligibilityChecker(catalog);
 
-	const applyDiscountBody = applyDiscountSchema.parse(
+	const identityId = checkDefined(
+		headers['x-identity-id'],
+		'Identity ID not found in request',
+	);
+
+	const requestBody = applyDiscountSchema.parse(
 		JSON.parse(checkDefined(body, 'No body was provided')),
 	);
 
 	console.log('Getting the subscription details from Zuora');
 	const subscription = await getSubscription(
 		zuoraClient,
-		applyDiscountBody.subscriptionNumber,
+		requestBody.subscriptionNumber,
 	);
 
 	if (subscription.status !== 'Active') {
@@ -38,12 +47,17 @@ export const discountEndpoint = async (
 		);
 	}
 
-	console.log('Getting billing preview for the subscription');
-	const billingPreview = await getBillingPreview(
-		zuoraClient,
-		dayjs().add(13, 'months'),
-		subscription.accountNumber,
+	console.log(
+		'Check sub is owned by user & get billing preview for the subscription',
 	);
+	const [, billingPreview] = await Promise.all([
+		checkSubscriptionBelongsToIdentityId(zuoraClient, subscription, identityId),
+		getBillingPreview(
+			zuoraClient,
+			dayjs().add(13, 'months'),
+			subscription.accountNumber,
+		),
+	]);
 
 	console.log('Working out the appropriate discount for the subscription');
 	const discount = getDiscountFromSubscription(stage, subscription);
@@ -59,14 +73,14 @@ export const discountEndpoint = async (
 		console.log('Preview the new price once the discount has been applied');
 		return getDiscountPreview(
 			zuoraClient,
-			applyDiscountBody.subscriptionNumber,
+			requestBody.subscriptionNumber,
 			nextBillingDate,
 			discount,
 		);
 	} else {
 		return applyDiscount(
 			zuoraClient,
-			applyDiscountBody.subscriptionNumber,
+			requestBody.subscriptionNumber,
 			nextBillingDate,
 			discount.productRatePlanId,
 		);
@@ -129,4 +143,16 @@ const applyDiscount = async (
 		body: 'Success',
 		statusCode: 200,
 	};
+};
+const checkSubscriptionBelongsToIdentityId = async (
+	zuoraClient: ZuoraClient,
+	subscription: ZuoraSubscription,
+	identityId: string,
+) => {
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+	if (account.basicInfo.IdentityId__c !== identityId) {
+		throw new ValidationError(
+			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityId}`,
+		);
+	}
 };

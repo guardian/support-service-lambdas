@@ -39,7 +39,7 @@ export const digiSubSubscribeBody = (
 				BillToContact: {
 					FirstName: 'Test',
 					LastName: 'User',
-					WorkEmail: 'test.user@thegulocal.com',
+					WorkEmail: 'test.user@test.com',
 					Country: 'GB',
 				},
 				PaymentMethod: {
