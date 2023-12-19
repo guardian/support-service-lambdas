@@ -66,6 +66,15 @@ export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
 export type RatePlan = ZuoraSubscription['ratePlans'][number];
 
 export type RatePlanCharge = RatePlan['ratePlanCharges'][number];
+
+export const zuoraAccountSchema = z.object({
+	success: z.boolean(),
+	basicInfo: z.object({
+		id: z.string(),
+		IdentityId__c: z.string(),
+	}),
+});
+export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 export const zuoraSubscribeResponseSchema = z.array(
 	z.object({
 		Success: z.boolean(),
