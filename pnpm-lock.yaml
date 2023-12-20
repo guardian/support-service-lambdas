@@ -32,6 +32,9 @@ importers:
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.10.0)
+      jest-runner-groups:
+        specifier: ^2.2.0
+        version: 2.2.0(jest-docblock@29.7.0)(jest-runner@29.7.0)
       prettier:
         specifier: ^3.1.0
         version: 3.1.0
@@ -44,13 +47,7 @@ importers:
 
   handlers/discount-api:
     dependencies:
-      '@aws-sdk/client-s3':
-        specifier: 3.451.0
-        version: 3.451.0
       '@aws-sdk/client-secrets-manager':
-        specifier: 3.451.0
-        version: 3.451.0
-      '@aws-sdk/credential-provider-node':
         specifier: 3.451.0
         version: 3.451.0
       dayjs:
@@ -63,9 +60,36 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.129
         version: 8.10.129
-      jest-runner-groups:
-        specifier: ^2.2.0
-        version: 2.2.0(jest-docblock@29.7.0)(jest-runner@29.7.0)
+
+  modules/aws:
+    dependencies:
+      '@aws-sdk/credential-provider-node':
+        specifier: 3.451.0
+        version: 3.451.0
+
+  modules/catalog:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: 3.451.0
+        version: 3.451.0
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+
+  modules/zuora:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: 3.451.0
+        version: 3.451.0
+      '@aws-sdk/client-secrets-manager':
+        specifier: 3.451.0
+        version: 3.451.0
+      dayjs:
+        specifier: ^1.11.10
+        version: 1.11.10
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
 
 packages:
 

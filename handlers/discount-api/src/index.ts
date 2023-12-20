@@ -4,7 +4,7 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import type { Stage } from '../../../modules/stage';
-import { discountEndpoint } from './endpoints/discountEndpoint';
+import { discountEndpoint } from './discountEndpoint';
 import { ValidationError } from './errors';
 
 const stage = process.env.STAGE as Stage;

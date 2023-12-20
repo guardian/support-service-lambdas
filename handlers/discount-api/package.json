@@ -9,14 +9,11 @@
     "package": "pnpm type-check && pnpm lint && pnpm build && cd target; zip -qr discount-api.zip ./*.js"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.451.0",
     "@aws-sdk/client-secrets-manager": "3.451.0",
-    "@aws-sdk/credential-provider-node": "3.451.0",
     "dayjs": "^1.11.10",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.129",
-    "jest-runner-groups": "^2.2.0"
+    "@types/aws-lambda": "^8.10.129"
   }
 }

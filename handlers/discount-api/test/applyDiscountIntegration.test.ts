@@ -5,11 +5,11 @@
  */
 
 import dayjs from 'dayjs';
+import { checkDefined } from '../../../modules/nullAndUndefined';
 import type { Stage } from '../../../modules/stage';
-import { checkDefined } from '../src/nullAndUndefined';
-import { addDiscount } from '../src/zuora/addDiscount';
-import { getSubscription } from '../src/zuora/getSubscription';
-import { ZuoraClient } from '../src/zuora/zuoraClient';
+import { addDiscount } from '../../../modules/zuora/src/addDiscount';
+import { getSubscription } from '../../../modules/zuora/src/getSubscription';
+import { ZuoraClient } from '../../../modules/zuora/src/zuoraClient';
 import { createDigitalSubscription, doPriceRise } from './helpers';
 
 const stage: Stage = 'CODE';

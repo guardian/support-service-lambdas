@@ -1,14 +1,14 @@
-import { sum } from './arrayFunctions';
-import type { ZuoraCatalog } from './catalog/catalog';
-import { ValidationError } from './errors';
-import { checkDefined } from './nullAndUndefined';
-import { getEligibleProductRatePlanIdsForDiscount } from './productToDiscountMapping';
-import { getNextInvoiceItems } from './zuora/billingPreview';
+import { sum } from '../../../modules/arrayFunctions';
+import type { ZuoraCatalog } from '../../../modules/catalog/src/catalog';
+import { checkDefined } from '../../../modules/nullAndUndefined';
+import { getNextInvoiceItems } from '../../../modules/zuora/src/billingPreview';
 import type {
 	BillingPreview,
 	RatePlan,
 	ZuoraSubscription,
-} from './zuora/zuoraSchemas';
+} from '../../../modules/zuora/src/zuoraSchemas';
+import { ValidationError } from './errors';
+import { getEligibleProductRatePlanIdsForDiscount } from './productToDiscountMapping';
 
 export class EligibilityChecker {
 	constructor(private catalog: ZuoraCatalog) {}

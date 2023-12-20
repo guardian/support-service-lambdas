@@ -1,6 +1,6 @@
 import type { Dayjs } from 'dayjs';
-import { groupBy } from '../arrayFunctions';
-import { checkDefined } from '../nullAndUndefined';
+import { groupBy } from '../../arrayFunctions';
+import { checkDefined } from '../../nullAndUndefined';
 import { zuoraDateFormat } from './common';
 import type { ZuoraClient } from './zuoraClient';
 import type { BillingPreview, InvoiceItem } from './zuoraSchemas';

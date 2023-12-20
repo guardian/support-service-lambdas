@@ -1,15 +1,15 @@
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { ZuoraClient } from '../src/zuora/zuoraClient';
+import type { ZuoraClient } from '../../../modules/zuora/src/zuoraClient';
 import type {
 	ZuoraSubscribeResponse,
 	ZuoraSubscription,
 	ZuoraSuccessResponse,
-} from '../src/zuora/zuoraSchemas';
+} from '../../../modules/zuora/src/zuoraSchemas';
 import {
 	zuoraSubscribeResponseSchema,
 	zuoraSuccessResponseSchema,
-} from '../src/zuora/zuoraSchemas';
+} from '../../../modules/zuora/src/zuoraSchemas';
 import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 

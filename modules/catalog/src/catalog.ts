@@ -1,7 +1,7 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import type { Stage } from '../../../../modules/stage';
-import { awsConfig } from '../aws/config';
-import { checkDefined, isNotNull } from '../nullAndUndefined';
+import { awsConfig } from '../../aws/src/config';
+import { checkDefined, isNotNull } from '../../nullAndUndefined';
+import type { Stage } from '../../stage';
 import type {
 	Catalog,
 	Pricing,

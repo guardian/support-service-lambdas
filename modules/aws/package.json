@@ -1,0 +1,7 @@
+{
+  "name": "aws",
+  "version": "1.0.0",
+  "dependencies": {
+    "@aws-sdk/credential-provider-node": "3.451.0"
+  }
+}
