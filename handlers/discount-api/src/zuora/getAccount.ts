@@ -7,5 +7,5 @@ export const getAccount = async (
 	accountNumber: string,
 ): Promise<ZuoraAccount> => {
 	const path = `v1/accounts/${accountNumber}`;
-	return zuoraClient.get<ZuoraAccount>(path, zuoraAccountSchema);
+	return zuoraClient.get(path, zuoraAccountSchema);
 };

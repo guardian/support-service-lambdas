@@ -18,7 +18,7 @@ export const getBillingPreview = async (
 		targetDate: zuoraDateFormat(targetDate),
 		assumeRenewal: 'Autorenew',
 	});
-	return zuoraClient.post<BillingPreview>(path, body, billingPreviewSchema);
+	return zuoraClient.post(path, body, billingPreviewSchema);
 };
 
 export const getNextInvoiceItems = (

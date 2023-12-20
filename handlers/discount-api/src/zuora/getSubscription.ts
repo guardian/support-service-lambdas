@@ -7,5 +7,5 @@ export const getSubscription = async (
 	subscriptionNumber: string,
 ): Promise<ZuoraSubscription> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
-	return zuoraClient.get<ZuoraSubscription>(path, zuoraSubscriptionSchema);
+	return zuoraClient.get(path, zuoraSubscriptionSchema);
 };

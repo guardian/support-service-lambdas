@@ -16,17 +16,13 @@ import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscri
 export const createDigitalSubscription = async (
 	zuoraClient: ZuoraClient,
 	createWithOldPrice: boolean,
-) => {
+): Promise<ZuoraSubscribeResponse> => {
 	const path = `/v1/action/subscribe`;
 	const body = JSON.stringify(
 		digiSubSubscribeBody(dayjs(), createWithOldPrice),
 	);
 
-	return zuoraClient.post<ZuoraSubscribeResponse>(
-		path,
-		body,
-		zuoraSubscribeResponseSchema,
-	);
+	return zuoraClient.post(path, body, zuoraSubscribeResponseSchema);
 };
 
 export const doPriceRise = async (
