@@ -47,15 +47,9 @@ importers:
 
   handlers/discount-api:
     dependencies:
-      '@aws-sdk/client-secrets-manager':
-        specifier: 3.451.0
-        version: 3.451.0
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.129
