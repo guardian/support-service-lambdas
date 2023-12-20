@@ -1,6 +1,6 @@
+import { sum } from '@modules/arrayFunctions';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { sum } from '../../../modules/arrayFunctions';
 import { getZuoraCatalog } from '../../../modules/catalog/src/catalog';
 import { checkDefined } from '../../../modules/nullAndUndefined';
 import type { Stage } from '../../../modules/stage';
