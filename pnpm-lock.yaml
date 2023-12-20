@@ -50,6 +50,9 @@ importers:
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.129

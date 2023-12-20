@@ -9,7 +9,8 @@
     "package": "pnpm type-check && pnpm lint && pnpm build && cd target; zip -qr discount-api.zip ./*.js"
   },
   "dependencies": {
-    "dayjs": "^1.11.10"
+    "dayjs": "^1.11.10",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.129"
