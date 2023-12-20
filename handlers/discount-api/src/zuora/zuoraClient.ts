@@ -18,24 +18,35 @@ export class ZuoraClient {
 		this.zuoraServerUrl = zuoraServerUrl(stage).replace(/\/$/, ''); // remove trailing slash
 	}
 
-	public async get<T>(path: string, schema: z.ZodType<T>) {
+	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		schema: T,
+	): Promise<O> {
 		return await this.fetch(path, 'GET', schema);
 	}
 
-	public async post<T>(path: string, body: string, schema: z.ZodType<T>) {
+	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		body: string,
+		schema: T,
+	): Promise<O> {
 		return await this.fetch(path, 'POST', schema, body);
 	}
 
-	public async put<T>(path: string, body: string, schema: z.ZodType<T>) {
+	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		body: string,
+		schema: T,
+	): Promise<O> {
 		return await this.fetch(path, 'PUT', schema, body);
 	}
 
-	private async fetch<T>(
+	private async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		method: string,
-		schema: z.ZodType<T>,
+		schema: T,
 		body?: string,
-	): Promise<T> {
+	): Promise<O> {
 		const bearerToken = await this.tokenProvider.getBearerToken();
 		const url = `${this.zuoraServerUrl}/${path.replace(/^\//, '')}`;
 		console.log(`${method} ${url} ${body ? `with body ${body}` : ''}`);

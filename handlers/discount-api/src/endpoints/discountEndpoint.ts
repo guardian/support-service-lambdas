@@ -150,7 +150,7 @@ const checkSubscriptionBelongsToIdentityId = async (
 	identityId: string,
 ) => {
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
-	if (account.basicInfo.IdentityId__c !== identityId) {
+	if (account.basicInfo.identityId !== identityId) {
 		throw new ValidationError(
 			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityId}`,
 		);

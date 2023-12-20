@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { BillingPeriodValues } from '../../../../modules/billingPeriod';
 
+// --------------- Auth ---------------
 export type OAuthClientCredentials = z.infer<
 	typeof oAuthClientCredentialsSchema
 >;
@@ -16,6 +17,7 @@ export const zuoraBearerTokenSchema = z.object({
 	expires_in: z.number(),
 });
 
+// --------------- Subscription ---------------
 export const zuoraSubscriptionSchema = z.object({
 	success: z.boolean(),
 	id: z.string(),
@@ -65,16 +67,24 @@ export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
 
 export type RatePlan = ZuoraSubscription['ratePlans'][number];
 
-export type RatePlanCharge = RatePlan['ratePlanCharges'][number];
+// --------------- Account ---------------
+export const zuoraAccountBasicInfoSchema = z
+	.object({
+		id: z.string(),
+		IdentityId__c: z.string(),
+	})
+	.transform((obj) => ({
+		id: obj.id,
+		identityId: obj.IdentityId__c,
+	}));
 
 export const zuoraAccountSchema = z.object({
 	success: z.boolean(),
-	basicInfo: z.object({
-		id: z.string(),
-		IdentityId__c: z.string(),
-	}),
+	basicInfo: zuoraAccountBasicInfoSchema,
 });
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
+
+// --------------- Subscribe ---------------
 export const zuoraSubscribeResponseSchema = z.array(
 	z.object({
 		Success: z.boolean(),
@@ -87,12 +97,14 @@ export type ZuoraSubscribeResponse = z.infer<
 	typeof zuoraSubscribeResponseSchema
 >;
 
+// --------------- Basic success response ---------------
 export const zuoraSuccessResponseSchema = z.object({
 	success: z.boolean(),
 });
 
 export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
 
+// --------------- Billing preview ---------------
 export const billingPreviewSchema = z.object({
 	accountId: z.string(),
 	invoiceItems: z.array(
@@ -110,6 +122,7 @@ export const billingPreviewSchema = z.object({
 export type BillingPreview = z.infer<typeof billingPreviewSchema>;
 export type InvoiceItem = BillingPreview['invoiceItems'][number];
 
+// --------------- Add discount preview ---------------
 export const addDiscountPreviewSchema = z.object({
 	success: z.boolean(),
 	invoiceItems: z.array(
