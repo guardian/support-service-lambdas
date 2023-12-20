@@ -1,3 +1,14 @@
 {
-	"extends": "@guardian/eslint-config-typescript"
+	"extends": "@guardian/eslint-config-typescript",
+	"plugins": ["import"],
+	"settings": {
+		"import/parsers": {
+			"@typescript-eslint/parser": [".ts", ".tsx"]
+		},
+		"import/resolver": {
+			"typescript": {
+				"alwaysTryTypes": true
+			}
+		}
+	}
 }

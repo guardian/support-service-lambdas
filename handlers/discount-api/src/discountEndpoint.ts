@@ -1,18 +1,15 @@
 import { sum } from '@modules/arrayFunctions';
+import { getZuoraCatalog } from '@modules/catalog/src/catalog';
+import { checkDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
+import { addDiscount, previewDiscount } from '@modules/zuora/src/addDiscount';
+import { getBillingPreview } from '@modules/zuora/src/billingPreview';
+import { getAccount } from '@modules/zuora/src/getAccount';
+import { getSubscription } from '@modules/zuora/src/getSubscription';
+import { ZuoraClient } from '@modules/zuora/src/zuoraClient';
+import type { ZuoraSubscription } from '@modules/zuora/src/zuoraSchemas';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { getZuoraCatalog } from '../../../modules/catalog/src/catalog';
-import { checkDefined } from '../../../modules/nullAndUndefined';
-import type { Stage } from '../../../modules/stage';
-import {
-	addDiscount,
-	previewDiscount,
-} from '../../../modules/zuora/src/addDiscount';
-import { getBillingPreview } from '../../../modules/zuora/src/billingPreview';
-import { getAccount } from '../../../modules/zuora/src/getAccount';
-import { getSubscription } from '../../../modules/zuora/src/getSubscription';
-import { ZuoraClient } from '../../../modules/zuora/src/zuoraClient';
-import type { ZuoraSubscription } from '../../../modules/zuora/src/zuoraSchemas';
 import { EligibilityChecker } from './eligibilityChecker';
 import { ValidationError } from './errors';
 import type { Discount } from './productToDiscountMapping';

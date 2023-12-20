@@ -1,9 +1,9 @@
+import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import type { Stage } from '../../../modules/stage';
 import { discountEndpoint } from './discountEndpoint';
 import { ValidationError } from './errors';
 

@@ -1,11 +1,11 @@
 /**
  * @group integration
  */
+import { checkDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
+import { cancelSubscription } from '@modules/zuora/src/cancelSubscription';
+import { ZuoraClient } from '@modules/zuora/src/zuoraClient';
 import dayjs from 'dayjs';
-import { checkDefined } from '../../../modules/nullAndUndefined';
-import type { Stage } from '../../../modules/stage';
-import { cancelSubscription } from '../../../modules/zuora/src/cancelSubscription';
-import { ZuoraClient } from '../../../modules/zuora/src/zuoraClient';
 import { discountEndpoint } from '../src/discountEndpoint';
 import { previewDiscountSchema } from '../src/responseSchema';
 import { createDigitalSubscription } from './helpers';
