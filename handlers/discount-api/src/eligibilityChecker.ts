@@ -1,12 +1,12 @@
 import { sum } from '@modules/arrayFunctions';
-import type { ZuoraCatalog } from '@modules/catalog/src/catalog';
+import type { ZuoraCatalog } from '@modules/catalog/catalog';
 import { checkDefined } from '@modules/nullAndUndefined';
-import { getNextInvoiceItems } from '@modules/zuora/src/billingPreview';
+import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
 import type {
 	BillingPreview,
 	RatePlan,
 	ZuoraSubscription,
-} from '@modules/zuora/src/zuoraSchemas';
+} from '@modules/zuora/zuoraSchemas';
 import { ValidationError } from './errors';
 import { getEligibleProductRatePlanIdsForDiscount } from './productToDiscountMapping';
 

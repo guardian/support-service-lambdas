@@ -6,9 +6,9 @@
 
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import { addDiscount } from '@modules/zuora/src/addDiscount';
-import { getSubscription } from '@modules/zuora/src/getSubscription';
-import { ZuoraClient } from '@modules/zuora/src/zuoraClient';
+import { addDiscount } from '@modules/zuora/addDiscount';
+import { getSubscription } from '@modules/zuora/getSubscription';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { createDigitalSubscription, doPriceRise } from './helpers';
 

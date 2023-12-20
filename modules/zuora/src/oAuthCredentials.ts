@@ -2,8 +2,8 @@ import {
 	GetSecretValueCommand,
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
-import { awsConfig } from '../../aws/src/config';
-import type { Stage } from '../../stage';
+import { awsConfig } from '@modules/aws/config';
+import type { Stage } from '@modules/stage';
 import type { OAuthClientCredentials } from './zuoraSchemas';
 import { oAuthClientCredentialsSchema } from './zuoraSchemas';
 

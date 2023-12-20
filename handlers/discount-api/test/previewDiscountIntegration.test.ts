@@ -3,8 +3,8 @@
  */
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import { cancelSubscription } from '@modules/zuora/src/cancelSubscription';
-import { ZuoraClient } from '@modules/zuora/src/zuoraClient';
+import { cancelSubscription } from '@modules/zuora/cancelSubscription';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { discountEndpoint } from '../src/discountEndpoint';
 import { previewDiscountSchema } from '../src/responseSchema';

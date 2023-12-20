@@ -1,5 +1,5 @@
+import { BillingPeriodValues } from '@modules/billingPeriod';
 import { z } from 'zod';
-import { BillingPeriodValues } from '../../billingPeriod';
 
 // --------------- Auth ---------------
 export type OAuthClientCredentials = z.infer<

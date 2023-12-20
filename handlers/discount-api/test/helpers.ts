@@ -1,13 +1,13 @@
-import type { ZuoraClient } from '@modules/zuora/src/zuoraClient';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	ZuoraSubscribeResponse,
 	ZuoraSubscription,
 	ZuoraSuccessResponse,
-} from '@modules/zuora/src/zuoraSchemas';
+} from '@modules/zuora/zuoraSchemas';
 import {
 	zuoraSubscribeResponseSchema,
 	zuoraSuccessResponseSchema,
-} from '@modules/zuora/src/zuoraSchemas';
+} from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
