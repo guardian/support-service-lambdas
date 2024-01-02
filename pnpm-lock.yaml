@@ -64,6 +64,12 @@ importers:
         specifier: ^8.10.129
         version: 8.10.129
 
+  handlers/test-api:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.129
+        version: 8.10.129
+
   modules/aws:
     dependencies:
       '@aws-sdk/credential-provider-node':
