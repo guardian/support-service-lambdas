@@ -93,6 +93,9 @@ export class <%= PascalCase %> extends GuStack {
 				},
 			}),
 		});
+		<% if (includeApiKey === 'Y'){ %>
+			Hello there!
+		<% } %>
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
