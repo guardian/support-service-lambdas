@@ -1,5 +1,5 @@
-import { getNextInvoiceItems } from '../src/zuora/billingPreview';
-import { billingPreviewSchema } from '../src/zuora/zuoraSchemas';
+import { getNextInvoiceItems } from '../src/billingPreview';
+import { billingPreviewSchema } from '../src/zuoraSchemas';
 import billingPreview from './fixtures/billing-preview-with-discount.json';
 
 test('getNextPayment', () => {

@@ -1,5 +1,5 @@
+import { zuoraDateFormat } from '@modules/zuora/common';
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from '../../../src/zuora/common';
 
 export const updateSubscriptionBody = (
 	contractEffectiveDate: Dayjs,

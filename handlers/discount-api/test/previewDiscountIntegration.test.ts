@@ -1,13 +1,13 @@
 /**
  * @group integration
  */
+import { checkDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
+import { cancelSubscription } from '@modules/zuora/cancelSubscription';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import type { Stage } from '../../../modules/stage';
-import { discountEndpoint } from '../src/endpoints/discountEndpoint';
-import { checkDefined } from '../src/nullAndUndefined';
+import { discountEndpoint } from '../src/discountEndpoint';
 import { previewDiscountSchema } from '../src/responseSchema';
-import { cancelSubscription } from '../src/zuora/cancelSubscription';
-import { ZuoraClient } from '../src/zuora/zuoraClient';
 import { createDigitalSubscription } from './helpers';
 
 const stage: Stage = 'CODE';

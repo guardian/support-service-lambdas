@@ -1,8 +1,8 @@
-import { ZuoraCatalog } from '../../src/catalog/catalog';
-import type { Catalog } from '../../src/catalog/catalogSchema';
-import { catalogSchema } from '../../src/catalog/catalogSchema';
-import code from '../fixtures/catalog-code.json';
-import prod from '../fixtures/catalog-prod.json';
+import { ZuoraCatalog } from '../src/catalog';
+import type { Catalog } from '../src/catalogSchema';
+import { catalogSchema } from '../src/catalogSchema';
+import code from './fixtures/catalog-code.json';
+import prod from './fixtures/catalog-prod.json';
 
 test('catalogSchema', () => {
 	const codeCatalog: Catalog = catalogSchema.parse(code);

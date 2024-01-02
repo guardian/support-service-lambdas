@@ -1,7 +1,7 @@
-import type { BillingPeriod } from '../../../modules/billingPeriod';
-import type { Stage } from '../../../modules/stage';
-import { checkDefined } from './nullAndUndefined';
-import type { ZuoraSubscription } from './zuora/zuoraSchemas';
+import type { BillingPeriod } from '@modules/billingPeriod';
+import { checkDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
+import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 
 export const getDiscountFromSubscription = (
 	stage: Stage,

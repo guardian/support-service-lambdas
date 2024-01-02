@@ -4,12 +4,12 @@
  * @group integration
  */
 
+import { checkDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
+import { addDiscount } from '@modules/zuora/addDiscount';
+import { getSubscription } from '@modules/zuora/getSubscription';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import type { Stage } from '../../../modules/stage';
-import { checkDefined } from '../src/nullAndUndefined';
-import { addDiscount } from '../src/zuora/addDiscount';
-import { getSubscription } from '../src/zuora/getSubscription';
-import { ZuoraClient } from '../src/zuora/zuoraClient';
 import { createDigitalSubscription, doPriceRise } from './helpers';
 
 const stage: Stage = 'CODE';
