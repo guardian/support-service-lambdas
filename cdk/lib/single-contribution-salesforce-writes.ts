@@ -104,7 +104,7 @@ export class SingleContributionSalesforceWrites extends GuStack {
 			app: APP_NAME,
 			snsTopicName: snsTopic.topicName,
 			alarmName: `${this.stage}: Failed to sync single contribution to Salesforce`,
-			alarmDescription: `Impact: customer service representative cannot see single contribution in Salesforce. Fix: check logs for lambda ${lambda.functionName}`,
+			alarmDescription: `Impact: A Single Contribution record has not been added to Salesforce. Fix: check logs for lambda ${lambda.functionName} and redrive from dead letter queue or, if Salesforce is preventing record creation due to a data quality issue, fix and add record manually to Salesforce`,
 			metric: deadLetterQueue
 				.metric('ApproximateNumberOfMessagesVisible')
 				.with({ statistic: 'Sum', period: Duration.hours(1) }),

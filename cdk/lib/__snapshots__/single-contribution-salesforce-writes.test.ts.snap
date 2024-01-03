@@ -112,10 +112,11 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
           "Fn::Join": [
             "",
             [
-              "Impact: customer service representative cannot see single contribution in Salesforce. Fix: check logs for lambda ",
+              "Impact: A Single Contribution record has not been added to Salesforce. Fix: check logs for lambda ",
               {
                 "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
               },
+              " and redrive from dead letter queue or, if Salesforce is preventing record creation due to a data quality issue, fix and add record manually to Salesforce",
             ],
           ],
         },
@@ -668,10 +669,11 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
           "Fn::Join": [
             "",
             [
-              "Impact: customer service representative cannot see single contribution in Salesforce. Fix: check logs for lambda ",
+              "Impact: A Single Contribution record has not been added to Salesforce. Fix: check logs for lambda ",
               {
                 "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
               },
+              " and redrive from dead letter queue or, if Salesforce is preventing record creation due to a data quality issue, fix and add record manually to Salesforce",
             ],
           ],
         },
