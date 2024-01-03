@@ -3,17 +3,21 @@ This document is a work in progress, please add edits/updates!
 Hopefully we can make this process easier in future (code generation or ideally things would happen at build time)
 
 ## Important! Deploying a lambda with riffraff for the first time
-1. preview the deploy using riffraff and only tick the "copy file to s3" step before hitting deploy
-1. go back to the deploy screen and deploy as normal (all the steps)
+If you are deploying a lambda for the first time you will need to follow these steps or the deploy will fail:
+1. preview the deploy using riffraff and uncheck all tasks except the `uploadLambda` one before hitting deploy as shown in this screenshot:
+![riff raff screenshot](./riff-raff.png)
+1. go back to the deploy screen and deploy as normal (all the tasks)
 1. set up [continuous deployment](https://riffraff.gutools.co.uk/deployment/continuous) for future deploys (optional)
 
 ## Typescript lambdas
 ### Api Gateway with a custom domain name
 We have a code generation script (using [Hygen](https://www.hygen.io/)) which will generate a scaffold for new lambdas 
-with an API Gateway front end and a custom domain name. To use it run `pnpm new-lambda` at the root of the repo, you will be prompted to provide a name for 
+with an API Gateway front end and a custom domain name. To use it run `pnpm new-lambda` at the root of the repo, you will be prompted to 
+- provide a name for 
 your new lambda - the convention is to use a hyphenated name such as `my-new-lambda`.
+- decide whether to create an api key for your lambda - the default is to do so.
 
-This will carry out the following actions:
+This will then carry out the following actions:
 1. create a new subdirectory of `\handlers` with the name of your new lambda
 1. add a `package.json` a `riff-raff.yaml`, a `tsconfig.json` and a `src\index.ts` file to this directory
 1. add a new CDK lib definition for your new lambda and the related infrastructure into the `cdk\libs` directory
