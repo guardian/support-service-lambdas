@@ -6,7 +6,4 @@ sh: git add handlers/<%=lambdaName%>/tsconfig.json
 ---
 {
   "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "resolveJsonModule": true
-  }
 }
