@@ -10,7 +10,6 @@ jobs:
     strategy:
       matrix:
         subproject:
-          - test-api
           - discount-api
     runs-on: ubuntu-latest
     permissions:
