@@ -1,6 +1,5 @@
 # How to create a new Lambda
 This document is a work in progress, please add edits/updates!
-Hopefully we can make this process easier in future (code generation or ideally things would happen at build time)
 
 ## Important! Deploying a lambda with riffraff for the first time
 If you are deploying a lambda for the first time you will need to follow these steps or the deploy will fail:
