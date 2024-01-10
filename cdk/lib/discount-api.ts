@@ -108,8 +108,7 @@ export class DiscountApi extends GuStack {
 						effect: Effect.ALLOW,
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas`,
-							`arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
 						],
 					}),
 				],
