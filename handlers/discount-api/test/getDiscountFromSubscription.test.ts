@@ -1,8 +1,3 @@
-/**
- * Creates test subscriptions in various state to test the price rise logic
- *
- * @group integration
- */
 import { zuoraSubscriptionSchema } from '@modules/zuora/zuoraSchemas';
 import { getDiscountFromSubscription } from '../src/productToDiscountMapping';
 import json from './fixtures/digital-subscriptions/get-discount-test.json';

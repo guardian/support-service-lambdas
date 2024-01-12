@@ -1,0 +1,27 @@
+{
+  "accountId": "8a12976380bd0c8a0180c4c7cc440605",
+  "invoiceItems": [
+    {
+      "id": "0b1d1a0734524f1f9ae0632d4b3847f8",
+      "subscriptionName": "A-S01675043",
+      "subscriptionId": "8a1294d38cd9b934018cf7af56c72c64",
+      "subscriptionNumber": "A-S01675043",
+      "serviceStartDate": "2024-05-30",
+      "serviceEndDate": "2025-05-29",
+      "chargeAmount": 195.45,
+      "chargeDescription": "",
+      "chargeName": "Digital Pack Annual",
+      "chargeNumber": "C-03544787",
+      "chargeId": "8a12976380bd0c8a0180c4c7cd100614",
+      "productName": "Digital Pack",
+      "quantity": 1,
+      "taxAmount": 19.55,
+      "unitOfMeasure": "",
+      "chargeDate": "2024-01-11 08:41:52",
+      "chargeType": "Recurring",
+      "processingType": "Charge",
+      "appliedToItemId": null
+    }
+  ],
+  "success": true
+}
