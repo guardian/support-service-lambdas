@@ -1,3 +1,4 @@
+import { getSingleOrThrow } from '@modules/arrayFunctions';
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
@@ -7,8 +8,12 @@ export const getDiscountFromSubscription = (
 	stage: Stage,
 	subscription: ZuoraSubscription,
 ) => {
+	const nonDiscountRatePlan = getSingleOrThrow(
+		subscription.ratePlans,
+		(ratePlan) => ratePlan.productName !== 'Discounts',
+	);
 	const billingPeriod = checkDefined(
-		subscription.ratePlans[0]?.ratePlanCharges[0]?.billingPeriod,
+		nonDiscountRatePlan.ratePlanCharges[0]?.billingPeriod,
 		`No billing period found on subscription ${subscription.subscriptionNumber}`,
 	);
 	return ProductToDiscountMapping[stage][billingPeriod];
