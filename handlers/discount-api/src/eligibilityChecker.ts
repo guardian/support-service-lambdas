@@ -45,6 +45,7 @@ export class EligibilityChecker {
 
 		const eligibleRatePlans: RatePlan[] = subscription.ratePlans.filter(
 			(ratePlan) =>
+				ratePlan.lastChangeType !== 'Remove' &&
 				eligibleProductRatePlans.includes(ratePlan.productRatePlanId),
 		);
 
