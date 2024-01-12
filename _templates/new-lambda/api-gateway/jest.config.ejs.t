@@ -1,3 +1,9 @@
+---
+# This template creates a jest.config.js for the new lambda
+
+to: handlers/<%=lambdaName%>/jest.config.js
+sh: git add handlers/<%=lambdaName%>/jest.config.js
+---
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',

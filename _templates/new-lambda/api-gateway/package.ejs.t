@@ -11,6 +11,6 @@ sh: git add handlers/<%=lambdaName%>/package.json
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
     "lint": "eslint src/**/*.ts",
-    "package": "pnpm type-check && pnpm lint && pnpm build && cd target; zip -qr <%=lambdaName%>.zip ./*.js"
+    "package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr <%=lambdaName%>.zip ./*.js"
   }
 }
