@@ -10,7 +10,9 @@ export const getDiscountFromSubscription = (
 ) => {
 	const nonDiscountRatePlan = getSingleOrThrow(
 		subscription.ratePlans,
-		(ratePlan) => ratePlan.productName !== 'Discounts',
+		(ratePlan) =>
+			ratePlan.productName !== 'Discounts' &&
+			ratePlan.lastChangeType !== 'Remove',
 	);
 	const billingPeriod = checkDefined(
 		nonDiscountRatePlan.ratePlanCharges[0]?.billingPeriod,
