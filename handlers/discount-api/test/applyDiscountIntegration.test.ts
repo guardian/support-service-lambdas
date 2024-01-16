@@ -60,6 +60,7 @@ test('createPriceRiseSubscription', async () => {
 	const discounted = await addDiscount(
 		zuoraClient,
 		subscriptionNumber,
+		dayjs(subscription.termStartDate),
 		nextBillingDate,
 		'8ad09be48b23d33f018b23e53afd522d',
 	);
