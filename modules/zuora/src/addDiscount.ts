@@ -58,6 +58,7 @@ export const previewDiscount = async (
 		// 14 days after the contract effective date (acquisition date/when the term begins) to provide a free
 		// trial period, for annual subs in particular the next billing date is going to be outside the current term.
 		currentTerm: 24,
+		currentTermPeriodType: 'Month',
 		preview: 'true',
 		invoiceTargetDate: zuoraDateFormat(contractEffectiveDate),
 	});
