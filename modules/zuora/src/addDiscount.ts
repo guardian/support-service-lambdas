@@ -15,11 +15,11 @@ export const addDiscount = async (
 	contractEffectiveDate: Dayjs,
 	discountProductRatePlanId: string,
 ): Promise<ZuoraSuccessResponse> => {
-	// If the next billing date is outside the current term, we will need to extend the current term up to the
-	// next billing date as you can't add a rate plan after the end of the current term.
-	// As digital subscriptions have their customer acceptance date (when first payment is taken therefore billing date)
-	// 14 days after the contract effective date (acquisition date/when the term begins) to provide a free
-	// trial period, for annual subs the next billing date is going to be outside the current term.
+	// If the next billing date is outside the current term, we will need to extend it as you can't add a rate plan
+	// after the end of the current term. As digital subscriptions have their customer acceptance date (when first
+	// payment is taken therefore billing date) 14 days after the contract effective date (acquisition date/when the
+	// term begins) to provide a free trial period, for annual subs the next billing date is going to be outside the
+	// current term.
 	const newTermLengthIfRequired = getNewTermLengthIfRequired(
 		termStartDate,
 		termEndDate,
