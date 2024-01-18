@@ -11,15 +11,20 @@ export const addDiscount = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	termStartDate: Dayjs,
+	termEndDate: Dayjs,
 	contractEffectiveDate: Dayjs,
 	discountProductRatePlanId: string,
 ): Promise<ZuoraSuccessResponse> => {
-	// We need to extend the current term up to the next billing date as you can't add a rate plan after the end of
-	// the current term.
+	// If the next billing date is outside the current term, we will need to extend the current term up to the
+	// next billing date as you can't add a rate plan after the end of the current term.
 	// As digital subscriptions have their customer acceptance date (when first payment is taken therefore billing date)
 	// 14 days after the contract effective date (acquisition date/when the term begins) to provide a free
-	// trial period, for annual subs in particular the next billing date is going to be outside the current term.
-	const newTermLength = getNewTermLength(termStartDate, contractEffectiveDate);
+	// trial period, for annual subs the next billing date is going to be outside the current term.
+	const newTermLengthIfRequired = getNewTermLengthIfRequired(
+		termStartDate,
+		termEndDate,
+		contractEffectiveDate,
+	);
 	const path = `/v1/subscriptions/${subscriptionNumber}`;
 	const body = JSON.stringify({
 		add: [
@@ -28,16 +33,24 @@ export const addDiscount = async (
 				productRatePlanId: discountProductRatePlanId,
 			},
 		],
-		currentTerm: newTermLength,
-		currentTermPeriodType: 'Day',
+		...newTermLengthIfRequired,
 	});
 	return zuoraClient.put(path, body, zuoraSuccessResponseSchema);
 };
 
-export const getNewTermLength = (
+export const getNewTermLengthIfRequired = (
 	termStartDate: Dayjs,
+	termEndDate: Dayjs,
 	nextBillingDate: Dayjs,
-) => nextBillingDate.diff(termStartDate, 'day');
+) => {
+	if (nextBillingDate.isAfter(termEndDate)) {
+		return {
+			currentTerm: nextBillingDate.diff(termStartDate, 'day'),
+			currentTermPeriodType: 'Day',
+		};
+	}
+	return {};
+};
 
 export const previewDiscount = async (
 	zuoraClient: ZuoraClient,
