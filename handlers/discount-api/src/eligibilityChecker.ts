@@ -2,6 +2,7 @@ import { sum } from '@modules/arrayFunctions';
 import type { ZuoraCatalog } from '@modules/catalog/catalog';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
+import { isNotRemoved } from '@modules/zuora/rateplan';
 import type {
 	BillingPreview,
 	RatePlan,
@@ -45,7 +46,7 @@ export class EligibilityChecker {
 
 		const eligibleRatePlans: RatePlan[] = subscription.ratePlans.filter(
 			(ratePlan) =>
-				ratePlan.lastChangeType !== 'Remove' &&
+				isNotRemoved(ratePlan) &&
 				eligibleProductRatePlans.includes(ratePlan.productRatePlanId),
 		);
 

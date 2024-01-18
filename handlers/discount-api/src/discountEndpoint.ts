@@ -82,6 +82,7 @@ export const discountEndpoint = async (
 			zuoraClient,
 			requestBody.subscriptionNumber,
 			subscription.termStartDate,
+			subscription.termEndDate,
 			nextBillingDate,
 			discount.productRatePlanId,
 		);
@@ -127,6 +128,7 @@ const applyDiscount = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	termStartDate: Date,
+	termEndDate: Date,
 	nextBillingDate: Date,
 	discountProductRatePlanId: string,
 ) => {
@@ -135,6 +137,7 @@ const applyDiscount = async (
 		zuoraClient,
 		subscriptionNumber,
 		dayjs(termStartDate),
+		dayjs(termEndDate),
 		dayjs(nextBillingDate),
 		discountProductRatePlanId,
 	);

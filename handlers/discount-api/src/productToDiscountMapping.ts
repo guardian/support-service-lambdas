@@ -2,6 +2,7 @@ import { getSingleOrThrow } from '@modules/arrayFunctions';
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
+import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 
 export const getDiscountFromSubscription = (
@@ -10,9 +11,7 @@ export const getDiscountFromSubscription = (
 ) => {
 	const nonDiscountRatePlan = getSingleOrThrow(
 		subscription.ratePlans,
-		(ratePlan) =>
-			ratePlan.productName !== 'Discounts' &&
-			ratePlan.lastChangeType !== 'Remove',
+		isNotRemovedOrDiscount,
 	);
 	const billingPeriod = checkDefined(
 		nonDiscountRatePlan.ratePlanCharges[0]?.billingPeriod,

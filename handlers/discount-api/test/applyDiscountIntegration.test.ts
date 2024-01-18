@@ -61,6 +61,7 @@ test('createPriceRiseSubscription', async () => {
 		zuoraClient,
 		subscriptionNumber,
 		dayjs(subscription.termStartDate),
+		dayjs(subscription.termEndDate),
 		nextBillingDate,
 		'8ad09be48b23d33f018b23e53afd522d',
 	);
