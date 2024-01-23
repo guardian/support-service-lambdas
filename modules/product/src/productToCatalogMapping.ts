@@ -314,7 +314,7 @@ export const getProductRatePlanId = <T extends Product>(
 	);
 };
 
-const getAllProductDetails = (stage: Stage): ProductDetails[] => {
+export const getAllProductDetails = (stage: Stage): ProductDetails[] => {
 	return products.flatMap((product) => {
 		const productOptions = getProductOptionsForProduct(product);
 		return getDeliveryOptionsForProduct(product).flatMap((deliveryOption) => {

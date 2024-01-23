@@ -1,5 +1,6 @@
 import {
 	findProductDetails,
+	getAllProductDetails,
 	getProductRatePlanId,
 } from '@modules/product/productToCatalogMapping';
 
@@ -15,5 +16,14 @@ test('We can find product details from a productRatePlanId', () => {
 		deliveryOption: 'Digital',
 		productOption: 'Monthly',
 		productRatePlanId,
+	});
+});
+
+test('All valid products have a product rate plan id', () => {
+	const allProducts = getAllProductDetails('CODE').concat(
+		getAllProductDetails('PROD'),
+	);
+	allProducts.forEach((product) => {
+		expect(product.productRatePlanId.length).toBeGreaterThan(0);
 	});
 });

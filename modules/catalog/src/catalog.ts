@@ -1,4 +1,5 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { sumNumbers } from '@modules/arrayFunctions';
 import { awsConfig } from '@modules/aws/config';
 import { checkDefined, isNotNull } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
@@ -44,20 +45,26 @@ export class ZuoraCatalog {
 	public getCatalogPriceOfCharges = (
 		productRatePlanId: string,
 		currency: string,
-	) => {
+	): number[] => {
 		const catalogPlan: ProductRatePlan = checkDefined(
 			this.catalog.products
 				.flatMap((product) => product.productRatePlans)
 				.find((productRatePlan) => productRatePlan.id === productRatePlanId),
 			`ProductRatePlan with id ${productRatePlanId} not found in catalog`,
 		);
-		const prices = catalogPlan.productRatePlanCharges
+		return catalogPlan.productRatePlanCharges
 			.map((charge: ProductRatePlanCharge) =>
 				charge.pricing.find((price: Pricing) => price.currency === currency),
 			)
 			.map((price) => price?.price)
 			.filter(isNotNull);
-
-		return prices;
 	};
+
+	public getCatalogPrice(productRatePlanId: string, currency: string): number {
+		const chargePrices = this.getCatalogPriceOfCharges(
+			productRatePlanId,
+			currency,
+		);
+		return sumNumbers(chargePrices);
+	}
 }
