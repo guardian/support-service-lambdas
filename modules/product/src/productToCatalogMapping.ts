@@ -253,19 +253,19 @@ const prodProductToCatalogMapping: ProductToCatalogMapping = {
 		},
 		HomeDelivery: {
 			Everyday: {
-				productRatePlanId: '2c92c0f955c3cf0f0155c5d9e2493c43',
+				productRatePlanId: '2c92a0fd560d13880156136b72e50f0c',
 			},
 			Sixday: {
-				productRatePlanId: '2c92c0f955c3cf0f0155c5d9ddf13bc5',
+				productRatePlanId: '2c92a0ff560d311b0156136f2afe5315',
 			},
 			Weekend: {
-				productRatePlanId: '2c92c0f955c3cf0f0155c5d9df433bf7',
+				productRatePlanId: '2c92a0fd5614305c01561dc88f3275be',
 			},
 			Sunday: {
-				productRatePlanId: '2c92c0f85aff3453015b1041dfd2317f',
+				productRatePlanId: '2c92a0ff5af9b657015b0fea5b653f81',
 			},
 			Saturday: {
-				productRatePlanId: '2c92c0f961f9cf300161fc4d2e3e3664',
+				productRatePlanId: '2c92a0fd5e1dcf0d015e3cb39d0a7ddb',
 			},
 		},
 		SubscriptionCard: {
@@ -299,13 +299,6 @@ export const getProductRatePlanId = <T extends Product>(
 	deliveryOption: DeliveryOption<T>,
 	productOption: ProductOption<T>,
 ) => {
-	console.log(
-		'Getting product rate plan for',
-		stage,
-		product,
-		deliveryOption,
-		productOption,
-	);
 	const stageMappings = mappingsByStage[stage];
 	const productMappings = stageMappings[product][deliveryOption][productOption];
 	return checkDefined(

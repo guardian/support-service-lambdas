@@ -3,6 +3,7 @@ import {
 	getAllProductDetails,
 	getProductRatePlanId,
 } from '@modules/product/productToCatalogMapping';
+import { findDuplicates } from '@modules/arrayFunctions';
 
 test('We can find a product rate plan from product details', () => {
 	expect(
@@ -26,4 +27,18 @@ test('All valid products have a product rate plan id', () => {
 	allProducts.forEach((product) => {
 		expect(product.productRatePlanId.length).toBeGreaterThan(0);
 	});
+});
+
+test('All product rate plan ids are unique', () => {
+	const allProducts = getAllProductDetails('CODE').concat(
+		getAllProductDetails('PROD'),
+	);
+	const productRatePlanIds = allProducts
+		.map((product) => {
+			return product.productRatePlanId;
+		})
+		.filter((id) => id !== 'Product option not available for this product');
+	const duplicateProductRatePlanIds = findDuplicates(productRatePlanIds);
+	console.log(duplicateProductRatePlanIds);
+	expect(duplicateProductRatePlanIds.length).toBe(0);
 });

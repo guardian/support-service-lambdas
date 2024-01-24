@@ -33,3 +33,6 @@ export const getSingleOrThrow = <T>(
 	}
 	return matchingElements[0];
 };
+
+export const findDuplicates = <T>(array: T[]) =>
+	array.filter((item, index) => array.indexOf(item) !== index);
