@@ -34,8 +34,11 @@ DigitalSubscription has the product options
 - `Annual`
 - `OneYearGift`
 - `ThreeMonthGift`
-# Usage
 
+This diagram shows the mapping between this type model and the Zuora catalog:
+
+![product-model-to-zuora.png](product-model-to-zuora.png)
+# Usage
 By providing a `Product`, `DeliveryOption` and `ProductOption` we can map to any [product rate plan](https://knowledgecenter.zuora.com/Zuora_Central_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlan) in the Zuora catalog and from that we can retrieve the pricing information for that particular configuration.
 ```typescript
 import { getZuoraCatalog } from '@modules/catalog/catalog';
