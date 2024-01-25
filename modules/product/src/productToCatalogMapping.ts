@@ -1,3 +1,4 @@
+import { checkDefined } from '@modules/nullAndUndefined';
 import type {
 	DeliveryOption,
 	Product,
@@ -9,7 +10,6 @@ import {
 	getProductOptionsForProduct,
 	products,
 } from '@modules/product/product';
-import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 
 export type ProductToCatalogMapping = {
@@ -20,6 +20,8 @@ export type ProductToCatalogMapping = {
 	};
 };
 
+const productOptionNotAvailable =
+	'Product option not available for this product';
 const codeProductToCatalogMapping: ProductToCatalogMapping = {
 	DigitalSubscription: {
 		Digital: {
@@ -111,10 +113,10 @@ const codeProductToCatalogMapping: ProductToCatalogMapping = {
 				productRatePlanId: '8ad096ca8992481d018992a36256175e',
 			},
 			Sunday: {
-				productRatePlanId: 'Product option not available for this product',
+				productRatePlanId: productOptionNotAvailable,
 			},
 			Saturday: {
-				productRatePlanId: 'Product option not available for this product',
+				productRatePlanId: productOptionNotAvailable,
 			},
 		},
 		HomeDelivery: {
@@ -245,10 +247,10 @@ const prodProductToCatalogMapping: ProductToCatalogMapping = {
 				productRatePlanId: '8a12999f8a268c57018a27ebe868150c',
 			},
 			Sunday: {
-				productRatePlanId: 'Product option not available for this product',
+				productRatePlanId: productOptionNotAvailable,
 			},
 			Saturday: {
-				productRatePlanId: 'Product option not available for this product',
+				productRatePlanId: productOptionNotAvailable,
 			},
 		},
 		HomeDelivery: {
@@ -307,32 +309,35 @@ export const getProductRatePlanId = <T extends Product>(
 	);
 };
 
-export const getAllProductDetails = (stage: Stage): ProductDetails[] => {
-	return products.flatMap((product) => {
+export const getAllProductDetails = (stage: Stage): ProductDetails[] =>
+	products.flatMap((product) => {
 		const productOptions = getProductOptionsForProduct(product);
-		return getDeliveryOptionsForProduct(product).flatMap((deliveryOption) => {
-			return productOptions.flatMap((productOption) => {
-				const productRatePlanId = getProductRatePlanId(
-					stage,
-					product,
-					deliveryOption,
-					productOption,
-				);
-				return {
-					product,
-					deliveryOption,
-					productOption,
-					productRatePlanId,
-				};
-			});
-		});
+		return getDeliveryOptionsForProduct(product).flatMap((deliveryOption) =>
+			productOptions
+				.flatMap((productOption) => {
+					const productRatePlanId = getProductRatePlanId(
+						stage,
+						product,
+						deliveryOption,
+						productOption,
+					);
+					return {
+						product,
+						deliveryOption,
+						productOption,
+						productRatePlanId,
+					};
+				})
+				.filter(
+					(productDetails) =>
+						productDetails.productRatePlanId !== productOptionNotAvailable,
+				),
+		);
 	});
-};
 
 export const findProductDetails = (stage: Stage, productRatePlanId: string) => {
 	const allProducts = getAllProductDetails(stage);
-	const result = allProducts.find((product) => {
-		return product.productRatePlanId === productRatePlanId;
-	});
-	return result;
+	return allProducts.find(
+		(product) => product.productRatePlanId === productRatePlanId,
+	);
 };

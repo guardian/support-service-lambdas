@@ -1,9 +1,13 @@
+import { findDuplicates } from '@modules/arrayFunctions';
+import { ZuoraCatalog } from '@modules/catalog/catalog';
 import {
 	findProductDetails,
 	getAllProductDetails,
 	getProductRatePlanId,
 } from '@modules/product/productToCatalogMapping';
-import { findDuplicates } from '@modules/arrayFunctions';
+import type { Stage } from '@modules/stage';
+import codeCatalog from '../../catalog/test/fixtures/catalog-code.json';
+import prodCatalog from '../../catalog/test/fixtures/catalog-prod.json';
 
 test('We can find a product rate plan from product details', () => {
 	expect(
@@ -20,13 +24,22 @@ test('We can find product details from a productRatePlanId', () => {
 	});
 });
 
-test('All valid products have a product rate plan id', () => {
-	const allProducts = getAllProductDetails('CODE').concat(
-		getAllProductDetails('PROD'),
-	);
-	allProducts.forEach((product) => {
-		expect(product.productRatePlanId.length).toBeGreaterThan(0);
+const productExistsInCatalog = (stage: Stage) => {
+	const zuoraCatalog =
+		stage === 'CODE'
+			? new ZuoraCatalog(codeCatalog)
+			: new ZuoraCatalog(prodCatalog);
+	const allProductDetails = getAllProductDetails(stage);
+	allProductDetails.forEach((productDetails) => {
+		expect(
+			zuoraCatalog.getCatalogPlan(productDetails.productRatePlanId),
+		).toBeDefined();
 	});
+};
+
+test('All valid products exist in the catalog', () => {
+	productExistsInCatalog('CODE');
+	productExistsInCatalog('PROD');
 });
 
 test('All product rate plan ids are unique', () => {
