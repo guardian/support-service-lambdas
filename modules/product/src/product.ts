@@ -78,30 +78,6 @@ export type ProductOption<T extends Product> = T extends 'DigitalSubscription'
 	        ? ContributionProductOption
 	        : never;
 
-// --------------- Charges ---------------
-export type SubscriptionCharge = 'Subscription';
-export type ContributionCharge = 'Contribution';
-export type SupporterPlusCharges = SubscriptionCharge | ContributionCharge;
-export type NewspaperCharges =
-	| 'Monday'
-	| 'Tuesday'
-	| 'Wednesday'
-	| 'Thursday'
-	| 'Friday'
-	| 'Saturday'
-	| 'Sunday';
-export type ProductCharge<T extends Product> = T extends 'DigitalSubscription'
-	? SubscriptionCharge
-	: T extends 'Newspaper'
-	  ? NewspaperCharges
-	  : T extends 'GuardianWeekly'
-	    ? SubscriptionCharge
-	    : T extends 'SupporterPlus'
-	      ? SupporterPlusCharges
-	      : T extends 'Contribution'
-	        ? ContributionCharge
-	        : never;
-
 export type ProductDetails = {
 	product: Product;
 	deliveryOption: DeliveryOption<Product>;
