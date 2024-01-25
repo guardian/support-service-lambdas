@@ -1,6 +1,5 @@
 # Product Module
-This module defines our product structure and the mapping between that structure and the Zuora catalog which holds
-pricing information.
+This module defines a model to describe our product structure and the mapping between that structure and the Zuora catalog which holds pricing information.
 
 There are three main types involved in our product definitions:
 ## `Product` 
@@ -22,14 +21,14 @@ This represents the method of delivery of a particular product, it is of most re
 
 For digital only products (Supporter Plus, DigitalSubscription and Contribution) this value will always be `Digital`
 ## `ProductOption`
-This describes specific varieties or flavours of a product. For example Newspaper as the following product options:
+This describes specific varieties or flavours of a product. For example Newspaper has the following product options:
 - `Saturday`
 - `Sunday`
 - `Weekend`
 - `Sixday`
 - `Everyday`
                                                        
-DigitalSubscription has the product options
+DigitalSubscription has:
 - `Monthly`
 - `Annual`
 - `OneYearGift`
@@ -39,7 +38,7 @@ This diagram shows the mapping between this type model and the Zuora catalog:
 
 ![product-model-to-zuora.png](product-model-to-zuora.png)
 # Usage
-By providing a `Product`, `DeliveryOption` and `ProductOption` we can map to any [product rate plan](https://knowledgecenter.zuora.com/Zuora_Central_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlan) in the Zuora catalog and from that we can retrieve the pricing information for that particular configuration.
+By providing a `Product`, `DeliveryOption` and `ProductOption` we can map to any [product rate plan](https://knowledgecenter.zuora.com/Zuora_Central_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlan) in the Zuora catalog and from that we can retrieve the pricing information for that particular configuration. For instance if I want to find the GBP price to get the Newspaper delivered on a Saturday I can use the following:
 ```typescript
 import { getZuoraCatalog } from '@modules/catalog/catalog';
 import { getProductRatePlanId } from '@modules/product/productToCatalogMapping';
