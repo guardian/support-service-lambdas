@@ -7,7 +7,7 @@
 		"clean": "rm -rf .parcel-cache && pnpm -r run clean",
 		"test": "pnpm --stream -r run test",
 		"it-test": "pnpm --stream -r run it-test",
-		"new-lambda": "pnpm hygen new-lambda api-gateway && cd ./cdk && yarn lint --fix && yarn test -u && git add ./lib/__snapshots__/*.test.ts.snap"
+		"new-lambda": "pnpm hygen new-lambda api-gateway && pnpm install && cd ./cdk && yarn lint --fix && yarn test -u && git add ./lib/__snapshots__/*.test.ts.snap"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "^7.0.0",

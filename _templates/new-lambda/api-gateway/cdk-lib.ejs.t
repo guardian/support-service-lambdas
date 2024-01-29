@@ -11,6 +11,9 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
+<% if (includeApiKey === 'Y'){ %>
+import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
+<% } %>
 import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -59,11 +62,38 @@ export class <%= PascalCase %> extends GuStack {
 				id: nameWithStage,
 				restApiName: nameWithStage,
 				description: 'API Gateway created by CDK',
+				proxy: true,
 				deployOptions: {
 					stageName: this.stage,
 				},
+			<% if (includeApiKey === 'Y'){ %>
+				apiKeySourceType: ApiKeySourceType.HEADER,
+				defaultMethodOptions: {
+					apiKeyRequired: true,
+				},
+			<% } %>
 			},
 		});
+	<% if (includeApiKey === 'Y'){ %>
+		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
+			name: nameWithStage,
+			description: 'REST endpoints for <%= lambdaName %>>',
+			apiStages: [
+				{
+					stage: lambda.api.deploymentStage,
+					api: lambda.api,
+				},
+			],
+		});
+
+		// create api key
+		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
+		apiKeyName: `${app}-key-${this.stage}`,
+		});
+
+		// associate api key to plan
+		usagePlan.addApiKey(apiKey);
+	<% } %>
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
