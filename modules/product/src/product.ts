@@ -84,30 +84,24 @@ export type ProductDetails = {
 	productOption: ProductOption<Product>;
 	productRatePlanId: string;
 };
-export const getDeliveryOptionsForProduct = (product: Product) => {
-	switch (product) {
-		case 'DigitalSubscription':
-		case 'SupporterPlus':
-		case 'Contribution':
-			return ['Digital'] as const;
-		case 'Newspaper':
-			return newspaperDeliveryOptions;
-		case 'GuardianWeekly':
-			return guardianWeeklyDeliveryOptions;
-	}
+
+const deliveryOptionsForProduct = {
+	DigitalSubscription: ['Digital'] as const,
+	Newspaper: newspaperDeliveryOptions,
+	GuardianWeekly: guardianWeeklyDeliveryOptions,
+	SupporterPlus: ['Digital'] as const,
+	Contribution: ['Digital'] as const,
 };
 
-export const getProductOptionsForProduct = (product: Product) => {
-	switch (product) {
-		case 'DigitalSubscription':
-			return digitalSubscriptionProductOptions;
-		case 'Newspaper':
-			return newspaperProductOptions;
-		case 'GuardianWeekly':
-			return guardianWeeklyProductOptions;
-		case 'SupporterPlus':
-			return supporterPlusProductOptions;
-		case 'Contribution':
-			return contributionProductOptions;
-	}
+export const getDeliveryOptionsForProduct = (product: Product) =>
+	deliveryOptionsForProduct[product];
+
+const productOptionsForProduct = {
+	DigitalSubscription: digitalSubscriptionProductOptions,
+	Newspaper: newspaperProductOptions,
+	GuardianWeekly: guardianWeeklyProductOptions,
+	SupporterPlus: supporterPlusProductOptions,
+	Contribution: contributionProductOptions,
 };
+export const getProductOptionsForProduct = (product: Product) =>
+	productOptionsForProduct[product];
