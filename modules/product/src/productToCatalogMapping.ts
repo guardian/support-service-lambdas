@@ -6,8 +6,8 @@ import type {
 	ProductOption,
 } from '@modules/product/product';
 import {
-	getDeliveryOptionsForProduct,
-	getProductOptionsForProduct,
+	deliveryOptionsForProduct,
+	productOptionsForProduct,
 	products,
 } from '@modules/product/product';
 import type { Stage } from '@modules/stage';
@@ -311,8 +311,8 @@ export const getProductRatePlanId = <T extends Product>(
 
 export const getAllProductDetails = (stage: Stage): ProductDetails[] =>
 	products.flatMap((product) => {
-		const productOptions = getProductOptionsForProduct(product);
-		return getDeliveryOptionsForProduct(product).flatMap((deliveryOption) =>
+		const productOptions = productOptionsForProduct[product];
+		return deliveryOptionsForProduct[product].flatMap((deliveryOption) =>
 			productOptions
 				.flatMap((productOption) => {
 					const productRatePlanId = getProductRatePlanId(

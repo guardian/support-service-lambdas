@@ -20,7 +20,9 @@ export const guardianWeeklyDeliveryOptions = [
 ] as const;
 export type GuardianWeeklyDeliveryOption =
 	(typeof guardianWeeklyDeliveryOptions)[number];
-export type DigitalDeliveryOption = 'Digital';
+export const digitalDeliveryOption = 'Digital';
+export type DigitalDeliveryOption = typeof digitalDeliveryOption;
+
 export type DeliveryOption<T extends Product> = T extends 'DigitalSubscription'
 	? DigitalDeliveryOption
 	: T extends 'Newspaper'
@@ -85,23 +87,22 @@ export type ProductDetails = {
 	productRatePlanId: string;
 };
 
-const deliveryOptionsForProduct = {
-	DigitalSubscription: ['Digital'] as const,
+export const deliveryOptionsForProduct: {
+	[P in Product]: ReadonlyArray<DeliveryOption<P>>;
+} = {
+	DigitalSubscription: [digitalDeliveryOption],
 	Newspaper: newspaperDeliveryOptions,
 	GuardianWeekly: guardianWeeklyDeliveryOptions,
-	SupporterPlus: ['Digital'] as const,
-	Contribution: ['Digital'] as const,
+	SupporterPlus: [digitalDeliveryOption],
+	Contribution: [digitalDeliveryOption],
 };
 
-export const getDeliveryOptionsForProduct = (product: Product) =>
-	deliveryOptionsForProduct[product];
-
-const productOptionsForProduct = {
+export const productOptionsForProduct: {
+	[P in Product]: ReadonlyArray<ProductOption<P>>;
+} = {
 	DigitalSubscription: digitalSubscriptionProductOptions,
 	Newspaper: newspaperProductOptions,
 	GuardianWeekly: guardianWeeklyProductOptions,
 	SupporterPlus: supporterPlusProductOptions,
 	Contribution: contributionProductOptions,
 };
-export const getProductOptionsForProduct = (product: Product) =>
-	productOptionsForProduct[product];
