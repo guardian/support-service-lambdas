@@ -7,6 +7,7 @@ import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
+import { ProductSwitchApi } from '../lib/product-switch-api';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
@@ -150,3 +151,18 @@ new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-PROD', {
 	stack: 'membership',
 	stage: 'PROD',
 });
+new ProductSwitchApi(app, 'product-switch-api-CODE', {
+    stack: 'support',
+    stage: 'CODE',
+    domainName: `product-switch-api-code.${supportApisDomain}`,
+    hostedZoneId: supportHostedZoneId,
+    certificateId: supportCertificateId,
+});
+new ProductSwitchApi(app, 'product-switch-api-PROD', {
+    stack: 'support',
+    stage: 'PROD',
+    domainName: `product-switch-api.${supportApisDomain}`,
+    hostedZoneId: supportHostedZoneId,
+    certificateId: supportCertificateId,
+});
+
