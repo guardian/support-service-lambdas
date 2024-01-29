@@ -116,6 +116,19 @@ importers:
         specifier: ^8.10.129
         version: 8.10.134
 
+  handlers/product-switch-api:
+    dependencies:
+      dayjs:
+        specifier: ^1.11.10
+        version: 1.11.10
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.129
+        version: 8.10.129
+
   handlers/salesforce-disaster-recovery:
     dependencies:
       '@aws-sdk/client-s3':

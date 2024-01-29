@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - product-switch-api
           - generate-product-catalog
           - alarms-handler
           - discount-api
@@ -48,3 +49,4 @@ jobs:
               - ./cdk/cdk.out
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
+
