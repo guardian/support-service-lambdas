@@ -1,0 +1,17 @@
+name: 'Update CFN Templates'
+description: 'Fetch cached CFN templates if unchanged, or generate fresh ones.'
+inputs:
+  custom-cdk-dir-path:
+    description: 'Custom CDK directory path'
+    required: false
+    default: './cdk'
+runs:
+  using: "composite"
+  steps:
+    - if: {{ false }}
+      run: echo "Hello, World!"
+      shell: bash
+
+    - if: {{ true }}
+      run: echo "Goodbye!"
+      shell: bash
