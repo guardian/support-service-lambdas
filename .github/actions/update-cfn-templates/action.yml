@@ -1,12 +1,21 @@
 name: 'Update CFN Templates'
-description: 'Fetch cached CFN templates if unchanged, or generate fresh ones.'
+description: 'Fetch cached CFN templates if unchanged, or generate updates ones'
 inputs:
-  custom-cdk-dir-path:
-    description: 'Custom CDK directory path'
+  custom-cdk-dir:
+    description: 'Custom CDK directory'
     required: false
     default: './cdk'
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - run: echo "Hello, World!"
+    - name: 'Check for changes'
+      run: ./script/diff_cdk_dir.sh ${{inputs.custom-cdk-dir-path}}
+      shell: bash
+
+    - if: ${{ env.CDK_CHANGES == 'true' }}
+      run: echo "--------------- There are changes ---------------"
+      shell: bash
+
+    - if: ${{ env.CDK_CHANGES == 'false' }}
+      run: echo "--------------- There are no changes ---------------"
       shell: bash
