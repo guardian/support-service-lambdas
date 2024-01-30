@@ -8,10 +8,5 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - if: {{ false }}
-      run: echo "Hello, World!"
-      shell: bash
-
-    - if: {{ true }}
-      run: echo "Goodbye!"
+    - run: echo "Hello, World!"
       shell: bash
