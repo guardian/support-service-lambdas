@@ -11,10 +11,16 @@ runs:
     - name: 'Checkout'
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0
+        fetch-depth: 2
+
+    - run: echo "head - ${{ github.event.pull_request.head.sha }}"
+      shell: bash
+
+    - run: echo "base - ${{ github.event.pull_request.base.sha }}"
+      shell: bash
 
     - name: 'Check for changes'
-      run: ./script/diff_cdk_dir.sh ${{inputs.custom-cdk-dir}}
+      run: ./script/diff_cdk_dir.sh ${{ inputs.custom-cdk-dir }}
       shell: bash
 
     - if: ${{ env.CDK_CHANGES == 'true' }}
