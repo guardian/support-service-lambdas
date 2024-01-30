@@ -1,0 +1,28 @@
+name: 'Update CFN Templates'
+description: 'Fetch cached CFN templates if unchanged, or generate updates ones'
+inputs:
+  custom-cdk-dir:
+    description: 'Custom CDK directory'
+    required: false
+    default: './cdk'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: 'Check for changes'
+      run: ./script/diff_cdk_dir.sh ${{ inputs.custom-cdk-dir }} ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
+      shell: bash
+
+    - name: 'Build new CFN templates'
+      if: ${{ env.CDK_CHANGES == 'true' }}
+      run: ./script/cfn.sh ${{ inputs.custom-cdk-dir }}
+      shell: bash
+
+    - name: 'Fetch cached CFN templates'
+      if: ${{ env.CDK_CHANGES == 'false' }}
+      run: echo "There are no CDK changes from main"
+      shell: bash
