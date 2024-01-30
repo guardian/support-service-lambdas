@@ -2,46 +2,69 @@
 This module defines a model to describe our product structure and the mapping between that structure and the Zuora catalog which holds pricing information.
 
 There are three main types involved in our product definitions:
-## `Product` 
-This represents a product which we sell, available values are 
-- `Guardian Weekly`
+## `ProductFamilyKey` 
+This represents a family or category of products which we sell, available values are 
+- `GuardianWeekly`
 - `Newspaper`
-- `Supporter Plus`
-- `DigitalSubscription`
-- `Contribution`
-## `DeliveryOption`
-This represents the method of delivery of a particular product, it is of most relevance to Newspaper and Guardian Weekly which have the available values of 
-### Newspaper:
+- `Digital`
+## `ZuoraProductKey`
+This maps onto a particular product defined in the Zuora catalog. Each ZuoraProductKey belongs to a product family so it is a generic type: 
+```typescript
+type ZuoraProductKey<PF extends ProductFamilyKey>
+``` 
+available values for each product family key are:
+#### Newspaper:
 - `NationalDelivery`
 - `HomeDelivery`
 - `SubscriptionCard`
-### Guardian Weekly
+#### GuardianWeekly
 - `Domestic`
 - `RestOfWorld`
+#### Digital
+- `DigitalSubscription`
+- `SupporterPlus`
+- `Contribution`
 
-For digital only products (Supporter Plus, DigitalSubscription and Contribution) this value will always be `Digital`
-## `ProductOption`
-This describes specific varieties or flavours of a product. For example Newspaper has the following product options:
-- `Saturday`
-- `Sunday`
-- `Weekend`
-- `Sixday`
-- `Everyday`
-                                                       
-DigitalSubscription has:
-- `Monthly`
-- `Annual`
-- `OneYearGift`
-- `ThreeMonthGift`
+## `ProductRatePlanKey`
+This maps to an individual product rate plan. Each ProductRatePlanKey belongs to a specific product family and zuora product so it is also a generic type with the signature:
+```typescript
+type ProductRatePlanKey<
+	PF extends ProductFamilyKey,
+	ZP extends ZuoraProductKey<PF>,
+>
+```
+Examples of product options for particular product families and Zuora products are:
+
+#### Newspaper
+- `HomeDelivery`
+  - `Saturday`
+  - `Sunday`
+  - `Weekend`
+  - `Sixday`
+  - `Everyday`
+- `NationalDelivery`
+  - `Weekend`
+  - `Sixday`
+  - `Everyday` // National delivery doesn't have a Saturday and Sunday option
+
+#### Digital
+- `DigitalSubscription`
+  - `Monthly`
+  - `Annual`
+  - `OneYearGift`
+  - `ThreeMonthGift`
+- `SupporterPlus`
+  - `Monthly`
+  - `Annual`
 
 This diagram shows the mapping between this type model and the Zuora catalog:
 
 ![product-model-to-zuora.png](product-model-to-zuora.png)
 # Usage
-By providing a `Product`, `DeliveryOption` and `ProductOption` we can map to any [product rate plan](https://knowledgecenter.zuora.com/Zuora_Central_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlan) in the Zuora catalog and from that we can retrieve the pricing information for that particular configuration. For instance if I want to find the GBP price to get the Newspaper delivered on a Saturday I can use the following:
+By providing a `ProductFamilyKey`, `ZuoraProductKey` and `ProductRatePlanKey` we can map to any [product rate plan](https://knowledgecenter.zuora.com/Zuora_Central_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlan) in the Zuora catalog and from that we can retrieve the pricing information for that particular configuration. For instance if I want to find the GBP price to get the Newspaper delivered on a Saturday I can use the following:
 ```typescript
 import { getZuoraCatalog } from '@modules/catalog/catalog';
-import { getProductRatePlanId } from '@modules/product/productToCatalogMapping';
+import { getProductRatePlanId } from '@modules/product/productCatalogMapping';
 
 const stage = 'CODE';
 const catalog = await getZuoraCatalog(stage);
@@ -58,7 +81,7 @@ const price = catalog.getCatalogPrice(productRatePlanId, 'GBP');
 ```
 
 ## Implementation
-`Product` is defined as a union type, `DeliveryOption` and `ProductOption` are generic types which take a type parameter specifying the product they are valid for, this ensures that we only use options which are appropriate for the given product
+`ProductFamilyKey` is defined as a union type, `ZuoraProductKey` and `ProductRatePlanKey` are generic types which take type parameters specifying the product they are valid for, this ensures that we only use options which are appropriate for the given product
 
 ```typescript
 import {getProductRatePlanId} from "./productToCatalogMapping";
@@ -66,7 +89,7 @@ import {getProductRatePlanId} from "./productToCatalogMapping";
 const productRatePlanId = getProductRatePlanId(
     'CODE',
     'GuardianWeekly',
-    'Digital', // TS2345: Argument of type "Digital" is not assignable to parameter of type "RestOfWorld" | "Domestic"
+    'HomeDelivery', // TS2345: Argument of type "Digital" is not assignable to parameter of type "RestOfWorld" | "Domestic"
     'Monthly',
 );
 ```

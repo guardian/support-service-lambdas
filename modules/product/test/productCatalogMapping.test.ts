@@ -4,20 +4,21 @@ import {
 	findProductDetails,
 	getAllProductDetails,
 	getProductRatePlanId,
-} from '@modules/product/productToCatalogMapping';
+} from '@modules/product/productCatalogMapping';
 import type { Stage } from '@modules/stage';
 import codeCatalog from '../../catalog/test/fixtures/catalog-code.json';
 import prodCatalog from '../../catalog/test/fixtures/catalog-prod.json';
 
 test('We can find a product rate plan from product details', () => {
 	expect(
-		getProductRatePlanId('CODE', 'SupporterPlus', 'SupporterPlus', 'Monthly'),
+		getProductRatePlanId('CODE', 'Digital', 'SupporterPlus', 'Monthly'),
 	).toBe('8ad08cbd8586721c01858804e3275376');
 });
+
 test('We can find product details from a productRatePlanId', () => {
 	const productRatePlanId = '2c92c0f84bbfec8b014bc655f4852d9d';
 	expect(findProductDetails('CODE', productRatePlanId)).toStrictEqual({
-		productFamily: 'DigitalSubscription',
+		productFamily: 'Digital',
 		zuoraProduct: 'DigitalSubscription',
 		productRatePlan: 'Monthly',
 		productRatePlanId,

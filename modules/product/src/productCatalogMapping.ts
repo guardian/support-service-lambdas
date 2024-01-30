@@ -1,29 +1,7 @@
-import { checkDefined } from '@modules/nullAndUndefined';
-import type {
-	ProductDetails,
-	ProductFamily,
-	ProductRatePlan,
-	ZuoraProduct,
-} from '@modules/product/productFamily';
-import {
-	productFamilies,
-	productRatePlansForProductFamily,
-	zuoraProductsForProductFamily,
-} from '@modules/product/productFamily';
 import type { Stage } from '@modules/stage';
 
-export type ProductToCatalogMapping = {
-	[P in ProductFamily]: {
-		[DO in ZuoraProduct<P>]: {
-			[PO in ProductRatePlan<P>]: { productRatePlanId: string };
-		};
-	};
-};
-
-const productOptionNotAvailable =
-	'Product option not available for this product';
-const codeProductToCatalogMapping: ProductToCatalogMapping = {
-	DigitalSubscription: {
+const codeMapping = {
+	Digital: {
 		DigitalSubscription: {
 			Monthly: {
 				productRatePlanId: '2c92c0f84bbfec8b014bc655f4852d9d',
@@ -38,8 +16,6 @@ const codeProductToCatalogMapping: ProductToCatalogMapping = {
 				productRatePlanId: '2c92c0f8778bf8f60177915b477714aa',
 			},
 		},
-	},
-	SupporterPlus: {
 		SupporterPlus: {
 			Monthly: {
 				productRatePlanId: '8ad08cbd8586721c01858804e3275376',
@@ -48,8 +24,6 @@ const codeProductToCatalogMapping: ProductToCatalogMapping = {
 				productRatePlanId: '8ad08e1a8586721801858805663f6fab',
 			},
 		},
-	},
-	Contribution: {
 		Contribution: {
 			Monthly: {
 				productRatePlanId: '2c92c0f85a6b134e015a7fcd9f0c7855',
@@ -112,12 +86,6 @@ const codeProductToCatalogMapping: ProductToCatalogMapping = {
 			Weekend: {
 				productRatePlanId: '8ad096ca8992481d018992a36256175e',
 			},
-			Sunday: {
-				productRatePlanId: productOptionNotAvailable,
-			},
-			Saturday: {
-				productRatePlanId: productOptionNotAvailable,
-			},
 		},
 		HomeDelivery: {
 			Everyday: {
@@ -156,8 +124,8 @@ const codeProductToCatalogMapping: ProductToCatalogMapping = {
 	},
 };
 
-const prodProductToCatalogMapping: ProductToCatalogMapping = {
-	DigitalSubscription: {
+const prodMapping = {
+	Digital: {
 		DigitalSubscription: {
 			Monthly: {
 				productRatePlanId: '2c92a0fb4edd70c8014edeaa4eae220a',
@@ -172,8 +140,6 @@ const prodProductToCatalogMapping: ProductToCatalogMapping = {
 				productRatePlanId: '2c92a00d779932ef0177a65430d30ac1',
 			},
 		},
-	},
-	SupporterPlus: {
 		SupporterPlus: {
 			Monthly: {
 				productRatePlanId: '8a128ed885fc6ded018602296ace3eb8',
@@ -182,8 +148,6 @@ const prodProductToCatalogMapping: ProductToCatalogMapping = {
 				productRatePlanId: '8a128ed885fc6ded01860228f77e3d5a',
 			},
 		},
-	},
-	Contribution: {
 		Contribution: {
 			Monthly: {
 				productRatePlanId: '2c92a0fc5aacfadd015ad24db4ff5e97',
@@ -246,12 +210,6 @@ const prodProductToCatalogMapping: ProductToCatalogMapping = {
 			Weekend: {
 				productRatePlanId: '8a12999f8a268c57018a27ebe868150c',
 			},
-			Sunday: {
-				productRatePlanId: productOptionNotAvailable,
-			},
-			Saturday: {
-				productRatePlanId: productOptionNotAvailable,
-			},
 		},
 		HomeDelivery: {
 			Everyday: {
@@ -289,54 +247,64 @@ const prodProductToCatalogMapping: ProductToCatalogMapping = {
 		},
 	},
 };
+const mappingsForStage = (stage: Stage) =>
+	stage === 'CODE' ? codeMapping : prodMapping;
 
-export const mappingsByStage = {
-	CODE: codeProductToCatalogMapping,
-	PROD: prodProductToCatalogMapping,
-};
+type ProductFamilyKey = keyof typeof prodMapping;
+type ZuoraProductKey<PF extends ProductFamilyKey> =
+	keyof (typeof prodMapping)[PF];
+type ProductRatePlanKey<
+	PF extends ProductFamilyKey,
+	ZP extends ZuoraProductKey<PF>,
+> = keyof (typeof prodMapping)[PF][ZP];
+type ProductRatePlanObject = { productRatePlanId: string };
 
-export const getProductRatePlanId = <T extends ProductFamily>(
+export const getProductRatePlanId = <
+	P extends ProductFamilyKey,
+	ZP extends ZuoraProductKey<P>,
+	PRP extends ProductRatePlanKey<P, ZP>,
+>(
 	stage: Stage,
-	productFamily: T,
-	zuoraProduct: ZuoraProduct<T>,
-	productRatePlan: ProductRatePlan<T>,
+	productFamily: P,
+	zuoraProduct: ZP,
+	productRatePlan: PRP,
 ) => {
-	const stageMappings = mappingsByStage[stage];
-	const productMappings =
-		stageMappings[productFamily][zuoraProduct][productRatePlan];
-	return checkDefined(
-		productMappings.productRatePlanId,
-		`No product rate plan id found for product family ${productFamily} zuora product ${zuoraProduct} product rate plan ${productRatePlan}`,
-	);
+	const productRatePlanObject = mappingsForStage(stage)[productFamily][
+		zuoraProduct
+	][productRatePlan] as ProductRatePlanObject;
+	return productRatePlanObject.productRatePlanId;
 };
 
-export const getAllProductDetails = (stage: Stage): ProductDetails[] =>
-	productFamilies.flatMap((productFamily) => {
-		const productRatePlans = productRatePlansForProductFamily[productFamily];
-		return zuoraProductsForProductFamily[productFamily].flatMap(
-			(zuoraProduct) =>
-				productRatePlans
-					.flatMap((productRatePlan) => {
-						const productRatePlanId = getProductRatePlanId(
-							stage,
-							productFamily,
-							zuoraProduct,
-							productRatePlan,
-						);
-						return {
-							productFamily,
-							zuoraProduct,
-							productRatePlan,
-							productRatePlanId,
-						};
-					})
-					.filter(
-						(productDetails) =>
-							productDetails.productRatePlanId !== productOptionNotAvailable,
-					),
-		);
+export const getAllProductDetails = (stage: Stage) => {
+	const stageMapping = mappingsForStage(stage);
+	const keys = Object.keys(stageMapping) as Array<keyof typeof stageMapping>;
+	return keys.flatMap((productFamily) => {
+		const productFamilyObject = stageMapping[productFamily];
+		const zuoraProductKeys = Object.keys(productFamilyObject) as Array<
+			keyof typeof productFamilyObject
+		>;
+		return zuoraProductKeys.flatMap((zuoraProduct) => {
+			const zuoraProductObject = productFamilyObject[zuoraProduct];
+			const productRatePlanKeys = Object.keys(zuoraProductObject) as Array<
+				keyof typeof zuoraProductObject
+			>;
+			return productRatePlanKeys.flatMap((productRatePlan) => {
+				const productRatePlanId = getProductRatePlanId(
+					stage,
+					productFamily,
+					zuoraProduct,
+					productRatePlan,
+				);
+				return {
+					productFamily,
+					zuoraProduct,
+					productRatePlan,
+					productRatePlanId: productRatePlanId,
+				};
+			});
+		});
 	});
-
+};
 export const findProductDetails = (stage: Stage, productRatePlanId: string) => {
 	const allProducts = getAllProductDetails(stage);
 	return allProducts.find(
