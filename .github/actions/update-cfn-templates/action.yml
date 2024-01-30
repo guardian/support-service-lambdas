@@ -10,17 +10,15 @@ runs:
   steps:
     - name: 'Checkout'
       uses: actions/checkout@v4
-#      with:
-#        fetch-depth: 2
 
     - name: 'Check for changes'
       run: ./script/diff_cdk_dir.sh ${{inputs.custom-cdk-dir}}
       shell: bash
 
     - if: ${{ env.CDK_CHANGES == 'true' }}
-      run: echo "--------------- There are changes ---------------"
+      run: echo "There are CDK changes from main"
       shell: bash
 
     - if: ${{ env.CDK_CHANGES == 'false' }}
-      run: echo "--------------- There are no changes ---------------"
+      run: echo "There are no CDK changes from main"
       shell: bash
