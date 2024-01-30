@@ -13,14 +13,21 @@ runs:
       with:
         fetch-depth: 2
 
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'yarn'
+
     - name: 'Check for changes'
       run: ./script/diff_cdk_dir.sh ${{ inputs.custom-cdk-dir }} ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
       shell: bash
 
-    - if: ${{ env.CDK_CHANGES == 'true' }}
-      run: echo "There are CDK changes from main"
+    - name: 'Build new CFN templates'
+      if: ${{ env.CDK_CHANGES == 'true' }}
+      run: ./script/cfn.sh ${{ inputs.custom-cdk-dir }}
       shell: bash
 
-    - if: ${{ env.CDK_CHANGES == 'false' }}
+    - name: 'Fetch cached CFN templates'
+      if: ${{ env.CDK_CHANGES == 'false' }}
       run: echo "There are no CDK changes from main"
       shell: bash
