@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-git diff --quiet origin/main HEAD $1
+CDK_DIR=$1
+BASE=$2
+HEAD=$3
+
+git diff --quiet $BASE...$HEAD $CDK_DIR
 if [ $? -eq 0 ]; then
   echo "CDK_CHANGES=false" >> $GITHUB_ENV
 else
