@@ -10,6 +10,8 @@ runs:
   steps:
     - name: 'Checkout'
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: 'Check for changes'
       run: ./script/diff_cdk_dir.sh ${{inputs.custom-cdk-dir}}
