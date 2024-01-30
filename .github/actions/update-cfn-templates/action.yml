@@ -8,8 +8,13 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v4
+#      with:
+#        fetch-depth: 2
+
     - name: 'Check for changes'
-      run: ./script/diff_cdk_dir.sh ${{inputs.custom-cdk-dir-path}}
+      run: ./script/diff_cdk_dir.sh ${{inputs.custom-cdk-dir}}
       shell: bash
 
     - if: ${{ env.CDK_CHANGES == 'true' }}
