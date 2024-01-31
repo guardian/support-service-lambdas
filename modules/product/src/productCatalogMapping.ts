@@ -1,6 +1,6 @@
 import type { Stage } from '@modules/stage';
 
-const codeMapping = {
+export const codeMapping = {
 	Digital: {
 		DigitalSubscription: {
 			Monthly: {
@@ -115,16 +115,16 @@ const codeMapping = {
 				productRatePlanId: '2c92c0f86fa49142016fa49ea0d028b6',
 			},
 			Sunday: {
-				productRatePlanId: '2c92c0f86fa49142016fa49ea90e2976',
+				productRatePlanId: '2c92c0f86fa49142016fa49eb0a42a01',
 			},
 			Saturday: {
-				productRatePlanId: '2c92c0f86fa49142016fa49eb1732a39',
+				productRatePlanId: '2c92c0f86fa49142016fa49ea442291b',
 			},
 		},
 	},
 };
 
-const prodMapping = {
+export const prodMapping = {
 	Digital: {
 		DigitalSubscription: {
 			Monthly: {
