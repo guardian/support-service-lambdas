@@ -144,7 +144,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "createsalesforcequeryjobfunction6C67DB32",
+                  "createsalesforcequeryjobA91B3B8B",
                   "Arn",
                 ],
               },
@@ -233,7 +233,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "createsalesforcequeryjobfunction6C67DB32",
+                    "createsalesforcequeryjobA91B3B8B",
                     "Arn",
                   ],
                 },
@@ -243,7 +243,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "createsalesforcequeryjobfunction6C67DB32",
+                          "createsalesforcequeryjobA91B3B8B",
                           "Arn",
                         ],
                       },
@@ -265,10 +265,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "createsalesforcequeryjobfunction6C67DB32": {
+    "createsalesforcequeryjobA91B3B8B": {
       "DependsOn": [
-        "createsalesforcequeryjobfunctionServiceRoleDefaultPolicy693AFE73",
-        "createsalesforcequeryjobfunctionServiceRole8CEF49FB",
+        "createsalesforcequeryjobServiceRoleDefaultPolicy729C50A0",
+        "createsalesforcequeryjobServiceRoleD24B3461",
       ],
       "Properties": {
         "Code": {
@@ -291,7 +291,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "createsalesforcequeryjobfunctionServiceRole8CEF49FB",
+            "createsalesforcequeryjobServiceRoleD24B3461",
             "Arn",
           ],
         },
@@ -322,7 +322,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "createsalesforcequeryjobfunctionServiceRole8CEF49FB": {
+    "createsalesforcequeryjobServiceRoleD24B3461": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -375,7 +375,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "createsalesforcequeryjobfunctionServiceRoleDefaultPolicy693AFE73": {
+    "createsalesforcequeryjobServiceRoleDefaultPolicy729C50A0": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -466,10 +466,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "createsalesforcequeryjobfunctionServiceRoleDefaultPolicy693AFE73",
+        "PolicyName": "createsalesforcequeryjobServiceRoleDefaultPolicy729C50A0",
         "Roles": [
           {
-            "Ref": "createsalesforcequeryjobfunctionServiceRole8CEF49FB",
+            "Ref": "createsalesforcequeryjobServiceRoleD24B3461",
           },
         ],
       },
@@ -623,7 +623,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "createsalesforcequeryjobfunction6C67DB32",
+                  "createsalesforcequeryjobA91B3B8B",
                   "Arn",
                 ],
               },
@@ -712,7 +712,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "createsalesforcequeryjobfunction6C67DB32",
+                    "createsalesforcequeryjobA91B3B8B",
                     "Arn",
                   ],
                 },
@@ -722,7 +722,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "createsalesforcequeryjobfunction6C67DB32",
+                          "createsalesforcequeryjobA91B3B8B",
                           "Arn",
                         ],
                       },
@@ -744,10 +744,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "createsalesforcequeryjobfunction6C67DB32": {
+    "createsalesforcequeryjobA91B3B8B": {
       "DependsOn": [
-        "createsalesforcequeryjobfunctionServiceRoleDefaultPolicy693AFE73",
-        "createsalesforcequeryjobfunctionServiceRole8CEF49FB",
+        "createsalesforcequeryjobServiceRoleDefaultPolicy729C50A0",
+        "createsalesforcequeryjobServiceRoleD24B3461",
       ],
       "Properties": {
         "Code": {
@@ -770,7 +770,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "createsalesforcequeryjobfunctionServiceRole8CEF49FB",
+            "createsalesforcequeryjobServiceRoleD24B3461",
             "Arn",
           ],
         },
@@ -801,7 +801,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "createsalesforcequeryjobfunctionServiceRole8CEF49FB": {
+    "createsalesforcequeryjobServiceRoleD24B3461": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -854,7 +854,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "createsalesforcequeryjobfunctionServiceRoleDefaultPolicy693AFE73": {
+    "createsalesforcequeryjobServiceRoleDefaultPolicy729C50A0": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -945,10 +945,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "createsalesforcequeryjobfunctionServiceRoleDefaultPolicy693AFE73",
+        "PolicyName": "createsalesforcequeryjobServiceRoleDefaultPolicy729C50A0",
         "Roles": [
           {
-            "Ref": "createsalesforcequeryjobfunctionServiceRole8CEF49FB",
+            "Ref": "createsalesforcequeryjobServiceRoleD24B3461",
           },
         ],
       },

@@ -41,9 +41,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const lambdaCommonConfig = { app, runtime, fileName, environment, timeout };
 
 		// Lambda functions
-		const createSalesforceQueryJobFunction = new GuLambdaFunction(
+		const createSalesforceQueryJobLambda = new GuLambdaFunction(
 			this,
-			'create-salesforce-query-job-function',
+			'create-salesforce-query-job',
 			{
 				handler: 'dist/createSalesforceQueryJob.handler',
 				functionName: `create-salesforce-query-job-${this.stage}`,
@@ -57,7 +57,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			this,
 			'CreateSalesforceQueryJob',
 			{
-				lambdaFunction: createSalesforceQueryJobFunction,
+				lambdaFunction: createSalesforceQueryJobLambda,
 				outputPath: '$.Payload', // Specify the output path if your Lambda returns JSON
 			},
 		);
