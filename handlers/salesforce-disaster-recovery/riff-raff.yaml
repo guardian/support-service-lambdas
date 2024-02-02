@@ -1,0 +1,25 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  salesforce-disaster-recovery-cloudformation:
+    type: cloud-formation
+    app: salesforce-disaster-recovery
+    parameters:
+      templateStagePaths:
+        CODE: salesforce-disaster-recovery-CODE.template.json
+        PROD: salesforce-disaster-recovery-PROD.template.json
+
+  salesforce-disaster-recovery:
+    type: aws-lambda
+    parameters:
+      fileName: salesforce-disaster-recovery.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - create-salesforce-query-job-
+    dependencies: [salesforce-disaster-recovery-cloudformation]
