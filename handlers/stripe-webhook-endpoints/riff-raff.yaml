@@ -13,6 +13,7 @@ deployments:
       functionNames:
       - stripe-payment-intent-issues-
       - stripe-customer-updated-
+      - stripe-sepa-payment-failure-updates-
       fileName: stripe-webhook-endpoints.jar
       prefixStack: false
     dependencies: [ cfn ]

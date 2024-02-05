@@ -1,4 +1,4 @@
-package com.gu.paymentFailureUpdatesInZuora
+package com.gu.paymentFailureUpdatesForSepaInZuora
 
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
 import com.typesafe.scalalogging.LazyLogging

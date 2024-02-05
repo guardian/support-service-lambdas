@@ -103,3 +103,39 @@ Resources:
             Method: post
             RequestParameters:
               - method.request.querystring.apiToken
+  SepaPaymentFailureUpdateLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub stripe-sepa-payment-failure-updates-${Stage}
+      Description: A lambda for updating payment failures(lost disputes) of SEPA payments in Zuora
+      Runtime: java11
+      Handler: com.gu.paymentFailureUpdatesForSepaInZuora.Lambda::handler
+      MemorySize: 512
+      Timeout: 300
+      Environment:
+        Variables:
+          App: sepa-payment-failure-updates
+          Stack: !Ref Stack
+          Stage: !Ref Stage
+      CodeUri:
+        Bucket: !Ref DeployBucket
+        Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            Effect: Allow
+            Action:
+              - ssm:GetParametersByPath
+            Resource:
+              - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership/sepa-payment-failure-updates
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
+      Events:
+        AcquisitionEvent:
+          Type: Api
+          Properties:
+            Path: '/sepa-payment-failure-updates'
+            Method: post

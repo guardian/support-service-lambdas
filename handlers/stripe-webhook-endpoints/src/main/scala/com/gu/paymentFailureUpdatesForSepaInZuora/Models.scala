@@ -1,4 +1,4 @@
-package com.gu.paymentFailureUpdatesInZuora
+package com.gu.paymentFailureUpdatesForSepaInZuora
 
 import io.circe.{Decoder, Encoder}
 import io.circe.parser.decode
