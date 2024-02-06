@@ -158,6 +158,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
+        "StateMachineName": "salesforce-disaster-recovery-CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -637,6 +638,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "Arn",
           ],
         },
+        "StateMachineName": "salesforce-disaster-recovery-PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",
