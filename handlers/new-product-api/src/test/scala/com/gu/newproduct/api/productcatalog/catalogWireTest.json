@@ -63,6 +63,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 47.62,
         "billingPeriod" : "Monthly",
         "description" : "GBP 47.62 every month"
       } ],
@@ -79,6 +80,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 51.96,
         "billingPeriod" : "Monthly",
         "description" : "GBP 51.96 every month"
       } ],
@@ -95,6 +97,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 10.36,
         "billingPeriod" : "Monthly",
         "description" : "GBP 10.36 every month"
       } ],
@@ -111,6 +114,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 21.62,
         "billingPeriod" : "Monthly",
         "description" : "GBP 21.62 every month"
       } ],
@@ -127,6 +131,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 41.12,
         "billingPeriod" : "Monthly",
         "description" : "GBP 41.12 every month"
       } ],
@@ -143,6 +148,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 47.62,
         "billingPeriod" : "Monthly",
         "description" : "GBP 47.62 every month"
       } ],
@@ -159,6 +165,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 10.79,
         "billingPeriod" : "Monthly",
         "description" : "GBP 10.79 every month"
       } ],
@@ -175,6 +182,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 22.06,
         "billingPeriod" : "Monthly",
         "description" : "GBP 22.06 every month"
       } ],
@@ -191,6 +199,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 20.76,
         "billingPeriod" : "Monthly",
         "description" : "GBP 20.76 every month"
       } ],
@@ -207,6 +216,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 29.42,
         "billingPeriod" : "Monthly",
         "description" : "GBP 29.42 every month"
       } ],
@@ -226,6 +236,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 1.23,
         "billingPeriod" : "Monthly",
         "description" : "GBP 1.23 every month"
       } ],
@@ -242,6 +253,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 9.99,
         "billingPeriod" : "Monthly",
         "description" : "GBP 9.99 every month"
       } ],
@@ -258,6 +270,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 4.56,
         "billingPeriod" : "Monthly",
         "description" : "GBP 4.56 every month"
       } ],
@@ -274,6 +287,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 6.78,
         "billingPeriod" : "Monthly",
         "description" : "GBP 6.78 every month"
       } ],
@@ -290,6 +304,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 7.77,
         "billingPeriod" : "Monthly",
         "description" : "GBP 7.77 every month"
       } ],
@@ -306,6 +321,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 11.11,
         "billingPeriod" : "Monthly",
         "description" : "GBP 11.11 every month"
       } ],
@@ -322,6 +338,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 3.21,
         "billingPeriod" : "Monthly",
         "description" : "GBP 3.21 every month"
       } ],
@@ -338,6 +355,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 10.1,
         "billingPeriod" : "Monthly",
         "description" : "GBP 10.10 every month"
       } ],
@@ -354,6 +372,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 8.88,
         "billingPeriod" : "Monthly",
         "description" : "GBP 8.88 every month"
       } ],
@@ -370,6 +389,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 22.22,
         "billingPeriod" : "Monthly",
         "description" : "GBP 22.22 every month"
       } ],
@@ -389,10 +409,12 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 666.66,
         "billingPeriod" : "Annual",
         "description" : "GBP 666.66 every 12 months"
       }, {
         "currencyCode" : "USD",
+        "amount" : 666.65,
         "billingPeriod" : "Annual",
         "description" : "USD 666.65 every 12 months"
       } ],
@@ -409,10 +431,12 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 55.55,
         "billingPeriod" : "Monthly",
         "description" : "GBP 55.55 every month"
       }, {
         "currencyCode" : "USD",
+        "amount" : 55.54,
         "billingPeriod" : "Monthly",
         "description" : "USD 55.54 every month"
       } ],
@@ -432,10 +456,12 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 11111.11,
         "billingPeriod" : "SixWeeks",
         "description" : "GBP 11111.11 for the first six weeks"
       }, {
         "currencyCode" : "USD",
+        "amount" : 111111.11,
         "billingPeriod" : "SixWeeks",
         "description" : "USD 111111.11 for the first six weeks"
       } ],
@@ -452,10 +478,12 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 22222.22,
         "billingPeriod" : "Quarterly",
         "description" : "GBP 22222.22 every 3 months"
       }, {
         "currencyCode" : "USD",
+        "amount" : 222222.22,
         "billingPeriod" : "Quarterly",
         "description" : "USD 222222.22 every 3 months"
       } ],
@@ -472,10 +500,12 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 33333.33,
         "billingPeriod" : "Annual",
         "description" : "GBP 33333.33 every 12 months"
       }, {
         "currencyCode" : "USD",
+        "amount" : 333333.33,
         "billingPeriod" : "Annual",
         "description" : "USD 333333.33 every 12 months"
       } ],
@@ -496,10 +526,12 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 44444.44,
         "billingPeriod" : "SixWeeks",
         "description" : "GBP 44444.44 for the first six weeks"
       }, {
         "currencyCode" : "USD",
+        "amount" : 444444.44,
         "billingPeriod" : "SixWeeks",
         "description" : "USD 444444.44 for the first six weeks"
       } ],
@@ -516,10 +548,12 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 55555.55,
         "billingPeriod" : "Quarterly",
         "description" : "GBP 55555.55 every 3 months"
       }, {
         "currencyCode" : "USD",
+        "amount" : 555555.55,
         "billingPeriod" : "Quarterly",
         "description" : "USD 555555.55 every 3 months"
       } ],
@@ -536,10 +570,12 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 66666.66,
         "billingPeriod" : "Annual",
         "description" : "GBP 66666.66 every 12 months"
       }, {
         "currencyCode" : "USD",
+        "amount" : 666666.66,
         "billingPeriod" : "Annual",
         "description" : "USD 666666.66 every 12 months"
       } ],
@@ -560,6 +596,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.05,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.05 every month"
       } ],
@@ -576,6 +613,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.06,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.06 every month"
       } ],
@@ -592,6 +630,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.01,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.01 every month"
       } ],
@@ -608,6 +647,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.02,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.02 every month"
       } ],
@@ -624,6 +664,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.07,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.07 every month"
       } ],
@@ -640,6 +681,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.08,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.08 every month"
       } ],
@@ -656,6 +698,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.09,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.09 every month"
       } ],
@@ -672,6 +715,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.1,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.10 every month"
       } ],
@@ -688,6 +732,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.03,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.03 every month"
       } ],
@@ -704,6 +749,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 70.04,
         "billingPeriod" : "Monthly",
         "description" : "GBP 70.04 every month"
       } ],
@@ -724,6 +770,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 71.01,
         "billingPeriod" : "Monthly",
         "description" : "GBP 71.01 every month"
       } ],
@@ -740,6 +787,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 71,
         "billingPeriod" : "Monthly",
         "description" : "GBP 71.00 every month"
       } ],
@@ -756,6 +804,7 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
+        "amount" : 71.02,
         "billingPeriod" : "Monthly",
         "description" : "GBP 71.02 every month"
       } ],

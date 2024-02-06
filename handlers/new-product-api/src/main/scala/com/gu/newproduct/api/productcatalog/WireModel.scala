@@ -39,7 +39,12 @@ object WireModel {
       paymentPlan: Option[String], // todo legacy field, remove once salesforce is reading from paymentPlans
   )
 
-  case class WirePaymentPlan(currencyCode: String, billingPeriod: WireBillingPeriod, description: String)
+  case class WirePaymentPlan(
+      currencyCode: String,
+      amount: BigDecimal,
+      billingPeriod: WireBillingPeriod,
+      description: String,
+  )
   object WirePaymentPlan {
     implicit val writes: OWrites[WirePaymentPlan] = Json.writes[WirePaymentPlan]
 
@@ -116,6 +121,7 @@ object WireModel {
       val paymentPlans = plan.paymentPlans.map { case (currency: Currency, paymentPlan: PaymentPlan) =>
         WirePaymentPlan(
           currency.iso,
+          paymentPlan.amountMinorUnits.value / 100d,
           WireBillingPeriod.fromBillingPeriod(paymentPlan.billingPeriod),
           paymentPlan.description,
         )
