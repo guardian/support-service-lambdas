@@ -105,11 +105,11 @@ object ZuoraUpdateDisputeDetails{
       .format(dtFormat)
 
   def fromStripeDisputeObject(disputeObject: DisputeObject) = ZuoraUpdateDisputeDetails(
-    gatewayResponse = disputeObject.status,
+    gatewayResponse = "Settled",
     referenceId = disputeObject.id,
     settledOn = zuoraTimestampFromSecondsSinceEpoch(disputeObject.created),
-    gatewayReconciliationStatus = "Settled",
-    gatewayReconciliationReason = "charge.dispute.closed.lost"
+    gatewayReconciliationStatus = "charge.dispute.closed.lost",
+    gatewayReconciliationReason = disputeObject.reason
   )
 }
 

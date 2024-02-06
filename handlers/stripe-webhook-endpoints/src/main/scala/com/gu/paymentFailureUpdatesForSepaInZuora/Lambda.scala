@@ -60,17 +60,15 @@ object Lambda extends LazyLogging {
     ConfigLoader.loadConfig[IO, Config](identity).leftMap(e => ConfigLoadingError(e.message))
 
 
-  def getPayload(event: APIGatewayProxyRequestEvent, endpointSecret: String): Either[Future,Error, String] ={
+  def getPayload(event: APIGatewayProxyRequestEvent, endpointSecret: String): Either[Error, String] ={
     logger.info("Attempting to verify event payload")
-    EitherT.fromEither(for {
+    for {
       payload <- Option(event.getBody()).toRight(InvalidRequestError("Missing body"))
-      _ = SafeLogger.info(s"payload is ${payload.replace("\n", "")}")
       sigHeader <- event.getHeaders.asScala.get("Stripe-Signature").toRight(InvalidRequestError("Missing sig header"))
       _ <- Try(Webhook.Signature.verifyHeader(payload, sigHeader, endpointSecret, 300)).toEither.left.map(e =>
         InvalidRequestError(e.getMessage())
-          _ = logger.info(s"payload successfully verified")
       )
-    } yield payload)
+    } yield payload
 }
 
   def processDisputeEvent(payload: String, config: Config): Either[Error, Unit] =
