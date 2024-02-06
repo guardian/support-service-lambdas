@@ -281,15 +281,16 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
-            "Bucket": "salesforce-disaster-recovery-dist",
+            "App": "salesforce-disaster-recovery",
             "STACK": "membership",
             "STAGE": "CODE",
+            "Stack": "membership",
             "Stage": "CODE",
           },
         },
         "FunctionName": "create-salesforce-query-job-CODE",
         "Handler": "dist/createSalesforceQueryJob.handler",
-        "MemorySize": 512,
+        "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
             "createsalesforcequeryjobServiceRoleD24B3461",
@@ -319,7 +320,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 45,
+        "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -761,15 +762,16 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
-            "Bucket": "salesforce-disaster-recovery-dist",
+            "App": "salesforce-disaster-recovery",
             "STACK": "membership",
             "STAGE": "PROD",
+            "Stack": "membership",
             "Stage": "PROD",
           },
         },
         "FunctionName": "create-salesforce-query-job-PROD",
         "Handler": "dist/createSalesforceQueryJob.handler",
-        "MemorySize": 512,
+        "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
             "createsalesforcequeryjobServiceRoleD24B3461",
@@ -799,7 +801,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 45,
+        "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
     },

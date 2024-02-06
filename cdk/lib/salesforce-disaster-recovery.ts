@@ -13,10 +13,22 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const app = 'salesforce-disaster-recovery';
 		const runtime = Runtime.NODEJS_20_X;
 		const fileName = `${app}.zip`;
-		const timeout = Duration.millis(45000);
-		const environment = { Bucket: `${app}-dist`, Stage: this.stage };
+		const timeout = Duration.seconds(300);
+		const memorySize = 1024;
+		const environment = {
+			APP: app,
+			STACK: this.stack,
+			STAGE: this.stage,
+		};
 
-		const lambdaCommonConfig = { app, runtime, fileName, environment, timeout };
+		const lambdaCommonConfig = {
+			app,
+			runtime,
+			fileName,
+			timeout,
+			memorySize,
+			environment,
+		};
 
 		const createSalesforceQueryJobLambda = new GuLambdaFunction(
 			this,
