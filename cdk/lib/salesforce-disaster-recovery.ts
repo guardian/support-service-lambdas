@@ -3,7 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
+import { DefinitionBody, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
 export class SalesforceDisasterRecovery extends GuStack {
@@ -11,13 +11,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 		super(scope, id, props);
 
 		const app = 'salesforce-disaster-recovery';
-		const runtime = Runtime.NODEJS_18_X;
+		const runtime = Runtime.NODEJS_20_X;
 		const fileName = `${app}.zip`;
 		const timeout = Duration.millis(45000);
-		const environment = {
-			Bucket: `${app}-dist`,
-			Stage: this.stage,
-		};
+		const environment = { Bucket: `${app}-dist`, Stage: this.stage };
 
 		const lambdaCommonConfig = { app, runtime, fileName, environment, timeout };
 
@@ -40,10 +37,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const definition = createSalesforceQueryJob;
-
 		new StateMachine(this, 'SalesforceDisasterRecoveryStateMachine', {
-			definition,
+			definitionBody: DefinitionBody.fromChainable(createSalesforceQueryJob),
 		});
 	}
 }
