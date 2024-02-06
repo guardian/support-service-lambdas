@@ -32,7 +32,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const createSalesforceQueryJobLambda = new GuLambdaFunction(
 			this,
-			'create-salesforce-query-job',
+			'CreateSalesforceQueryJobLambda',
 			{
 				handler: 'createSalesforceQueryJob.handler',
 				functionName: `create-salesforce-query-job-${this.stage}`,
@@ -40,7 +40,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const createSalesforceQueryJobState = new LambdaInvoke(
+		const createSalesforceQueryJob = new LambdaInvoke(
 			this,
 			'CreateSalesforceQueryJob',
 			{
@@ -51,9 +51,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		new StateMachine(this, 'SalesforceDisasterRecoveryStateMachine', {
 			stateMachineName: `${app}-${this.stage}`,
-			definitionBody: DefinitionBody.fromChainable(
-				createSalesforceQueryJobState,
-			),
+			definitionBody: DefinitionBody.fromChainable(createSalesforceQueryJob),
 		});
 	}
 }
