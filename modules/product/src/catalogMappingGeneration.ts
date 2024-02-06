@@ -1,5 +1,9 @@
 import { groupBy } from '@modules/arrayFunctions';
-import type { Catalog } from '@modules/catalog/catalogSchema';
+import type {
+	Catalog,
+	ProductRatePlan,
+	ProductRatePlanCharge,
+} from '@modules/catalog/catalogSchema';
 import { checkDefined } from '@modules/nullAndUndefined';
 
 const getProductFamily = (product: string): string => {
@@ -87,7 +91,12 @@ const productRatePlanChargeNamesToProductRatePlanCharge: Record<
 	'Digital Pack Monthly': 'Subscription',
 	'Digital Pack Annual': 'Subscription',
 	'Digital Subscription One Year Fixed - One Time Charge': 'Subscription',
+	'Digital Subscription Three Month Fixed - One Time Charge': 'Subscription',
 	'Digital Subscription Three Month Fixed - One Time': 'Subscription',
+	'Supporter Plus Monthly Charge': 'Subscription',
+	'Supporter Plus Annual Charge': 'Subscription',
+	'Annual Contribution': 'Contribution',
+	'Monthly Contribution': 'Contribution',
 	'GW Oct 18 - Annual - ROW': 'Subscription',
 	'GW Oct 18 - Monthly - ROW': 'Monthly',
 	'GW Oct 18 - Quarterly - ROW': 'Subscription',
@@ -116,6 +125,47 @@ const isSupportedProductRatePlan = (productRatePlan: string) =>
 const isSupportedProduct = (product: string) =>
 	Object.keys(catalogNamesToProductFamily).includes(product);
 
+const arrayToObject = <T>(array: Array<Record<string, T>>) => {
+	return array.reduce((acc, val) => {
+		return { ...acc, ...val };
+	}, {});
+};
+
+const getProductRatePlanChargeObjects = (
+	productRatePlanCharges: ProductRatePlanCharge[],
+) => {
+	return arrayToObject(
+		productRatePlanCharges.map((productRatePlanCharge) => {
+			const productRatePlanChargeName = getProductRatePlanChargeName(
+				productRatePlanCharge.name,
+			);
+			return {
+				[productRatePlanChargeName]: productRatePlanCharge.id,
+			};
+		}),
+	);
+};
+const getZuoraProductObjects = (productRatePlans: ProductRatePlan[]) => {
+	return arrayToObject(
+		productRatePlans
+			.filter((productRatePlan) =>
+				isSupportedProductRatePlan(productRatePlan.name),
+			)
+			.map((productRatePlan) => {
+				const productRatePlanName = getProductRatePlanName(
+					productRatePlan.name,
+				);
+				return {
+					[productRatePlanName]: {
+						productRatePlanId: productRatePlan.id,
+						productRatePlanCharges: getProductRatePlanChargeObjects(
+							productRatePlan.productRatePlanCharges,
+						),
+					},
+				};
+			}),
+	);
+};
 export const generateCatalogMapping = (catalog: Catalog) => {
 	const supportedProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
@@ -126,49 +176,27 @@ export const generateCatalogMapping = (catalog: Catalog) => {
 		const productFamily = getProductFamily(product.name);
 		return {
 			productFamily: productFamily,
-			[productName]: product.productRatePlans
-				.filter((productRatePlan) =>
-					isSupportedProductRatePlan(productRatePlan.name),
-				)
-				.map((productRatePlan) => {
-					const productRatePlanName = getProductRatePlanName(
-						productRatePlan.name,
-					);
-					return {
-						[productRatePlanName]: {
-							productRatePlanId: productRatePlan.id,
-							productRatePlanCharges: productRatePlan.productRatePlanCharges
-								.map((productRatePlanCharge) => {
-									const productRatePlanChargeName =
-										getProductRatePlanChargeName(productRatePlanCharge.name);
-									return {
-										[productRatePlanChargeName]: productRatePlanCharge.id,
-									};
-								})
-								.reduce((acc, val) => {
-									return { ...acc, ...val };
-								}, {}),
-						},
-					};
-				})
-				.reduce((acc, val) => {
-					return { ...acc, ...val };
-				}, {}),
+			[productName]: getZuoraProductObjects(product.productRatePlans),
 		};
 	});
 
-	const grouped = groupBy(arrayVersion, (product) => product.productFamily);
-	const nestedObject = Object.entries(grouped).map(([key, value]) => {
-		return {
-			[key]: value.reduce((acc, val) => {
-				const { productFamily, ...rest } = val;
-				return { ...acc, ...rest };
-			}, {}),
-		};
-	});
-	//console.log(unnested[0]);
+	// Nest the Zuora products under the product family they belong to
+	const groupedByProductFamily = groupBy(
+		arrayVersion,
+		(product) => product.productFamily,
+	);
 
-	return nestedObject.reduce((acc, val) => {
-		return { ...acc, ...val };
-	});
+	const nestedObject = Object.entries(groupedByProductFamily).map(
+		([key, value]) => {
+			const objectsWithoutProductFamily = value.map((product) => {
+				const { productFamily, ...otherFields } = product;
+				return otherFields;
+			});
+			return {
+				[key]: arrayToObject(objectsWithoutProductFamily),
+			};
+		},
+	);
+
+	return arrayToObject(nestedObject);
 };
