@@ -8,7 +8,7 @@ object LambdaEndpoint {
   private val includeInterruptedCause: Boolean = false
 
   // for testing
-  def runTest[OUT](response: IO[Any, OUT]): Unit = {
+  def runTest[OUT](response: Task[OUT]): Unit = {
     val result = Unsafe.unsafe { implicit u =>
       Runtime.default.unsafe.run(
         response

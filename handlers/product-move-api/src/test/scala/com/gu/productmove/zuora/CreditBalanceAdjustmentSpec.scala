@@ -5,7 +5,7 @@ import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.{RefundSupporterPlus, RefundInput}
 import com.gu.productmove.zuora.RefundSupporterPlusSpec.{suite, test}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import zio.Scope
+import zio.*
 import zio.test.Assertion.equalTo
 import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assert}
 
@@ -30,6 +30,7 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               SttpClientLive.layer,
               SecretsLive.layer,
               AwsCredentialsLive.layer,
+              GuStageLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,
@@ -51,6 +52,7 @@ object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
               SttpClientLive.layer,
               SecretsLive.layer,
               AwsCredentialsLive.layer,
+              GuStageLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,

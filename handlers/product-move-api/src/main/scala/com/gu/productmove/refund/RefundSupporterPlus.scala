@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
-import zio.Task
+import zio.{Clock, RIO, Task, ZIO}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
 import com.gu.productmove.zuora.model.SubscriptionName
@@ -25,7 +25,6 @@ import com.gu.productmove.zuora.{
 }
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3.SttpBackend
-import zio.{Clock, Task, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 import java.time.{LocalDate, LocalDateTime}
@@ -50,7 +49,7 @@ object RefundSupporterPlus {
       with GetRefundInvoiceDetails
       with GetInvoice
       with InvoiceItemAdjustment,
-    ErrorResponse,
+    Throwable | TransactionError,
     Unit,
   ] = {
 
@@ -68,7 +67,7 @@ object RefundSupporterPlus {
 
   private def ensureThatNegativeInvoiceBalanceIsZero(
       refundInvoiceDetails: RefundInvoiceDetails,
-  ): ZIO[GetInvoice with InvoiceItemAdjustment, ErrorResponse, Unit] = for {
+  ): ZIO[GetInvoice with InvoiceItemAdjustment, Throwable | TransactionError, Unit] = for {
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(
       refundInvoiceDetails.negativeInvoiceId,
@@ -96,7 +95,7 @@ object RefundSupporterPlus {
   private def adjustInvoiceBalanceToZero(
       refundInvoiceDetails: RefundInvoiceDetails,
       negativeInvoiceBalance: BigDecimal,
-  ): ZIO[InvoiceItemAdjustment, ErrorResponse, Unit] =
+  ): ZIO[InvoiceItemAdjustment, Throwable | TransactionError, Unit] =
     for {
       _ <- ZIO.log(
         s"Invoice with id ${refundInvoiceDetails.negativeInvoiceId} still has balance of $negativeInvoiceBalance",

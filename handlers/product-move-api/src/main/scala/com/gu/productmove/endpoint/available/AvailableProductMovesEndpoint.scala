@@ -5,7 +5,7 @@ import com.gu.productmove.SecretsLive
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.*
 import com.gu.productmove.endpoint.available.Currency.GBP
-import zio.Task
+import zio.{Clock, IO, RIO, Task, URIO, ZIO}
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.zuora.GetAccount.{GetAccountResponse, PaymentMethodResponse}
 import com.gu.productmove.zuora.*
@@ -18,7 +18,6 @@ import sttp.tapir.EndpointIO.Example
 import sttp.tapir.EndpointOutput.StatusCode
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.jsonBody
-import zio.{Clock, IO, URIO, ZIO}
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 import java.time.LocalDate
@@ -93,8 +92,6 @@ object AvailableProductMovesEndpoint {
       SecretsLive.layer,
     )
 
-  private val freeTrialDays = 14
-
   def getAvailableSwitchRatePlans(
       zuoraProductCatalogue: ZuoraProductCatalogue,
       ratePlanNames: List[String],
@@ -129,14 +126,9 @@ object AvailableProductMovesEndpoint {
         } yield resp
     }
 
-  extension [R, E, A](zio: ZIO[R, E, A])
-    private def mapErrorTo500(message: String) = zio.catchAll { error =>
-      ZIO.log(s"$message failed with: $error").flatMap(_ => ZIO.fail(InternalServerError))
-    }
-
   private[productmove] def runWithEnvironment(
       subscriptionName: SubscriptionName,
-  ): URIO[GetSubscription with GetCatalogue with GetAccount with Stage, OutputBody] = {
+  ): RIO[GetSubscription with GetCatalogue with GetAccount with Stage, OutputBody] = {
     val output = for {
       stage <- ZIO.service[Stage]
       monthlyContributionRatePlanId =
@@ -146,9 +138,9 @@ object AvailableProductMovesEndpoint {
 
       // Kick off catalogue fetch in parallel
       zuoraProductCatalogueFetch <- GetCatalogue.get.fork
-      subscription <- GetSubscription
-        .get(subscriptionName)
-        .mapErrorTo500("GetSubscription") // TODO add code to return 404 rather than 500 if it's not found
+      subscription <- GetSubscription.get(
+        subscriptionName,
+      ) // TODO add code to return 404 rather than 500 if it's not found
 
       ratePlan <- getSingleOrNotEligible(subscription.ratePlans, s"Subscription: ${subscriptionName.value} , ratePlan")
       _ <- succeedIfEligible(
@@ -168,7 +160,7 @@ object AvailableProductMovesEndpoint {
         } yield resp
       }
 
-      account <- GetAccount.get(subscription.accountNumber).mapErrorTo500("GetAccount")
+      account <- GetAccount.get(subscription.accountNumber)
 
       creditCardExpirationDate <- ZIO
         .fromOption(account.basicInfo.defaultPaymentMethod.creditCardExpirationDate)
@@ -180,7 +172,6 @@ object AvailableProductMovesEndpoint {
 
       paymentMethod <- GetAccount
         .getPaymentMethod(account.basicInfo.defaultPaymentMethod.id)
-        .mapErrorTo500("GetAccount.getPaymentMethod")
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
@@ -218,7 +209,7 @@ object AvailableProductMovesEndpoint {
 
       _ <- if (accountIsEligible) ZIO.succeed(()) else ZIO.fail(AvailableMoves(List()))
 
-      zuoraProductCatalogue <- zuoraProductCatalogueFetch.join.mapErrorTo500("GetCatalogue")
+      zuoraProductCatalogue <- zuoraProductCatalogueFetch.join
 
       productRatePlans = getAvailableSwitchRatePlans(zuoraProductCatalogue, List("Digital Pack"))
       moveToProduct <- ZIO.foreach(productRatePlans) { productRatePlan =>
@@ -228,8 +219,9 @@ object AvailableProductMovesEndpoint {
       _ <- ZIO.log("done")
     } yield AvailableMoves(moveToProduct)
 
-    output.catchAll { failure =>
-      ZIO.succeed(failure)
+    output.catchAll {
+      case failure: OutputBody => ZIO.succeed(failure)
+      case other: Throwable => ZIO.fail(other)
     }
   }
 }

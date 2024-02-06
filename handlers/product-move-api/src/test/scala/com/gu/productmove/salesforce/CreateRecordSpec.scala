@@ -55,6 +55,7 @@ object CreateRecordSpec extends ZIOSpecDefault {
               SalesforceClientLive.layer,
               SecretsLive.layer,
               AwsCredentialsLive.layer,
+              GuStageLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,

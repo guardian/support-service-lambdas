@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription.validation.supporterplus
 
 import com.gu.i18n.Currency
-import com.gu.i18n.Currency._
+import com.gu.i18n.Currency.*
 import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.newproduct.api.productcatalog.PlanId.AnnualSupporterPlus
 
@@ -56,6 +56,7 @@ object AmountLimits {
     case NZD => nzd
     case CAD => cad
     case EUR => eur
+    case _ => ???
   }
 
 }

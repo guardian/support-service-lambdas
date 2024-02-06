@@ -4,10 +4,10 @@ import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.endpoint.move.{SupporterPlusRatePlanIds, ProductSwitchRatePlanIds}
 import com.gu.productmove.zuora.{SubscriptionUpdateInvoice, SubscriptionUpdateInvoiceItem}
-import zio.{ZIO, Clock}
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{PreviewResult, InternalServerError, ErrorResponse}
+import zio.{Clock, IO, Task, ZIO}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
+import com.gu.productmove.endpoint.move.switchtype.{ProductSwitchRatePlanIds, SupporterPlusRatePlanIds}
 
 object BuildPreviewResult {
   def isBelowMinimumStripeCharge(amount: BigDecimal): Boolean =
@@ -18,7 +18,7 @@ object BuildPreviewResult {
       invoice: SubscriptionUpdateInvoice,
       invoiceItems: List[SubscriptionUpdateInvoiceItem],
       activeRatePlanCharge: RatePlanCharge,
-  ): ZIO[Any, InternalServerError, BigDecimal] =
+  ): Task[BigDecimal] =
     if (invoiceItems.isEmpty) {
       /*
           Term renewal for many subs happens during the billing run on the renewal day which is scheduled for around 6am BST.
@@ -30,7 +30,7 @@ object BuildPreviewResult {
         priceDifference <- ZIO
           .fromOption(activeRatePlanCharge.price)
           .orElseFail(
-            InternalServerError(
+            new Throwable(
               s"Price is null on rate plan. Subscription name is $subscriptionName. Invoice data was: $invoice",
             ),
           )
@@ -65,7 +65,7 @@ object BuildPreviewResult {
       activeRatePlanCharge: RatePlanCharge,
       invoice: SubscriptionUpdateInvoice,
       ids: ProductSwitchRatePlanIds,
-  ): ZIO[Stage, ErrorResponse, PreviewResult] =
+  ): Task[PreviewResult] =
     Clock.currentDateTime.map(_.toLocalDate).flatMap { today =>
       val invoiceItems =
         invoice.invoiceItems.sortWith((i1, i2) => i1.serviceStartDate.isBefore(i2.serviceStartDate))

@@ -3,7 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.GetAccount.PaymentMethodResponse
 import com.gu.productmove.zuora.model.AccountNumber
-import zio.{IO, ZIO}
+import zio.*
 
 class MockGetAccount(
     accountResponse: Map[AccountNumber, GetAccount.GetAccountResponse],
@@ -14,20 +14,20 @@ class MockGetAccount(
 
   def requests = mutableStore.reverse
 
-  override def get(accountNumber: AccountNumber): IO[ErrorResponse, GetAccount.GetAccountResponse] = {
+  override def get(accountNumber: AccountNumber): Task[GetAccount.GetAccountResponse] = {
     mutableStore = accountNumber :: mutableStore
 
     accountResponse.get(accountNumber) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(InternalServerError(s"success = false, subscription not found: $accountNumber"))
+      case None => ZIO.fail(new Throwable(s"mock: success = false, getAccount: $accountNumber"))
   }
 
-  override def getPaymentMethod(paymentMethodId: String): IO[ErrorResponse, PaymentMethodResponse] = {
+  override def getPaymentMethod(paymentMethodId: String): Task[PaymentMethodResponse] = {
     mutableStore = paymentMethodId :: mutableStore
 
     paymentResponse.get(paymentMethodId) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(InternalServerError(s"success = false, subscription not found: $paymentMethodId"))
+      case None => ZIO.fail(new Throwable(s"mock: success = false, getPaymentMethod: $paymentMethodId"))
   }
 }
 

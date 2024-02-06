@@ -608,7 +608,7 @@ lazy val `product-move-api` = lambdaProject(
       s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
-  .dependsOn(`zuora-models`, `effects-sqs`, `new-product-api`)
+  .dependsOn(`zuora-models`, `effects-sqs`)
 
 lazy val `metric-push-api` =
   lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")

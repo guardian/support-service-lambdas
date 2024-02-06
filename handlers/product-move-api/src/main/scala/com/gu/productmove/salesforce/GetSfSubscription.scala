@@ -21,19 +21,19 @@ object GetSfSubscriptionLive:
   val layer: URLayer[SalesforceClient, GetSfSubscription] = ZLayer.fromFunction(GetSfSubscriptionLive(_))
 
 private class GetSfSubscriptionLive(salesforceClient: SalesforceClient) extends GetSfSubscription:
-  override def get(subscriptionNumber: String): IO[ErrorResponse, GetSfSubscriptionResponse] =
+  override def get(subscriptionNumber: String): Task[GetSfSubscriptionResponse] =
     salesforceClient.get[GetSfSubscriptionResponse](
       uri"/services/data/v55.0/sobjects/SF_Subscription__c/Name/$subscriptionNumber",
     )
 
 trait GetSfSubscription:
-  def get(subscriptionNumber: String): IO[ErrorResponse, GetSfSubscriptionResponse]
+  def get(subscriptionNumber: String): Task[GetSfSubscriptionResponse]
 
 object GetSfSubscription {
 
   case class GetSfSubscriptionResponse(Id: String)
   given JsonDecoder[GetSfSubscriptionResponse] = DeriveJsonDecoder.gen[GetSfSubscriptionResponse]
 
-  def get(subscriptionNumber: String): ZIO[GetSfSubscription, ErrorResponse, GetSfSubscriptionResponse] =
+  def get(subscriptionNumber: String): RIO[GetSfSubscription, GetSfSubscriptionResponse] =
     ZIO.serviceWithZIO[GetSfSubscription](_.get(subscriptionNumber))
 }

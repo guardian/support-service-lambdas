@@ -1,7 +1,6 @@
 package com.gu.productmove
 
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.supporterdata.model.Stage.{PROD, CODE}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.supporterdata.services.SupporterDataDynamoService
@@ -12,11 +11,11 @@ import zio.*
 import zio.json.*
 
 trait Dynamo {
-  def writeItem(item: SupporterRatePlanItem): ZIO[Any, ErrorResponse, Unit]
+  def writeItem(item: SupporterRatePlanItem): Task[Unit]
 }
 
 object Dynamo {
-  def writeItem(item: SupporterRatePlanItem): ZIO[Dynamo, ErrorResponse, Unit] = {
+  def writeItem(item: SupporterRatePlanItem): RIO[Dynamo, Unit] = {
     ZIO.environmentWithZIO(_.get.writeItem(item))
   }
 }
@@ -35,14 +34,15 @@ object DynamoLive {
         val dynamoService = SupporterDataDynamoService(getStage(stage))
 
         new Dynamo {
-          override def writeItem(item: SupporterRatePlanItem): ZIO[Any, ErrorResponse, Unit] =
+          override def writeItem(item: SupporterRatePlanItem): Task[Unit] =
             ZIO
               .fromFuture {
                 dynamoService.writeItem(item)
               }
               .mapError { ex =>
-                InternalServerError(
+                new Throwable(
                   s"Failed to write to the Supporter Data Dynamo table for identityId: ${item.identityId} with subscription Number: ${item.subscriptionName} with error: ${ex.toString}",
+                  ex,
                 )
               }
               .flatMap { _ =>

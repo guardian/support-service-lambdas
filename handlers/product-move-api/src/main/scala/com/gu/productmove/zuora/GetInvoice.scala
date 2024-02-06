@@ -25,14 +25,14 @@ object GetInvoiceLive:
   val layer: URLayer[ZuoraGet, GetInvoice] = ZLayer.fromFunction(GetInvoiceLive(_))
 
 private class GetInvoiceLive(zuoraGet: ZuoraGet) extends GetInvoice:
-  override def get(invoiceId: String): IO[ErrorResponse, GetInvoiceResponse] =
+  override def get(invoiceId: String): Task[GetInvoiceResponse] =
     zuoraGet.get[GetInvoiceResponse](
       uri"invoices/$invoiceId",
       ZuoraRestBody.ZuoraSuccessCheck.None,
     )
 
 trait GetInvoice:
-  def get(invoiceId: String): IO[ErrorResponse, GetInvoiceResponse]
+  def get(invoiceId: String): Task[GetInvoiceResponse]
 
 object GetInvoice {
 
@@ -40,6 +40,6 @@ object GetInvoice {
 
   given JsonDecoder[GetInvoiceResponse] = DeriveJsonDecoder.gen[GetInvoiceResponse]
 
-  def get(invoiceId: String): ZIO[GetInvoice, ErrorResponse, GetInvoiceResponse] =
+  def get(invoiceId: String): RIO[GetInvoice, GetInvoiceResponse] =
     ZIO.serviceWithZIO[GetInvoice](_.get(invoiceId))
 }
