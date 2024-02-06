@@ -1,3 +1,5 @@
+// Read the README.md on how to visualise the diagrams in vscode
+
 workspace {
 
     model {
