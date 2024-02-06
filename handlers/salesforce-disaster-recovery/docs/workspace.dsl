@@ -18,7 +18,7 @@ workspace {
         }
 
         // Relationships
-        maliciousSoftware -> salesforce "1. Compromises data in" "Ransomware attacks"
+        maliciousSoftware -> salesforce "1. Compromises data in" "Attacks"
         dev -> ownBackup "2. Triggers after a data loss event" "Dashboard"
         ownBackup -> salesforce "3. Restores data with new IDs" "Third party system"
         dev -> stepFunction "4. Triggers after the Own Backup has completed" "AWS Console"
