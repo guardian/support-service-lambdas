@@ -54,10 +54,6 @@ workspace {
                 shape Cylinder
             }
 
-            element "Queue" {
-                shape Pipe
-            }
-
             element "File" {
                 shape Folder
             }
