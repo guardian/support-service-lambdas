@@ -34,7 +34,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			this,
 			'create-salesforce-query-job',
 			{
-				handler: 'dist/createSalesforceQueryJob.handler',
+				handler: 'createSalesforceQueryJob.handler',
 				functionName: `create-salesforce-query-job-${this.stage}`,
 				...lambdaCommonConfig,
 			},

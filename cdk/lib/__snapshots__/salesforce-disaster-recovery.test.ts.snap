@@ -281,15 +281,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
-            "App": "salesforce-disaster-recovery",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stack": "membership",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "create-salesforce-query-job-CODE",
-        "Handler": "dist/createSalesforceQueryJob.handler",
+        "Handler": "createSalesforceQueryJob.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -762,15 +759,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
-            "App": "salesforce-disaster-recovery",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stack": "membership",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "create-salesforce-query-job-PROD",
-        "Handler": "dist/createSalesforceQueryJob.handler",
+        "Handler": "createSalesforceQueryJob.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
