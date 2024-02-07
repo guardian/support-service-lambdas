@@ -45,7 +45,7 @@ const ProductToDiscountMapping: {
 } = {
 	CODE: {
 		Month: {
-			productRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
+			id: '2c92c0f962cec7990162d3882afc52dd',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
@@ -57,7 +57,7 @@ const ProductToDiscountMapping: {
 			],
 		},
 		Quarter: {
-			productRatePlanId: '2c92c0f962cec7990162d3882afc52dd',
+			id: '2c92c0f962cec7990162d3882afc52dd',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
@@ -69,7 +69,7 @@ const ProductToDiscountMapping: {
 			],
 		},
 		Annual: {
-			productRatePlanId: '8ad08f068b5b9ca2018b5cadf0897ed3',
+			id: '8ad08f068b5b9ca2018b5cadf0897ed3',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
@@ -80,7 +80,7 @@ const ProductToDiscountMapping: {
 	},
 	PROD: {
 		Month: {
-			productRatePlanId: '2c92a0ff64176cd40164232c8ec97661',
+			id: '2c92a0ff64176cd40164232c8ec97661',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
@@ -92,7 +92,7 @@ const ProductToDiscountMapping: {
 			],
 		},
 		Quarter: {
-			productRatePlanId: '2c92a0ff64176cd40164232c8ec97661',
+			id: '2c92a0ff64176cd40164232c8ec97661',
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
@@ -104,7 +104,7 @@ const ProductToDiscountMapping: {
 			],
 		},
 		Annual: {
-			productRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
+			id: '8a128adf8b64bcfd018b6b6fdc7674f5',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',

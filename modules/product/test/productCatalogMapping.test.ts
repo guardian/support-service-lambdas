@@ -11,15 +11,14 @@ import prodCatalog from '../../catalog/test/fixtures/catalog-prod.json';
 
 test('We can find a product rate plan from product details', () => {
 	expect(
-		getProductRatePlan('CODE', 'Digital', 'SupporterPlus', 'Monthly')
-			.productRatePlanId,
+		getProductRatePlan('CODE', 'Digital', 'SupporterPlus', 'Monthly').id,
 	).toBe('8ad08cbd8586721c01858804e3275376');
 });
 
 test('We can find a product rate plan charge from product details', () => {
 	expect(
 		getProductRatePlan('CODE', 'Newspaper', 'NationalDelivery', 'Everyday')
-			.Monday,
+			.charges.Monday,
 	).toBe('8ad096ca8992481d018992a3674c18da');
 });
 
@@ -29,7 +28,7 @@ test('We can find product details from a productRatePlanId', () => {
 		productFamily: 'Digital',
 		zuoraProduct: 'DigitalSubscription',
 		productRatePlan: 'Monthly',
-		productRatePlanId,
+		id: productRatePlanId,
 	});
 });
 
@@ -40,9 +39,7 @@ const productExistsInCatalog = (stage: Stage) => {
 			: new ZuoraCatalog(prodCatalog);
 	const allProductDetails = getAllProductDetails(stage);
 	allProductDetails.forEach((productDetails) => {
-		expect(
-			zuoraCatalog.getCatalogPlan(productDetails.productRatePlanId),
-		).toBeDefined();
+		expect(zuoraCatalog.getCatalogPlan(productDetails.id)).toBeDefined();
 	});
 };
 
@@ -57,7 +54,7 @@ test('All product rate plan ids are unique', () => {
 	);
 	const productRatePlanIds = allProducts
 		.map((product) => {
-			return product.productRatePlanId;
+			return product.id;
 		})
 		.filter((id) => id !== 'Product option not available for this product');
 	const duplicateProductRatePlanIds = findDuplicates(productRatePlanIds);

@@ -159,8 +159,8 @@ const getZuoraProductObjects = (productRatePlans: ProductRatePlan[]) => {
 				);
 				return {
 					[productRatePlanName]: {
-						productRatePlanId: productRatePlan.id,
-						...getProductRatePlanChargeObjects(
+						id: productRatePlan.id,
+						charges: getProductRatePlanChargeObjects(
 							productRatePlan.productRatePlanCharges,
 						),
 					},

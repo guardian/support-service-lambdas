@@ -15,44 +15,7 @@ type ProductRatePlanKey<
 	ZP extends ZuoraProductKey<PF>,
 > = keyof (typeof prodMapping)[PF][ZP];
 
-type ProductRatePlanChargeKey<
-	PF extends ProductFamilyKey,
-	ZP extends ZuoraProductKey<PF>,
-	PRP extends ProductRatePlanKey<PF, ZP>,
-> = keyof (typeof prodMapping)[PF][ZP][PRP];
-
-type ProductFamily<PF extends ProductFamilyKey> = (typeof prodMapping)[PF];
-type ZuoraProduct<
-	PF extends ProductFamilyKey,
-	ZP extends ZuoraProductKey<PF>,
-> = ProductFamily<PF>[ZP];
-
-type ProductRatePlanObject = { productRatePlanId: string };
-
-export type ProductRatePlan<
-	PF extends ProductFamilyKey,
-	ZP extends ZuoraProductKey<PF>,
-	PRP extends ProductRatePlanKey<PF, ZP>,
-> = ZuoraProduct<PF, ZP>[PRP];
-
-export const getProductRatePlanCharges = <
-	PF extends ProductFamilyKey,
-	ZP extends ZuoraProductKey<PF>,
-	PRP extends ProductRatePlanKey<PF, ZP>,
-	PRPC extends ProductRatePlanChargeKey<PF, ZP, PRP>,
->(
-	stage: Stage,
-	productFamily: PF,
-	zuoraProduct: ZP,
-	productRatePlan: PRP,
-	productRatePlanCharge: PRPC,
-) => {
-	const productRatePlanObject =
-		mappingsForStage(stage)[productFamily][zuoraProduct][productRatePlan][
-			productRatePlanCharge
-		];
-	return productRatePlanObject;
-};
+type MinimalProductRatePlanObject = { id: string };
 
 export const getProductRatePlan = <
 	PF extends ProductFamilyKey,
@@ -63,9 +26,7 @@ export const getProductRatePlan = <
 	productFamily: PF,
 	zuoraProduct: ZP,
 	productRatePlan: PRP,
-) => {
-	return mappingsForStage(stage)[productFamily][zuoraProduct][productRatePlan];
-};
+) => mappingsForStage(stage)[productFamily][zuoraProduct][productRatePlan];
 
 export const getAllProductDetails = (stage: Stage) => {
 	const stageMapping = mappingsForStage(stage);
@@ -81,17 +42,17 @@ export const getAllProductDetails = (stage: Stage) => {
 				keyof typeof zuoraProductObject
 			>;
 			return productRatePlanKeys.flatMap((productRatePlan) => {
-				const productRatePlanObject = getProductRatePlan(
+				const { id } = getProductRatePlan(
 					stage,
 					productFamily,
 					zuoraProduct,
 					productRatePlan,
-				) as ProductRatePlanObject;
+				) as MinimalProductRatePlanObject;
 				return {
 					productFamily,
 					zuoraProduct,
 					productRatePlan,
-					productRatePlanId: productRatePlanObject.productRatePlanId,
+					id,
 				};
 			});
 		});
@@ -99,7 +60,5 @@ export const getAllProductDetails = (stage: Stage) => {
 };
 export const findProductDetails = (stage: Stage, productRatePlanId: string) => {
 	const allProducts = getAllProductDetails(stage);
-	return allProducts.find(
-		(product) => product.productRatePlanId === productRatePlanId,
-	);
+	return allProducts.find((product) => product.id === productRatePlanId);
 };
