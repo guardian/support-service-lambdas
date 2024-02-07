@@ -109,7 +109,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'secretsmanager:DescribeSecret',
 						],
 						resources: [
-							'arn:aws:secretsmanager:*:*:secret:events!connection/*',
+							`arn:aws:secretsmanager:*:*:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
 						],
 					}),
 				],
