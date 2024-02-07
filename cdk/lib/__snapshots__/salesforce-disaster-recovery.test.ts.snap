@@ -847,7 +847,22 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             {
               "Action": "events:RetrieveConnectionCredentials",
               "Effect": "Allow",
-              "Resource": "TBC",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608-3cQPK0",
+                  ],
+                ],
+              },
             },
             {
               "Action": [
@@ -875,7 +890,22 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
       ],
       "Properties": {
-        "DefinitionString": "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"TBC"},"RequestBody":{"operation":"query","query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}}}}}",
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:secretsmanager:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608-3cQPK0"},"RequestBody":{"operation":"query","query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}}}}}",
+            ],
+          ],
+        },
         "RoleArn": {
           "Fn::GetAtt": [
             "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",

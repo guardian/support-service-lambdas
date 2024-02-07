@@ -44,7 +44,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 		// Created from the AWS console: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/apidestinations
 		const salesforceApiConnectionArn =
 			this.stage === 'PROD'
-				? `TBC`
+				? // PROD ARN TBC
+				  `arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608-3cQPK0`
 				: `arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608-3cQPK0`;
 
 		const salesforceApiDomain =
