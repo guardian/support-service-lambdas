@@ -15,6 +15,6 @@ const writeMappingsToFile = async () => {
 	fs.writeFileSync('./src/prodCatalogMapping.json', prodCatalogMappingString);
 };
 
-(async function () {
+void (async function () {
 	await writeMappingsToFile();
 })();
