@@ -1,6 +1,4 @@
-import * as fs from 'fs';
 import { groupBy } from '@modules/arrayFunctions';
-import { getCatalogFromS3 } from '@modules/catalog/catalog';
 import type {
 	Catalog,
 	ProductRatePlan,
@@ -201,17 +199,4 @@ export const generateCatalogMapping = (catalog: Catalog) => {
 	);
 
 	return arrayToObject(nestedObject);
-};
-
-export const writeMappingsToFile = async () => {
-	const codeCatalog = await getCatalogFromS3('CODE');
-	const codeCatalogMapping = generateCatalogMapping(codeCatalog);
-	const prodCatalog = await getCatalogFromS3('PROD');
-	const prodCatalogMapping = generateCatalogMapping(prodCatalog);
-
-	const codeCatalogMappingString = JSON.stringify(codeCatalogMapping, null, 2);
-	const prodCatalogMappingString = JSON.stringify(prodCatalogMapping, null, 2);
-
-	fs.writeFileSync('./src/codeCatalogMapping.json', codeCatalogMappingString);
-	fs.writeFileSync('./src/prodCatalogMapping.json', prodCatalogMappingString);
 };
