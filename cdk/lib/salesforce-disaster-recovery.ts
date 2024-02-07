@@ -103,15 +103,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 						actions: ['events:RetrieveConnectionCredentials'],
 						resources: [salesforceApiConnectionArn],
 					}),
-					// new PolicyStatement({
-					// 	actions: [
-					// 		'secretsmanager:GetSecretValue',
-					// 		'secretsmanager:DescribeSecret',
-					// 	],
-					// 	resources: [
-					// 		'arn:aws:secretsmanager:*:*:secret:events!connection/*',
-					// 	],
-					// }),
+					new PolicyStatement({
+						actions: [
+							'secretsmanager:GetSecretValue',
+							'secretsmanager:DescribeSecret',
+						],
+						resources: [
+							'arn:aws:secretsmanager:*:*:secret:events!connection/*',
+						],
+					}),
 				],
 			}),
 		);
