@@ -68,8 +68,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						RequestBody: {
 							operation: 'query',
 							'query.$': '$.query',
-							// query:
-							// 	'SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c',
 						},
 					},
 				},
