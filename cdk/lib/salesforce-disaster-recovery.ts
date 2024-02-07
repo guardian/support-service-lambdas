@@ -1,9 +1,10 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-// import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
+import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration, SecretValue } from 'aws-cdk-lib';
 import { Authorization, Connection } from 'aws-cdk-lib/aws-events';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
 // import {} from 'aws-cdk-lib/aws-events-targets';
 // import lambda from 'aws-cdk-lib/aws-lambda';
 import {
@@ -18,43 +19,43 @@ export class SalesforceDisasterRecovery extends GuStack {
 		super(scope, id, props);
 
 		const app = 'salesforce-disaster-recovery';
-		// const runtime = lambda.Runtime.NODEJS_20_X;
-		// const fileName = `${app}.zip`;
-		// const timeout = Duration.seconds(300);
-		// const memorySize = 1024;
-		// const environment = {
-		// 	APP: app,
-		// 	STACK: this.stack,
-		// 	STAGE: this.stage,
-		// };
+		const runtime = Runtime.NODEJS_20_X;
+		const fileName = `${app}.zip`;
+		const timeout = Duration.seconds(300);
+		const memorySize = 1024;
+		const environment = {
+			APP: app,
+			STACK: this.stack,
+			STAGE: this.stage,
+		};
 
-		// const lambdaCommonConfig = {
-		// 	app,
-		// 	runtime,
-		// 	fileName,
-		// 	timeout,
-		// 	memorySize,
-		// 	environment,
-		// };
+		const lambdaCommonConfig = {
+			app,
+			runtime,
+			fileName,
+			timeout,
+			memorySize,
+			environment,
+		};
 
-		// const createSalesforceQueryJobLambda = new GuLambdaFunction(
-		// 	this,
-		// 	'CreateSalesforceQueryJobLambda',
-		// 	{
-		// 		handler: 'createSalesforceQueryJob.handler',
-		// 		functionName: `create-salesforce-query-job-${this.stage}`,
-		// 		...lambdaCommonConfig,
-		// 	},
-		// );
+		const createSalesforceQueryJobLambda = new GuLambdaFunction(
+			this,
+			'CreateSalesforceQueryJobLambda',
+			{
+				handler: 'createSalesforceQueryJob.handler',
+				functionName: `create-salesforce-query-job-${this.stage}`,
+				...lambdaCommonConfig,
+			},
+		);
 
 		// const salesforceApiConnection = new Connection(
 		// 	this,
 		// 	'SalesforceApiConnection',
 		// 	{
 		// 		authorization: Authorization.apiKey(
-		// 			'Authorization',
+		// 			'events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608',
 		// 			SecretValue.secretsManager(
-		// 				'events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608',
+		// 				'arn:aws:secretsmanager:eu-west-1:865473395570:secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608-3cQPK0',
 		// 			),
 		// 		),
 		// 		description: 'Salesforce API authentication',
@@ -74,6 +75,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 						// ConnectionArn: salesforceApiConnection.connectionArn,
 						ConnectionArn:
 							'arn:aws:events:eu-west-1:865473395570:connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c',
+					},
+					RequestBody: {
+						operation: 'query',
+						query:
+							'SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c',
 					},
 					// RequestBody: {
 					// 	data: {
