@@ -63,50 +63,54 @@ export class SalesforceDisasterRecovery extends GuStack {
 		// 	},
 		// );
 
-		const createSalesforceQueryJob = new CustomState(this, 'test1', {
-			stateJson: {
-				Type: 'Task',
-				Resource: 'arn:aws:states:::http:invoke',
-				Parameters: {
-					ApiEndpoint:
-						'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query',
-					Method: 'POST',
-					Authentication: {
-						// ConnectionArn: salesforceApiConnection.connectionArn,
-						ConnectionArn:
-							'arn:aws:events:eu-west-1:865473395570:connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c',
+		const createSalesforceQueryJob = new CustomState(
+			this,
+			'CreateSalesforceQueryJob',
+			{
+				stateJson: {
+					Type: 'Task',
+					Resource: 'arn:aws:states:::http:invoke',
+					Parameters: {
+						ApiEndpoint:
+							'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query',
+						Method: 'POST',
+						Authentication: {
+							// ConnectionArn: salesforceApiConnection.connectionArn,
+							ConnectionArn:
+								'arn:aws:events:eu-west-1:865473395570:connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c',
+						},
+						RequestBody: {
+							operation: 'query',
+							query:
+								'SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c',
+						},
+						// RequestBody: {
+						// 	data: {
+						// 		type: 'licenses',
+						// 		attributes: {
+						// 			metadata: {
+						// 				'transactionId.$': '$.data.id',
+						// 				'customerId.$': '$.data.customer_id',
+						// 			},
+						// 		},
+						// 		relationships: {
+						// 			policy: {
+						// 				data: {
+						// 					type: 'policies',
+						// 					id: '8c2294b0-dbbe-4028-b561-6aa246d60951',
+						// 				},
+						// 			},
+						// 		},
+						// 	},
+						// },
 					},
-					RequestBody: {
-						operation: 'query',
-						query:
-							'SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c',
-					},
-					// RequestBody: {
-					// 	data: {
-					// 		type: 'licenses',
-					// 		attributes: {
-					// 			metadata: {
-					// 				'transactionId.$': '$.data.id',
-					// 				'customerId.$': '$.data.customer_id',
-					// 			},
-					// 		},
-					// 		relationships: {
-					// 			policy: {
-					// 				data: {
-					// 					type: 'policies',
-					// 					id: '8c2294b0-dbbe-4028-b561-6aa246d60951',
-					// 				},
-					// 			},
-					// 		},
-					// 	},
+					// ResultSelector: {
+					// 	'body.$': 'States.StringToJson($.ResponseBody)',
 					// },
+					// OutputPath: '$.body',
 				},
-				ResultSelector: {
-					'body.$': 'States.StringToJson($.ResponseBody)',
-				},
-				OutputPath: '$.body',
 			},
-		});
+		);
 
 		const stateMachine = new StateMachine(
 			this,
