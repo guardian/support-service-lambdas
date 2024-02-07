@@ -95,7 +95,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								'states:HTTPMethod': 'POST',
 							},
 							StringLike: {
-								'states:HTTPEndpoint': salesforceApiDomain,
+								'states:HTTPEndpoint': `${salesforceApiDomain}/*`,
 							},
 						},
 					}),

@@ -137,7 +137,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "states:HTTPMethod": "POST",
                 },
                 "StringLike": {
-                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
+                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/*",
                 },
               },
               "Effect": "Allow",
@@ -628,7 +628,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "states:HTTPMethod": "POST",
                 },
                 "StringLike": {
-                  "states:HTTPEndpoint": "https://gnmtouchpoint.my.salesforce.com",
+                  "states:HTTPEndpoint": "https://gnmtouchpoint.my.salesforce.com/*",
                 },
               },
               "Effect": "Allow",
