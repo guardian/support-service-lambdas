@@ -171,7 +171,22 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                 "secretsmanager:DescribeSecret",
               ],
               "Effect": "Allow",
-              "Resource": "arn:aws:secretsmanager:*:*:secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -662,7 +677,22 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                 "secretsmanager:DescribeSecret",
               ],
               "Effect": "Allow",
-              "Resource": "arn:aws:secretsmanager:*:*:secret:events!connection/salesforce-disaster-recovery-PROD-salesforce-api/*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:events!connection/salesforce-disaster-recovery-PROD-salesforce-api/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
