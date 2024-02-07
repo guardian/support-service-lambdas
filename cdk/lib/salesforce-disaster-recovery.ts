@@ -41,8 +41,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 			...lambdaCommonConfig,
 		});
 
-		// Created from the AWS console
-		const salesforceApiConnectionArn = `arn:aws:events:${this.region}:${this.account}:connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c`;
+		// Created from the AWS console: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/apidestinations
+		const salesforceApiConnectionArn =
+			this.stage === 'PROD'
+				? `TBC`
+				: `arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608-3cQPK0`;
+
+		const salesforceApiDomain =
+			this.stage === 'PROD'
+				? 'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com'
+				: 'https://gnmtouchpoint.my.salesforce.com';
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
@@ -52,8 +60,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::http:invoke',
 					Parameters: {
-						ApiEndpoint:
-							'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query',
+						ApiEndpoint: `${salesforceApiDomain}/services/data/v60.0/jobs/query`,
 						Method: 'POST',
 						Authentication: {
 							ConnectionArn: salesforceApiConnectionArn,
@@ -88,8 +95,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								'states:HTTPMethod': 'POST',
 							},
 							StringLike: {
-								'states:HTTPEndpoint':
-									'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query',
+								'states:HTTPEndpoint': salesforceApiDomain,
 							},
 						},
 					}),

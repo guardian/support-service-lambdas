@@ -345,7 +345,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "states:HTTPMethod": "POST",
                 },
                 "StringLike": {
-                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query",
+                  "states:HTTPEndpoint": "https://gnmtouchpoint.my.salesforce.com",
                 },
               },
               "Effect": "Allow",
@@ -360,7 +360,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:events:",
+                    "arn:aws:secretsmanager:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -368,7 +368,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c",
+                    ":secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608-3cQPK0",
                   ],
                 ],
               },
@@ -403,7 +403,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v60.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:secretsmanager:",
               {
                 "Ref": "AWS::Region",
               },
@@ -411,7 +411,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c"},"RequestBody":{"operation":"query","query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}}}}}",
+              ":secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/a9fe1227-5dae-4f09-87f2-edb097875608-3cQPK0"},"RequestBody":{"operation":"query","query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}}}}}",
             ],
           ],
         },
@@ -836,7 +836,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "states:HTTPMethod": "POST",
                 },
                 "StringLike": {
-                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query",
+                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
                 },
               },
               "Effect": "Allow",
@@ -847,22 +847,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             {
               "Action": "events:RetrieveConnectionCredentials",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:events:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c",
-                  ],
-                ],
-              },
+              "Resource": "TBC",
             },
             {
               "Action": [
@@ -890,22 +875,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
       ],
       "Properties": {
-        "DefinitionString": {
-          "Fn::Join": [
-            "",
-            [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c"},"RequestBody":{"operation":"query","query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}}}}}",
-            ],
-          ],
-        },
+        "DefinitionString": "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"TBC"},"RequestBody":{"operation":"query","query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}}}}}",
         "RoleArn": {
           "Fn::GetAtt": [
             "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
