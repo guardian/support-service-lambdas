@@ -21,5 +21,5 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - create-salesforce-query-job-
+        - lambda-placeholder-
     dependencies: [salesforce-disaster-recovery-cloudformation]

@@ -145,7 +145,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "create-salesforce-query-job-CODE",
+        "FunctionName": "lambda-placeholder-CODE",
         "Handler": "createSalesforceQueryJob.handler",
         "MemorySize": 1024,
         "Role": {
@@ -636,7 +636,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "create-salesforce-query-job-PROD",
+        "FunctionName": "lambda-placeholder-PROD",
         "Handler": "createSalesforceQueryJob.handler",
         "MemorySize": 1024,
         "Role": {

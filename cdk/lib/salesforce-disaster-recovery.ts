@@ -37,7 +37,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		// Placeholder lambda
 		new GuLambdaFunction(this, 'CreateSalesforceQueryJobLambda', {
 			handler: 'createSalesforceQueryJob.handler',
-			functionName: `create-salesforce-query-job-${this.stage}`,
+			functionName: `lambda-placeholder-${this.stage}`,
 			...lambdaCommonConfig,
 		});
 
