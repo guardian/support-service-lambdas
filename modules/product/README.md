@@ -113,7 +113,7 @@ const sundayRatePlanChargeId = getProductRatePlan(
         'Newpaper',
         'NationalDelivery',
         'Sixday'
-).charges.Sunday // TS2339: Property Subscription does not exist on type
+).charges.Sunday // TS2339: Property Sunday does not exist on type
 
 
 ```
