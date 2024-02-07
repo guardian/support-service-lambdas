@@ -4,27 +4,22 @@ import type { Stage } from '@modules/stage';
 import {
 	findProductDetails,
 	getAllProductDetails,
-	getProductRatePlanCharges,
-	getProductRatePlanId,
+	getProductRatePlan,
 } from '@modules/product/productCatalogMapping';
 import codeCatalog from '../../catalog/test/fixtures/catalog-code.json';
 import prodCatalog from '../../catalog/test/fixtures/catalog-prod.json';
 
 test('We can find a product rate plan from product details', () => {
 	expect(
-		getProductRatePlanId('CODE', 'Digital', 'SupporterPlus', 'Monthly'),
+		getProductRatePlan('CODE', 'Digital', 'SupporterPlus', 'Monthly')
+			.productRatePlanId,
 	).toBe('8ad08cbd8586721c01858804e3275376');
 });
 
 test('We can find a product rate plan charge from product details', () => {
 	expect(
-		getProductRatePlanCharges(
-			'CODE',
-			'Newspaper',
-			'NationalDelivery',
-			'Everyday',
-			'Monday',
-		),
+		getProductRatePlan('CODE', 'Newspaper', 'NationalDelivery', 'Everyday')
+			.Monday,
 	).toBe('8ad096ca8992481d018992a3674c18da');
 });
 

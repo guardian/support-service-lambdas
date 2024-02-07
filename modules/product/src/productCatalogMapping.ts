@@ -21,16 +21,28 @@ type ProductRatePlanChargeKey<
 	PRP extends ProductRatePlanKey<PF, ZP>,
 > = keyof (typeof prodMapping)[PF][ZP][PRP];
 
+type ProductFamily<PF extends ProductFamilyKey> = (typeof prodMapping)[PF];
+type ZuoraProduct<
+	PF extends ProductFamilyKey,
+	ZP extends ZuoraProductKey<PF>,
+> = ProductFamily<PF>[ZP];
+
 type ProductRatePlanObject = { productRatePlanId: string };
 
+export type ProductRatePlan<
+	PF extends ProductFamilyKey,
+	ZP extends ZuoraProductKey<PF>,
+	PRP extends ProductRatePlanKey<PF, ZP>,
+> = ZuoraProduct<PF, ZP>[PRP];
+
 export const getProductRatePlanCharges = <
-	P extends ProductFamilyKey,
-	ZP extends ZuoraProductKey<P>,
-	PRP extends ProductRatePlanKey<P, ZP>,
-	PRPC extends ProductRatePlanChargeKey<P, ZP, PRP>,
+	PF extends ProductFamilyKey,
+	ZP extends ZuoraProductKey<PF>,
+	PRP extends ProductRatePlanKey<PF, ZP>,
+	PRPC extends ProductRatePlanChargeKey<PF, ZP, PRP>,
 >(
 	stage: Stage,
-	productFamily: P,
+	productFamily: PF,
 	zuoraProduct: ZP,
 	productRatePlan: PRP,
 	productRatePlanCharge: PRPC,
@@ -42,20 +54,17 @@ export const getProductRatePlanCharges = <
 	return productRatePlanObject;
 };
 
-export const getProductRatePlanId = <
-	P extends ProductFamilyKey,
-	ZP extends ZuoraProductKey<P>,
-	PRP extends ProductRatePlanKey<P, ZP>,
+export const getProductRatePlan = <
+	PF extends ProductFamilyKey,
+	ZP extends ZuoraProductKey<PF>,
+	PRP extends ProductRatePlanKey<PF, ZP>,
 >(
 	stage: Stage,
-	productFamily: P,
+	productFamily: PF,
 	zuoraProduct: ZP,
 	productRatePlan: PRP,
 ) => {
-	const productRatePlanObject = mappingsForStage(stage)[productFamily][
-		zuoraProduct
-	][productRatePlan] as ProductRatePlanObject;
-	return productRatePlanObject.productRatePlanId;
+	return mappingsForStage(stage)[productFamily][zuoraProduct][productRatePlan];
 };
 
 export const getAllProductDetails = (stage: Stage) => {
@@ -72,17 +81,17 @@ export const getAllProductDetails = (stage: Stage) => {
 				keyof typeof zuoraProductObject
 			>;
 			return productRatePlanKeys.flatMap((productRatePlan) => {
-				const productRatePlanId = getProductRatePlanId(
+				const productRatePlanObject = getProductRatePlan(
 					stage,
 					productFamily,
 					zuoraProduct,
 					productRatePlan,
-				);
+				) as ProductRatePlanObject;
 				return {
 					productFamily,
 					zuoraProduct,
 					productRatePlan,
-					productRatePlanId: productRatePlanId,
+					productRatePlanId: productRatePlanObject.productRatePlanId,
 				};
 			});
 		});
