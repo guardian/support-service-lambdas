@@ -70,10 +70,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 					},
 					Retry: [
-						// {
-						// 	ErrorEquals: ['States.Timeout', 'States.Http.StatusCode.400'],
-						// 	MaxAttempts: 0,
-						// },
+						{
+							ErrorEquals: ['States.Http.StatusCode.400'],
+							MaxAttempts: 0,
+						},
 						{
 							ErrorEquals: ['States.ALL'],
 							IntervalSeconds: 5,
@@ -95,7 +95,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		);
 
 		stateMachine.role.attachInlinePolicy(
-			new Policy(this, 'HttpInvoke', {
+			new Policy(this, 'SalesforceApiHttpInvoke', {
 				statements: [
 					new PolicyStatement({
 						actions: ['states:InvokeHTTPEndpoint'],
