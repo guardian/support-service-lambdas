@@ -19,8 +19,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 	constructor(scope: App, id: string, props: Props) {
 		super(scope, id, props);
 
-		const { salesforceApiDomain, salesforceApiConnectionResourceId } = props;
-		const salesforceApiConnectionArn = `arn:aws:events:${this.region}:${this.account}:connection/${salesforceApiConnectionResourceId}`;
+		const salesforceApiConnectionArn = `arn:aws:events:${this.region}:${this.account}:connection/${props.salesforceApiConnectionResourceId}`;
 
 		const app = 'salesforce-disaster-recovery';
 		const runtime = Runtime.NODEJS_20_X;
@@ -56,7 +55,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::http:invoke',
 					Parameters: {
-						ApiEndpoint: `${salesforceApiDomain}/services/data/v59.0/jobs/query`,
+						ApiEndpoint: `${props.salesforceApiDomain}/services/data/v59.0/jobs/query`,
 						Method: 'POST',
 						Authentication: {
 							ConnectionArn: salesforceApiConnectionArn,
@@ -102,7 +101,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								'states:HTTPMethod': 'POST',
 							},
 							StringLike: {
-								'states:HTTPEndpoint': `${salesforceApiDomain}/*`,
+								'states:HTTPEndpoint': `${props.salesforceApiDomain}/*`,
 							},
 						},
 					}),
