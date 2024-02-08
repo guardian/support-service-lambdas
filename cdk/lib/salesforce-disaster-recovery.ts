@@ -11,14 +11,16 @@ import {
 } from 'aws-cdk-lib/aws-stepfunctions';
 
 interface Props extends GuStackProps {
-	salesforceAuthEndpoint: string;
-	salesforceApiConnectionArn: string;
+	salesforceApiDomain: string;
+	salesforceApiConnectionResourceId: string;
 }
 
 export class SalesforceDisasterRecovery extends GuStack {
 	constructor(scope: App, id: string, props: Props) {
 		super(scope, id, props);
-		const { salesforceAuthEndpoint, salesforceApiConnectionArn } = props;
+
+		const { salesforceApiDomain, salesforceApiConnectionResourceId } = props;
+		const salesforceApiConnectionArn = `arn:aws:events:${this.region}:${this.account}:connection/${salesforceApiConnectionResourceId}`;
 
 		const app = 'salesforce-disaster-recovery';
 		const runtime = Runtime.NODEJS_20_X;
@@ -54,7 +56,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::http:invoke',
 					Parameters: {
-						ApiEndpoint: `${salesforceAuthEndpoint}/services/data/v59.0/jobs/query`,
+						ApiEndpoint: `${salesforceApiDomain}/services/data/v59.0/jobs/query`,
 						Method: 'POST',
 						Authentication: {
 							ConnectionArn: salesforceApiConnectionArn,
@@ -100,7 +102,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								'states:HTTPMethod': 'POST',
 							},
 							StringLike: {
-								'states:HTTPEndpoint': `${salesforceAuthEndpoint}/*`,
+								'states:HTTPEndpoint': `${salesforceApiDomain}/*`,
 							},
 						},
 					}),
@@ -114,7 +116,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'secretsmanager:DescribeSecret',
 						],
 						resources: [
-							`arn:aws:secretsmanager:::secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
 						],
 					}),
 				],
