@@ -69,6 +69,18 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'query.$': '$.query',
 						},
 					},
+					Retry: [
+						{
+							ErrorEquals: ['States.Timeout', 'States.Http.StatusCode.400'],
+							MaxAttempts: 0,
+						},
+						{
+							ErrorEquals: ['States.ALL'],
+							IntervalSeconds: 5,
+							MaxAttempts: 3,
+							BackoffRate: 2,
+						},
+					],
 				},
 			},
 		);
