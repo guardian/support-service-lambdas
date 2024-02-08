@@ -418,7 +418,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v60.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -924,7 +924,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v60.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
