@@ -10,9 +10,15 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 
+interface Props extends GuStackProps {
+	salesforceAuthEndpoint: string;
+	salesforceApiConnectionArn: string;
+}
+
 export class SalesforceDisasterRecovery extends GuStack {
-	constructor(scope: App, id: string, props: GuStackProps) {
+	constructor(scope: App, id: string, props: Props) {
 		super(scope, id, props);
+		const { salesforceAuthEndpoint, salesforceApiConnectionArn } = props;
 
 		const app = 'salesforce-disaster-recovery';
 		const runtime = Runtime.NODEJS_20_X;
@@ -40,17 +46,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			...lambdaCommonConfig,
 		});
 
-		// Created from the AWS console
-		const salesforceApiConnectionArn =
-			this.stage === 'PROD'
-				? `arn:aws:events:${this.region}:${this.account}:connection/${app}-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e`
-				: `arn:aws:events:${this.region}:${this.account}:connection/${app}-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f`;
-
-		const salesforceApiDomain =
-			this.stage === 'PROD'
-				? 'https://gnmtouchpoint.my.salesforce.com'
-				: 'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com';
-
 		const createSalesforceQueryJob = new CustomState(
 			this,
 			'CreateSalesforceQueryJob',
@@ -59,7 +54,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::http:invoke',
 					Parameters: {
-						ApiEndpoint: `${salesforceApiDomain}/services/data/v59.0/jobs/query`,
+						ApiEndpoint: `${salesforceAuthEndpoint}/services/data/v59.0/jobs/query`,
 						Method: 'POST',
 						Authentication: {
 							ConnectionArn: salesforceApiConnectionArn,
@@ -105,7 +100,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								'states:HTTPMethod': 'POST',
 							},
 							StringLike: {
-								'states:HTTPEndpoint': `${salesforceApiDomain}/*`,
+								'states:HTTPEndpoint': `${salesforceAuthEndpoint}/*`,
 							},
 						},
 					}),
@@ -119,7 +114,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'secretsmanager:DescribeSecret',
 						],
 						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
+							`arn:aws:secretsmanager:::secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
 						],
 					}),
 				],
