@@ -40,7 +40,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			...lambdaCommonConfig,
 		});
 
-		// Created from the AWS console: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/apidestinations
+		// Created from the AWS console
 		const salesforceApiConnectionArn =
 			this.stage === 'PROD'
 				? `arn:aws:events:${this.region}:${this.account}:connection/${app}-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e`
