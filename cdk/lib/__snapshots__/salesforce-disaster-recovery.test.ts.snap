@@ -160,7 +160,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c",
+                    ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f",
                   ],
                 ],
               },
@@ -426,7 +426,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/5ffa1b46-6757-4c6d-aea6-9ebc9aef983c"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]}}}",
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]}}}",
             ],
           ],
         },
@@ -666,7 +666,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":connection/salesforce-disaster-recovery-PROD-salesforce-api/d2c146d4-8a46-4803-9ba4-e7671f32cfbb",
+                    ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e",
                   ],
                 ],
               },
@@ -932,7 +932,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/d2c146d4-8a46-4803-9ba4-e7671f32cfbb"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]}}}",
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]}}}",
             ],
           ],
         },
