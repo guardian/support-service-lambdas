@@ -113,9 +113,19 @@ export class SalesforceDisasterRecovery extends GuStack {
 						conditions: {
 							StringEquals: {
 								'states:HTTPMethod': 'POST',
+								'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query`,
+							},
+						},
+					}),
+					new PolicyStatement({
+						actions: ['states:InvokeHTTPEndpoint'],
+						resources: [stateMachine.stateMachineArn],
+						conditions: {
+							StringEquals: {
+								'states:HTTPMethod': 'GET',
 							},
 							StringLike: {
-								'states:HTTPEndpoint': `${props.salesforceApiDomain}/*`,
+								'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query/*`,
 							},
 						},
 					}),

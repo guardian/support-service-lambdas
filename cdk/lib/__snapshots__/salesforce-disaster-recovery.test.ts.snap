@@ -124,10 +124,23 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               "Action": "states:InvokeHTTPEndpoint",
               "Condition": {
                 "StringEquals": {
+                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query",
                   "states:HTTPMethod": "POST",
                 },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+              },
+            },
+            {
+              "Action": "states:InvokeHTTPEndpoint",
+              "Condition": {
+                "StringEquals": {
+                  "states:HTTPMethod": "GET",
+                },
                 "StringLike": {
-                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/*",
+                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/*",
                 },
               },
               "Effect": "Allow",
@@ -420,10 +433,23 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Action": "states:InvokeHTTPEndpoint",
               "Condition": {
                 "StringEquals": {
+                  "states:HTTPEndpoint": "https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query",
                   "states:HTTPMethod": "POST",
                 },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+              },
+            },
+            {
+              "Action": "states:InvokeHTTPEndpoint",
+              "Condition": {
+                "StringEquals": {
+                  "states:HTTPMethod": "GET",
+                },
                 "StringLike": {
-                  "states:HTTPEndpoint": "https://gnmtouchpoint.my.salesforce.com/*",
+                  "states:HTTPEndpoint": "https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query/*",
                 },
               },
               "Effect": "Allow",
