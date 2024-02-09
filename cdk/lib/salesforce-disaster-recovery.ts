@@ -9,7 +9,6 @@ import {
 	DefinitionBody,
 	JsonPath,
 	Pass,
-	State,
 	StateMachine,
 	Wait,
 	WaitTime,
@@ -81,7 +80,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::http:invoke',
 					Parameters: {
-						ApiEndpoint: `States.Format('${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)`,
+						// ApiEndpoint: `States.Format('${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)`,
+						ApiEndpoint: `States.Format('{}{}', ${props.salesforceApiDomain}/services/data/v59.0/jobs/query/, $.ResponseBody.id)`,
+						// ApiEndpoint: `States.Format('${
+						// 	props.salesforceApiDomain
+						// }/services/data/v59.0/jobs/query/{}', ${JsonPath.stringAt(
+						// 	'$.ResponseBody.id',
+						// )})`,
 						Method: 'GET',
 						Authentication: {
 							ConnectionArn: salesforceApiConnectionArn,
