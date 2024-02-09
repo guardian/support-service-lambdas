@@ -221,7 +221,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"States.Format('test{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('{}{}', https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/, $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -530,7 +530,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":30,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"States.Format('test{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":30,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('{}{}', https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query/, $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
