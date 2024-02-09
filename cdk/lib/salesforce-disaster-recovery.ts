@@ -81,7 +81,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Resource: 'arn:aws:states:::http:invoke',
 					Parameters: {
 						// ApiEndpoint: `States.Format('${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)`,
-						ApiEndpoint: `States.Format('{}{}', ${props.salesforceApiDomain}/services/data/v59.0/jobs/query/, $.ResponseBody.id)`,
+						// ApiEndpoint: JsonPath.stringAt(
+						// 	`States.Format('{}{}', ${props.salesforceApiDomain}/services/data/v59.0/jobs/query/, $.ResponseBody.id)`,
+						// ),
+						ApiEndpoint: JsonPath.stringAt(
+							`States.Format('{}', $.ResponseBody.id)`,
+						),
 						// ApiEndpoint: `States.Format('${
 						// 	props.salesforceApiDomain
 						// }/services/data/v59.0/jobs/query/{}', ${JsonPath.stringAt(
