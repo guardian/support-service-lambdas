@@ -102,7 +102,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			'IsSalesforceQueryJobCompleted',
 		)
 			.when(
-				Condition.stringEqualsJsonPath('$.ResponseBody.state', 'JobComplete'),
+				Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 				waitForSalesforceQueryJobToComplete,
 			)
 			.otherwise(getSalesforceQueryResult);
