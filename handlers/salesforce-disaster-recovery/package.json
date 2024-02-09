@@ -1,0 +1,15 @@
+{
+	"name": "salesforce-disaster-recovery",
+	"description": "A state machine that updates the Zuora accounts with the new Salesforce IDs restored in the event of a disaster.",
+	"scripts": {
+		"test": "jest --group=-integration",
+		"it-test": "jest --group=integration",
+		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target src/handlers/*.ts",
+		"lint": "eslint src/**/*.ts",
+		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr salesforce-disaster-recovery.zip ./*.js",
+		"type-check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/aws-lambda": "^8.10.129"
+	}
+}

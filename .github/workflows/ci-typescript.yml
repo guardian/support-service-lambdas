@@ -11,6 +11,7 @@ jobs:
       matrix:
         subproject:
           - discount-api
+          - salesforce-disaster-recovery
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -48,4 +49,3 @@ jobs:
               - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
-

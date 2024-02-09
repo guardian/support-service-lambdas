@@ -5,6 +5,7 @@ import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
@@ -71,6 +72,7 @@ new CancellationSfCasesApi(app, 'cancellation-sf-cases-api-PROD', {
 
 new NewProductApi(app, 'new-product-api-CODE', codeProps);
 new NewProductApi(app, 'new-product-api-PROD', prodProps);
+
 new SingleContributionSalesforceWrites(
 	app,
 	`${SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME}-CODE`,
@@ -81,6 +83,7 @@ new SingleContributionSalesforceWrites(
 	`${SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME}-PROD`,
 	{ stack: 'membership', stage: 'PROD' },
 );
+
 new DiscountApi(app, 'discount-api-CODE', {
 	stack: 'support',
 	stage: 'CODE',
@@ -94,4 +97,13 @@ new DiscountApi(app, 'discount-api-PROD', {
 	domainName: `discount-api.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
+});
+
+new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+});
+new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
+	stack: 'membership',
+	stage: 'PROD',
 });
