@@ -5,6 +5,7 @@ import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import {
 	CustomState,
 	DefinitionBody,
+	JsonPath,
 	StateMachine,
 	Wait,
 	WaitTime,
@@ -68,13 +69,37 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const getSalesforceQueryJobStatus = new CustomState(
+			this,
+			'GetSalesforceQueryJobStatus',
+			{
+				stateJson: {
+					Type: 'Task',
+					Resource: 'arn:aws:states:::http:invoke',
+					Parameters: {
+						ApiEndpoint: `${
+							props.salesforceApiDomain
+						}/services/data/v59.0/jobs/query/${JsonPath.stringAt(
+							'$.ResponseBody.id',
+						)}`,
+						Method: 'GET',
+						Authentication: {
+							ConnectionArn: salesforceApiConnectionArn,
+						},
+					},
+				},
+			},
+		);
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
 			{
 				stateMachineName: `${app}-${this.stage}`,
 				definitionBody: DefinitionBody.fromChainable(
-					createSalesforceQueryJob.next(waitForSalesforceQueryJobToComplete),
+					createSalesforceQueryJob
+						.next(waitForSalesforceQueryJobToComplete)
+						.next(getSalesforceQueryJobStatus),
 				),
 			},
 		);
