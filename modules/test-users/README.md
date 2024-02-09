@@ -1,5 +1,5 @@
 ## Test Users
-This module provides an easy way to create, cancel and delete test subscriptions and accounts in CODE Zuora from the command line.
+This module provides an easy way to create, cancel and delete test subscriptions and accounts in CODE Zuora from the command line. You will need to have fresh Janus credentials.
 
 Usage examples are below:
 ### Create a subscription
