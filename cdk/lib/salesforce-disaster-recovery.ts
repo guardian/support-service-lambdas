@@ -13,7 +13,7 @@ import {
 interface Props extends GuStackProps {
 	salesforceApiDomain: string;
 	salesforceApiConnectionResourceId: string;
-	salesforceBulkQueryWaitSeconds: number;
+	salesforceQueryWaitSeconds: number;
 }
 
 export class SalesforceDisasterRecovery extends GuStack {
@@ -63,7 +63,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			'WaitForSalesforceQueryJobToComplete',
 			{
 				time: WaitTime.duration(
-					Duration.seconds(props.salesforceBulkQueryWaitSeconds),
+					Duration.seconds(props.salesforceQueryWaitSeconds),
 				),
 			},
 		);
