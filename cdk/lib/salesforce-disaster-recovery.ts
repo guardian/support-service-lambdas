@@ -103,9 +103,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 		)
 			.when(
 				Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-				waitForSalesforceQueryJobToComplete,
+				getSalesforceQueryResult,
 			)
-			.otherwise(getSalesforceQueryResult);
+			.otherwise(waitForSalesforceQueryJobToComplete);
 
 		const stateMachine = new StateMachine(
 			this,
