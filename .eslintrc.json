@@ -1,6 +1,9 @@
 {
 	"extends": "@guardian/eslint-config-typescript",
 	"plugins": ["import"],
+	"rules": {
+		"@typescript-eslint/no-unused-vars": ["error", { "ignoreRestSiblings": true }]
+	},
 	"settings": {
 		"import/parsers": {
 			"@typescript-eslint/parser": [".ts", ".tsx"]

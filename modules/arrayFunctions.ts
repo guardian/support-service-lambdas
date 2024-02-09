@@ -1,6 +1,9 @@
 export const sum = <T>(array: T[], fn: (item: T) => number): number => {
 	return array.reduce((acc, item) => acc + fn(item), 0);
 };
+export const sumNumbers = (array: number[]): number => {
+	return sum(array, (item) => item);
+};
 export const groupBy = <T>(
 	array: T[],
 	fn: (item: T) => string,
@@ -30,3 +33,6 @@ export const getSingleOrThrow = <T>(
 	}
 	return matchingElements[0];
 };
+
+export const findDuplicates = <T>(array: T[]) =>
+	array.filter((item, index) => array.indexOf(item) !== index);
