@@ -97,16 +97,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const getSalesforceQueryResult = new Pass(this, 'GetSalesforceQueryResult');
 
-		const isSalesforceQueryJobCompleted = new Choice(
-			this,
-			'IsSalesforceQueryJobCompleted',
-		)
-			.when(
-				Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-				getSalesforceQueryResult,
-			)
-			.otherwise(waitForSalesforceQueryJobToComplete);
-
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -116,7 +106,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 					createSalesforceQueryJob
 						.next(waitForSalesforceQueryJobToComplete)
 						.next(getSalesforceQueryJobStatus)
-						.next(isSalesforceQueryJobCompleted),
+						.next(
+							new Choice(this, 'IsSalesforceQueryJobCompleted')
+								.when(
+									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
+									getSalesforceQueryResult,
+								)
+								.otherwise(waitForSalesforceQueryJobToComplete),
+						),
 				),
 			},
 		);
