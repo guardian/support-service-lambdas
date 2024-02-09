@@ -4,7 +4,10 @@ import dayjs from 'dayjs';
 
 void (async () => {
 	const subscriptionNumber = process.argv[2];
-	if (!subscriptionNumber?.startsWith('A-S')) {
+	if (
+		!subscriptionNumber?.startsWith('A-S') ||
+		subscriptionNumber.length != 11
+	) {
 		console.log('Please provide a valid Zuora subscription number');
 		return;
 	}
