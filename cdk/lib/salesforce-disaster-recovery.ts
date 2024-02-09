@@ -93,7 +93,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						// 	`${props.salesforceApiDomain}/services/data/v59.0/jobs/query/`,
 						// 	JsonPath.stringAt('$.ResponseBody.id'),
 						// ),
-						ApiEndpoint: JsonPath.format(
+						'ApiEndpoint.$': JsonPath.format(
 							`${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}`,
 							JsonPath.stringAt('$.ResponseBody.id'),
 						),
