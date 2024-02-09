@@ -16,7 +16,7 @@ Result will be:
   }
 ]
 ```
-Check create.ts to see what type of sub has been created.
+This will create a monthly digital subscription
 ### Cancel a subscription
 ```shell
 pnpm -filter test-users cancelSubscription A-S00815422

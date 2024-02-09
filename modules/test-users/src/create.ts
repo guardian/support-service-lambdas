@@ -113,14 +113,6 @@ export const createAccountAndSubscription = async (
 				'Monthly',
 			).id as string,
 		},
-		{
-			productRatePlanId: getProductRatePlan(
-				stage,
-				'GuardianWeekly',
-				'Domestic',
-				'Monthly',
-			).id as string,
-		},
 	];
 	const today = dayjs();
 	const body = JSON.stringify(createSubscribeBody(subscribeItems, today));
