@@ -8,11 +8,14 @@ import {
 	CustomState,
 	DefinitionBody,
 	StateMachine,
+	Wait,
+	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 
 interface Props extends GuStackProps {
 	salesforceApiDomain: string;
 	salesforceApiConnectionResourceId: string;
+	salesforceBulkQueryWaitSeconds: number;
 }
 
 export class SalesforceDisasterRecovery extends GuStack {
@@ -81,12 +84,24 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const waitForSalesforceQueryJobToComplete = new Wait(
+			this,
+			'WaitForSalesforceQueryJobToComplete',
+			{
+				time: WaitTime.duration(
+					Duration.seconds(props.salesforceBulkQueryWaitSeconds),
+				),
+			},
+		);
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
 			{
 				stateMachineName: `${app}-${this.stage}`,
-				definitionBody: DefinitionBody.fromChainable(createSalesforceQueryJob),
+				definitionBody: DefinitionBody.fromChainable(
+					createSalesforceQueryJob.next(waitForSalesforceQueryJobToComplete),
+				),
 			},
 		);
 
