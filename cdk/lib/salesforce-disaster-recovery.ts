@@ -77,11 +77,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::http:invoke',
 					Parameters: {
-						ApiEndpoint: `${
-							props.salesforceApiDomain
-						}/services/data/v59.0/jobs/query/${JsonPath.stringAt(
-							'$.ResponseBody.id',
-						)}`,
+						// ApiEndpoint: `${
+						// 	props.salesforceApiDomain
+						// }/services/data/v59.0/jobs/query/${JsonPath.stringAt(
+						// 	'$.ResponseBody.id',
+						// )}`,
+						ApiEndpoint: `${props.salesforceApiDomain}/services/data/v59.0/jobs/query/750UD000001hnzPYAQ`,
 						Method: 'GET',
 						Authentication: {
 							ConnectionArn: salesforceApiConnectionArn,
