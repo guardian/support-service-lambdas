@@ -3,9 +3,12 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import {
+	Choice,
+	Condition,
 	CustomState,
 	DefinitionBody,
 	JsonPath,
+	Pass,
 	StateMachine,
 	Wait,
 	WaitTime,
@@ -92,6 +95,18 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const getSalesforceQueryResult = new Pass(this, 'GetSalesforceQueryResult');
+
+		const isSalesforceQueryJobCompleted = new Choice(
+			this,
+			'IsSalesforceQueryJobCompleted',
+		)
+			.when(
+				Condition.stringEqualsJsonPath('$.ResponseBody.state', 'JobComplete'),
+				waitForSalesforceQueryJobToComplete,
+			)
+			.otherwise(getSalesforceQueryResult);
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -100,7 +115,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 				definitionBody: DefinitionBody.fromChainable(
 					createSalesforceQueryJob
 						.next(waitForSalesforceQueryJobToComplete)
-						.next(getSalesforceQueryJobStatus),
+						.next(getSalesforceQueryJobStatus)
+						.next(isSalesforceQueryJobCompleted),
 				),
 			},
 		);
