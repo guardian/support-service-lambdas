@@ -1,9 +1,7 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { type App, Duration } from 'aws-cdk-lib';
+import { type App } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
 	CustomState,
 	DefinitionBody,
@@ -25,30 +23,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const salesforceApiConnectionArn = `arn:aws:events:${this.region}:${this.account}:connection/${props.salesforceApiConnectionResourceId}`;
 
 		const app = 'salesforce-disaster-recovery';
-		const runtime = Runtime.NODEJS_20_X;
-		const fileName = `${app}.zip`;
-		const timeout = Duration.seconds(300);
-		const memorySize = 1024;
-		const environment = {
-			APP: app,
-			STACK: this.stack,
-			STAGE: this.stage,
-		};
-
-		const lambdaCommonConfig = {
-			app,
-			runtime,
-			fileName,
-			timeout,
-			memorySize,
-			environment,
-		};
-
-		new GuLambdaFunction(this, 'PlaceholderLambda', {
-			handler: 'placeholderLambda.handler',
-			functionName: `placeholder-lambda-${this.stage}`,
-			...lambdaCommonConfig,
-		});
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
