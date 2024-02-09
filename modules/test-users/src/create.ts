@@ -46,9 +46,9 @@ export const createSubscribeBody = (
 		subscribes: [
 			{
 				Account: {
-					Name: '0019E00002QSysUQAT',
+					Name: 'Test User',
 					Currency: 'GBP',
-					CrmId: '0019E00002QSysUQAT',
+					CrmId: '0019E00002QSysUQAT', // The Saleforce Account ID
 					IdentityId__c: '200175946',
 					PaymentGateway: 'GoCardless',
 					CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
@@ -69,7 +69,7 @@ export const createSubscribeBody = (
 				PaymentMethod: {
 					FirstName: 'Test',
 					LastName: 'User',
-					BankTransferAccountName: 'blah',
+					BankTransferAccountName: 'Test User',
 					BankCode: '200000',
 					BankTransferAccountNumber: '55779911',
 					Country: 'GB',
@@ -91,7 +91,6 @@ export const createSubscribeBody = (
 						RenewalTerm: 12,
 						TermType: 'TERMED',
 						ReaderType__c: 'Direct',
-						CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					},
 				},
 				SubscribeOptions: { GenerateInvoice: true, ProcessPayments: true },
@@ -100,6 +99,7 @@ export const createSubscribeBody = (
 	};
 };
 
+const stage = 'CODE';
 export const createAccountAndSubscription = async (
 	zuoraClient: ZuoraClient,
 ): Promise<ZuoraSubscribeResponse> => {
@@ -107,7 +107,7 @@ export const createAccountAndSubscription = async (
 	const subscribeItems = [
 		{
 			productRatePlanId: getProductRatePlan(
-				'CODE',
+				stage,
 				'Digital',
 				'DigitalSubscription',
 				'Monthly',
@@ -115,7 +115,7 @@ export const createAccountAndSubscription = async (
 		},
 		{
 			productRatePlanId: getProductRatePlan(
-				'CODE',
+				stage,
 				'GuardianWeekly',
 				'Domestic',
 				'Monthly',
@@ -129,7 +129,7 @@ export const createAccountAndSubscription = async (
 };
 
 void (async () => {
-	const zuoraClient = await ZuoraClient.create('CODE');
+	const zuoraClient = await ZuoraClient.create(stage);
 	const response = await createAccountAndSubscription(zuoraClient);
 	console.log(response);
 })();
