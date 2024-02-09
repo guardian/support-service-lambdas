@@ -1,0 +1,16 @@
+{
+  "name": "test-users",
+  "version": "1.0.0",
+  "scripts": {
+    "createSubscription": "ts-node ./src/create.ts",
+    "cancelSubscription": "ts-node ./src/cancel.ts",
+    "deleteAccount": "ts-node ./src/deleteAccount.ts",
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration"
+  },
+  "devDependencies": {
+    "dayjs": "^1.11.10",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0"
+  }
+}
