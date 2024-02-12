@@ -93,7 +93,26 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const getSalesforceQueryResult = new Pass(this, 'GetSalesforceQueryResult');
+		const getSalesforceQueryResult = new CustomState(
+			this,
+			'GetSalesforceQueryResult',
+			{
+				stateJson: {
+					Type: 'Task',
+					Resource: 'arn:aws:states:::http:invoke',
+					Parameters: {
+						'ApiEndpoint.$': JsonPath.format(
+							`${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}/results`,
+							JsonPath.stringAt('$.ResponseBody.id'),
+						),
+						Method: 'GET',
+						Authentication: {
+							ConnectionArn: salesforceApiConnectionArn,
+						},
+					},
+				},
+			},
+		);
 
 		const stateMachine = new StateMachine(
 			this,
