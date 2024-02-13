@@ -93,7 +93,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const getSalesforceQueryResult = new Pass(this, 'GetSalesforceQueryResult');
+		const saveSalesforceQueryResultToS3 = new Pass(
+			this,
+			'SaveSalesforceQueryResultToS3',
+		);
 
 		const stateMachine = new StateMachine(
 			this,
@@ -108,7 +111,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									getSalesforceQueryResult,
+									saveSalesforceQueryResultToS3,
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
