@@ -14,6 +14,7 @@ import {
 	DefinitionBody,
 	JsonPath,
 	StateMachine,
+	TaskInput,
 	Wait,
 	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
@@ -44,16 +45,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			timeout: Duration.seconds(300),
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
-
-		const saveSalesforceQueryResultToS3Lambda = new GuLambdaFunction(
-			this,
-			'SaveSalesforceQueryResultToS3Lambda',
-			{
-				...lambdaDefaultConfig,
-				handler: 'saveSalesforceQueryResultToS3.handler',
-				functionName: `save-salesforce-query-result-to-s3-${this.stage}`,
-			},
-		);
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
@@ -124,8 +115,18 @@ export class SalesforceDisasterRecovery extends GuStack {
 			this,
 			'SaveSalesforceQueryResultToS3',
 			{
-				lambdaFunction: saveSalesforceQueryResultToS3Lambda,
-				inputPath: '$.input',
+				lambdaFunction: new GuLambdaFunction(
+					this,
+					'SaveSalesforceQueryResultToS3Lambda',
+					{
+						...lambdaDefaultConfig,
+						handler: 'saveSalesforceQueryResultToS3.handler',
+						functionName: `save-salesforce-query-result-to-s3-${this.stage}`,
+					},
+				),
+				payload: TaskInput.fromObject({
+					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
+				}),
 			},
 		);
 
