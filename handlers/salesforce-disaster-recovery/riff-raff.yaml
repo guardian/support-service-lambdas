@@ -13,3 +13,12 @@ deployments:
       templateStagePaths:
         CODE: salesforce-disaster-recovery-CODE.template.json
         PROD: salesforce-disaster-recovery-PROD.template.json
+  salesforce-disaster-recovery:
+    type: aws-lambda
+    parameters:
+      fileName: salesforce-disaster-recovery.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - save-salesforce-query-result-to-s3
+    dependencies: [salesforce-disaster-recovery-cloudformation]
