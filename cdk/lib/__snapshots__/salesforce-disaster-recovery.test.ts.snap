@@ -112,181 +112,37 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
     },
   },
   "Metadata": {
-    "gu:cdk:constructs": [
-      "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-    ],
+    "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
   },
-  "Parameters": {
-    "DistributionBucketName": {
-      "Default": "/account/services/artifact.bucket",
-      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-  },
   "Resources": {
-    "CreateSalesforceQueryJobLambda4C1B0CD3": {
-      "DependsOn": [
-        "CreateSalesforceQueryJobLambdaServiceRoleDefaultPolicyDB632263",
-        "CreateSalesforceQueryJobLambdaServiceRole480CD271",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/CODE/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "salesforce-disaster-recovery",
-            "STACK": "membership",
-            "STAGE": "CODE",
-          },
-        },
-        "FunctionName": "create-salesforce-query-job-CODE",
-        "Handler": "createSalesforceQueryJob.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "CreateSalesforceQueryJobLambdaServiceRole480CD271",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "CreateSalesforceQueryJobLambdaServiceRole480CD271": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "CreateSalesforceQueryJobLambdaServiceRoleDefaultPolicyDB632263": {
+    "SalesforceApiHttpInvoke9D82CE85": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
+              "Action": "states:InvokeHTTPEndpoint",
+              "Condition": {
+                "StringEquals": {
+                  "states:HTTPMethod": "POST",
+                },
+                "StringLike": {
+                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/*",
+                },
+              },
               "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/CODE/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-                    ],
-                  ],
-                },
-              ],
+              "Resource": {
+                "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+              },
             },
             {
-              "Action": "ssm:GetParametersByPath",
+              "Action": "events:RetrieveConnectionCredentials",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:",
+                    "arn:aws:events:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -294,22 +150,22 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/salesforce-disaster-recovery",
+                    ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f",
                   ],
                 ],
               },
             },
             {
               "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
               ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:",
+                    "arn:aws:secretsmanager:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -317,7 +173,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/salesforce-disaster-recovery/*",
+                    ":secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/*",
                   ],
                 ],
               },
@@ -325,10 +181,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "CreateSalesforceQueryJobLambdaServiceRoleDefaultPolicyDB632263",
+        "PolicyName": "SalesforceApiHttpInvoke9D82CE85",
         "Roles": [
           {
-            "Ref": "CreateSalesforceQueryJobLambdaServiceRole480CD271",
+            "Ref": "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
           },
         ],
       },
@@ -337,7 +193,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
     "SalesforceDisasterRecoveryStateMachine6185B29D": {
       "DeletionPolicy": "Delete",
       "DependsOn": [
-        "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
         "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
       ],
       "Properties": {
@@ -345,18 +200,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
-                "Ref": "AWS::Partition",
+                "Ref": "AWS::Region",
               },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              ":",
               {
-                "Fn::GetAtt": [
-                  "CreateSalesforceQueryJobLambda4C1B0CD3",
-                  "Arn",
-                ],
+                "Ref": "AWS::AccountId",
               },
-              "","Payload.$":"$"}}}}",
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]}}}",
             ],
           ],
         },
@@ -431,48 +283,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Role",
-    },
-    "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "CreateSalesforceQueryJobLambda4C1B0CD3",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "CreateSalesforceQueryJobLambda4C1B0CD3",
-                          "Arn",
-                        ],
-                      },
-                      ":*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
-        "Roles": [
-          {
-            "Ref": "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
   },
 }
@@ -590,181 +400,37 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     },
   },
   "Metadata": {
-    "gu:cdk:constructs": [
-      "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-    ],
+    "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
   },
-  "Parameters": {
-    "DistributionBucketName": {
-      "Default": "/account/services/artifact.bucket",
-      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-  },
   "Resources": {
-    "CreateSalesforceQueryJobLambda4C1B0CD3": {
-      "DependsOn": [
-        "CreateSalesforceQueryJobLambdaServiceRoleDefaultPolicyDB632263",
-        "CreateSalesforceQueryJobLambdaServiceRole480CD271",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/PROD/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "salesforce-disaster-recovery",
-            "STACK": "membership",
-            "STAGE": "PROD",
-          },
-        },
-        "FunctionName": "create-salesforce-query-job-PROD",
-        "Handler": "createSalesforceQueryJob.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "CreateSalesforceQueryJobLambdaServiceRole480CD271",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "CreateSalesforceQueryJobLambdaServiceRole480CD271": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "CreateSalesforceQueryJobLambdaServiceRoleDefaultPolicyDB632263": {
+    "SalesforceApiHttpInvoke9D82CE85": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
+              "Action": "states:InvokeHTTPEndpoint",
+              "Condition": {
+                "StringEquals": {
+                  "states:HTTPMethod": "POST",
+                },
+                "StringLike": {
+                  "states:HTTPEndpoint": "https://gnmtouchpoint.my.salesforce.com/*",
+                },
+              },
               "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/PROD/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-                    ],
-                  ],
-                },
-              ],
+              "Resource": {
+                "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+              },
             },
             {
-              "Action": "ssm:GetParametersByPath",
+              "Action": "events:RetrieveConnectionCredentials",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:",
+                    "arn:aws:events:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -772,22 +438,22 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/salesforce-disaster-recovery",
+                    ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e",
                   ],
                 ],
               },
             },
             {
               "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
               ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:",
+                    "arn:aws:secretsmanager:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -795,7 +461,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/salesforce-disaster-recovery/*",
+                    ":secret:events!connection/salesforce-disaster-recovery-PROD-salesforce-api/*",
                   ],
                 ],
               },
@@ -803,10 +469,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "CreateSalesforceQueryJobLambdaServiceRoleDefaultPolicyDB632263",
+        "PolicyName": "SalesforceApiHttpInvoke9D82CE85",
         "Roles": [
           {
-            "Ref": "CreateSalesforceQueryJobLambdaServiceRole480CD271",
+            "Ref": "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
           },
         ],
       },
@@ -815,7 +481,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     "SalesforceDisasterRecoveryStateMachine6185B29D": {
       "DeletionPolicy": "Delete",
       "DependsOn": [
-        "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
         "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
       ],
       "Properties": {
@@ -823,18 +488,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"End":true,"Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
-                "Ref": "AWS::Partition",
+                "Ref": "AWS::Region",
               },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              ":",
               {
-                "Fn::GetAtt": [
-                  "CreateSalesforceQueryJobLambda4C1B0CD3",
-                  "Arn",
-                ],
+                "Ref": "AWS::AccountId",
               },
-              "","Payload.$":"$"}}}}",
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]}}}",
             ],
           ],
         },
@@ -909,48 +571,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Role",
-    },
-    "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "CreateSalesforceQueryJobLambda4C1B0CD3",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "CreateSalesforceQueryJobLambda4C1B0CD3",
-                          "Arn",
-                        ],
-                      },
-                      ":*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
-        "Roles": [
-          {
-            "Ref": "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
   },
 }
