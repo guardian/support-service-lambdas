@@ -240,14 +240,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"Invoke Handler"}],"Default":"WaitForSalesforceQueryJobToComplete"},"Invoke Handler":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.input","Resource":"arn:",
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.input","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "SaveSalesforceQueryResultToS38BE3DBD9",
+                  "SaveSalesforceQueryResultToS3Lambda65311A6F",
                   "Arn",
                 ],
               },
@@ -337,7 +337,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "SaveSalesforceQueryResultToS38BE3DBD9",
+                    "SaveSalesforceQueryResultToS3Lambda65311A6F",
                     "Arn",
                   ],
                 },
@@ -347,7 +347,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "SaveSalesforceQueryResultToS38BE3DBD9",
+                          "SaveSalesforceQueryResultToS3Lambda65311A6F",
                           "Arn",
                         ],
                       },
@@ -369,10 +369,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SaveSalesforceQueryResultToS38BE3DBD9": {
+    "SaveSalesforceQueryResultToS3Lambda65311A6F": {
       "DependsOn": [
-        "SaveSalesforceQueryResultToS3ServiceRoleDefaultPolicy3880EE01",
-        "SaveSalesforceQueryResultToS3ServiceRole2148D14C",
+        "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
+        "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
       ],
       "Properties": {
         "Code": {
@@ -393,7 +393,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SaveSalesforceQueryResultToS3ServiceRole2148D14C",
+            "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
             "Arn",
           ],
         },
@@ -424,7 +424,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SaveSalesforceQueryResultToS3ServiceRole2148D14C": {
+    "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -477,7 +477,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SaveSalesforceQueryResultToS3ServiceRoleDefaultPolicy3880EE01": {
+    "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -568,10 +568,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SaveSalesforceQueryResultToS3ServiceRoleDefaultPolicy3880EE01",
+        "PolicyName": "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
         "Roles": [
           {
-            "Ref": "SaveSalesforceQueryResultToS3ServiceRole2148D14C",
+            "Ref": "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
           },
         ],
       },
@@ -821,14 +821,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"Invoke Handler"}],"Default":"WaitForSalesforceQueryJobToComplete"},"Invoke Handler":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.input","Resource":"arn:",
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.input","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "SaveSalesforceQueryResultToS38BE3DBD9",
+                  "SaveSalesforceQueryResultToS3Lambda65311A6F",
                   "Arn",
                 ],
               },
@@ -918,7 +918,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "SaveSalesforceQueryResultToS38BE3DBD9",
+                    "SaveSalesforceQueryResultToS3Lambda65311A6F",
                     "Arn",
                   ],
                 },
@@ -928,7 +928,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "SaveSalesforceQueryResultToS38BE3DBD9",
+                          "SaveSalesforceQueryResultToS3Lambda65311A6F",
                           "Arn",
                         ],
                       },
@@ -950,10 +950,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SaveSalesforceQueryResultToS38BE3DBD9": {
+    "SaveSalesforceQueryResultToS3Lambda65311A6F": {
       "DependsOn": [
-        "SaveSalesforceQueryResultToS3ServiceRoleDefaultPolicy3880EE01",
-        "SaveSalesforceQueryResultToS3ServiceRole2148D14C",
+        "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
+        "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
       ],
       "Properties": {
         "Code": {
@@ -974,7 +974,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SaveSalesforceQueryResultToS3ServiceRole2148D14C",
+            "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
             "Arn",
           ],
         },
@@ -1005,7 +1005,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SaveSalesforceQueryResultToS3ServiceRole2148D14C": {
+    "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1058,7 +1058,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SaveSalesforceQueryResultToS3ServiceRoleDefaultPolicy3880EE01": {
+    "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1149,10 +1149,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SaveSalesforceQueryResultToS3ServiceRoleDefaultPolicy3880EE01",
+        "PolicyName": "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
         "Roles": [
           {
-            "Ref": "SaveSalesforceQueryResultToS3ServiceRole2148D14C",
+            "Ref": "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
           },
         ],
       },

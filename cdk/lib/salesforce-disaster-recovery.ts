@@ -47,7 +47,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const saveSalesforceQueryResultToS3Lambda = new GuLambdaFunction(
 			this,
-			'SaveSalesforceQueryResultToS3',
+			'SaveSalesforceQueryResultToS3Lambda',
 			{
 				...lambdaDefaultConfig,
 				handler: 'saveSalesforceQueryResultToS3.handler',
@@ -122,7 +122,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const saveSalesforceQueryResultToS3 = new LambdaInvoke(
 			this,
-			'Invoke Handler',
+			'SaveSalesforceQueryResultToS3',
 			{
 				lambdaFunction: saveSalesforceQueryResultToS3Lambda,
 				inputPath: '$.input',
