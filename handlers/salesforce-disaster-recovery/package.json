@@ -9,6 +9,9 @@
 		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr salesforce-disaster-recovery.zip ./*.js",
 		"type-check": "tsc --noEmit"
 	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.511.0"
+	},
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.129"
 	}
