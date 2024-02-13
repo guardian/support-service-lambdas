@@ -121,7 +121,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					{
 						...lambdaDefaultConfig,
 						handler: 'saveSalesforceQueryResultToS3.handler',
-						functionName: `save-salesforce-query-result-to-s3-${this.stage}`,
+						functionName: `save-salesforce-query-result-to-s3-test-${this.stage}`,
 					},
 				),
 				payload: TaskInput.fromObject({
