@@ -23,7 +23,14 @@ export const handler = async (event: { queryJobId: string }) => {
 
 	if (!response.SecretString) throw new Error('No secret');
 
-	const secretValue = JSON.parse(response.SecretString);
+	const secretValue = JSON.parse(response.SecretString) as {
+		authorization_endpoint: string;
+		client_id: string;
+		client_secret: string;
+		oauth_http_parameters: {
+			body_parameters: { key: string; value: string }[];
+		};
+	};
 
 	let token = '';
 	console.log(token[0]);
@@ -33,12 +40,6 @@ export const handler = async (event: { queryJobId: string }) => {
 		const formData = new URLSearchParams([
 			['client_id', secretValue.client_id],
 			['client_secret', secretValue.client_secret],
-			[
-				'grant_type',
-				secretValue.oauth_http_parameters.body_parameters[0].value,
-			],
-			['username', secretValue.oauth_http_parameters.body_parameters[1].value],
-			['password', secretValue.oauth_http_parameters.body_parameters[2].value],
 		]);
 
 		const response = await fetch(secretValue.authorization_endpoint, {
