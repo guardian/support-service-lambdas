@@ -84,6 +84,7 @@ const fetchToken = async () => {
 		console.log(Object.values(json));
 		console.log(typeof json['access_token']);
 		console.log(typeof json.access_token);
+		console.log(typeof json);
 		// return json['access_token'];
 		return Object.values(json)[0];
 	} catch (error) {
