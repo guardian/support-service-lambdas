@@ -17,6 +17,7 @@ export const handler = async (event: { queryJobId: string }) => {
 	const token = await fetchToken();
 
 	try {
+		console.log('here');
 		const response = await fetch(
 			`${process.env.SALESFORCE_API_DOMAIN}/services/data/v59.0/jobs/query/${event.queryJobId}/results`,
 			{
