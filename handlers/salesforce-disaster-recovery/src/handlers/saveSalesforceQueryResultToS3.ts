@@ -1,7 +1,7 @@
 // import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
-	SecretsManagerClient,
 	GetSecretValueCommand,
+	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 
 // const s3Client = new S3Client({ region: process.env.region });
@@ -12,6 +12,10 @@ const secretsManagerClient = new SecretsManagerClient({
 export const handler = async (event: { queryJobId: string }) => {
 	console.log(event);
 	console.log('Inside lambda...');
+
+	if (!process.env.SALESFORCE_API_DOMAIN) {
+		throw new Error('No env');
+	}
 
 	// Get secret
 	const input = {
@@ -28,7 +32,7 @@ export const handler = async (event: { queryJobId: string }) => {
 		client_id: string;
 		client_secret: string;
 		oauth_http_parameters: {
-			body_parameters: { key: string; value: string }[];
+			body_parameters: Array<{ key: string; value: string }>;
 		};
 	};
 
