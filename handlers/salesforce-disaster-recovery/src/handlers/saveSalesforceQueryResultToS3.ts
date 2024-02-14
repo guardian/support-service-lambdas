@@ -29,6 +29,7 @@ export const handler = async (event: { queryJobId: string }) => {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${token}`,
+					Accept: 'application/json',
 				},
 			},
 		);
