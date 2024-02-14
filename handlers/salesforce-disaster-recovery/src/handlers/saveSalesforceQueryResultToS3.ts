@@ -51,7 +51,8 @@ export const handler = async (event: { queryJobId: string }) => {
 		const response = await fetch(secretValue.authorization_endpoint, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
+				// 'Content-Type': 'application/json',
+				Accept: 'application/json',
 			},
 			body: formData,
 		});
