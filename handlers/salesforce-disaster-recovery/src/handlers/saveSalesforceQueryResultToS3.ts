@@ -54,16 +54,8 @@ export const handler = async (event: { queryJobId: string }) => {
 		});
 
 		const json = (await response.json()) as { access_token: string };
-		token = json.access_token;
-
-		// if (response.ok) {
-		// 	const data = (await response.json()) as { access_token: string };
-		// 	token = data.access_token;
-		// } else {
-		// 	console.log('4');
-		// 	console.error('Failed to get access token: ', response.statusText);
-		// 	throw new Error('Error');
-		// }
+		console.log(json);
+		token = 'sdlkf';
 	} catch (error) {
 		console.error('Error during request: ', error);
 		throw new Error('Failed to get access token');
