@@ -145,7 +145,6 @@ lazy val `holiday-stops` = library(project in file("lib/holiday-stops"))
       playJson,
       scalatest,
       scalaCheck,
-      playJsonExtensions,
       circe,
       circeParser,
       sttp,
@@ -255,7 +254,6 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
   .settings(
     libraryDependencies ++= Seq(
       playJson,
-      playJsonExtensions,
       catsCore,
       circe,
       circeParser,
@@ -485,19 +483,19 @@ lazy val `sf-api-user-credentials-setter` = lambdaProject(
 lazy val `cancellation-sf-cases-api` = lambdaProject(
   "cancellation-sf-cases-api",
   "Create/update SalesForce cases for self service cancellation tracking",
-  Seq(playJsonExtensions),
+  Seq(),
 ).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-gocardless-sync` = lambdaProject(
   "sf-gocardless-sync",
   "Polls GoCardless for direct debit mandate events and pushes into SalesForce",
-  Seq(playJsonExtensions),
+  Seq(),
 ).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `holiday-stop-api` = lambdaProject(
   "holiday-stop-api",
   "CRUD API for Holiday Stop Requests stored in SalesForce",
-  Seq(playJsonExtensions, awsSecretsManager, upickle),
+  Seq(awsSecretsManager, upickle),
 ).dependsOn(
   `holiday-stops` % "compile->compile;test->test",
   handler,
@@ -521,7 +519,7 @@ lazy val `zuora-datalake-export` = lambdaProject(
 lazy val `batch-email-sender` = lambdaProject(
   "batch-email-sender",
   "Receive batches of emails to be sent, munge them into an appropriate format and put them on the email sending queue.",
-  Seq(playJsonExtensions, supportInternationalisation, diffx, parallelCollections, mockito),
+  Seq(supportInternationalisation, diffx, parallelCollections, mockito),
 ).dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 lazy val `holiday-stop-processor` = lambdaProject(

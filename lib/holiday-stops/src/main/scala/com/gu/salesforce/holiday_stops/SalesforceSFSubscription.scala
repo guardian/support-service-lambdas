@@ -1,6 +1,5 @@
 package com.gu.salesforce.holiday_stops
 
-import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
@@ -20,7 +19,7 @@ object SalesforceSFSubscription extends Logging {
   object SubscriptionForSubscriptionNameAndContact {
 
     case class SFSubscriptionId(value: String) extends AnyVal
-    implicit val formatHolidayStopRequestId = Jsonx.formatInline[SFSubscriptionId]
+    implicit val formatHolidayStopRequestId = Json.valueFormat[SFSubscriptionId]
 
     case class MatchingSubscription(
         Id: SFSubscriptionId,

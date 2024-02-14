@@ -1,37 +1,37 @@
 package com.gu.sf_gocardless_sync
 
-import ai.x.play.json.Jsonx
+import play.api.libs.json.Json
 
 object SyncSharedObjects {
 
   case class GoCardlessMandateID(value: String) extends AnyVal
-  implicit val formatMandateID = Jsonx.formatInline[GoCardlessMandateID]
+  implicit val formatMandateID = Json.valueFormat[GoCardlessMandateID]
 
   case class Reference(value: String) extends AnyVal
-  implicit val formatReference = Jsonx.formatInline[Reference]
+  implicit val formatReference = Json.valueFormat[Reference]
 
   case class GoCardlessMandateEventID(value: String) extends AnyVal
-  implicit val formatMandateEventID = Jsonx.formatInline[GoCardlessMandateEventID]
+  implicit val formatMandateEventID = Json.valueFormat[GoCardlessMandateEventID]
 
   case class MandateCreatedAt(value: String) extends AnyVal
-  implicit val formatMandateCreatedAt = Jsonx.formatInline[MandateCreatedAt]
+  implicit val formatMandateCreatedAt = Json.valueFormat[MandateCreatedAt]
 
   case class BankName(value: String) extends AnyVal
-  implicit val formatBankName = Jsonx.formatInline[BankName]
+  implicit val formatBankName = Json.valueFormat[BankName]
 
   case class BankAccountNumberEnding(value: String) extends AnyVal
-  implicit val formatBankAccountNumberEnding = Jsonx.formatInline[BankAccountNumberEnding]
+  implicit val formatBankAccountNumberEnding = Json.valueFormat[BankAccountNumberEnding]
 
   case class Status(value: String) extends AnyVal
-  implicit val formatStatus = Jsonx.formatInline[Status]
+  implicit val formatStatus = Json.valueFormat[Status]
 
   case class Cause(value: String) extends AnyVal
-  implicit val formatCause = Jsonx.formatInline[Cause]
+  implicit val formatCause = Json.valueFormat[Cause]
 
   case class Description(value: String) extends AnyVal
-  implicit val formatDescription = Jsonx.formatInline[Description]
+  implicit val formatDescription = Json.valueFormat[Description]
 
   case class ReasonCode(value: String) extends AnyVal
-  implicit val formatReasonCode = Jsonx.formatInline[ReasonCode]
+  implicit val formatReasonCode = Json.valueFormat[ReasonCode]
 
 }

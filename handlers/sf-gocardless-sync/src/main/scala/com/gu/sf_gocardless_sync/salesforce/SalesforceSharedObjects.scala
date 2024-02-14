@@ -1,16 +1,16 @@
 package com.gu.sf_gocardless_sync.salesforce
 
-import ai.x.play.json.Jsonx
+import play.api.libs.json.Json
 
 object SalesforceSharedObjects {
 
   case class MandateSfId(value: String) extends AnyVal
-  implicit val formatMandateSfID = Jsonx.formatInline[MandateSfId]
+  implicit val formatMandateSfID = Json.valueFormat[MandateSfId]
 
   case class MandateEventSfId(value: String) extends AnyVal
-  implicit val formatMandateEventSfId = Jsonx.formatInline[MandateEventSfId]
+  implicit val formatMandateEventSfId = Json.valueFormat[MandateEventSfId]
 
   case class EventHappenedAt(value: String) extends AnyVal
-  implicit val formatEventHappenedAt = Jsonx.formatInline[EventHappenedAt]
+  implicit val formatEventHappenedAt = Json.valueFormat[EventHappenedAt]
 
 }
