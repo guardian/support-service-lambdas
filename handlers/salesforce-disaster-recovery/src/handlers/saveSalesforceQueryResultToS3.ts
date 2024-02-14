@@ -58,6 +58,9 @@ export const handler = async (event: { queryJobId: string }) => {
 
 		const json = (await response.json()) as { access_token: string };
 		console.log(json);
+		console.log(Object.keys(json));
+		console.log(Object.entries(json));
+		console.log(Object.values(json));
 		token = json.access_token;
 	} catch (error) {
 		console.error('Error during request: ', error);
