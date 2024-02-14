@@ -37,7 +37,7 @@ export const handler = async (event: { queryJobId: string }) => {
 	};
 
 	let token = '';
-	console.log(token[0]);
+	console.log(response.SecretString[0]);
 
 	// Get Salesforce token
 	try {
@@ -45,6 +45,10 @@ export const handler = async (event: { queryJobId: string }) => {
 			['client_id', secretValue.client_id],
 			['client_secret', secretValue.client_secret],
 		]);
+
+		secretValue.oauth_http_parameters.body_parameters.forEach((param) => {
+			formData.append(param.key, param.value);
+		});
 
 		const response = await fetch(secretValue.authorization_endpoint, {
 			method: 'POST',
@@ -60,7 +64,7 @@ export const handler = async (event: { queryJobId: string }) => {
 		}
 	} catch (error) {
 		console.error('Error during request: ', error);
-		throw new Error('Error');
+		throw new Error('Failed to get access token');
 	}
 
 	// Get Query result
