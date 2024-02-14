@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - ad/save-result-to-s3
 jobs:
   gu-cdk-build:
     strategy:
