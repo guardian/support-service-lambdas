@@ -60,6 +60,10 @@ export const handler = async (event: { queryJobId: string }) => {
 
 		if (response.ok) {
 			console.log('ok');
+			console.log(response.text);
+			console.log(response.headers);
+			console.log(response.json);
+			console.log(response.status);
 			console.log(response.ok);
 			console.log(response.body);
 			console.log(response.json());
