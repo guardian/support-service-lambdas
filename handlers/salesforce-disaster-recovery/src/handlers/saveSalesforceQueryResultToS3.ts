@@ -62,6 +62,7 @@ export const handler = async (event: { queryJobId: string }) => {
 		console.log(Object.keys(json));
 		console.log(Object.entries(json));
 		console.log(Object.values(json));
+		console.log(typeof json['access_token']);
 		console.log(typeof json.access_token);
 		token = json['access_token'];
 	} catch (error) {
