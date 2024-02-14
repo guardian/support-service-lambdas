@@ -5,7 +5,7 @@ import {
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
 	Choice,
@@ -122,6 +122,21 @@ export class SalesforceDisasterRecovery extends GuStack {
 						...lambdaDefaultConfig,
 						handler: 'saveSalesforceQueryResultToS3.handler',
 						functionName: `save-salesforce-query-result-to-s3-test-${this.stage}`,
+						environment: {
+							...lambdaDefaultConfig.environment,
+							SALESFORCE_API_DOMAIN: props.salesforceApiDomain,
+						},
+						initialPolicy: [
+							new PolicyStatement({
+								actions: [
+									'secretsmanager:GetSecretValue',
+									'secretsmanager:DescribeSecret',
+								],
+								resources: [
+									`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
+								],
+							}),
+						],
 					},
 				),
 				payload: TaskInput.fromObject({

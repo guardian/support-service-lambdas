@@ -384,6 +384,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
+            "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
             "STACK": "membership",
             "STAGE": "CODE",
           },
@@ -481,6 +482,29 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:events!connection/salesforce-disaster-recovery-CODE-salesforce-api/*",
+                  ],
+                ],
+              },
+            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -965,6 +989,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
+            "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint.my.salesforce.com",
             "STACK": "membership",
             "STAGE": "PROD",
           },
@@ -1062,6 +1087,29 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:events!connection/salesforce-disaster-recovery-PROD-salesforce-api/*",
+                  ],
+                ],
+              },
+            },
             {
               "Action": [
                 "s3:GetObject*",
