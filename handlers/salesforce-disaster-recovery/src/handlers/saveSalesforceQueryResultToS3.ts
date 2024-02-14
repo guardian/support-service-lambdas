@@ -1,10 +1,10 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+// import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
 	SecretsManagerClient,
 	GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager';
 
-const s3Client = new S3Client({ region: process.env.region });
+// const s3Client = new S3Client({ region: process.env.region });
 const secretsManagerClient = new SecretsManagerClient({
 	region: process.env.region,
 });
