@@ -59,6 +59,8 @@ export const handler = async (event: { queryJobId: string }) => {
 		console.log('3');
 
 		if (response.ok) {
+			console.log('ok');
+			console.log(response.ok);
 			const data = (await response.json()) as { access_token: string };
 			token = data.access_token;
 		} else {
