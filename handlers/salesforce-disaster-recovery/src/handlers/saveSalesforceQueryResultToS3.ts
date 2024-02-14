@@ -77,7 +77,15 @@ const fetchToken = async () => {
 			body: formData,
 		});
 
-		const json = (await response2.json()) as { access_token: string };
+		const json = (await response2.json()) as {
+			access_token: string;
+			instance_url: string;
+			id: string;
+			token_type: string;
+			issued_at: string;
+			signature: string;
+		};
+
 		console.log(json);
 		console.log(Object.keys(json));
 		console.log(Object.entries(json));
