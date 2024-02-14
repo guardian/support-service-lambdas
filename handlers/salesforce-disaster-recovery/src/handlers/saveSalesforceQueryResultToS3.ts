@@ -94,7 +94,7 @@ const fetchToken = async () => {
 		console.log(typeof json.access_token);
 		console.log(typeof json);
 		// return json['access_token'];
-		return Object.values(json)[0] || '';
+		return Object.values(json)[0] ?? '';
 	} catch (error) {
 		console.error('Error during request: ', error);
 		throw new Error('Failed to get access token');
