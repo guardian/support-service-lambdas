@@ -16,6 +16,10 @@ export const handler = async (event: { queryJobId: string }) => {
 
 	const token = await fetchToken();
 	console.log(token[0]);
+	console.log(process.env.SALESFORCE_API_DOMAIN);
+	console.log(
+		`${process.env.SALESFORCE_API_DOMAIN}/services/data/v59.0/jobs/query/${event.queryJobId}/results`,
+	);
 
 	try {
 		console.log('here');
@@ -28,13 +32,14 @@ export const handler = async (event: { queryJobId: string }) => {
 				},
 			},
 		);
+		console.log(response);
 
 		const json = (await response.json()) as string;
 		console.log(json);
 		return 'OK';
 	} catch (error) {
-		console.error('Error during request: ', error);
-		throw new Error('Error');
+		console.error('Error during request here: ', error);
+		throw new Error('Error csv');
 	}
 
 	// Save CSV to S3
@@ -96,7 +101,7 @@ const fetchToken = async () => {
 		// return json['access_token'];
 		return Object.values(json)[0] ?? '';
 	} catch (error) {
-		console.error('Error during request: ', error);
+		console.error('Error during request before: ', error);
 		throw new Error('Failed to get access token');
 	}
 };
