@@ -26,6 +26,7 @@ export const handler = async (event: { queryJobId: string }) => {
 	const secretValue = JSON.parse(response.SecretString);
 
 	let token = '';
+	console.log(token[0]);
 
 	// Get Salesforce token
 	try {
