@@ -64,9 +64,11 @@ export const handler = async (event: { queryJobId: string }) => {
 			console.log(response.body);
 			console.log(response.json());
 			// console.log(response);
-			const data = (await response.json()) as { access_token: string };
-			console.log(data);
-			token = data.access_token;
+			// const data = (await response.json()) as { access_token: string };
+			const json = await response.json();
+			console.log('Response from Salesforce was: ', json);
+			// console.log(data);
+			token = 'sd';
 		} else {
 			console.log('4');
 			console.error('Failed to get access token: ', response.statusText);
