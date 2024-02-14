@@ -58,26 +58,17 @@ export const handler = async (event: { queryJobId: string }) => {
 		});
 		console.log('3');
 
-		if (response.ok) {
-			// console.log('ok');
-			// console.log(response.text);
-			// console.log(response.headers);
-			// console.log(response.json);
-			// console.log(response.status);
-			// console.log(response.ok);
-			// console.log(response.body);
-			// console.log(response.json());
-			// console.log(response);
-			// const data = (await response.json()) as { access_token: string };
-			const json = await response.json();
-			console.log('Response from Salesforce was: ', json);
-			// console.log(data);
-			token = 'sd';
-		} else {
-			console.log('4');
-			console.error('Failed to get access token: ', response.statusText);
-			throw new Error('Error');
-		}
+		const json = (await response.json()) as { access_token: string };
+		token = json.access_token;
+
+		// if (response.ok) {
+		// 	const data = (await response.json()) as { access_token: string };
+		// 	token = data.access_token;
+		// } else {
+		// 	console.log('4');
+		// 	console.error('Failed to get access token: ', response.statusText);
+		// 	throw new Error('Error');
+		// }
 	} catch (error) {
 		console.error('Error during request: ', error);
 		throw new Error('Failed to get access token');
