@@ -65,7 +65,8 @@ export const handler = async (event: { queryJobId: string }) => {
 			console.log(response.json());
 			// console.log(response);
 			const data = (await response.json()) as { access_token: string };
-			token = data.access_token;
+			console.log(data);
+			// token = data.access_token;
 		} else {
 			console.log('4');
 			console.error('Failed to get access token: ', response.statusText);
