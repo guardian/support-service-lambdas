@@ -59,14 +59,14 @@ export const handler = async (event: { queryJobId: string }) => {
 		console.log('3');
 
 		if (response.ok) {
-			console.log('ok');
-			console.log(response.text);
-			console.log(response.headers);
-			console.log(response.json);
-			console.log(response.status);
-			console.log(response.ok);
-			console.log(response.body);
-			console.log(response.json());
+			// console.log('ok');
+			// console.log(response.text);
+			// console.log(response.headers);
+			// console.log(response.json);
+			// console.log(response.status);
+			// console.log(response.ok);
+			// console.log(response.body);
+			// console.log(response.json());
 			// console.log(response);
 			// const data = (await response.json()) as { access_token: string };
 			const json = await response.json();
