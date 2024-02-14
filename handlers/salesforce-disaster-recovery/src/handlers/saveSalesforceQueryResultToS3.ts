@@ -73,15 +73,9 @@ export const handler = async (event: { queryJobId: string }) => {
 			},
 		);
 
-		if (response.ok) {
-			const data = (await response.json()) as string;
-			console.log('OK');
-			console.log(data.length);
-			return data;
-		} else {
-			console.error('Failed to get query result: ', response.statusText);
-			throw new Error('Error');
-		}
+		const json = (await response.json()) as string;
+		console.log(json);
+		return 'OK';
 	} catch (error) {
 		console.error('Error during request: ', error);
 		throw new Error('Error');
