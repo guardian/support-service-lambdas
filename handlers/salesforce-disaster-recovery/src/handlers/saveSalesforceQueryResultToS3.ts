@@ -15,14 +15,13 @@ export const handler = async (event: { queryJobId: string }) => {
 	}
 
 	const token = await fetchToken();
-	console.log(token[0]);
-	console.log(process.env.SALESFORCE_API_DOMAIN);
-	console.log(
-		`${process.env.SALESFORCE_API_DOMAIN}/services/data/v59.0/jobs/query/${event.queryJobId}/results`,
-	);
+	// console.log(token[0]);
+	// console.log(process.env.SALESFORCE_API_DOMAIN);
+	// console.log(
+	// 	`${process.env.SALESFORCE_API_DOMAIN}/services/data/v59.0/jobs/query/${event.queryJobId}/results`,
+	// );
 
 	try {
-		console.log('here');
 		const response = await fetch(
 			`${process.env.SALESFORCE_API_DOMAIN}/services/data/v59.0/jobs/query/${event.queryJobId}/results`,
 			{
