@@ -125,7 +125,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						environment: {
 							...lambdaDefaultConfig.environment,
 							SALESFORCE_API_DOMAIN: props.salesforceApiDomain,
-							// S3_BUCKET: app,
+							S3_BUCKET: app,
 						},
 						initialPolicy: [
 							new PolicyStatement({

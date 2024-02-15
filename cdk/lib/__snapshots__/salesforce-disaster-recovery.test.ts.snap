@@ -384,6 +384,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
+            "S3_BUCKET": "salesforce-disaster-recovery",
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
             "STACK": "membership",
             "STAGE": "CODE",
@@ -994,6 +995,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
+            "S3_BUCKET": "salesforce-disaster-recovery",
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint.my.salesforce.com",
             "STACK": "membership",
             "STAGE": "PROD",
