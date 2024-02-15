@@ -35,6 +35,7 @@ export const handler = async (event: { queryJobId: string }) => {
 		console.log('Response status code:', response.status);
 
 		const text = await response.text();
+		console.log(typeof response);
 		console.log('Response body:', text);
 
 		// const json = JSON.parse(text || '');
