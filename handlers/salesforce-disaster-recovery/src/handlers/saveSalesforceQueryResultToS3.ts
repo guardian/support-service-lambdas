@@ -32,10 +32,14 @@ export const handler = async (event: { queryJobId: string }) => {
 				},
 			},
 		);
-		console.log(response);
+		console.log('Response status code:', response.status);
 
-		const json = await response.json();
-		console.log(json);
+		const text = await response.text();
+		console.log('Response body:', text);
+
+		const json = JSON.parse(text);
+		console.log('Parsed JSON:', json);
+
 		return 'OK';
 	} catch (error) {
 		console.error('Error during request here: ', error);
