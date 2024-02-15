@@ -19,7 +19,8 @@ export const handler = async (event: { queryJobId: string }) => {
 		throw new Error('Environment variables not set.');
 	}
 
-	const token = await fetchToken({ salesforceOauthSecretName });
+	const secretValue = await getSecretValue({ salesforceOauthSecretName });
+	const token = await fetchToken({ secretValue });
 	const csvContent = await callSalesforce({
 		token,
 		queryJobId: event.queryJobId,
@@ -39,7 +40,16 @@ export const handler = async (event: { queryJobId: string }) => {
 	}
 };
 
-const fetchToken = async ({
+type Secret1 = {
+	authorization_endpoint: string;
+	client_id: string;
+	client_secret: string;
+	oauth_http_parameters: {
+		body_parameters: Array<{ key: string; value: string }>;
+	};
+};
+
+const getSecretValue = async ({
 	salesforceOauthSecretName,
 }: {
 	salesforceOauthSecretName: string;
@@ -54,14 +64,17 @@ const fetchToken = async ({
 		if (!response.SecretString)
 			throw new Error('No secret for Salesforce Oauth credentials.');
 
-		const secretValue = JSON.parse(response.SecretString) as {
-			authorization_endpoint: string;
-			client_id: string;
-			client_secret: string;
-			oauth_http_parameters: {
-				body_parameters: Array<{ key: string; value: string }>;
-			};
-		};
+		const secretValue = JSON.parse(response.SecretString) as Secret1;
+
+		return secretValue;
+	} catch (error) {
+		console.error(error);
+		throw new Error('No secret for Salesforce Oauth credentials.');
+	}
+};
+
+const fetchToken = async ({ secretValue }: { secretValue: Secret1 }) => {
+	try {
 		const formData = new URLSearchParams([
 			['client_id', secretValue.client_id],
 			['client_secret', secretValue.client_secret],
