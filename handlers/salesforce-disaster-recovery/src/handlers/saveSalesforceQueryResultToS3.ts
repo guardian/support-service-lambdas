@@ -2,8 +2,8 @@ import {
 	generateSalesforceAccessToken,
 	getSalesforceQueryResults,
 	getSecretValue,
-	type SalesforceOauthCredentials,
 	upsertFileToS3,
+	type SalesforceOauthCredentials,
 } from '../services';
 
 export const handler = async (event: { queryJobId: string }) => {
@@ -30,7 +30,7 @@ export const handler = async (event: { queryJobId: string }) => {
 		apiDomain: salesforceApiDomain,
 	});
 
-	upsertFileToS3({
+	await upsertFileToS3({
 		bucketName,
 		filePath: 'original.csv',
 		content: csvContent,
