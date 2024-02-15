@@ -2,10 +2,9 @@ import {
 	generateSalesforceAccessToken,
 	getSalesforceQueryResults,
 	getSecretValue,
+	type SalesforceOauthCredentials,
 	upsertFileToS3,
 } from '../services';
-
-import { type SalesforceOauthCredentials } from '../services';
 
 export const handler = async (event: { queryJobId: string }) => {
 	const bucketName = process.env.S3_BUCKET;
