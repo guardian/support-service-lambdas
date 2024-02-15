@@ -61,8 +61,9 @@ const getSecretValue = async ({
 
 		const response = await secretsManagerClient.send(command);
 
-		if (!response.SecretString)
+		if (!response.SecretString) {
 			throw new Error('No secret for Salesforce Oauth credentials.');
+		}
 
 		const secretValue = JSON.parse(response.SecretString) as Secret1;
 
