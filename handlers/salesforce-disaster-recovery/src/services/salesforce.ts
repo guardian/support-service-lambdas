@@ -36,7 +36,7 @@ export const generateSalesforceAccessToken = async ({
 	}
 };
 
-export const getSalesforceQueryResults = async ({
+export const getSalesforceQueryResult = async ({
 	accessToken,
 	queryJobId,
 	apiDomain,

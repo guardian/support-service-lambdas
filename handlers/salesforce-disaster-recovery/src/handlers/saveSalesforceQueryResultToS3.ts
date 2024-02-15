@@ -1,6 +1,6 @@
 import {
 	generateSalesforceAccessToken,
-	getSalesforceQueryResults,
+	getSalesforceQueryResult,
 	getSecretValue,
 	type SalesforceOauthCredentials,
 	upsertFileToS3,
@@ -27,7 +27,7 @@ export const handler = async (event: {
 		credentials: salesforceOauthCredentials,
 	});
 
-	const csvContent = await getSalesforceQueryResults({
+	const csvContent = await getSalesforceQueryResult({
 		accessToken: salesforceAccessToken,
 		queryJobId: event.queryJobId,
 		apiDomain: salesforceApiDomain,
