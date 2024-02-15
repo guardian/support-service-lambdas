@@ -35,14 +35,11 @@ export const handler = async (event: {
 
 	await upsertFileToS3({
 		bucketName,
-		filePath: `${event.executionStartTime}/test3.csv`,
+		filePath: `${event.executionStartTime}/before-processing.csv`,
 		content: csvContent,
 	});
 
 	return {
 		StatusCode: 200,
-		ResponseBody: {
-			bucketArn: `arn:aws:s3:::${bucketName}`,
-		},
 	};
 };
