@@ -1,8 +1,4 @@
-import {
-	PutObjectCommand,
-	type PutObjectCommandInput,
-	S3Client,
-} from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
 	GetSecretValueCommand,
 	SecretsManagerClient,
@@ -17,12 +13,13 @@ const secretsManagerClient = new SecretsManagerClient({
 export const handler = async (event: { queryJobId: string }) => {
 	const s3Bucket = process.env.S3_BUCKET;
 	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
+	const salesforceOauthSecretName = process.env.SALESFORCE_OAUTH_SECRET_NAME;
 
-	if (!s3Bucket || !salesforceApiDomain) {
+	if (!s3Bucket || !salesforceApiDomain || !salesforceOauthSecretName) {
 		throw new Error('Environment variables not set.');
 	}
 
-	const token = await fetchToken();
+	const token = await fetchToken({ salesforceOauthSecretName });
 	const csvContent = await callSalesforce({
 		token,
 		queryJobId: event.queryJobId,
@@ -30,13 +27,11 @@ export const handler = async (event: { queryJobId: string }) => {
 	});
 
 	try {
-		const input: PutObjectCommandInput = {
+		const command = new PutObjectCommand({
 			Bucket: s3Bucket,
 			Key: `test.csv`,
 			Body: csvContent,
-		};
-
-		const command = new PutObjectCommand(input);
+		});
 		const response = await s3Client.send(command);
 		console.log(response);
 	} catch (error) {
@@ -44,18 +39,22 @@ export const handler = async (event: { queryJobId: string }) => {
 	}
 };
 
-const fetchToken = async () => {
+const fetchToken = async ({
+	salesforceOauthSecretName,
+}: {
+	salesforceOauthSecretName: string;
+}) => {
 	try {
-		const input = {
-			SecretId:
-				'events!connection/salesforce-disaster-recovery-CODE-salesforce-api/e2792d75-414a-48f3-89a1-5e8eac15f627',
-		};
-		const command = new GetSecretValueCommand(input);
-		const response1 = await secretsManagerClient.send(command);
+		const command = new GetSecretValueCommand({
+			SecretId: salesforceOauthSecretName,
+		});
 
-		if (!response1.SecretString) throw new Error('No secret');
+		const response = await secretsManagerClient.send(command);
 
-		const secretValue = JSON.parse(response1.SecretString) as {
+		if (!response.SecretString)
+			throw new Error('No secret for Salesforce Oauth credentials.');
+
+		const secretValue = JSON.parse(response.SecretString) as {
 			authorization_endpoint: string;
 			client_id: string;
 			client_secret: string;
@@ -109,7 +108,7 @@ const callSalesforce = async ({
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${token}`,
-					Accept: 'application/json',
+					// Accept: 'application/json',
 				},
 			},
 		);

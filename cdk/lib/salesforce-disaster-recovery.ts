@@ -25,6 +25,7 @@ interface Props extends GuStackProps {
 	salesforceApiDomain: string;
 	salesforceApiConnectionResourceId: string;
 	salesforceQueryWaitSeconds: number;
+	salesforceOauthSecretName: string;
 }
 
 export class SalesforceDisasterRecovery extends GuStack {
@@ -130,6 +131,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						environment: {
 							...lambdaDefaultConfig.environment,
 							SALESFORCE_API_DOMAIN: props.salesforceApiDomain,
+							SALESFORCE_OAUTH_SECRET_NAME: props.salesforceOauthSecretName,
 							S3_BUCKET: bucket.bucketName,
 						},
 						initialPolicy: [
