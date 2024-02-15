@@ -6,7 +6,10 @@ import {
 	upsertFileToS3,
 } from '../services';
 
-export const handler = async (event: { queryJobId: string }) => {
+export const handler = async (event: {
+	queryJobId: string;
+	executionStartTime: string;
+}) => {
 	const bucketName = process.env.S3_BUCKET;
 	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
 	const salesforceOauthSecretName = process.env.SALESFORCE_OAUTH_SECRET_NAME;
@@ -32,7 +35,7 @@ export const handler = async (event: { queryJobId: string }) => {
 
 	await upsertFileToS3({
 		bucketName,
-		filePath: 'original.csv',
+		filePath: `${event.executionStartTime}/test3.csv`,
 		content: csvContent,
 	});
 
