@@ -1,6 +1,6 @@
 import {
 	PutObjectCommand,
-	PutObjectCommandInput,
+	type PutObjectCommandInput,
 	S3Client,
 } from '@aws-sdk/client-s3';
 import {
