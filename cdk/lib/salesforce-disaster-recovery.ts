@@ -125,6 +125,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						environment: {
 							...lambdaDefaultConfig.environment,
 							SALESFORCE_API_DOMAIN: props.salesforceApiDomain,
+							// S3_BUCKET: app,
 						},
 						initialPolicy: [
 							new PolicyStatement({
@@ -135,6 +136,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 								resources: [
 									`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
 								],
+							}),
+							new PolicyStatement({
+								actions: ['s3:PutObject'],
+								resources: [`${app}/${this.stage}/*`],
 							}),
 						],
 					},

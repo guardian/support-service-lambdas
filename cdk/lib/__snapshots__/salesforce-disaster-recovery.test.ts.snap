@@ -506,6 +506,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               },
             },
             {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": "salesforce-disaster-recovery/CODE/*",
+            },
+            {
               "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
@@ -1109,6 +1114,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   ],
                 ],
               },
+            },
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": "salesforce-disaster-recovery/PROD/*",
             },
             {
               "Action": [
