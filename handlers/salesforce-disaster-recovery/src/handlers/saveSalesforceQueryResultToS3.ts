@@ -1,53 +1,48 @@
-// import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+	PutObjectCommand,
+	PutObjectCommandInput,
+	S3Client,
+} from '@aws-sdk/client-s3';
 import {
 	GetSecretValueCommand,
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 
-// const s3Client = new S3Client({ region: process.env.region });
+const s3Client = new S3Client({ region: process.env.region });
+
 const secretsManagerClient = new SecretsManagerClient({
 	region: process.env.region,
 });
 
 export const handler = async (event: { queryJobId: string }) => {
-	if (!process.env.SALESFORCE_API_DOMAIN) {
-		throw new Error('No env');
+	const app = process.env.APP;
+	const stage = process.env.STAGE;
+	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
+
+	if (!app || !stage || !salesforceApiDomain) {
+		throw new Error('Environment variables not set');
 	}
 
 	const token = await fetchToken();
-	// console.log(token[0]);
-	// console.log(process.env.SALESFORCE_API_DOMAIN);
-	// console.log(
-	// 	`${process.env.SALESFORCE_API_DOMAIN}/services/data/v59.0/jobs/query/${event.queryJobId}/results`,
-	// );
+	const csvContent = await callSalesforce({
+		token,
+		queryJobId: event.queryJobId,
+		salesforceApiDomain,
+	});
 
 	try {
-		const response = await fetch(
-			`${process.env.SALESFORCE_API_DOMAIN}/services/data/v59.0/jobs/query/${event.queryJobId}/results`,
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					Accept: 'application/json',
-				},
-			},
-		);
-		console.log('Response status code:', response.status);
+		const input: PutObjectCommandInput = {
+			Bucket: `${process.env.APP}`,
+			Key: `${app}/test.csv`,
+			Body: csvContent,
+		};
 
-		const text = await response.text();
-		console.log(typeof response);
-		console.log('Response body:', text);
-
-		// const json = JSON.parse(text || '');
-		// console.log('Parsed JSON:', json);
-
-		return 'OK';
+		const command = new PutObjectCommand(input);
+		const response = await s3Client.send(command);
+		console.log(response);
 	} catch (error) {
-		console.error('Error during request here: ', error);
-		throw new Error('Error csv');
+		console.error(error);
 	}
-
-	// Save CSV to S3
 };
 
 const fetchToken = async () => {
@@ -92,18 +87,39 @@ const fetchToken = async () => {
 			signature: string;
 		};
 
-		// console.log(json);
-		// console.log(Object.keys(json));
-		// console.log(Object.entries(json));
-		// console.log(Object.values(json));
-		// console.log(typeof json['access_token']);
-		// console.log(typeof json.access_token);
-		// console.log(typeof json);
-		// return json['access_token'];
-		// return Object.values(json)[0] ?? '';
 		return json.access_token;
 	} catch (error) {
 		console.error('Error during request before: ', error);
 		throw new Error('Failed to get access token');
+	}
+};
+
+const callSalesforce = async ({
+	token,
+	queryJobId,
+	salesforceApiDomain,
+}: {
+	token: string;
+	queryJobId: string;
+	salesforceApiDomain: string;
+}) => {
+	try {
+		const response = await fetch(
+			`${salesforceApiDomain}/services/data/v59.0/jobs/query/${queryJobId}/results`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					Accept: 'application/json',
+				},
+			},
+		);
+
+		const text = await response.text();
+
+		return text;
+	} catch (error) {
+		console.error('Error during request here: ', error);
+		throw new Error('Error csv');
 	}
 };
