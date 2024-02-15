@@ -76,10 +76,6 @@ const fetchToken = async () => {
 
 		const response2 = await fetch(secretValue.authorization_endpoint, {
 			method: 'POST',
-			// headers: {
-			// 	// 'Content-Type': 'application/json',
-			// 	Accept: 'application/json',
-			// },
 			body: formData,
 		});
 
@@ -92,15 +88,16 @@ const fetchToken = async () => {
 			signature: string;
 		};
 
-		console.log(json);
-		console.log(Object.keys(json));
-		console.log(Object.entries(json));
-		console.log(Object.values(json));
-		console.log(typeof json['access_token']);
-		console.log(typeof json.access_token);
-		console.log(typeof json);
+		// console.log(json);
+		// console.log(Object.keys(json));
+		// console.log(Object.entries(json));
+		// console.log(Object.values(json));
+		// console.log(typeof json['access_token']);
+		// console.log(typeof json.access_token);
+		// console.log(typeof json);
 		// return json['access_token'];
-		return Object.values(json)[0] ?? '';
+		// return Object.values(json)[0] ?? '';
+		return json.access_token;
 	} catch (error) {
 		console.error('Error during request before: ', error);
 		throw new Error('Failed to get access token');
