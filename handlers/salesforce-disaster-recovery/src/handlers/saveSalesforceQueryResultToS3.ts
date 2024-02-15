@@ -1,8 +1,8 @@
 import {
-	type SalesforceOauthCredentials,
 	generateSalesforceAccessToken,
 	getSalesforceQueryResults,
 	getSecretValue,
+	type SalesforceOauthCredentials,
 	upsertFileToS3,
 } from '../services';
 
