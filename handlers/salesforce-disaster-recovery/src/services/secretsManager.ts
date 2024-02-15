@@ -28,6 +28,6 @@ export const getSecretValue = async <T>({
 		return secretValue;
 	} catch (error) {
 		console.error(error);
-		throw new Error('No secret for Salesforce Oauth credentials.');
+		throw new Error('Failed to get secret value');
 	}
 };
