@@ -35,7 +35,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const app = 'salesforce-disaster-recovery';
 
-		const bucket = new Bucket(this, app + 'estlskjlsjf', {
+		const bucket = new Bucket(this, app + 'Bucket', {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 

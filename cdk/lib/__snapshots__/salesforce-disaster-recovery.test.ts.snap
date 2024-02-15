@@ -385,7 +385,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "salesforcedisasterrecoveryestlskjlsjf5A846C36",
+              "Ref": "salesforcedisasterrecoveryBucket4EDEE4E7",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
             "STACK": "membership",
@@ -517,7 +517,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "salesforcedisasterrecoveryestlskjlsjf5A846C36",
+                        "salesforcedisasterrecoveryBucket4EDEE4E7",
                         "Arn",
                       ],
                     },
@@ -622,7 +622,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "salesforcedisasterrecoveryestlskjlsjf5A846C36": {
+    "salesforcedisasterrecoveryBucket4EDEE4E7": {
       "DeletionPolicy": "Retain",
       "Properties": {
         "BucketName": "salesforce-disaster-recovery-code",
@@ -1037,7 +1037,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "salesforcedisasterrecoveryestlskjlsjf5A846C36",
+              "Ref": "salesforcedisasterrecoveryBucket4EDEE4E7",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint.my.salesforce.com",
             "STACK": "membership",
@@ -1169,7 +1169,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "salesforcedisasterrecoveryestlskjlsjf5A846C36",
+                        "salesforcedisasterrecoveryBucket4EDEE4E7",
                         "Arn",
                       ],
                     },
@@ -1274,7 +1274,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "salesforcedisasterrecoveryestlskjlsjf5A846C36": {
+    "salesforcedisasterrecoveryBucket4EDEE4E7": {
       "DeletionPolicy": "Retain",
       "Properties": {
         "BucketName": "salesforce-disaster-recovery-prod",
