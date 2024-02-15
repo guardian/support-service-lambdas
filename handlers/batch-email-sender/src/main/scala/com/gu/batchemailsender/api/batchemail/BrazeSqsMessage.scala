@@ -1,9 +1,8 @@
 package com.gu.batchemailsender.api.batchemail
 
-import ai.x.play.json.Jsonx
 import SalesforceMessage.SalesforceBatchItem
 import SalesforceToBrazeTransformations._
-import ai.x.play.json.Encoders._
+import play.api.libs.json.{JsNull, JsObject, JsPath, Json, OWrites}
 
 /** This is what actually gets sent to SQS and the fields correspond to Braze api_trigger_properties. For example,
   * stopped_credit_summaries can be found in SV_HolidayStopConfirmation_GuardianWeeklyBodyCopy Braze content block.
@@ -74,12 +73,51 @@ case class BrazeSqsMessage(
 )
 
 object BrazeSqsMessage {
-  implicit val stoppedCreditSummaryFormat = Jsonx.formatCaseClass[StoppedCreditSummary]
-  implicit val digitalVoucherFormat = Jsonx.formatCaseClass[DigitalVoucher]
-  implicit val emailPayloadSubscriberAttributesWriter = Jsonx.formatCaseClass[BrazeApiTriggerProperties]
-  implicit val emailPayloadContactAttributesWriter = Jsonx.formatCaseClass[EmailPayloadContactAttributes]
-  implicit val emailPayloadToWriter = Jsonx.formatCaseClass[EmailPayloadTo]
-  implicit val emailToSendWriter = Jsonx.formatCaseClass[BrazeSqsMessage]
+  implicit val stoppedCreditSummaryFormat = Json.writes[StoppedCreditSummary]
+  implicit val digitalVoucherFormat = Json.writes[DigitalVoucher]
+
+  // has to be done manually due to the 22 field limit
+  implicit val emailPayloadSubscriberAttributesWriter: OWrites[BrazeApiTriggerProperties] =
+    OWrites[BrazeApiTriggerProperties](b =>
+      JsObject(
+        Seq(
+          "first_name" -> Json.toJson(b.first_name),
+          "first_name" -> Json.toJson(b.first_name),
+          "last_name" -> Json.toJson(b.last_name),
+          "subscriber_id" -> Json.toJson(b.subscriber_id),
+          "next_charge_date" -> Json.toJson(b.next_charge_date),
+          "product" -> Json.toJson(b.product),
+          "modified_by_customer" -> Json.toJson(b.modified_by_customer),
+          "holiday_start_date" -> Json.toJson(b.holiday_start_date),
+          "holiday_end_date" -> Json.toJson(b.holiday_end_date),
+          "stopped_credit_sum" -> Json.toJson(b.stopped_credit_sum),
+          "currency_symbol" -> Json.toJson(b.currency_symbol),
+          "stopped_issue_count" -> Json.toJson(b.stopped_issue_count),
+          "stopped_credit_summaries" -> Json.toJson(b.stopped_credit_summaries),
+          "bulk_suspension_reason" -> Json.toJson(b.bulk_suspension_reason),
+          "digital_voucher" -> Json.toJson(b.digital_voucher),
+          "delivery_problem_action" -> Json.toJson(b.delivery_problem_action),
+          "delivery_problem_total_affected" -> Json.toJson(b.delivery_problem_total_affected),
+          "delivery_problem_affected_dates" -> Json.toJson(b.delivery_problem_affected_dates),
+          "delivery_problem_total_credit" -> Json.toJson(b.delivery_problem_total_credit),
+          "delivery_problem_invoice_date" -> Json.toJson(b.delivery_problem_invoice_date),
+          "delivery_problem_type" -> Json.toJson(b.delivery_problem_type),
+          "delivery_problem_currency_symbol" -> Json.toJson(b.delivery_problem_currency_symbol),
+          "delivery_problem_case_number" -> Json.toJson(b.delivery_problem_case_number),
+          "delivery_address_change_line1" -> Json.toJson(b.delivery_address_change_line1),
+          "delivery_address_change_line2" -> Json.toJson(b.delivery_address_change_line2),
+          "delivery_address_change_city" -> Json.toJson(b.delivery_address_change_city),
+          "delivery_address_change_state" -> Json.toJson(b.delivery_address_change_state),
+          "delivery_address_change_postcode" -> Json.toJson(b.delivery_address_change_postcode),
+          "delivery_address_change_country" -> Json.toJson(b.delivery_address_change_country),
+          "delivery_address_change_effective_date_blurb" -> Json.toJson(b.delivery_address_change_effective_date_blurb),
+        )
+          .filter(_._2 != JsNull),
+      ),
+    )
+  implicit val emailPayloadContactAttributesWriter = Json.writes[EmailPayloadContactAttributes]
+  implicit val emailPayloadToWriter = Json.writes[EmailPayloadTo]
+  implicit val emailToSendWriter = Json.writes[BrazeSqsMessage]
 
   def fromSalesforceMessage(salesforceBatchItem: SalesforceBatchItem): BrazeSqsMessage = {
     val salesforcePayload = salesforceBatchItem.payload

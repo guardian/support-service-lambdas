@@ -1,6 +1,5 @@
 package com.gu.salesforce
 
-import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.util.resthttp.HttpOp._
 import com.gu.util.resthttp.RestOp._
@@ -14,13 +13,13 @@ object SalesforceGenericIdLookup {
   type TSalesforceGenericIdLookup = (SfObjectType, FieldName, LookupValue) => ClientFailableOp[ResponseWithId]
 
   case class SfObjectType(value: String) extends AnyVal
-  implicit val formatSfObjectType = Jsonx.formatInline[SfObjectType]
+  implicit val formatSfObjectType = Json.valueFormat[SfObjectType]
 
   case class FieldName(value: String) extends AnyVal
-  implicit val formatFieldName = Jsonx.formatInline[FieldName]
+  implicit val formatFieldName = Json.valueFormat[FieldName]
 
   case class LookupValue(value: String) extends AnyVal
-  implicit val formatLookupValue = Jsonx.formatInline[LookupValue]
+  implicit val formatLookupValue = Json.valueFormat[LookupValue]
 
   case class ResponseWithId(Id: String)
   implicit val reads = Json.reads[ResponseWithId]
