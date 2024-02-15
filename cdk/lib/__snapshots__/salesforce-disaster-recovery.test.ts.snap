@@ -384,7 +384,9 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
-            "S3_BUCKET": "salesforce-disaster-recovery",
+            "S3_BUCKET": {
+              "Ref": "salesforcedisasterrecoveryestlskjlsjf5A846C36",
+            },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
             "STACK": "membership",
             "STAGE": "CODE",
@@ -509,7 +511,20 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             {
               "Action": "s3:PutObject",
               "Effect": "Allow",
-              "Resource": "salesforce-disaster-recovery/CODE/*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "salesforcedisasterrecoveryestlskjlsjf5A846C36",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
             },
             {
               "Action": [
@@ -606,6 +621,32 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "salesforcedisasterrecoveryestlskjlsjf5A846C36": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "salesforce-disaster-recovery-code",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
   },
 }
@@ -995,7 +1036,9 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
-            "S3_BUCKET": "salesforce-disaster-recovery",
+            "S3_BUCKET": {
+              "Ref": "salesforcedisasterrecoveryestlskjlsjf5A846C36",
+            },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint.my.salesforce.com",
             "STACK": "membership",
             "STAGE": "PROD",
@@ -1120,7 +1163,20 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             {
               "Action": "s3:PutObject",
               "Effect": "Allow",
-              "Resource": "salesforce-disaster-recovery/PROD/*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "salesforcedisasterrecoveryestlskjlsjf5A846C36",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
             },
             {
               "Action": [
@@ -1217,6 +1273,32 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "salesforcedisasterrecoveryestlskjlsjf5A846C36": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "salesforce-disaster-recovery-prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
   },
 }

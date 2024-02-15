@@ -7,6 +7,7 @@ import {
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
 	Condition,
@@ -33,6 +34,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const salesforceApiConnectionArn = `arn:aws:events:${this.region}:${this.account}:connection/${props.salesforceApiConnectionResourceId}`;
 
 		const app = 'salesforce-disaster-recovery';
+
+		const bucket = new Bucket(this, app + 'estlskjlsjf', {
+			bucketName: `${app}-${this.stage.toLowerCase()}`,
+		});
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -125,7 +130,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						environment: {
 							...lambdaDefaultConfig.environment,
 							SALESFORCE_API_DOMAIN: props.salesforceApiDomain,
-							S3_BUCKET: app,
+							S3_BUCKET: bucket.bucketName,
 						},
 						initialPolicy: [
 							new PolicyStatement({
@@ -139,7 +144,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							}),
 							new PolicyStatement({
 								actions: ['s3:PutObject'],
-								resources: [`${app}/${this.stage}/*`],
+								resources: [bucket.arnForObjects('*')],
 							}),
 						],
 					},

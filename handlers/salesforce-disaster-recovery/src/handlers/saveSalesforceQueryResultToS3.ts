@@ -15,11 +15,10 @@ const secretsManagerClient = new SecretsManagerClient({
 });
 
 export const handler = async (event: { queryJobId: string }) => {
-	const stage = process.env.STAGE;
 	const s3Bucket = process.env.S3_BUCKET;
 	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
 
-	if (!stage || !s3Bucket || !salesforceApiDomain) {
+	if (!s3Bucket || !salesforceApiDomain) {
 		throw new Error('Environment variables not set.');
 	}
 
@@ -33,7 +32,7 @@ export const handler = async (event: { queryJobId: string }) => {
 	try {
 		const input: PutObjectCommandInput = {
 			Bucket: s3Bucket,
-			Key: `${stage}/test.csv`,
+			Key: `test.csv`,
 			Body: csvContent,
 		};
 
