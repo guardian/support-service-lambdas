@@ -393,7 +393,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "save-salesforce-query-result-to-s3-test-CODE",
+        "FunctionName": "save-salesforce-query-result-to-s3-CODE",
         "Handler": "saveSalesforceQueryResultToS3.handler",
         "MemorySize": 1024,
         "Role": {
@@ -1046,7 +1046,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "save-salesforce-query-result-to-s3-test-PROD",
+        "FunctionName": "save-salesforce-query-result-to-s3-PROD",
         "Handler": "saveSalesforceQueryResultToS3.handler",
         "MemorySize": 1024,
         "Role": {
