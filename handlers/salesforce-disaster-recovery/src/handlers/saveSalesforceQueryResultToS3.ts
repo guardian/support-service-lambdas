@@ -34,7 +34,7 @@ export const handler = async (event: { queryJobId: string }) => {
 		);
 		console.log(response);
 
-		const json = (await response.json()) as string;
+		const json = await response.json();
 		console.log(json);
 		return 'OK';
 	} catch (error) {
