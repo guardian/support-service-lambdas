@@ -35,6 +35,7 @@ describe('Handler', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		process.env = { ...mockEnv };
+		console.error = jest.fn();
 	});
 
 	it('should handle successfully', async () => {
