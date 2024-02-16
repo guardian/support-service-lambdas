@@ -25,6 +25,12 @@ object WireModel {
 
   case object Sunday extends WireDayOfWeek
 
+  sealed trait WireBillingPeriod
+  case object Monthly extends WireBillingPeriod
+  case object Quarterly extends WireBillingPeriod
+  case object Annual extends WireBillingPeriod
+  case object SixWeeks extends WireBillingPeriod
+
   case class WirePlanInfo(
       id: String,
       label: String,
@@ -33,7 +39,12 @@ object WireModel {
       paymentPlan: Option[String], // todo legacy field, remove once salesforce is reading from paymentPlans
   )
 
-  case class WirePaymentPlan(currencyCode: String, description: String)
+  case class WirePaymentPlan(
+      currencyCode: String,
+      amount: BigDecimal,
+      billingPeriod: WireBillingPeriod,
+      description: String,
+  )
   object WirePaymentPlan {
     implicit val writes: OWrites[WirePaymentPlan] = Json.writes[WirePaymentPlan]
 
@@ -71,6 +82,16 @@ object WireModel {
     }
   }
 
+  object WireBillingPeriod {
+    implicit val writes: Writes[WireBillingPeriod] = { (period: WireBillingPeriod) => JsString(period.toString) }
+    def fromBillingPeriod(billingPeriod: BillingPeriod) = billingPeriod match {
+      case com.gu.newproduct.api.productcatalog.Monthly => Monthly
+      case com.gu.newproduct.api.productcatalog.Quarterly => Quarterly
+      case com.gu.newproduct.api.productcatalog.Annual => Annual
+      case com.gu.newproduct.api.productcatalog.SixWeeks => SixWeeks
+    }
+  }
+
   object WireSelectableWindow {
     implicit val writes: OWrites[WireSelectableWindow] = Json.writes[WireSelectableWindow]
 
@@ -98,7 +119,12 @@ object WireModel {
     def fromPlan(plan: Plan) = {
 
       val paymentPlans = plan.paymentPlans.map { case (currency: Currency, paymentPlan: PaymentPlan) =>
-        WirePaymentPlan(currency.iso, paymentPlan.description)
+        WirePaymentPlan(
+          currency.iso,
+          paymentPlan.amountMinorUnits.value / 100d,
+          WireBillingPeriod.fromBillingPeriod(paymentPlan.billingPeriod),
+          paymentPlan.description,
+        )
       }
 
       val legacyPaymentPlan = plan.paymentPlans.get(GBP).map(_.description)
@@ -178,7 +204,7 @@ object WireModel {
       val nationalDelivery = WireProduct(
         label = "National Delivery",
         plans = PlanId.enabledNationalDeliveryPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(List(Country.UK.name))
+        enabledForDeliveryCountries = Some(List(Country.UK.name)),
       )
 
       val availableProductsAndPlans = {

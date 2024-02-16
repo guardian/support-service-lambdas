@@ -1,13 +1,9 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { sumNumbers } from '@modules/arrayFunctions';
 import { awsConfig } from '@modules/aws/config';
 import { checkDefined, isNotNull } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import type {
-	Catalog,
-	Pricing,
-	ProductRatePlan,
-	ProductRatePlanCharge,
-} from './catalogSchema';
+import type { Catalog, Pricing, ProductRatePlanCharge } from './catalogSchema';
 import { catalogSchema } from './catalogSchema';
 
 const client = new S3Client(awsConfig);
@@ -41,23 +37,29 @@ export class ZuoraCatalog {
 			?.productRatePlans;
 	};
 
-	public getCatalogPriceOfCharges = (
-		productRatePlanId: string,
-		currency: string,
-	) => {
-		const catalogPlan: ProductRatePlan = checkDefined(
+	public getCatalogPlan = (productRatePlanId: string) =>
+		checkDefined(
 			this.catalog.products
 				.flatMap((product) => product.productRatePlans)
 				.find((productRatePlan) => productRatePlan.id === productRatePlanId),
 			`ProductRatePlan with id ${productRatePlanId} not found in catalog`,
 		);
-		const prices = catalogPlan.productRatePlanCharges
-			.map((charge: ProductRatePlanCharge) =>
+	public getCatalogPriceOfCharges = (
+		productRatePlanId: string,
+		currency: string,
+	): number[] =>
+		this.getCatalogPlan(productRatePlanId)
+			.productRatePlanCharges.map((charge: ProductRatePlanCharge) =>
 				charge.pricing.find((price: Pricing) => price.currency === currency),
 			)
 			.map((price) => price?.price)
 			.filter(isNotNull);
 
-		return prices;
-	};
+	public getCatalogPrice(productRatePlanId: string, currency: string): number {
+		const chargePrices = this.getCatalogPriceOfCharges(
+			productRatePlanId,
+			currency,
+		);
+		return sumNumbers(chargePrices);
+	}
 }

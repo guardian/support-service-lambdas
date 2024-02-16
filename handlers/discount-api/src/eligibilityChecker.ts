@@ -76,11 +76,10 @@ export class EligibilityChecker {
 			ratePlan.ratePlanCharges[0]?.currency,
 			'No currency found on rate plan charge',
 		);
-		const chargePrices = this.catalog.getCatalogPriceOfCharges(
+		const totalPrice = this.catalog.getCatalogPrice(
 			ratePlan.productRatePlanId,
 			currency,
 		);
-		const totalPrice = sum(chargePrices, (i) => i);
 
 		// Work out how much the cost of the next invoice will be
 		const nextInvoiceItems = checkDefined(
