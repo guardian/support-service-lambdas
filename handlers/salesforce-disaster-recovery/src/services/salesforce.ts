@@ -11,7 +11,7 @@ export const generateSalesforceAccessToken = async ({
 	credentials,
 }: {
 	credentials: SalesforceOauthCredentials;
-}) => {
+}): Promise<string> => {
 	try {
 		const formData = new URLSearchParams([
 			['client_id', credentials.client_id],
@@ -44,7 +44,7 @@ export const getSalesforceQueryResult = async ({
 	accessToken: string;
 	queryJobId: string;
 	apiDomain: string;
-}) => {
+}): Promise<string> => {
 	try {
 		const response = await fetch(
 			`${apiDomain}/services/data/v59.0/jobs/query/${queryJobId}/results`,
