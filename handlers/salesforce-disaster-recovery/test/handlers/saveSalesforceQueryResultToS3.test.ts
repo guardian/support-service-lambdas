@@ -18,59 +18,58 @@ describe('Handler', () => {
 		SALESFORCE_API_DOMAIN: 'mock_salesforce_api_domain',
 		SALESFORCE_OAUTH_SECRET_NAME: 'mock_salesforce_oauth_secret_name',
 	};
-	// const mockSecretValue = {
-	// 	authorization_endpoint: 'mock_auth_endpoint',
-	// 	client_id: 'mock_client_id',
-	// 	client_secret: 'mock_client_secret',
-	// 	oauth_http_parameters: {
-	// 		body_parameters: [
-	// 			{ key: 'key1', value: 'value1' },
-	// 			{ key: 'key2', value: 'value2' },
-	// 		],
-	// 	},
-	// };
-	// const mockAccessToken = 'mock_access_token';
-	// const mockCsvContent = 'mock_csv_content';
+	const mockSecretValue = {
+		authorization_endpoint: 'mock_auth_endpoint',
+		client_id: 'mock_client_id',
+		client_secret: 'mock_client_secret',
+		oauth_http_parameters: {
+			body_parameters: [
+				{ key: 'key1', value: 'value1' },
+				{ key: 'key2', value: 'value2' },
+			],
+		},
+	};
+	const mockAccessToken = 'mock_access_token';
+	const mockCsvContent = 'mock_csv_content';
 
 	beforeEach(() => {
-		// Reset mock implementations and clear mock calls
 		jest.clearAllMocks();
 		process.env = { ...mockEnv };
 	});
 
-	// it('should handle successfully', async () => {
-	// 	// Mock the successful flow
-	// 	(getSecretValue as jest.Mock).mockResolvedValueOnce(mockSecretValue);
-	// 	(generateSalesforceAccessToken as jest.Mock).mockResolvedValueOnce(
-	// 		mockAccessToken,
-	// 	);
-	// 	(getSalesforceQueryResult as jest.Mock).mockResolvedValueOnce(
-	// 		mockCsvContent,
-	// 	);
-	// 	(upsertFileToS3 as jest.Mock).mockResolvedValueOnce();
+	it('should handle successfully', async () => {
+		(getSecretValue as jest.Mock).mockResolvedValueOnce(mockSecretValue);
+		(generateSalesforceAccessToken as jest.Mock).mockResolvedValueOnce(
+			mockAccessToken,
+		);
+		(getSalesforceQueryResult as jest.Mock).mockResolvedValueOnce(
+			mockCsvContent,
+		);
+		(upsertFileToS3 as jest.Mock).mockImplementationOnce(() =>
+			Promise.resolve(),
+		);
 
-	// 	const result = await handler(mockEvent);
+		const result = await handler(mockEvent);
 
-	// 	expect(result).toEqual({ StatusCode: 200 });
+		expect(result).toEqual({ StatusCode: 200 });
 
-	// 	// Verify service function calls with correct arguments
-	// 	expect(getSecretValue).toHaveBeenCalledWith({
-	// 		secretName: mockEnv.SALESFORCE_OAUTH_SECRET_NAME,
-	// 	});
-	// 	expect(generateSalesforceAccessToken).toHaveBeenCalledWith({
-	// 		credentials: mockSecretValue,
-	// 	});
-	// 	expect(getSalesforceQueryResult).toHaveBeenCalledWith({
-	// 		accessToken: mockAccessToken,
-	// 		queryJobId: mockEvent.queryJobId,
-	// 		apiDomain: mockEnv.SALESFORCE_API_DOMAIN,
-	// 	});
-	// 	expect(upsertFileToS3).toHaveBeenCalledWith({
-	// 		bucketName: mockEnv.S3_BUCKET,
-	// 		filePath: `${mockEvent.executionStartTime}/before-processing.csv`,
-	// 		content: mockCsvContent,
-	// 	});
-	// });
+		expect(getSecretValue).toHaveBeenCalledWith({
+			secretName: mockEnv.SALESFORCE_OAUTH_SECRET_NAME,
+		});
+		expect(generateSalesforceAccessToken).toHaveBeenCalledWith({
+			credentials: mockSecretValue,
+		});
+		expect(getSalesforceQueryResult).toHaveBeenCalledWith({
+			accessToken: mockAccessToken,
+			queryJobId: mockEvent.queryJobId,
+			apiDomain: mockEnv.SALESFORCE_API_DOMAIN,
+		});
+		expect(upsertFileToS3).toHaveBeenCalledWith({
+			bucketName: mockEnv.S3_BUCKET,
+			filePath: `${mockEvent.executionStartTime}/before-processing.csv`,
+			content: mockCsvContent,
+		});
+	});
 
 	it('should throw error if environment variables are not set', async () => {
 		process.env = {};
