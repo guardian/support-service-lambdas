@@ -35,6 +35,9 @@ export const getSecretValue = async <T>({
 			console.log(Object.keys(error));
 			console.log(Object.values(error));
 			console.log(Object.entries(error));
+			if (typeof error === 'object' && 'message' in error) {
+				console.log(error.message);
+			}
 		}
 		console.error(error);
 		throw new Error('Failed to get secret value');
