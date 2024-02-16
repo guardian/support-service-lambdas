@@ -14,19 +14,28 @@ export const getSecretValue = async <T>({
 }): Promise<T> => {
 	try {
 		const command = new GetSecretValueCommand({
-			SecretId: secretName,
+			// SecretId: secretName,
+			SecretId: 'lskjdf',
 		});
+		console.log(secretName);
 
 		const response = await secretsManagerClient.send(command);
 
 		if (!response.SecretString) {
-			throw new Error('No secret found.');
+			throw new Error('No secret found');
 		}
 
 		const secretValue = JSON.parse(response.SecretString) as T;
 
 		return secretValue;
 	} catch (error) {
+		console.log(typeof error);
+
+		if (error) {
+			console.log(Object.keys(error));
+			console.log(Object.values(error));
+			console.log(Object.entries(error));
+		}
 		console.error(error);
 		throw new Error('Failed to get secret value');
 	}
