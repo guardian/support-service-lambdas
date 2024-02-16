@@ -126,6 +126,32 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "salesforce-disaster-recovery-code",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
     "SalesforceApiHttpInvoke9D82CE85": {
       "Properties": {
         "PolicyDocument": {
@@ -385,7 +411,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "salesforcedisasterrecoveryBucket4EDEE4E7",
+              "Ref": "Bucket83908E77",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-CODE-salesforce-api/e2792d75-414a-48f3-89a1-5e8eac15f627",
@@ -518,7 +544,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "salesforcedisasterrecoveryBucket4EDEE4E7",
+                        "Bucket83908E77",
                         "Arn",
                       ],
                     },
@@ -622,32 +648,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "salesforcedisasterrecoveryBucket4EDEE4E7": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "BucketName": "salesforce-disaster-recovery-code",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
     },
   },
 }
@@ -779,6 +779,32 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "salesforce-disaster-recovery-prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
     "SalesforceApiHttpInvoke9D82CE85": {
       "Properties": {
         "PolicyDocument": {
@@ -1038,7 +1064,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "salesforcedisasterrecoveryBucket4EDEE4E7",
+              "Ref": "Bucket83908E77",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3",
@@ -1171,7 +1197,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "salesforcedisasterrecoveryBucket4EDEE4E7",
+                        "Bucket83908E77",
                         "Arn",
                       ],
                     },
@@ -1275,32 +1301,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "salesforcedisasterrecoveryBucket4EDEE4E7": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "BucketName": "salesforce-disaster-recovery-prod",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
     },
   },
 }
