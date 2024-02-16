@@ -4,7 +4,7 @@ import { uploadFileToS3 } from '../../src/services';
 
 const s3ClientMock = mockClient(S3Client);
 
-describe('upsertFileToS3', () => {
+describe('uploadFileToS3', () => {
 	beforeEach(() => {
 		s3ClientMock.reset();
 		jest.resetAllMocks();
