@@ -32,10 +32,14 @@ export const getSecretValue = async <T>({
 		console.error(error);
 
 		let errorMessage = 'Failed to get secret value';
-		const errorName = 'Name';
+		let errorName = 'Name';
 
 		if (error && typeof error === 'object' && 'message' in error) {
 			errorMessage = error.message as string;
+		}
+
+		if (error && typeof error === 'object' && 'name' in error) {
+			errorName = error.name as string;
 		}
 
 		console.log('MESSAGE');
