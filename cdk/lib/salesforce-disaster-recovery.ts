@@ -3,8 +3,12 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import {
+	Choice,
+	Condition,
 	CustomState,
 	DefinitionBody,
+	JsonPath,
+	Pass,
 	StateMachine,
 	Wait,
 	WaitTime,
@@ -68,13 +72,49 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const getSalesforceQueryJobStatus = new CustomState(
+			this,
+			'GetSalesforceQueryJobStatus',
+			{
+				stateJson: {
+					Type: 'Task',
+					Resource: 'arn:aws:states:::http:invoke',
+					Parameters: {
+						'ApiEndpoint.$': JsonPath.format(
+							`${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}`,
+							JsonPath.stringAt('$.ResponseBody.id'),
+						),
+						Method: 'GET',
+						Authentication: {
+							ConnectionArn: salesforceApiConnectionArn,
+						},
+					},
+				},
+			},
+		);
+
+		const saveSalesforceQueryResultToS3 = new Pass(
+			this,
+			'SaveSalesforceQueryResultToS3',
+		);
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
 			{
 				stateMachineName: `${app}-${this.stage}`,
 				definitionBody: DefinitionBody.fromChainable(
-					createSalesforceQueryJob.next(waitForSalesforceQueryJobToComplete),
+					createSalesforceQueryJob
+						.next(waitForSalesforceQueryJobToComplete)
+						.next(getSalesforceQueryJobStatus)
+						.next(
+							new Choice(this, 'IsSalesforceQueryJobCompleted')
+								.when(
+									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
+									saveSalesforceQueryResultToS3,
+								)
+								.otherwise(waitForSalesforceQueryJobToComplete),
+						),
 				),
 			},
 		);
@@ -88,9 +128,19 @@ export class SalesforceDisasterRecovery extends GuStack {
 						conditions: {
 							StringEquals: {
 								'states:HTTPMethod': 'POST',
+								'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query`,
+							},
+						},
+					}),
+					new PolicyStatement({
+						actions: ['states:InvokeHTTPEndpoint'],
+						resources: [stateMachine.stateMachineArn],
+						conditions: {
+							StringEquals: {
+								'states:HTTPMethod': 'GET',
 							},
 							StringLike: {
-								'states:HTTPEndpoint': `${props.salesforceApiDomain}/*`,
+								'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query/*`,
 							},
 						},
 					}),
