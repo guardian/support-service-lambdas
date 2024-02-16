@@ -6,7 +6,7 @@ import {
 
 const s3Client = new S3Client({ region: process.env.region });
 
-export const upsertFileToS3 = async ({
+export const uploadFileToS3 = async ({
 	bucketName,
 	filePath,
 	content,

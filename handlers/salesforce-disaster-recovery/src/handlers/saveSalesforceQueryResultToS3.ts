@@ -3,7 +3,7 @@ import {
 	getSalesforceQueryResult,
 	getSecretValue,
 	type SalesforceOauthCredentials,
-	upsertFileToS3,
+	uploadFileToS3,
 } from '../services';
 
 export const handler = async (event: {
@@ -33,7 +33,7 @@ export const handler = async (event: {
 		apiDomain: salesforceApiDomain,
 	});
 
-	await upsertFileToS3({
+	await uploadFileToS3({
 		bucketName,
 		filePath: `${event.executionStartTime}/before-processing.csv`,
 		content: csvContent,

@@ -3,7 +3,7 @@ import {
 	generateSalesforceAccessToken,
 	getSalesforceQueryResult,
 	getSecretValue,
-	upsertFileToS3,
+	uploadFileToS3,
 } from '../../src/services';
 
 jest.mock('../../src/services');
@@ -46,7 +46,7 @@ describe('Handler', () => {
 		(getSalesforceQueryResult as jest.Mock).mockResolvedValueOnce(
 			mockCsvContent,
 		);
-		(upsertFileToS3 as jest.Mock).mockImplementationOnce(() =>
+		(uploadFileToS3 as jest.Mock).mockImplementationOnce(() =>
 			Promise.resolve(),
 		);
 
@@ -65,7 +65,7 @@ describe('Handler', () => {
 			queryJobId: mockEvent.queryJobId,
 			apiDomain: mockEnv.SALESFORCE_API_DOMAIN,
 		});
-		expect(upsertFileToS3).toHaveBeenCalledWith({
+		expect(uploadFileToS3).toHaveBeenCalledWith({
 			bucketName: mockEnv.S3_BUCKET,
 			filePath: `${mockEvent.executionStartTime}/before-processing.csv`,
 			content: mockCsvContent,
@@ -82,6 +82,6 @@ describe('Handler', () => {
 		expect(getSecretValue).not.toHaveBeenCalled();
 		expect(generateSalesforceAccessToken).not.toHaveBeenCalled();
 		expect(getSalesforceQueryResult).not.toHaveBeenCalled();
-		expect(upsertFileToS3).not.toHaveBeenCalled();
+		expect(uploadFileToS3).not.toHaveBeenCalled();
 	});
 });

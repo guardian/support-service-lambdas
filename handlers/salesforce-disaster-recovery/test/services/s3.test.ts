@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import { upsertFileToS3 } from '../../src/services';
+import { uploadFileToS3 } from '../../src/services';
 
 const s3ClientMock = mockClient(S3Client);
 
@@ -20,7 +20,7 @@ describe('upsertFileToS3', () => {
 		s3ClientMock.on(PutObjectCommand).resolves({});
 
 		// Act
-		await upsertFileToS3({ bucketName, filePath, content });
+		await uploadFileToS3({ bucketName, filePath, content });
 
 		// Assert
 		expect(s3ClientMock.calls().length).toEqual(1);
