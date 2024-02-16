@@ -1,16 +1,19 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { type App } from 'aws-cdk-lib';
+import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import {
 	CustomState,
 	DefinitionBody,
 	StateMachine,
+	Wait,
+	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 
 interface Props extends GuStackProps {
 	salesforceApiDomain: string;
 	salesforceApiConnectionResourceId: string;
+	salesforceQueryWaitSeconds: number;
 }
 
 export class SalesforceDisasterRecovery extends GuStack {
@@ -55,12 +58,24 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const waitForSalesforceQueryJobToComplete = new Wait(
+			this,
+			'WaitForSalesforceQueryJobToComplete',
+			{
+				time: WaitTime.duration(
+					Duration.seconds(props.salesforceQueryWaitSeconds),
+				),
+			},
+		);
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
 			{
 				stateMachineName: `${app}-${this.stage}`,
-				definitionBody: DefinitionBody.fromChainable(createSalesforceQueryJob),
+				definitionBody: DefinitionBody.fromChainable(
+					createSalesforceQueryJob.next(waitForSalesforceQueryJobToComplete),
+				),
 			},
 		);
 
