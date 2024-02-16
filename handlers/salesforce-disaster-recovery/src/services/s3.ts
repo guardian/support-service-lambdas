@@ -24,6 +24,6 @@ export const upsertFileToS3 = async ({
 		await s3Client.send(command);
 	} catch (error) {
 		console.error(error);
-		throw new Error('Failed to upsert file to S3');
+		throw error;
 	}
 };

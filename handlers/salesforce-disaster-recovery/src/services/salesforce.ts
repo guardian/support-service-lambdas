@@ -32,7 +32,7 @@ export const generateSalesforceAccessToken = async ({
 		return json.access_token;
 	} catch (error) {
 		console.error(error);
-		throw new Error('Failed to generate access token');
+		throw error;
 	}
 };
 
@@ -61,6 +61,6 @@ export const getSalesforceQueryResult = async ({
 		return text;
 	} catch (error) {
 		console.error(error);
-		throw new Error('Failed to get Salesforce query results');
+		throw error;
 	}
 };

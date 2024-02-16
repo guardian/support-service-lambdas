@@ -52,7 +52,7 @@ describe('Salesforce API Functions', () => {
 
 			await expect(
 				generateSalesforceAccessToken({ credentials: mockCredentials }),
-			).rejects.toThrow('Failed to generate access token');
+			).rejects.toThrow('Network error');
 		});
 	});
 
@@ -94,7 +94,7 @@ describe('Salesforce API Functions', () => {
 					queryJobId: mockQueryJobId,
 					apiDomain: mockApiDomain,
 				}),
-			).rejects.toThrow('Failed to get Salesforce query results');
+			).rejects.toThrow('Network error');
 		});
 	});
 });
