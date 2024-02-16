@@ -15,7 +15,7 @@ export const handler = async (event: {
 	const salesforceOauthSecretName = process.env.SALESFORCE_OAUTH_SECRET_NAME;
 
 	if (!bucketName || !salesforceApiDomain || !salesforceOauthSecretName) {
-		throw new Error('Environment variables not set.');
+		throw new Error('Environment variables not set');
 	}
 
 	const salesforceOauthCredentials =

@@ -75,7 +75,7 @@ describe('Handler', () => {
 		process.env = {};
 
 		await expect(handler(mockEvent)).rejects.toThrow(
-			'Environment variables not set.',
+			'Environment variables not set',
 		);
 
 		expect(getSecretValue).not.toHaveBeenCalled();
