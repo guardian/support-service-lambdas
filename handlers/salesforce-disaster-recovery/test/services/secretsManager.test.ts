@@ -11,7 +11,6 @@ describe('getSecretValue', () => {
 	beforeEach(() => {
 		secretsManagerClientMock.reset();
 		jest.resetAllMocks();
-		console.log = jest.fn();
 		console.error = jest.fn();
 	});
 

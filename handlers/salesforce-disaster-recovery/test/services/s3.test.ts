@@ -8,6 +8,7 @@ describe('upsertFileToS3', () => {
 	beforeEach(() => {
 		s3ClientMock.reset();
 		jest.resetAllMocks();
+		console.error = jest.fn();
 	});
 
 	test('should upload file to S3', async () => {
