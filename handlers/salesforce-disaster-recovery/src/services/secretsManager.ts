@@ -14,10 +14,8 @@ export const getSecretValue = async <T>({
 }): Promise<T> => {
 	try {
 		const command = new GetSecretValueCommand({
-			// SecretId: secretName,
-			SecretId: 'lskjdf',
+			SecretId: secretName,
 		});
-		console.log(secretName);
 
 		const response = await secretsManagerClient.send(command);
 
@@ -30,24 +28,6 @@ export const getSecretValue = async <T>({
 		return secretValue;
 	} catch (error) {
 		console.error(error);
-
-		let errorMessage = 'Failed to get secret value';
-		let errorName = 'Name';
-
-		if (error && typeof error === 'object' && 'message' in error) {
-			errorMessage = error.message as string;
-		}
-
-		if (error && typeof error === 'object' && 'name' in error) {
-			errorName = error.name as string;
-		}
-
-		console.log('MESSAGE');
-		console.log(errorMessage);
-
-		console.log('NAME');
-		console.log(errorName);
-
-		throw new Error(errorMessage);
+		throw error;
 	}
 };
