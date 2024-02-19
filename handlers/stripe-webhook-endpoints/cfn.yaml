@@ -26,6 +26,109 @@ Conditions:
   IsProd: !Equals [ !Ref Stage, "PROD" ]
 
 Resources:
+  ##########################################################################
+  #   API Gateway                                                    #
+  ##########################################################################
+
+  APIGateway:  #to have API created in AWS Console
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Description: Gateway for Stripe to make POST requests to
+      Name: !Sub stripe-webhook-endpoints-${Stage}
+
+  ApiGatewayToSQSRole :
+    Type: AWS::IAM::Role  #to allow API Gateway to push message to SQS
+    Properties:
+      Path: /payment-intent-issue
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/stripe-webhook-endpoints-to-SQS-Policy
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      RoleName: !Sub "stripe-webhook-endpoints-apigateway-to-sqs"
+      Policies:
+        - PolicyName: ApiGatewayLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - sqs:SendMessage
+                  - sqs:SetQueueAttributes
+                Effect: Allow
+                Resource: !GetAtt 'StripePaymentFailureMessagesQueue.Arn'
+
+  StripePaymentFailureMessagesQueuePolicy:  #on the SQS side, need to have policy defined to receive message from API
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref StripePaymentFailureMessagesQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: order-api-send-msg-sqs
+            Effect: Allow
+            Principal:
+              Service: "apigateway.amazonaws.com"
+            Action:
+              - SQS:SendMessage
+              - SQS:ReceiveMessage
+            Resource: !GetAtt 'StripePaymentFailureMessagesQueue.Arn'
+
+  PostMethod:
+    Type: AWS::ApiGateway::Method #to configure the API to refer to SQS Policy and wire the Rest Call to SQS
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        Credentials: !GetAtt 'ApiGatewayToSQSRole.Arn'
+        IntegrationHttpMethod: POST
+        IntegrationResponses:
+          - StatusCode: '200'
+        PassthroughBehavior: NEVER
+        RequestParameters:
+          integration.request.header.Content-Type: '''application/x-www-form-urlencoded'''
+        RequestTemplates:
+          application/json: Action=SendMessage&MessageBody=$util.urlEncode($input.body)
+        Type: AWS
+        Uri: !Join
+          - ''
+          - - 'arn:aws:apigateway:'
+            - !Ref 'AWS::Region'
+            - :sqs:path/payment-intent-issue/
+            - !Ref 'AWS::AccountId'
+            - /
+            - !Sub ${StripePaymentFailureMessagesQueue.QueueName}
+      MethodResponses:
+        - ResponseModels:
+            application/json: Empty
+          StatusCode: '200'
+      ResourceId: !GetAtt ApiGateway.RootResourceId
+      RestApiId: !Ref ApiGateway
+
+  Deployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - PostMethod
+    Properties:
+      RestApiId: !Ref ApiGateway
+      StageName: !Ref Stage
+
+  Stage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: !Ref Stage
+      RestApiId: !Ref ApiGateway
+      DeploymentId: !Ref Deployment
+
+  ##########################################################################
+  #    PaymentIntentIssuesLambda
+  ##########################################################################
+
   PaymentIntentIssuesLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -56,12 +159,41 @@ Resources:
           Action: s3:GetObject
           Resource:
             - arn:aws:s3::*:membership-dist/*
+      - AWSLambdaSQSQueueExecutionRole # This policy is required to allow the lambda to read from the queue
+      - Statement:
+          Effect: Allow
+          Action:
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+          Resource:
+            - !GetAtt StripePaymentFailureMessagesQueue.Arn
       Events:
-        AcquisitionEvent:
-            Type: Api
-            Properties:
-                Path: '/payment-intent-issue'
-                Method: post
+        MySQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt StripePaymentFailureMessagesQueue.Arn
+            BatchSize: 10
+            Enabled: false
+
+  Type: AWS::Lambda::EventSourceMapping
+  Properties:
+    BatchSize: 10
+    Enabled: True
+    EventSourceArn: The ARN of the queue
+    FunctionName: !Sub stripe-payment-intent-issues-${Stage}
+    FunctionResponseTypes: ReportBatchItemFailures
+
+  StripePaymentFailureMessagesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: stripe-payment-failure-messages-queue-${Stage}
+      VisibilityTimeout: 1800
+
+  ##########################################################################
+  #  CustomerUpdatedLambda
+  ##########################################################################
+
   CustomerUpdatedLambda:
     Type: AWS::Serverless::Function
     Properties:
