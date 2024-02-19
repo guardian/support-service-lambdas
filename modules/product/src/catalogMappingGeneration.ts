@@ -145,37 +145,43 @@ const getProductRatePlanChargeObjects = (
 	);
 };
 const getZuoraProductObjects = (productRatePlans: ProductRatePlan[]) => {
-	return arrayToObject(
-		productRatePlans
-			.filter((productRatePlan) =>
-				isSupportedProductRatePlan(productRatePlan.name),
-			)
-			.map((productRatePlan) => {
-				const productRatePlanName = getProductRatePlanName(
-					productRatePlan.name,
-				);
-				return {
-					[productRatePlanName]: {
-						id: productRatePlan.id,
-						charges: getProductRatePlanChargeObjects(
-							productRatePlan.productRatePlanCharges,
-						),
-					},
-				};
-			}),
-	);
+	return {
+		ratePlans: arrayToObject(
+			productRatePlans
+				.filter((productRatePlan) =>
+					isSupportedProductRatePlan(productRatePlan.name),
+				)
+				.map((productRatePlan) => {
+					const productRatePlanName = getProductRatePlanName(
+						productRatePlan.name,
+					);
+					return {
+						[productRatePlanName]: {
+							id: productRatePlan.id,
+							charges: getProductRatePlanChargeObjects(
+								productRatePlan.productRatePlanCharges,
+							),
+						},
+					};
+				}),
+		),
+	};
 };
 export const generateCatalogMapping = (catalog: Catalog) => {
 	const supportedProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
 	);
 
-	const arrayVersion = supportedProducts.map((product) => {
-		const productName = getProductName(product.name);
-		return {
-			[productName]: getZuoraProductObjects(product.productRatePlans),
-		};
-	});
+	const result = {
+		products: arrayToObject(
+			supportedProducts.map((product) => {
+				const productName = getProductName(product.name);
+				return {
+					[productName]: getZuoraProductObjects(product.productRatePlans),
+				};
+			}),
+		),
+	};
 
 	// // Nest the Zuora products under the product family they belong to
 	// const groupedByProductFamily = groupBy(
@@ -195,5 +201,5 @@ export const generateCatalogMapping = (catalog: Catalog) => {
 	// 	},
 	// );
 
-	return arrayToObject(arrayVersion);
+	return result;
 };

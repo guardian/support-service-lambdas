@@ -18,12 +18,26 @@ type ProductRatePlanChargeKey<
 	PRP extends ProductRatePlanKey<ZP>,
 > = keyof (typeof prodTypes)[ZP][PRP];
 
+// export type ZuoraProductKey = keyof (typeof prodMapping)['products'];
+
+// export type ProductRatePlanKey<ZP extends ZuoraProductKey> =
+// 	keyof (typeof prodMapping)['products'][ZP]['ratePlans'];
+
+// export type ProductRatePlanChargeKey<
+// 	ZP extends ZuoraProductKey,
+// 	PRP extends ProductRatePlanKey<ZP>,
+// > = keyof (typeof prodMapping)['products'][ZP]['ratePlans'][PRP]['charges'];
+
 type MappedCatalog = {
-	[ZP in ZuoraProductKey]: {
-		[PRP in ProductRatePlanKey<ZP>]: {
-			id: string;
-			charges: {
-				[PRPC in ProductRatePlanChargeKey<ZP, PRP>]: string;
+	products: {
+		[ZP in ZuoraProductKey]: {
+			ratePlans: {
+				[PRP in ProductRatePlanKey<ZP>]: {
+					id: string;
+					charges: {
+						[PRPC in ProductRatePlanChargeKey<ZP, PRP>]: string;
+					};
+				};
 			};
 		};
 	};
@@ -36,17 +50,21 @@ export const getProductRatePlan = <
 	stage: Stage,
 	zuoraProduct: ZP,
 	productRatePlan: PRP,
-) => mappingsForStage(stage)[zuoraProduct][productRatePlan];
+) => {
+	const products = mappingsForStage(stage).products;
+	const product = products[zuoraProduct];
+	return product.ratePlans[productRatePlan];
+};
 
 export const getAllProductDetails = (stage: Stage) => {
-	const stageMapping = mappingsForStage(stage);
+	const stageMapping = mappingsForStage(stage).products;
 	const zuoraProductKeys = Object.keys(stageMapping) as Array<
 		keyof typeof stageMapping
 	>;
 	return zuoraProductKeys.flatMap((zuoraProduct) => {
-		const zuoraProductObject = stageMapping[zuoraProduct];
-		const productRatePlanKeys = Object.keys(zuoraProductObject) as Array<
-			keyof typeof zuoraProductObject
+		const productRatePlans = stageMapping[zuoraProduct].ratePlans;
+		const productRatePlanKeys = Object.keys(productRatePlans) as Array<
+			keyof typeof productRatePlans
 		>;
 		return productRatePlanKeys.flatMap((productRatePlan) => {
 			const { id } = getProductRatePlan(stage, zuoraProduct, productRatePlan);
