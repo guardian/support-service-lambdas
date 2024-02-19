@@ -1,7 +1,8 @@
 import type {
 	Catalog,
-	ProductRatePlan,
-	ProductRatePlanCharge,
+	CatalogProductRatePlan,
+	CatalogProductRatePlanCharge,
+	Pricing,
 } from '@modules/catalog/catalogSchema';
 import { checkDefined } from '@modules/nullAndUndefined';
 
@@ -11,21 +12,21 @@ import { checkDefined } from '@modules/nullAndUndefined';
 // 		`Unexpected product type ${product}`,
 // 	);
 // };
-const getProductName = (product: string): string => {
+export const getProductName = (product: string): string => {
 	return checkDefined(
 		catalogNamesToProduct[product],
 		`Unexpected product type ${product}`,
 	);
 };
 
-const getProductRatePlanName = (productRatePlan: string): string => {
+export const getProductRatePlanName = (productRatePlan: string): string => {
 	return checkDefined(
 		productRatePlanNamesToProductRatePlan[productRatePlan],
 		`Unexpected product rate plan type ${productRatePlan}`,
 	);
 };
 
-const getProductRatePlanChargeName = (
+export const getProductRatePlanChargeName = (
 	productRatePlanCharge: string,
 ): string => {
 	return checkDefined(
@@ -44,18 +45,18 @@ const catalogNamesToProductFamily: Record<string, string> = {
 	'Newspaper Delivery': 'Newspaper',
 } as const;
 
-const catalogNamesToProduct: Record<string, string> = {
+export const catalogNamesToProduct: Record<string, string> = {
 	'Digital Pack': 'DigitalSubscription',
 	'Newspaper - National Delivery': 'NationalDelivery',
 	'Supporter Plus': 'SupporterPlus',
-	'Guardian Weekly - ROW': 'RestOfWorld',
-	'Guardian Weekly - Domestic': 'Domestic',
+	'Guardian Weekly - ROW': 'GuardianWeeklyRestOfWorld',
+	'Guardian Weekly - Domestic': 'GuardianWeeklyDomestic',
 	'Newspaper Digital Voucher': 'SubscriptionCard',
 	Contributor: 'Contribution',
 	'Newspaper Delivery': 'HomeDelivery',
 } as const;
 
-const productRatePlanNamesToProductRatePlan: Record<string, string> = {
+export const productRatePlanNamesToProductRatePlan: Record<string, string> = {
 	'Digital Pack Monthly': 'Monthly',
 	'Digital Pack Annual': 'Annual',
 	'Digital Subscription One Year Fixed - One Time Charge': 'OneYearGift',
@@ -83,7 +84,7 @@ const productRatePlanNamesToProductRatePlan: Record<string, string> = {
 	Sixday: 'Sixday',
 } as const;
 
-const productRatePlanChargeNamesToProductRatePlanCharge: Record<
+export const productRatePlanChargeNamesToProductRatePlanCharge: Record<
 	string,
 	string
 > = {
@@ -119,9 +120,9 @@ const productRatePlanChargeNamesToProductRatePlanCharge: Record<
 	Friday: 'Friday',
 } as const;
 
-const isSupportedProductRatePlan = (productRatePlan: string) =>
+export const isSupportedProductRatePlan = (productRatePlan: string) =>
 	Object.keys(productRatePlanNamesToProductRatePlan).includes(productRatePlan);
-const isSupportedProduct = (product: string) =>
+export const isSupportedProduct = (product: string) =>
 	Object.keys(catalogNamesToProductFamily).includes(product);
 
 const arrayToObject = <T>(array: Array<Record<string, T>>) => {
@@ -130,8 +131,17 @@ const arrayToObject = <T>(array: Array<Record<string, T>>) => {
 	}, {});
 };
 
+const getPricingObject = (pricing: Pricing[]) => {
+	return arrayToObject(
+		pricing.map((price) => {
+			return {
+				[price.currency]: price.price,
+			};
+		}),
+	);
+};
 const getProductRatePlanChargeObjects = (
-	productRatePlanCharges: ProductRatePlanCharge[],
+	productRatePlanCharges: CatalogProductRatePlanCharge[],
 ) => {
 	return arrayToObject(
 		productRatePlanCharges.map((productRatePlanCharge) => {
@@ -139,12 +149,15 @@ const getProductRatePlanChargeObjects = (
 				productRatePlanCharge.name,
 			);
 			return {
-				[productRatePlanChargeName]: productRatePlanCharge.id,
+				[productRatePlanChargeName]: {
+					id: productRatePlanCharge.id,
+					pricing: getPricingObject(productRatePlanCharge.pricing),
+				},
 			};
 		}),
 	);
 };
-const getZuoraProductObjects = (productRatePlans: ProductRatePlan[]) => {
+const getZuoraProductObjects = (productRatePlans: CatalogProductRatePlan[]) => {
 	return {
 		ratePlans: arrayToObject(
 			productRatePlans

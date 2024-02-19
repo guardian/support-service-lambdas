@@ -3,7 +3,11 @@ import { sumNumbers } from '@modules/arrayFunctions';
 import { awsConfig } from '@modules/aws/config';
 import { checkDefined, isNotNull } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import type { Catalog, Pricing, ProductRatePlanCharge } from './catalogSchema';
+import type {
+	Catalog,
+	CatalogProductRatePlanCharge,
+	Pricing,
+} from './catalogSchema';
 import { catalogSchema } from './catalogSchema';
 
 const client = new S3Client(awsConfig);
@@ -49,7 +53,7 @@ export class ZuoraCatalog {
 		currency: string,
 	): number[] =>
 		this.getCatalogPlan(productRatePlanId)
-			.productRatePlanCharges.map((charge: ProductRatePlanCharge) =>
+			.productRatePlanCharges.map((charge: CatalogProductRatePlanCharge) =>
 				charge.pricing.find((price: Pricing) => price.currency === currency),
 			)
 			.map((price) => price?.price)

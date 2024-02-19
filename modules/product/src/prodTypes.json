@@ -1,155 +1,216 @@
 {
   "DigitalSubscription": {
-    "Monthly": {
-      "Subscription": {}
+    "currencies": {
+      "USD": {},
+      "NZD": {},
+      "EUR": {},
+      "GBP": {},
+      "CAD": {},
+      "AUD": {}
     },
-    "Annual": {
-      "Subscription": {}
-    },
-    "ThreeMonthGift": {
-      "Subscription": {}
-    },
-    "OneYearGift": {
-      "Subscription": {}
+    "productRatePlans": {
+      "Monthly": {
+        "Subscription": {}
+      },
+      "Annual": {
+        "Subscription": {}
+      },
+      "ThreeMonthGift": {
+        "Subscription": {}
+      },
+      "OneYearGift": {
+        "Subscription": {}
+      }
     }
   },
   "NationalDelivery": {
-    "Sixday": {
-      "Saturday": {},
-      "Friday": {},
-      "Thursday": {},
-      "Wednesday": {},
-      "Tuesday": {},
-      "Monday": {}
+    "currencies": {
+      "GBP": {}
     },
-    "Weekend": {
-      "Sunday": {},
-      "Saturday": {}
-    },
-    "Everyday": {
-      "Sunday": {},
-      "Saturday": {},
-      "Friday": {},
-      "Thursday": {},
-      "Wednesday": {},
-      "Tuesday": {},
-      "Monday": {}
+    "productRatePlans": {
+      "Sixday": {
+        "Saturday": {},
+        "Friday": {},
+        "Thursday": {},
+        "Wednesday": {},
+        "Tuesday": {},
+        "Monday": {}
+      },
+      "Weekend": {
+        "Sunday": {},
+        "Saturday": {}
+      },
+      "Everyday": {
+        "Sunday": {},
+        "Saturday": {},
+        "Friday": {},
+        "Thursday": {},
+        "Wednesday": {},
+        "Tuesday": {},
+        "Monday": {}
+      }
     }
   },
   "SupporterPlus": {
-    "Monthly": {
-      "Contribution": {},
-      "Subscription": {}
+    "currencies": {
+      "USD": {},
+      "NZD": {},
+      "EUR": {},
+      "GBP": {},
+      "CAD": {},
+      "AUD": {}
     },
-    "Annual": {
-      "Subscription": {},
-      "Contribution": {}
+    "productRatePlans": {
+      "Monthly": {
+        "Contribution": {},
+        "Subscription": {}
+      },
+      "Annual": {
+        "Subscription": {},
+        "Contribution": {}
+      }
     }
   },
-  "RestOfWorld": {
-    "Monthly": {
-      "Monthly": {}
+  "GuardianWeeklyRestOfWorld": {
+    "currencies": {
+      "USD": {},
+      "GBP": {}
     },
-    "OneYearGift": {
-      "Subscription": {}
-    },
-    "Annual": {
-      "Subscription": {}
-    },
-    "SixWeekly": {
-      "Subscription": {}
-    },
-    "Quarterly": {
-      "Subscription": {}
-    },
-    "ThreeMonthGift": {
-      "Subscription": {}
+    "productRatePlans": {
+      "Monthly": {
+        "Monthly": {}
+      },
+      "OneYearGift": {
+        "Subscription": {}
+      },
+      "Annual": {
+        "Subscription": {}
+      },
+      "SixWeekly": {
+        "Subscription": {}
+      },
+      "Quarterly": {
+        "Subscription": {}
+      },
+      "ThreeMonthGift": {
+        "Subscription": {}
+      }
     }
   },
-  "Domestic": {
-    "OneYearGift": {
-      "Subscription": {}
+  "GuardianWeeklyDomestic": {
+    "currencies": {
+      "USD": {},
+      "NZD": {},
+      "EUR": {},
+      "GBP": {},
+      "CAD": {},
+      "AUD": {}
     },
-    "Annual": {
-      "Subscription": {}
-    },
-    "Quarterly": {
-      "Subscription": {}
-    },
-    "Monthly": {
-      "Subscription": {}
-    },
-    "ThreeMonthGift": {
-      "Subscription": {}
-    },
-    "SixWeekly": {
-      "Subscription": {}
+    "productRatePlans": {
+      "OneYearGift": {
+        "Subscription": {}
+      },
+      "Annual": {
+        "Subscription": {}
+      },
+      "Quarterly": {
+        "Subscription": {}
+      },
+      "Monthly": {
+        "Subscription": {}
+      },
+      "ThreeMonthGift": {
+        "Subscription": {}
+      },
+      "SixWeekly": {
+        "Subscription": {}
+      }
     }
   },
   "SubscriptionCard": {
-    "Everyday": {
-      "Monday": {},
-      "Tuesday": {},
-      "Saturday": {},
-      "Thursday": {},
-      "Friday": {},
-      "Wednesday": {},
-      "Sunday": {}
+    "currencies": {
+      "GBP": {}
     },
-    "Weekend": {
-      "Saturday": {},
-      "Sunday": {}
-    },
-    "Sixday": {
-      "Saturday": {},
-      "Friday": {},
-      "Monday": {},
-      "Tuesday": {},
-      "Thursday": {},
-      "Wednesday": {}
-    },
-    "Sunday": {
-      "Sunday": {}
-    },
-    "Saturday": {
-      "Saturday": {}
+    "productRatePlans": {
+      "Everyday": {
+        "Monday": {},
+        "Tuesday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Friday": {},
+        "Wednesday": {},
+        "Sunday": {}
+      },
+      "Weekend": {
+        "Saturday": {},
+        "Sunday": {}
+      },
+      "Sixday": {
+        "Saturday": {},
+        "Friday": {},
+        "Monday": {},
+        "Tuesday": {},
+        "Thursday": {},
+        "Wednesday": {}
+      },
+      "Sunday": {
+        "Sunday": {}
+      },
+      "Saturday": {
+        "Saturday": {}
+      }
     }
   },
   "Contribution": {
-    "Annual": {
-      "Contribution": {}
+    "currencies": {
+      "USD": {},
+      "NZD": {},
+      "EUR": {},
+      "GBP": {},
+      "CAD": {},
+      "AUD": {}
     },
-    "Monthly": {
-      "Contribution": {}
+    "productRatePlans": {
+      "Annual": {
+        "Contribution": {}
+      },
+      "Monthly": {
+        "Contribution": {}
+      }
     }
   },
   "HomeDelivery": {
-    "Sixday": {
-      "Wednesday": {},
-      "Friday": {},
-      "Thursday": {},
-      "Monday": {},
-      "Tuesday": {},
-      "Saturday": {}
+    "currencies": {
+      "GBP": {}
     },
-    "Everyday": {
-      "Tuesday": {},
-      "Saturday": {},
-      "Sunday": {},
-      "Wednesday": {},
-      "Friday": {},
-      "Thursday": {},
-      "Monday": {}
-    },
-    "Weekend": {
-      "Sunday": {},
-      "Saturday": {}
-    },
-    "Sunday": {
-      "Sunday": {}
-    },
-    "Saturday": {
-      "Saturday": {}
+    "productRatePlans": {
+      "Sixday": {
+        "Wednesday": {},
+        "Friday": {},
+        "Thursday": {},
+        "Monday": {},
+        "Tuesday": {},
+        "Saturday": {}
+      },
+      "Everyday": {
+        "Tuesday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Wednesday": {},
+        "Friday": {},
+        "Thursday": {},
+        "Monday": {}
+      },
+      "Weekend": {
+        "Sunday": {},
+        "Saturday": {}
+      },
+      "Sunday": {
+        "Sunday": {}
+      },
+      "Saturday": {
+        "Saturday": {}
+      }
     }
   }
 }
