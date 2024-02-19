@@ -158,6 +158,37 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const updateZuoraAccounts = new LambdaInvoke(this, 'UpdateZuoraAccounts', {
+			lambdaFunction: new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
+				...lambdaDefaultConfig,
+				handler: 'updateZuoraAccounts.handler',
+				functionName: `update-zuora-accounts-${this.stage}`,
+				environment: {
+					...lambdaDefaultConfig.environment,
+					S3_BUCKET: bucket.bucketName,
+				},
+				initialPolicy: [
+					// new PolicyStatement({
+					// 	actions: [
+					// 		'secretsmanager:GetSecretValue',
+					// 		'secretsmanager:DescribeSecret',
+					// 	],
+					// 	resources: [
+					// 		`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
+					// 	],
+					// }),
+					new PolicyStatement({
+						actions: ['s3:GetObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+				],
+			}),
+			// payload: TaskInput.fromObject({
+			// 	queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
+			// 	executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+			// }),
+		});
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -171,7 +202,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3,
+									saveSalesforceQueryResultToS3.next(updateZuoraAccounts),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
