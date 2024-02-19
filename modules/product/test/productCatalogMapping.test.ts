@@ -10,22 +10,20 @@ import codeCatalog from '../../catalog/test/fixtures/catalog-code.json';
 import prodCatalog from '../../catalog/test/fixtures/catalog-prod.json';
 
 test('We can find a product rate plan from product details', () => {
-	expect(
-		getProductRatePlan('CODE', 'Digital', 'SupporterPlus', 'Monthly').id,
-	).toBe('8ad08cbd8586721c01858804e3275376');
+	expect(getProductRatePlan('CODE', 'SupporterPlus', 'Monthly').id).toBe(
+		'8ad08cbd8586721c01858804e3275376',
+	);
 });
 
 test('We can find a product rate plan charge from product details', () => {
 	expect(
-		getProductRatePlan('CODE', 'Newspaper', 'NationalDelivery', 'Everyday')
-			.charges.Monday,
+		getProductRatePlan('CODE', 'NationalDelivery', 'Everyday').charges.Monday,
 	).toBe('8ad096ca8992481d018992a3674c18da');
 });
 
 test('We can find product details from a productRatePlanId', () => {
 	const productRatePlanId = '2c92c0f84bbfec8b014bc655f4852d9d';
 	expect(findProductDetails('CODE', productRatePlanId)).toStrictEqual({
-		productFamily: 'Digital',
 		zuoraProduct: 'DigitalSubscription',
 		productRatePlan: 'Monthly',
 		id: productRatePlanId,

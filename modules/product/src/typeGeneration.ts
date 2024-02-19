@@ -139,7 +139,7 @@ const getProductRatePlanChargeObjects = (
 				productRatePlanCharge.name,
 			);
 			return {
-				[productRatePlanChargeName]: productRatePlanCharge.id,
+				[productRatePlanChargeName]: {},
 			};
 		}),
 	);
@@ -155,17 +155,14 @@ const getZuoraProductObjects = (productRatePlans: ProductRatePlan[]) => {
 					productRatePlan.name,
 				);
 				return {
-					[productRatePlanName]: {
-						id: productRatePlan.id,
-						charges: getProductRatePlanChargeObjects(
-							productRatePlan.productRatePlanCharges,
-						),
-					},
+					[productRatePlanName]: getProductRatePlanChargeObjects(
+						productRatePlan.productRatePlanCharges,
+					),
 				};
 			}),
 	);
 };
-export const generateCatalogMapping = (catalog: Catalog) => {
+export const generateTypes = (catalog: Catalog) => {
 	const supportedProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
 	);
@@ -176,24 +173,6 @@ export const generateCatalogMapping = (catalog: Catalog) => {
 			[productName]: getZuoraProductObjects(product.productRatePlans),
 		};
 	});
-
-	// // Nest the Zuora products under the product family they belong to
-	// const groupedByProductFamily = groupBy(
-	// 	arrayVersion,
-	// 	(product) => product.productFamily,
-	// );
-	//
-	// const nestedObject = Object.entries(groupedByProductFamily).map(
-	// 	([key, value]) => {
-	// 		const objectsWithoutProductFamily = value.map((product) => {
-	// 			const { productFamily, ...otherFields } = product;
-	// 			return otherFields;
-	// 		});
-	// 		return {
-	// 			[key]: arrayToObject(objectsWithoutProductFamily),
-	// 		};
-	// 	},
-	// );
 
 	return arrayToObject(arrayVersion);
 };

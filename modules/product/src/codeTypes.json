@@ -1,0 +1,155 @@
+{
+  "DigitalSubscription": {
+    "Annual": {
+      "Subscription": {}
+    },
+    "ThreeMonthGift": {
+      "Subscription": {}
+    },
+    "OneYearGift": {
+      "Subscription": {}
+    },
+    "Monthly": {
+      "Subscription": {}
+    }
+  },
+  "HomeDelivery": {
+    "Everyday": {
+      "Saturday": {},
+      "Monday": {},
+      "Sunday": {},
+      "Friday": {},
+      "Wednesday": {},
+      "Tuesday": {},
+      "Thursday": {}
+    },
+    "Sixday": {
+      "Friday": {},
+      "Thursday": {},
+      "Wednesday": {},
+      "Tuesday": {},
+      "Monday": {},
+      "Saturday": {}
+    },
+    "Weekend": {
+      "Saturday": {},
+      "Sunday": {}
+    },
+    "Saturday": {
+      "Saturday": {}
+    },
+    "Sunday": {
+      "Sunday": {}
+    }
+  },
+  "NationalDelivery": {
+    "Everyday": {
+      "Monday": {},
+      "Tuesday": {},
+      "Wednesday": {},
+      "Thursday": {},
+      "Friday": {},
+      "Saturday": {},
+      "Sunday": {}
+    },
+    "Weekend": {
+      "Saturday": {},
+      "Sunday": {}
+    },
+    "Sixday": {
+      "Thursday": {},
+      "Monday": {},
+      "Tuesday": {},
+      "Wednesday": {},
+      "Friday": {},
+      "Saturday": {}
+    }
+  },
+  "SupporterPlus": {
+    "Monthly": {
+      "Subscription": {},
+      "Contribution": {}
+    },
+    "Annual": {
+      "Subscription": {},
+      "Contribution": {}
+    }
+  },
+  "RestOfWorld": {
+    "ThreeMonthGift": {
+      "Subscription": {}
+    },
+    "OneYearGift": {
+      "Subscription": {}
+    },
+    "SixWeekly": {
+      "Subscription": {}
+    },
+    "Quarterly": {
+      "Subscription": {}
+    },
+    "Annual": {
+      "Subscription": {}
+    },
+    "Monthly": {
+      "Monthly": {}
+    }
+  },
+  "Domestic": {
+    "ThreeMonthGift": {
+      "Subscription": {}
+    },
+    "SixWeekly": {
+      "Subscription": {}
+    },
+    "Quarterly": {
+      "Subscription": {}
+    },
+    "Annual": {
+      "Subscription": {}
+    },
+    "Monthly": {
+      "Subscription": {}
+    },
+    "OneYearGift": {
+      "Subscription": {}
+    }
+  },
+  "SubscriptionCard": {
+    "Everyday": {
+      "Monday": {},
+      "Friday": {},
+      "Thursday": {},
+      "Wednesday": {},
+      "Tuesday": {},
+      "Saturday": {},
+      "Sunday": {}
+    },
+    "Weekend": {
+      "Saturday": {},
+      "Sunday": {}
+    },
+    "Sixday": {
+      "Thursday": {},
+      "Friday": {},
+      "Saturday": {},
+      "Wednesday": {},
+      "Tuesday": {},
+      "Monday": {}
+    },
+    "Sunday": {
+      "Sunday": {}
+    },
+    "Saturday": {
+      "Saturday": {}
+    }
+  },
+  "Contribution": {
+    "Annual": {
+      "Contribution": {}
+    },
+    "Monthly": {
+      "Contribution": {}
+    }
+  }
+}
