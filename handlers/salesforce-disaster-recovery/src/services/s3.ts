@@ -42,8 +42,15 @@ export const getFileFromS3 = async ({
 			Bucket: bucketName,
 			Key: filePath,
 		});
-		const file = await s3Client.send(command);
-		console.log(file);
+
+		const response = await s3Client.send(command);
+		const fileContent = response.Body?.transformToString();
+
+		if (!fileContent) {
+			throw new Error('File is empty');
+		}
+
+		return fileContent;
 	} catch (error) {
 		console.error(error);
 		throw error;
