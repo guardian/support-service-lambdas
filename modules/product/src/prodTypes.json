@@ -1,0 +1,155 @@
+{
+  "DigitalSubscription": {
+    "Monthly": {
+      "Subscription": {}
+    },
+    "Annual": {
+      "Subscription": {}
+    },
+    "ThreeMonthGift": {
+      "Subscription": {}
+    },
+    "OneYearGift": {
+      "Subscription": {}
+    }
+  },
+  "NationalDelivery": {
+    "Sixday": {
+      "Saturday": {},
+      "Friday": {},
+      "Thursday": {},
+      "Wednesday": {},
+      "Tuesday": {},
+      "Monday": {}
+    },
+    "Weekend": {
+      "Sunday": {},
+      "Saturday": {}
+    },
+    "Everyday": {
+      "Sunday": {},
+      "Saturday": {},
+      "Friday": {},
+      "Thursday": {},
+      "Wednesday": {},
+      "Tuesday": {},
+      "Monday": {}
+    }
+  },
+  "SupporterPlus": {
+    "Monthly": {
+      "Contribution": {},
+      "Subscription": {}
+    },
+    "Annual": {
+      "Subscription": {},
+      "Contribution": {}
+    }
+  },
+  "RestOfWorld": {
+    "Monthly": {
+      "Monthly": {}
+    },
+    "OneYearGift": {
+      "Subscription": {}
+    },
+    "Annual": {
+      "Subscription": {}
+    },
+    "SixWeekly": {
+      "Subscription": {}
+    },
+    "Quarterly": {
+      "Subscription": {}
+    },
+    "ThreeMonthGift": {
+      "Subscription": {}
+    }
+  },
+  "Domestic": {
+    "OneYearGift": {
+      "Subscription": {}
+    },
+    "Annual": {
+      "Subscription": {}
+    },
+    "Quarterly": {
+      "Subscription": {}
+    },
+    "Monthly": {
+      "Subscription": {}
+    },
+    "ThreeMonthGift": {
+      "Subscription": {}
+    },
+    "SixWeekly": {
+      "Subscription": {}
+    }
+  },
+  "SubscriptionCard": {
+    "Everyday": {
+      "Monday": {},
+      "Tuesday": {},
+      "Saturday": {},
+      "Thursday": {},
+      "Friday": {},
+      "Wednesday": {},
+      "Sunday": {}
+    },
+    "Weekend": {
+      "Saturday": {},
+      "Sunday": {}
+    },
+    "Sixday": {
+      "Saturday": {},
+      "Friday": {},
+      "Monday": {},
+      "Tuesday": {},
+      "Thursday": {},
+      "Wednesday": {}
+    },
+    "Sunday": {
+      "Sunday": {}
+    },
+    "Saturday": {
+      "Saturday": {}
+    }
+  },
+  "Contribution": {
+    "Annual": {
+      "Contribution": {}
+    },
+    "Monthly": {
+      "Contribution": {}
+    }
+  },
+  "HomeDelivery": {
+    "Sixday": {
+      "Wednesday": {},
+      "Friday": {},
+      "Thursday": {},
+      "Monday": {},
+      "Tuesday": {},
+      "Saturday": {}
+    },
+    "Everyday": {
+      "Tuesday": {},
+      "Saturday": {},
+      "Sunday": {},
+      "Wednesday": {},
+      "Friday": {},
+      "Thursday": {},
+      "Monday": {}
+    },
+    "Weekend": {
+      "Sunday": {},
+      "Saturday": {}
+    },
+    "Sunday": {
+      "Sunday": {}
+    },
+    "Saturday": {
+      "Saturday": {}
+    }
+  }
+}
