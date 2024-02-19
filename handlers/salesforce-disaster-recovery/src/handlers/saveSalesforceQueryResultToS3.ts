@@ -33,13 +33,18 @@ export const handler = async (event: {
 		apiDomain: salesforceApiDomain,
 	});
 
+	const filePath = `${event.executionStartTime}/before-processing.csv`;
+
 	await uploadFileToS3({
 		bucketName,
-		filePath: `${event.executionStartTime}/before-processing.csv`,
+		filePath,
 		content: csvContent,
 	});
 
 	return {
 		StatusCode: 200,
+		ResponseBody: {
+			filePath,
+		},
 	};
 };

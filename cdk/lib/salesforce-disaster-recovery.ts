@@ -183,10 +183,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 					}),
 				],
 			}),
-			// payload: TaskInput.fromObject({
-			// 	queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
-			// 	executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
-			// }),
+			payload: TaskInput.fromObject({
+				filePath: JsonPath.stringAt('$.ResponseBody.filePath'),
+			}),
 		});
 
 		const stateMachine = new StateMachine(
