@@ -8,6 +8,10 @@ import { getSecretValue } from '../../src/services/secretsManager';
 const secretsManagerClientMock = mockClient(SecretsManagerClient);
 
 describe('getSecretValue', () => {
+	const secretName = 'test-secret';
+	const secretValue = { password: 'test-password' };
+	const secretString = JSON.stringify(secretValue);
+
 	beforeEach(() => {
 		secretsManagerClientMock.reset();
 		jest.resetAllMocks();
@@ -15,10 +19,6 @@ describe('getSecretValue', () => {
 	});
 
 	test('should get secret value from Secrets Manager', async () => {
-		const secretName = 'test-secret';
-		const secretValue = { password: 'test-password' };
-		const secretString = JSON.stringify(secretValue);
-
 		secretsManagerClientMock.on(GetSecretValueCommand).resolves({
 			SecretString: secretString,
 		});
@@ -33,8 +33,6 @@ describe('getSecretValue', () => {
 	});
 
 	test('should throw error if no secret found', async () => {
-		const secretName = 'non-existent-secret';
-
 		secretsManagerClientMock.on(GetSecretValueCommand).resolves({});
 
 		await expect(
@@ -43,7 +41,6 @@ describe('getSecretValue', () => {
 	});
 
 	test('should throw error if Secrets Manager request fails', async () => {
-		const secretName = 'test-secret';
 		const errorMessage = 'Failed to get secret value';
 
 		secretsManagerClientMock
