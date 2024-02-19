@@ -1,17 +1,33 @@
 import type { Stage } from '@modules/stage';
 import codeMapping from './codeCatalogMapping.json';
 import prodMapping from './prodCatalogMapping.json';
-//import prodTypes from './prodTypes.json';
+import type prodTypes from './prodTypes.json';
 
 const mappingsForStage = (stage: Stage) =>
-	stage === 'CODE' ? codeMapping : prodMapping;
+	stage === 'CODE'
+		? (codeMapping as MappedCatalog)
+		: (prodMapping as MappedCatalog);
 
-type ZuoraProductKey = keyof typeof prodMapping;
+type ZuoraProductKey = keyof typeof prodTypes;
 
 type ProductRatePlanKey<ZP extends ZuoraProductKey> =
-	keyof (typeof prodMapping)[ZP];
+	keyof (typeof prodTypes)[ZP];
 
-type MinimalProductRatePlanObject = { id: string };
+type ProductRatePlanChargeKey<
+	ZP extends ZuoraProductKey,
+	PRP extends ProductRatePlanKey<ZP>,
+> = keyof (typeof prodTypes)[ZP][PRP];
+
+type MappedCatalog = {
+	[ZP in ZuoraProductKey]: {
+		[PRP in ProductRatePlanKey<ZP>]: {
+			id: string;
+			charges: {
+				[PRPC in ProductRatePlanChargeKey<ZP, PRP>]: string;
+			};
+		};
+	};
+};
 
 export const getProductRatePlan = <
 	ZP extends ZuoraProductKey,
@@ -33,11 +49,7 @@ export const getAllProductDetails = (stage: Stage) => {
 			keyof typeof zuoraProductObject
 		>;
 		return productRatePlanKeys.flatMap((productRatePlan) => {
-			const { id } = getProductRatePlan(
-				stage,
-				zuoraProduct,
-				productRatePlan,
-			) as MinimalProductRatePlanObject;
+			const { id } = getProductRatePlan(stage, zuoraProduct, productRatePlan);
 			return {
 				zuoraProduct,
 				productRatePlan,
