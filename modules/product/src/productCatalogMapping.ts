@@ -1,37 +1,25 @@
 import type { Stage } from '@modules/stage';
 import codeMapping from './codeCatalogMapping.json';
+import type { mappingTypes } from './mappingTypes';
 import prodMapping from './prodCatalogMapping.json';
-import type prodTypes from './prodTypes.json';
 
 const mappingsForStage = (stage: Stage) =>
 	stage === 'CODE'
 		? (codeMapping as MappedCatalog)
 		: (prodMapping as MappedCatalog);
 
-type ZuoraProductKey = keyof typeof prodTypes;
+type ZuoraProductKey = keyof typeof mappingTypes;
 
 type ProductRatePlanKey<ZP extends ZuoraProductKey> =
-	keyof (typeof prodTypes)[ZP]['productRatePlans'];
+	keyof (typeof mappingTypes)[ZP]['productRatePlans'];
 
 type ProductRatePlanChargeKey<
 	ZP extends ZuoraProductKey,
 	PRP extends ProductRatePlanKey<ZP>,
-> = keyof (typeof prodTypes)[ZP]['productRatePlans'][PRP];
+> = keyof (typeof mappingTypes)[ZP]['productRatePlans'][PRP];
 
 type ProductCurrency<ZP extends ZuoraProductKey> =
-	keyof (typeof prodTypes)[ZP]['currencies'];
-
-// export type ZuoraProductKey = keyof (typeof prodMapping)['products'];
-
-// export type ProductRatePlanKey<ZP extends ZuoraProductKey> =
-// 	keyof (typeof prodMapping)['products'][ZP]['ratePlans'];
-
-// export type ProductRatePlanChargeKey<
-// 	ZP extends ZuoraProductKey,
-// 	PRP extends ProductRatePlanKey<ZP>,
-// > = keyof (typeof prodMapping)['products'][ZP]['ratePlans'][PRP]['charges'];
-
-//type ProductCurrency<ZP extends ZuoraProductKey>
+	(typeof mappingTypes)[ZP]['currencies'][number];
 
 export type ProductRatePlanCharge<ZP extends ZuoraProductKey> = {
 	id: string;
@@ -69,7 +57,7 @@ export const getProductRatePlan = <
 	stage: Stage,
 	zuoraProduct: ZP,
 	productRatePlan: PRP,
-): ProductRatePlan<ZP, PRP> => {
+) => {
 	const products = mappingsForStage(stage).products;
 	const product = products[zuoraProduct];
 	return product.ratePlans[productRatePlan];

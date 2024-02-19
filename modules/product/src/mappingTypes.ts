@@ -1,13 +1,13 @@
-{
+export const mappingTypes = {
   "DigitalSubscription": {
-    "currencies": {
-      "USD": {},
-      "NZD": {},
-      "EUR": {},
-      "GBP": {},
-      "CAD": {},
-      "AUD": {}
-    },
+    "currencies": [
+      "USD",
+      "NZD",
+      "EUR",
+      "GBP",
+      "CAD",
+      "AUD"
+    ],
     "productRatePlans": {
       "Monthly": {
         "Subscription": {}
@@ -24,9 +24,9 @@
     }
   },
   "NationalDelivery": {
-    "currencies": {
-      "GBP": {}
-    },
+    "currencies": [
+      "GBP"
+    ],
     "productRatePlans": {
       "Sixday": {
         "Saturday": {},
@@ -52,14 +52,14 @@
     }
   },
   "SupporterPlus": {
-    "currencies": {
-      "USD": {},
-      "NZD": {},
-      "EUR": {},
-      "GBP": {},
-      "CAD": {},
-      "AUD": {}
-    },
+    "currencies": [
+      "USD",
+      "NZD",
+      "EUR",
+      "GBP",
+      "CAD",
+      "AUD"
+    ],
     "productRatePlans": {
       "Monthly": {
         "Contribution": {},
@@ -72,10 +72,10 @@
     }
   },
   "GuardianWeeklyRestOfWorld": {
-    "currencies": {
-      "USD": {},
-      "GBP": {}
-    },
+    "currencies": [
+      "USD",
+      "GBP"
+    ],
     "productRatePlans": {
       "Monthly": {
         "Monthly": {}
@@ -98,14 +98,14 @@
     }
   },
   "GuardianWeeklyDomestic": {
-    "currencies": {
-      "USD": {},
-      "NZD": {},
-      "EUR": {},
-      "GBP": {},
-      "CAD": {},
-      "AUD": {}
-    },
+    "currencies": [
+      "USD",
+      "NZD",
+      "EUR",
+      "GBP",
+      "CAD",
+      "AUD"
+    ],
     "productRatePlans": {
       "OneYearGift": {
         "Subscription": {}
@@ -128,9 +128,9 @@
     }
   },
   "SubscriptionCard": {
-    "currencies": {
-      "GBP": {}
-    },
+    "currencies": [
+      "GBP"
+    ],
     "productRatePlans": {
       "Everyday": {
         "Monday": {},
@@ -162,14 +162,14 @@
     }
   },
   "Contribution": {
-    "currencies": {
-      "USD": {},
-      "NZD": {},
-      "EUR": {},
-      "GBP": {},
-      "CAD": {},
-      "AUD": {}
-    },
+    "currencies": [
+      "USD",
+      "NZD",
+      "EUR",
+      "GBP",
+      "CAD",
+      "AUD"
+    ],
     "productRatePlans": {
       "Annual": {
         "Contribution": {}
@@ -180,9 +180,9 @@
     }
   },
   "HomeDelivery": {
-    "currencies": {
-      "GBP": {}
-    },
+    "currencies": [
+      "GBP"
+    ],
     "productRatePlans": {
       "Sixday": {
         "Wednesday": {},
@@ -213,4 +213,4 @@
       }
     }
   }
-}
+} as const;

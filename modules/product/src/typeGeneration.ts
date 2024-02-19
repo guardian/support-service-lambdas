@@ -1,4 +1,4 @@
-import { arrayToObject } from '@modules/arrayFunctions';
+import { arrayToObject, distinct } from '@modules/arrayFunctions';
 import type {
 	Catalog,
 	CatalogProductRatePlan,
@@ -28,8 +28,10 @@ const getProductRatePlanChargeObjects = (
 	);
 };
 const getCurrenciesForProduct = (productRatePlan: CatalogProductRatePlan) =>
-	productRatePlan.productRatePlanCharges.flatMap((charge) =>
-		charge.pricing.map((price) => price.currency),
+	distinct(
+		productRatePlan.productRatePlanCharges.flatMap((charge) =>
+			charge.pricing.map((price) => price.currency),
+		),
 	);
 
 const getZuoraProductObjects = (productRatePlans: CatalogProductRatePlan[]) => {
@@ -38,9 +40,9 @@ const getZuoraProductObjects = (productRatePlans: CatalogProductRatePlan[]) => {
 			productRatePlans[0],
 			'Undefined productRatePlan in getZuoraProductObjects',
 		),
-	).map((currency) => ({ [currency]: {} }));
+	);
 	return {
-		currencies: arrayToObject(currencies),
+		currencies,
 		productRatePlans: arrayToObject(
 			productRatePlans
 				.filter((productRatePlan) =>
