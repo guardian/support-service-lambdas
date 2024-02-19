@@ -1,4 +1,4 @@
-import { getFileFromS3 } from '../services';
+import { convertCsvToAccountRows, getFileFromS3 } from '../services';
 
 export const handler = async (event: { filePath: string }) => {
 	const bucketName = process.env.S3_BUCKET;
@@ -12,7 +12,8 @@ export const handler = async (event: { filePath: string }) => {
 		filePath: event.filePath,
 	});
 
-	console.log(fileContent);
+	const rows = convertCsvToAccountRows({ csvString: fileContent });
+	console.log(rows[0]);
 
 	return {
 		StatusCode: 200,
