@@ -42,9 +42,6 @@ export const handler = async (event: {
 	});
 
 	return {
-		StatusCode: 200,
-		ResponseBody: {
-			filePath,
-		},
+		filePath,
 	};
 };

@@ -184,7 +184,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				],
 			}),
 			payload: TaskInput.fromObject({
-				filePath: JsonPath.stringAt('$.ResponseBody.filePath'),
+				filePath: JsonPath.stringAt('$.Payload.filePath'),
 			}),
 		});
 

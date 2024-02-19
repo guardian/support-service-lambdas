@@ -53,10 +53,7 @@ describe('Handler', () => {
 		const result = await handler(mockEvent);
 
 		expect(result).toEqual({
-			StatusCode: 200,
-			ResponseBody: {
-				filePath: 'mock_execution_start_time/before-processing.csv',
-			},
+			filePath: 'mock_execution_start_time/before-processing.csv',
 		});
 
 		expect(getSecretValue).toHaveBeenCalledWith({
