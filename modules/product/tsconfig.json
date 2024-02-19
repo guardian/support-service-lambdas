@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "ts-node": {
+    "require": [
+      "tsconfig-paths/register"
+    ]
+  },
+  "compilerOptions": {
+    "paths": {
+      "@modules/aws/*": ["../aws/src/*"],
+      "@modules/zuora/*": ["../zuora/src/*"],
+      "@modules/catalog/*": ["../catalog/src/*"],
+      "@modules/product/*": ["../product/src/*"],
+      "@modules/*": ["../*"]
+    }
+  },
+}

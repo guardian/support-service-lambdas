@@ -5,6 +5,7 @@ import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
@@ -71,6 +72,7 @@ new CancellationSfCasesApi(app, 'cancellation-sf-cases-api-PROD', {
 
 new NewProductApi(app, 'new-product-api-CODE', codeProps);
 new NewProductApi(app, 'new-product-api-PROD', prodProps);
+
 new SingleContributionSalesforceWrites(
 	app,
 	`${SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME}-CODE`,
@@ -81,6 +83,7 @@ new SingleContributionSalesforceWrites(
 	`${SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME}-PROD`,
 	{ stack: 'membership', stage: 'PROD' },
 );
+
 new DiscountApi(app, 'discount-api-CODE', {
 	stack: 'support',
 	stage: 'CODE',
@@ -94,4 +97,21 @@ new DiscountApi(app, 'discount-api-PROD', {
 	domainName: `discount-api.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
+});
+
+new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+	salesforceApiDomain: 'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com',
+	salesforceApiConnectionResourceId:
+		'salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f',
+	salesforceQueryWaitSeconds: 1,
+});
+new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
+	stack: 'membership',
+	stage: 'PROD',
+	salesforceApiDomain: 'https://gnmtouchpoint.my.salesforce.com',
+	salesforceApiConnectionResourceId:
+		'salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e',
+	salesforceQueryWaitSeconds: 30,
 });
