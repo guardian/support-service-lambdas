@@ -12,17 +12,14 @@ describe('uploadFileToS3', () => {
 	});
 
 	test('should upload file to S3', async () => {
-		// Arrange
 		const bucketName = 'test-bucket';
 		const filePath = 'path/to/file.txt';
 		const content = 'Hello, world!';
 
 		s3ClientMock.on(PutObjectCommand).resolves({});
 
-		// Act
 		await uploadFileToS3({ bucketName, filePath, content });
 
-		// Assert
 		expect(s3ClientMock.calls().length).toEqual(1);
 		const uploadArgs = s3ClientMock.call(0).firstArg as PutObjectCommand;
 		expect(uploadArgs.input.Bucket).toEqual('test-bucket');
