@@ -168,15 +168,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 					S3_BUCKET: bucket.bucketName,
 				},
 				initialPolicy: [
-					// new PolicyStatement({
-					// 	actions: [
-					// 		'secretsmanager:GetSecretValue',
-					// 		'secretsmanager:DescribeSecret',
-					// 	],
-					// 	resources: [
-					// 		`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
-					// 	],
-					// }),
+					new PolicyStatement({
+						actions: [
+							'secretsmanager:GetSecretValue',
+							// 'secretsmanager:DescribeSecret',
+						],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
 					new PolicyStatement({
 						actions: ['s3:GetObject'],
 						resources: [bucket.arnForObjects('*')],
