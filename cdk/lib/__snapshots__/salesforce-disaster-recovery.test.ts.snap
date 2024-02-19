@@ -127,10 +127,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "Bucket83908E77": {
+    "Bucket25524B414": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "BucketName": "salesforce-disaster-recovery-code",
+        "BucketName": "salesforce-disaster-recovery-code-2",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -449,7 +449,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket83908E77",
+              "Ref": "Bucket25524B414",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-CODE-salesforce-api/e2792d75-414a-48f3-89a1-5e8eac15f627",
@@ -582,7 +582,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket83908E77",
+                        "Bucket25524B414",
                         "Arn",
                       ],
                     },
@@ -703,7 +703,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket83908E77",
+              "Ref": "Bucket25524B414",
             },
             "STACK": "membership",
             "STAGE": "CODE",
@@ -811,7 +811,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket83908E77",
+                        "Bucket25524B414",
                         "Arn",
                       ],
                     },
@@ -1047,10 +1047,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "Bucket83908E77": {
+    "Bucket25524B414": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "BucketName": "salesforce-disaster-recovery-prod",
+        "BucketName": "salesforce-disaster-recovery-prod-2",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -1369,7 +1369,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket83908E77",
+              "Ref": "Bucket25524B414",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3",
@@ -1502,7 +1502,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket83908E77",
+                        "Bucket25524B414",
                         "Arn",
                       ],
                     },
@@ -1623,7 +1623,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket83908E77",
+              "Ref": "Bucket25524B414",
             },
             "STACK": "membership",
             "STAGE": "PROD",
@@ -1731,7 +1731,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket83908E77",
+                        "Bucket25524B414",
                         "Arn",
                       ],
                     },

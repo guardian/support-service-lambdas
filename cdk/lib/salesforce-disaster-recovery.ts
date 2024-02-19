@@ -36,8 +36,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const app = 'salesforce-disaster-recovery';
 
-		const bucket = new Bucket(this, 'Bucket', {
-			bucketName: `${app}-${this.stage.toLowerCase()}`,
+		const bucket = new Bucket(this, 'Bucket2', {
+			bucketName: `${app}-${this.stage.toLowerCase()}-2`,
 		});
 
 		const lambdaDefaultConfig: Pick<

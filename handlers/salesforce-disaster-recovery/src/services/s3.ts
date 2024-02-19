@@ -1,4 +1,6 @@
 import {
+	GetObjectCommand,
+	type GetObjectCommandInput,
 	PutObjectCommand,
 	type PutObjectCommandInput,
 	S3Client,
@@ -22,6 +24,26 @@ export const uploadFileToS3 = async ({
 			Body: content,
 		});
 		await s3Client.send(command);
+	} catch (error) {
+		console.error(error);
+		throw error;
+	}
+};
+
+export const getFileFromS3 = async ({
+	bucketName,
+	filePath,
+}: {
+	bucketName: GetObjectCommandInput['Bucket'];
+	filePath: GetObjectCommandInput['Key'];
+}) => {
+	try {
+		const command = new GetObjectCommand({
+			Bucket: bucketName,
+			Key: filePath,
+		});
+		const file = await s3Client.send(command);
+		console.log(file);
 	} catch (error) {
 		console.error(error);
 		throw error;
