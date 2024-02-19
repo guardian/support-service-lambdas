@@ -23,11 +23,11 @@ object GetSubscriptionLive:
   val layer: URLayer[ZuoraGet, GetSubscription] = ZLayer.fromFunction(GetSubscriptionLive(_))
 
 private class GetSubscriptionLive(zuoraGet: ZuoraGet) extends GetSubscription:
-  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, GetSubscriptionResponse] =
+  override def get(subscriptionName: SubscriptionName): Task[GetSubscriptionResponse] =
     zuoraGet.get[GetSubscriptionResponse](uri"subscriptions/${subscriptionName.value}")
 
 trait GetSubscription:
-  def get(subscriptionName: SubscriptionName): IO[ErrorResponse, GetSubscriptionResponse]
+  def get(subscriptionName: SubscriptionName): Task[GetSubscriptionResponse]
 
 object GetSubscription {
 
@@ -79,6 +79,6 @@ object GetSubscription {
   given JsonDecoder[RatePlan] = DeriveJsonDecoder.gen[RatePlan]
   given JsonDecoder[RatePlanCharge] = DeriveJsonDecoder.gen[RatePlanCharge]
 
-  def get(subscriptionName: SubscriptionName): ZIO[GetSubscription, ErrorResponse, GetSubscriptionResponse] =
+  def get(subscriptionName: SubscriptionName): RIO[GetSubscription, GetSubscriptionResponse] =
     ZIO.serviceWithZIO[GetSubscription](_.get(subscriptionName))
 }

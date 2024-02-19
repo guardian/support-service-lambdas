@@ -8,7 +8,7 @@ import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.{GetSubscription, SubscriptionUpdatePreviewResponse}
 import com.gu.productmove.zuora.model.SubscriptionName
 import zio.json.JsonDecoder
-import zio.{IO, ZIO}
+import zio.*
 
 import java.time.LocalDate
 
@@ -24,7 +24,7 @@ class MockTermRenewal(
   override def renewSubscription(
       subscriptionName: SubscriptionName,
       collectPayment: Boolean,
-  ): ZIO[Any, ErrorResponse, RenewalResponse] = {
+  ): Task[RenewalResponse] = {
     mutableStore = subscriptionName :: mutableStore
 
     ZIO.succeed(

@@ -22,7 +22,7 @@ private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBala
       comment: String,
       invoiceId: String,
       `type`: String,
-  ): IO[ErrorResponse, Res] = {
+  ): Task[Res] = {
     val body = RequestBody(amount, comment, invoiceId, `type`)
 
     zuoraGet.post[RequestBody, Res](
@@ -38,7 +38,7 @@ trait CreditBalanceAdjustment:
       comment: String,
       invoiceId: String,
       `type`: String,
-  ): ZIO[CreditBalanceAdjustment, ErrorResponse, Res]
+  ): RIO[CreditBalanceAdjustment, Res]
 
 object CreditBalanceAdjustment {
   def adjust(
@@ -46,6 +46,6 @@ object CreditBalanceAdjustment {
       comment: String,
       invoiceId: String,
       `type`: String,
-  ): ZIO[CreditBalanceAdjustment, ErrorResponse, Res] =
+  ): RIO[CreditBalanceAdjustment, Res] =
     ZIO.serviceWithZIO[CreditBalanceAdjustment](_.adjust(amount, comment, invoiceId, `type`))
 }

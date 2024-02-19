@@ -2,7 +2,8 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.*
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
-import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, RecurringContributionToSupporterPlus}
+import com.gu.productmove.endpoint.move.{ProductMoveEndpoint}
+import com.gu.productmove.endpoint.move.switchtype.RecurringContributionToSupporterPlus
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import zio.*
@@ -32,6 +33,7 @@ object CreatePaymentSpec extends ZIOSpecDefault {
               SttpClientLive.layer,
               SecretsLive.layer,
               AwsCredentialsLive.layer,
+              GuStageLive.layer,
             )
 
         } yield {

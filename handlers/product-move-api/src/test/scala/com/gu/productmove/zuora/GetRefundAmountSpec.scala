@@ -1,18 +1,11 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.{AwsCredentialsLive, GuStageLive, SQSLive, SttpClientLive}
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.ExpectedInput
-import com.gu.productmove.zuora.SubscriptionCancelSpec.{suite, test}
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import zio.{Scope, ZLayer}
+import com.gu.productmove.zuora.rest.ZuoraGetLive
+import zio.*
 import zio.test.Assertion.equalTo
-import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assert}
+import zio.test.{Spec, TestEnvironment, ZIOSpecDefault, assert}
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import scala.collection.immutable.{ListMap, SortedMap}
 import scala.collection.mutable
 
 object GetRefundAmountSpec extends ZIOSpecDefault {

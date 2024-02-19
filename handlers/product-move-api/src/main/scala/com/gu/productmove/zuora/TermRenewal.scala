@@ -1,46 +1,21 @@
 package com.gu.productmove.zuora
 
-import com.gu.i18n.Currency
-import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, MonthlySupporterPlus}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{
-  ProductRatePlanId,
-  SupporterPlusZuoraIds,
-  ZuoraIds,
-  zuoraIdsForStage,
-}
-import com.gu.newproduct.api.productcatalog.*
-import com.gu.productmove.AwsS3
-import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
-import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import com.gu.productmove.zuora.model.{SubscriptionId, SubscriptionName}
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
-import com.gu.productmove.zuora.rest.ZuoraRestBody.{ZuoraSuccessCheck, ZuoraSuccessLowercase}
-import com.gu.util.config
-import sttp.capabilities.zio.ZioStreams
-import sttp.capabilities.{Effect, WebSockets}
+import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck
 import sttp.client3.*
-import sttp.client3.httpclient.zio.HttpClientZioBackend
-import sttp.client3.ziojson.*
-import sttp.model.Uri
 import zio.json.*
-import zio.json.ast.Json
-import zio.json.internal.Write
-import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
+import zio.{Clock, Task, ZIO}
 
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 trait TermRenewal:
   def renewSubscription(
       subscriptionName: SubscriptionName,
       runBilling: Boolean,
-  ): ZIO[Stage with GetSubscription, ErrorResponse, RenewalResponse]
+  ): Task[RenewalResponse]
 
-object TermRenewalLive:
-  val layer: URLayer[ZuoraGet, TermRenewal] = ZLayer.fromFunction(TermRenewalLive(_))
-
-private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
+class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
   /*
   Start a new term for this subscription from today.
   This is to avoid problems with charges not aligning correctly with the term and resulting in unpredictable
@@ -52,7 +27,7 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
   override def renewSubscription(
       subscriptionName: SubscriptionName,
       runBilling: Boolean,
-  ): ZIO[Stage with GetSubscription, ErrorResponse, RenewalResponse] = for {
+  ): Task[RenewalResponse] = for {
     _ <- ZIO.log(s"Attempting to renew subscription $subscriptionName")
     today <- Clock.currentDateTime.map(_.toLocalDate)
     response <- renewSubscriptionFromDate(subscriptionName, today, runBilling)
@@ -63,7 +38,7 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
       subscriptionName: SubscriptionName,
       contractEffectiveDate: LocalDate,
       runBilling: Boolean,
-  ): ZIO[Stage, ErrorResponse, RenewalResponse] = {
+  ): Task[RenewalResponse] = {
     val requestBody = RenewalRequest(
       contractEffectiveDate,
       collect = None,
@@ -77,20 +52,9 @@ private class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
       )
   }
 
-object TermRenewal {
-  def renewSubscription(
-      subscriptionName: SubscriptionName,
-      runBilling: Boolean,
-  ): ZIO[TermRenewal with Stage with GetSubscription, ErrorResponse, RenewalResponse] =
-    ZIO.serviceWithZIO[TermRenewal](_.renewSubscription(subscriptionName, runBilling))
-}
 case class RenewalRequest(
     contractEffectiveDate: LocalDate,
     collect: Option[Boolean],
     runBilling: Boolean,
-)
-case class RenewalResponse(success: Option[Boolean], invoiceId: Option[String])
-object RenewalResponse {
-  given JsonDecoder[RenewalResponse] = DeriveJsonDecoder.gen[RenewalResponse]
-}
-given JsonEncoder[RenewalRequest] = DeriveJsonEncoder.gen[RenewalRequest]
+) derives JsonEncoder
+case class RenewalResponse(success: Option[Boolean], invoiceId: Option[String]) derives JsonDecoder

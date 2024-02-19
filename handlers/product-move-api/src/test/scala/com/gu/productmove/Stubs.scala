@@ -22,11 +22,13 @@ import com.gu.productmove.zuora.Fixtures.{
 }
 import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
-import com.gu.productmove.{EmailMessage, EmailPayload, RCtoSPEmailPayloadProductSwitchAttributes}
+import com.gu.productmove.{EmailMessage, EmailPayload, IdentityId, RCtoSPEmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
 
 import java.time.LocalDate
+
+val someIdentityId: Some[IdentityId] = Some(IdentityId("12345"))
 
 //======================================================================
 // Stubs/test data/Mock Data
@@ -220,7 +222,7 @@ val getAccountResponse = GetAccountResponse(
   BasicInfo(
     "id",
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
-    Some("12345"),
+    someIdentityId,
     "sfContactId",
     balance = 0,
     currency = Currency.GBP,
@@ -318,7 +320,7 @@ val emailMessageBody = EmailMessage(
   ),
   "SV_RCtoSP_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 val emailMessageBodyRefund = EmailMessage(
@@ -339,7 +341,7 @@ val emailMessageBodyRefund = EmailMessage(
   ),
   "SV_RCtoSP_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 val emailMessageBodyNoPaymentOrRefund = EmailMessage(
@@ -360,7 +362,7 @@ val emailMessageBodyNoPaymentOrRefund = EmailMessage(
   ),
   "SV_RCtoSP_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 val emailMessageLowCharge = EmailMessage(
@@ -381,7 +383,7 @@ val emailMessageLowCharge = EmailMessage(
   ),
   "SV_RCtoSP_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 // MembershipToRecurringContribution
@@ -402,7 +404,7 @@ val emailMessageBody2 = EmailMessage(
   ),
   "SV_MBtoRC_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 val refundInput1 = RefundInput(

@@ -1,45 +1,18 @@
 package com.gu.productmove.endpoint.updateamount
 
 import cats.data.NonEmptyList
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
-import com.gu.supporterdata.model.SupporterRatePlanItem
-import com.gu.productmove.SecretsLive
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
-  BadRequest,
-  ErrorResponse,
-  InternalServerError,
-  OutputBody,
-  Success,
-}
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, ZuoraIds}
 import com.gu.productmove.GuStageLive.Stage
-import zio.Task
+import com.gu.productmove.endpoint.available.Currency
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
+import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpointTypes.ExpectedInput
 import com.gu.productmove.framework.{LambdaEndpoint, ZIOApiGatewayRequestHandler}
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetSubscription.RatePlanCharge
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.util.config
-import com.gu.productmove.zuora.{
-  ChargeUpdateDetails,
-  GetAccount,
-  GetAccountLive,
-  GetInvoiceItems,
-  GetInvoiceItemsLive,
-  GetSubscription,
-  GetSubscriptionLive,
-  InvoiceItemAdjustment,
-  InvoiceItemAdjustmentLive,
-  Subscribe,
-  SubscribeLive,
-  SubscriptionUpdate,
-  SubscriptionUpdateLive,
-  SubscriptionUpdateRequest,
-  SubscriptionUpdateResponse,
-  UpdateSubscriptionAmount,
-  UpdateSubscriptionAmountItem,
-  ZuoraCancel,
-  ZuoraCancelLive,
-}
+import com.gu.productmove.zuora.*
 import com.gu.productmove.{
   AwsCredentialsLive,
   AwsS3Live,
@@ -51,22 +24,18 @@ import com.gu.productmove.{
   GuStageLive,
   SQS,
   SQSLive,
+  SecretsLive,
   SttpClientLive,
 }
-import sttp.tapir.*
+import com.gu.supporterdata.model.SupporterRatePlanItem
+import com.gu.util.config
 import sttp.tapir.EndpointIO.Example
-import sttp.tapir.Schema
+import sttp.tapir.*
 import sttp.tapir.json.zio.jsonBody
 import zio.*
 import zio.json.*
-import com.gu.newproduct.api.productcatalog.ZuoraIds
-import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
-import com.gu.productmove.endpoint.available.Currency
 
 import java.time.format.DateTimeFormatter
-import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpointTypes.ExpectedInput
-import com.gu.productmove.zuora.model.SubscriptionName
-
 import scala.collection.immutable
 
 // this is the description for just the one endpoint

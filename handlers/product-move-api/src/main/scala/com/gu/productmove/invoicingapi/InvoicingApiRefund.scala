@@ -14,7 +14,7 @@ import sttp.client3.quick.basicRequest
 import sttp.client3.ziojson.*
 import sttp.client3.*
 import zio.json.*
-import zio.{RLayer, Task, ZIO, ZLayer}
+import zio.{RIO, RLayer, Task, ZIO, ZLayer}
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.SecretsError
 
 object InvoicingApiRefundLive {
@@ -46,7 +46,7 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
   override def refund(
       subscriptionName: SubscriptionName,
       amount: BigDecimal,
-  ): ZIO[Any, ErrorResponse, RefundResponse] = {
+  ): Task[RefundResponse] = {
 
     val requestBody = RefundRequest(subscriptionName, amount)
     basicRequest
@@ -64,19 +64,18 @@ private class InvoicingApiRefundLive(config: InvoicingApiConfig, sttpClient: Stt
         response.body
       }
       .absolve
-      .mapError(e => InternalServerError(e.toString))
   }
 }
 
 trait InvoicingApiRefund {
-  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): ZIO[Any, ErrorResponse, RefundResponse]
+  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): Task[RefundResponse]
 }
 
 object InvoicingApiRefund {
   def refund(
       subscriptionName: SubscriptionName,
       amount: BigDecimal,
-  ): ZIO[InvoicingApiRefund, ErrorResponse, RefundResponse] =
+  ): RIO[InvoicingApiRefund, RefundResponse] =
     ZIO.serviceWithZIO[InvoicingApiRefund](_.refund(subscriptionName, amount))
 
   case class RefundRequest(subscriptionName: SubscriptionName, refund: BigDecimal)

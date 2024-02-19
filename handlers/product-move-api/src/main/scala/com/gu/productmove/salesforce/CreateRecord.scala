@@ -22,14 +22,14 @@ object CreateRecordLive:
   val layer: URLayer[SalesforceClient, CreateRecord] = ZLayer.fromFunction(CreateRecordLive(_))
 
 private class CreateRecordLive(salesforceClient: SalesforceClient) extends CreateRecord:
-  override def create(requestBody: CreateRecordRequest): IO[ErrorResponse, CreateRecordResponse] =
+  override def create(requestBody: CreateRecordRequest): Task[CreateRecordResponse] =
     salesforceClient.post[CreateRecordRequest, CreateRecordResponse](
       requestBody,
       uri"/services/data/v55.0/sobjects/Subscription_Rate_Plan_Update__c/",
     )
 
 trait CreateRecord:
-  def create(requestBody: CreateRecordRequest): IO[ErrorResponse, CreateRecordResponse]
+  def create(requestBody: CreateRecordRequest): Task[CreateRecordResponse]
 
 object CreateRecord {
   case class CreateRecordRequest(
@@ -52,6 +52,6 @@ object CreateRecord {
   case class CreateRecordResponse(id: String)
   given JsonDecoder[CreateRecordResponse] = DeriveJsonDecoder.gen[CreateRecordResponse]
 
-  def create(requestBody: CreateRecordRequest): ZIO[CreateRecord, ErrorResponse, CreateRecordResponse] =
+  def create(requestBody: CreateRecordRequest): RIO[CreateRecord, CreateRecordResponse] =
     ZIO.serviceWithZIO[CreateRecord](_.create(requestBody))
 }

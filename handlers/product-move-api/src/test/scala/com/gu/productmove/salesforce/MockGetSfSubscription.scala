@@ -2,7 +2,7 @@ package com.gu.productmove.salesforce
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
-import zio.{IO, ZIO}
+import zio.*
 
 class MockGetSfSubscription(responses: Map[String, GetSfSubscriptionResponse]) extends GetSfSubscription {
 
@@ -10,12 +10,12 @@ class MockGetSfSubscription(responses: Map[String, GetSfSubscriptionResponse]) e
 
   def requests = mutableStore.reverse
 
-  override def get(subscriptionName: String): ZIO[Any, ErrorResponse, GetSfSubscriptionResponse] = {
+  override def get(subscriptionName: String): Task[GetSfSubscriptionResponse] = {
     mutableStore = subscriptionName :: mutableStore
 
     responses.get(subscriptionName) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(InternalServerError(s"Salesforce error message"))
+      case None => ZIO.fail(new Throwable(s"Salesforce error message"))
   }
 }
 

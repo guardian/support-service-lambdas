@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.TimeUnit
@@ -19,7 +20,7 @@ import java.time.LocalDate
 object GetCatalogueLive:
   val layer: URLayer[AwsS3 with Stage, GetCatalogue] = ZLayer.fromFunction(GetCatalogueLive(_, _))
 
-private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
+class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
   private val zuoraCatalogueBucket = "gu-zuora-catalog"
 
   private def key(stage: Stage) = {
@@ -29,48 +30,39 @@ private class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
     s"$stagePath/$relativePath"
   }
 
-  def get: ZIO[Any, ErrorResponse, ZuoraProductCatalogue] =
+  def get: Task[ZuoraProductCatalogue] =
     for {
       fileContent <- awsS3.getObject(zuoraCatalogueBucket, key(stage))
       zuoraCatalogue <- ZIO
         .fromEither(summon[JsonDecoder[ZuoraProductCatalogue]].decodeJson(fileContent))
-        .mapError(x => InternalServerError(x))
+        .mapError(x => new Throwable("issue decoding catalog: " + x))
     } yield zuoraCatalogue
 
 trait GetCatalogue:
-  def get: ZIO[Any, ErrorResponse, ZuoraProductCatalogue]
+  def get: Task[ZuoraProductCatalogue]
 
 object GetCatalogue {
-  def get: ZIO[GetCatalogue, ErrorResponse, ZuoraProductCatalogue] = ZIO.serviceWithZIO[GetCatalogue](_.get)
+  def get: RIO[GetCatalogue, ZuoraProductCatalogue] = ZIO.serviceWithZIO[GetCatalogue](_.get)
 }
 
-case class ZuoraProductCatalogue(products: List[ZuoraProduct], nextPage: Option[String] = None)
+given JsonDecoder[ProductRatePlanChargeId] = JsonDecoder[String].map(ProductRatePlanChargeId.apply)
+given JsonDecoder[ProductRatePlanId] = JsonDecoder[String].map(ProductRatePlanId.apply)
 
-object ZuoraProductCatalogue {
-  given JsonDecoder[ZuoraProductCatalogue] = DeriveJsonDecoder.gen[ZuoraProductCatalogue]
-}
+case class ZuoraProductCatalogue(products: List[ZuoraProduct], nextPage: Option[String] = None) derives JsonDecoder
 
 case class ZuoraProduct(
     name: String,
     productRatePlans: List[ZuoraProductRatePlan],
-)
-
-object ZuoraProduct {
-  given JsonDecoder[ZuoraProduct] = DeriveJsonDecoder.gen[ZuoraProduct]
-}
+) derives JsonDecoder
 
 case class ZuoraProductRatePlan(
-    id: String,
+    id: ProductRatePlanId,
     name: String,
     productRatePlanCharges: List[ZuoraProductRatePlanCharge],
-)
+) derives JsonDecoder
 
-object ZuoraProductRatePlan {
-  given JsonDecoder[ZuoraProductRatePlan] = DeriveJsonDecoder.gen[ZuoraProductRatePlan]
-}
-
-case class ZuoraProductRatePlanCharge(id: String, billingPeriod: Option[String], pricing: List[ZuoraPricing])
-
-object ZuoraProductRatePlanCharge {
-  given JsonDecoder[ZuoraProductRatePlanCharge] = DeriveJsonDecoder.gen[ZuoraProductRatePlanCharge]
-}
+case class ZuoraProductRatePlanCharge(
+    id: ProductRatePlanChargeId,
+    billingPeriod: Option[String],
+    pricing: List[ZuoraPricing],
+) derives JsonDecoder

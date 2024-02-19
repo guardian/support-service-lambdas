@@ -7,8 +7,6 @@ import com.gu.productmove.zuora.{
   CaseId,
   ChargeOverrides,
   CreateSubscriptionResponse,
-  ProductRatePlanChargeId,
-  ProductRatePlanId,
   SubscribeToRatePlans,
   ZuoraAccountId,
 }
@@ -26,7 +24,7 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 import java.time.LocalDate
 
 trait Subscribe:
-  def create(zuoraAccountId: String, targetProductId: String): ZIO[Stage, ErrorResponse, CreateSubscriptionResponse]
+  def create(zuoraAccountId: String, targetProductId: String): RIO[Stage, CreateSubscriptionResponse]
 
 object SubscribeLive:
   val layer: URLayer[ZuoraGet, Subscribe] = ZLayer.fromFunction(SubscribeLive(_))
@@ -35,7 +33,7 @@ private class SubscribeLive(zuoraGet: ZuoraGet) extends Subscribe:
   override def create(
       zuoraAccountId: String,
       targetProductId: String,
-  ): ZIO[Stage, ErrorResponse, CreateSubscriptionResponse] = {
+  ): RIO[Stage, CreateSubscriptionResponse] = {
     for {
       subscribeRequest <- SubscribeRequest.withTodaysDate(zuoraAccountId, targetProductId)
       response <- zuoraGet.post[SubscribeRequest, CreateSubscriptionResponse](uri"subscriptions", subscribeRequest)
@@ -46,12 +44,10 @@ object Subscribe {
   def create(
       zuoraAccountId: String,
       targetProductId: String,
-  ): ZIO[Subscribe with Stage, ErrorResponse, CreateSubscriptionResponse] =
+  ): RIO[Subscribe with Stage, CreateSubscriptionResponse] =
     ZIO.serviceWithZIO[Subscribe](_.create(zuoraAccountId, targetProductId))
 }
 
-case class ProductRatePlanId(value: String) extends AnyVal
-case class ProductRatePlanChargeId(value: String) extends AnyVal
 case class CreateSubscriptionResponse(subscriptionNumber: String)
 
 given JsonDecoder[CreateSubscriptionResponse] = DeriveJsonDecoder.gen[CreateSubscriptionResponse]

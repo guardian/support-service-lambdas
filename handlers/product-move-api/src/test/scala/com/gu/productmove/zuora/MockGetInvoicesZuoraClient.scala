@@ -4,7 +4,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.rest.ZuoraRestBody
 import sttp.client3.Request
 import sttp.model.Uri
-import zio.{IO, ZIO}
+import zio.*
 import com.gu.productmove.zuora.rest.ZuoraClient
 
 import scala.collection.mutable
@@ -389,13 +389,13 @@ object MockGetInvoicesZuoraClient {
 
 class MockGetInvoicesZuoraClient(response: MockGetInvoicesZuoraClient.ClientResponse) extends ZuoraClient {
 
-  override def send(request: Request[Either[String, String], Any]): IO[ErrorResponse, String] =
+  override def send(request: Request[Either[String, String], Any]): Task[String] =
     ZIO.succeed(response);
 }
 
 class MockStackedGetInvoicesZuoraClient(responses: mutable.Stack[MockGetInvoicesZuoraClient.ClientResponse])
     extends ZuoraClient {
 
-  override def send(request: Request[Either[String, String], Any]): IO[ErrorResponse, String] =
+  override def send(request: Request[Either[String, String], Any]): Task[String] =
     ZIO.succeed(responses.pop);
 }

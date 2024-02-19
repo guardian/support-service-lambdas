@@ -8,7 +8,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse,
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
-import zio.{IO, ZIO}
+import zio.*
 
 class MockDynamo(responses: Map[SupporterRatePlanItem, Unit]) extends Dynamo {
 
@@ -16,12 +16,12 @@ class MockDynamo(responses: Map[SupporterRatePlanItem, Unit]) extends Dynamo {
 
   def requests = mutableStore.reverse
 
-  override def writeItem(item: SupporterRatePlanItem): ZIO[Any, ErrorResponse, Unit] = {
+  override def writeItem(item: SupporterRatePlanItem): Task[Unit] = {
     mutableStore = item :: mutableStore
 
     responses.get(item) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(InternalServerError(s"wrong input, item was $item"))
+      case None => ZIO.fail(new Throwable(s"wrong input, item was $item"))
   }
 }
 
