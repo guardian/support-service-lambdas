@@ -1,6 +1,5 @@
 package com.gu.salesforce.holiday_stops
 
-import ai.x.play.json.Jsonx
 import cats.implicits._
 import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.salesforce.SalesforceConstants._
@@ -45,22 +44,22 @@ object SalesforceHolidayStopRequest extends Logging {
   }
 
   case class HolidayStopRequestStartDate(value: LocalDate) extends AnyVal
-  implicit val formatHolidayStopRequestStartDate = Jsonx.formatInline[HolidayStopRequestStartDate]
+  implicit val formatHolidayStopRequestStartDate = Json.valueFormat[HolidayStopRequestStartDate]
 
   case class HolidayStopRequestEndDate(value: LocalDate) extends AnyVal
-  implicit val formatHolidayStopRequestEndDate = Jsonx.formatInline[HolidayStopRequestEndDate]
+  implicit val formatHolidayStopRequestEndDate = Json.valueFormat[HolidayStopRequestEndDate]
 
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
-  implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
+  implicit val formatHolidayStopRequestActionedCount = Json.valueFormat[HolidayStopRequestActionedCount]
 
   case class HolidayStopRequestWithdrawnTime(value: ZonedDateTime) extends AnyVal
-  implicit val formatHolidayStopRequestWithdrawnTime = Jsonx.formatInline[HolidayStopRequestWithdrawnTime]
+  implicit val formatHolidayStopRequestWithdrawnTime = Json.valueFormat[HolidayStopRequestWithdrawnTime]
 
   case class HolidayStopRequestIsWithdrawn(value: Boolean) extends AnyVal
-  implicit val formatHolidayStopRequestIsWithdrawn = Jsonx.formatInline[HolidayStopRequestIsWithdrawn]
+  implicit val formatHolidayStopRequestIsWithdrawn = Json.valueFormat[HolidayStopRequestIsWithdrawn]
 
   case class BulkSuspensionReason(value: String) extends AnyVal
-  implicit val formatBulkSuspensionReason = Jsonx.formatInline[BulkSuspensionReason]
+  implicit val formatBulkSuspensionReason = Json.valueFormat[BulkSuspensionReason]
 
   def getHolidayStopRequestPrefixSOQL(productNamePrefixOption: Option[ProductName] = None) = s"""
       | SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c,

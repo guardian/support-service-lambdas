@@ -1,6 +1,5 @@
 package com.gu.salesforce.cases
 
-import ai.x.play.json.Jsonx
 import com.gu.cancellation.sf_cases.RaiseCase.SubscriptionName
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.util.Logging
@@ -17,19 +16,19 @@ object SalesforceCase extends Logging {
   private val caseSObjectsBaseUrl = sfObjectsBaseUrl + "Case"
 
   case class CaseId(value: String) extends AnyVal
-  implicit val formatCaseId = Jsonx.formatInline[CaseId]
+  implicit val formatCaseId = Json.valueFormat[CaseId]
 
   case class CaseWithId(id: CaseId)
   implicit val caseWithIdReads = Json.reads[CaseWithId]
 
   case class ContactId(value: String) extends AnyVal
-  implicit val formatContactId = Jsonx.formatInline[ContactId]
+  implicit val formatContactId = Json.valueFormat[ContactId]
 
   case class SubscriptionId(value: String) extends AnyVal
-  implicit val formatSubscriptionId = Jsonx.formatInline[SubscriptionId]
+  implicit val formatSubscriptionId = Json.valueFormat[SubscriptionId]
 
   case class CaseSubject(value: String) extends AnyVal
-  implicit val formatCaseSubject = Jsonx.formatInline[CaseSubject]
+  implicit val formatCaseSubject = Json.valueFormat[CaseSubject]
 
   object Create {
 
