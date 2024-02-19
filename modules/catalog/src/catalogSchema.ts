@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
 export type Catalog = z.infer<typeof catalogSchema>;
-export type Product = Catalog['products'][number];
-export type ProductRatePlan =
+export type CatalogProduct = Catalog['products'][number];
+export type CatalogProductRatePlan =
 	Catalog['products'][number]['productRatePlans'][number];
-export type ProductRatePlanCharge =
-	ProductRatePlan['productRatePlanCharges'][number];
-export type Pricing = ProductRatePlanCharge['pricing'][number];
+export type CatalogProductRatePlanCharge =
+	CatalogProductRatePlan['productRatePlanCharges'][number];
+export type Pricing = CatalogProductRatePlanCharge['pricing'][number];
 
 export const catalogSchema = z.object({
 	products: z.array(
