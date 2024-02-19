@@ -1,4 +1,4 @@
-import { getSubscription } from '@modules/zuora/getSubscription';
+import { actionUpdate } from '@modules/zuora/actionUpdate';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { convertCsvToAccountRows, getFileFromS3 } from '../services';
 
@@ -26,9 +26,23 @@ export const handler = async (event: { filePath: string }) => {
 const testZuoraServiceCall = async () => {
 	const zuoraClient = await ZuoraClient.create('CODE');
 
-	const subscription = await getSubscription(
+	const test = await actionUpdate(
 		zuoraClient,
-		'8ad09c9f8db5ab95018dc1fb9c3944e7',
+		JSON.stringify({
+			objects: [
+				{
+					Id: '8ad09be48d8dc4c3018d9e1a015f0ce7',
+					CrmId: 'test2',
+					sfContactId__c: 'test2',
+				},
+				{
+					Id: '8ad09be48d646537018d6573e8a830dd',
+					CrmId: 'test2',
+					sfContactId__c: 'test2',
+				},
+			],
+			type: 'Account',
+		}),
 	);
-	console.log(subscription);
+	console.log(test);
 };
