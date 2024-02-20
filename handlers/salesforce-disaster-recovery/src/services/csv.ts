@@ -1,6 +1,6 @@
 import { parse } from 'csv-parse/sync';
 
-interface AccountRow {
+export interface AccountRow {
 	Id: string;
 	Zuora__Zuora_Id__c: string;
 	Zuora__Account__c: string;
