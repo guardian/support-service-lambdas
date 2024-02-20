@@ -16,15 +16,9 @@ const errorObjectSchema = z.object({
 	Success: z.literal(false),
 });
 
-const errorIdInvalidSchema = z.object({
-	code: z.literal('"soapenv:Server"'),
-	message: z.literal('Id is invalid'),
-});
-
-const responseSchema = z.union([
-	errorIdInvalidSchema,
-	z.array(z.union([successObjectSchema, errorObjectSchema])),
-]);
+const responseSchema = z.array(
+	z.union([successObjectSchema, errorObjectSchema]),
+);
 
 export type ActionUpdateResponse = z.infer<typeof responseSchema>;
 
