@@ -34,6 +34,7 @@ export const handler = async (
 	for (let i = 0; i < rows.length; i += BATCH_SIZE) {
 		console.log('Index: ', i / BATCH_SIZE);
 		const batch = rows.slice(i, i + BATCH_SIZE);
+		console.log(context.getRemainingTimeInMillis());
 
 		await batchUpdateZuoraAccounts({
 			zuoraClient,
