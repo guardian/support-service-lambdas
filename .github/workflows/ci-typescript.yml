@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - ad/update-zuora-accounts
 jobs:
   gu-cdk-build:
     strategy:
