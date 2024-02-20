@@ -1,10 +1,15 @@
+import { type Context } from 'aws-lambda';
 import {
 	batchUpdateZuoraAccounts,
 	convertCsvToAccountRows,
 	getFileFromS3,
 } from '../services';
 
-export const handler = async (event: { filePath: string }) => {
+export const handler = async (
+	event: { filePath: string },
+	context: Context,
+) => {
+	console.log(context);
 	const stage = process.env.STAGE;
 	const bucketName = process.env.S3_BUCKET;
 
@@ -19,20 +24,27 @@ export const handler = async (event: { filePath: string }) => {
 
 	const rows = convertCsvToAccountRows({ csvString: fileContent });
 
-	const batchSize = 50;
-	console.log(rows.length);
+	console.info(`Number of Zuora accounts left to process: ${rows.length}`);
 
-	for (let i = 0; i < rows.length; i += batchSize) {
-		if (i > 300) {
-			throw new Error('Stop');
-		}
-		const batch = rows.slice(i, i + batchSize);
+	const BATCH_SIZE = 50;
 
-		const response = await batchUpdateZuoraAccounts({
+	for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+		console.log(i);
+		const batch = rows.slice(i, i + BATCH_SIZE);
+
+		await batchUpdateZuoraAccounts({
 			stage,
 			accountRows: batch,
 		});
-		console.log(response);
+
+		console.log(context.getRemainingTimeInMillis());
+
+		// 30 seconds
+		if (context.getRemainingTimeInMillis() < 30000) {
+			return {
+				StatusCode: 200,
+			};
+		}
 	}
 
 	return {
