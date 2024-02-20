@@ -1,3 +1,5 @@
+import { type Stage } from '@modules/stage';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { type Context } from 'aws-lambda';
 import {
 	batchUpdateZuoraAccounts,
@@ -9,7 +11,6 @@ export const handler = async (
 	event: { filePath: string },
 	context: Context,
 ) => {
-	console.log(context);
 	const stage = process.env.STAGE;
 	const bucketName = process.env.S3_BUCKET;
 
@@ -23,26 +24,24 @@ export const handler = async (
 	});
 
 	const rows = convertCsvToAccountRows({ csvString: fileContent });
-
-	console.info(`Number of Zuora accounts left to process: ${rows.length}`);
+	const zuoraClient = await ZuoraClient.create(stage as Stage);
 
 	const BATCH_SIZE = 50;
+	const THIRTY_SECONDS = 30000;
 
 	for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-		console.log(i);
+		console.log('Index: ', i);
 		const batch = rows.slice(i, i + BATCH_SIZE);
 
 		await batchUpdateZuoraAccounts({
-			stage,
+			zuoraClient,
 			accountRows: batch,
 		});
 
-		console.log(context.getRemainingTimeInMillis());
-
-		// 30 seconds
-		if (context.getRemainingTimeInMillis() < 30000) {
+		if (context.getRemainingTimeInMillis() < THIRTY_SECONDS) {
 			return {
 				StatusCode: 200,
+				Test: 'OK',
 			};
 		}
 	}

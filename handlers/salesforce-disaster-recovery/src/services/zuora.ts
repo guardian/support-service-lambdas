@@ -1,18 +1,15 @@
-import { type Stage } from '@modules/stage';
 import { actionUpdate } from '@modules/zuora/actionUpdate';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { type ZuoraClient } from '@modules/zuora/zuoraClient';
 import { type AccountRow } from './csv';
 
 export const batchUpdateZuoraAccounts = async ({
-	stage,
+	zuoraClient,
 	accountRows,
 }: {
-	stage: string;
+	zuoraClient: ZuoraClient;
 	accountRows: AccountRow[];
 }) => {
 	try {
-		const zuoraClient = await ZuoraClient.create(stage as Stage);
-
 		const responseArray = await actionUpdate(
 			zuoraClient,
 			JSON.stringify({
