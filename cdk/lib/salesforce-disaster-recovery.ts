@@ -171,10 +171,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				},
 				initialPolicy: [
 					new PolicyStatement({
-						actions: [
-							'secretsmanager:GetSecretValue',
-							// 'secretsmanager:DescribeSecret',
-						],
+						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
 						],

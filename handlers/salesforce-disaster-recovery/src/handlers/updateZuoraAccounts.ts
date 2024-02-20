@@ -26,6 +26,7 @@ export const handler = async (
 	const rows = convertCsvToAccountRows({ csvString: fileContent }).filter(
 		(row) => row.Zuora__Zuora_Id__c,
 	);
+
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
 
 	const BATCH_SIZE = 50;
@@ -34,7 +35,6 @@ export const handler = async (
 	for (let i = 0; i < rows.length; i += BATCH_SIZE) {
 		console.log('Index: ', i / BATCH_SIZE);
 		const batch = rows.slice(i, i + BATCH_SIZE);
-		console.log(context.getRemainingTimeInMillis());
 
 		await batchUpdateZuoraAccounts({
 			zuoraClient,
@@ -44,12 +44,13 @@ export const handler = async (
 		if (context.getRemainingTimeInMillis() < THIRTY_SECONDS) {
 			return {
 				StatusCode: 200,
-				Test: 'OK',
+				TemporaryField: 'TIMEOUT',
 			};
 		}
 	}
 
 	return {
 		StatusCode: 200,
+		TemporaryField: 'COMPLETE WITHIN 15 MINS',
 	};
 };
