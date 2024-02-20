@@ -23,14 +23,16 @@ export const handler = async (
 		filePath: event.filePath,
 	});
 
-	const rows = convertCsvToAccountRows({ csvString: fileContent });
+	const rows = convertCsvToAccountRows({ csvString: fileContent }).filter(
+		(row) => row.Zuora__Zuora_Id__c,
+	);
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
 
 	const BATCH_SIZE = 50;
 	const THIRTY_SECONDS = 30000;
 
 	for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-		console.log('Index: ', i);
+		console.log('Index: ', i / BATCH_SIZE);
 		const batch = rows.slice(i, i + BATCH_SIZE);
 
 		await batchUpdateZuoraAccounts({
