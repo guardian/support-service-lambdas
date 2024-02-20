@@ -711,7 +711,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         },
         "FunctionName": "update-zuora-accounts-CODE",
         "Handler": "updateZuoraAccounts.handler",
-        "MemorySize": 1024,
+        "MemorySize": 10240,
         "Role": {
           "Fn::GetAtt": [
             "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
@@ -1651,7 +1651,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         },
         "FunctionName": "update-zuora-accounts-PROD",
         "Handler": "updateZuoraAccounts.handler",
-        "MemorySize": 1024,
+        "MemorySize": 10240,
         "Role": {
           "Fn::GetAtt": [
             "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",

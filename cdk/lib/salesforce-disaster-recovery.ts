@@ -162,6 +162,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			lambdaFunction: new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
 				...lambdaDefaultConfig,
 				timeout: Duration.minutes(15),
+				memorySize: 10240,
 				handler: 'updateZuoraAccounts.handler',
 				functionName: `update-zuora-accounts-${this.stage}`,
 				environment: {
