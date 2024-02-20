@@ -18,17 +18,22 @@ export const handler = async (event: { filePath: string }) => {
 	});
 
 	const rows = convertCsvToAccountRows({ csvString: fileContent });
-	console.log(rows[0]);
 
-	if (!rows[0]) {
-		return;
+	const batchSize = 50;
+	console.log(rows.length);
+
+	for (let i = 0; i < rows.length; i += batchSize) {
+		if (i > 300) {
+			throw new Error('Stop');
+		}
+		const batch = rows.slice(i, i + batchSize);
+
+		const response = await batchUpdateZuoraAccounts({
+			stage,
+			accountRows: batch,
+		});
+		console.log(response);
 	}
-
-	const response = await batchUpdateZuoraAccounts({
-		stage,
-		accountRows: [rows[0]],
-	});
-	console.log(response);
 
 	return {
 		StatusCode: 200,
