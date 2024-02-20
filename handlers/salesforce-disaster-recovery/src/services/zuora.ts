@@ -10,19 +10,28 @@ export const batchUpdateZuoraAccounts = async ({
 	stage: string;
 	accountRows: AccountRow[];
 }) => {
-	const zuoraClient = await ZuoraClient.create(stage as Stage);
+	try {
+		const zuoraClient = await ZuoraClient.create(stage as Stage);
 
-	const response = await actionUpdate(
-		zuoraClient,
-		JSON.stringify({
-			objects: accountRows.map((row) => ({
-				Id: row.Zuora__Zuora_Id__c,
-				CrmId: row.Zuora__Account__c,
-				sfContactId__c: row.Contact__c,
-			})),
-			type: 'Account',
-		}),
-	);
+		const responseArray = await actionUpdate(
+			zuoraClient,
+			JSON.stringify({
+				objects: accountRows.map((row) => ({
+					Id: row.Zuora__Zuora_Id__c,
+					CrmId: row.Zuora__Account__c,
+					sfContactId__c: row.Contact__c,
+				})),
+				type: 'Account',
+			}),
+		);
 
-	return response;
+		return { responses: responseArray };
+	} catch (error) {
+		console.error(error);
+		if (error && typeof error === 'object' && 'message' in error) {
+			console.log('here');
+			console.log(error.message);
+		}
+		return { error: '' };
+	}
 };
