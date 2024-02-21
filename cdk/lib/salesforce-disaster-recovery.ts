@@ -14,7 +14,7 @@ import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
-	Map,
+	// Map,
 	Pass,
 	Result,
 	StateMachine,
@@ -161,49 +161,50 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const transform = new Pass(this, 'Add Hello World', {
-			result: Result.fromObject({ array: JsonPath.arrayRange(0, 20, 4) }),
+		const createBatches = new Pass(this, 'CreateBatches', {
+			result: Result.fromObject({ batches: JsonPath.arrayRange(0, 20, 4) }),
 			// resultPath: '$.subObject',
 		});
 
-		const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
-			stateName: 'test name',
+		const passState = new Pass(this, 'slkdjfd', {});
 
-			itemsPath: '$.array',
-			maxConcurrency: 1,
-			// parameters: {},
-		}).iterator(
-			new Pass(this, 'testpass', {}),
-			// new LambdaInvoke(this, 'test', {
-			// 	lambdaFunction: new GuLambdaFunction(
-			// 		this,
-			// 		'UpdateZuoraAccountsLambda',
-			// 		{
-			// 			...lambdaDefaultConfig,
-			// 			timeout: Duration.minutes(15),
-			// 			memorySize: 10240,
-			// 			handler: 'updateZuoraAccounts.handler',
-			// 			functionName: `update-zuora-accounts-${this.stage}`,
-			// 			environment: {
-			// 				...lambdaDefaultConfig.environment,
-			// 				S3_BUCKET: bucket.bucketName,
-			// 			},
-			// 			initialPolicy: [
-			// 				new PolicyStatement({
-			// 					actions: ['secretsmanager:GetSecretValue'],
-			// 					resources: [
-			// 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-			// 					],
-			// 				}),
-			// 				new PolicyStatement({
-			// 					actions: ['s3:GetObject'],
-			// 					resources: [bucket.arnForObjects('*')],
-			// 				}),
-			// 			],
-			// 		},
-			// 	),
-			// }),
-		);
+		// const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
+		// 	stateName: 'test name',
+		// 	itemsPath: '$.batches',
+		// 	maxConcurrency: 1,
+		// 	// parameters: {},
+		// }).iterator(
+		// 	new Pass(this, 'testpass', {}),
+		// 	// new LambdaInvoke(this, 'test', {
+		// 	// 	lambdaFunction: new GuLambdaFunction(
+		// 	// 		this,
+		// 	// 		'UpdateZuoraAccountsLambda',
+		// 	// 		{
+		// 	// 			...lambdaDefaultConfig,
+		// 	// 			timeout: Duration.minutes(15),
+		// 	// 			memorySize: 10240,
+		// 	// 			handler: 'updateZuoraAccounts.handler',
+		// 	// 			functionName: `update-zuora-accounts-${this.stage}`,
+		// 	// 			environment: {
+		// 	// 				...lambdaDefaultConfig.environment,
+		// 	// 				S3_BUCKET: bucket.bucketName,
+		// 	// 			},
+		// 	// 			initialPolicy: [
+		// 	// 				new PolicyStatement({
+		// 	// 					actions: ['secretsmanager:GetSecretValue'],
+		// 	// 					resources: [
+		// 	// 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+		// 	// 					],
+		// 	// 				}),
+		// 	// 				new PolicyStatement({
+		// 	// 					actions: ['s3:GetObject'],
+		// 	// 					resources: [bucket.arnForObjects('*')],
+		// 	// 				}),
+		// 	// 			],
+		// 	// 		},
+		// 	// 	),
+		// 	// }),
+		// );
 
 		const stateMachine = new StateMachine(
 			this,
@@ -219,8 +220,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
-										.next(transform)
-										.next(batchUpdateZuoraAccounts),
+										.next(createBatches)
+										.next(passState),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
