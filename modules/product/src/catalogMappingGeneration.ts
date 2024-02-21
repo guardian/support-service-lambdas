@@ -2,7 +2,6 @@ import type {
 	Catalog,
 	CatalogProductRatePlan,
 	CatalogProductRatePlanCharge,
-	Pricing,
 } from '@modules/catalog/catalogSchema';
 import { checkDefined } from '@modules/nullAndUndefined';
 
@@ -131,14 +130,25 @@ const arrayToObject = <T>(array: Array<Record<string, T>>) => {
 	}, {});
 };
 
-const getPricingObject = (pricing: Pricing[]) => {
-	return arrayToObject(
-		pricing.map((price) => {
-			return {
-				[price.currency]: price.price,
-			};
-		}),
-	);
+type NonNullPrice = { currency: string; price: number };
+type PricingObject = Record<string, number>;
+
+const roundPriceToTwoDecimalPlaces = (price: number) => {
+	return parseFloat(price.toFixed(2));
+};
+const getPricingObject = (charges: CatalogProductRatePlanCharge[]) => {
+	const allPrices = charges.flatMap((charge) => {
+		return charge.pricing
+			.map(({ currency, price }) => ({ currency, price }))
+			.filter<NonNullPrice>(
+				(price): price is NonNullPrice => price.price != null,
+			);
+	});
+	return allPrices.reduce<PricingObject>((acc, price) => {
+		const total = (acc[price.currency] ?? 0) + price.price;
+		acc[price.currency] = roundPriceToTwoDecimalPlaces(total);
+		return acc;
+	}, {});
 };
 const getProductRatePlanChargeObjects = (
 	productRatePlanCharges: CatalogProductRatePlanCharge[],
@@ -151,7 +161,6 @@ const getProductRatePlanChargeObjects = (
 			return {
 				[productRatePlanChargeName]: {
 					id: productRatePlanCharge.id,
-					pricing: getPricingObject(productRatePlanCharge.pricing),
 				},
 			};
 		}),
@@ -171,6 +180,7 @@ const getZuoraProductObjects = (productRatePlans: CatalogProductRatePlan[]) => {
 					return {
 						[productRatePlanName]: {
 							id: productRatePlan.id,
+							pricing: getPricingObject(productRatePlan.productRatePlanCharges),
 							charges: getProductRatePlanChargeObjects(
 								productRatePlan.productRatePlanCharges,
 							),
