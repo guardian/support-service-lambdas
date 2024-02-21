@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "generateMapping": "ts-node ./src/generateMappings.ts",
+    "updateSnapshots": "jest -u --group=-integration",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration"
   },
