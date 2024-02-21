@@ -14,6 +14,8 @@ import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
+	Map,
+	Pass,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -158,34 +160,42 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const updateZuoraAccounts = new LambdaInvoke(this, 'UpdateZuoraAccounts', {
-			lambdaFunction: new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
-				...lambdaDefaultConfig,
-				timeout: Duration.minutes(15),
-				memorySize: 10240,
-				handler: 'updateZuoraAccounts.handler',
-				functionName: `update-zuora-accounts-${this.stage}`,
-				environment: {
-					...lambdaDefaultConfig.environment,
-					S3_BUCKET: bucket.bucketName,
-				},
-				initialPolicy: [
-					new PolicyStatement({
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-						],
-					}),
-					new PolicyStatement({
-						actions: ['s3:GetObject'],
-						resources: [bucket.arnForObjects('*')],
-					}),
-				],
-			}),
-			payload: TaskInput.fromObject({
-				filePath: JsonPath.stringAt('$.Payload.filePath'),
-			}),
-		});
+		const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
+			itemsPath: JsonPath.arrayRange(0, 20, 4),
+			maxConcurrency: 1,
+			// parameters: {},
+		}).iterator(
+			new Pass(this, 'testpass', {}),
+			// new LambdaInvoke(this, 'test', {
+			// 	lambdaFunction: new GuLambdaFunction(
+			// 		this,
+			// 		'UpdateZuoraAccountsLambda',
+			// 		{
+			// 			...lambdaDefaultConfig,
+			// 			timeout: Duration.minutes(15),
+			// 			memorySize: 10240,
+			// 			handler: 'updateZuoraAccounts.handler',
+			// 			functionName: `update-zuora-accounts-${this.stage}`,
+			// 			environment: {
+			// 				...lambdaDefaultConfig.environment,
+			// 				S3_BUCKET: bucket.bucketName,
+			// 			},
+			// 			initialPolicy: [
+			// 				new PolicyStatement({
+			// 					actions: ['secretsmanager:GetSecretValue'],
+			// 					resources: [
+			// 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+			// 					],
+			// 				}),
+			// 				new PolicyStatement({
+			// 					actions: ['s3:GetObject'],
+			// 					resources: [bucket.arnForObjects('*')],
+			// 				}),
+			// 			],
+			// 		},
+			// 	),
+			// }),
+		);
 
 		const stateMachine = new StateMachine(
 			this,
@@ -200,7 +210,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3.next(updateZuoraAccounts),
+									saveSalesforceQueryResultToS3.next(batchUpdateZuoraAccounts),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
