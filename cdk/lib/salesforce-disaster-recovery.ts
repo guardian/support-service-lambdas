@@ -15,8 +15,8 @@ import {
 	DefinitionBody,
 	JsonPath,
 	// Map,
-	// Pass,
-	// Result,
+	Pass,
+	Result,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -39,8 +39,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const app = 'salesforce-disaster-recovery';
 
-		const bucket = new Bucket(this, 'Bucket', {
-			bucketName: `${app}-${this.stage.toLowerCase()}`,
+		const bucket = new Bucket(this, 'Bucket2', {
+			bucketName: `${app}-${this.stage.toLowerCase()}-2`,
 		});
 
 		const lambdaDefaultConfig: Pick<
@@ -57,7 +57,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
-			'CreateSalesforceQueryJob',
+			'CreateSalesforceQueryJob2',
 			{
 				stateJson: {
 					Type: 'Task',
@@ -162,12 +162,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		// const createBatches = new Pass(this, 'CreateBatches', {
-		// 	result: Result.fromObject({ batches: JsonPath.arrayRange(0, 20, 4) }),
-		// 	// resultPath: '$.subObject',
-		// });
+		const createBatches = new Pass(this, 'CreateBatches', {
+			result: Result.fromObject({ batches: JsonPath.arrayRange(0, 20, 4) }),
+			// resultPath: '$.subObject',
+		});
 
-		// const passState = new Pass(this, 'slkdjfd', {});
+		const passState = new Pass(this, 'slkdjfd', {});
 
 		// const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
 		// 	stateName: 'test name',
@@ -220,9 +220,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3,
-									// .next(createBatches)
-									// .next(passState),
+									saveSalesforceQueryResultToS3
+										.next(createBatches)
+										.next(passState),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),

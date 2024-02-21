@@ -126,10 +126,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "Bucket83908E77": {
+    "Bucket25524B414": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "BucketName": "salesforce-disaster-recovery-code",
+        "BucketName": "salesforce-disaster-recovery-code-2",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -250,7 +250,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              "{"StartAt":"CreateSalesforceQueryJob2","States":{"CreateSalesforceQueryJob2":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -266,7 +266,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.ResponseBody","Resource":"arn:",
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"CreateBatches","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.ResponseBody","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -277,7 +277,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","executionStartTime.$":"$$.Execution.StartTime"}}}}}",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","executionStartTime.$":"$$.Execution.StartTime"}}},"CreateBatches":{"Type":"Pass","Result":{"batches":"States.ArrayRange(0, 20, 4)"},"Next":"slkdjfd"},"slkdjfd":{"Type":"Pass","End":true}}}",
             ],
           ],
         },
@@ -411,7 +411,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket83908E77",
+              "Ref": "Bucket25524B414",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-CODE-salesforce-api/e2792d75-414a-48f3-89a1-5e8eac15f627",
@@ -544,7 +544,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket83908E77",
+                        "Bucket25524B414",
                         "Arn",
                       ],
                     },
@@ -779,10 +779,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "Bucket83908E77": {
+    "Bucket25524B414": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "BucketName": "salesforce-disaster-recovery-prod",
+        "BucketName": "salesforce-disaster-recovery-prod-2",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -903,7 +903,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              "{"StartAt":"CreateSalesforceQueryJob2","States":{"CreateSalesforceQueryJob2":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -919,7 +919,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.ResponseBody","Resource":"arn:",
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"CreateBatches","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.ResponseBody","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -930,7 +930,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","executionStartTime.$":"$$.Execution.StartTime"}}}}}",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","executionStartTime.$":"$$.Execution.StartTime"}}},"CreateBatches":{"Type":"Pass","Result":{"batches":"States.ArrayRange(0, 20, 4)"},"Next":"slkdjfd"},"slkdjfd":{"Type":"Pass","End":true}}}",
             ],
           ],
         },
@@ -1064,7 +1064,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket83908E77",
+              "Ref": "Bucket25524B414",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3",
@@ -1197,7 +1197,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket83908E77",
+                        "Bucket25524B414",
                         "Arn",
                       ],
                     },
