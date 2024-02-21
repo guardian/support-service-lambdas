@@ -25,9 +25,8 @@ type ProductPrice<ZP extends ZuoraProductKey> = {
 	[PC in ProductCurrency<ZP>]: number;
 };
 
-export type ProductRatePlanCharge<ZP extends ZuoraProductKey> = {
+export type ProductRatePlanCharge = {
 	id: string;
-	pricing: ProductPrice<ZP>;
 };
 
 type ProductRatePlan<
@@ -35,8 +34,9 @@ type ProductRatePlan<
 	PRP extends ProductRatePlanKey<ZP>,
 > = {
 	id: string;
+	pricing: ProductPrice<ZP>;
 	charges: {
-		[PRPC in ProductRatePlanChargeKey<ZP, PRP>]: ProductRatePlanCharge<ZP>;
+		[PRPC in ProductRatePlanChargeKey<ZP, PRP>]: ProductRatePlanCharge;
 	};
 };
 

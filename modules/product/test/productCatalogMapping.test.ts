@@ -1,7 +1,6 @@
-import { findDuplicates, sum } from '@modules/arrayFunctions';
+import { findDuplicates } from '@modules/arrayFunctions';
 import { ZuoraCatalog } from '@modules/catalog/catalog';
 import type { Stage } from '@modules/stage';
-import type { ProductRatePlanCharge } from '@modules/product/productCatalogMapping';
 import {
 	findProductDetails,
 	getAllProductDetails,
@@ -23,22 +22,10 @@ test('We can find a product rate plan charge from product details', () => {
 	).toBe('8ad096ca8992481d018992a3674c18da');
 });
 
-test('We can find the price of a product charge from product details', () => {
-	expect(
-		getProductRatePlan('CODE', 'SupporterPlus', 'Monthly').charges.Subscription
-			.pricing.GBP,
-	).toBe(10);
-});
-
-test('We can easily find the price of a product from product details', () => {
-	expect(
-		sum(
-			Object.values(
-				getProductRatePlan('CODE', 'HomeDelivery', 'Sixday').charges,
-			),
-			(charge: ProductRatePlanCharge<'HomeDelivery'>) => charge.pricing.GBP,
-		),
-	).toBe(68.99);
+test('We can find the price of a product from product details', () => {
+	expect(getProductRatePlan('CODE', 'HomeDelivery', 'Sixday').pricing.GBP).toBe(
+		68.99,
+	);
 });
 
 test('We can find product details from a productRatePlanId', () => {
