@@ -11,7 +11,7 @@ import {
 	getProductRatePlanKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
-} from '@modules/product/catalogMappingGeneration';
+} from '@modules/product/generateProductCatalog';
 
 const getProductRatePlanCharges = (
 	productRatePlanCharges: CatalogProductRatePlanCharge[],

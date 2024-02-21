@@ -1,5 +1,5 @@
 import type { Catalog } from '@modules/catalog/catalogSchema';
-import { generateCatalogMapping } from '@modules/product/catalogMappingGeneration';
+import { generateProductCatalog } from '@modules/product/generateProductCatalog';
 import type { mappingTypes } from './mappingTypes';
 
 type ZuoraProductKey = keyof typeof mappingTypes;
@@ -85,6 +85,6 @@ export class ProductCatalog {
 }
 
 export const getProductCatalogFromZuoraCatalog = (catalog: Catalog) => {
-	const catalogData = generateCatalogMapping(catalog);
+	const catalogData = generateProductCatalog(catalog);
 	return new ProductCatalog(catalogData);
 };

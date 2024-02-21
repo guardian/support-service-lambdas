@@ -6,12 +6,6 @@ import type {
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { ProductCatalogData } from '@modules/product/productCatalog';
 
-// const getProductFamily = (product: string): string => {
-// 	return checkDefined(
-// 		catalogNamesToProductFamily[product],
-// 		`Unexpected product type ${product}`,
-// 	);
-// };
 export const getProductName = (product: string): string => {
 	return checkDefined(
 		catalogNamesToProduct[product],
@@ -34,16 +28,6 @@ export const getProductRatePlanChargeKey = (
 		`Unexpected product rate plan charge type ${productRatePlanCharge}`,
 	);
 };
-const catalogNamesToProductFamily: Record<string, string> = {
-	'Digital Pack': 'Digital',
-	'Newspaper - National Delivery': 'Newspaper',
-	'Supporter Plus': 'Digital',
-	'Guardian Weekly - ROW': 'GuardianWeekly',
-	'Guardian Weekly - Domestic': 'GuardianWeekly',
-	'Newspaper Digital Voucher': 'Newspaper',
-	Contributor: 'Digital',
-	'Newspaper Delivery': 'Newspaper',
-} as const;
 
 export const catalogNamesToProduct: Record<string, string> = {
 	'Digital Pack': 'DigitalSubscription',
@@ -123,7 +107,7 @@ export const productRatePlanChargeNamesToProductRatePlanCharge: Record<
 export const isSupportedProductRatePlan = (productRatePlan: string) =>
 	Object.keys(productRatePlanNamesToProductRatePlan).includes(productRatePlan);
 export const isSupportedProduct = (product: string) =>
-	Object.keys(catalogNamesToProductFamily).includes(product);
+	Object.keys(catalogNamesToProduct).includes(product);
 
 const arrayToObject = <T>(array: Array<Record<string, T>>) => {
 	return array.reduce((acc, val) => {
@@ -191,7 +175,7 @@ const getZuoraProduct = (productRatePlans: CatalogProductRatePlan[]) => {
 		),
 	};
 };
-export const generateCatalogMapping = (
+export const generateProductCatalog = (
 	catalog: Catalog,
 ): ProductCatalogData => {
 	const supportedProducts = catalog.products.filter((product) =>
