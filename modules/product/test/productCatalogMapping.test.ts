@@ -1,36 +1,36 @@
 import { findDuplicates } from '@modules/arrayFunctions';
 import { ZuoraCatalog } from '@modules/catalog/catalog';
 import type { Stage } from '@modules/stage';
-import {
-	findProductDetails,
-	getAllProductDetails,
-	getProductRatePlan,
-} from '@modules/product/productCatalog';
-import codeCatalog from '../../catalog/test/fixtures/catalog-code.json';
-import prodCatalog from '../../catalog/test/fixtures/catalog-prod.json';
+import { getProductCatalogFromZuoraCatalog } from '@modules/product/productCatalog';
+import codeZuoraCatalog from '../../catalog/test/fixtures/catalog-code.json';
+import prodZuoraCatalog from '../../catalog/test/fixtures/catalog-prod.json';
 
+const codeProductCatalog = getProductCatalogFromZuoraCatalog(codeZuoraCatalog);
+const prodProductCatalog = getProductCatalogFromZuoraCatalog(prodZuoraCatalog);
 test('We can find a product rate plan from product details', () => {
-	expect(getProductRatePlan('CODE', 'SupporterPlus', 'Monthly').id).toBe(
-		'8ad08cbd8586721c01858804e3275376',
-	);
+	expect(
+		codeProductCatalog.getProductRatePlan('SupporterPlus', 'Monthly').id,
+	).toBe('8ad08cbd8586721c01858804e3275376');
 });
 
 test('We can find a product rate plan charge from product details', () => {
 	expect(
-		getProductRatePlan('CODE', 'NationalDelivery', 'Everyday').charges.Monday
-			.id,
+		codeProductCatalog.getProductRatePlan('NationalDelivery', 'Everyday')
+			.charges.Monday.id,
 	).toBe('8ad096ca8992481d018992a3674c18da');
 });
 
 test('We can find the price of a product from product details', () => {
-	expect(getProductRatePlan('CODE', 'HomeDelivery', 'Sixday').pricing.GBP).toBe(
-		68.99,
-	);
+	expect(
+		codeProductCatalog.getProductRatePlan('HomeDelivery', 'Sixday').pricing.GBP,
+	).toBe(68.99);
 });
 
 test('We can find product details from a productRatePlanId', () => {
 	const productRatePlanId = '2c92c0f84bbfec8b014bc655f4852d9d';
-	expect(findProductDetails('CODE', productRatePlanId)).toStrictEqual({
+	expect(
+		codeProductCatalog.findProductDetails(productRatePlanId),
+	).toStrictEqual({
 		zuoraProduct: 'DigitalSubscription',
 		productRatePlan: 'Monthly',
 		id: productRatePlanId,
@@ -38,11 +38,11 @@ test('We can find product details from a productRatePlanId', () => {
 });
 
 const productExistsInCatalog = (stage: Stage) => {
-	const zuoraCatalog =
+	const [zuoraCatalog, productCatalog] =
 		stage === 'CODE'
-			? new ZuoraCatalog(codeCatalog)
-			: new ZuoraCatalog(prodCatalog);
-	const allProductDetails = getAllProductDetails(stage);
+			? [new ZuoraCatalog(codeZuoraCatalog), codeProductCatalog]
+			: [new ZuoraCatalog(prodZuoraCatalog), prodProductCatalog];
+	const allProductDetails = productCatalog.getAllProductDetails();
 	allProductDetails.forEach((productDetails) => {
 		expect(zuoraCatalog.getCatalogPlan(productDetails.id)).toBeDefined();
 	});
@@ -54,9 +54,9 @@ test('All valid products exist in the catalog', () => {
 });
 
 test('All product rate plan ids are unique', () => {
-	const allProducts = getAllProductDetails('CODE').concat(
-		getAllProductDetails('PROD'),
-	);
+	const allProducts = codeProductCatalog
+		.getAllProductDetails()
+		.concat(prodProductCatalog.getAllProductDetails());
 	const productRatePlanIds = allProducts
 		.map((product) => {
 			return product.id;

@@ -4,6 +4,7 @@ import type {
 	CatalogProductRatePlanCharge,
 } from '@modules/catalog/catalogSchema';
 import { checkDefined } from '@modules/nullAndUndefined';
+import type { ProductCatalogData } from '@modules/product/productCatalog';
 
 // const getProductFamily = (product: string): string => {
 // 	return checkDefined(
@@ -190,7 +191,9 @@ const getZuoraProduct = (productRatePlans: CatalogProductRatePlan[]) => {
 		),
 	};
 };
-export const generateCatalogMapping = (catalog: Catalog) => {
+export const generateCatalogMapping = (
+	catalog: Catalog,
+): ProductCatalogData => {
 	const supportedProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
 	);
@@ -224,5 +227,5 @@ export const generateCatalogMapping = (catalog: Catalog) => {
 	// 	},
 	// );
 
-	return result;
+	return result as ProductCatalogData;
 };

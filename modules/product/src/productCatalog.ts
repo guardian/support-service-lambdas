@@ -1,12 +1,6 @@
-import type { Stage } from '@modules/stage';
-import codeMapping from './codeCatalogMapping.json';
+import type { Catalog } from '@modules/catalog/catalogSchema';
+import { generateCatalogMapping } from '@modules/product/catalogMappingGeneration';
 import type { mappingTypes } from './mappingTypes';
-import prodMapping from './prodCatalogMapping.json';
-
-const mappingsForStage = (stage: Stage) =>
-	stage === 'CODE'
-		? (codeMapping as ProductCatalog)
-		: (prodMapping as ProductCatalog);
 
 type ZuoraProductKey = keyof typeof mappingTypes;
 
@@ -46,46 +40,51 @@ type ZuoraProduct<ZP extends ZuoraProductKey> = {
 	};
 };
 
-type ProductCatalog = {
+export type ProductCatalogData = {
 	products: {
 		[ZP in ZuoraProductKey]: ZuoraProduct<ZP>;
 	};
 };
 
-export const getProductRatePlan = <
-	ZP extends ZuoraProductKey,
-	PRP extends ProductRatePlanKey<ZP>,
->(
-	stage: Stage,
-	zuoraProduct: ZP,
-	productRatePlan: PRP,
-) => {
-	const products = mappingsForStage(stage).products;
-	const product = products[zuoraProduct];
-	return product.ratePlans[productRatePlan];
-};
+export class ProductCatalog {
+	constructor(private catalogData: ProductCatalogData) {}
 
-export const getAllProductDetails = (stage: Stage) => {
-	const stageMapping = mappingsForStage(stage).products;
-	const zuoraProductKeys = Object.keys(stageMapping) as Array<
-		keyof typeof stageMapping
-	>;
-	return zuoraProductKeys.flatMap((zuoraProduct) => {
-		const productRatePlans = stageMapping[zuoraProduct].ratePlans;
-		const productRatePlanKeys = Object.keys(productRatePlans) as Array<
-			keyof typeof productRatePlans
+	getProductRatePlan = <
+		ZP extends ZuoraProductKey,
+		PRP extends ProductRatePlanKey<ZP>,
+	>(
+		zuoraProduct: ZP,
+		productRatePlan: PRP,
+	) => {
+		return this.catalogData.products[zuoraProduct].ratePlans[productRatePlan];
+	};
+	getAllProductDetails = () => {
+		const stageMapping = this.catalogData.products;
+		const zuoraProductKeys = Object.keys(stageMapping) as Array<
+			keyof typeof stageMapping
 		>;
-		return productRatePlanKeys.flatMap((productRatePlan) => {
-			const { id } = getProductRatePlan(stage, zuoraProduct, productRatePlan);
-			return {
-				zuoraProduct,
-				productRatePlan,
-				id,
-			};
+		return zuoraProductKeys.flatMap((zuoraProduct) => {
+			const productRatePlans = stageMapping[zuoraProduct].ratePlans;
+			const productRatePlanKeys = Object.keys(productRatePlans) as Array<
+				keyof typeof productRatePlans
+			>;
+			return productRatePlanKeys.flatMap((productRatePlan) => {
+				const { id } = this.getProductRatePlan(zuoraProduct, productRatePlan);
+				return {
+					zuoraProduct,
+					productRatePlan,
+					id,
+				};
+			});
 		});
-	});
-};
-export const findProductDetails = (stage: Stage, productRatePlanId: string) => {
-	const allProducts = getAllProductDetails(stage);
-	return allProducts.find((product) => product.id === productRatePlanId);
+	};
+	findProductDetails = (productRatePlanId: string) => {
+		const allProducts = this.getAllProductDetails();
+		return allProducts.find((product) => product.id === productRatePlanId);
+	};
+}
+
+export const getProductCatalogFromZuoraCatalog = (catalog: Catalog) => {
+	const catalogData = generateCatalogMapping(catalog);
+	return new ProductCatalog(catalogData);
 };
