@@ -16,6 +16,7 @@ import {
 	JsonPath,
 	Map,
 	Pass,
+	Result,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -160,10 +161,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const transform = new Pass(this, 'Add Hello World', {
+			result: Result.fromObject({ array: JsonPath.arrayRange(0, 20, 4) }),
+			// resultPath: '$.subObject',
+		});
+
 		const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
 			stateName: 'test name',
 
-			itemsPath: JsonPath.arrayRange(0, 20, 4),
+			itemsPath: '$.array',
 			maxConcurrency: 1,
 			// parameters: {},
 		}).iterator(
@@ -212,7 +218,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3.next(batchUpdateZuoraAccounts),
+									saveSalesforceQueryResultToS3
+										.next(transform)
+										.next(batchUpdateZuoraAccounts),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
