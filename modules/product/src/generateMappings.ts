@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getCatalogFromS3 } from '@modules/catalog/catalog';
 import { generateCatalogMapping } from '@modules/product/catalogMappingGeneration';
-import { generateTypes } from '@modules/product/typeGeneration';
+import { generateTypes } from '@modules/product/generateTypes';
 
 const writeMappingsToFile = async () => {
 	const codeCatalog = await getCatalogFromS3('CODE');

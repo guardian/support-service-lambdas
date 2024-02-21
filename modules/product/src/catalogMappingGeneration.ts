@@ -18,14 +18,14 @@ export const getProductName = (product: string): string => {
 	);
 };
 
-export const getProductRatePlanName = (productRatePlan: string): string => {
+export const getProductRatePlanKey = (productRatePlan: string): string => {
 	return checkDefined(
 		productRatePlanNamesToProductRatePlan[productRatePlan],
 		`Unexpected product rate plan type ${productRatePlan}`,
 	);
 };
 
-export const getProductRatePlanChargeName = (
+export const getProductRatePlanChargeKey = (
 	productRatePlanCharge: string,
 ): string => {
 	return checkDefined(
@@ -150,12 +150,12 @@ const getPricingObject = (charges: CatalogProductRatePlanCharge[]) => {
 		return acc;
 	}, {});
 };
-const getProductRatePlanChargeObjects = (
+const getProductRatePlanCharges = (
 	productRatePlanCharges: CatalogProductRatePlanCharge[],
 ) => {
 	return arrayToObject(
 		productRatePlanCharges.map((productRatePlanCharge) => {
-			const productRatePlanChargeName = getProductRatePlanChargeName(
+			const productRatePlanChargeName = getProductRatePlanChargeKey(
 				productRatePlanCharge.name,
 			);
 			return {
@@ -166,7 +166,7 @@ const getProductRatePlanChargeObjects = (
 		}),
 	);
 };
-const getZuoraProductObjects = (productRatePlans: CatalogProductRatePlan[]) => {
+const getZuoraProduct = (productRatePlans: CatalogProductRatePlan[]) => {
 	return {
 		ratePlans: arrayToObject(
 			productRatePlans
@@ -174,14 +174,14 @@ const getZuoraProductObjects = (productRatePlans: CatalogProductRatePlan[]) => {
 					isSupportedProductRatePlan(productRatePlan.name),
 				)
 				.map((productRatePlan) => {
-					const productRatePlanName = getProductRatePlanName(
+					const productRatePlanKey = getProductRatePlanKey(
 						productRatePlan.name,
 					);
 					return {
-						[productRatePlanName]: {
+						[productRatePlanKey]: {
 							id: productRatePlan.id,
 							pricing: getPricingObject(productRatePlan.productRatePlanCharges),
-							charges: getProductRatePlanChargeObjects(
+							charges: getProductRatePlanCharges(
 								productRatePlan.productRatePlanCharges,
 							),
 						},
@@ -200,7 +200,7 @@ export const generateCatalogMapping = (catalog: Catalog) => {
 			supportedProducts.map((product) => {
 				const productName = getProductName(product.name);
 				return {
-					[productName]: getZuoraProductObjects(product.productRatePlans),
+					[productName]: getZuoraProduct(product.productRatePlans),
 				};
 			}),
 		),

@@ -7,18 +7,18 @@ import type {
 import { checkDefined } from '@modules/nullAndUndefined';
 import {
 	getProductName,
-	getProductRatePlanChargeName,
-	getProductRatePlanName,
+	getProductRatePlanChargeKey,
+	getProductRatePlanKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product/catalogMappingGeneration';
 
-const getProductRatePlanChargeObjects = (
+const getProductRatePlanCharges = (
 	productRatePlanCharges: CatalogProductRatePlanCharge[],
 ) => {
 	return arrayToObject(
 		productRatePlanCharges.map((productRatePlanCharge) => {
-			const productRatePlanChargeName = getProductRatePlanChargeName(
+			const productRatePlanChargeName = getProductRatePlanChargeKey(
 				productRatePlanCharge.name,
 			);
 			return {
@@ -34,7 +34,7 @@ const getCurrenciesForProduct = (productRatePlan: CatalogProductRatePlan) =>
 		),
 	);
 
-const getZuoraProductObjects = (productRatePlans: CatalogProductRatePlan[]) => {
+const getZuoraProduct = (productRatePlans: CatalogProductRatePlan[]) => {
 	const currencies = getCurrenciesForProduct(
 		checkDefined(
 			productRatePlans[0],
@@ -49,11 +49,11 @@ const getZuoraProductObjects = (productRatePlans: CatalogProductRatePlan[]) => {
 					isSupportedProductRatePlan(productRatePlan.name),
 				)
 				.map((productRatePlan) => {
-					const productRatePlanName = getProductRatePlanName(
+					const productRatePlanKey = getProductRatePlanKey(
 						productRatePlan.name,
 					);
 					return {
-						[productRatePlanName]: getProductRatePlanChargeObjects(
+						[productRatePlanKey]: getProductRatePlanCharges(
 							productRatePlan.productRatePlanCharges,
 						),
 					};
@@ -69,7 +69,7 @@ export const generateTypes = (catalog: Catalog) => {
 	const arrayVersion = supportedProducts.map((product) => {
 		const productName = getProductName(product.name);
 		return {
-			[productName]: getZuoraProductObjects(product.productRatePlans),
+			[productName]: getZuoraProduct(product.productRatePlans),
 		};
 	});
 

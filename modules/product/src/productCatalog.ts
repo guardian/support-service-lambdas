@@ -5,8 +5,8 @@ import prodMapping from './prodCatalogMapping.json';
 
 const mappingsForStage = (stage: Stage) =>
 	stage === 'CODE'
-		? (codeMapping as MappedCatalog)
-		: (prodMapping as MappedCatalog);
+		? (codeMapping as ProductCatalog)
+		: (prodMapping as ProductCatalog);
 
 type ZuoraProductKey = keyof typeof mappingTypes;
 
@@ -46,7 +46,7 @@ type ZuoraProduct<ZP extends ZuoraProductKey> = {
 	};
 };
 
-type MappedCatalog = {
+type ProductCatalog = {
 	products: {
 		[ZP in ZuoraProductKey]: ZuoraProduct<ZP>;
 	};

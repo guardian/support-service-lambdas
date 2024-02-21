@@ -5,7 +5,7 @@ import {
 	findProductDetails,
 	getAllProductDetails,
 	getProductRatePlan,
-} from '@modules/product/productCatalogMapping';
+} from '@modules/product/productCatalog';
 import codeCatalog from '../../catalog/test/fixtures/catalog-code.json';
 import prodCatalog from '../../catalog/test/fixtures/catalog-prod.json';
 
