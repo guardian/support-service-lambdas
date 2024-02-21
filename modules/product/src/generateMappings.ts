@@ -1,14 +1,14 @@
 import fs from 'fs';
 import { getCatalogFromS3 } from '@modules/catalog/catalog';
-import { generateProductCatalog } from '@modules/product/generateProductCatalog';
-import { generateTypes } from '@modules/product/generateTypes';
+import { generateProductCatalogData } from '@modules/product/generateProductCatalogData';
+import { generateTypeObject } from '@modules/product/types/generateTypeObject';
 
 const writeMappingsToFile = async () => {
 	const codeCatalog = await getCatalogFromS3('CODE');
-	const codeCatalogMapping = generateProductCatalog(codeCatalog);
+	const codeCatalogMapping = generateProductCatalogData(codeCatalog);
 	const prodCatalog = await getCatalogFromS3('PROD');
-	const prodCatalogMapping = generateProductCatalog(prodCatalog);
-	const types = generateTypes(prodCatalog);
+	const prodCatalogMapping = generateProductCatalogData(prodCatalog);
+	const types = generateTypeObject(prodCatalog);
 
 	const codeCatalogMappingString = JSON.stringify(codeCatalogMapping, null, 2);
 	const prodCatalogMappingString = JSON.stringify(prodCatalogMapping, null, 2);
@@ -17,7 +17,7 @@ const writeMappingsToFile = async () => {
 	fs.writeFileSync('./src/codeCatalogMapping.json', codeCatalogMappingString);
 	fs.writeFileSync('./src/prodCatalogMapping.json', prodCatalogMappingString);
 	fs.writeFileSync(
-		'./src/mappingTypes.ts',
+		'./src/typeObject.ts',
 		`export const mappingTypes = ${typesString} as const;`,
 	);
 };

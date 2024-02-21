@@ -1,19 +1,19 @@
 import type { Catalog } from '@modules/catalog/catalogSchema';
-import { generateProductCatalog } from '@modules/product/generateProductCatalog';
-import type { mappingTypes } from './mappingTypes';
+import { generateProductCatalogData } from './generateProductCatalogData';
+import type { typeObject } from './types/typeObject';
 
-type ZuoraProductKey = keyof typeof mappingTypes;
+type ZuoraProductKey = keyof typeof typeObject;
 
 type ProductRatePlanKey<ZP extends ZuoraProductKey> =
-	keyof (typeof mappingTypes)[ZP]['productRatePlans'];
+	keyof (typeof typeObject)[ZP]['productRatePlans'];
 
 type ProductRatePlanChargeKey<
 	ZP extends ZuoraProductKey,
 	PRP extends ProductRatePlanKey<ZP>,
-> = keyof (typeof mappingTypes)[ZP]['productRatePlans'][PRP];
+> = keyof (typeof typeObject)[ZP]['productRatePlans'][PRP];
 
 type ProductCurrency<ZP extends ZuoraProductKey> =
-	(typeof mappingTypes)[ZP]['currencies'][number];
+	(typeof typeObject)[ZP]['currencies'][number];
 
 type ProductPrice<ZP extends ZuoraProductKey> = {
 	[PC in ProductCurrency<ZP>]: number;
@@ -85,6 +85,6 @@ export class ProductCatalog {
 }
 
 export const getProductCatalogFromZuoraCatalog = (catalog: Catalog) => {
-	const catalogData = generateProductCatalog(catalog);
+	const catalogData = generateProductCatalogData(catalog);
 	return new ProductCatalog(catalogData);
 };
