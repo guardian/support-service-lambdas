@@ -21,11 +21,13 @@ type ProductRatePlanChargeKey<
 type ProductCurrency<ZP extends ZuoraProductKey> =
 	(typeof mappingTypes)[ZP]['currencies'][number];
 
+type ProductPrice<ZP extends ZuoraProductKey> = {
+	[PC in ProductCurrency<ZP>]: number;
+};
+
 export type ProductRatePlanCharge<ZP extends ZuoraProductKey> = {
 	id: string;
-	pricing: {
-		[PC in ProductCurrency<ZP>]: number;
-	};
+	pricing: ProductPrice<ZP>;
 };
 
 type ProductRatePlan<
