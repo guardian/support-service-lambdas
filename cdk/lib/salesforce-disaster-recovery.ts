@@ -164,7 +164,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const createBatches = new Pass(this, 'CreateBatches', {
 			parameters: {
-				array: JsonPath.arrayRange(0, 20, 4),
+				'array.$': JsonPath.arrayRange(0, 20, 4),
 			},
 			// result: Result.fromArray(
 			// 	JsonPath.stringToJson(JsonPath.arrayRange(0, 20, 4)),
