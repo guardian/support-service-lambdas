@@ -159,6 +159,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
 					executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
 				}),
+				// resultSelector
 			},
 		);
 
@@ -186,7 +187,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const mapStateTest = new Map(this, 'testtestmap', {
 			stateName: 'test name',
-			itemsPath: '$.array',
+			itemsPath: JsonPath.array('$.array'),
 			maxConcurrency: 1,
 		}).iterator(
 			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
