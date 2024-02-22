@@ -175,6 +175,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			// resultPath: '$.subObject',
 		});
 
+		const passState = new Pass(this, 'testlkjdf', {});
+
 		const mapStateTest = new Map(this, 'testtestmap', {
 			stateName: 'test name',
 			itemsPath: '$.batches',
@@ -223,6 +225,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
 										.next(createBatches)
+										.next(passState)
 										.next(mapStateTest),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
