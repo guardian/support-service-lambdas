@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         subproject:
-          - product-catalog
+          - generate-product-catalog
           - discount-api
           - salesforce-disaster-recovery
     runs-on: ubuntu-latest
