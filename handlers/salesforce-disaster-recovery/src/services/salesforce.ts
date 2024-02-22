@@ -13,10 +13,10 @@ export const generateSalesforceAccessToken = async ({
 	credentials: SalesforceOauthCredentials;
 }): Promise<string> => {
 	try {
-		const formData = new URLSearchParams([
-			['client_id', credentials.client_id],
-			['client_secret', credentials.client_secret],
-		]);
+		const formData = new FormData();
+
+		formData.append('client_id', credentials.client_id);
+		formData.append('client_secret', credentials.client_secret);
 
 		credentials.oauth_http_parameters.body_parameters.forEach((param) => {
 			formData.append(param.key, param.value);
