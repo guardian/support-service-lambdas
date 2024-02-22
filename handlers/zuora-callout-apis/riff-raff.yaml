@@ -14,7 +14,7 @@ deployments:
       cloudFormationStackByTags: false
       prependStackToCloudFormationStackName: false
       createStackIfAbsent: false
-  support-service-lambdas:
+  zuora-callout-apis:
     type: aws-lambda
     parameters:
       fileName: zuora-callout-apis.jar
