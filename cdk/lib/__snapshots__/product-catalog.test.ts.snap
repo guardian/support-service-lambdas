@@ -235,7 +235,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/CODE/product-catalog/",
+                "arn:aws:s3::*:membership-dist/membership/CODE/generate-product-catalog/",
                 "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/",
               ],
             },
@@ -250,131 +250,41 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "PolicyName": "S3inlinepolicy3B07399A",
         "Roles": [
           {
-            "Ref": "productcataloglambdaServiceRole73D35F26",
+            "Ref": "generateproductcataloglambdaServiceRole5FF40E84",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "guproductcatalog6FBFBC20": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "guproductcatalogAllowBucketNotificationsToproductcatalogCODEproductcataloglambdaA4DC99AE30EBFF7B": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "productcataloglambdaD4E642A9",
-            "Arn",
-          ],
-        },
-        "Principal": "s3.amazonaws.com",
-        "SourceAccount": {
-          "Ref": "AWS::AccountId",
-        },
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "guproductcatalog6FBFBC20",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "guproductcatalogNotifications133DB1B4": {
+    "generateproductcataloglambda1E6192C7": {
       "DependsOn": [
-        "guproductcatalogAllowBucketNotificationsToproductcatalogCODEproductcataloglambdaA4DC99AE30EBFF7B",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "guproductcatalog6FBFBC20",
-        },
-        "Managed": true,
-        "NotificationConfiguration": {
-          "LambdaFunctionConfigurations": [
-            {
-              "Events": [
-                "s3:ObjectCreated:*",
-              ],
-              "Filter": {
-                "Key": {
-                  "FilterRules": [
-                    {
-                      "Name": "prefix",
-                      "Value": "CODE/",
-                    },
-                  ],
-                },
-              },
-              "LambdaFunctionArn": {
-                "Fn::GetAtt": [
-                  "productcataloglambdaD4E642A9",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3BucketNotifications",
-    },
-    "productcataloglambdaD4E642A9": {
-      "DependsOn": [
-        "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A",
-        "productcataloglambdaServiceRole73D35F26",
+        "generateproductcataloglambdaServiceRoleDefaultPolicy68C46CDA",
+        "generateproductcataloglambdaServiceRole5FF40E84",
       ],
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/product-catalog/product-catalog.zip",
+          "S3Key": "membership/CODE/generate-product-catalog/generate-product-catalog.zip",
         },
         "Description": "A lambda to generate the Guardian product catalog from the Zuora catalog",
         "Environment": {
           "Variables": {
-            "APP": "product-catalog",
-            "App": "product-catalog",
+            "APP": "generate-product-catalog",
+            "App": "generate-product-catalog",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stack": "membership",
             "Stage": "CODE",
           },
         },
-        "FunctionName": "product-catalog-CODE",
+        "FunctionName": "generate-product-catalog-CODE",
         "Handler": "index.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "productcataloglambdaServiceRole73D35F26",
+            "generateproductcataloglambdaServiceRole5FF40E84",
             "Arn",
           ],
         },
@@ -382,7 +292,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "Tags": [
           {
             "Key": "App",
-            "Value": "product-catalog",
+            "Value": "generate-product-catalog",
           },
           {
             "Key": "gu:cdk:version",
@@ -405,7 +315,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::Lambda::Function",
     },
-    "productcataloglambdaServiceRole73D35F26": {
+    "generateproductcataloglambdaServiceRole5FF40E84": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -436,7 +346,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "Tags": [
           {
             "Key": "App",
-            "Value": "product-catalog",
+            "Value": "generate-product-catalog",
           },
           {
             "Key": "gu:cdk:version",
@@ -458,7 +368,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Role",
     },
-    "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A": {
+    "generateproductcataloglambdaServiceRoleDefaultPolicy68C46CDA": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -497,7 +407,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/product-catalog/product-catalog.zip",
+                      "/membership/CODE/generate-product-catalog/generate-product-catalog.zip",
                     ],
                   ],
                 },
@@ -518,7 +428,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/product-catalog",
+                    ":parameter/CODE/membership/generate-product-catalog",
                   ],
                 ],
               },
@@ -541,7 +451,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/product-catalog/*",
+                    ":parameter/CODE/membership/generate-product-catalog/*",
                   ],
                 ],
               },
@@ -549,14 +459,104 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A",
+        "PolicyName": "generateproductcataloglambdaServiceRoleDefaultPolicy68C46CDA",
         "Roles": [
           {
-            "Ref": "productcataloglambdaServiceRole73D35F26",
+            "Ref": "generateproductcataloglambdaServiceRole5FF40E84",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "guproductcatalog6FBFBC20": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "guproductcatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF64ACBEDAB": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "generateproductcataloglambda1E6192C7",
+            "Arn",
+          ],
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId",
+        },
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "guproductcatalog6FBFBC20",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "guproductcatalogNotifications133DB1B4": {
+      "DependsOn": [
+        "guproductcatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF64ACBEDAB",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "guproductcatalog6FBFBC20",
+        },
+        "Managed": true,
+        "NotificationConfiguration": {
+          "LambdaFunctionConfigurations": [
+            {
+              "Events": [
+                "s3:ObjectCreated:*",
+              ],
+              "Filter": {
+                "Key": {
+                  "FilterRules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "CODE/",
+                    },
+                  ],
+                },
+              },
+              "LambdaFunctionArn": {
+                "Fn::GetAtt": [
+                  "generateproductcataloglambda1E6192C7",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3BucketNotifications",
     },
   },
 }
@@ -797,7 +797,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/PROD/product-catalog/",
+                "arn:aws:s3::*:membership-dist/membership/PROD/generate-product-catalog/",
                 "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/",
               ],
             },
@@ -812,131 +812,41 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "PolicyName": "S3inlinepolicy3B07399A",
         "Roles": [
           {
-            "Ref": "productcataloglambdaServiceRole73D35F26",
+            "Ref": "generateproductcataloglambdaServiceRole5FF40E84",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "guproductcatalog6FBFBC20": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "guproductcatalogAllowBucketNotificationsToproductcatalogPRODproductcataloglambda4BF6B8A5CAF72A69": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "productcataloglambdaD4E642A9",
-            "Arn",
-          ],
-        },
-        "Principal": "s3.amazonaws.com",
-        "SourceAccount": {
-          "Ref": "AWS::AccountId",
-        },
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "guproductcatalog6FBFBC20",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "guproductcatalogNotifications133DB1B4": {
+    "generateproductcataloglambda1E6192C7": {
       "DependsOn": [
-        "guproductcatalogAllowBucketNotificationsToproductcatalogPRODproductcataloglambda4BF6B8A5CAF72A69",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "guproductcatalog6FBFBC20",
-        },
-        "Managed": true,
-        "NotificationConfiguration": {
-          "LambdaFunctionConfigurations": [
-            {
-              "Events": [
-                "s3:ObjectCreated:*",
-              ],
-              "Filter": {
-                "Key": {
-                  "FilterRules": [
-                    {
-                      "Name": "prefix",
-                      "Value": "PROD/",
-                    },
-                  ],
-                },
-              },
-              "LambdaFunctionArn": {
-                "Fn::GetAtt": [
-                  "productcataloglambdaD4E642A9",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3BucketNotifications",
-    },
-    "productcataloglambdaD4E642A9": {
-      "DependsOn": [
-        "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A",
-        "productcataloglambdaServiceRole73D35F26",
+        "generateproductcataloglambdaServiceRoleDefaultPolicy68C46CDA",
+        "generateproductcataloglambdaServiceRole5FF40E84",
       ],
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/product-catalog/product-catalog.zip",
+          "S3Key": "membership/PROD/generate-product-catalog/generate-product-catalog.zip",
         },
         "Description": "A lambda to generate the Guardian product catalog from the Zuora catalog",
         "Environment": {
           "Variables": {
-            "APP": "product-catalog",
-            "App": "product-catalog",
+            "APP": "generate-product-catalog",
+            "App": "generate-product-catalog",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stack": "membership",
             "Stage": "PROD",
           },
         },
-        "FunctionName": "product-catalog-PROD",
+        "FunctionName": "generate-product-catalog-PROD",
         "Handler": "index.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "productcataloglambdaServiceRole73D35F26",
+            "generateproductcataloglambdaServiceRole5FF40E84",
             "Arn",
           ],
         },
@@ -944,7 +854,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "Tags": [
           {
             "Key": "App",
-            "Value": "product-catalog",
+            "Value": "generate-product-catalog",
           },
           {
             "Key": "gu:cdk:version",
@@ -967,7 +877,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::Lambda::Function",
     },
-    "productcataloglambdaServiceRole73D35F26": {
+    "generateproductcataloglambdaServiceRole5FF40E84": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -998,7 +908,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "Tags": [
           {
             "Key": "App",
-            "Value": "product-catalog",
+            "Value": "generate-product-catalog",
           },
           {
             "Key": "gu:cdk:version",
@@ -1020,7 +930,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Role",
     },
-    "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A": {
+    "generateproductcataloglambdaServiceRoleDefaultPolicy68C46CDA": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1059,7 +969,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/product-catalog/product-catalog.zip",
+                      "/membership/PROD/generate-product-catalog/generate-product-catalog.zip",
                     ],
                   ],
                 },
@@ -1080,7 +990,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/product-catalog",
+                    ":parameter/PROD/membership/generate-product-catalog",
                   ],
                 ],
               },
@@ -1103,7 +1013,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/product-catalog/*",
+                    ":parameter/PROD/membership/generate-product-catalog/*",
                   ],
                 ],
               },
@@ -1111,14 +1021,104 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A",
+        "PolicyName": "generateproductcataloglambdaServiceRoleDefaultPolicy68C46CDA",
         "Roles": [
           {
-            "Ref": "productcataloglambdaServiceRole73D35F26",
+            "Ref": "generateproductcataloglambdaServiceRole5FF40E84",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "guproductcatalog6FBFBC20": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "guproductcatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B388EA5A5": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "generateproductcataloglambda1E6192C7",
+            "Arn",
+          ],
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId",
+        },
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "guproductcatalog6FBFBC20",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "guproductcatalogNotifications133DB1B4": {
+      "DependsOn": [
+        "guproductcatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B388EA5A5",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "guproductcatalog6FBFBC20",
+        },
+        "Managed": true,
+        "NotificationConfiguration": {
+          "LambdaFunctionConfigurations": [
+            {
+              "Events": [
+                "s3:ObjectCreated:*",
+              ],
+              "Filter": {
+                "Key": {
+                  "FilterRules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "PROD/",
+                    },
+                  ],
+                },
+              },
+              "LambdaFunctionArn": {
+                "Fn::GetAtt": [
+                  "generateproductcataloglambda1E6192C7",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3BucketNotifications",
     },
   },
 }
