@@ -163,49 +163,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 		);
 
 		const createBatches = new Pass(this, 'CreateBatches', {
-			result: Result.fromObject({ batches: JsonPath.arrayRange(0, 20, 4) }),
+			result: Result.fromObject({
+				batches: JsonPath.array(JsonPath.arrayRange(0, 20, 4)),
+			}),
 			// resultPath: '$.subObject',
 		});
-
-		// const passState = new Pass(this, 'slkdjfd', {});
-
-		// const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
-		// 	stateName: 'test name',
-		// 	itemsPath: '$.batches',
-		// 	maxConcurrency: 1,
-		// 	// parameters: {},
-		// }).iterator(
-		// 	new Pass(this, 'testpass', {}),
-		// 	// new LambdaInvoke(this, 'test', {
-		// 	// 	lambdaFunction: new GuLambdaFunction(
-		// 	// 		this,
-		// 	// 		'UpdateZuoraAccountsLambda',
-		// 	// 		{
-		// 	// 			...lambdaDefaultConfig,
-		// 	// 			timeout: Duration.minutes(15),
-		// 	// 			memorySize: 10240,
-		// 	// 			handler: 'updateZuoraAccounts.handler',
-		// 	// 			functionName: `update-zuora-accounts-${this.stage}`,
-		// 	// 			environment: {
-		// 	// 				...lambdaDefaultConfig.environment,
-		// 	// 				S3_BUCKET: bucket.bucketName,
-		// 	// 			},
-		// 	// 			initialPolicy: [
-		// 	// 				new PolicyStatement({
-		// 	// 					actions: ['secretsmanager:GetSecretValue'],
-		// 	// 					resources: [
-		// 	// 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-		// 	// 					],
-		// 	// 				}),
-		// 	// 				new PolicyStatement({
-		// 	// 					actions: ['s3:GetObject'],
-		// 	// 					resources: [bucket.arnForObjects('*')],
-		// 	// 				}),
-		// 	// 			],
-		// 	// 		},
-		// 	// 	),
-		// 	// }),
-		// );
 
 		new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
 			...lambdaDefaultConfig,
