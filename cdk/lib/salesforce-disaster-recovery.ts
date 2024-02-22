@@ -124,7 +124,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			this,
 			'SaveSalesforceQueryResultToS3',
 			{
-				inputPath: '$.ResponseBody',
+				// inputPath: '$.ResponseBody',
 				lambdaFunction: new GuLambdaFunction(
 					this,
 					'SaveSalesforceQueryResultToS3Lambda',
