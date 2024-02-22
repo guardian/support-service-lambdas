@@ -242,7 +242,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
             {
               "Action": "s3:PutObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/",
+              "Resource": "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE//",
             },
           ],
           "Version": "2012-10-17",
@@ -471,6 +471,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
     "guproductcatalog6FBFBC20": {
       "DeletionPolicy": "Retain",
       "Properties": {
+        "BucketName": "gu-product-catalog",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -535,7 +536,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                   "FilterRules": [
                     {
                       "Name": "prefix",
-                      "Value": "CODE/",
+                      "Value": "PROD/Zuora-CODE/",
                     },
                   ],
                 },
@@ -804,7 +805,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
             {
               "Action": "s3:PutObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/",
+              "Resource": "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD//",
             },
           ],
           "Version": "2012-10-17",
@@ -1033,6 +1034,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
     "guproductcatalog6FBFBC20": {
       "DeletionPolicy": "Retain",
       "Properties": {
+        "BucketName": "gu-product-catalog",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -1097,7 +1099,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                   "FilterRules": [
                     {
                       "Name": "prefix",
-                      "Value": "PROD/",
+                      "Value": "PROD/Zuora-PROD/",
                     },
                   ],
                 },
