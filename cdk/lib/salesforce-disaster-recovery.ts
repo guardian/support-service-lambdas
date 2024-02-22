@@ -164,11 +164,24 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const createBatches = new Pass(this, 'CreateBatches', {
 			result: Result.fromObject({
-				// batches: JsonPath.array(JsonPath.arrayRange(0, 20, 4)),
-				batches: [1, 4, 644, 6, 4, 5],
+				'batches.$': JsonPath.array(JsonPath.arrayRange(0, 20, 4)),
+				// batches: [1, 4, 644, 6, 4, 5],
+				// batches: Array.from(
+				// 	{ length: Math.ceil(834085 / 330) },
+				// 	(_, index) => index * 330,
+				// ),
 			}),
 			// resultPath: '$.subObject',
 		});
+
+		const mapStateTest = new Map(this, 'testtestmap', {
+			stateName: 'test name',
+			itemsPath: '$.batches',
+			maxConcurrency: 1,
+		}).iterator(
+			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
+			new Pass(this, 'fdsf', {}),
+		);
 
 		new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
 			...lambdaDefaultConfig,
@@ -193,15 +206,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				}),
 			],
 		});
-
-		const mapStateTest = new Map(this, 'testtestmap', {
-			stateName: 'test name',
-			itemsPath: '$.batches',
-			maxConcurrency: 1,
-		}).iterator(
-			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
-			new Pass(this, 'fdsf', {}),
-		);
 
 		const stateMachine = new StateMachine(
 			this,
