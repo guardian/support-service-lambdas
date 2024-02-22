@@ -1,0 +1,1747 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The Product catalog stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuApiGateway5xxPercentageAlarm",
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "productcataloglambdaproductcatalogCODEEndpoint697F7BE8": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "productcataloglambdaproductcatalogCODEDeploymentStageCODE11DD6A2E",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGateway4XXAlarmCDKC83EACCA": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - Product catalog received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "PRODUCT-CATALOG-CODE API gateway 4XX response",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "product-catalog-CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "4XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ApiGatewayHigh5xxPercentageAlarmProductcatalogC8CB36EB": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "product-catalog exceeded 5% error rate",
+        "AlarmName": "High 5XX error percentage from product-catalog (ApiGateway) in CODE",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "EvaluationPeriods": 1,
+        "Metrics": [
+          {
+            "Expression": "100*m1/m2",
+            "Id": "expr_1",
+            "Label": "% of 5XX responses served for product-catalog",
+          },
+          {
+            "Id": "m1",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "product-catalog-CODE",
+                  },
+                ],
+                "MetricName": "5XXError",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "m2",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "product-catalog-CODE",
+                  },
+                ],
+                "MetricName": "Count",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "SampleCount",
+            },
+            "ReturnData": false,
+          },
+        ],
+        "Threshold": 5,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+        },
+        "Stage": {
+          "Ref": "productcataloglambdaproductcatalogCODEDeploymentStageCODE11DD6A2E",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "product-catalog.code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "product-catalog.code.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "S3inlinepolicy3B07399A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/product-catalog/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "productcataloglambdaServiceRole73D35F26",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "productcataloglambdaD4E642A9": {
+      "DependsOn": [
+        "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A",
+        "productcataloglambdaServiceRole73D35F26",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/CODE/product-catalog/product-catalog.zip",
+        },
+        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Environment": {
+          "Variables": {
+            "APP": "product-catalog",
+            "App": "product-catalog",
+            "STACK": "membership",
+            "STAGE": "CODE",
+            "Stack": "membership",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "product-catalog-CODE",
+        "Handler": "index.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "productcataloglambdaServiceRole73D35F26",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "productcataloglambdaServiceRole73D35F26": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/CODE/product-catalog/product-catalog.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/product-catalog",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/product-catalog/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A",
+        "Roles": [
+          {
+            "Ref": "productcataloglambdaServiceRole73D35F26",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "productcataloglambdaproductcatalogCODEANY10250DA6": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "productcataloglambdaD4E642A9",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "productcataloglambdaproductcatalogCODEF63EDF89",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "productcataloglambdaproductcatalogCODEANYApiPermissionTestproductcatalogCODEproductcataloglambdaproductcatalogCODE8AFC27D7ANYFF9F4DE1": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productcataloglambdaD4E642A9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productcataloglambdaproductcatalogCODEANYApiPermissionproductcatalogCODEproductcataloglambdaproductcatalogCODE8AFC27D7ANY9474295D": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productcataloglambdaD4E642A9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+              },
+              "/",
+              {
+                "Ref": "productcataloglambdaproductcatalogCODEDeploymentStageCODE11DD6A2E",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productcataloglambdaproductcatalogCODEAccount8B63F12E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "productcataloglambdaproductcatalogCODEF63EDF89",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "productcataloglambdaproductcatalogCODECloudWatchRole66FF0B36",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "productcataloglambdaproductcatalogCODECloudWatchRole66FF0B36": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "productcataloglambdaproductcatalogCODEDeployment39C7A3E7c5cdbe27d5916e4e44b6925773be84fc": {
+      "DependsOn": [
+        "productcataloglambdaproductcatalogCODEproxyANYE666890B",
+        "productcataloglambdaproductcatalogCODEproxy68A3CB7A",
+        "productcataloglambdaproductcatalogCODEANY10250DA6",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "productcataloglambdaproductcatalogCODEDeploymentStageCODE11DD6A2E": {
+      "DependsOn": [
+        "productcataloglambdaproductcatalogCODEAccount8B63F12E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "productcataloglambdaproductcatalogCODEDeployment39C7A3E7c5cdbe27d5916e4e44b6925773be84fc",
+        },
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "productcataloglambdaproductcatalogCODEF63EDF89": {
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "Name": "product-catalog-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "productcataloglambdaproductcatalogCODEproxy68A3CB7A": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "productcataloglambdaproductcatalogCODEF63EDF89",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "productcataloglambdaproductcatalogCODEproxyANYApiPermissionTestproductcatalogCODEproductcataloglambdaproductcatalogCODE8AFC27D7ANYproxyE77F9E6C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productcataloglambdaD4E642A9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productcataloglambdaproductcatalogCODEproxyANYApiPermissionproductcatalogCODEproductcataloglambdaproductcatalogCODE8AFC27D7ANYproxy6003B9A6": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productcataloglambdaD4E642A9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+              },
+              "/",
+              {
+                "Ref": "productcataloglambdaproductcatalogCODEDeploymentStageCODE11DD6A2E",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productcataloglambdaproductcatalogCODEproxyANYE666890B": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "productcataloglambdaD4E642A9",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "productcataloglambdaproductcatalogCODEproxy68A3CB7A",
+        },
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogCODEF63EDF89",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+  },
+}
+`;
+
+exports[`The Product catalog stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuApiGateway5xxPercentageAlarm",
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "productcataloglambdaproductcatalogPRODEndpoint2EAAB9A3": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "productcataloglambdaproductcatalogPRODDeploymentStagePRODA44F63D4",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGateway4XXAlarmCDKC83EACCA": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - Product catalog received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "PRODUCT-CATALOG-PROD API gateway 4XX response",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "product-catalog-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "4XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ApiGatewayHigh5xxPercentageAlarmProductcatalogC8CB36EB": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "product-catalog exceeded 5% error rate",
+        "AlarmName": "High 5XX error percentage from product-catalog (ApiGateway) in PROD",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "EvaluationPeriods": 1,
+        "Metrics": [
+          {
+            "Expression": "100*m1/m2",
+            "Id": "expr_1",
+            "Label": "% of 5XX responses served for product-catalog",
+          },
+          {
+            "Id": "m1",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "product-catalog-PROD",
+                  },
+                ],
+                "MetricName": "5XXError",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "m2",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "product-catalog-PROD",
+                  },
+                ],
+                "MetricName": "Count",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "SampleCount",
+            },
+            "ReturnData": false,
+          },
+        ],
+        "Threshold": 5,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+        },
+        "Stage": {
+          "Ref": "productcataloglambdaproductcatalogPRODDeploymentStagePRODA44F63D4",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "product-catalog.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "product-catalog.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "S3inlinepolicy3B07399A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/product-catalog/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "productcataloglambdaServiceRole73D35F26",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "productcataloglambdaD4E642A9": {
+      "DependsOn": [
+        "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A",
+        "productcataloglambdaServiceRole73D35F26",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/PROD/product-catalog/product-catalog.zip",
+        },
+        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Environment": {
+          "Variables": {
+            "APP": "product-catalog",
+            "App": "product-catalog",
+            "STACK": "membership",
+            "STAGE": "PROD",
+            "Stack": "membership",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "product-catalog-PROD",
+        "Handler": "index.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "productcataloglambdaServiceRole73D35F26",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "productcataloglambdaServiceRole73D35F26": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/PROD/product-catalog/product-catalog.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/product-catalog",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/product-catalog/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "productcataloglambdaServiceRoleDefaultPolicyA2C1FA8A",
+        "Roles": [
+          {
+            "Ref": "productcataloglambdaServiceRole73D35F26",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "productcataloglambdaproductcatalogPRODANY4DCD7457": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "productcataloglambdaD4E642A9",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "productcataloglambdaproductcatalogPRODFECB395A",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "productcataloglambdaproductcatalogPRODANYApiPermissionTestproductcatalogPRODproductcataloglambdaproductcatalogPROD4A792D7DANY1F5351E0": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productcataloglambdaD4E642A9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productcataloglambdaproductcatalogPRODANYApiPermissionproductcatalogPRODproductcataloglambdaproductcatalogPROD4A792D7DANY2BA95D7D": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productcataloglambdaD4E642A9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+              },
+              "/",
+              {
+                "Ref": "productcataloglambdaproductcatalogPRODDeploymentStagePRODA44F63D4",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productcataloglambdaproductcatalogPRODAccount3339CDC5": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "productcataloglambdaproductcatalogPRODFECB395A",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "productcataloglambdaproductcatalogPRODCloudWatchRoleE603CEA1",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "productcataloglambdaproductcatalogPRODCloudWatchRoleE603CEA1": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "productcataloglambdaproductcatalogPRODDeployment2056690Fd0c458de807035c085c41611bd0eb53e": {
+      "DependsOn": [
+        "productcataloglambdaproductcatalogPRODproxyANY3E0E8535",
+        "productcataloglambdaproductcatalogPRODproxyAB3702C5",
+        "productcataloglambdaproductcatalogPRODANY4DCD7457",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "productcataloglambdaproductcatalogPRODDeploymentStagePRODA44F63D4": {
+      "DependsOn": [
+        "productcataloglambdaproductcatalogPRODAccount3339CDC5",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "productcataloglambdaproductcatalogPRODDeployment2056690Fd0c458de807035c085c41611bd0eb53e",
+        },
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "productcataloglambdaproductcatalogPRODFECB395A": {
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "Name": "product-catalog-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "productcataloglambdaproductcatalogPRODproxyAB3702C5": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "productcataloglambdaproductcatalogPRODFECB395A",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "productcataloglambdaproductcatalogPRODproxyANY3E0E8535": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "productcataloglambdaD4E642A9",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "productcataloglambdaproductcatalogPRODproxyAB3702C5",
+        },
+        "RestApiId": {
+          "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "productcataloglambdaproductcatalogPRODproxyANYApiPermissionTestproductcatalogPRODproductcataloglambdaproductcatalogPROD4A792D7DANYproxyB261474C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productcataloglambdaD4E642A9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productcataloglambdaproductcatalogPRODproxyANYApiPermissionproductcatalogPRODproductcataloglambdaproductcatalogPROD4A792D7DANYproxyB41BF766": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productcataloglambdaD4E642A9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productcataloglambdaproductcatalogPRODFECB395A",
+              },
+              "/",
+              {
+                "Ref": "productcataloglambdaproductcatalogPRODDeploymentStagePRODA44F63D4",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+  },
+}
+`;
