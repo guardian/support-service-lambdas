@@ -165,7 +165,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const createBatches = new Pass(this, 'CreateBatches', {
 			parameters: {
-				'array2.$': JsonPath.arrayRange(0, 20, 4),
+				array2: JsonPath.arrayRange(0, 20, 4),
 			},
 		});
 
@@ -180,6 +180,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			new Pass(this, 'fdsf', {}),
 		);
 
+		// JsonPath.arra
 		new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
 			...lambdaDefaultConfig,
 			timeout: Duration.minutes(15),
