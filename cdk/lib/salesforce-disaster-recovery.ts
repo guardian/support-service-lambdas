@@ -187,7 +187,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const mapStateTest = new Map(this, 'Map test', {
 			stateName: 'test name',
-			itemsPath: '$.array2',
+			// itemsPath: '$.array2',
+			itemsPath: JsonPath.stringAt('$.array2'),
 			maxConcurrency: 1,
 		}).iterator(
 			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
