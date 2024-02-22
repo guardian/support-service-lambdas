@@ -17,7 +17,7 @@ deployments:
   support-service-lambdas:
     type: aws-lambda
     parameters:
-      fileName: support-service-lambdas.jar
+      fileName: zuora-callout-apis.jar
       bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
