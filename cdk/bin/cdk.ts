@@ -3,9 +3,9 @@ import { App } from 'aws-cdk-lib';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
+import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
-import { ProductCatalog } from '../lib/product-catalog';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
@@ -121,11 +121,11 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
 		'events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3',
 	salesforceQueryWaitSeconds: 30,
 });
-new ProductCatalog(app, 'product-catalog-CODE', {
+new GenerateProductCatalog(app, 'generate-product-catalog-CODE', {
 	stack: 'support',
 	stage: 'CODE',
 });
-new ProductCatalog(app, 'product-catalog-PROD', {
+new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });

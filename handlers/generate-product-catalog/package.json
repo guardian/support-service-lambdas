@@ -1,12 +1,12 @@
 {
-  "name": "product-catalog",
+  "name": "generate-product-catalog",
   "scripts": {
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
     "lint": "eslint src/**/*.ts",
-    "package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr product-catalog.zip ./*.js"
+    "package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr generate-product-catalog.zip ./*.js"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.129"

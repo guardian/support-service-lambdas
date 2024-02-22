@@ -8,13 +8,13 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { S3EventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 
-export interface ProductCatalogProps extends GuStackProps {
+export interface GenerateProductCatalogProps extends GuStackProps {
 	stack: string;
 	stage: string;
 }
 
-export class ProductCatalog extends GuStack {
-	constructor(scope: App, id: string, props: ProductCatalogProps) {
+export class GenerateProductCatalog extends GuStack {
+	constructor(scope: App, id: string, props: GenerateProductCatalogProps) {
 		super(scope, id, props);
 
 		const app = 'generate-product-catalog';

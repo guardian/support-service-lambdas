@@ -5,16 +5,16 @@ import {
 	supportCertificateId,
 	supportHostedZoneId,
 } from '../bin/cdk';
-import { ProductCatalog } from './product-catalog';
+import { GenerateProductCatalog } from './generate-product-catalog';
 
 describe('The Product catalog stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const codeStack = new ProductCatalog(app, 'product-catalog-CODE', {
+		const codeStack = new GenerateProductCatalog(app, 'product-catalog-CODE', {
 			stack: 'membership',
 			stage: 'CODE',
 		});
-		const prodStack = new ProductCatalog(app, 'product-catalog-PROD', {
+		const prodStack = new GenerateProductCatalog(app, 'product-catalog-PROD', {
 			stack: 'membership',
 			stage: 'PROD',
 		});
