@@ -64,7 +64,7 @@ importers:
         specifier: ^8.10.129
         version: 8.10.133
 
-  handlers/product-catalog:
+  handlers/generate-product-catalog:
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.129
