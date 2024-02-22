@@ -163,7 +163,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 		);
 
 		const createBatches = new Pass(this, 'CreateBatches', {
-			result: Result.fromString(JsonPath.arrayRange(0, 20, 4)),
+			parameters: {
+				array: JsonPath.arrayRange(0, 20, 4),
+			},
 			// result: Result.fromArray(
 			// 	JsonPath.stringToJson(JsonPath.arrayRange(0, 20, 4)),
 			// ),
@@ -184,6 +186,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const mapStateTest = new Map(this, 'testtestmap', {
 			stateName: 'test name',
+			itemsPath: '$.array',
 			maxConcurrency: 1,
 		}).iterator(
 			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
