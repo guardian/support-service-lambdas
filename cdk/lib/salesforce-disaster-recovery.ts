@@ -14,7 +14,7 @@ import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
-	// Map,
+	Map,
 	Pass,
 	Result,
 	StateMachine,
@@ -167,7 +167,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			// resultPath: '$.subObject',
 		});
 
-		const passState = new Pass(this, 'slkdjfd', {});
+		// const passState = new Pass(this, 'slkdjfd', {});
 
 		// const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
 		// 	stateName: 'test name',
@@ -231,6 +231,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 			],
 		});
 
+		const mapStateTest = new Map(this, 'testtestmap', {
+			stateName: 'test name',
+			itemsPath: '$.batches',
+			maxConcurrency: 1,
+		}).iterator(
+			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
+			new Pass(this, 'fdsf', {}),
+		);
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -246,7 +255,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
 										.next(createBatches)
-										.next(passState),
+										.next(mapStateTest),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
