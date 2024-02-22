@@ -39,11 +39,16 @@ export class GenerateProductCatalog extends GuStack {
 			app: app,
 		});
 
-		const bucket = new Bucket(this, 'gu-product-catalog');
+		const bucket = new Bucket(this, 'gu-product-catalog', {
+			bucketName: 'gu-product-catalog',
+		});
+
+		const s3Folder = `PROD/Zuora-${this.stage}/`;
+
 		lambda.addEventSource(
 			new S3EventSource(bucket, {
 				events: [EventType.OBJECT_CREATED],
-				filters: [{ prefix: `${this.stage}/` }],
+				filters: [{ prefix: s3Folder }],
 			}),
 		);
 
@@ -60,9 +65,7 @@ export class GenerateProductCatalog extends GuStack {
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:PutObject'],
-					resources: [
-						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/`,
-					],
+					resources: [`arn:aws:s3::*:gu-zuora-catalog/${s3Folder}/`],
 				}),
 			],
 		});
