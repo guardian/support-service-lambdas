@@ -17,7 +17,7 @@ export class ProductCatalog extends GuStack {
 	constructor(scope: App, id: string, props: ProductCatalogProps) {
 		super(scope, id, props);
 
-		const app = 'product-catalog';
+		const app = 'generate-product-catalog';
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
@@ -46,34 +46,6 @@ export class ProductCatalog extends GuStack {
 				filters: [{ prefix: `${this.stage}/` }],
 			}),
 		);
-
-		// // ---- API-triggered lambda functions ---- //
-		// const apiLambda = new GuApiLambda(this, `${app}-lambda`, {
-		// 	description:
-		// 		'An API Gateway triggered lambda generated in the support-service-lambdas repo',
-		// 	functionName: nameWithStage,
-		// 	fileName: `${app}.zip`,
-		// 	handler: 'index.handler',
-		// 	runtime: Runtime.NODEJS_18_X,
-		// 	memorySize: 1024,
-		// 	timeout: Duration.seconds(300),
-		// 	environment: commonEnvironmentVariables,
-		// 	// Create an alarm
-		// 	monitoringConfiguration: {
-		// 		http5xxAlarm: { tolerated5xxPercentage: 5 },
-		// 		snsTopicName: 'retention-dev',
-		// 	},
-		// 	app: app,
-		// 	api: {
-		// 		id: nameWithStage,
-		// 		restApiName: nameWithStage,
-		// 		description: 'API Gateway created by CDK',
-		// 		proxy: true,
-		// 		deployOptions: {
-		// 			stageName: this.stage,
-		// 		},
-		// 	},
-		// });
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [
