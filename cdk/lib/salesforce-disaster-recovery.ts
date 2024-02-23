@@ -182,7 +182,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const bacthUpdateZuoraAccounts = new Map(this, 'BacthUpdateZuoraAccounts', {
 			stateName: 'Bacth Update Zuora Accounts',
-			itemsPath: '$.chunks',
+			itemsPath: '$.Payload.chunks',
 			maxConcurrency: maxConcurrency,
 		}).iterator(
 			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
