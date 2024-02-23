@@ -185,7 +185,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			'BatchUpdateZuoraAccounts2',
 			{
 				stateName: 'Batch Update Zuora Accounts',
-				itemsPath: '$.Payload.body',
+				itemsPath: '$.Payload',
 				maxConcurrency: maxConcurrency,
 			},
 		).iterator(

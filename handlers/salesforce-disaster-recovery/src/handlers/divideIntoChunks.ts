@@ -20,7 +20,6 @@ export const handler = (event: {
 
 		chunks.push(chunk);
 	}
-	// console.log(chunks);
 
-	return { chunks };
+	return chunks;
 };
