@@ -60,6 +60,7 @@ export class GenerateProductCatalog extends GuStack {
 			encryption: BucketEncryption.S3_MANAGED,
 			enforceSSL: true,
 			versioned: true,
+			publicReadAccess: true,
 		});
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
