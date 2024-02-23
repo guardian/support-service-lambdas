@@ -1,4 +1,4 @@
-export const handler = async (event: {
+export const handler = (event: {
 	filePath: string;
 	concurrency: number;
 	numberOfRecords: number;
@@ -22,9 +22,5 @@ export const handler = async (event: {
 	}
 	console.log(chunks);
 
-	return {
-		test: 'sldkjf',
-	};
-
-	// return { body: chunks };
+	return { chunks: JSON.stringify(chunks) };
 };
