@@ -176,9 +176,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					batches: JsonPath.arrayRange(
 						0,
 						JsonPath.numberAt('$.Payload.numberOfRecords'),
-						// Math.ceil(
-						JsonPath.numberAt(`$.Payload.numberOfRecords / ${MAX_CONCURRENCY}`),
-						// ),
+						5000,
 					),
 				},
 			},
