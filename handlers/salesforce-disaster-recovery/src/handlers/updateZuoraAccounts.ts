@@ -1,56 +1,49 @@
-import { type Stage } from '@modules/stage';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { type Context } from 'aws-lambda';
-import {
-	batchUpdateZuoraAccounts,
-	convertCsvToAccountRows,
-	getFileFromS3,
-} from '../services';
+// import { type Stage } from '@modules/stage';
+// import { ZuoraClient } from '@modules/zuora/zuoraClient';
+// import {
+// 	batchUpdateZuoraAccounts,
+// 	convertCsvToAccountRows,
+// 	getFileFromS3,
+// } from '../services';
 
-export const handler = async (
-	event: { filePath: string },
-	context: Context,
-) => {
-	const stage = process.env.STAGE;
-	const bucketName = process.env.S3_BUCKET;
+export const handler = (event: {
+	filePath: string;
+	startIndex: number;
+	chunkSize: number;
+}) => {
+	console.log(event);
+	return;
+	// const stage = process.env.STAGE;
+	// const bucketName = process.env.S3_BUCKET;
 
-	if (!stage || !bucketName) {
-		throw new Error('Environment variables not set');
-	}
+	// if (!stage || !bucketName) {
+	// 	throw new Error('Environment variables not set');
+	// }
 
-	const fileContent = await getFileFromS3({
-		bucketName,
-		filePath: event.filePath,
-	});
+	// const fileContent = await getFileFromS3({
+	// 	bucketName,
+	// 	filePath: event.filePath,
+	// });
 
-	const rows = convertCsvToAccountRows({ csvString: fileContent }).filter(
-		(row) => row.Zuora__Zuora_Id__c,
-	);
+	// const rows = convertCsvToAccountRows({ csvString: fileContent }).filter(
+	// 	(row) => row.Zuora__Zuora_Id__c,
+	// );
 
-	const zuoraClient = await ZuoraClient.create(stage as Stage);
+	// const zuoraClient = await ZuoraClient.create(stage as Stage);
 
-	const BATCH_SIZE = 50;
-	const THIRTY_SECONDS = 30000;
+	// const startIndex = event.startIndex;
+	// const endIndex = Math.min(startIndex + event.chunkSize, rows.length - 1);
 
-	for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-		console.log('Index: ', i / BATCH_SIZE);
-		const batch = rows.slice(i, i + BATCH_SIZE);
+	// for (let i = startIndex; i < endIndex; i += 50) {
+	// 	const batch = rows.slice(i, i + 50);
 
-		await batchUpdateZuoraAccounts({
-			zuoraClient,
-			accountRows: batch,
-		});
+	// 	await batchUpdateZuoraAccounts({
+	// 		zuoraClient,
+	// 		accountRows: batch,
+	// 	});
+	// }
 
-		if (context.getRemainingTimeInMillis() < THIRTY_SECONDS) {
-			return {
-				StatusCode: 200,
-				TemporaryField: 'TIMEOUT',
-			};
-		}
-	}
-
-	return {
-		StatusCode: 200,
-		TemporaryField: 'COMPLETE WITHIN 15 MINS',
-	};
+	// return {
+	// 	StatusCode: 200,
+	// };
 };

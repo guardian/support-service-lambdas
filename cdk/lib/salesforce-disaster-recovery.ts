@@ -124,7 +124,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			this,
 			'SaveSalesforceQueryResultToS3',
 			{
-				// inputPath: '$.ResponseBody',
 				lambdaFunction: new GuLambdaFunction(
 					this,
 					'SaveSalesforceQueryResultToS3Lambda',
@@ -165,51 +164,57 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const MAX_CONCURRENCY = 10;
+		const maxConcurrency = 10;
 
-		const divideProcessingInBatches = new Pass(
-			this,
-			'DivideProcessingInBatches',
-			{
-				stateName: `Divide Processing In ${MAX_CONCURRENCY} Batches`,
-				parameters: {
-					batches: JsonPath.arrayRange(1, MAX_CONCURRENCY, 1),
-				},
-			},
-		);
+		const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
+			stateName: `Divide Into Chunks`,
+			lambdaFunction: new GuLambdaFunction(this, 'divideIntoChunksLambda', {
+				...lambdaDefaultConfig,
+				handler: 'divideIntoChunks.handler',
+				functionName: `divide-into-chunks-${this.stage}`,
+			}),
+			payload: TaskInput.fromObject({
+				filePath: JsonPath.stringAt('$.Payload.filePath'),
+				concurrency: maxConcurrency,
+				numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
+			}),
+		});
 
 		const bacthUpdateZuoraAccounts = new Map(this, 'BacthUpdateZuoraAccounts', {
 			stateName: 'Bacth Update Zuora Accounts',
-			itemsPath: '$.batches',
-			maxConcurrency: MAX_CONCURRENCY,
+			itemsPath: '$.chunks',
+			maxConcurrency: maxConcurrency,
 		}).iterator(
-			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
-			new Pass(this, 'Batch', {}),
+			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
+				lambdaFunction: new GuLambdaFunction(
+					this,
+					'UpdateZuoraAccountsLambda',
+					{
+						...lambdaDefaultConfig,
+						timeout: Duration.minutes(15),
+						memorySize: 10240,
+						handler: 'updateZuoraAccounts.handler',
+						functionName: `update-zuora-accounts-${this.stage}`,
+						environment: {
+							...lambdaDefaultConfig.environment,
+							S3_BUCKET: bucket.bucketName,
+						},
+						initialPolicy: [
+							new PolicyStatement({
+								actions: ['secretsmanager:GetSecretValue'],
+								resources: [
+									`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+								],
+							}),
+							new PolicyStatement({
+								actions: ['s3:GetObject'],
+								resources: [bucket.arnForObjects('*')],
+							}),
+						],
+					},
+				),
+			}),
 		);
-
-		new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
-			...lambdaDefaultConfig,
-			timeout: Duration.minutes(15),
-			memorySize: 10240,
-			handler: 'updateZuoraAccounts.handler',
-			functionName: `update-zuora-accounts-${this.stage}`,
-			environment: {
-				...lambdaDefaultConfig.environment,
-				S3_BUCKET: bucket.bucketName,
-			},
-			initialPolicy: [
-				new PolicyStatement({
-					actions: ['secretsmanager:GetSecretValue'],
-					resources: [
-						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-					],
-				}),
-				new PolicyStatement({
-					actions: ['s3:GetObject'],
-					resources: [bucket.arnForObjects('*')],
-				}),
-			],
-		});
 
 		const stateMachine = new StateMachine(
 			this,
@@ -225,7 +230,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
-										.next(divideProcessingInBatches)
+										.next(divideIntoChunks)
 										.next(bacthUpdateZuoraAccounts),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
