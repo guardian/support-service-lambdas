@@ -21,6 +21,6 @@ deployments:
       prefixStack: false
       functionNames:
         - save-salesforce-query-result-to-s3-
-        - update-zuora-accounts-
+        - update-zuora-accounts-2-
         - divide-into-chunks-2-
     dependencies: [salesforce-disaster-recovery-cloudformation]

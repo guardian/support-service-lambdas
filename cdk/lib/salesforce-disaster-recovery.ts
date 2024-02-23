@@ -198,7 +198,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						timeout: Duration.minutes(15),
 						memorySize: 10240,
 						handler: 'updateZuoraAccounts.handler',
-						functionName: `update-zuora-accounts-${this.stage}`,
+						functionName: `update-zuora-accounts-2-${this.stage}`,
 						environment: {
 							...lambdaDefaultConfig.environment,
 							S3_BUCKET: bucket.bucketName,
