@@ -1,5 +1,5 @@
 import type { Catalog } from '@modules/catalog/catalogSchema';
-import { generateProductCatalogData } from './generateProductCatalogData';
+import { generateProductCatalog } from './generateProductCatalog';
 import type { typeObject } from './types/typeObject';
 
 type ZuoraProductKey = keyof typeof typeObject;
@@ -40,14 +40,14 @@ type ZuoraProduct<ZP extends ZuoraProductKey> = {
 	};
 };
 
-export type ProductCatalogData = {
+export type ProductCatalog = {
 	products: {
 		[ZP in ZuoraProductKey]: ZuoraProduct<ZP>;
 	};
 };
 
-export class ProductCatalog {
-	constructor(private catalogData: ProductCatalogData) {}
+export class ProductCatalogHelper {
+	constructor(private catalogData: ProductCatalog) {}
 
 	getProductRatePlan = <
 		ZP extends ZuoraProductKey,
@@ -85,6 +85,6 @@ export class ProductCatalog {
 }
 
 export const getProductCatalogFromZuoraCatalog = (catalog: Catalog) => {
-	const catalogData = generateProductCatalogData(catalog);
-	return new ProductCatalog(catalogData);
+	const catalogData = generateProductCatalog(catalog);
+	return new ProductCatalogHelper(catalogData);
 };

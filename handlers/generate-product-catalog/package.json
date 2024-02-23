@@ -9,6 +9,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr generate-product-catalog.zip ./*.js"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.129"
+    "@types/aws-lambda": "^8.10.129",
+    "@aws-sdk/client-s3": "3.451.0"
   }
 }

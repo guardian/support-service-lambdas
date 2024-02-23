@@ -13,6 +13,8 @@ export interface GenerateProductCatalogProps extends GuStackProps {
 	stage: string;
 }
 
+export const productCatalogBucketName: string = 'gu-product-catalog';
+
 export class GenerateProductCatalog extends GuStack {
 	constructor(scope: App, id: string, props: GenerateProductCatalogProps) {
 		super(scope, id, props);
@@ -39,13 +41,12 @@ export class GenerateProductCatalog extends GuStack {
 			app: app,
 		});
 
+		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}/`;
 		const zuoraCatalogBucket = Bucket.fromBucketName(
 			this,
 			'gu-zuora-catalog',
 			'gu-zuora-catalog',
 		);
-
-		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}/`;
 
 		zuoraCatalogBucket.addEventNotification(
 			EventType.OBJECT_CREATED,
@@ -55,8 +56,8 @@ export class GenerateProductCatalog extends GuStack {
 			},
 		);
 
-		const productCatalogBucket = new Bucket(this, 'gu-product-catalog', {
-			bucketName: 'gu-product-catalog',
+		const productCatalogBucket = new Bucket(this, productCatalogBucketName, {
+			bucketName: productCatalogBucketName,
 			encryption: BucketEncryption.S3_MANAGED,
 			enforceSSL: true,
 			versioned: false,
