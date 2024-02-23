@@ -5,7 +5,6 @@ import { generateProductCatalog } from '@modules/product/generateProductCatalog'
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler, S3CreateEvent } from 'aws-lambda';
-import { productCatalogBucketName } from '../../../cdk/lib/generate-product-catalog';
 
 const client = new S3Client(awsConfig);
 export const handler: Handler = async (event: S3CreateEvent) => {
@@ -18,6 +17,8 @@ export const writeProductCatalogToS3 = async (stage: Stage) => {
 	console.log('writeProductCatalogToS3');
 	const zuoraCatalog = await getCatalogFromS3(stage);
 	const productCatalog = generateProductCatalog(zuoraCatalog);
+	//TODO: take this from the CDK definition
+	const productCatalogBucketName = 'gu-product-catalog';
 	const command = new PutObjectCommand({
 		Bucket: productCatalogBucketName,
 		Key: `${stage}/product-catalog.json`,
