@@ -215,6 +215,11 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Effect": "Allow",
               "Resource": "*",
             },
+            {
+              "Action": "s3:GetBucketNotification",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -236,13 +241,18 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3::*:membership-dist/membership/CODE/generate-product-catalog/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/",
+                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE//",
               ],
             },
             {
               "Action": "s3:PutObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE//",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "guproductcatalog6FBFBC20",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -471,6 +481,15 @@ def submit_response(event: dict, context, response_status: str, error_message: s
     "guproductcatalog6FBFBC20": {
       "DeletionPolicy": "Retain",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "BucketName": "gu-product-catalog",
         "Tags": [
           {
@@ -494,7 +513,54 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "guproductcatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF64ACBEDAB": {
+    "guproductcatalogPolicyE9A98A46": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "guproductcatalog6FBFBC20",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "guproductcatalog6FBFBC20",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "guproductcatalog6FBFBC20",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "guzuoracatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF629ECA47D": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -508,23 +574,27 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           "Ref": "AWS::AccountId",
         },
         "SourceArn": {
-          "Fn::GetAtt": [
-            "guproductcatalog6FBFBC20",
-            "Arn",
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":s3:::gu-zuora-catalog",
+            ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "guproductcatalogNotifications133DB1B4": {
+    "guzuoracatalogNotifications2A4398B4": {
       "DependsOn": [
-        "guproductcatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF64ACBEDAB",
+        "guzuoracatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF629ECA47D",
       ],
       "Properties": {
-        "BucketName": {
-          "Ref": "guproductcatalog6FBFBC20",
-        },
-        "Managed": true,
+        "BucketName": "gu-zuora-catalog",
+        "Managed": false,
         "NotificationConfiguration": {
           "LambdaFunctionConfigurations": [
             {
@@ -778,6 +848,11 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Effect": "Allow",
               "Resource": "*",
             },
+            {
+              "Action": "s3:GetBucketNotification",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -799,13 +874,18 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3::*:membership-dist/membership/PROD/generate-product-catalog/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/",
+                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD//",
               ],
             },
             {
               "Action": "s3:PutObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD//",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "guproductcatalog6FBFBC20",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -1034,6 +1114,15 @@ def submit_response(event: dict, context, response_status: str, error_message: s
     "guproductcatalog6FBFBC20": {
       "DeletionPolicy": "Retain",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "BucketName": "gu-product-catalog",
         "Tags": [
           {
@@ -1057,7 +1146,54 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "guproductcatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B388EA5A5": {
+    "guproductcatalogPolicyE9A98A46": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "guproductcatalog6FBFBC20",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "guproductcatalog6FBFBC20",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "guproductcatalog6FBFBC20",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "guzuoracatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B3B2A0C82": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1071,23 +1207,27 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           "Ref": "AWS::AccountId",
         },
         "SourceArn": {
-          "Fn::GetAtt": [
-            "guproductcatalog6FBFBC20",
-            "Arn",
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":s3:::gu-zuora-catalog",
+            ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "guproductcatalogNotifications133DB1B4": {
+    "guzuoracatalogNotifications2A4398B4": {
       "DependsOn": [
-        "guproductcatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B388EA5A5",
+        "guzuoracatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B3B2A0C82",
       ],
       "Properties": {
-        "BucketName": {
-          "Ref": "guproductcatalog6FBFBC20",
-        },
-        "Managed": true,
+        "BucketName": "gu-zuora-catalog",
+        "Managed": false,
         "NotificationConfiguration": {
           "LambdaFunctionConfigurations": [
             {

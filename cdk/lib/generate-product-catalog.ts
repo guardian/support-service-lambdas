@@ -5,8 +5,8 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { S3EventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
+import { Bucket, BucketEncryption, EventType } from 'aws-cdk-lib/aws-s3';
+import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 
 export interface GenerateProductCatalogProps extends GuStackProps {
 	stack: string;
@@ -39,18 +39,28 @@ export class GenerateProductCatalog extends GuStack {
 			app: app,
 		});
 
-		const bucket = new Bucket(this, 'gu-product-catalog', {
-			bucketName: 'gu-product-catalog',
-		});
-
-		const s3Folder = `PROD/Zuora-${this.stage}/`;
-
-		lambda.addEventSource(
-			new S3EventSource(bucket, {
-				events: [EventType.OBJECT_CREATED],
-				filters: [{ prefix: s3Folder }],
-			}),
+		const zuoraCatalogBucket = Bucket.fromBucketName(
+			this,
+			'gu-zuora-catalog',
+			'gu-zuora-catalog',
 		);
+
+		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}/`;
+
+		zuoraCatalogBucket.addEventNotification(
+			EventType.OBJECT_CREATED,
+			new LambdaDestination(lambda),
+			{
+				prefix: zuoraCatalogFolder,
+			},
+		);
+
+		const productCatalogBucket = new Bucket(this, 'gu-product-catalog', {
+			bucketName: 'gu-product-catalog',
+			encryption: BucketEncryption.S3_MANAGED,
+			enforceSSL: true,
+			versioned: false,
+		});
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [
@@ -59,13 +69,13 @@ export class GenerateProductCatalog extends GuStack {
 					actions: ['s3:GetObject'],
 					resources: [
 						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/`,
+						`arn:aws:s3::*:gu-zuora-catalog/${zuoraCatalogFolder}/`,
 					],
 				}),
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:PutObject'],
-					resources: [`arn:aws:s3::*:gu-zuora-catalog/${s3Folder}/`],
+					resources: [productCatalogBucket.bucketArn],
 				}),
 			],
 		});
