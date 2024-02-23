@@ -17,12 +17,10 @@ describe('Handler', () => {
 	it('should handle successfully', () => {
 		const result = handler(mockEvent);
 
-		expect(result).toEqual({
-			chunks: [
-				{ filePath: 'filePath', startIndex: 0, chunkSize: 4 },
-				{ filePath: 'filePath', startIndex: 4, chunkSize: 4 },
-				{ filePath: 'filePath', startIndex: 8, chunkSize: 2 },
-			],
-		});
+		expect(result).toEqual([
+			{ filePath: 'filePath', startIndex: 0, chunkSize: 4 },
+			{ filePath: 'filePath', startIndex: 4, chunkSize: 4 },
+			{ filePath: 'filePath', startIndex: 8, chunkSize: 2 },
+		]);
 	});
 });
