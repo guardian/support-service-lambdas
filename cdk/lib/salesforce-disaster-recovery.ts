@@ -157,30 +157,33 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 				payload: TaskInput.fromObject({
 					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
+					numberOfRecords: JsonPath.numberAt(
+						'$.ResponseBody.numberRecordsProcessed',
+					),
 					executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
 				}),
-				// resultSelector
 			},
 		);
 
-		const createBatches = new Pass(this, 'CreateBatches', {
-			parameters: {
-				array2: JsonPath.arrayRange(0, 20, 4),
+		const divideProcessingInBatches = new Pass(
+			this,
+			'DivideProcessingInBatches',
+			{
+				parameters: {
+					batches: JsonPath.arrayRange(0, 20, 4),
+				},
 			},
-		});
+		);
 
-		const passState = new Pass(this, 'Pass test', {});
-
-		const mapStateTest = new Map(this, 'Map test', {
+		const bacthUpdateZuoraAccounts = new Map(this, 'BacthUpdateZuoraAccounts', {
 			stateName: 'test name',
-			itemsPath: '$.array2',
+			itemsPath: '$.batches',
 			maxConcurrency: 1,
 		}).iterator(
 			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
 			new Pass(this, 'fdsf', {}),
 		);
 
-		// JsonPath.arra
 		new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
 			...lambdaDefaultConfig,
 			timeout: Duration.minutes(15),
@@ -219,9 +222,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
-										.next(createBatches)
-										.next(passState)
-										.next(mapStateTest),
+										.next(divideProcessingInBatches)
+										.next(bacthUpdateZuoraAccounts),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
