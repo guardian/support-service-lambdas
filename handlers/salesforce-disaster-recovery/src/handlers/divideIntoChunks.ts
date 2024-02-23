@@ -23,5 +23,5 @@ export const handler = (event: {
 	}
 	console.log(chunks);
 
-	return { chunks };
+	return { body: chunks };
 };

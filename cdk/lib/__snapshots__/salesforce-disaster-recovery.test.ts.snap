@@ -154,6 +154,214 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "DivideIntoChunksLambda4A48F728": {
+      "DependsOn": [
+        "DivideIntoChunksLambdaServiceRoleDefaultPolicy5418EA5E",
+        "DivideIntoChunksLambdaServiceRoleD623E2E2",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/CODE/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "salesforce-disaster-recovery",
+            "STACK": "membership",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "divide-into-chunks-CODE",
+        "Handler": "divideIntoChunks.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "DivideIntoChunksLambdaServiceRoleD623E2E2",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "salesforce-disaster-recovery",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "DivideIntoChunksLambdaServiceRoleD623E2E2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "salesforce-disaster-recovery",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "DivideIntoChunksLambdaServiceRoleDefaultPolicy5418EA5E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/CODE/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/salesforce-disaster-recovery",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/salesforce-disaster-recovery/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "DivideIntoChunksLambdaServiceRoleDefaultPolicy5418EA5E",
+        "Roles": [
+          {
+            "Ref": "DivideIntoChunksLambdaServiceRoleD623E2E2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "SalesforceApiHttpInvoke9D82CE85": {
       "Properties": {
         "PolicyDocument": {
@@ -286,7 +494,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "divideIntoChunksLambda67D3DC82",
+                  "DivideIntoChunksLambda4A48F728",
                   "Arn",
                 ],
               },
@@ -301,7 +509,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.Payload.chunks","MaxConcurrency":10}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.Payload.body","MaxConcurrency":10}}}",
             ],
           ],
         },
@@ -413,7 +621,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "divideIntoChunksLambda67D3DC82",
+                    "DivideIntoChunksLambda4A48F728",
                     "Arn",
                   ],
                 },
@@ -423,7 +631,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "divideIntoChunksLambda67D3DC82",
+                          "DivideIntoChunksLambda4A48F728",
                           "Arn",
                         ],
                       },
@@ -974,214 +1182,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "divideIntoChunksLambda67D3DC82": {
-      "DependsOn": [
-        "divideIntoChunksLambdaServiceRoleDefaultPolicyC1549180",
-        "divideIntoChunksLambdaServiceRoleA4DB5B2D",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/CODE/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "salesforce-disaster-recovery",
-            "STACK": "membership",
-            "STAGE": "CODE",
-          },
-        },
-        "FunctionName": "divide-into-chunks-CODE",
-        "Handler": "divideIntoChunks.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "divideIntoChunksLambdaServiceRoleA4DB5B2D",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "divideIntoChunksLambdaServiceRoleA4DB5B2D": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "divideIntoChunksLambdaServiceRoleDefaultPolicyC1549180": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/CODE/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/salesforce-disaster-recovery",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/salesforce-disaster-recovery/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "divideIntoChunksLambdaServiceRoleDefaultPolicyC1549180",
-        "Roles": [
-          {
-            "Ref": "divideIntoChunksLambdaServiceRoleA4DB5B2D",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
   },
 }
 `;
@@ -1340,6 +1340,214 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "DivideIntoChunksLambda4A48F728": {
+      "DependsOn": [
+        "DivideIntoChunksLambdaServiceRoleDefaultPolicy5418EA5E",
+        "DivideIntoChunksLambdaServiceRoleD623E2E2",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/PROD/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "salesforce-disaster-recovery",
+            "STACK": "membership",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "divide-into-chunks-PROD",
+        "Handler": "divideIntoChunks.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "DivideIntoChunksLambdaServiceRoleD623E2E2",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "salesforce-disaster-recovery",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "DivideIntoChunksLambdaServiceRoleD623E2E2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "salesforce-disaster-recovery",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "DivideIntoChunksLambdaServiceRoleDefaultPolicy5418EA5E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/PROD/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/salesforce-disaster-recovery",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/salesforce-disaster-recovery/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "DivideIntoChunksLambdaServiceRoleDefaultPolicy5418EA5E",
+        "Roles": [
+          {
+            "Ref": "DivideIntoChunksLambdaServiceRoleD623E2E2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "SalesforceApiHttpInvoke9D82CE85": {
       "Properties": {
         "PolicyDocument": {
@@ -1472,7 +1680,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "divideIntoChunksLambda67D3DC82",
+                  "DivideIntoChunksLambda4A48F728",
                   "Arn",
                 ],
               },
@@ -1487,7 +1695,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.Payload.chunks","MaxConcurrency":10}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.Payload.body","MaxConcurrency":10}}}",
             ],
           ],
         },
@@ -1599,7 +1807,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "divideIntoChunksLambda67D3DC82",
+                    "DivideIntoChunksLambda4A48F728",
                     "Arn",
                   ],
                 },
@@ -1609,7 +1817,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "divideIntoChunksLambda67D3DC82",
+                          "DivideIntoChunksLambda4A48F728",
                           "Arn",
                         ],
                       },
@@ -2155,214 +2363,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Roles": [
           {
             "Ref": "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "divideIntoChunksLambda67D3DC82": {
-      "DependsOn": [
-        "divideIntoChunksLambdaServiceRoleDefaultPolicyC1549180",
-        "divideIntoChunksLambdaServiceRoleA4DB5B2D",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/PROD/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "salesforce-disaster-recovery",
-            "STACK": "membership",
-            "STAGE": "PROD",
-          },
-        },
-        "FunctionName": "divide-into-chunks-PROD",
-        "Handler": "divideIntoChunks.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "divideIntoChunksLambdaServiceRoleA4DB5B2D",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "divideIntoChunksLambdaServiceRoleA4DB5B2D": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "divideIntoChunksLambdaServiceRoleDefaultPolicyC1549180": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/PROD/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/salesforce-disaster-recovery",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/salesforce-disaster-recovery/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "divideIntoChunksLambdaServiceRoleDefaultPolicyC1549180",
-        "Roles": [
-          {
-            "Ref": "divideIntoChunksLambdaServiceRoleA4DB5B2D",
           },
         ],
       },

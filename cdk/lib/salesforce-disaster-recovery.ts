@@ -168,7 +168,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
 			stateName: `Divide Into Chunks`,
-			lambdaFunction: new GuLambdaFunction(this, 'divideIntoChunksLambda', {
+			lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
 				...lambdaDefaultConfig,
 				handler: 'divideIntoChunks.handler',
 				functionName: `divide-into-chunks-${this.stage}`,
@@ -182,7 +182,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const bacthUpdateZuoraAccounts = new Map(this, 'BacthUpdateZuoraAccounts', {
 			stateName: 'Bacth Update Zuora Accounts',
-			itemsPath: '$.Payload.chunks',
+			itemsPath: '$.Payload.body',
 			maxConcurrency: maxConcurrency,
 		}).iterator(
 			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
