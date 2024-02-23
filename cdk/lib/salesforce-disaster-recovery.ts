@@ -173,11 +173,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateName: `Divide Processing In ${MAX_CONCURRENCY} Batches`,
 				parameters: {
-					batches: JsonPath.arrayRange(
-						0,
-						JsonPath.numberAt('$.Payload.numberOfRecords'),
-						Math.ceil(JsonPath.numberAt('$.Payload.numberOfRecords')) / 10,
-					),
+					batches: JsonPath.arrayRange(1, MAX_CONCURRENCY, 1),
 				},
 			},
 		);
