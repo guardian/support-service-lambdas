@@ -92,7 +92,7 @@ lazy val zuora = library(project in file("lib/zuora"))
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `salesforce-core` = library(project in file("lib/salesforce/core"))
+lazy val `salesforce-core` = library(project in file("lib/salesforce/core"), scala3Settings)
   .dependsOn(`config-core`)
   .settings(
     libraryDependencies ++= Seq(playJson),
