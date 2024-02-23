@@ -165,6 +165,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const MAX_CONCURRENCY = 10;
+
 		const divideProcessingInBatches = new Pass(
 			this,
 			'DivideProcessingInBatches',
@@ -173,19 +175,19 @@ export class SalesforceDisasterRecovery extends GuStack {
 					batches: JsonPath.arrayRange(
 						0,
 						JsonPath.numberAt('$.Payload.numberOfRecords'),
-						10,
+						JsonPath.numberAt('$.Payload.numberOfRecords') / MAX_CONCURRENCY,
 					),
 				},
 			},
 		);
 
 		const bacthUpdateZuoraAccounts = new Map(this, 'BacthUpdateZuoraAccounts', {
-			stateName: 'test name',
+			stateName: 'Bacth Update Zuora Accounts',
 			itemsPath: '$.batches',
-			maxConcurrency: 1,
+			maxConcurrency: MAX_CONCURRENCY,
 		}).iterator(
 			// new LambdaInvoke(this, 'slkjdf', { lambdaFunction: testlambda }),
-			new Pass(this, 'fdsf', {}),
+			new Pass(this, 'Batch', {}),
 		);
 
 		new GuLambdaFunction(this, 'UpdateZuoraAccountsLambda', {
