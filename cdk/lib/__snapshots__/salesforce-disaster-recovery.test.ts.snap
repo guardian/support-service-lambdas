@@ -173,7 +173,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "divide-into-chunks-CODE",
+        "FunctionName": "divide-into-chunks-2-CODE",
         "Handler": "divideIntoChunks.handler",
         "MemorySize": 1024,
         "Role": {
@@ -1359,7 +1359,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "divide-into-chunks-PROD",
+        "FunctionName": "divide-into-chunks-2-PROD",
         "Handler": "divideIntoChunks.handler",
         "MemorySize": 1024,
         "Role": {

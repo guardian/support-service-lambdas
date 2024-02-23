@@ -171,7 +171,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
 				...lambdaDefaultConfig,
 				handler: 'divideIntoChunks.handler',
-				functionName: `divide-into-chunks-${this.stage}`,
+				functionName: `divide-into-chunks-2-${this.stage}`,
 			}),
 			payload: TaskInput.fromObject({
 				filePath: JsonPath.stringAt('$.Payload.filePath'),
