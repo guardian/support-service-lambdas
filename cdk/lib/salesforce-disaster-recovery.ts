@@ -170,7 +170,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 			'DivideProcessingInBatches',
 			{
 				parameters: {
-					batches: JsonPath.arrayRange(0, 20, 4),
+					batches: JsonPath.arrayRange(
+						0,
+						JsonPath.numberAt('$.Payload.numberOfRecords'),
+						10,
+					),
 				},
 			},
 		);
