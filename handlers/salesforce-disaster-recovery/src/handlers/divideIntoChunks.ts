@@ -22,5 +22,9 @@ export const handler = (event: {
 	}
 	console.log(chunks);
 
-	return { body: chunks };
+	return {
+		test: 'sldkjf',
+	};
+
+	// return { body: chunks };
 };
