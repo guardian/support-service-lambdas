@@ -487,7 +487,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","numberOfRecords.$":"$.ResponseBody.numberRecordsProcessed","executionStartTime.$":"$$.Execution.StartTime"}}},"Divide Into Chunks":{"Next":"Bacth Update Zuora Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","numberOfRecords.$":"$.ResponseBody.numberRecordsProcessed","executionStartTime.$":"$$.Execution.StartTime"}}},"Divide Into Chunks":{"Next":"Batch Update Zuora Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -498,14 +498,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"filePath.$":"$.Payload.filePath","concurrency":10,"numberOfRecords.$":"$.Payload.numberOfRecords"}}},"Bacth Update Zuora Accounts":{"Type":"Map","End":true,"Iterator":{"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Payload":{"filePath.$":"$.Payload.filePath","concurrency":10,"numberOfRecords.$":"$.Payload.numberOfRecords"}}},"Batch Update Zuora Accounts":{"Type":"Map","End":true,"Iterator":{"StartAt":"UpdateZuoraAccounts2","States":{"UpdateZuoraAccounts2":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "UpdateZuoraAccountsLambda20D871415",
                   "Arn",
                 ],
               },
@@ -647,7 +647,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "UpdateZuoraAccountsLambda64E51B2A",
+                    "UpdateZuoraAccountsLambda20D871415",
                     "Arn",
                   ],
                 },
@@ -657,7 +657,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "UpdateZuoraAccountsLambda64E51B2A",
+                          "UpdateZuoraAccountsLambda20D871415",
                           "Arn",
                         ],
                       },
@@ -933,10 +933,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "UpdateZuoraAccountsLambda64E51B2A": {
+    "UpdateZuoraAccountsLambda20D871415": {
       "DependsOn": [
-        "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786",
-        "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
+        "UpdateZuoraAccountsLambda2ServiceRoleDefaultPolicy9771834F",
+        "UpdateZuoraAccountsLambda2ServiceRoleD841CB02",
       ],
       "Properties": {
         "Code": {
@@ -960,7 +960,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "MemorySize": 10240,
         "Role": {
           "Fn::GetAtt": [
-            "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
+            "UpdateZuoraAccountsLambda2ServiceRoleD841CB02",
             "Arn",
           ],
         },
@@ -991,7 +991,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "UpdateZuoraAccountsLambdaServiceRole31E9D1CD": {
+    "UpdateZuoraAccountsLambda2ServiceRoleD841CB02": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1044,7 +1044,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786": {
+    "UpdateZuoraAccountsLambda2ServiceRoleDefaultPolicy9771834F": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1173,10 +1173,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786",
+        "PolicyName": "UpdateZuoraAccountsLambda2ServiceRoleDefaultPolicy9771834F",
         "Roles": [
           {
-            "Ref": "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
+            "Ref": "UpdateZuoraAccountsLambda2ServiceRoleD841CB02",
           },
         ],
       },
@@ -1673,7 +1673,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","numberOfRecords.$":"$.ResponseBody.numberRecordsProcessed","executionStartTime.$":"$$.Execution.StartTime"}}},"Divide Into Chunks":{"Next":"Bacth Update Zuora Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","numberOfRecords.$":"$.ResponseBody.numberRecordsProcessed","executionStartTime.$":"$$.Execution.StartTime"}}},"Divide Into Chunks":{"Next":"Batch Update Zuora Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1684,14 +1684,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"filePath.$":"$.Payload.filePath","concurrency":10,"numberOfRecords.$":"$.Payload.numberOfRecords"}}},"Bacth Update Zuora Accounts":{"Type":"Map","End":true,"Iterator":{"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Payload":{"filePath.$":"$.Payload.filePath","concurrency":10,"numberOfRecords.$":"$.Payload.numberOfRecords"}}},"Batch Update Zuora Accounts":{"Type":"Map","End":true,"Iterator":{"StartAt":"UpdateZuoraAccounts2","States":{"UpdateZuoraAccounts2":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "UpdateZuoraAccountsLambda20D871415",
                   "Arn",
                 ],
               },
@@ -1833,7 +1833,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "UpdateZuoraAccountsLambda64E51B2A",
+                    "UpdateZuoraAccountsLambda20D871415",
                     "Arn",
                   ],
                 },
@@ -1843,7 +1843,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "UpdateZuoraAccountsLambda64E51B2A",
+                          "UpdateZuoraAccountsLambda20D871415",
                           "Arn",
                         ],
                       },
@@ -2119,10 +2119,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "UpdateZuoraAccountsLambda64E51B2A": {
+    "UpdateZuoraAccountsLambda20D871415": {
       "DependsOn": [
-        "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786",
-        "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
+        "UpdateZuoraAccountsLambda2ServiceRoleDefaultPolicy9771834F",
+        "UpdateZuoraAccountsLambda2ServiceRoleD841CB02",
       ],
       "Properties": {
         "Code": {
@@ -2146,7 +2146,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "MemorySize": 10240,
         "Role": {
           "Fn::GetAtt": [
-            "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
+            "UpdateZuoraAccountsLambda2ServiceRoleD841CB02",
             "Arn",
           ],
         },
@@ -2177,7 +2177,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "UpdateZuoraAccountsLambdaServiceRole31E9D1CD": {
+    "UpdateZuoraAccountsLambda2ServiceRoleD841CB02": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -2230,7 +2230,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786": {
+    "UpdateZuoraAccountsLambda2ServiceRoleDefaultPolicy9771834F": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2359,10 +2359,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786",
+        "PolicyName": "UpdateZuoraAccountsLambda2ServiceRoleDefaultPolicy9771834F",
         "Roles": [
           {
-            "Ref": "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
+            "Ref": "UpdateZuoraAccountsLambda2ServiceRoleD841CB02",
           },
         ],
       },
