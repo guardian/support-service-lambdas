@@ -9,6 +9,7 @@ export const handler = (event: {
 	const chunks = [];
 
 	for (let i = 0; i < concurrency; i++) {
+		console.log(i);
 		const startIndex = i * chunkSize;
 		const endIndex = Math.min(startIndex + chunkSize - 1, numberOfRecords - 1);
 
@@ -20,6 +21,7 @@ export const handler = (event: {
 
 		chunks.push(chunk);
 	}
+	console.log(chunks);
 
 	return { chunks };
 };
