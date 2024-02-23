@@ -171,6 +171,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			this,
 			'DivideProcessingInBatches',
 			{
+				stateName: `Divide Processing In ${MAX_CONCURRENCY} Batches`,
 				parameters: {
 					batches: JsonPath.arrayRange(
 						0,
