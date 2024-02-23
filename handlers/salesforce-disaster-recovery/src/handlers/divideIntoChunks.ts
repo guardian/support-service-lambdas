@@ -1,4 +1,4 @@
-export const handler = (event: {
+export const handler = async (event: {
 	filePath: string;
 	concurrency: number;
 	numberOfRecords: number;
