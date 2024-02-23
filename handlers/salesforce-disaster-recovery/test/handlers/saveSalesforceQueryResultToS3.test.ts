@@ -11,6 +11,7 @@ jest.mock('../../src/services');
 describe('Handler', () => {
 	const mockEvent = {
 		queryJobId: 'mock_query_job_id',
+		numberOfRecords: 1,
 		executionStartTime: 'mock_execution_start_time',
 	};
 	const mockEnv = {
@@ -54,6 +55,7 @@ describe('Handler', () => {
 
 		expect(result).toEqual({
 			filePath: 'mock_execution_start_time/before-processing.csv',
+			numberOfRecords: 1,
 		});
 
 		expect(getSecretValue).toHaveBeenCalledWith({
