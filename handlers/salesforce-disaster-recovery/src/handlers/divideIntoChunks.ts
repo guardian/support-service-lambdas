@@ -20,7 +20,7 @@ export const handler = (event: {
 
 		chunks.push(chunk);
 	}
-	console.log(chunks);
+	// console.log(chunks);
 
-	return { chunks: JSON.stringify(chunks) };
+	return { chunks };
 };
