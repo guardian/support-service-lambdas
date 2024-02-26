@@ -189,10 +189,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 				maxConcurrency: maxConcurrency,
 			},
 		).iterator(
-			new LambdaInvoke(this, 'UpdateZuoraAccounts2', {
+			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
 				lambdaFunction: new GuLambdaFunction(
 					this,
-					'UpdateZuoraAccountsLambda2',
+					'UpdateZuoraAccountsLambda',
 					{
 						...lambdaDefaultConfig,
 						timeout: Duration.minutes(15),
