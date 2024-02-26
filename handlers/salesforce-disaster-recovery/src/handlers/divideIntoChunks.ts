@@ -3,6 +3,8 @@ export const handler = (event: {
 	concurrency: number;
 	numberOfRecords: number;
 }) => {
+	console.log('HERERE');
+	console.log(event);
 	const { filePath, concurrency, numberOfRecords } = event;
 	const chunkSize = Math.ceil(numberOfRecords / concurrency);
 
