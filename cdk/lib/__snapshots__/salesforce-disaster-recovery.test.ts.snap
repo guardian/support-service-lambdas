@@ -128,10 +128,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "Bucket25524B414": {
+    "Bucket83908E77": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "BucketName": "salesforce-disaster-recovery-code-2",
+        "BucketName": "salesforce-disaster-recovery-code",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -460,7 +460,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob2","States":{"CreateSalesforceQueryJob2":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -695,7 +695,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket25524B414",
+              "Ref": "Bucket83908E77",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-CODE-salesforce-api/e2792d75-414a-48f3-89a1-5e8eac15f627",
@@ -828,7 +828,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket25524B414",
+                        "Bucket83908E77",
                         "Arn",
                       ],
                     },
@@ -949,7 +949,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket25524B414",
+              "Ref": "Bucket83908E77",
             },
             "STACK": "membership",
             "STAGE": "CODE",
@@ -1077,7 +1077,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket25524B414",
+                        "Bucket83908E77",
                         "Arn",
                       ],
                     },
@@ -1314,10 +1314,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "Bucket25524B414": {
+    "Bucket83908E77": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "BucketName": "salesforce-disaster-recovery-prod-2",
+        "BucketName": "salesforce-disaster-recovery-prod",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -1646,7 +1646,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob2","States":{"CreateSalesforceQueryJob2":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -1881,7 +1881,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket25524B414",
+              "Ref": "Bucket83908E77",
             },
             "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3",
@@ -2014,7 +2014,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket25524B414",
+                        "Bucket83908E77",
                         "Arn",
                       ],
                     },
@@ -2135,7 +2135,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "salesforce-disaster-recovery",
             "S3_BUCKET": {
-              "Ref": "Bucket25524B414",
+              "Ref": "Bucket83908E77",
             },
             "STACK": "membership",
             "STAGE": "PROD",
@@ -2263,7 +2263,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   [
                     {
                       "Fn::GetAtt": [
-                        "Bucket25524B414",
+                        "Bucket83908E77",
                         "Arn",
                       ],
                     },

@@ -39,8 +39,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const app = 'salesforce-disaster-recovery';
 
-		const bucket = new Bucket(this, 'Bucket2', {
-			bucketName: `${app}-${this.stage.toLowerCase()}-2`,
+		const bucket = new Bucket(this, 'Bucket', {
+			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
 		const lambdaDefaultConfig: Pick<
@@ -57,7 +57,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
-			'CreateSalesforceQueryJob2',
+			'CreateSalesforceQueryJob',
 			{
 				stateJson: {
 					Type: 'Task',
@@ -180,15 +180,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 		});
 
-		const batchUpdateZuoraAccounts = new Map(
-			this,
-			'BatchUpdateZuoraAccounts2',
-			{
-				stateName: 'Batch Update Zuora Accounts',
-				itemsPath: '$.Payload.chunks',
-				maxConcurrency: maxConcurrency,
-			},
-		).iterator(
+		const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
+			stateName: 'Batch Update Zuora Accounts',
+			itemsPath: '$.Payload.chunks',
+			maxConcurrency: maxConcurrency,
+		}).iterator(
 			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
 				lambdaFunction: new GuLambdaFunction(
 					this,
