@@ -67,17 +67,17 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
 
 def library(
     theProject: Project,
-    deps: Seq[ClasspathDependency] = Seq(),
+    projectDependencies: Seq[ClasspathDependency] = Seq(),
     scalaSettings: SettingsDefinition = scala2Settings,
 ) =
   theProject
     .settings(scalaSettings, testSettings, scalafmtSettings)
     .configs(EffectsTest, HealthCheckTest)
-    .dependsOn(deps *)
+    .dependsOn(projectDependencies *)
     .settings(
-      Test / test := ((Test / test) dependsOn (deps.map(cp => cp.project / Test / test) *)).value,
-      Test / testOnly := ((Test / testOnly) dependsOn (deps.map(_.project / Test / test) *)).evaluated,
-      Test / testQuick := ((Test / testQuick) dependsOn (deps.map(_.project / Test / test) *)).evaluated,
+      Test / test := ((Test / test) dependsOn (projectDependencies.map(cp => cp.project / Test / test) *)).value,
+      Test / testOnly := ((Test / testOnly) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
+      Test / testQuick := ((Test / testQuick) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
     )
 
 // ==== START libraries ====
@@ -341,15 +341,15 @@ lazy val `imovo-sttp-test-stub` = library(
 def lambdaProject(
     projectName: String,
     projectDescription: String,
-    dependencies: Seq[sbt.ModuleID] = Nil,
-    deps: Seq[ClasspathDependency] = Nil,
+    externalDependencies: Seq[sbt.ModuleID] = Nil,
+    projectDependencies: Seq[ClasspathDependency] = Nil,
     scalaSettings: SettingsDefinition = scala2Settings,
 ) = {
   val cfName = "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
     .configs(EffectsTest, HealthCheckTest)
-    .dependsOn(deps *)
+    .dependsOn(projectDependencies *)
     .settings(scalaSettings, testSettings, scalafmtSettings)
     .settings(
       name := projectName,
@@ -363,10 +363,10 @@ def lambdaProject(
       riffRaffManifestProjectName := s"support-service-lambdas::$projectName",
       riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
       dependencyOverrides ++= jacksonDependencies,
-      libraryDependencies ++= dependencies ++ logging,
-      Test / test := ((Test / test) dependsOn (deps.map(_.project / Test / test) *)).value,
-      Test / testOnly := ((Test / testOnly) dependsOn (deps.map(_.project / Test / test) *)).evaluated,
-      Test / testQuick := ((Test / testQuick) dependsOn (deps.map(_.project / Test / test) *)).evaluated,
+      libraryDependencies ++= externalDependencies ++ logging,
+      Test / test := ((Test / test) dependsOn (projectDependencies.map(_.project / Test / test) *)).value,
+      Test / testOnly := ((Test / testOnly) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
+      Test / testQuick := ((Test / testQuick) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
     )
 }
 
