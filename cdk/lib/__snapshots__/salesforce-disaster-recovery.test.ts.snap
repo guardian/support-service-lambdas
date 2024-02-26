@@ -476,7 +476,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"Divide Into Chunks","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"Save Salesforce Query Result To S3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"Save Salesforce Query Result To S3":{"Next":"Divide Into 40 Chunks","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -487,7 +487,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","numberOfRecords.$":"$.ResponseBody.numberRecordsProcessed","executionStartTime.$":"$$.Execution.StartTime"}}},"Divide Into Chunks":{"Next":"Batch Update Zuora Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","numberOfRecords.$":"$.ResponseBody.numberRecordsProcessed","executionStartTime.$":"$$.Execution.StartTime"}}},"Divide Into 40 Chunks":{"Next":"Batch Update Zuora Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -955,7 +955,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "sync-zuora-accounts-CODE",
+        "FunctionName": "update-zuora-accounts-CODE",
         "Handler": "updateZuoraAccounts.handler",
         "MemorySize": 10240,
         "Role": {
@@ -1662,7 +1662,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"Divide Into Chunks","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"Save Salesforce Query Result To S3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"Save Salesforce Query Result To S3":{"Next":"Divide Into 40 Chunks","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1673,7 +1673,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","numberOfRecords.$":"$.ResponseBody.numberRecordsProcessed","executionStartTime.$":"$$.Execution.StartTime"}}},"Divide Into Chunks":{"Next":"Batch Update Zuora Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","numberOfRecords.$":"$.ResponseBody.numberRecordsProcessed","executionStartTime.$":"$$.Execution.StartTime"}}},"Divide Into 40 Chunks":{"Next":"Batch Update Zuora Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2141,7 +2141,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "sync-zuora-accounts-PROD",
+        "FunctionName": "update-zuora-accounts-PROD",
         "Handler": "updateZuoraAccounts.handler",
         "MemorySize": 10240,
         "Role": {

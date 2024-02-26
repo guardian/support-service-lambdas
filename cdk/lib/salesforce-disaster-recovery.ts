@@ -126,6 +126,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			this,
 			'SaveSalesforceQueryResultToS3',
 			{
+				stateName: 'Save Salesforce Query Result To S3',
 				lambdaFunction: new GuLambdaFunction(
 					this,
 					'SaveSalesforceQueryResultToS3Lambda',
@@ -167,7 +168,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		);
 
 		const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
-			stateName: `Divide Into Chunks`,
+			stateName: `Divide Into ${maxConcurrency} Chunks`,
 			lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
 				...lambdaDefaultConfig,
 				handler: 'divideIntoChunks.handler',
@@ -194,7 +195,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						timeout: Duration.minutes(15),
 						memorySize: 10240,
 						handler: 'updateZuoraAccounts.handler',
-						functionName: `sync-zuora-accounts-${this.stage}`,
+						functionName: `update-zuora-accounts-${this.stage}`,
 						environment: {
 							...lambdaDefaultConfig.environment,
 							S3_BUCKET: bucket.bucketName,
