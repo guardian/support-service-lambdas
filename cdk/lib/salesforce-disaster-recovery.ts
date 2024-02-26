@@ -1,23 +1,31 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import {
+	type GuFunctionProps,
+	GuLambdaFunction,
+} from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
 	Condition,
 	CustomState,
 	DefinitionBody,
 	JsonPath,
-	Pass,
 	StateMachine,
+	TaskInput,
 	Wait,
 	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
+import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
 interface Props extends GuStackProps {
 	salesforceApiDomain: string;
 	salesforceApiConnectionResourceId: string;
 	salesforceQueryWaitSeconds: number;
+	salesforceOauthSecretName: string;
 }
 
 export class SalesforceDisasterRecovery extends GuStack {
@@ -27,6 +35,22 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const salesforceApiConnectionArn = `arn:aws:events:${this.region}:${this.account}:connection/${props.salesforceApiConnectionResourceId}`;
 
 		const app = 'salesforce-disaster-recovery';
+
+		const bucket = new Bucket(this, 'Bucket', {
+			bucketName: `${app}-${this.stage.toLowerCase()}`,
+		});
+
+		const lambdaDefaultConfig: Pick<
+			GuFunctionProps,
+			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
+		> = {
+			app,
+			memorySize: 1024,
+			fileName: `${app}.zip`,
+			runtime: Runtime.NODEJS_20_X,
+			timeout: Duration.seconds(300),
+			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
+		};
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
@@ -93,9 +117,45 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const saveSalesforceQueryResultToS3 = new Pass(
+		const saveSalesforceQueryResultToS3 = new LambdaInvoke(
 			this,
 			'SaveSalesforceQueryResultToS3',
+			{
+				lambdaFunction: new GuLambdaFunction(
+					this,
+					'SaveSalesforceQueryResultToS3Lambda',
+					{
+						...lambdaDefaultConfig,
+						handler: 'saveSalesforceQueryResultToS3.handler',
+						functionName: `save-salesforce-query-result-to-s3-${this.stage}`,
+						environment: {
+							...lambdaDefaultConfig.environment,
+							SALESFORCE_API_DOMAIN: props.salesforceApiDomain,
+							SALESFORCE_OAUTH_SECRET_NAME: props.salesforceOauthSecretName,
+							S3_BUCKET: bucket.bucketName,
+						},
+						initialPolicy: [
+							new PolicyStatement({
+								actions: [
+									'secretsmanager:GetSecretValue',
+									'secretsmanager:DescribeSecret',
+								],
+								resources: [
+									`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
+								],
+							}),
+							new PolicyStatement({
+								actions: ['s3:PutObject'],
+								resources: [bucket.arnForObjects('*')],
+							}),
+						],
+					},
+				),
+				payload: TaskInput.fromObject({
+					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
+					executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+				}),
+			},
 		);
 
 		const stateMachine = new StateMachine(

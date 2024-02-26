@@ -10,6 +10,11 @@
 		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.129"
+		"@types/aws-lambda": "^8.10.129",
+		"aws-sdk-client-mock": "^3.0.1"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "3.451.0",
+		"@aws-sdk/client-secrets-manager": "3.451.0"
 	}
 }
