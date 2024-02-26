@@ -13,8 +13,6 @@ export type UpdateZuoraAccountsLambdaInput = {
 };
 
 export const handler = async (event: UpdateZuoraAccountsLambdaInput) => {
-	console.log(event);
-
 	const stage = process.env.STAGE;
 	const bucketName = process.env.S3_BUCKET;
 

@@ -15,8 +15,6 @@ import {
 	DefinitionBody,
 	JsonPath,
 	Map,
-	// Pass,
-	// Result,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -126,7 +124,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			this,
 			'SaveSalesforceQueryResultToS3',
 			{
-				stateName: 'Save Salesforce Query Result To S3',
 				lambdaFunction: new GuLambdaFunction(
 					this,
 					'SaveSalesforceQueryResultToS3Lambda',
@@ -168,7 +165,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 		);
 
 		const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
-			stateName: `Divide Into ${maxConcurrency} Chunks`,
 			lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
 				...lambdaDefaultConfig,
 				handler: 'divideIntoChunks.handler',
@@ -182,7 +178,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 		});
 
 		const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
-			stateName: 'Batch Update Zuora Accounts',
 			itemsPath: '$.Payload.chunks',
 			maxConcurrency,
 		}).iterator(
