@@ -5,7 +5,7 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { Bucket, BucketEncryption, EventType } from 'aws-cdk-lib/aws-s3';
+import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 
 export interface GenerateProductCatalogProps extends GuStackProps {
@@ -39,12 +39,13 @@ export class GenerateProductCatalog extends GuStack {
 			app: app,
 		});
 
+		const zuoraCatalogBucketName: string = 'gu-zuora-catalog';
 		const productCatalogBucketName: string = 'gu-product-catalog';
-		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}/`;
+		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}`;
 		const zuoraCatalogBucket = Bucket.fromBucketName(
 			this,
-			'gu-zuora-catalog',
-			'gu-zuora-catalog',
+			zuoraCatalogBucketName,
+			zuoraCatalogBucketName,
 		);
 
 		zuoraCatalogBucket.addEventNotification(
@@ -55,12 +56,11 @@ export class GenerateProductCatalog extends GuStack {
 			},
 		);
 
-		const productCatalogBucket = new Bucket(this, productCatalogBucketName, {
-			bucketName: productCatalogBucketName,
-			encryption: BucketEncryption.S3_MANAGED,
-			enforceSSL: true,
-			versioned: true,
-		});
+		const productCatalogBucket = Bucket.fromBucketName(
+			this,
+			productCatalogBucketName,
+			productCatalogBucketName,
+		);
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [
@@ -69,50 +69,17 @@ export class GenerateProductCatalog extends GuStack {
 					actions: ['s3:GetObject'],
 					resources: [
 						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-						`arn:aws:s3::*:gu-zuora-catalog/${zuoraCatalogFolder}/`,
+						`arn:aws:s3::*:gu-zuora-catalog/${zuoraCatalogFolder}/*`,
 					],
 				}),
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:PutObject'],
-					resources: [productCatalogBucket.bucketArn],
+					resources: [`${productCatalogBucket.bucketArn}/${this.stage}/*`],
 				}),
 			],
 		});
 
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
-
-		// ---- DNS ---- //
-		// const domainName = `product-catalog-${this.stage}.${supportApisDomain}`;
-
-		// new GuCname(this, 'Cname', {
-		// 	app,
-		// 	domainName,
-		// 	ttl: Duration.minutes(1),
-		// 	resourceRecord: 'dualstack.guardian.map.fastly.net.',
-		// });
-
-		// const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${supportCertificateId}`;
-		// const cfnDomainName = new CfnDomainName(this, 'DomainName', {
-		// 	domainName: domainName,
-		// 	regionalCertificateArn: certificateArn,
-		// 	endpointConfiguration: {
-		// 		types: ['REGIONAL'],
-		// 	},
-		// });
-		//
-		// new CfnBasePathMapping(this, 'BasePathMapping', {
-		// 	domainName: cfnDomainName.ref,
-		// 	restApiId: lambda.api.restApiId,
-		// 	stage: lambda.api.deploymentStage.stageName,
-		// });
-		//
-		// new CfnRecordSet(this, 'DNSRecord', {
-		// 	name: domainName,
-		// 	type: 'CNAME',
-		// 	hostedZoneId: props.hostedZoneId,
-		// 	ttl: '120',
-		// 	resourceRecords: [cfnDomainName.attrRegionalDomainName],
-		// });
 	}
 }
