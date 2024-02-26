@@ -36,5 +36,5 @@ export const handler = (event: {
 	console.log('final');
 	console.log(chunks);
 
-	return chunks;
+	return JSON.stringify([]);
 };
