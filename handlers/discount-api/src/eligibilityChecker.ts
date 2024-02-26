@@ -1,5 +1,5 @@
 import { sum } from '@modules/arrayFunctions';
-import type { ZuoraCatalog } from '@modules/catalog/catalog';
+import type { ZuoraCatalog } from '@modules/catalog/zuoraCatalog';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
 import { isNotRemoved } from '@modules/zuora/rateplan';

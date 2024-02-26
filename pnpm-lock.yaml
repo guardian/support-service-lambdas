@@ -106,6 +106,9 @@ importers:
 
   modules/product:
     devDependencies:
+      '@aws-sdk/client-s3':
+        specifier: 3.451.0
+        version: 3.451.0
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.11.16)(typescript@5.3.3)

@@ -1,22 +1,20 @@
-import type { Catalog } from '@modules/catalog/catalogSchema';
-import { generateProductCatalog } from './generateProductCatalog';
-import type { typeObject } from './types/typeObject';
+import type { typeObject } from '@modules/product/typeObject';
 
-type ZuoraProductKey = keyof typeof typeObject;
+type ProductKey = keyof typeof typeObject;
 
-type ProductRatePlanKey<ZP extends ZuoraProductKey> =
-	keyof (typeof typeObject)[ZP]['productRatePlans'];
+type ProductRatePlanKey<P extends ProductKey> =
+	keyof (typeof typeObject)[P]['productRatePlans'];
 
 type ProductRatePlanChargeKey<
-	ZP extends ZuoraProductKey,
-	PRP extends ProductRatePlanKey<ZP>,
-> = keyof (typeof typeObject)[ZP]['productRatePlans'][PRP];
+	P extends ProductKey,
+	PRP extends ProductRatePlanKey<P>,
+> = keyof (typeof typeObject)[P]['productRatePlans'][PRP];
 
-type ProductCurrency<ZP extends ZuoraProductKey> =
-	(typeof typeObject)[ZP]['currencies'][number];
+type ProductCurrency<P extends ProductKey> =
+	(typeof typeObject)[P]['currencies'][number];
 
-type ProductPrice<ZP extends ZuoraProductKey> = {
-	[PC in ProductCurrency<ZP>]: number;
+type ProductPrice<P extends ProductKey> = {
+	[PC in ProductCurrency<P>]: number;
 };
 
 export type ProductRatePlanCharge = {
@@ -24,25 +22,25 @@ export type ProductRatePlanCharge = {
 };
 
 type ProductRatePlan<
-	ZP extends ZuoraProductKey,
-	PRP extends ProductRatePlanKey<ZP>,
+	P extends ProductKey,
+	PRP extends ProductRatePlanKey<P>,
 > = {
 	id: string;
-	pricing: ProductPrice<ZP>;
+	pricing: ProductPrice<P>;
 	charges: {
-		[PRPC in ProductRatePlanChargeKey<ZP, PRP>]: ProductRatePlanCharge;
+		[PRPC in ProductRatePlanChargeKey<P, PRP>]: ProductRatePlanCharge;
 	};
 };
 
-type ZuoraProduct<ZP extends ZuoraProductKey> = {
+type ZuoraProduct<P extends ProductKey> = {
 	ratePlans: {
-		[PRP in ProductRatePlanKey<ZP>]: ProductRatePlan<ZP, PRP>;
+		[PRP in ProductRatePlanKey<P>]: ProductRatePlan<P, PRP>;
 	};
 };
 
 export type ProductCatalog = {
 	products: {
-		[ZP in ZuoraProductKey]: ZuoraProduct<ZP>;
+		[P in ProductKey]: ZuoraProduct<P>;
 	};
 };
 
@@ -50,10 +48,10 @@ export class ProductCatalogHelper {
 	constructor(private catalogData: ProductCatalog) {}
 
 	getProductRatePlan = <
-		ZP extends ZuoraProductKey,
-		PRP extends ProductRatePlanKey<ZP>,
+		P extends ProductKey,
+		PRP extends ProductRatePlanKey<P>,
 	>(
-		zuoraProduct: ZP,
+		zuoraProduct: P,
 		productRatePlan: PRP,
 	) => {
 		return this.catalogData.products[zuoraProduct].ratePlans[productRatePlan];
@@ -83,8 +81,3 @@ export class ProductCatalogHelper {
 		return allProducts.find((product) => product.id === productRatePlanId);
 	};
 }
-
-export const getProductCatalogFromZuoraCatalog = (catalog: Catalog) => {
-	const catalogData = generateProductCatalog(catalog);
-	return new ProductCatalogHelper(catalogData);
-};

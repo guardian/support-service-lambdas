@@ -3,15 +3,15 @@ import type {
 	Catalog,
 	CatalogProductRatePlan,
 	CatalogProductRatePlanCharge,
-} from '@modules/catalog/catalogSchema';
-import type { ProductCatalog } from '@modules/product/productCatalog';
+} from '@modules/catalog/zuoraCatalogSchema';
 import {
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
 	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
-} from './types/zuoraCatalogToProductCatalogMappings';
+} from '@modules/product/nameMappings';
+import type { ProductCatalog } from '@modules/product/productCatalog';
 
 type NonNullPrice = { currency: string; price: number };
 type PricingObject = Record<string, number>;

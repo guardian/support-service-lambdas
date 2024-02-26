@@ -1,5 +1,5 @@
-import { ZuoraCatalog } from '@modules/catalog/catalog';
-import { catalogSchema } from '@modules/catalog/catalogSchema';
+import { ZuoraCatalog } from '@modules/catalog/zuoraCatalog';
+import { zuoraCatalogSchema } from '@modules/catalog/zuoraCatalogSchema';
 import {
 	billingPreviewSchema,
 	zuoraSubscriptionSchema,
@@ -18,7 +18,7 @@ import subscriptionJson1 from './fixtures/digital-subscriptions/get-discount-tes
 test('Eligibility check fails for a subscription which is on a reduced price', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson1);
 	const catalog: ZuoraCatalog = new ZuoraCatalog(
-		catalogSchema.parse(catalogJsonProd),
+		zuoraCatalogSchema.parse(catalogJsonProd),
 	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson1);
 	const eligibilityChecker = new EligibilityChecker(catalog);
@@ -33,7 +33,7 @@ test('Eligibility check fails for a subscription which is on a reduced price', (
 test('Eligibility check works for a price risen subscription', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson2);
 	const catalog: ZuoraCatalog = new ZuoraCatalog(
-		catalogSchema.parse(catalogJsonProd),
+		zuoraCatalogSchema.parse(catalogJsonProd),
 	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson2);
 	const eligibilityChecker = new EligibilityChecker(catalog);
@@ -51,7 +51,7 @@ test('Eligibility check works for a price risen subscription', () => {
 test('error', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson3);
 	const catalog: ZuoraCatalog = new ZuoraCatalog(
-		catalogSchema.parse(catalogJsonCode),
+		zuoraCatalogSchema.parse(catalogJsonCode),
 	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson3);
 	const eligibilityChecker = new EligibilityChecker(catalog);

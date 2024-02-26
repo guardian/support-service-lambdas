@@ -2,12 +2,13 @@
   "name": "product",
   "version": "1.0.0",
   "scripts": {
-    "generateTypes": "ts-node src/types/generateTypeObject.ts",
+    "generateTypes": "ts-node src/generateTypeObject.ts",
     "updateSnapshots": "jest -u --group=-integration",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "3.451.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0"
   }

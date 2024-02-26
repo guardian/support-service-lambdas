@@ -4,10 +4,10 @@
  * @group integration
  */
 
-import { getCatalogFromS3 } from '../src/catalog';
-import type { Catalog } from '../src/catalogSchema';
+import type { Catalog } from '@modules/catalog/zuoraCatalogSchema';
+import { getZuoraCatalogFromS3 } from '@modules/catalog/S3';
 
 test('getCatalogFromS3', async () => {
-	const codeCatalog: Catalog = await getCatalogFromS3('CODE');
+	const codeCatalog: Catalog = await getZuoraCatalogFromS3('CODE');
 	expect(codeCatalog.products.length).toEqual(39);
 });

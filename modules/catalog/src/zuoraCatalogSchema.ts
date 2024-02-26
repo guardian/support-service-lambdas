@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type Catalog = z.infer<typeof catalogSchema>;
+export type Catalog = z.infer<typeof zuoraCatalogSchema>;
 export type CatalogProduct = Catalog['products'][number];
 export type CatalogProductRatePlan =
 	Catalog['products'][number]['productRatePlans'][number];
@@ -8,7 +8,7 @@ export type CatalogProductRatePlanCharge =
 	CatalogProductRatePlan['productRatePlanCharges'][number];
 export type Pricing = CatalogProductRatePlanCharge['pricing'][number];
 
-export const catalogSchema = z.object({
+export const zuoraCatalogSchema = z.object({
 	products: z.array(
 		z.object({
 			id: z.string(),

@@ -1,11 +1,11 @@
 import fs from 'fs';
 import { arrayToObject, distinct } from '@modules/arrayFunctions';
-import { getCatalogFromS3 } from '@modules/catalog/catalog';
+import { getZuoraCatalogFromS3 } from '@modules/catalog/S3';
 import type {
 	Catalog,
 	CatalogProductRatePlan,
 	CatalogProductRatePlanCharge,
-} from '@modules/catalog/catalogSchema';
+} from '@modules/catalog/zuoraCatalogSchema';
 import { checkDefined } from '@modules/nullAndUndefined';
 import {
 	getProductRatePlanChargeKey,
@@ -13,7 +13,7 @@ import {
 	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
-} from '@modules/product/types/zuoraCatalogToProductCatalogMappings';
+} from '@modules/product/nameMappings';
 
 const getProductRatePlanCharges = (
 	productRatePlanCharges: CatalogProductRatePlanCharge[],
@@ -79,7 +79,7 @@ export const generateTypeObject = (catalog: Catalog) => {
 };
 
 const writeTypesToFile = async () => {
-	const prodCatalog = await getCatalogFromS3('PROD');
+	const prodCatalog = await getZuoraCatalogFromS3('PROD');
 	const types = generateTypeObject(prodCatalog);
 	const typesString = JSON.stringify(types, null, 2);
 

@@ -5,19 +5,10 @@
 ## Introduction
 This module defines a model to describe our product structure and the mapping between that structure and the Zuora catalog which holds pricing information.
 
-
-There are three main types involved in our product definitions:
-## `ProductFamilyKey` 
-This represents a family or category of products which we sell, available values are 
-- `GuardianWeekly`
-- `Newspaper`
-- `Digital`
-## `ZuoraProductKey`
-This maps onto a particular product defined in the Zuora catalog. Each ZuoraProductKey belongs to a product family so it is a generic type: 
-```typescript
-type ZuoraProductKey<PF extends ProductFamilyKey>
-``` 
-available values for each product family key are:
+There are two main types involved in our product definitions:
+## `ProductKey`
+This maps onto a particular product defined in the Zuora catalog. 
+Available values are:
 #### Newspaper:
 - `NationalDelivery`
 - `HomeDelivery`
@@ -31,42 +22,42 @@ available values for each product family key are:
 - `Contribution`
 
 ## `ProductRatePlanKey`
-This maps to an individual product rate plan. Each ProductRatePlanKey belongs to a specific product family and zuora product so it is also a generic type with the signature:
+This maps to an individual product rate plan. Each ProductRatePlanKey belongs to a specific zuora product so it is a generic type with the signature:
 ```typescript
-type ProductRatePlanKey<
-	PF extends ProductFamilyKey,
-	ZP extends ZuoraProductKey<PF>,
->
+type ProductRatePlanKey<P extends ProductKey>
 ```
-Examples of product options for particular product families and Zuora products are:
+Examples of product options for particular products are:
 
-#### Newspaper
 - `HomeDelivery`
   - `Saturday`
   - `Sunday`
   - `Weekend`
   - `Sixday`
   - `Everyday`
+  
+
 - `NationalDelivery`
   - `Weekend`
   - `Sixday`
   - `Everyday` // National delivery doesn't have a Saturday and Sunday option
 
-#### Digital
+
 - `DigitalSubscription`
   - `Monthly`
   - `Annual`
   - `OneYearGift`
   - `ThreeMonthGift`
+
+ 
 - `SupporterPlus`
   - `Monthly`
   - `Annual`
 
-This diagram shows the mapping between this type model and the Zuora catalog:
+This diagram shows all product keys and their associated product rate plan keys:
 
-![product-model-to-zuora.png](product-model-to-zuora.png)
+![product-catalog.png](product-catalog.png)
 # Usage
-By providing a `ProductFamilyKey`, `ZuoraProductKey` and `ProductRatePlanKey` we can map to any [product rate plan](https://knowledgecenter.zuora.com/Zuora_Central_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlan) in the Zuora catalog and from that we can retrieve the pricing information for that particular configuration. For instance if I want to find the GBP price to get the Newspaper delivered on a Saturday I can use the following:
+By providing a `ProductKey` and `ProductRatePlanKey` we can map to any [product rate plan](https://knowledgecenter.zuora.com/Zuora_Central_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlan) in the Zuora catalog and from that we can retrieve the pricing information for that particular configuration. For instance if I want to find the GBP price to get the Newspaper delivered on a Saturday I can use the following:
 ```typescript
 import { getZuoraCatalog } from '@modules/catalog/catalog';
 import { getProductRatePlan } from '@modules/product/productCatalogMapping';

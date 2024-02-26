@@ -1,5 +1,4 @@
 import { sum } from '@modules/arrayFunctions';
-import { getZuoraCatalog } from '@modules/catalog/catalog';
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
@@ -15,6 +14,7 @@ import { ValidationError } from './errors';
 import type { Discount } from './productToDiscountMapping';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
 import { applyDiscountSchema } from './requestSchema';
+import { getZuoraCatalog } from '@modules/catalog/S3';
 
 export const discountEndpoint = async (
 	stage: Stage,
