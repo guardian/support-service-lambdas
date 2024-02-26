@@ -955,7 +955,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "update-zuora-accounts-CODE",
+        "FunctionName": "update-zuora-accounts-mod-CODE",
         "Handler": "updateZuoraAccounts.handler",
         "MemorySize": 10240,
         "Role": {
@@ -2141,7 +2141,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "update-zuora-accounts-PROD",
+        "FunctionName": "update-zuora-accounts-mod-PROD",
         "Handler": "updateZuoraAccounts.handler",
         "MemorySize": 10240,
         "Role": {
