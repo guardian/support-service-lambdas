@@ -43,6 +43,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
+		const maxConcurrency = 40;
+
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
@@ -164,8 +166,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const maxConcurrency = 150;
-
 		const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
 			stateName: `Divide Into Chunks`,
 			lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
@@ -175,7 +175,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 			payload: TaskInput.fromObject({
 				filePath: JsonPath.stringAt('$.Payload.filePath'),
-				concurrency: maxConcurrency,
+				maxConcurrency,
 				numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
 			}),
 		});
@@ -183,7 +183,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
 			stateName: 'Batch Update Zuora Accounts',
 			itemsPath: '$.Payload.chunks',
-			maxConcurrency: maxConcurrency,
+			maxConcurrency,
 		}).iterator(
 			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
 				lambdaFunction: new GuLambdaFunction(
