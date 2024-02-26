@@ -2,17 +2,17 @@ import { type UpdateZuoraAccountsLambdaInput } from './updateZuoraAccounts';
 
 export const handler = async (event: {
 	filePath: string;
-	concurrency: number;
+	maxConcurrency: number;
 	numberOfRecords: number;
 }) => {
 	await Promise.resolve();
 
-	const { filePath, concurrency, numberOfRecords } = event;
-	const chunkSize = Math.ceil(numberOfRecords / concurrency);
+	const { filePath, maxConcurrency, numberOfRecords } = event;
+	const chunkSize = Math.ceil(numberOfRecords / maxConcurrency);
 
 	const chunks: UpdateZuoraAccountsLambdaInput[] = [];
 
-	for (let i = 0; i < concurrency; i++) {
+	for (let i = 0; i < maxConcurrency; i++) {
 		const startIndex = i * chunkSize;
 		const endIndex = Math.min(startIndex + chunkSize - 1, numberOfRecords - 1);
 

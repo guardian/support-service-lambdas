@@ -5,7 +5,7 @@ jest.mock('../../src/services');
 describe('Handler', () => {
 	const mockEvent = {
 		filePath: 'filePath',
-		concurrency: 3,
+		maxConcurrency: 3,
 		numberOfRecords: 10,
 	};
 
@@ -14,14 +14,13 @@ describe('Handler', () => {
 		console.error = jest.fn();
 	});
 
-	it('should handle successfully', () => {
-		const result = handler(mockEvent);
-		console.log(result);
+	it('should handle successfully', async () => {
+		const result = await handler(mockEvent);
 
-		// expect(result).toEqual([
-		// 	{ filePath: 'filePath', startIndex: 0, chunkSize: 4 },
-		// 	{ filePath: 'filePath', startIndex: 4, chunkSize: 4 },
-		// 	{ filePath: 'filePath', startIndex: 8, chunkSize: 2 },
-		// ]);
+		expect(result.chunks).toEqual([
+			{ filePath: 'filePath', startIndex: 0, chunkSize: 4 },
+			{ filePath: 'filePath', startIndex: 4, chunkSize: 4 },
+			{ filePath: 'filePath', startIndex: 8, chunkSize: 2 },
+		]);
 	});
 });
