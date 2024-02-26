@@ -1,3 +1,9 @@
+export type ChunkInput = {
+	filePath: string;
+	startIndex: number;
+	chunkSize: number;
+};
+
 export const handler = async (event: {
 	filePath: string;
 	concurrency: number;
@@ -8,11 +14,7 @@ export const handler = async (event: {
 	const { filePath, concurrency, numberOfRecords } = event;
 	const chunkSize = Math.ceil(numberOfRecords / concurrency);
 
-	const chunks: Array<{
-		filePath: string;
-		startIndex: number;
-		chunkSize: number;
-	}> = [];
+	const chunks: ChunkInput[] = [];
 
 	for (let i = 0; i < concurrency; i++) {
 		const startIndex = i * chunkSize;
