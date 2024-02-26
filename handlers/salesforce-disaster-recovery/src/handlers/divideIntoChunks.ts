@@ -1,8 +1,9 @@
-export const handler = (event: {
+export const handler = async (event: {
 	filePath: string;
 	concurrency: number;
 	numberOfRecords: number;
 }) => {
+	await Promise.resolve();
 	console.log('HERERE');
 	console.log(event);
 	const { filePath, concurrency, numberOfRecords } = event;
