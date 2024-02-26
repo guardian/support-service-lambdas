@@ -5,9 +5,14 @@ import {
 	convertCsvToAccountRows,
 	getFileFromS3,
 } from '../services';
-import { type ChunkInput } from './divideIntoChunks';
 
-export const handler = async (event: ChunkInput) => {
+export type UpdateZuoraAccountsLambdaInput = {
+	filePath: string;
+	startIndex: number;
+	chunkSize: number;
+};
+
+export const handler = async (event: UpdateZuoraAccountsLambdaInput) => {
 	console.log(event);
 
 	const stage = process.env.STAGE;
