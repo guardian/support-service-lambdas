@@ -1,6 +1,7 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
 import type { ProductCatalog } from '@modules/product/productCatalog';
+import { productCatalogSchema } from '@modules/product/productCatalogSchema';
 
 const client = new S3Client(awsConfig);
 export const getProductCatalogFromS3 = async (stage: string) => {
@@ -17,5 +18,5 @@ export const getProductCatalogFromS3 = async (stage: string) => {
 			'Response body was undefined when fetching the Product Catalog from S3',
 		);
 	}
-	return JSON.parse(body) as ProductCatalog;
+	return productCatalogSchema.parse(JSON.parse(body)) as ProductCatalog;
 };

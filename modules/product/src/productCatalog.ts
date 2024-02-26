@@ -1,17 +1,19 @@
 import type { typeObject } from '@modules/product/typeObject';
 
-type ProductKey = keyof typeof typeObject;
+type TypeObject = typeof typeObject;
+
+type ProductKey = keyof TypeObject;
 
 type ProductRatePlanKey<P extends ProductKey> =
-	keyof (typeof typeObject)[P]['productRatePlans'];
+	keyof TypeObject[P]['productRatePlans'];
 
 type ProductRatePlanChargeKey<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
-> = keyof (typeof typeObject)[P]['productRatePlans'][PRP];
+> = keyof TypeObject[P]['productRatePlans'][PRP];
 
 type ProductCurrency<P extends ProductKey> =
-	(typeof typeObject)[P]['currencies'][number];
+	TypeObject[P]['currencies'][number];
 
 type ProductPrice<P extends ProductKey> = {
 	[PC in ProductCurrency<P>]: number;
