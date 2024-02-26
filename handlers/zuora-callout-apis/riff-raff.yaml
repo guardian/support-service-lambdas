@@ -14,10 +14,10 @@ deployments:
       cloudFormationStackByTags: false
       prependStackToCloudFormationStackName: false
       createStackIfAbsent: false
-  support-service-lambdas:
+  zuora-callout-apis:
     type: aws-lambda
     parameters:
-      fileName: support-service-lambdas.jar
+      fileName: zuora-callout-apis.jar
       bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:

@@ -65,8 +65,20 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
   HealthCheckTest / testOptions += Tests.Argument("-n", "com.gu.test.HealthCheck"),
 )
 
-def library(theProject: Project, scalaSettings: SettingsDefinition = scala2Settings) =
-  theProject.settings(scalaSettings, testSettings, scalafmtSettings).configs(EffectsTest, HealthCheckTest)
+def library(
+    theProject: Project,
+    projectDependencies: Seq[ClasspathDependency] = Seq(),
+    scalaSettings: SettingsDefinition = scala2Settings,
+) =
+  theProject
+    .settings(scalaSettings, testSettings, scalafmtSettings)
+    .configs(EffectsTest, HealthCheckTest)
+    .dependsOn(projectDependencies *)
+    .settings(
+      Test / test := ((Test / test) dependsOn (projectDependencies.map(cp => cp.project / Test / test) *)).value,
+      Test / testOnly := ((Test / testOnly) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
+      Test / testQuick := ((Test / testQuick) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
+    )
 
 // ==== START libraries ====
 
@@ -80,65 +92,77 @@ lazy val testLib = library(project in file("lib/test"))
 
 val testDep = testLib % "test->test"
 
-lazy val zuora = library(project in file("lib/zuora"))
-  .dependsOn(
+lazy val zuora = library(
+  project in file("lib/zuora"),
+  Seq(
     restHttp,
     testDep,
     handler, // TODO only for the config, which needs to be split out
     effects % "test->test",
-  )
+  ),
+)
   .settings(
     libraryDependencies ++= Seq(okhttp3, playJson, scalatest) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `salesforce-core` = library(project in file("lib/salesforce/core"))
-  .dependsOn(`config-core`)
+lazy val `salesforce-core` = library(
+  project in file("lib/salesforce/core"),
+  Seq(`config-core`)
+)
   .settings(
     libraryDependencies ++= Seq(playJson),
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `salesforce-client` = library(project in file("lib/salesforce/client"))
-  .dependsOn(
+lazy val `salesforce-client` = library(
+  project in file("lib/salesforce/client"),
+  Seq(
     restHttp,
     handler, // % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
     effects % "test->test",
     testDep,
     `salesforce-core`,
-  )
+  ),
+)
   .settings(
     libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `salesforce-sttp-client` = library(project in file("lib/salesforce/sttp-client"))
-  .dependsOn(
+lazy val `salesforce-sttp-client` = library(
+  project in file("lib/salesforce/sttp-client"),
+  Seq(
     `salesforce-core`,
     `salesforce-sttp-test-stub` % Test,
-  )
+  ),
+)
   .settings(
     libraryDependencies ++=
       Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `salesforce-sttp-test-stub` = library(project in file("lib/salesforce/sttp-test-stub"))
-  .dependsOn(
+lazy val `salesforce-sttp-test-stub` = library(
+  project in file("lib/salesforce/sttp-test-stub"),
+  Seq(
     `salesforce-core`,
-  )
+  ),
+)
   .settings(
     libraryDependencies ++= Seq(sttp, sttpCirce, scalatest) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `holiday-stops` = library(project in file("lib/holiday-stops"))
-  .dependsOn(
+lazy val `holiday-stops` = library(
+  project in file("lib/holiday-stops"),
+  Seq(
     `salesforce-client`,
     effects % "test->test",
     testDep,
     `zuora-core` % "compile->compile;test->test",
-  )
+  ),
+)
   .settings(
     libraryDependencies ++= Seq(
       okhttp3,
@@ -155,15 +179,15 @@ lazy val `holiday-stops` = library(project in file("lib/holiday-stops"))
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val restHttp = library(project in file("lib/restHttp"))
-  .dependsOn(handler)
+lazy val restHttp = library(project in file("lib/restHttp"), Seq(handler))
   .settings(
     libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val s3ConfigValidator = library(project in file("lib/s3ConfigValidator"))
-  .dependsOn(
+lazy val s3ConfigValidator = library(
+  project in file("lib/s3ConfigValidator"),
+  Seq(
     testDep,
     handler,
     zuora,
@@ -173,22 +197,27 @@ lazy val s3ConfigValidator = library(project in file("lib/s3ConfigValidator"))
     `cancellation-sf-cases-api`,
     `sf-gocardless-sync`,
     `holiday-stop-api`,
-  )
+  ),
+)
   .settings(
     libraryDependencies ++= Seq(scalatest),
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val handler = library(project in file("lib/handler"))
-  .dependsOn(`effects-s3`, `config-core`)
+lazy val handler = library(
+  project in file("lib/handler"),
+  Seq(`effects-s3`, `config-core`),
+)
   .settings(
     libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest, awsLambda) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
-lazy val effects = library(project in file("lib/effects"))
-  .dependsOn(handler)
+lazy val effects = library(
+  project in file("lib/effects"),
+  Seq(handler),
+)
   .settings(
     dependencyOverrides ++= jacksonDependencies,
     libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging,
@@ -198,25 +227,25 @@ lazy val `effects-s3` = library(project in file("lib/effects-s3"))
     libraryDependencies ++= Seq(awsS3) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
-lazy val `effects-cloudwatch` = library(project in file("lib/effects-cloudwatch"))
-  .dependsOn(testDep)
+lazy val `effects-cloudwatch` = library(
+  project in file("lib/effects-cloudwatch"),
+  Seq(testDep),
+)
   .settings(
     libraryDependencies ++= Seq(awsCloudwatch) ++ logging,
   )
-lazy val `effects-sqs` = library(project in file("lib/effects-sqs"))
-  .dependsOn(testDep)
+lazy val `effects-sqs` = library(project in file("lib/effects-sqs"), Seq(testDep))
   .settings(
     libraryDependencies ++= Seq(awsSQS) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
-lazy val `effects-lambda` = library(project in file("lib/effects-lambda"))
-  .dependsOn(testDep)
+lazy val `effects-lambda` = library(project in file("lib/effects-lambda"), Seq(testDep))
   .settings(
     libraryDependencies ++= Seq(awsSdkLambda) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `config-core` = library(project in file("lib/config-core"), scala3Settings)
+lazy val `config-core` = library(project in file("lib/config-core"), Seq(), scala3Settings)
 
 lazy val `config-cats` = library(project in file("lib/config-cats"))
   .settings(
@@ -226,25 +255,33 @@ lazy val `config-cats` = library(project in file("lib/config-cats"))
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
-lazy val `zuora-reports` = library(project in file("lib/zuora-reports"))
-  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `zuora-reports` = library(
+  project in file("lib/zuora-reports"),
+  Seq(zuora, handler, effectsDepIncludingTestFolder, testDep)
+)
   .settings(dependencyOverrides ++= jacksonDependencies)
 
-lazy val `fulfilment-dates` = library(project in file("lib/fulfilment-dates"))
-  .dependsOn(`effects-s3`, `config-core`, testDep, `zuora-core`)
+lazy val `fulfilment-dates` = library(
+  project in file("lib/fulfilment-dates"),
+  Seq(`effects-s3`, `config-core`, testDep, `zuora-core`)
+)
   .settings(
     libraryDependencies ++= Seq(catsCore, circe, circeParser),
     dependencyOverrides ++= jacksonDependencies,
   )
 
-lazy val `google-bigquery` = library(project in file("lib/google-bigquery"))
-  .dependsOn(testDep, `config-core`, `effects-s3` % "test", handler % "test")
+lazy val `google-bigquery` = library(
+    project in file("lib/google-bigquery"),
+  Seq(testDep, `config-core`, `effects-s3` % "test", handler % "test")
+)
   .settings(
     libraryDependencies ++= Seq(googleBigQuery, playJson) ++ logging,
   )
 
-lazy val `zuora-baton` = library(project in file("lib/zuora-baton"))
-  .dependsOn(zuora, `config-core`)
+lazy val `zuora-baton` = library(
+  project in file("lib/zuora-baton"),
+  Seq(zuora, `config-core`)
+)
   .settings(
     libraryDependencies ++= Seq(playJson),
     dependencyOverrides ++= jacksonDependencies,
@@ -266,17 +303,22 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
   )
 
 // this lib is shared between ZIO and non zio projects so can't depend on json libs, http clients, effects etc.
-lazy val `zuora-models` = library(project in file("lib/zuora-models"), scala3Settings)
-  .dependsOn(`config-core`)
+lazy val `zuora-models` = library(
+  project in file("lib/zuora-models"),
+  Seq(`config-core`),
+  scala3Settings
+)
   .settings(
     libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
   )
 
-lazy val `credit-processor` = library(project in file("lib/credit-processor"))
-  .dependsOn(
+lazy val `credit-processor` = library(
+  project in file("lib/credit-processor"),
+  Seq(
     `zuora-core`,
     `fulfilment-dates`,
-  )
+  ),
+)
   .settings(
     libraryDependencies ++= logging,
     dependencyOverrides ++= jacksonDependencies,
@@ -288,8 +330,10 @@ lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-cli
       Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging,
   )
 
-lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-test-stub"))
-  .dependsOn(`imovo-sttp-client`)
+lazy val `imovo-sttp-test-stub` = library(
+  project in file("lib/imovo/imovo-sttp-test-stub"),
+  Seq(`imovo-sttp-client`)
+)
   .settings(
     libraryDependencies ++= Seq(scalatest),
   )
@@ -297,13 +341,15 @@ lazy val `imovo-sttp-test-stub` = library(project in file("lib/imovo/imovo-sttp-
 def lambdaProject(
     projectName: String,
     projectDescription: String,
-    dependencies: Seq[sbt.ModuleID] = Nil,
+    externalDependencies: Seq[sbt.ModuleID] = Nil,
+    projectDependencies: Seq[ClasspathDependency] = Nil,
     scalaSettings: SettingsDefinition = scala2Settings,
 ) = {
   val cfName = "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
     .configs(EffectsTest, HealthCheckTest)
+    .dependsOn(projectDependencies *)
     .settings(scalaSettings, testSettings, scalafmtSettings)
     .settings(
       name := projectName,
@@ -317,40 +363,52 @@ def lambdaProject(
       riffRaffManifestProjectName := s"support-service-lambdas::$projectName",
       riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
       dependencyOverrides ++= jacksonDependencies,
-      libraryDependencies ++= dependencies ++ logging,
+      libraryDependencies ++= externalDependencies ++ logging,
+      Test / test := ((Test / test) dependsOn (projectDependencies.map(_.project / Test / test) *)).value,
+      Test / testOnly := ((Test / testOnly) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
+      Test / testQuick := ((Test / testQuick) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
     )
 }
 
-// FIXME: This seems to be non-standard
-// FIXME: Why is the name in sub-project build.sbt support-service-lambda
-// FIXME: Why is riff-raff not refering to CF?
-lazy val `zuora-callout-apis` = library(project in file("handlers/zuora-callout-apis"))
-  .enablePlugins(RiffRaffArtifact)
-  .settings(libraryDependencies += scalaMock)
-  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
+lazy val `zuora-callout-apis` = lambdaProject(
+  "zuora-callout-apis",
+  "Handles auto-cancellations for membership and subscriptions",
+  Seq(
+    awsLambda,
+    okhttp3,
+    scalatest,
+    stripe,
+    scalaMock,
+  ),
+  Seq(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
+)
 
 lazy val `identity-backfill` = lambdaProject(
   "identity-backfill",
   "links subscriptions with identity accounts",
   Seq(supportInternationalisation),
-).dependsOn(
-  zuora,
-  `salesforce-client` % "compile->compile;test->test",
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep,
+  Seq(
+    zuora,
+    `salesforce-client` % "compile->compile;test->test",
+    handler,
+    effectsDepIncludingTestFolder,
+    testDep,
+  ),
 )
 
 lazy val `digital-subscription-expiry` = lambdaProject(
   "digital-subscription-expiry",
   "check digital subscription expiration for authorisation purposes",
   Seq(contentAuthCommon),
-).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  Seq(zuora, handler, effectsDepIncludingTestFolder, testDep),
+)
 
 lazy val `catalog-service` = lambdaProject(
   "catalog-service",
   "Download the Zuora Catalog and store the JSON in S3",
-).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  Seq(),
+  Seq(zuora, handler, effectsDepIncludingTestFolder, testDep),
+)
   .settings(
     dependencyOverrides ++= jacksonDependencies,
   )
@@ -358,7 +416,9 @@ lazy val `catalog-service` = lambdaProject(
 lazy val `identity-retention` = lambdaProject(
   "identity-retention",
   "Confirms whether an identity account can be deleted, from a reader revenue perspective",
-).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `google-bigquery`, testDep)
+  Seq(),
+  Seq(zuora, handler, effectsDepIncludingTestFolder, `google-bigquery`, testDep),
+)
   .settings(
     assemblyMergeStrategy := {
       case "arrow-git.properties" => MergeStrategy.discard
@@ -374,30 +434,32 @@ lazy val `new-product-api` = lambdaProject(
   "new-product-api",
   "Add subscription to account",
   Seq(diffx),
+  Seq(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`),
 )
   .settings(
     Test / unmanagedResourceDirectories += (Test / scalaSource).value,
-    Test / unmanagedResources / excludeFilter := "*.scala"
+    Test / unmanagedResources / excludeFilter := "*.scala",
   )
-  .dependsOn(zuora, handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep, `zuora-models`, `config-core`)
 
 lazy val `single-contribution-salesforce-writes` = lambdaProject(
   "single-contribution-salesforce-writes",
   "Create a single contribution record in Salesforce",
   Seq(circe, circeParser, awsEvents, scalajHttp, awsSecretsManager),
-).dependsOn(handler, testDep)
+  Seq(handler, testDep),
+)
 
 lazy val `zuora-retention` = lambdaProject(
   "zuora-retention",
   "find and mark accounts that are out of the retention period",
-).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
+  Seq(),
+  Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep),
+)
 
 lazy val `zuora-rer` = lambdaProject(
   "zuora-rer",
   "Performs Right to Erasure Requests against Zuora",
   Seq(catsEffect, circeParser, circe),
-).settings(Test / unmanagedSourceDirectories += baseDirectory.value / "src/local")
-  .dependsOn(
+  Seq(
     `zuora-reports`,
     `zuora-baton`,
     handler,
@@ -405,27 +467,31 @@ lazy val `zuora-rer` = lambdaProject(
     testDep,
     `effects-s3`,
     `effects-lambda`,
-  )
+  ),
+)
+  .settings(Test / unmanagedSourceDirectories += baseDirectory.value / "src/local")
 
 lazy val `zuora-sar` = lambdaProject(
   "zuora-sar",
   "Performs a Subject Access Requests against Zuora",
   Seq(catsEffect, circeParser, circe),
-).dependsOn(
-  `zuora-reports`,
-  `zuora-baton`,
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep,
-  `effects-s3`,
-  `effects-lambda`,
+  Seq(
+    `zuora-reports`,
+    `zuora-baton`,
+    handler,
+    effectsDepIncludingTestFolder,
+    testDep,
+    `effects-s3`,
+    `effects-lambda`,
+  ),
 )
 
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",
   "Cleans up the salesforce to free up storage via 360 sync/zuora",
   Seq(),
-).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
+  Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`),
+)
 
 lazy val `revenue-recogniser-job` = lambdaProject(
   "revenue-recogniser-job",
@@ -434,12 +500,15 @@ lazy val `revenue-recogniser-job` = lambdaProject(
     "com.nrinaudo" %% "kantan.csv-generic" % "0.7.0",
     "com.nrinaudo" %% "kantan.csv-java8" % "0.7.0",
   ),
-).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`)
+  Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`),
+)
 
 lazy val `sf-contact-merge` = lambdaProject(
   "sf-contact-merge",
   "Merges together the salesforce account referenced by a set of zuora accounts",
-).dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
+  Seq(),
+  Seq(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep),
+)
 
 lazy val `sf-billing-account-remover` = lambdaProject(
   "sf-billing-account-remover",
@@ -466,13 +535,15 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     awsSecretsManager,
     upickle,
   ) ++ logging,
-).dependsOn(`effects-s3`, `effects-cloudwatch`, `salesforce-core`)
+  Seq(`effects-s3`, `effects-cloudwatch`, `salesforce-core`),
+)
 
 lazy val `sf-emails-to-s3-exporter` = lambdaProject(
   "sf-emails-to-s3-exporter",
   "Runs regularly to retrieve emails from Salesforce and save as json in S3",
   Seq(circe, circeParser, scalajHttp, awsS3, awsSecretsManager, upickle),
-).dependsOn(`effects-s3`, `effects-cloudwatch`)
+  Seq(`effects-s3`, `effects-cloudwatch`),
+)
 
 lazy val `sf-api-user-credentials-setter` = lambdaProject(
   "sf-api-user-credentials-setter",
@@ -484,31 +555,35 @@ lazy val `cancellation-sf-cases-api` = lambdaProject(
   "cancellation-sf-cases-api",
   "Create/update SalesForce cases for self service cancellation tracking",
   Seq(),
-).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
+  Seq(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep),
+)
 
 lazy val `sf-gocardless-sync` = lambdaProject(
   "sf-gocardless-sync",
   "Polls GoCardless for direct debit mandate events and pushes into SalesForce",
   Seq(),
-).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
+  Seq(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep),
+)
 
 lazy val `holiday-stop-api` = lambdaProject(
   "holiday-stop-api",
   "CRUD API for Holiday Stop Requests stored in SalesForce",
   Seq(awsSecretsManager, upickle),
-).dependsOn(
-  `holiday-stops` % "compile->compile;test->test",
-  handler,
-  effectsDepIncludingTestFolder,
-  testDep,
-  `fulfilment-dates`,
+  Seq(
+    `holiday-stops` % "compile->compile;test->test",
+    handler,
+    effectsDepIncludingTestFolder,
+    testDep,
+    `fulfilment-dates`,
+  ),
 )
 
 lazy val `sf-datalake-export` = lambdaProject(
   "sf-datalake-export",
   "Export salesforce data to the data lake",
   Seq(scalaXml),
-).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
+  Seq(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep),
+)
 
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
@@ -520,16 +595,18 @@ lazy val `batch-email-sender` = lambdaProject(
   "batch-email-sender",
   "Receive batches of emails to be sent, munge them into an appropriate format and put them on the email sending queue.",
   Seq(supportInternationalisation, diffx, parallelCollections, mockito),
-).dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
+  Seq(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep),
+)
 
 lazy val `holiday-stop-processor` = lambdaProject(
   "holiday-stop-processor",
   "Add a holiday credit amendment to a subscription.",
   Seq(scalaLambda, awsS3),
-).dependsOn(
-  `credit-processor`,
-  `holiday-stops` % "compile->compile;test->test",
-  effects,
+  Seq(
+    `credit-processor`,
+    `holiday-stops` % "compile->compile;test->test",
+    effects,
+  ),
 )
 
 lazy val `delivery-problem-credit-processor` = lambdaProject(
@@ -543,7 +620,8 @@ lazy val `delivery-problem-credit-processor` = lambdaProject(
     scalatest,
     diffx,
   ),
-).dependsOn(`credit-processor`, `salesforce-sttp-client`, effects)
+  Seq(`credit-processor`, `salesforce-sttp-client`, effects),
+)
 
 lazy val `product-move-api` = lambdaProject(
   "product-move-api",
@@ -571,6 +649,7 @@ lazy val `product-move-api` = lambdaProject(
     awsSecretsManager,
     upickle,
   ),
+  Seq(`zuora-models`, `effects-sqs`, `new-product-api`),
   scala3Settings ++ Seq(
     excludeDependencies ++= Seq(
       ExclusionRule("org.typelevel", "cats-kernel_2.13"),
@@ -606,7 +685,6 @@ lazy val `product-move-api` = lambdaProject(
       s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
-  .dependsOn(`zuora-models`, `effects-sqs`, `new-product-api`)
 
 lazy val `metric-push-api` =
   lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")
@@ -624,13 +702,15 @@ lazy val `sf-move-subscriptions-api` = lambdaProject(
     scalatest,
     diffx,
   ),
-).dependsOn(`effects-s3`, `effects-sqs`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
+  Seq(`effects-s3`, `effects-sqs`, `config-cats`, `zuora-core`, `http4s-lambda-handler`),
+)
 
 lazy val `fulfilment-date-calculator` = lambdaProject(
   "fulfilment-date-calculator",
   "Generate files in S3 bucket containing relevant fulfilment-related dates, for example, acquisitionsStartDate, holidayStopFirstAvailableDate, etc.",
   Seq(scalaLambda, scalajHttp, enumeratum),
-).dependsOn(testDep, `fulfilment-dates`)
+  Seq(testDep, `fulfilment-dates`),
+)
 
 lazy val `delivery-records-api` = lambdaProject(
   "delivery-records-api",
@@ -642,15 +722,16 @@ lazy val `delivery-records-api` = lambdaProject(
     circe,
     sttpAsyncHttpClientBackendCats,
     scalatest,
-    diffx
+    diffx,
   ),
-).dependsOn(
-  `effects-s3`,
-  `config-core`,
-  `salesforce-sttp-client`,
-  `salesforce-sttp-test-stub` % Test,
-  `http4s-lambda-handler`,
-  testDep,
+  Seq(
+    `effects-s3`,
+    `config-core`,
+    `salesforce-sttp-client`,
+    `salesforce-sttp-test-stub` % Test,
+    `http4s-lambda-handler`,
+    testDep,
+  ),
 )
 
 lazy val `digital-voucher-api` = lambdaProject(
@@ -665,7 +746,8 @@ lazy val `digital-voucher-api` = lambdaProject(
     diffx,
     scalaMock,
   ),
-).dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`)
+  Seq(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`),
+)
 
 lazy val `digital-voucher-cancellation-processor` = lambdaProject(
   "digital-voucher-cancellation-processor",
@@ -675,12 +757,13 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
     diffx,
     sttpAsyncHttpClientBackendCats,
   ),
-).dependsOn(
-  `config-cats`,
-  `salesforce-sttp-client`,
-  `salesforce-sttp-test-stub` % Test,
-  `imovo-sttp-client`,
-  `imovo-sttp-test-stub` % Test,
+  Seq(
+    `config-cats`,
+    `salesforce-sttp-client`,
+    `salesforce-sttp-test-stub` % Test,
+    `imovo-sttp-client`,
+    `imovo-sttp-test-stub` % Test,
+  ),
 ).settings(
   dependencyOverrides += nettyCodec,
 )
@@ -697,7 +780,9 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
     awsSecretsManager,
     upickle,
   ),
-).dependsOn(`salesforce-sttp-client`, `imovo-sttp-client`).settings(dependencyOverrides ++= Seq(nettyCodec))
+  Seq(`salesforce-sttp-client`, `imovo-sttp-client`),
+)
+  .settings(dependencyOverrides ++= Seq(nettyCodec))
 
 lazy val `contact-us-api` = lambdaProject(
   "contact-us-api",
@@ -711,7 +796,8 @@ lazy val `contact-us-api` = lambdaProject(
     awsSecretsManager,
     upickle,
   ),
-).dependsOn(handler)
+  Seq(handler),
+)
 
 lazy val `http4s-lambda-handler` = library(project in file("lib/http4s-lambda-handler"))
   .settings(
@@ -730,6 +816,7 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     sttp,
     sttpCirce,
   ),
+  Seq(handler, `config-cats`, zuora, `zuora-core`, effectsDepIncludingTestFolder, testDep),
 ).settings {
   dependencyOverrides ++= jacksonDependencies
   lazy val deployTo =
@@ -755,7 +842,7 @@ lazy val `stripe-webhook-endpoints` = lambdaProject(
     s"aws lambda update-function-code --function-name stripe-customer-updated-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!
     s"aws lambda update-function-code --function-name stripe-payment-intent-issues-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!
   }
-}.dependsOn(handler, `config-cats`, zuora, `zuora-core`, effectsDepIncludingTestFolder, testDep)
+}
 
 // ==== END handlers ====
 
