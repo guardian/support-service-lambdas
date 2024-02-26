@@ -23,10 +23,25 @@ Parameters:
     Default: membership-dist
 
 Resources:
+
+  StripePaymentFailureMessagesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub stripe-payment-failure-messages-queue-${Stage}
+      VisibilityTimeout: 1800
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt StripePaymentFailureMessagesDLQ.Arn
+        maxReceiveCount: 10
+
+  StripePaymentFailureMessagesDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub stripe-payment-failure-messages-queue-${Stage}
+
   ApiGateway: #to have API created in AWS Console
     Type: AWS::Serverless::Api
     Properties:
-      StageName: IsProd
+      StageName: !Ref Stage
       Description: Gateway for Stripe to make POST requests to
       Name: !Sub stripe-webhook-endpoints-${Stage}
       Cors:
@@ -61,7 +76,7 @@ Resources:
         paths:
           "/":
             post:
-              summary: receive a new stripe request
+              summary: receive a new stripe payment failed event
               consumes:
                 - "application/json"
               produces:
@@ -75,10 +90,10 @@ Resources:
                 - authorizer: [ ]
               parameters:
                 - in: body
-                  name: MailSendBody
+                  name: PaymentFailedEventBody
                   required: true
                   schema:
-                    $ref: "#/definitions/MailSendBody"
+                    $ref: "#/definitions/PaymentFailedEventBody"
               x-amazon-apigateway-request-validator: body-only
               x-amazon-apigateway-integration:
                 credentials: !GetAtt ApiGatewayToSQSRole.Arn
@@ -98,23 +113,55 @@ Resources:
           Empty:
             type: object
             title: Empty
-          MailSendBody:
-            title: MailSendBody
+          PaymentFailedEventBody:
+            title: PaymentFailedEvent
             type: object
             properties:
-              template:
+              id:
                 type: string
-              locale:
+                description: The unique identifier for the payment intent.
+              object:
                 type: string
-              userName:
+                description: The type of object, always 'payment_intent'.
+              amount:
+                type: integer
+                description: The amount of the payment intent in the smallest currency unit.
+              currency:
                 type: string
-              userEmail:
+                description: The currency of the payment intent.
+              status:
                 type: string
+                description: The status of the payment intent. Should be 'failed'.
+              failure_message:
+                type: string
+                description: A message indicating why the payment intent failed.
+              created:
+                type: integer
+                description: Timestamp indicating when the payment intent was created.
+              payment_method:
+                type: string
+                description: The ID of the payment method used in the payment intent.
+              payment_method_types:
+                type: array
+                items:
+                  type: string
+                description: The list of payment method types (e.g. card) that this PaymentIntent is allowed to use.
+              customer:
+                type: string
+                description: The ID of the customer associated with the payment intent.
+              metadata:
+                type: object
+                description: Any additional metadata associated with the payment intent.
             required:
-              - template
-              - locale
-              - userName
-              - userEmail
+              - id
+              - object
+              - amount
+              - currency
+              - status
+              - created
+              - payment_method
+              - payment_method_types
+              - customer
 
   # authorization lambda
   StripeAuthorizer:
@@ -122,9 +169,31 @@ Resources:
     Properties:
       FunctionName: !Sub ${App}-authorization-${Stage}
       Description: Authorize API Gateway requests
-      Handler: com.gu.paymentIntentIssues.Lambda::handler
+      Handler: com.gu.paymentIntentIssues.StripeAuthorizerLambda::handler
       Runtime: java11
-
+      MemorySize: 512
+      Timeout: 300
+      Environment:
+        Variables:
+          App: payment-intent-issues
+          Stack: !Ref Stack
+          Stage: !Ref Stage
+      CodeUri:
+        Bucket: !Ref DeployBucket
+        Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            Effect: Allow
+            Action:
+              - ssm:GetParametersByPath
+            Resource:
+              - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership/payment-intent-issues
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
   ApiGatewayToSQSRole: #to allow API Gateway to push message to SQS
     Type: AWS::IAM::Role
     Properties:
@@ -212,23 +281,9 @@ Resources:
     Properties:
       BatchSize: 10
       Enabled: True
-      EventSourceArn: The ARN of the queue
+      EventSourceArn: StripePaymentFailureMessagesQueue.Arn
       FunctionName: !Sub stripe-payment-intent-issues-${Stage}
       FunctionResponseTypes: [ReportBatchItemFailures]
-
-  StripePaymentFailureMessagesQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub stripe-payment-failure-messages-queue-${Stage}
-      VisibilityTimeout: 1800
-      RedrivePolicy:
-        deadLetterTargetArn: !GetAtt StripePaymentFailureMessagesDLQ.Arn
-        maxReceiveCount: 10
-
-  StripePaymentFailureMessagesDLQ:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub stripe-payment-failure-messages-queue-${Stage}
 
   CustomerUpdatedLambda:
     Type: AWS::Serverless::Function
