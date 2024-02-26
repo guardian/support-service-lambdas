@@ -8,7 +8,11 @@ aws cloudformation update-stack \
   --stack-name stripe-webhook-endpoints-CODE \
   --template-body file://cfn.yaml \
   --parameters  ParameterKey=Stage,ParameterValue=CODE \
-  --profile membership
+  --profile membership \
+  --region eu-west-1
+
+
+
 
 echo -e "\nStack update has been started, check progress in the AWS console.";
 echo -e "https://eu-west-1.console.aws.amazon.com/cloudformation/home";
