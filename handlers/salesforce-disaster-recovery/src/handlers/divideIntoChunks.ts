@@ -1,4 +1,4 @@
-import { type UpdateChunkZuoraAccountsLambdaInput } from './updateChunkZuoraAccounts';
+import { type UpdateChunkZuoraAccountsLambdaInput } from './updateZuoraAccounts';
 
 export const handler = async (event: {
 	filePath: string;
