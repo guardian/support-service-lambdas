@@ -164,7 +164,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const maxConcurrency = 50;
+		const maxConcurrency = 150;
 
 		const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
 			stateName: `Divide Into Chunks`,
