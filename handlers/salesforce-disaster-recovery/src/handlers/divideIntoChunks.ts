@@ -1,4 +1,4 @@
-import { type UpdateZuoraAccountsLambdaInput } from './updateZuoraAccounts';
+import { type UpdateChunkZuoraAccountsLambdaInput } from './updateChunkZuoraAccounts';
 
 export const handler = async (event: {
 	filePath: string;
@@ -10,7 +10,7 @@ export const handler = async (event: {
 	const { filePath, maxConcurrency, numberOfRecords } = event;
 	const chunkSize = Math.ceil(numberOfRecords / maxConcurrency);
 
-	const chunks: UpdateZuoraAccountsLambdaInput[] = [];
+	const chunks: UpdateChunkZuoraAccountsLambdaInput[] = [];
 
 	for (let i = 0; i < maxConcurrency; i++) {
 		const startIndex = i * chunkSize;

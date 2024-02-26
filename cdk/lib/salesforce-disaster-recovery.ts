@@ -177,20 +177,20 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 		});
 
-		const batchUpdateZuoraAccounts = new Map(this, 'BatchUpdateZuoraAccounts', {
+		const updateZuoraAccounts = new Map(this, 'UpdateZuoraAccounts', {
 			itemsPath: '$.Payload.chunks',
 			maxConcurrency,
 		}).iterator(
-			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
+			new LambdaInvoke(this, 'UpdateChunkZuoraAccounts', {
 				lambdaFunction: new GuLambdaFunction(
 					this,
-					'UpdateZuoraAccountsLambda',
+					'UpdateChunkZuoraAccountsLambda',
 					{
 						...lambdaDefaultConfig,
 						timeout: Duration.minutes(15),
 						memorySize: 10240,
-						handler: 'updateZuoraAccounts.handler',
-						functionName: `update-zuora-accounts-${this.stage}`,
+						handler: 'updateChunkZuoraAccounts.handler',
+						functionName: `update-chunk-zuora-accounts-${this.stage}`,
 						environment: {
 							...lambdaDefaultConfig.environment,
 							S3_BUCKET: bucket.bucketName,
@@ -227,7 +227,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
 										.next(divideIntoChunks)
-										.next(batchUpdateZuoraAccounts),
+										.next(updateZuoraAccounts),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
