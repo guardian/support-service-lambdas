@@ -173,7 +173,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "divide-into-chunks-2-CODE",
+        "FunctionName": "divide-into-chunks-CODE",
         "Handler": "divideIntoChunks.handler",
         "MemorySize": 1024,
         "Role": {
@@ -955,7 +955,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "update-zuora-accounts-2-CODE",
+        "FunctionName": "update-zuora-accounts-CODE",
         "Handler": "updateZuoraAccounts.handler",
         "MemorySize": 10240,
         "Role": {
@@ -1359,7 +1359,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "divide-into-chunks-2-PROD",
+        "FunctionName": "divide-into-chunks-PROD",
         "Handler": "divideIntoChunks.handler",
         "MemorySize": 1024,
         "Role": {
@@ -2141,7 +2141,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "update-zuora-accounts-2-PROD",
+        "FunctionName": "update-zuora-accounts-PROD",
         "Handler": "updateZuoraAccounts.handler",
         "MemorySize": 10240,
         "Role": {

@@ -171,7 +171,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
 				...lambdaDefaultConfig,
 				handler: 'divideIntoChunks.handler',
-				functionName: `divide-into-chunks-2-${this.stage}`,
+				functionName: `divide-into-chunks-${this.stage}`,
 			}),
 			payload: TaskInput.fromObject({
 				filePath: JsonPath.stringAt('$.Payload.filePath'),
@@ -198,7 +198,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						timeout: Duration.minutes(15),
 						memorySize: 10240,
 						handler: 'updateZuoraAccounts.handler',
-						functionName: `update-zuora-accounts-2-${this.stage}`,
+						functionName: `update-zuora-accounts-${this.stage}`,
 						environment: {
 							...lambdaDefaultConfig.environment,
 							S3_BUCKET: bucket.bucketName,
