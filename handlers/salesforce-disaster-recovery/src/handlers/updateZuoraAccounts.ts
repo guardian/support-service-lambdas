@@ -35,7 +35,6 @@ export const handler = async (event: UpdateZuoraAccountsLambdaInput) => {
 	const endIndex = Math.min(startIndex + event.chunkSize, rows.length - 1);
 
 	for (let i = startIndex; i < endIndex; i += 50) {
-		console.log(startIndex, i);
 		const batch = rows.slice(i, i + 50);
 
 		await batchUpdateZuoraAccounts({
