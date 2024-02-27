@@ -15,6 +15,7 @@ import {
 	DefinitionBody,
 	JsonPath,
 	Map,
+	Pass,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -209,7 +210,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-			}),
+			}).addCatch(
+				new Wait(this, 'WaitAfterError', {
+					time: WaitTime.duration(Duration.minutes(1)),
+				}),
+				{ errors: [''] },
+			),
 		);
 
 		const stateMachine = new StateMachine(
