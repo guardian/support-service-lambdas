@@ -6,6 +6,7 @@ exports[`The Product catalog stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuCname",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -232,6 +233,18 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Policy",
     },
+    "NS1DNSentry": {
+      "Properties": {
+        "Name": "product-catalog.code.dev-guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "guardian.map.fastly.net",
+        ],
+        "Stage": "CODE",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -241,16 +254,22 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3::*:membership-dist/membership/CODE/generate-product-catalog/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE//",
+                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/*",
               ],
             },
             {
               "Action": "s3:PutObject",
               "Effect": "Allow",
               "Resource": {
-                "Fn::GetAtt": [
-                  "guproductcatalog6FBFBC20",
-                  "Arn",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::gu-product-catalog/CODE/*",
+                  ],
                 ],
               },
             },
@@ -478,91 +497,6 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Policy",
     },
-    "guproductcatalog6FBFBC20": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "BucketEncryption": {
-          "ServerSideEncryptionConfiguration": [
-            {
-              "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
-              },
-            },
-          ],
-        },
-        "BucketName": "gu-product-catalog",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "VersioningConfiguration": {
-          "Status": "Enabled",
-        },
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "guproductcatalogPolicyE9A98A46": {
-      "Properties": {
-        "Bucket": {
-          "Ref": "guproductcatalog6FBFBC20",
-        },
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:*",
-              "Condition": {
-                "Bool": {
-                  "aws:SecureTransport": "false",
-                },
-              },
-              "Effect": "Deny",
-              "Principal": {
-                "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "guproductcatalog6FBFBC20",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "guproductcatalog6FBFBC20",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
-    },
     "guzuoracatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF629ECA47D": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
@@ -609,7 +543,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                   "FilterRules": [
                     {
                       "Name": "prefix",
-                      "Value": "PROD/Zuora-CODE/",
+                      "Value": "PROD/Zuora-CODE",
                     },
                   ],
                 },
@@ -642,6 +576,7 @@ exports[`The Product catalog stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuCname",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -868,6 +803,18 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Policy",
     },
+    "NS1DNSentry": {
+      "Properties": {
+        "Name": "product-catalog.guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "guardian.map.fastly.net",
+        ],
+        "Stage": "PROD",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -877,16 +824,22 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3::*:membership-dist/membership/PROD/generate-product-catalog/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD//",
+                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/*",
               ],
             },
             {
               "Action": "s3:PutObject",
               "Effect": "Allow",
               "Resource": {
-                "Fn::GetAtt": [
-                  "guproductcatalog6FBFBC20",
-                  "Arn",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::gu-product-catalog/PROD/*",
+                  ],
                 ],
               },
             },
@@ -1114,91 +1067,6 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Policy",
     },
-    "guproductcatalog6FBFBC20": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "BucketEncryption": {
-          "ServerSideEncryptionConfiguration": [
-            {
-              "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
-              },
-            },
-          ],
-        },
-        "BucketName": "gu-product-catalog",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "VersioningConfiguration": {
-          "Status": "Enabled",
-        },
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "guproductcatalogPolicyE9A98A46": {
-      "Properties": {
-        "Bucket": {
-          "Ref": "guproductcatalog6FBFBC20",
-        },
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:*",
-              "Condition": {
-                "Bool": {
-                  "aws:SecureTransport": "false",
-                },
-              },
-              "Effect": "Deny",
-              "Principal": {
-                "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "guproductcatalog6FBFBC20",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "guproductcatalog6FBFBC20",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
-    },
     "guzuoracatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B3B2A0C82": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
@@ -1245,7 +1113,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                   "FilterRules": [
                     {
                       "Name": "prefix",
-                      "Value": "PROD/Zuora-PROD/",
+                      "Value": "PROD/Zuora-PROD",
                     },
                   ],
                 },

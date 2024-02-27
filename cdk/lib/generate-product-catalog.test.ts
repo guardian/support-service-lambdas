@@ -13,10 +13,12 @@ describe('The Product catalog stack', () => {
 		const codeStack = new GenerateProductCatalog(app, 'product-catalog-CODE', {
 			stack: 'membership',
 			stage: 'CODE',
+			domainName: 'product-catalog.code.dev-guardianapis.com',
 		});
 		const prodStack = new GenerateProductCatalog(app, 'product-catalog-PROD', {
 			stack: 'membership',
 			stage: 'PROD',
+			domainName: 'product-catalog.guardianapis.com',
 		});
 
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
