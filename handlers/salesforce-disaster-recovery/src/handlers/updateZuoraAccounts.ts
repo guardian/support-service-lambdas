@@ -13,6 +13,7 @@ export type UpdateZuoraAccountsLambdaInput = {
 };
 
 export const handler = async () => {
+	await Promise.resolve();
 	const error = new Error('message');
 	// @ts-expect-error This is a test
 	error.code = '429';
