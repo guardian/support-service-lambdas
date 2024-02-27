@@ -23,23 +23,8 @@ Parameters:
     Default: membership-dist
 
 Resources:
-
-  StripePaymentFailureMessagesQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub stripe-payment-failure-messages-queue-${Stage}
-      VisibilityTimeout: 1800
-      RedrivePolicy:
-        deadLetterTargetArn: !GetAtt StripePaymentFailureMessagesDLQ.Arn
-        maxReceiveCount: 10
-
-  StripePaymentFailureMessagesDLQ:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub stripe-payment-failure-messages-queue-${Stage}
-
   ApiGateway: #to have API created in AWS Console
-    Type: AWS::Serverless::Api
+    Type: AWS::Serverless::Api #Creates a collection of Amazon API Gateway resources and methods that can be invoked through HTTPS endpoints.
     Properties:
       StageName: !Ref Stage
       Description: Gateway for Stripe to make POST requests to
@@ -104,7 +89,7 @@ Resources:
                 requestParameters:
                   integration.request.header.Content-Type: "'application/x-www-form-urlencoded'"
                 requestTemplates:
-                  application/json: !Sub "Action=SendMessage##\n&QueueUrl=$util.urlEncode('${ApiQueue}')##\n\
+                  application/json: !Sub "Action=SendMessage##\n&QueueUrl=$util.urlEncode('${StripePaymentFailureMessagesQueue}')##\n\
                     &MessageBody=$util.urlEncode($input.body)##\n"
                 passthroughBehavior: "never"
                 httpMethod: "POST"
@@ -276,14 +261,19 @@ Resources:
             BatchSize: 10
             Enabled: false
 
-  LambdaEventSourceMapping:
-    Type: AWS::Lambda::EventSourceMapping
+  StripePaymentFailureMessagesQueue:
+    Type: AWS::SQS::Queue
     Properties:
-      BatchSize: 10
-      Enabled: True
-      EventSourceArn: StripePaymentFailureMessagesQueue.Arn
-      FunctionName: !Sub stripe-payment-intent-issues-${Stage}
-      FunctionResponseTypes: [ReportBatchItemFailures]
+      QueueName: !Sub stripe-payment-failure-messages-queue-${Stage}
+      VisibilityTimeout: 1800
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt StripePaymentFailureMessagesDLQ.Arn
+        maxReceiveCount: 10
+
+  StripePaymentFailureMessagesDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub stripe-payment-failure-messages-queue-dlq-${Stage}
 
   CustomerUpdatedLambda:
     Type: AWS::Serverless::Function
