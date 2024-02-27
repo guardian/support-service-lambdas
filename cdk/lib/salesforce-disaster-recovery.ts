@@ -56,6 +56,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
+		new Pass(this, 'testpass');
+
 		const createSalesforceQueryJob = new CustomState(
 			this,
 			'CreateSalesforceQueryJob',
@@ -74,16 +76,22 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'query.$': '$.query',
 						},
 					},
-					Retry: [
+					// Retry: [
+					// 	{
+					// 		ErrorEquals: ['States.Http.StatusCode.400'],
+					// 		MaxAttempts: 0,
+					// 	},
+					// 	{
+					// 		ErrorEquals: ['States.ALL'],
+					// 		IntervalSeconds: 5,
+					// 		MaxAttempts: 3,
+					// 		BackoffRate: 2,
+					// 	},
+					// ],
+					Catch: [
 						{
 							ErrorEquals: ['States.Http.StatusCode.400'],
-							MaxAttempts: 0,
-						},
-						{
-							ErrorEquals: ['States.ALL'],
-							IntervalSeconds: 5,
-							MaxAttempts: 3,
-							BackoffRate: 2,
+							Next: 'testpass',
 						},
 					],
 				},
