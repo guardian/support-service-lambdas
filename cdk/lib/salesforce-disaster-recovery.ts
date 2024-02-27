@@ -57,13 +57,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
-		new Pass(this, 'TestTestTest', {
-			// stateName: 'testpass',
-			// result: Result.fromString(
-			// 	'The input is invalid.\nExample: {"query": "SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}',
-			// ),
-		});
-
 		const createSalesforceQueryJob = new CustomState(
 			this,
 			'CreateSalesforceQueryJob',
@@ -82,22 +75,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'query.$': '$.query',
 						},
 					},
-					// Retry: [
-					// 	{
-					// 		ErrorEquals: ['States.Http.StatusCode.400'],
-					// 		MaxAttempts: 0,
-					// 	},
-					// 	{
-					// 		ErrorEquals: ['States.ALL'],
-					// 		IntervalSeconds: 5,
-					// 		MaxAttempts: 3,
-					// 		BackoffRate: 2,
-					// 	},
-					// ],
-					Catch: [
+					Retry: [
 						{
 							ErrorEquals: ['States.Http.StatusCode.400'],
-							Next: 'TestTestTest',
+							MaxAttempts: 0,
+						},
+						{
+							ErrorEquals: ['States.ALL'],
+							IntervalSeconds: 5,
+							MaxAttempts: 3,
+							BackoffRate: 2,
 						},
 					],
 				},
@@ -229,7 +216,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 		);
 
-		const aggregateMapResults = new Pass(this, 'AggregateMapResults');
+		const aggregateMapResults = new Pass(this, 'AggregateMapResults', {
+			parameters: {
+				tooManyRequests: '',
+			},
+		});
+
+		// const choiceStateTest = new Choice(this,'testchoice').when(Condition.)
 
 		const stateMachine = new StateMachine(
 			this,
