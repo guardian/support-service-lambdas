@@ -1,15 +1,17 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
-import type { Stage } from '@modules/stage';
 import { ZuoraCatalog } from '@modules/catalog/zuoraCatalog';
 import {
-	type Catalog,
+	type ZuoraCatalog,
 	zuoraCatalogSchema,
 } from '@modules/catalog/zuoraCatalogSchema';
+import type { Stage } from '@modules/stage';
 
 const client = new S3Client(awsConfig);
 
-export async function getZuoraCatalogFromS3(stage: Stage): Promise<Catalog> {
+export async function getZuoraCatalogFromS3(
+	stage: Stage,
+): Promise<ZuoraCatalog> {
 	console.log('getZuoraCatalogFromS3');
 	const command = new GetObjectCommand({
 		Bucket: 'gu-zuora-catalog',

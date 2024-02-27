@@ -1,13 +1,13 @@
 import { sumNumbers } from '@modules/arrayFunctions';
 import { checkDefined, isNotNull } from '@modules/nullAndUndefined';
 import type {
-	Catalog,
-	CatalogProductRatePlanCharge,
 	Pricing,
+	ZuoraCatalog,
+	ZuoraProductRatePlanCharge,
 } from './zuoraCatalogSchema';
 
 export class ZuoraCatalog {
-	constructor(private catalog: Catalog) {}
+	constructor(private catalog: ZuoraCatalog) {}
 
 	public getDiscountProductRatePlans = () => {
 		return this.catalog.products.find((product) => product.name === 'Discounts')
@@ -26,7 +26,7 @@ export class ZuoraCatalog {
 		currency: string,
 	): number[] =>
 		this.getCatalogPlan(productRatePlanId)
-			.productRatePlanCharges.map((charge: CatalogProductRatePlanCharge) =>
+			.productRatePlanCharges.map((charge: ZuoraProductRatePlanCharge) =>
 				charge.pricing.find((price: Pricing) => price.currency === currency),
 			)
 			.map((price) => price?.price)

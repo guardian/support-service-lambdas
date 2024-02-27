@@ -4,9 +4,7 @@
   "scripts": {
     "createSubscription": "ts-node ./src/create.ts",
     "cancelSubscription": "ts-node ./src/cancel.ts",
-    "deleteAccount": "ts-node ./src/deleteAccount.ts",
-    "test": "jest --group=-integration",
-    "it-test": "jest --group=integration"
+    "deleteAccount": "ts-node ./src/deleteAccount.ts"
   },
   "devDependencies": {
     "dayjs": "^1.11.10",
