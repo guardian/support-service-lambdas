@@ -16,6 +16,7 @@ import {
 	JsonPath,
 	Map,
 	Pass,
+	Result,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -56,7 +57,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
-		const testPass = new Pass(this, 'testpass', { stateName: 'testpass' });
+		// const testPass = new Pass(this, 'testpass', {
+		// 	stateName: 'testpass',
+		// 	result: Result.fromString(
+		// 		'The input is invalid.\nExample: {"query": "SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}',
+		// 	),
+		// });
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
@@ -91,7 +97,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Catch: [
 						{
 							ErrorEquals: ['States.Http.StatusCode.400'],
-							Next: testPass.id,
+							Next: 'UpdateZuoraAccountsMap',
 						},
 					],
 				},
