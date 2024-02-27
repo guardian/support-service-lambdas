@@ -1,10 +1,10 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
+import { getZuoraCatalogFromS3 } from '@modules/catalog/S3';
 import { generateProductCatalog } from '@modules/product/generateProductCatalog';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler, S3CreateEvent } from 'aws-lambda';
-import { getZuoraCatalogFromS3 } from '@modules/catalog/S3';
 
 const client = new S3Client(awsConfig);
 export const handler: Handler = async (event: S3CreateEvent) => {
@@ -22,6 +22,7 @@ export const writeProductCatalogToS3 = async (stage: Stage) => {
 	const command = new PutObjectCommand({
 		Bucket: productCatalogBucketName,
 		Key: `${stage}/product-catalog.json`,
+		ContentType: 'application/json',
 		Body: JSON.stringify(productCatalog, null, 2),
 	});
 
