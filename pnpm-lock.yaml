@@ -104,6 +104,18 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
 
+  modules/test-users:
+    devDependencies:
+      dayjs:
+        specifier: ^1.11.10
+        version: 1.11.10
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@20.11.16)(typescript@5.3.3)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
+
   modules/zuora:
     dependencies:
       '@aws-sdk/client-s3':
@@ -2933,7 +2945,6 @@ packages:
 
   /dayjs@1.11.10:
     resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
-    dev: false
 
   /debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
