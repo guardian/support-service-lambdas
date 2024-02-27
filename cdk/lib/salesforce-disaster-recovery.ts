@@ -56,7 +56,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
-		new Pass(this, 'testpass', { stateName: 'testpass' });
+		const testPass = new Pass(this, 'testpass', { stateName: 'testpass' });
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
@@ -91,7 +91,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Catch: [
 						{
 							ErrorEquals: ['States.Http.StatusCode.400'],
-							Next: 'testpass',
+							Next: testPass.id,
 						},
 					],
 				},
