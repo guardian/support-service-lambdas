@@ -124,10 +124,12 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
 new GenerateProductCatalog(app, 'generate-product-catalog-CODE', {
 	stack: 'support',
 	stage: 'CODE',
+	domainName: 'product-catalog.code.dev-guardianapis.com',
 });
 new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
 	stack: 'support',
 	stage: 'PROD',
+	domainName: 'product-catalog.guardianapis.com',
 });
 
 new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-CODE", { stack: "membership", stage: "CODE" });

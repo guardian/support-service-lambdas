@@ -1,5 +1,6 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
@@ -11,6 +12,7 @@ import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 export interface GenerateProductCatalogProps extends GuStackProps {
 	stack: string;
 	stage: string;
+	domainName: string;
 }
 
 export class GenerateProductCatalog extends GuStack {
@@ -81,5 +83,12 @@ export class GenerateProductCatalog extends GuStack {
 		});
 
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+
+		new GuCname(this, 'NS1 DNS entry', {
+			app: app,
+			domainName: props.domainName,
+			ttl: Duration.hours(1),
+			resourceRecord: 'guardian.map.fastly.net',
+		});
 	}
 }
