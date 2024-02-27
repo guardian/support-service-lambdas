@@ -211,17 +211,25 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-			}).addCatch(new Pass(this, 'CatchErrors', {}), {
-				errors: ['States.ALL'],
-			}),
+			}).addCatch(
+				new Pass(this, 'CatchErrors', {
+					parameters: {
+						Cause: JsonPath.stringToJson('$.Cause'),
+						Error: JsonPath.stringAt('$.Error'),
+					},
+				}),
+				{
+					errors: ['States.ALL'],
+				},
+			),
 		);
 
 		const aggregateMapResults = new Pass(this, 'AggregateMapResults', {
-			parameters: {
-				// 'Cause.$': 'States.StringToJson($.Cause)',
-				Cause: JsonPath.stringToJson('$.Cause'),
-				Error: JsonPath.stringAt('$.Error'),
-			},
+			// parameters: {
+			// 	// 'Cause.$': 'States.StringToJson($.Cause)',
+			// 	Cause: JsonPath.stringToJson('$.Cause'),
+			// 	Error: JsonPath.stringAt('$.Error'),
+			// },
 		});
 
 		// const choiceStateTest = new Choice(this,'testchoice').when(Condition.)
