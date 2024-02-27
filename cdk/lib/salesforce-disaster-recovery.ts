@@ -56,7 +56,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
-		new Pass(this, 'testpass');
+		new Pass(this, 'testpass', { stateName: 'testpass' });
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
