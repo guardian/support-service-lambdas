@@ -57,12 +57,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
-		// const testPass = new Pass(this, 'testpass', {
-		// 	stateName: 'testpass',
-		// 	result: Result.fromString(
-		// 		'The input is invalid.\nExample: {"query": "SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}',
-		// 	),
-		// });
+		new Pass(this, 'TestTestTest', {
+			// stateName: 'testpass',
+			// result: Result.fromString(
+			// 	'The input is invalid.\nExample: {"query": "SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c from Zuora__CustomerAccount__c"}',
+			// ),
+		});
 
 		const createSalesforceQueryJob = new CustomState(
 			this,
@@ -97,7 +97,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Catch: [
 						{
 							ErrorEquals: ['States.Http.StatusCode.400'],
-							Next: 'UpdateZuoraAccountsMap',
+							Next: 'TestTestTest',
 						},
 					],
 				},
@@ -224,13 +224,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-			})
-				.addCatch(new Pass(this, 'CatchTooManyRequestsError', {}), {
-					errors: ['States.Http.StatusCode.429'],
-				})
-				.addCatch(new Pass(this, 'CatchInternalServerError', {}), {
-					errors: ['States.Http.StatusCode.500'],
-				}),
+			}).addCatch(new Pass(this, 'CatchErrors', {}), {
+				errors: ['States.ALL'],
+			}),
 		);
 
 		const aggregateMapResults = new Pass(this, 'AggregateMapResults');

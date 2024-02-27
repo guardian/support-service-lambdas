@@ -468,7 +468,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Catch":[{"ErrorEquals":["States.Http.StatusCode.400"],"Next":"UpdateZuoraAccountsMap"}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Catch":[{"ErrorEquals":["States.Http.StatusCode.400"],"Next":"TestTestTest"}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -498,7 +498,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"filePath.$":"$.Payload.filePath","maxConcurrency":40,"numberOfRecords.$":"$.Payload.numberOfRecords"}}},"UpdateZuoraAccountsMap":{"Type":"Map","Next":"AggregateMapResults","Iterator":{"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Catch":[{"ErrorEquals":["States.Http.StatusCode.429"],"Next":"CatchTooManyRequestsError"},{"ErrorEquals":["States.Http.StatusCode.500"],"Next":"CatchInternalServerError"}],"Type":"Task","Resource":"arn:",
+              "","Payload":{"filePath.$":"$.Payload.filePath","maxConcurrency":40,"numberOfRecords.$":"$.Payload.numberOfRecords"}}},"UpdateZuoraAccountsMap":{"Type":"Map","Next":"AggregateMapResults","Iterator":{"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Catch":[{"ErrorEquals":["States.ALL"],"Next":"CatchErrors"}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -509,7 +509,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"CatchTooManyRequestsError":{"Type":"Pass","End":true},"CatchInternalServerError":{"Type":"Pass","End":true}}},"ItemsPath":"$.Payload.chunks","MaxConcurrency":40},"AggregateMapResults":{"Type":"Pass","End":true}}}",
+              "","Payload.$":"$"}},"CatchErrors":{"Type":"Pass","End":true}}},"ItemsPath":"$.Payload.chunks","MaxConcurrency":40},"AggregateMapResults":{"Type":"Pass","End":true}}}",
             ],
           ],
         },
@@ -1654,7 +1654,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Catch":[{"ErrorEquals":["States.Http.StatusCode.400"],"Next":"UpdateZuoraAccountsMap"}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":30,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Catch":[{"ErrorEquals":["States.Http.StatusCode.400"],"Next":"TestTestTest"}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":30,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -1684,7 +1684,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"filePath.$":"$.Payload.filePath","maxConcurrency":40,"numberOfRecords.$":"$.Payload.numberOfRecords"}}},"UpdateZuoraAccountsMap":{"Type":"Map","Next":"AggregateMapResults","Iterator":{"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Catch":[{"ErrorEquals":["States.Http.StatusCode.429"],"Next":"CatchTooManyRequestsError"},{"ErrorEquals":["States.Http.StatusCode.500"],"Next":"CatchInternalServerError"}],"Type":"Task","Resource":"arn:",
+              "","Payload":{"filePath.$":"$.Payload.filePath","maxConcurrency":40,"numberOfRecords.$":"$.Payload.numberOfRecords"}}},"UpdateZuoraAccountsMap":{"Type":"Map","Next":"AggregateMapResults","Iterator":{"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Catch":[{"ErrorEquals":["States.ALL"],"Next":"CatchErrors"}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1695,7 +1695,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"CatchTooManyRequestsError":{"Type":"Pass","End":true},"CatchInternalServerError":{"Type":"Pass","End":true}}},"ItemsPath":"$.Payload.chunks","MaxConcurrency":40},"AggregateMapResults":{"Type":"Pass","End":true}}}",
+              "","Payload.$":"$"}},"CatchErrors":{"Type":"Pass","End":true}}},"ItemsPath":"$.Payload.chunks","MaxConcurrency":40},"AggregateMapResults":{"Type":"Pass","End":true}}}",
             ],
           ],
         },
