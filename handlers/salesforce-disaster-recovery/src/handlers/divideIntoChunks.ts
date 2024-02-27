@@ -5,6 +5,7 @@ export const handler = async (event: {
 	maxConcurrency: number;
 	numberOfRecords: number;
 }) => {
+	// This is required since not making this handler async will cause the function to always return null
 	await Promise.resolve();
 
 	const { filePath, maxConcurrency, numberOfRecords } = event;
