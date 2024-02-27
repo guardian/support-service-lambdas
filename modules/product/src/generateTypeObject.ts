@@ -1,19 +1,19 @@
 import fs from 'fs';
 import { arrayToObject, distinct } from '@modules/arrayFunctions';
-import { getZuoraCatalogFromS3 } from '@modules/catalog/S3';
+import { checkDefined } from '@modules/nullAndUndefined';
+import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type {
 	Catalog,
 	CatalogProductRatePlan,
 	CatalogProductRatePlanCharge,
-} from '@modules/catalog/zuoraCatalogSchema';
-import { checkDefined } from '@modules/nullAndUndefined';
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import {
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
 	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
-} from '@modules/product/nameMappings';
+} from '@modules/product/zuoraToProductNameMappings';
 
 const getProductRatePlanCharges = (
 	productRatePlanCharges: CatalogProductRatePlanCharge[],

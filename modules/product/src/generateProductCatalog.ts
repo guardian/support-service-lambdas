@@ -1,17 +1,17 @@
 import { arrayToObject } from '@modules/arrayFunctions';
 import type {
-	Catalog,
-	CatalogProductRatePlan,
-	CatalogProductRatePlanCharge,
-} from '@modules/catalog/zuoraCatalogSchema';
+	ZuoraCatalog,
+	ZuoraProductRatePlan,
+	ZuoraProductRatePlanCharge,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
+import type { ProductCatalog } from '@modules/product/productCatalog';
 import {
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
 	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
-} from '@modules/product/nameMappings';
-import type { ProductCatalog } from '@modules/product/productCatalog';
+} from '@modules/product/zuoraToProductNameMappings';
 
 type NonNullPrice = { currency: string; price: number };
 type PricingObject = Record<string, number>;
@@ -19,7 +19,7 @@ type PricingObject = Record<string, number>;
 const roundPriceToTwoDecimalPlaces = (price: number) => {
 	return parseFloat(price.toFixed(2));
 };
-const getPricingObject = (charges: CatalogProductRatePlanCharge[]) => {
+const getPricingObject = (charges: ZuoraProductRatePlanCharge[]) => {
 	const allPrices = charges.flatMap((charge) => {
 		return charge.pricing
 			.map(({ currency, price }) => ({ currency, price }))
@@ -35,7 +35,7 @@ const getPricingObject = (charges: CatalogProductRatePlanCharge[]) => {
 	}, {});
 };
 const getProductRatePlanCharges = (
-	productRatePlanCharges: CatalogProductRatePlanCharge[],
+	productRatePlanCharges: ZuoraProductRatePlanCharge[],
 ) => {
 	return arrayToObject(
 		productRatePlanCharges.map((productRatePlanCharge) => {
@@ -50,7 +50,7 @@ const getProductRatePlanCharges = (
 		}),
 	);
 };
-const getZuoraProduct = (productRatePlans: CatalogProductRatePlan[]) => {
+const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 	return {
 		ratePlans: arrayToObject(
 			productRatePlans
@@ -74,7 +74,9 @@ const getZuoraProduct = (productRatePlans: CatalogProductRatePlan[]) => {
 		),
 	};
 };
-export const generateProductCatalog = (catalog: Catalog): ProductCatalog => {
+export const generateProductCatalog = (
+	catalog: ZuoraCatalog,
+): ProductCatalog => {
 	const supportedProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
 	);

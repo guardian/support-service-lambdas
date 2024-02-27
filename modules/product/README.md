@@ -1,77 +1,83 @@
 # Product Module
-### If you are looking for how to regenerate catalog mappings, jump to the [implementation section](#implementation)
+### If you are looking for how to regenerate catalog types, jump to the [implementation section](#implementation)
 
 ---------------------------------
 ## Introduction
-This module defines a model to describe our product structure and the mapping between that structure and the Zuora catalog which holds pricing information.
+This module defines a simplified product catalog model and mappings between that structure and the larger, more general catalog structure which we export from Zuora.
 
-There are two main types involved in our product definitions:
-## `ProductKey`
-This maps onto a particular product defined in the Zuora catalog. 
+There are two main types involved in our product definitions and they map onto the identically named objects in the [Zuora product catalog](https://knowledgecenter.zuora.com/Zuora_Billing/Build_products_and_prices/Basic_concepts_and_terms/AAA_Product_Catalog_Concepts)
+## `Product`
+This represents a particular product defined in the Zuora catalog. 
 Available values are:
-#### Newspaper:
-- `NationalDelivery`
-- `HomeDelivery`
-- `SubscriptionCard`
-#### GuardianWeekly
-- `Domestic`
-- `RestOfWorld`
-#### Digital
-- `DigitalSubscription`
-- `SupporterPlus`
-- `Contribution`
 
-## `ProductRatePlanKey`
-This maps to an individual product rate plan. Each ProductRatePlanKey belongs to a specific zuora product so it is a generic type with the signature:
+- NationalDelivery
+- HomeDelivery
+- SubscriptionCard
+
+which are all types of Newspaper subscription
+
+- GuardianWeeklyDomestic
+- GuardianWeeklyRestOfWorld
+
+which are both types of Guardian Weekly
+
+- DigitalSubscription
+- SupporterPlus
+- Contribution
+
+## `ProductRatePlan`
+This maps to a Zuora product rate plan. Each ProductRatePlanKey belongs to a specific zuora product so it is a generic type with the signature:
 ```typescript
 type ProductRatePlanKey<P extends ProductKey>
 ```
-Examples of product options for particular products are:
+Product rate plans for each product are:
 
-- `HomeDelivery`
-  - `Saturday`
-  - `Sunday`
-  - `Weekend`
-  - `Sixday`
-  - `Everyday`
+- HomeDelivery & SubscriptionCard
+  - Saturday
+  - Sunday
+  - Weekend
+  - Sixday
+  - Everyday
   
 
-- `NationalDelivery`
-  - `Weekend`
-  - `Sixday`
-  - `Everyday` // National delivery doesn't have a Saturday and Sunday option
+- NationalDelivery
+  - Weekend
+  - Sixday
+  - Everyday // National delivery doesn't have a Saturday and Sunday option
 
 
-- `DigitalSubscription`
-  - `Monthly`
-  - `Annual`
-  - `OneYearGift`
-  - `ThreeMonthGift`
+- GuardianWeeklyDomestic & GuardianWeeklyRestOfWorld
+  - Monthly
+  - Annual
+  - Quarterly
+  - SixWeekly
+  - OneYearGift
+  - ThreeMonthGift
+
+
+- DigitalSubscription
+  - Monthly
+  - Annual
+  - OneYearGift
+  - ThreeMonthGift
 
  
-- `SupporterPlus`
-  - `Monthly`
-  - `Annual`
+- SupporterPlus
+  - Monthly
+  - Annual
 
 This diagram shows all product keys and their associated product rate plan keys:
 
 ![product-catalog.png](product-catalog.png)
 # Usage
-By providing a `ProductKey` and `ProductRatePlanKey` we can map to any [product rate plan](https://knowledgecenter.zuora.com/Zuora_Central_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlan) in the Zuora catalog and from that we can retrieve the pricing information for that particular configuration. For instance if I want to find the GBP price to get the Newspaper delivered on a Saturday I can use the following:
+The product catalog object contains pricing information and Zuora ids for product rate plans and product rate plan charges (needed when creating subscriptions). For instance if I want to find the GBP price to get the Newspaper delivered on a Saturday I can use the following:
 ```typescript
 import { getZuoraCatalog } from '@modules/catalog/catalog';
 import { getProductRatePlan } from '@modules/product/productCatalogMapping';
 
-const stage = 'CODE';
-const catalog = await getZuoraCatalog(stage);
+const catalog: ProductCatalog = await getProductCatalogFromApi('CODE');
 
-const productRatePlan = getProductRatePlan(
-    stage,
-    'Newspaper',
-    'HomeDelivery',
-    'Saturday',
-);
-const price = catalog.getCatalogPrice(productRatePlan.id, 'GBP');
+const price = catalog.products.HomeDelivery.ratePlans.Saturday.pricing.GBP;
 // price is 19.99
 
 ```

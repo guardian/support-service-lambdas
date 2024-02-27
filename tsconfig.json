@@ -32,7 +32,7 @@
     "paths": {
       "@modules/aws/*": ["./modules/aws/src/*"],
       "@modules/zuora/*": ["./modules/zuora/src/*"],
-      "@modules/catalog/*": ["./modules/catalog/src/*"],
+      "@modules/zuora-catalog/*": ["./modules/zuora-catalog/src/*"],
       "@modules/product/*": ["./modules/product/src/*"],
       "@modules/*": ["./modules/*"]
     },

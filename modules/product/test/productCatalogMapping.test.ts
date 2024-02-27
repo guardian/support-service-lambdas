@@ -1,10 +1,10 @@
 import { findDuplicates } from '@modules/arrayFunctions';
-import { ZuoraCatalog } from '@modules/catalog/zuoraCatalog';
 import type { Stage } from '@modules/stage';
+import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { generateProductCatalog } from '@modules/product/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product/productCatalog';
-import codeZuoraCatalog from '../../catalog/test/fixtures/catalog-code.json';
-import prodZuoraCatalog from '../../catalog/test/fixtures/catalog-prod.json';
+import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
+import prodZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 
 const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
 const prodProductCatalog = generateProductCatalog(prodZuoraCatalog);
@@ -43,8 +43,8 @@ test('We can find product details from a productRatePlanId', () => {
 const productExistsInCatalog = (stage: Stage) => {
 	const [zuoraCatalog, productCatalog] =
 		stage === 'CODE'
-			? [new ZuoraCatalog(codeZuoraCatalog), codeCatalogHelper]
-			: [new ZuoraCatalog(prodZuoraCatalog), prodCatalogHelper];
+			? [new ZuoraCatalogHelper(codeZuoraCatalog), codeCatalogHelper]
+			: [new ZuoraCatalogHelper(prodZuoraCatalog), prodCatalogHelper];
 	const allProductDetails = productCatalog.getAllProductDetails();
 	allProductDetails.forEach((productDetails) => {
 		expect(zuoraCatalog.getCatalogPlan(productDetails.id)).toBeDefined();

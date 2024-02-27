@@ -1,11 +1,11 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
-import { ZuoraCatalog } from '@modules/catalog/zuoraCatalog';
+import type { Stage } from '@modules/stage';
+import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import {
 	type ZuoraCatalog,
 	zuoraCatalogSchema,
-} from '@modules/catalog/zuoraCatalogSchema';
-import type { Stage } from '@modules/stage';
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 const client = new S3Client(awsConfig);
 
@@ -30,5 +30,5 @@ export async function getZuoraCatalogFromS3(
 
 export const getZuoraCatalog = async (stage: Stage) => {
 	const catalog = await getZuoraCatalogFromS3(stage);
-	return new ZuoraCatalog(catalog);
+	return new ZuoraCatalogHelper(catalog);
 };

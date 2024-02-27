@@ -1,6 +1,6 @@
-import { zuoraCatalogSchema } from '@modules/catalog/zuoraCatalogSchema';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { generateProductCatalog } from '@modules/product/generateProductCatalog';
-import prod from '../../catalog/test/fixtures/catalog-prod.json';
+import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 
 test('Generated product catalog matches snapshot', () => {
 	const prodCatalog = zuoraCatalogSchema.parse(prod);

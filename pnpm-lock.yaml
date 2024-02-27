@@ -95,15 +95,6 @@ importers:
         specifier: 3.451.0
         version: 3.451.0
 
-  modules/catalog:
-    dependencies:
-      '@aws-sdk/client-s3':
-        specifier: 3.451.0
-        version: 3.451.0
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
-
   modules/product:
     devDependencies:
       ts-node:
@@ -139,6 +130,15 @@ importers:
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+
+  modules/zuora-catalog:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: 3.451.0
+        version: 3.451.0
       zod:
         specifier: ^3.22.4
         version: 3.22.4

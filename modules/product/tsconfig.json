@@ -9,7 +9,7 @@
     "paths": {
       "@modules/aws/*": ["../aws/src/*"],
       "@modules/zuora/*": ["../zuora/src/*"],
-      "@modules/catalog/*": ["../catalog/src/*"],
+      "@modules/zuora-catalog/*": ["../zuora-catalog/src/*"],
       "@modules/product/*": ["../product/src/*"],
       "@modules/*": ["../*"]
     }

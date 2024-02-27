@@ -6,7 +6,7 @@ import type {
 	ZuoraProductRatePlanCharge,
 } from './zuoraCatalogSchema';
 
-export class ZuoraCatalog {
+export class ZuoraCatalogHelper {
 	constructor(private catalog: ZuoraCatalog) {}
 
 	public getDiscountProductRatePlans = () => {

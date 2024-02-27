@@ -1,12 +1,12 @@
-import { ZuoraCatalog } from '@modules/catalog/zuoraCatalog';
-import { zuoraCatalogSchema } from '@modules/catalog/zuoraCatalogSchema';
 import {
 	billingPreviewSchema,
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/zuoraSchemas';
+import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
-import catalogJsonCode from '../../../modules/catalog/test/fixtures/catalog-code.json';
-import catalogJsonProd from '../../../modules/catalog/test/fixtures/catalog-prod.json';
+import catalogJsonCode from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
+import catalogJsonProd from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import { EligibilityChecker } from '../src/eligibilityChecker';
 import billingPreviewJson1 from './fixtures/billing-previews/eligibility-checker-test.json';
 import billingPreviewJson2 from './fixtures/billing-previews/eligibility-checker-test2.json';
@@ -17,7 +17,7 @@ import subscriptionJson1 from './fixtures/digital-subscriptions/get-discount-tes
 
 test('Eligibility check fails for a subscription which is on a reduced price', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson1);
-	const catalog: ZuoraCatalog = new ZuoraCatalog(
+	const catalog = new ZuoraCatalogHelper(
 		zuoraCatalogSchema.parse(catalogJsonProd),
 	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson1);
@@ -32,7 +32,7 @@ test('Eligibility check fails for a subscription which is on a reduced price', (
 });
 test('Eligibility check works for a price risen subscription', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson2);
-	const catalog: ZuoraCatalog = new ZuoraCatalog(
+	const catalog = new ZuoraCatalogHelper(
 		zuoraCatalogSchema.parse(catalogJsonProd),
 	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson2);
@@ -50,7 +50,7 @@ test('Eligibility check works for a price risen subscription', () => {
 
 test('error', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson3);
-	const catalog: ZuoraCatalog = new ZuoraCatalog(
+	const catalog = new ZuoraCatalogHelper(
 		zuoraCatalogSchema.parse(catalogJsonCode),
 	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson3);
