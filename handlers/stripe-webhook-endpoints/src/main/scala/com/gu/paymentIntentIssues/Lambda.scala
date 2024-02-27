@@ -1,8 +1,7 @@
 package com.gu.paymentIntentIssues
-
-import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
+import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent,SQSBatchResponse, SQSEvent}
 import com.typesafe.scalalogging.LazyLogging
-
+import com.fasterxml.jackson.databind.ObjectMapper
 import scala.jdk.CollectionConverters._
 import com.stripe.net.Webhook
 
@@ -22,42 +21,59 @@ import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 import sttp.client3._
 import sttp.client3.circe._
 import com.gu.zuora.AccessToken
+import io.circe.ParsingFailure
+import io.circe.{Decoder, DecodingFailure}
+import io.circe.generic.auto._
+import io.circe.parser.{decode => circeDecode}
+
 
 object Lambda extends LazyLogging {
-  def handler(event: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent = {
+  // ObjectMapper to deserialize JSON
+  private val objectMapper = new ObjectMapper()
+  def handler(event: SQSEvent): Unit= {
+    logger.info(s"Input was $event")
+
     val identity = AppIdentity.whoAmI(defaultAppName = "payment-intent-issues")
 
-    val program = loadConfig(identity).subflatMap(config =>
-      for {
-        payload <- getPayload(event, config.endpointSecret)
-        _ <- processEvent(payload, config)
-      } yield (),
-    )
+    val messages: List[SQSEvent.SQSMessage] = event.getRecords.asScala.toList
 
-    val result = program.value.unsafeRunSync()
+    messages.foreach { message =>
+      val sqsMessageBody = message.getBody
+      val apiGatewayEvent = deserializeAPIGatewayEvent(sqsMessageBody)
 
-    val response = new APIGatewayProxyResponseEvent()
-    result match {
-      case Left(ConfigLoadingError(message)) =>
-        logger.error(message)
-        response.setStatusCode(500)
-      case Left(error @ (InvalidRequestError(_) | InvalidJsonError(_))) =>
-        logger.error(error.message)
-        response.setStatusCode(400)
-      case Left(error @ (MissingPaymentNumberError(_) | ZuoraApiError(_))) =>
-        // TODO: alarm
-        logger.error(error.message)
-        response.setStatusCode(200)
-      case Right(_) =>
-        response.setStatusCode(200)
+      val program = loadConfig(identity).subflatMap(config =>
+        for {
+          payload <- getPayload(apiGatewayEvent, config.endpointSecret)
+          _ <- processEvent(payload, config)
+        } yield (),
+      )
+
+      val result = program.value.unsafeRunSync()
+
+//      result match {
+//        case Right(_) =>
+//          logger.info(s"Message processed successfully")
+//          val failedMessageIds = messages.map(message => processEvent(, config)).collect { case Left(messageId) => messageId }
+//          new SQSBatchResponse(
+//            failedMessageIds.map(messageId => new BatchItemFailure(messageId)).asJava,
+//          )
+//        case Left(error) =>
+//          logger.error(s"Error processing SQS event: $error")
+//          new SQSBatchResponse(
+//            event.getRecords.asScala.map(message => new SQSBatchResponse.BatchItemFailure(message.getMessageId)).asJava,
+//          )
+//      }
     }
-    response
   }
 
   def loadConfig(identity: AppIdentity): EitherT[IO, Error, Config] =
     ConfigLoader.loadConfig[IO, Config](identity).leftMap(e => ConfigLoadingError(e.message))
+  def deserializeAPIGatewayEvent(json: String): APIGatewayProxyRequestEvent = {
+    // Deserialize the JSON string into APIGatewayProxyRequestEvent
+    objectMapper.readValue(json, classOf[APIGatewayProxyRequestEvent])
 
-  def getPayload(event: APIGatewayProxyRequestEvent, endpointSecret: String): Either[Error, String] =
+  }
+  def getPayload(event: APIGatewayProxyRequestEvent,endpointSecret: String): Either[Error, String] =
     for {
       payload <- Option(event.getBody()).toRight(InvalidRequestError("Missing body"))
       sigHeader <- event.getHeaders.asScala.get("Stripe-Signature").toRight(InvalidRequestError("Missing sig header"))
@@ -88,10 +104,10 @@ object Lambda extends LazyLogging {
     }
 
   def refundZuoraPayment(
-      paymentNumber: String,
-      paymentIntentObject: PaymentIntentObject,
-      config: Config,
-  ): Either[Error, Unit] = {
+                          paymentNumber: String,
+                          paymentIntentObject: PaymentIntentObject,
+                          config: Config,
+                        ): Either[Error, Unit] = {
     logger.info(s"Zuora payment number: $paymentNumber")
 
     implicit val backend: SttpBackend[Id, Any] = HttpURLConnectionBackend()
@@ -112,10 +128,10 @@ object Lambda extends LazyLogging {
     accessTokenGetResponseV2(oauthConfig, backend).left.map(e => ZuoraApiError(e.reason))
 
   def queryPayments(
-      paymentNumber: String,
-      config: ZuoraRestConfig,
-      backend: SttpBackend[Id, Any],
-  ): Either[Error, ZuoraPaymentQueryResponse] =
+                     paymentNumber: String,
+                     config: ZuoraRestConfig,
+                     backend: SttpBackend[Id, Any],
+                   ): Either[Error, ZuoraPaymentQueryResponse] =
     basicRequest
       .post(uri"${config.baseUrl}/action/query")
       .header("Authorization", s"Bearer ${config.accessToken}")
@@ -128,11 +144,11 @@ object Lambda extends LazyLogging {
       .body
 
   def rejectPayment(
-      paymentId: String,
-      paymentIntentObject: PaymentIntentObject,
-      config: ZuoraRestConfig,
-      backend: SttpBackend[Id, Any],
-  ): Either[Error, Unit] = {
+                     paymentId: String,
+                     paymentIntentObject: PaymentIntentObject,
+                     config: ZuoraRestConfig,
+                     backend: SttpBackend[Id, Any],
+                   ): Either[Error, Unit] = {
     val body = ZuoraRejectPaymentBody.fromStripePaymentIntentObject(paymentIntentObject)
 
     basicRequest

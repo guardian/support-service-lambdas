@@ -22,10 +22,198 @@ Parameters:
     Type: String
     Default: membership-dist
 
-Conditions:
-  IsProd: !Equals [ !Ref Stage, "PROD" ]
-
 Resources:
+  ApiGateway: #to have API created in AWS Console
+    Type: AWS::Serverless::Api #Creates a collection of Amazon API Gateway resources and methods that can be invoked through HTTPS endpoints.
+    Properties:
+      StageName: !Ref Stage
+      Description: Gateway for Stripe to make POST requests to
+      Name: !Sub stripe-webhook-endpoints-${Stage}
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          title: !Ref Stack
+          description: API Gateway to handle Stripe events
+        x-amazon-apigateway-request-validators:
+          body-only:
+            validateRequestBody: true
+            validateRequestParameters: false
+          params-only:
+            validateRequestBody: false
+            validateRequestParameters: true
+        x-amazon-apigateway-request-validator: body-only
+        securityDefinitions:
+          authorizer:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: oauth2
+            x-amazon-apigateway-authorizer:
+              type: token
+              authorizerUri: !Join [ "", [ !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/", !GetAtt StripeAuthorizer.Arn, "/invocations" ] ]
+              authorizerCredentials: !GetAtt ApiGatewayToSQSRole.Arn
+              identityValidationExpression: "Bearer [A-Za-z0-9_-]+.[A-Za-z0-9_-]+.[A-Za-z0-9_-]+"
+              authorizerResultTtlInSeconds: 300
+        paths:
+          "/":
+            post:
+              summary: receive a new stripe payment failed event
+              consumes:
+                - "application/json"
+              produces:
+                - "application/json"
+              responses:
+                "200":
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/Empty"
+              security:
+                - authorizer: [ ]
+              parameters:
+                - in: body
+                  name: PaymentFailedEventBody
+                  required: true
+                  schema:
+                    $ref: "#/definitions/PaymentFailedEventBody"
+              x-amazon-apigateway-request-validator: body-only
+              x-amazon-apigateway-integration:
+                credentials: !GetAtt ApiGatewayToSQSRole.Arn
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:sqs:path//"
+                responses:
+                  default:
+                    statusCode: "200"
+                requestParameters:
+                  integration.request.header.Content-Type: "'application/x-www-form-urlencoded'"
+                requestTemplates:
+                  application/json: !Sub "Action=SendMessage##\n&QueueUrl=$util.urlEncode('${StripePaymentFailureMessagesQueue}')##\n\
+                    &MessageBody=$util.urlEncode($input.body)##\n"
+                passthroughBehavior: "never"
+                httpMethod: "POST"
+                type: "aws"
+        definitions:
+          Empty:
+            type: object
+            title: Empty
+          PaymentFailedEventBody:
+            title: PaymentFailedEvent
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique identifier for the payment intent.
+              object:
+                type: string
+                description: The type of object, always 'payment_intent'.
+              amount:
+                type: integer
+                description: The amount of the payment intent in the smallest currency unit.
+              currency:
+                type: string
+                description: The currency of the payment intent.
+              status:
+                type: string
+                description: The status of the payment intent. Should be 'failed'.
+              failure_message:
+                type: string
+                description: A message indicating why the payment intent failed.
+              created:
+                type: integer
+                description: Timestamp indicating when the payment intent was created.
+              payment_method:
+                type: string
+                description: The ID of the payment method used in the payment intent.
+              payment_method_types:
+                type: array
+                items:
+                  type: string
+                description: The list of payment method types (e.g. card) that this PaymentIntent is allowed to use.
+              customer:
+                type: string
+                description: The ID of the customer associated with the payment intent.
+              metadata:
+                type: object
+                description: Any additional metadata associated with the payment intent.
+            required:
+              - id
+              - object
+              - amount
+              - currency
+              - status
+              - created
+              - payment_method
+              - payment_method_types
+              - customer
+
+  # authorization lambda
+  StripeAuthorizer:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${App}-authorization-${Stage}
+      Description: Authorize API Gateway requests
+      Handler: com.gu.paymentIntentIssues.StripeAuthorizerLambda::handler
+      Runtime: java11
+      MemorySize: 512
+      Timeout: 300
+      Environment:
+        Variables:
+          App: payment-intent-issues
+          Stack: !Ref Stack
+          Stage: !Ref Stage
+      CodeUri:
+        Bucket: !Ref DeployBucket
+        Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            Effect: Allow
+            Action:
+              - ssm:GetParametersByPath
+            Resource:
+              - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership/payment-intent-issues
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
+  ApiGatewayToSQSRole: #to allow API Gateway to push message to SQS
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      RoleName: !Sub "stripe-webhook-endpoints-apigateway-to-sqs"
+      Policies:
+        - PolicyName: ApiQueuePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:SendMessage
+                  - sqs:SetQueueAttributes
+                Resource: !GetAtt StripePaymentFailureMessagesQueue.Arn
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !GetAtt StripeAuthorizer.Arn
+
   PaymentIntentIssuesLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -44,24 +232,49 @@ Resources:
         Bucket: !Ref DeployBucket
         Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
       Policies:
-      - AWSLambdaBasicExecutionRole
-      - Statement:
-          Effect: Allow
-          Action:
-            - ssm:GetParametersByPath
-          Resource:
-            - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership/payment-intent-issues
-      - Statement:
-        - Effect: Allow
-          Action: s3:GetObject
-          Resource:
-            - arn:aws:s3::*:membership-dist/*
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            Effect: Allow
+            Action:
+              - ssm:GetParametersByPath
+            Resource:
+              - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership/payment-intent-issues
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
+        - AWSLambdaSQSQueueExecutionRole # This policy is required to allow the lambda to read from the queue
+        - Statement:
+            Effect: Allow
+            Action:
+              - sqs:ReceiveMessage
+              - sqs:DeleteMessage
+              - sqs:GetQueueAttributes
+            Resource:
+              - !GetAtt StripePaymentFailureMessagesQueue.Arn
       Events:
-        AcquisitionEvent:
-            Type: Api
-            Properties:
-                Path: '/payment-intent-issue'
-                Method: post
+        MySQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt StripePaymentFailureMessagesQueue.Arn
+            BatchSize: 10
+            Enabled: false
+
+  StripePaymentFailureMessagesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub stripe-payment-failure-messages-queue-${Stage}
+      VisibilityTimeout: 1800
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt StripePaymentFailureMessagesDLQ.Arn
+        maxReceiveCount: 10
+
+  StripePaymentFailureMessagesDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub stripe-payment-failure-messages-queue-dlq-${Stage}
+
   CustomerUpdatedLambda:
     Type: AWS::Serverless::Function
     Properties:

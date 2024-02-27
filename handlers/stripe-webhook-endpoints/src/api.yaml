@@ -1,0 +1,79 @@
+swagger: "2.0"
+info:
+  title: !Ref Stack
+x-amazon-apigateway-request-validators:
+  body-only:
+    validateRequestBody: true
+    validateRequestParameters: false
+  params-only:
+    validateRequestBody: false
+    validateRequestParameters: true
+x-amazon-apigateway-request-validator: body-only
+securityDefinitions:
+  token-authorizer:
+    type: apiKey
+    name: Authorization
+    in: header
+    x-amazon-apigateway-authtype: oauth2
+    x-amazon-apigateway-authorizer:
+      type: token
+      authorizerUri: !Join [ "", [ !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/", !GetAtt Authorizer.Arn, "/invocations" ] ]
+      authorizerCredentials: !GetAtt ApiGatewayToSQSRole.Arn
+      identityValidationExpression: "Bearer [A-Za-z0-9_-]+.[A-Za-z0-9_-]+.[A-Za-z0-9_-]+"
+      authorizerResultTtlInSeconds: 300
+paths:
+  "/":
+    post:
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      security:
+        - token-authorizer: [ ]
+      parameters:
+        - in: body
+          name: MailSendBody
+          required: true
+          schema:
+            $ref: "#/definitions/MailSendBody"
+      x-amazon-apigateway-request-validator: body-only
+      x-amazon-apigateway-integration:
+        credentials: !GetAtt ApiGatewayToSQSRole.Arn
+        uri: !Sub "arn:aws:apigateway:${AWS::Region}:sqs:path//"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.Content-Type: "'application/x-www-form-urlencoded'"
+        requestTemplates:
+          application/json: !Sub "Action=SendMessage##\n&QueueUrl=$util.urlEncode('${ApiQueue}')##\n\
+            &MessageBody=$util.urlEncode($input.body)##\n"
+        passthroughBehavior: "never"
+        httpMethod: "POST"
+        type: "aws"
+definitions:
+  Empty:
+    type: object
+    title: Empty
+  MailSendBody:
+    title: MailSendBody
+    type: object
+    properties:
+      template:
+        type: string
+      locale:
+        type: string
+      userName:
+        type: string
+      userEmail:
+        type: string
+    required:
+      - template
+      - locale
+      - userName
+      - userEmail
