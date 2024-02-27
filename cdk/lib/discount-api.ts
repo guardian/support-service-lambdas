@@ -127,9 +127,9 @@ export class DiscountApi extends GuStack {
 
 		new GuAlarm(this, 'ApiGateway5XXAlarmCDK', {
 			app,
-			alarmName: alarmName('API gateway 5XX response'),
+			alarmName: alarmName('Discount-api 5XX response'),
 			alarmDescription: alarmDescription(
-				'Discount api received an invalid request',
+				'Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-PROD',
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
