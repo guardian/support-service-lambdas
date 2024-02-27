@@ -218,6 +218,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 			),
 		);
 
+		const waitTest = new Wait(this, 'sdf', {
+			time: WaitTime.duration(Duration.minutes(1)),
+		});
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -233,7 +237,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
 										.next(divideIntoChunks)
-										.next(updateZuoraAccountsMap),
+										.next(updateZuoraAccountsMap)
+										.next(waitTest),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),

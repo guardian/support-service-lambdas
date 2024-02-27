@@ -6,12 +6,12 @@
 // 	getFileFromS3,
 // } from '../services';
 
-// export class MyError extends Error {
-// 	constructor(message: string) {
-// 		super(message);
-// 		this.name = 'MyError';
-// 	}
-// }
+export class MyError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'MyError';
+	}
+}
 
 export type UpdateZuoraAccountsLambdaInput = {
 	filePath: string;
