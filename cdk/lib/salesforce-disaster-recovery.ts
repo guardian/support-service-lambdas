@@ -210,17 +210,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-			}).addCatch(
-				new Wait(this, 'WaitAfterError', {
-					time: WaitTime.duration(Duration.minutes(1)),
+			})
+				.addCatch(new Pass(this, 'CatchTooManyRequestsError', {}), {
+					errors: ['States.Http.StatusCode.429'],
+				})
+				.addCatch(new Pass(this, 'CatchInternalServerError', {}), {
+					errors: ['States.Http.StatusCode.500'],
 				}),
-				{ errors: ['Error'] },
-			),
 		);
 
-		const waitTest = new Wait(this, 'sdf', {
-			time: WaitTime.duration(Duration.minutes(1)),
-		});
+		const aggregateMapResults = new Pass(this, 'AggregateMapResults');
 
 		const stateMachine = new StateMachine(
 			this,
@@ -238,7 +237,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 									saveSalesforceQueryResultToS3
 										.next(divideIntoChunks)
 										.next(updateZuoraAccountsMap)
-										.next(waitTest),
+										.next(aggregateMapResults),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
