@@ -5,12 +5,12 @@ import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
-import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
