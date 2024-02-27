@@ -214,7 +214,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				new Wait(this, 'WaitAfterError', {
 					time: WaitTime.duration(Duration.minutes(1)),
 				}),
-				{ errors: ['Error', 'message'] },
+				{ errors: ['Error'] },
 			),
 		);
 
