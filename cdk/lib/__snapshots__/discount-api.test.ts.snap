@@ -47,7 +47,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
+    "ApiGateway5XXAlarmCDK11905206": {
       "Properties": {
         "ActionsEnabled": false,
         "AlarmActions": [
@@ -69,7 +69,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "Impact - Discount api received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "DISCOUNT-API-CODE API gateway 4XX response",
+        "AlarmName": "DISCOUNT-API-CODE API gateway 5XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -78,7 +78,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
         ],
         "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
+        "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
@@ -1053,7 +1053,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
+    "ApiGateway5XXAlarmCDK11905206": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1075,7 +1075,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "Impact - Discount api received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "DISCOUNT-API-PROD API gateway 4XX response",
+        "AlarmName": "DISCOUNT-API-PROD API gateway 5XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1084,7 +1084,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
         ],
         "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
+        "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
