@@ -6,13 +6,13 @@ import {
 	getFileFromS3,
 } from '../services';
 
-export type UpdateChunkZuoraAccountsLambdaInput = {
+export type UpdateZuoraAccountsLambdaInput = {
 	filePath: string;
 	startIndex: number;
 	chunkSize: number;
 };
 
-export const handler = async (event: UpdateChunkZuoraAccountsLambdaInput) => {
+export const handler = async (event: UpdateZuoraAccountsLambdaInput) => {
 	const stage = process.env.STAGE;
 	const bucketName = process.env.S3_BUCKET;
 
