@@ -179,10 +179,74 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 		});
 
-		const updateZuoraAccountsLambdaInvoke = new LambdaInvoke(
-			this,
-			'UpdateZuoraAccounts',
-			{
+		// const updateZuoraAccountsLambdaInvoke = new LambdaInvoke(
+		// 	this,
+		// 	'UpdateZuoraAccounts',
+		// 	{
+		// 		lambdaFunction: new GuLambdaFunction(
+		// 			this,
+		// 			'UpdateZuoraAccountsLambda',
+		// 			{
+		// 				...lambdaDefaultConfig,
+		// 				timeout: Duration.minutes(15),
+		// 				memorySize: 10240,
+		// 				handler: 'updateZuoraAccounts.handler',
+		// 				functionName: `update-zuora-accounts-${this.stage}`,
+		// 				environment: {
+		// 					...lambdaDefaultConfig.environment,
+		// 					S3_BUCKET: bucket.bucketName,
+		// 				},
+		// 				initialPolicy: [
+		// 					new PolicyStatement({
+		// 						actions: ['secretsmanager:GetSecretValue'],
+		// 						resources: [
+		// 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+		// 						],
+		// 					}),
+		// 					new PolicyStatement({
+		// 						actions: ['s3:GetObject'],
+		// 						resources: [bucket.arnForObjects('*')],
+		// 					}),
+		// 				],
+		// 			},
+		// 		),
+		// 	},
+		// );
+
+		// const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
+		// 	itemsPath: '$.Payload.chunks',
+		// 	maxConcurrency,
+		// }).iterator(
+		// 	updateZuoraAccountsLambdaInvoke.addRetry({
+		// 		errors: ['States.ALL'],
+		// 		interval: Duration.seconds(10),
+		// 		maxAttempts: 5,
+		// 		backoffRate: 2,
+		// 	}),
+		// 	// updateZuoraAccountsLambdaInvoke.addCatch(
+		// 	// 	new Pass(this, 'CatchErrors', {
+		// 	// 		parameters: {
+		// 	// 			Cause: JsonPath.stringToJson(JsonPath.stringAt('$.Cause')),
+		// 	// 			Error: JsonPath.stringAt('$.Error'),
+		// 	// 		},
+		// 	// 	})
+		// 	// 		.next(
+		// 	// 			new Wait(this, 'WaitForOneMinute', {
+		// 	// 				time: WaitTime.duration(Duration.minutes(1)),
+		// 	// 			}),
+		// 	// 		)
+		// 	// 		.next(updateZuoraAccountsLambdaInvoke),
+		// 	// 	{
+		// 	// 		errors: ['States.ALL'],
+		// 	// 	},
+		// 	// ),
+		// );
+
+		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
+			itemsPath: '$.Payload.chunks',
+			maxConcurrency,
+		}).iterator(
+			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
 				lambdaFunction: new GuLambdaFunction(
 					this,
 					'UpdateZuoraAccountsLambda',
@@ -210,31 +274,26 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-			},
+			}).addRetry({
+				errors: ['States.ALL'],
+				interval: Duration.seconds(10),
+				maxAttempts: 5,
+				backoffRate: 2,
+			}),
 		);
 
-		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
-			itemsPath: '$.Payload.chunks',
-			maxConcurrency,
-		}).iterator(
-			updateZuoraAccountsLambdaInvoke.addCatch(
-				new Pass(this, 'CatchErrors', {
-					parameters: {
-						Cause: JsonPath.stringToJson(JsonPath.stringAt('$.Cause')),
-						Error: JsonPath.stringAt('$.Error'),
-					},
-				})
-					.next(
-						new Wait(this, 'WaitForOneMinute', {
-							time: WaitTime.duration(Duration.minutes(1)),
-						}),
-					)
-					.next(updateZuoraAccountsLambdaInvoke),
-				{
-					errors: ['States.ALL'],
-				},
-			),
-		);
+		// Retry: [
+		// 	{
+		// 		ErrorEquals: ['States.Http.StatusCode.400'],
+		// 		MaxAttempts: 0,
+		// 	},
+		// 	{
+		// 		ErrorEquals: ['States.ALL'],
+		// 		IntervalSeconds: 5,
+		// 		MaxAttempts: 3,
+		// 		BackoffRate: 2,
+		// 	},
+		// ],
 
 		const aggregateMapResults = new Pass(this, 'AggregateMapResults', {
 			// parameters: {
