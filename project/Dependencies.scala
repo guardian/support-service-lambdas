@@ -25,7 +25,7 @@ object Dependencies {
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.2"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.4"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
