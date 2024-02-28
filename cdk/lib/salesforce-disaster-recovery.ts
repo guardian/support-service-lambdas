@@ -179,7 +179,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 		});
 
-		const updateZuoraAccountsLambda = new LambdaInvoke(
+		const updateZuoraAccountsLambdaInvoke = new LambdaInvoke(
 			this,
 			'UpdateZuoraAccounts',
 			{
@@ -217,24 +217,23 @@ export class SalesforceDisasterRecovery extends GuStack {
 			itemsPath: '$.Payload.chunks',
 			maxConcurrency,
 		}).iterator(
-			updateZuoraAccountsLambda
-				.addCatch(
-					new Pass(this, 'CatchErrors', {
-						parameters: {
-							Cause: JsonPath.stringToJson(JsonPath.stringAt('$.Cause')),
-							Error: JsonPath.stringAt('$.Error'),
-						},
-					}),
-					{
-						errors: ['States.ALL'],
+			updateZuoraAccountsLambdaInvoke.addCatch(
+				new Pass(this, 'CatchErrors', {
+					parameters: {
+						Cause: JsonPath.stringToJson(JsonPath.stringAt('$.Cause')),
+						Error: JsonPath.stringAt('$.Error'),
 					},
-				)
-				.next(
-					new Wait(this, 'WaitForOneMinute', {
-						time: WaitTime.duration(Duration.minutes(1)),
-					}),
-				)
-				.next(updateZuoraAccountsLambda),
+				})
+					.next(
+						new Wait(this, 'WaitForOneMinute', {
+							time: WaitTime.duration(Duration.minutes(1)),
+						}),
+					)
+					.next(updateZuoraAccountsLambdaInvoke),
+				{
+					errors: ['States.ALL'],
+				},
+			),
 		);
 
 		const aggregateMapResults = new Pass(this, 'AggregateMapResults', {
