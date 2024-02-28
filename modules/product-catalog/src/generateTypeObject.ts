@@ -3,9 +3,9 @@ import { arrayToObject, distinct } from '@modules/arrayFunctions';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type {
-	Catalog,
-	CatalogProductRatePlan,
-	CatalogProductRatePlanCharge,
+	ZuoraCatalog,
+	ZuoraProductRatePlan,
+	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import {
 	getProductRatePlanChargeKey,
@@ -13,10 +13,10 @@ import {
 	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
-} from '@modules/product/zuoraToProductNameMappings';
+} from '@modules/product-catalog/zuoraToProductNameMappings';
 
 const getProductRatePlanCharges = (
-	productRatePlanCharges: CatalogProductRatePlanCharge[],
+	productRatePlanCharges: ZuoraProductRatePlanCharge[],
 ) => {
 	return arrayToObject(
 		productRatePlanCharges.map((productRatePlanCharge) => {
@@ -29,14 +29,14 @@ const getProductRatePlanCharges = (
 		}),
 	);
 };
-const getCurrenciesForProduct = (productRatePlan: CatalogProductRatePlan) =>
+const getCurrenciesForProduct = (productRatePlan: ZuoraProductRatePlan) =>
 	distinct(
 		productRatePlan.productRatePlanCharges.flatMap((charge) =>
 			charge.pricing.map((price) => price.currency),
 		),
 	);
 
-const getZuoraProduct = (productRatePlans: CatalogProductRatePlan[]) => {
+const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 	const currencies = getCurrenciesForProduct(
 		checkDefined(
 			productRatePlans[0],
@@ -63,7 +63,7 @@ const getZuoraProduct = (productRatePlans: CatalogProductRatePlan[]) => {
 		),
 	};
 };
-export const generateTypeObject = (catalog: Catalog) => {
+export const generateTypeObject = (catalog: ZuoraCatalog) => {
 	const supportedProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
 	);
@@ -84,7 +84,7 @@ const writeTypesToFile = async () => {
 	const typesString = JSON.stringify(types, null, 2);
 
 	fs.writeFileSync(
-		'./src/types/typeObject.ts',
+		'./src/typeObject.ts',
 		`export const typeObject = ${typesString} as const;`,
 	);
 };

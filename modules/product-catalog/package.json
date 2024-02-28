@@ -1,5 +1,5 @@
 {
-  "name": "product",
+  "name": "product-catalog",
   "version": "1.0.0",
   "scripts": {
     "generateTypes": "ts-node src/generateTypeObject.ts",

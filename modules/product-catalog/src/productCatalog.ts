@@ -1,4 +1,4 @@
-import type { typeObject } from '@modules/product/typeObject';
+import type { typeObject } from '@modules/product-catalog/typeObject';
 
 type TypeObject = typeof typeObject;
 

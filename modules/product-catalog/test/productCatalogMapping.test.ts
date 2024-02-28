@@ -1,8 +1,8 @@
 import { findDuplicates } from '@modules/arrayFunctions';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
-import { generateProductCatalog } from '@modules/product/generateProductCatalog';
-import { ProductCatalogHelper } from '@modules/product/productCatalog';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import prodZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 

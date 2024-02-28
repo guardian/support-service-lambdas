@@ -10,7 +10,7 @@
       "@modules/aws/*": ["../aws/src/*"],
       "@modules/zuora/*": ["../zuora/src/*"],
       "@modules/zuora-catalog/*": ["../zuora-catalog/src/*"],
-      "@modules/product/*": ["../product/src/*"],
+      "@modules/product-catalog/*": ["../product-catalog/src/*"],
       "@modules/*": ["../*"]
     }
   },

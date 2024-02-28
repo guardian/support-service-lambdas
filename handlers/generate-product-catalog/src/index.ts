@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
-import { generateProductCatalog } from '@modules/product/generateProductCatalog';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';

@@ -611,3 +611,222 @@ exports[`Generated product catalog matches snapshot 1`] = `
   },
 }
 `;
+
+exports[`Generated product catalog types match snapshot 1`] = `
+{
+  "Contribution": {
+    "currencies": [
+      "USD",
+      "NZD",
+      "EUR",
+      "GBP",
+      "CAD",
+      "AUD",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Contribution": {},
+      },
+      "Monthly": {
+        "Contribution": {},
+      },
+    },
+  },
+  "DigitalSubscription": {
+    "currencies": [
+      "USD",
+      "NZD",
+      "EUR",
+      "GBP",
+      "CAD",
+      "AUD",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "OneYearGift": {
+        "Subscription": {},
+      },
+      "ThreeMonthGift": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianWeeklyDomestic": {
+    "currencies": [
+      "USD",
+      "NZD",
+      "EUR",
+      "GBP",
+      "CAD",
+      "AUD",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "OneYearGift": {
+        "Subscription": {},
+      },
+      "Quarterly": {
+        "Subscription": {},
+      },
+      "SixWeekly": {
+        "Subscription": {},
+      },
+      "ThreeMonthGift": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianWeeklyRestOfWorld": {
+    "currencies": [
+      "USD",
+      "GBP",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Monthly": {},
+      },
+      "OneYearGift": {
+        "Subscription": {},
+      },
+      "Quarterly": {
+        "Subscription": {},
+      },
+      "SixWeekly": {
+        "Subscription": {},
+      },
+      "ThreeMonthGift": {
+        "Subscription": {},
+      },
+    },
+  },
+  "HomeDelivery": {
+    "currencies": [
+      "GBP",
+    ],
+    "productRatePlans": {
+      "Everyday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Saturday": {
+        "Saturday": {},
+      },
+      "Sixday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sunday": {
+        "Sunday": {},
+      },
+      "Weekend": {
+        "Saturday": {},
+        "Sunday": {},
+      },
+    },
+  },
+  "NationalDelivery": {
+    "currencies": [
+      "GBP",
+    ],
+    "productRatePlans": {
+      "Everyday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sixday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Weekend": {
+        "Saturday": {},
+        "Sunday": {},
+      },
+    },
+  },
+  "SubscriptionCard": {
+    "currencies": [
+      "GBP",
+    ],
+    "productRatePlans": {
+      "Everyday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Saturday": {
+        "Saturday": {},
+      },
+      "Sixday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sunday": {
+        "Sunday": {},
+      },
+      "Weekend": {
+        "Saturday": {},
+        "Sunday": {},
+      },
+    },
+  },
+  "SupporterPlus": {
+    "currencies": [
+      "USD",
+      "NZD",
+      "EUR",
+      "GBP",
+      "CAD",
+      "AUD",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Contribution": {},
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Contribution": {},
+        "Subscription": {},
+      },
+    },
+  },
+}
+`;
