@@ -4,7 +4,7 @@ import {
 	type GuFunctionProps,
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
-import { type App, Duration, JsonNull } from 'aws-cdk-lib';
+import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
@@ -16,7 +16,7 @@ import {
 	JsonPath,
 	Map,
 	Pass,
-	Result,
+	// Result,
 	StateMachine,
 	TaskInput,
 	Wait,
