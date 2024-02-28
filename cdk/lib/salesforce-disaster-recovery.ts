@@ -219,8 +219,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 		);
 
-		const aggregateMapResults = new Pass(this, 'AggregateMapResults', {});
-
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -236,8 +234,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
 										.next(divideIntoChunks)
-										.next(updateZuoraAccountsMap)
-										.next(aggregateMapResults),
+										.next(updateZuoraAccountsMap),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
