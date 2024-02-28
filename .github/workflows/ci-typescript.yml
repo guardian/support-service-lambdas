@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - ad/rate-limits
 jobs:
   gu-cdk-build:
     strategy:
