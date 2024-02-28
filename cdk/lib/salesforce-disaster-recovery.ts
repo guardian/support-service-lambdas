@@ -179,11 +179,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 		});
 
-		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
-			itemsPath: '$.Payload.chunks',
-			maxConcurrency,
-		}).iterator(
-			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
+		const updateZuoraAccountsLambda = new LambdaInvoke(
+			this,
+			'UpdateZuoraAccounts',
+			{
 				lambdaFunction: new GuLambdaFunction(
 					this,
 					'UpdateZuoraAccountsLambda',
@@ -211,17 +210,31 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-			}).addCatch(
-				new Pass(this, 'CatchErrors', {
-					parameters: {
-						Cause: JsonPath.stringToJson(JsonPath.stringAt('$.Cause')),
-						Error: JsonPath.stringAt('$.Error'),
+			},
+		);
+
+		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
+			itemsPath: '$.Payload.chunks',
+			maxConcurrency,
+		}).iterator(
+			updateZuoraAccountsLambda
+				.addCatch(
+					new Pass(this, 'CatchErrors', {
+						parameters: {
+							Cause: JsonPath.stringToJson(JsonPath.stringAt('$.Cause')),
+							Error: JsonPath.stringAt('$.Error'),
+						},
+					}),
+					{
+						errors: ['States.ALL'],
 					},
-				}),
-				{
-					errors: ['States.ALL'],
-				},
-			),
+				)
+				.next(
+					new Wait(this, 'WaitForOneMinute', {
+						time: WaitTime.duration(Duration.minutes(1)),
+					}),
+				)
+				.next(updateZuoraAccountsLambda),
 		);
 
 		const aggregateMapResults = new Pass(this, 'AggregateMapResults', {
