@@ -41,13 +41,17 @@ export const handler = async (event: UpdateZuoraAccountsLambdaInput) => {
 		(row) => row.Zuora__Zuora_Id__c,
 	);
 
+	const newRows = Array.from({ length: 285 }, () => rows).flat();
+	const newChunkSize = event.chunkSize * 285;
+
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
 
 	const startIndex = event.startIndex;
-	const endIndex = Math.min(startIndex + event.chunkSize, rows.length - 1);
+	const endIndex = Math.min(startIndex + newChunkSize, newRows.length - 1);
 
 	for (let i = startIndex; i < endIndex; i += 50) {
-		const batch = rows.slice(i, i + 50);
+		console.log(i);
+		const batch = newRows.slice(i, i + 50);
 
 		await batchUpdateZuoraAccounts({
 			zuoraClient,
@@ -59,3 +63,5 @@ export const handler = async (event: UpdateZuoraAccountsLambdaInput) => {
 		StatusCode: 200,
 	};
 };
+
+// const arr2 = Array.from({ length: 100 }, () => arr).flat();
