@@ -83,7 +83,6 @@ jobs:
           - sf-gocardless-sync
           - sf-move-subscriptions-api
           - soft-opt-in-consent-setter
-          - stripe-webhook-endpoints
           - zuora-callout-apis
           - zuora-datalake-export
           - zuora-rer
