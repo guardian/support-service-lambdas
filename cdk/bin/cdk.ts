@@ -10,6 +10,7 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -119,3 +120,6 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
 		'events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3',
 	salesforceQueryWaitSeconds: 30,
 });
+
+new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-CODE", { stack: "membership", stage: "CODE" });
+new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-PROD", { stack: "membership", stage: "PROD" });
