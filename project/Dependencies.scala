@@ -4,7 +4,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.21.10"
+  val awsSdkVersion = "2.21.46"
   val circeVersion = "0.13.0"
   val sttpVersion = "3.8.15"
   val http4sVersion = "0.21.34"
@@ -24,8 +24,8 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
 
-  val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.2"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.2"
+  val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.4"
 
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
