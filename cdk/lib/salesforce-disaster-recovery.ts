@@ -214,8 +214,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}).addCatch(
 				new Pass(this, 'CatchErrors', {
 					parameters: {
-						'Cause.$': JsonPath.stringToJson('$.Cause'),
-						'Error.$': JsonPath.stringAt('$.Error'),
+						Cause: JsonPath.stringToJson('$.Cause'),
+						Error: JsonPath.stringAt('$.Error'),
 					},
 				}),
 				{
