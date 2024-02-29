@@ -1,10 +1,5 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import {
-	supportApisDomain,
-	supportCertificateId,
-	supportHostedZoneId,
-} from '../bin/cdk';
 import { GenerateProductCatalog } from './generate-product-catalog';
 
 describe('The Product catalog stack', () => {
