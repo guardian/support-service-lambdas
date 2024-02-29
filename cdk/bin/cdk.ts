@@ -10,7 +10,8 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
-import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import type { StripeWebhookEndpointsProps  } from '../lib/stripe-webhook-endpoints';
+import  { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -121,5 +122,24 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
 	salesforceQueryWaitSeconds: 30,
 });
 
-new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-CODE", { stack: "membership", stage: "CODE" });
-new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-PROD", { stack: "membership", stage: "PROD" });
+export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
+	stack: "membership",
+	stage: "CODE",
+	deployBucket: "membership-dist",
+	certificateId: membershipCertificateId,
+	domainName: `stripe-webhook-endpoints-code.${membershipApisDomain}`,
+	hostedZoneId: membershipHostedZoneId,
+
+}
+export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
+	stack: "membership",
+	stage: "PROD",
+	deployBucket: "membership-dist",
+	certificateId: membershipCertificateId,
+	domainName:  `stripe-webhook-endpoints-prod.${membershipApisDomain}`,
+	hostedZoneId: membershipHostedZoneId,
+}
+
+
+new StripeWebhookEndpoints(app, "Stripe-Webhook-Endpoints-CODE",stripeWebhookEndpointsCodeProps);
+new StripeWebhookEndpoints(app, "Stripe-Webhook-Endpoints-PROD", stripeWebhookEndpointsProdProps);
