@@ -34,7 +34,7 @@ type ProductRatePlan<
 	};
 };
 
-type ZuoraProduct<P extends ProductKey> = {
+type Product<P extends ProductKey> = {
 	ratePlans: {
 		[PRP in ProductRatePlanKey<P>]: ProductRatePlan<P, PRP>;
 	};
@@ -42,7 +42,7 @@ type ZuoraProduct<P extends ProductKey> = {
 
 export type ProductCatalog = {
 	products: {
-		[P in ProductKey]: ZuoraProduct<P>;
+		[P in ProductKey]: Product<P>;
 	};
 };
 
