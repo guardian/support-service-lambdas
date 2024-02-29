@@ -95,7 +95,7 @@ importers:
         specifier: 3.451.0
         version: 3.451.0
 
-  modules/product:
+  modules/product-catalog:
     devDependencies:
       ts-node:
         specifier: ^10.9.2
