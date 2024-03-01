@@ -249,6 +249,16 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "Arn",
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -1182,6 +1192,16 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     },
                     "/*",
                   ],
+                ],
+              },
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "Arn",
                 ],
               },
             },

@@ -14,7 +14,7 @@ import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
-	Map,
+	// Map,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -41,7 +41,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
-		const maxConcurrency = 40;
+		// const maxConcurrency = 40;
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -302,9 +302,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(distributedMap),
-									// .next(divideIntoChunks)
-									// .next(createBatches)
-									// .next(updateZuoraAccountsMap),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
@@ -353,6 +350,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 					new PolicyStatement({
 						actions: ['s3:GetObject', 's3:PutObject'],
 						resources: [bucket.arnForObjects('*')],
+					}),
+					new PolicyStatement({
+						actions: ['lambda:InvokeFunction'],
+						resources: [updateZuoraAccountsLambda.functionArn],
 					}),
 				],
 			}),
