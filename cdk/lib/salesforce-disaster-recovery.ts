@@ -187,7 +187,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 					'UpdateZuoraAccountsLambda',
 					{
 						...lambdaDefaultConfig,
-						timeout: Duration.minutes(15),
+						// timeout: Duration.minutes(15),
+						timeout: Duration.seconds(20),
 						memorySize: 10240,
 						handler: 'updateZuoraAccounts.handler',
 						functionName: `update-zuora-accounts-${this.stage}`,
@@ -209,12 +210,24 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-			}).addRetry({
-				errors: ['States.ALL'],
-				interval: Duration.seconds(10),
-				maxAttempts: 5,
-				backoffRate: 2,
-			}),
+			})
+				.addRetry({
+					errors: [
+						'Lambda.ClientExecutionTimeoutException',
+						'Lambda.ServiceException',
+						'Lambda.AWSLambdaException',
+						'Lambda.SdkClientException',
+					],
+					interval: Duration.seconds(2),
+					maxAttempts: 5,
+					backoffRate: 2,
+				})
+				.addRetry({
+					errors: ['States.ALL'],
+					interval: Duration.seconds(10),
+					maxAttempts: 5,
+					backoffRate: 2,
+				}),
 		);
 
 		const stateMachine = new StateMachine(
