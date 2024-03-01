@@ -178,6 +178,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 		});
 
 		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
+			parameters: {
+				'test.$': 4,
+				// 'paytest.$': '$',
+			},
 			itemsPath: '$.Payload.chunks',
 			maxConcurrency,
 		}).iterator(
