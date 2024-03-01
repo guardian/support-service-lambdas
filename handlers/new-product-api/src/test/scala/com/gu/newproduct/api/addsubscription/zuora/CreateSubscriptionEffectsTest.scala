@@ -19,7 +19,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
 
   import ZuoraCodeContributions._
 
-  def currentDate = () => LocalDate.of(2018, 2, 10)
+  def currentDate = () => LocalDate.of(2024, 2, 10)
   it should "create subscription in account" taggedAs EffectsTest in {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val request = CreateSubscription.ZuoraCreateSubRequest(
@@ -42,6 +42,10 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
             ),
           ),
         ),
+        ZuoraCreateSubRequestRatePlan(
+          productRatePlanId = ProductRatePlanId("71a1018d1c18b3c6af44b8dbb5720000"),
+          maybeChargeOverride = None,
+        ),
       ),
     )
     val actual = for {
@@ -55,6 +59,44 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
     }
     // ideally should check that it was really created with the right fields
   }
+
+
+  it should "create digipack in account with a discount" taggedAs EffectsTest in {
+    val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
+    val monthlyTestRatePlanZuoraId = ProductRatePlanId("2c92c0f84bbfec8b014bc655f4852d9d")
+    val request = CreateSubscription.ZuoraCreateSubRequest(
+      ZuoraAccountId(
+        "8ad095dd82f7aaa50182f96de24d3ddb",
+      ), // code https://apisandbox.zuora.com/apps/CustomerAccount.do?method=view&id=8ad095dd82f7aaa50182f96de24d3ddb
+      currentDate().plusDays(2),
+      validCaseIdToAvoidCausingSFErrors,
+      AcquisitionSource("sourcesource"),
+      CreatedByCSR("csrcsr"),
+      None,
+      List(
+        ZuoraCreateSubRequestRatePlan(
+          productRatePlanId = monthlyTestRatePlanZuoraId,
+          maybeChargeOverride = None,
+        ),
+        ZuoraCreateSubRequestRatePlan(
+          productRatePlanId = ProductRatePlanId("2c92c0f97421eeff017425ad4ef7522b"),
+          maybeChargeOverride = None,
+        ),
+      ),
+    )
+
+    val actual = for {
+      zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
+      zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
+      post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
+      res <- CreateSubscription(post, currentDate)(request).toDisjunction
+    } yield res
+    withClue(actual) {
+      actual.map(_.value.substring(0, 3)) shouldBe Right("A-S")
+    }
+    // ideally should check that it was really created with the right fields
+  }
+
 }
 
 object ZuoraCodeContributions {
