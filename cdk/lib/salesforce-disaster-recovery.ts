@@ -187,14 +187,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 		// 	}),
 		// });
 
+		//
+
 		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
+			maxConcurrency,
 			itemsPath: '$.batchIndexes',
 			parameters: {
 				'filePath.$': '$.filePath',
 				'numberOfRecords.$': '$.numberOfRecords',
 				'index.$': '$',
 			},
-			maxConcurrency,
 		}).iterator(
 			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
 				lambdaFunction: new GuLambdaFunction(
