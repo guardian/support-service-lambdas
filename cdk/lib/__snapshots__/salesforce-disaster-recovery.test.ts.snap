@@ -282,7 +282,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$.Payload.filePath"}},"ItemSelector":{"item.$":"$$.Map.Item.Value"},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"LambdaTask","States":{"LambdaTask":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"$.Payload.filePath"}},"ItemSelector":{"item.$":"$$.Map.Item.Value"},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"LambdaTask","States":{"LambdaTask":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Ref": "UpdateZuoraAccountsLambda64E51B2A",
               },
@@ -1197,7 +1197,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$.Payload.filePath"}},"ItemSelector":{"item.$":"$$.Map.Item.Value"},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"LambdaTask","States":{"LambdaTask":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"$.Payload.filePath"}},"ItemSelector":{"item.$":"$$.Map.Item.Value"},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"LambdaTask","States":{"LambdaTask":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Ref": "UpdateZuoraAccountsLambda64E51B2A",
               },

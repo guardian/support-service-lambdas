@@ -220,7 +220,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						LambdaTask: {
 							Type: 'Task',
 							Resource: 'arn:aws:states:::lambda:invoke',
-							// OutputPath: '$.Payload',
+							OutputPath: '$.Payload',
 							Parameters: {
 								'Payload.$': '$',
 								FunctionName: updateZuoraAccountsLambda.functionName,
@@ -229,13 +229,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 					},
 				},
-				// ItemProcessor: {
-				// 	...(dummyMap.toStateJson() as any).Iterator,
-				// 	ProcessorConfig: {
-				// 		Mode: 'DISTRIBUTED',
-				// 		ExecutionType: 'STANDARD',
-				// 	},
-				// },
 				ResultWriter: {
 					Resource: 'arn:aws:states:::s3:putObject',
 					Parameters: {
@@ -246,41 +239,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				// ResultPath: '$.map_result',
 			},
 		});
-
-		// const distributedMap = new CustomState(this, 'DistributedMap', {
-		// 	stateJson: {
-		// 		// Type: 'Task',
-		// 		// Resource: 'arn:aws:states:::http:invoke',
-		// 		// Parameters: {
-		// 		// 	ApiEndpoint: `${props.salesforceApiDomain}/services/data/v59.0/jobs/query`,
-		// 		// 	Method: 'POST',
-		// 		// 	Authentication: {
-		// 		// 		ConnectionArn: salesforceApiConnectionArn,
-		// 		// 	},
-		// 		// 	RequestBody: {
-		// 		// 		operation: 'query',
-		// 		// 		'query.$': '$.query',
-		// 		// 	},
-		// 		// },
-		// 		// Retry: [
-		// 		// 	{
-		// 		// 		ErrorEquals: ['States.Http.StatusCode.400'],
-		// 		// 		MaxAttempts: 0,
-		// 		// 	},
-		// 		// 	{
-		// 		// 		ErrorEquals: ['States.ALL'],
-		// 		// 		IntervalSeconds: 5,
-		// 		// 		MaxAttempts: 3,
-		// 		// 		BackoffRate: 2,
-		// 		// 	},
-		// 		// ],
-		// 	},
-		// });
-
-		// const distributedMap = new Map(this, 'distrbutedmap', {
-		// 	maxConcurrency,
-
-		// });
 
 		// const createBatches = new Pass(this, 'CreateBatches', {
 		// 	parameters: {
