@@ -331,7 +331,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix":"$$.Execution.StartTime"}}}}}",
+              "","Prefix.$":"$$.Execution.StartTime"}}}}}",
             ],
           ],
         },
@@ -1266,7 +1266,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix":"$$.Execution.StartTime"}}}}}",
+              "","Prefix.$":"$$.Execution.StartTime"}}}}}",
             ],
           ],
         },

@@ -235,7 +235,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Resource: 'arn:aws:states:::s3:putObject',
 					Parameters: {
 						Bucket: bucket.bucketName,
-						Prefix: JsonPath.stringAt('$$.Execution.StartTime'),
+						'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
 					},
 				},
 			},
