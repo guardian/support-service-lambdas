@@ -249,6 +249,13 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -310,7 +317,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              ""},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1188,6 +1195,13 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                 ],
               },
             },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -1249,7 +1263,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              ""},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },

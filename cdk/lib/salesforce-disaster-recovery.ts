@@ -225,6 +225,19 @@ export class SalesforceDisasterRecovery extends GuStack {
 								'Payload.$': '$',
 								FunctionName: updateZuoraAccountsLambda.functionArn,
 							},
+							Retry: [
+								{
+									ErrorEquals: [
+										'Lambda.ServiceException',
+										'Lambda.AWSLambdaException',
+										'Lambda.SdkClientException',
+										'Lambda.TooManyRequestsException',
+									],
+									IntervalSeconds: 2,
+									MaxAttempts: 6,
+									BackoffRate: 2,
+								},
+							],
 							End: true,
 						},
 					},
@@ -358,10 +371,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						actions: ['s3:GetObject', 's3:PutObject'],
 						resources: [bucket.arnForObjects('*')],
 					}),
-					// new PolicyStatement({
-					// 	actions: ['lambda:InvokeFunction'],
-					// 	resources: [updateZuoraAccountsLambda.functionArn],
-					// }),
+					new PolicyStatement({
+						actions: ['states:StartExecution'],
+						resources: [stateMachine.stateMachineArn],
+					}),
 				],
 			}),
 		);
