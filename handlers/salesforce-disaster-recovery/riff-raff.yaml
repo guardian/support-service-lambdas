@@ -22,5 +22,5 @@ deployments:
       functionNames:
         - save-salesforce-query-result-to-s3-
         - update-zuora-accounts-
-        - divide-into-chunks-
+        # - divide-into-chunks-
     dependencies: [salesforce-disaster-recovery-cloudformation]
