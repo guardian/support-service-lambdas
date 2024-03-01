@@ -350,6 +350,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
 						],
 					}),
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
 				],
 			}),
 		);

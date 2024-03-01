@@ -228,6 +228,27 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -1139,6 +1160,27 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                       "Ref": "AWS::AccountId",
                     },
                     ":secret:events!connection/salesforce-disaster-recovery-PROD-salesforce-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
                   ],
                 ],
               },
