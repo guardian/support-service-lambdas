@@ -167,11 +167,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 		);
 
 		const createBatches = new Pass(this, 'CreateBatches', {
-			result: Result.fromObject({
+			parameters: {
 				filePath: JsonPath.stringAt('$.Payload.filePath'),
 				numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
 				batchIndexes: JsonPath.arrayRange(0, 1000, 200),
-			}),
+			},
+			// result: Result.fromObject({
+			// 	filePath: JsonPath.stringAt('$.Payload.filePath'),
+			// 	numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
+			// 	batchIndexes: JsonPath.arrayRange(0, 1000, 200),
+			// }),
 		});
 
 		// const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
@@ -186,8 +191,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 		// 		numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
 		// 	}),
 		// });
-
-		//
 
 		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
 			maxConcurrency,
