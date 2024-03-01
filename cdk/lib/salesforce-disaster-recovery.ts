@@ -223,7 +223,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							OutputPath: '$.Payload',
 							Parameters: {
 								'Payload.$': '$',
-								FunctionName: updateZuoraAccountsLambda.functionName,
+								FunctionName: updateZuoraAccountsLambda.functionArn,
 							},
 							End: true,
 						},
@@ -309,6 +309,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		// updateZuoraAccountsLambda.addToRolePolicy(
+		// 	new PolicyStatement({
+		// 		actions: ['states:StartExecution'],
+		// 		resources: [stateMachine.stateMachineArn],
+		// 	}),
+		// );
+
 		stateMachine.role.attachInlinePolicy(
 			new Policy(this, 'SalesforceApiHttpInvoke', {
 				statements: [
@@ -351,10 +358,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						actions: ['s3:GetObject', 's3:PutObject'],
 						resources: [bucket.arnForObjects('*')],
 					}),
-					new PolicyStatement({
-						actions: ['lambda:InvokeFunction'],
-						resources: [updateZuoraAccountsLambda.functionArn],
-					}),
+					// new PolicyStatement({
+					// 	actions: ['lambda:InvokeFunction'],
+					// 	resources: [updateZuoraAccountsLambda.functionArn],
+					// }),
 				],
 			}),
 		);

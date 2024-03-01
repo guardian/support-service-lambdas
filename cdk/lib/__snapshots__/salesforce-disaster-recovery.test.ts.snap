@@ -249,16 +249,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                 ],
               },
             },
-            {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "UpdateZuoraAccountsLambda64E51B2A",
-                  "Arn",
-                ],
-              },
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -315,7 +305,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               },
               "","Key.$":"$.Payload.filePath"}},"ItemSelector":{"item.$":"$$.Map.Item.Value"},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"LambdaTask","States":{"LambdaTask":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
-                "Ref": "UpdateZuoraAccountsLambda64E51B2A",
+                "Fn::GetAtt": [
+                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "Arn",
+                ],
               },
               ""},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
@@ -1195,16 +1188,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                 ],
               },
             },
-            {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "UpdateZuoraAccountsLambda64E51B2A",
-                  "Arn",
-                ],
-              },
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -1261,7 +1244,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               },
               "","Key.$":"$.Payload.filePath"}},"ItemSelector":{"item.$":"$$.Map.Item.Value"},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"LambdaTask","States":{"LambdaTask":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
-                "Ref": "UpdateZuoraAccountsLambda64E51B2A",
+                "Fn::GetAtt": [
+                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "Arn",
+                ],
               },
               ""},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
