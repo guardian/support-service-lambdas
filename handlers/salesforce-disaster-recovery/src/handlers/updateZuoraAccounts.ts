@@ -1,5 +1,6 @@
 import { type Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { type Context } from 'aws-lambda';
 import {
 	batchUpdateZuoraAccounts,
 	convertCsvToAccountRows,
@@ -12,7 +13,10 @@ export type UpdateZuoraAccountsLambdaInput = {
 	chunkSize: number;
 };
 
-export const handler = async (event: UpdateZuoraAccountsLambdaInput) => {
+export const handler = async (
+	event: UpdateZuoraAccountsLambdaInput,
+	context: Context,
+) => {
 	const stage = process.env.STAGE;
 	const bucketName = process.env.S3_BUCKET;
 
@@ -41,6 +45,12 @@ export const handler = async (event: UpdateZuoraAccountsLambdaInput) => {
 			zuoraClient,
 			accountRows: batch,
 		});
+
+		if (context.getRemainingTimeInMillis() < 30000) {
+			return {
+				StatusCode: 200,
+			};
+		}
 	}
 
 	return {
