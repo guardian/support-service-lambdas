@@ -179,28 +179,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 			// }),
 		});
 
-		//
-
-		// const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
-		// 	lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
-		// 		...lambdaDefaultConfig,
-		// 		handler: 'divideIntoChunks.handler',
-		// 		functionName: `divide-into-chunks-${this.stage}`,
-		// 	}),
-		// 	payload: TaskInput.fromObject({
-		// 		filePath: JsonPath.stringAt('$.Payload.filePath'),
-		// 		maxConcurrency,
-		// 		numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
-		// 	}),
-		// });
-
 		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
 			maxConcurrency,
 			itemsPath: '$.batchIndexes',
 			parameters: {
 				'filePath.$': '$.filePath',
 				'numberOfRecords.$': '$.numberOfRecords',
-				'index.$': '$',
+				'batchIndex.$': '$$.Map.Item.Value',
 			},
 		}).iterator(
 			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
@@ -231,6 +216,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
+				payload: TaskInput.fromObject({
+					filePath: '$.filePath',
+					batchIndex: JsonPath.stringAt('$'),
+				}),
 			}),
 		);
 
