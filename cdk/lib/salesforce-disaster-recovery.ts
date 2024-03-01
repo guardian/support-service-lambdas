@@ -180,7 +180,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
 			parameters: {
 				defaultpaam: 'test',
-				'test.$': '4',
+				// 'test.$': '4',
 				'new.$': '$',
 			},
 			itemsPath: '$.Payload.chunks',
