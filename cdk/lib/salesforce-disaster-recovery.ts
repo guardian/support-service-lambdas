@@ -15,6 +15,8 @@ import {
 	DefinitionBody,
 	JsonPath,
 	Map,
+	Pass,
+	Result,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -164,26 +166,34 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
-			lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
-				...lambdaDefaultConfig,
-				handler: 'divideIntoChunks.handler',
-				functionName: `divide-into-chunks-${this.stage}`,
-			}),
-			payload: TaskInput.fromObject({
+		const createBatches = new Pass(this, 'CreateBatches', {
+			result: Result.fromObject({
 				filePath: JsonPath.stringAt('$.Payload.filePath'),
-				maxConcurrency,
 				numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
+				batchIndexes: JsonPath.arrayRange(0, 200, 1000),
 			}),
 		});
 
+		// const divideIntoChunks = new LambdaInvoke(this, 'DivideIntoChunks', {
+		// 	lambdaFunction: new GuLambdaFunction(this, 'DivideIntoChunksLambda', {
+		// 		...lambdaDefaultConfig,
+		// 		handler: 'divideIntoChunks.handler',
+		// 		functionName: `divide-into-chunks-${this.stage}`,
+		// 	}),
+		// 	payload: TaskInput.fromObject({
+		// 		filePath: JsonPath.stringAt('$.Payload.filePath'),
+		// 		maxConcurrency,
+		// 		numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
+		// 	}),
+		// });
+
 		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
+			itemsPath: '$.batchIndexes',
 			parameters: {
-				defaultpaam: 'test',
-				// 'test.$': '4',
-				'new.$': '$',
+				'filePath.$': '$.filePath',
+				'numberOfRecords.$': '$.numberOfRecords',
+				'index.$': '$',
 			},
-			itemsPath: '$.Payload.chunks',
 			maxConcurrency,
 		}).iterator(
 			new LambdaInvoke(this, 'UpdateZuoraAccounts', {
@@ -231,7 +241,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3
-										.next(divideIntoChunks)
+										// .next(divideIntoChunks)
+										.next(createBatches)
 										.next(updateZuoraAccountsMap),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
