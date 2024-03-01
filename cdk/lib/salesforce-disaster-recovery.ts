@@ -211,10 +211,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-				// payload: TaskInput.fromObject({
-				// 	filePath: '$.filePath',
-				// 	batchIndex: JsonPath.stringAt('$'),
-				// }),
 			}),
 		);
 
