@@ -172,11 +172,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
 				batchIndexes: JsonPath.arrayRange(0, 1000, 200),
 			},
-			// result: Result.fromObject({
-			// 	filePath: JsonPath.stringAt('$.Payload.filePath'),
-			// 	numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
-			// 	batchIndexes: JsonPath.arrayRange(0, 1000, 200),
-			// }),
 		});
 
 		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
@@ -216,10 +211,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						],
 					},
 				),
-				payload: TaskInput.fromObject({
-					filePath: '$.filePath',
-					batchIndex: JsonPath.stringAt('$'),
-				}),
+				// payload: TaskInput.fromObject({
+				// 	filePath: '$.filePath',
+				// 	batchIndex: JsonPath.stringAt('$'),
+				// }),
 			}),
 		);
 
