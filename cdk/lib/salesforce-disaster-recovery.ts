@@ -215,9 +215,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 					// 	// 'destination_bucket_name.$': '$.input.destination_bucket_name',
 					// },
 				},
-				ItemSelector: {
-					'item.$': '$$.Map.Item.Value',
-				},
+				// ItemSelector: {
+				// 	'item.$': '$$.Map.Item.Value',
+				// },
 				ItemProcessor: {
 					ProcessorConfig: {
 						Mode: 'DISTRIBUTED',
