@@ -170,7 +170,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			result: Result.fromObject({
 				filePath: JsonPath.stringAt('$.Payload.filePath'),
 				numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
-				batchIndexes: JsonPath.arrayRange(0, 200, 1000),
+				'batchIndexes.$': JsonPath.arrayRange(0, 200, 1000),
 			}),
 		});
 
