@@ -14,7 +14,6 @@ import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
-	// Map,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -40,8 +39,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
-
-		// const maxConcurrency = 40;
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -215,9 +212,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 					// 	// 'destination_bucket_name.$': '$.input.destination_bucket_name',
 					// },
 				},
-				// ItemSelector: {
-				// 	'item.$': '$$.Map.Item.Value',
-				// },
 				ItemProcessor: {
 					ProcessorConfig: {
 						Mode: 'DISTRIBUTED',
@@ -260,54 +254,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				// ResultPath: '$.map_result',
 			},
 		});
-
-		// const createBatches = new Pass(this, 'CreateBatches', {
-		// 	parameters: {
-		// 		filePath: JsonPath.stringAt('$.Payload.filePath'),
-		// 		numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
-		// 		batchIndexes: JsonPath.arrayRange(0, 1000, 200),
-		// 	},
-		// });
-
-		// const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
-		// 	maxConcurrency,
-		// 	itemsPath: '$.batchIndexes',
-		// 	parameters: {
-		// 		'filePath.$': '$.filePath',
-		// 		'numberOfRecords.$': '$.numberOfRecords',
-		// 		'batchIndex.$': '$$.Map.Item.Value',
-		// 	},
-		// }).iterator(
-		// 	new LambdaInvoke(this, 'UpdateZuoraAccounts', {
-		// 		lambdaFunction: new GuLambdaFunction(
-		// 			this,
-		// 			'UpdateZuoraAccountsLambda',
-		// 			{
-		// 				...lambdaDefaultConfig,
-		// 				timeout: Duration.minutes(15),
-		// 				memorySize: 10240,
-		// 				handler: 'updateZuoraAccounts.handler',
-		// 				functionName: `update-zuora-accounts-${this.stage}`,
-		// 				environment: {
-		// 					...lambdaDefaultConfig.environment,
-		// 					S3_BUCKET: bucket.bucketName,
-		// 				},
-		// 				initialPolicy: [
-		// 					new PolicyStatement({
-		// 						actions: ['secretsmanager:GetSecretValue'],
-		// 						resources: [
-		// 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-		// 						],
-		// 					}),
-		// 					new PolicyStatement({
-		// 						actions: ['s3:GetObject'],
-		// 						resources: [bucket.arnForObjects('*')],
-		// 					}),
-		// 				],
-		// 			},
-		// 		),
-		// 	}),
-		// );
 
 		const stateMachine = new StateMachine(
 			this,
