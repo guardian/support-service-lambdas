@@ -170,20 +170,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 				memorySize: 10240,
 				handler: 'updateZuoraAccounts.handler',
 				functionName: `update-zuora-accounts-${this.stage}`,
-				environment: {
-					...lambdaDefaultConfig.environment,
-					S3_BUCKET: bucket.bucketName,
-				},
 				initialPolicy: [
 					new PolicyStatement({
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
 						],
-					}),
-					new PolicyStatement({
-						actions: ['s3:GetObject'],
-						resources: [bucket.arnForObjects('*')],
 					}),
 				],
 			},
@@ -206,11 +198,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				},
 				ItemBatcher: {
 					MaxItemsPerBatch: 1000,
-					// BatchInput: {
-					// 	// 'lambda_processor_arn.$': '$.input.lambda_processor_arn',
-					// 	// 'source_bucket_name.$': '$.input.source_bucket_name',
-					// 	// 'destination_bucket_name.$': '$.input.destination_bucket_name',
-					// },
 				},
 				ItemProcessor: {
 					ProcessorConfig: {
@@ -248,10 +235,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Resource: 'arn:aws:states:::s3:putObject',
 					Parameters: {
 						Bucket: bucket.bucketName,
-						Prefix: 'process_output',
+						Prefix: JsonPath.stringAt('$$.Execution.StartTime'),
 					},
 				},
-				// ResultPath: '$.map_result',
 			},
 		});
 
