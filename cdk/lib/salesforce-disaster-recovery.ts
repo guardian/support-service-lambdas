@@ -153,9 +153,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 				payload: TaskInput.fromObject({
 					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
-					numberOfRecords: JsonPath.numberAt(
-						'$.ResponseBody.numberRecordsProcessed',
-					),
 					executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
 				}),
 			},

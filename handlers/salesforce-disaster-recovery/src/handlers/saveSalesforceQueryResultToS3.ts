@@ -8,7 +8,6 @@ import {
 
 export const handler = async (event: {
 	queryJobId: string;
-	numberOfRecords: number;
 	executionStartTime: string;
 }) => {
 	const bucketName = process.env.S3_BUCKET;
@@ -44,6 +43,5 @@ export const handler = async (event: {
 
 	return {
 		filePath,
-		numberOfRecords: event.numberOfRecords,
 	};
 };
