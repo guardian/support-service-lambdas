@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - ad/divide-into-chunks
 jobs:
   gu-cdk-build:
     strategy:
