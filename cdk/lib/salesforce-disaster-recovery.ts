@@ -174,7 +174,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		//
 		const updateZuoraAccountsMap = new Map(this, 'UpdateZuoraAccountsMap', {
 			maxConcurrency,
 			itemsPath: '$.batchIndexes',
