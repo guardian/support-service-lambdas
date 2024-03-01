@@ -181,65 +181,69 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const distributedMap = new CustomState(this, 'DistributedMap', {
-			stateJson: {
-				Type: 'Map',
-				MaxConcurrency: 100,
-				ItemReader: {
-					Resource: 'arn:aws:states:::s3:getObject',
-					ReaderConfig: {
-						InputType: 'CSV',
-						CSVHeaderLocation: 'FIRST_ROW',
+		const processAccountsInDistributedMap = new CustomState(
+			this,
+			'ProcessAccountsInDistributedMap',
+			{
+				stateJson: {
+					Type: 'Map',
+					MaxConcurrency: 100,
+					ItemReader: {
+						Resource: 'arn:aws:states:::s3:getObject',
+						ReaderConfig: {
+							InputType: 'CSV',
+							CSVHeaderLocation: 'FIRST_ROW',
+						},
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Key.$': '$.Payload.filePath',
+						},
 					},
-					Parameters: {
-						Bucket: bucket.bucketName,
-						'Key.$': '$.Payload.filePath',
+					ItemBatcher: {
+						MaxItemsPerBatch: 5000,
 					},
-				},
-				ItemBatcher: {
-					MaxItemsPerBatch: 5000,
-				},
-				ItemProcessor: {
-					ProcessorConfig: {
-						Mode: 'DISTRIBUTED',
-						ExecutionType: 'STANDARD',
-					},
-					StartAt: 'LambdaTask',
-					States: {
-						LambdaTask: {
-							Type: 'Task',
-							Resource: 'arn:aws:states:::lambda:invoke',
-							OutputPath: '$.Payload',
-							Parameters: {
-								'Payload.$': '$',
-								FunctionName: updateZuoraAccountsLambda.functionArn,
-							},
-							Retry: [
-								{
-									ErrorEquals: [
-										'Lambda.ServiceException',
-										'Lambda.AWSLambdaException',
-										'Lambda.SdkClientException',
-										'Lambda.TooManyRequestsException',
-									],
-									IntervalSeconds: 2,
-									MaxAttempts: 6,
-									BackoffRate: 2,
+					ItemProcessor: {
+						ProcessorConfig: {
+							Mode: 'DISTRIBUTED',
+							ExecutionType: 'STANDARD',
+						},
+						StartAt: 'UpdateZuoraAccounts',
+						States: {
+							UpdateZuoraAccounts: {
+								Type: 'Task',
+								Resource: 'arn:aws:states:::lambda:invoke',
+								OutputPath: '$.Payload',
+								Parameters: {
+									'Payload.$': '$',
+									FunctionName: updateZuoraAccountsLambda.functionArn,
 								},
-							],
-							End: true,
+								Retry: [
+									{
+										ErrorEquals: [
+											'Lambda.ServiceException',
+											'Lambda.AWSLambdaException',
+											'Lambda.SdkClientException',
+											'Lambda.TooManyRequestsException',
+										],
+										IntervalSeconds: 2,
+										MaxAttempts: 6,
+										BackoffRate: 2,
+									},
+								],
+								End: true,
+							},
+						},
+					},
+					ResultWriter: {
+						Resource: 'arn:aws:states:::s3:putObject',
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
 						},
 					},
 				},
-				ResultWriter: {
-					Resource: 'arn:aws:states:::s3:putObject',
-					Parameters: {
-						Bucket: bucket.bucketName,
-						'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
-					},
-				},
 			},
-		});
+		);
 
 		const stateMachine = new StateMachine(
 			this,
@@ -254,7 +258,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3.next(distributedMap),
+									saveSalesforceQueryResultToS3.next(
+										processAccountsInDistributedMap,
+									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
