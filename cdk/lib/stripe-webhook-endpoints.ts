@@ -38,16 +38,16 @@ export class StripeWebhookEndpoints extends GuStack {
 
         //PaymentIntentIssuesLambda
         const paymentIntentIssuesLambda = new GuLambdaFunction(this,"payment-intent-issues-cdk-lambda", {
-                app: "payment-intent-issues",
+                app: app,
                 description: "A lambda for handling payment intent issues (cancellation, failure, action required)",
                 functionName: `stripe-payment-intent-issues-cdk-${this.stage}`,
-                fileName: `${this.stack}/${this.stage}/${app}/${app}.jar`,
+                fileName: `${app}.jar`,
                 handler: "com.gu.paymentIntentIssues.Lambda::handler",
                 runtime: Runtime.JAVA_11,
                 memorySize: 512,
                 timeout: Duration.seconds(300),
                 environment: {
-                    App: "payment-intent-issues",
+                    App: app,
                     Stack: this.stack,
                     Stage: this.stage,
                 },
@@ -56,16 +56,16 @@ export class StripeWebhookEndpoints extends GuStack {
 
         //CustomerUpdatedLambda
         const customerUpdatedLambda = new GuLambdaFunction(this, "customer-updated-cdk-lambda", {
-                app: "stripe-customer-updated",
+                app: app,
                 description: "A lambda for handling customer updates",
                 functionName: `stripe-customer-updated-cdk-${this.stage}`,
-                fileName: `${this.stack}/${this.stage}/${app}/${app}.jar`,
+                fileName: `${app}.jar`,
                 handler: "com.gu.stripeCardUpdated.Lambda::apply",
                 runtime: Runtime.JAVA_11,
                 memorySize: 1536,
                 timeout: Duration.seconds(900),
                 environment: {
-                    App: "stripe-customer-updated",
+                    App: app,
                     Stack: this.stack,
                     Stage: this.stage,
                 },
@@ -199,7 +199,7 @@ export class StripeWebhookEndpoints extends GuStack {
             ],
         });
 
-        const s3InlinePolicyForCustomerUpdated: Policy = new Policy(this, "S3 inline policy ForCustomerUpdated lambda", {
+        const s3InlinePolicyForCustomerUpdated: Policy = new Policy(this, "S3 inline policy For Customer Updated lambda", {
             statements: [
                 new PolicyStatement({
                     effect: Effect.ALLOW,

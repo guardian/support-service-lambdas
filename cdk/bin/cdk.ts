@@ -126,20 +126,20 @@ export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
 	stack: "membership",
 	stage: "CODE",
 	deployBucket: "membership-dist",
-	certificateId: membershipCertificateId,
-	domainName: `stripe-webhook-endpoints-code.${membershipApisDomain}`,
-	hostedZoneId: membershipHostedZoneId,
+	certificateId: supportCertificateId,
+	domainName: `stripe-webhook-endpoints-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
 
 }
 export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
 	stack: "membership",
 	stage: "PROD",
 	deployBucket: "membership-dist",
-	certificateId: membershipCertificateId,
-	domainName:  `stripe-webhook-endpoints-prod.${membershipApisDomain}`,
-	hostedZoneId: membershipHostedZoneId,
+	certificateId: supportCertificateId,
+	domainName:  `stripe-webhook-endpoints-prod.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
 }
 
 
-new StripeWebhookEndpoints(app, "Stripe-Webhook-Endpoints-CODE",stripeWebhookEndpointsCodeProps);
-new StripeWebhookEndpoints(app, "Stripe-Webhook-Endpoints-PROD", stripeWebhookEndpointsProdProps);
+new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-CODE",stripeWebhookEndpointsCodeProps);
+new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-PROD",stripeWebhookEndpointsProdProps);

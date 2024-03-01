@@ -338,8 +338,8 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
     },
     "DNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z1E4V12LQGXFEC",
-        "Name": "stripe-webhook-endpoints-code.membership.guardianapis.com",
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "stripe-webhook-endpoints-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -853,7 +853,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "S3inlinepolicyForCustomerUpdatedlambda27B7FA51": {
+    "S3inlinepolicyForCustomerUpdatedlambdaD4D663D2": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -870,7 +870,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicyForCustomerUpdatedlambda27B7FA51",
+        "PolicyName": "S3inlinepolicyForCustomerUpdatedlambdaD4D663D2",
         "Roles": [
           {
             "Ref": "customerupdatedcdklambdaServiceRole70F25448",
@@ -920,7 +920,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
     },
     "StripeWebhookEndpointsDomainName": {
       "Properties": {
-        "DomainName": "stripe-webhook-endpoints-code.membership.guardianapis.com",
+        "DomainName": "stripe-webhook-endpoints-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -938,7 +938,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
             ],
           ],
         },
@@ -973,13 +973,13 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/stripe-customer-updated/membership/CODE/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
+          "S3Key": "membership/CODE/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
         },
         "Description": "A lambda for handling customer updates",
         "Environment": {
           "Variables": {
-            "APP": "stripe-customer-updated",
-            "App": "stripe-customer-updated",
+            "APP": "stripe-webhook-endpoints",
+            "App": "stripe-webhook-endpoints",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stack": "membership",
@@ -999,7 +999,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "stripe-customer-updated",
+            "Value": "stripe-webhook-endpoints",
           },
           {
             "Key": "gu:cdk:version",
@@ -1053,7 +1053,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "stripe-customer-updated",
+            "Value": "stripe-webhook-endpoints",
           },
           {
             "Key": "gu:cdk:version",
@@ -1114,7 +1114,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/stripe-customer-updated/membership/CODE/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
+                      "/membership/CODE/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
                     ],
                   ],
                 },
@@ -1135,7 +1135,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/stripe-customer-updated",
+                    ":parameter/CODE/membership/stripe-webhook-endpoints",
                   ],
                 ],
               },
@@ -1158,7 +1158,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/stripe-customer-updated/*",
+                    ":parameter/CODE/membership/stripe-webhook-endpoints/*",
                   ],
                 ],
               },
@@ -1185,13 +1185,13 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/payment-intent-issues/membership/CODE/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
+          "S3Key": "membership/CODE/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
         },
         "Description": "A lambda for handling payment intent issues (cancellation, failure, action required)",
         "Environment": {
           "Variables": {
-            "APP": "payment-intent-issues",
-            "App": "payment-intent-issues",
+            "APP": "stripe-webhook-endpoints",
+            "App": "stripe-webhook-endpoints",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stack": "membership",
@@ -1211,7 +1211,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "payment-intent-issues",
+            "Value": "stripe-webhook-endpoints",
           },
           {
             "Key": "gu:cdk:version",
@@ -1265,7 +1265,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "payment-intent-issues",
+            "Value": "stripe-webhook-endpoints",
           },
           {
             "Key": "gu:cdk:version",
@@ -1326,7 +1326,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/payment-intent-issues/membership/CODE/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
+                      "/membership/CODE/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
                     ],
                   ],
                 },
@@ -1347,7 +1347,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/payment-intent-issues",
+                    ":parameter/CODE/membership/stripe-webhook-endpoints",
                   ],
                 ],
               },
@@ -1370,7 +1370,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/payment-intent-issues/*",
+                    ":parameter/CODE/membership/stripe-webhook-endpoints/*",
                   ],
                 ],
               },
@@ -1730,8 +1730,8 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
     },
     "DNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z1E4V12LQGXFEC",
-        "Name": "stripe-webhook-endpoints-prod.membership.guardianapis.com",
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "stripe-webhook-endpoints-prod.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -2245,7 +2245,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "S3inlinepolicyForCustomerUpdatedlambda27B7FA51": {
+    "S3inlinepolicyForCustomerUpdatedlambdaD4D663D2": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2262,7 +2262,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicyForCustomerUpdatedlambda27B7FA51",
+        "PolicyName": "S3inlinepolicyForCustomerUpdatedlambdaD4D663D2",
         "Roles": [
           {
             "Ref": "customerupdatedcdklambdaServiceRole70F25448",
@@ -2312,7 +2312,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
     },
     "StripeWebhookEndpointsDomainName": {
       "Properties": {
-        "DomainName": "stripe-webhook-endpoints-prod.membership.guardianapis.com",
+        "DomainName": "stripe-webhook-endpoints-prod.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -2330,7 +2330,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
             ],
           ],
         },
@@ -2365,13 +2365,13 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/stripe-customer-updated/membership/PROD/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
+          "S3Key": "membership/PROD/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
         },
         "Description": "A lambda for handling customer updates",
         "Environment": {
           "Variables": {
-            "APP": "stripe-customer-updated",
-            "App": "stripe-customer-updated",
+            "APP": "stripe-webhook-endpoints",
+            "App": "stripe-webhook-endpoints",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stack": "membership",
@@ -2391,7 +2391,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "stripe-customer-updated",
+            "Value": "stripe-webhook-endpoints",
           },
           {
             "Key": "gu:cdk:version",
@@ -2445,7 +2445,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "stripe-customer-updated",
+            "Value": "stripe-webhook-endpoints",
           },
           {
             "Key": "gu:cdk:version",
@@ -2506,7 +2506,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/stripe-customer-updated/membership/PROD/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
+                      "/membership/PROD/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
                     ],
                   ],
                 },
@@ -2527,7 +2527,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/stripe-customer-updated",
+                    ":parameter/PROD/membership/stripe-webhook-endpoints",
                   ],
                 ],
               },
@@ -2550,7 +2550,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/stripe-customer-updated/*",
+                    ":parameter/PROD/membership/stripe-webhook-endpoints/*",
                   ],
                 ],
               },
@@ -2577,13 +2577,13 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/payment-intent-issues/membership/PROD/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
+          "S3Key": "membership/PROD/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
         },
         "Description": "A lambda for handling payment intent issues (cancellation, failure, action required)",
         "Environment": {
           "Variables": {
-            "APP": "payment-intent-issues",
-            "App": "payment-intent-issues",
+            "APP": "stripe-webhook-endpoints",
+            "App": "stripe-webhook-endpoints",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stack": "membership",
@@ -2603,7 +2603,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "payment-intent-issues",
+            "Value": "stripe-webhook-endpoints",
           },
           {
             "Key": "gu:cdk:version",
@@ -2657,7 +2657,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "payment-intent-issues",
+            "Value": "stripe-webhook-endpoints",
           },
           {
             "Key": "gu:cdk:version",
@@ -2718,7 +2718,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/payment-intent-issues/membership/PROD/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
+                      "/membership/PROD/stripe-webhook-endpoints/stripe-webhook-endpoints.jar",
                     ],
                   ],
                 },
@@ -2739,7 +2739,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/payment-intent-issues",
+                    ":parameter/PROD/membership/stripe-webhook-endpoints",
                   ],
                 ],
               },
@@ -2762,7 +2762,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/payment-intent-issues/*",
+                    ":parameter/PROD/membership/stripe-webhook-endpoints/*",
                   ],
                 ],
               },
