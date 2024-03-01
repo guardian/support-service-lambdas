@@ -207,6 +207,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 						'Key.$': '$.Payload.filePath',
 					},
 				},
+				ItemBatcher: {
+					MaxItemsPerBatch: 1000,
+					// BatchInput: {
+					// 	// 'lambda_processor_arn.$': '$.input.lambda_processor_arn',
+					// 	// 'source_bucket_name.$': '$.input.source_bucket_name',
+					// 	// 'destination_bucket_name.$': '$.input.destination_bucket_name',
+					// },
+				},
 				ItemSelector: {
 					'item.$': '$$.Map.Item.Value',
 				},
@@ -322,13 +330,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		// updateZuoraAccountsLambda.addToRolePolicy(
-		// 	new PolicyStatement({
-		// 		actions: ['states:StartExecution'],
-		// 		resources: [stateMachine.stateMachineArn],
-		// 	}),
-		// );
-
 		stateMachine.role.attachInlinePolicy(
 			new Policy(this, 'SalesforceApiHttpInvoke', {
 				statements: [
@@ -374,6 +375,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 					new PolicyStatement({
 						actions: ['states:StartExecution'],
 						resources: [stateMachine.stateMachineArn],
+					}),
+					new PolicyStatement({
+						actions: ['lambda:InvokeFunction'],
+						resources: [updateZuoraAccountsLambda.functionArn],
 					}),
 				],
 			}),
