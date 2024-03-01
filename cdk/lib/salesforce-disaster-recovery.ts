@@ -200,7 +200,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 					},
 					ItemBatcher: {
-						MaxItemsPerBatch: 2500,
+						MaxItemsPerBatch: 1000,
 					},
 					ItemProcessor: {
 						ProcessorConfig: {
