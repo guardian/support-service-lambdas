@@ -31,6 +31,6 @@ export const batchUpdateZuoraAccounts = async ({
 		return { response };
 	} catch (error) {
 		console.error(error);
-		return { error: 'Unexpected error' };
+		return { error: JSON.stringify(error) };
 	}
 };
