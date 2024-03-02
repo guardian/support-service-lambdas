@@ -153,7 +153,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 				payload: TaskInput.fromObject({
 					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
-					fileKey: JsonPath.format(
+					filePath: JsonPath.format(
 						`{}/query-result.csv`,
 						JsonPath.stringAt('$$.Execution.Id'),
 					),
