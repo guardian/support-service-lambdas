@@ -40,6 +40,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
+		const queryResultFileName = 'query-result.csv';
+
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
@@ -154,7 +156,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				payload: TaskInput.fromObject({
 					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
 					filePath: JsonPath.format(
-						`{}/query-result.csv`,
+						`{}/${queryResultFileName}`,
 						JsonPath.stringAt('$$.Execution.StartTime'),
 					),
 				}),
@@ -197,7 +199,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						Parameters: {
 							Bucket: bucket.bucketName,
 							'Key.$': JsonPath.format(
-								`{}/query-result.csv`,
+								`{}/${queryResultFileName}`,
 								JsonPath.stringAt('$$.Execution.StartTime'),
 							),
 						},
