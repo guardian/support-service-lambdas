@@ -316,11 +316,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","executionStartTime.$":"$$.Execution.StartTime"}}},"ProcessAccountsInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":100,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","fileKey.$":"States.Format('{}/query-result.csv', $$.Execution.Id)"}}},"ProcessAccountsInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":100,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$.Payload.filePath"}},"ItemBatcher":{"MaxItemsPerBatch":1000},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.Id)"}},"ItemBatcher":{"MaxItemsPerBatch":1000},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -331,7 +331,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}}}}",
+              "","Prefix.$":"$$.Execution.Id"}}}}}",
             ],
           ],
         },
@@ -1251,11 +1251,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","executionStartTime.$":"$$.Execution.StartTime"}}},"ProcessAccountsInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":100,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","fileKey.$":"States.Format('{}/query-result.csv', $$.Execution.Id)"}}},"ProcessAccountsInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":100,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$.Payload.filePath"}},"ItemBatcher":{"MaxItemsPerBatch":1000},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.Id)"}},"ItemBatcher":{"MaxItemsPerBatch":1000},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -1266,7 +1266,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}}}}",
+              "","Prefix.$":"$$.Execution.Id"}}}}}",
             ],
           ],
         },

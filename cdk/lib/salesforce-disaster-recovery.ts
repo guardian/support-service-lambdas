@@ -153,7 +153,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 				payload: TaskInput.fromObject({
 					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
-					executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+					fileKey: JsonPath.format(
+						`{}/query-result.csv`,
+						JsonPath.stringAt('$$.Execution.Id'),
+					),
 				}),
 			},
 		);
@@ -193,7 +196,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							'Key.$': '$.Payload.filePath',
+							'Key.$': JsonPath.format(
+								`{}/query-result.csv`,
+								JsonPath.stringAt('$$.Execution.Id'),
+							),
 						},
 					},
 					ItemBatcher: {
@@ -235,7 +241,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						Resource: 'arn:aws:states:::s3:putObject',
 						Parameters: {
 							Bucket: bucket.bucketName,
-							'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
+							'Prefix.$': JsonPath.stringAt('$$.Execution.Id'),
 						},
 					},
 				},
