@@ -10,13 +10,18 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 	}
 
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
+	const responses = [];
 
 	for (let i = 0; i < event.Items.length; i += 50) {
 		const batch = event.Items.slice(i, i + 50);
 
-		await batchUpdateZuoraAccounts({
+		const response = await batchUpdateZuoraAccounts({
 			zuoraClient,
 			accountRows: batch,
 		});
+
+		responses.push(batch.map((item) => ({ id: item.Id, response })));
 	}
+
+	return responses;
 };
