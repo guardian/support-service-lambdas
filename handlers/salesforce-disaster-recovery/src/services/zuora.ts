@@ -1,6 +1,12 @@
 import { actionUpdate } from '@modules/zuora/actionUpdate';
 import { type ZuoraClient } from '@modules/zuora/zuoraClient';
-import { type AccountRow } from './csv';
+
+export interface AccountRow {
+	Id: string;
+	Zuora__Zuora_Id__c: string;
+	Zuora__Account__c: string;
+	Contact__c: string;
+}
 
 export const batchUpdateZuoraAccounts = async ({
 	zuoraClient,
