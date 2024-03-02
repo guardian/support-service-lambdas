@@ -20,7 +20,9 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 			accountRows: batch,
 		});
 
-		responses.push(batch.map((item) => ({ id: item.Id, response })));
+		responses.push(
+			...batch.map((item) => ({ id: item.Zuora__Zuora_Id__c, response })),
+		);
 	}
 
 	return responses;
