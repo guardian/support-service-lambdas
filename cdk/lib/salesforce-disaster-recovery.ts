@@ -181,9 +181,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const processAccountsInDistributedMap = new CustomState(
+		const processCsvInDistributedMap = new CustomState(
 			this,
-			'ProcessAccountsInDistributedMap',
+			'ProcessCsvInDistributedMap',
 			{
 				stateJson: {
 					Type: 'Map',
@@ -262,7 +262,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(
-										processAccountsInDistributedMap,
+										processCsvInDistributedMap,
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
