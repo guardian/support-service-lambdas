@@ -267,8 +267,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 				Type: 'Task',
 				Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
 				Parameters: {
-					Bucket: bucket.bucketName,
-					Key: '2024-03-04T12:45:30.173Z/912e4a4d-349f-43ce-b350-d3fd59d2c4a7/manifest.json',
+					'Bucket.$': JsonPath.stringAt('$.ResultWriterDetails.Bucket'),
+					'Key.$': JsonPath.stringAt('$.ResultWriterDetails.Key'),
 				},
 				ResultSelector: {
 					'Payload.$': JsonPath.stringToJson(JsonPath.stringAt('$.Body')),
