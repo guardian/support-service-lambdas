@@ -30,17 +30,13 @@ export const batchUpdateZuoraAccounts = async ({
 
 		return { response };
 	} catch (error) {
-		const zuoraError = error as ZuoraError;
-		console.log(zuoraError.code); //429
-		console.log(zuoraError.message); //request exceeded limit
-		console.log(zuoraError.name); //ZuoraError
-		console.log(zuoraError.stack);
-
-		console.log(typeof error);
-		console.log('error here');
 		console.error(error);
-		console.log(JSON.stringify(error));
-		// console.log(Object.entries(error))
+		const zuoraError = error as ZuoraError;
+
+		if (zuoraError.code === 429) {
+			throw error;
+		}
+
 		return { error: zuoraError };
 	}
 };
