@@ -355,7 +355,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'states:StopExecution',
 						],
 						resources: [
-							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineArn}:*`,
+							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}:*`,
 						],
 					}),
 					new PolicyStatement({

@@ -277,7 +277,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     },
                     ":execution:",
                     {
-                      "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+                      "Fn::GetAtt": [
+                        "SalesforceDisasterRecoveryStateMachine6185B29D",
+                        "Name",
+                      ],
                     },
                     ":*",
                   ],
@@ -1240,7 +1243,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     },
                     ":execution:",
                     {
-                      "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+                      "Fn::GetAtt": [
+                        "SalesforceDisasterRecoveryStateMachine6185B29D",
+                        "Name",
+                      ],
                     },
                     ":*",
                   ],
