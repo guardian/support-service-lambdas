@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The Product catalog stack matches the snapshot 1`] = `
+exports[`The generate product catalog stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -497,7 +497,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Policy",
     },
-    "guzuoracatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF629ECA47D": {
+    "guzuoracatalogAllowBucketNotificationsTogenerateproductcatalogCODEgenerateproductcataloglambda2EDA50AEF752DADC": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -527,7 +527,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
     },
     "guzuoracatalogNotifications2A4398B4": {
       "DependsOn": [
-        "guzuoracatalogAllowBucketNotificationsToproductcatalogCODEgenerateproductcataloglambda7873BEF629ECA47D",
+        "guzuoracatalogAllowBucketNotificationsTogenerateproductcatalogCODEgenerateproductcataloglambda2EDA50AEF752DADC",
       ],
       "Properties": {
         "BucketName": "gu-zuora-catalog",
@@ -570,7 +570,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
 }
 `;
 
-exports[`The Product catalog stack matches the snapshot 2`] = `
+exports[`The generate product catalog stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -1067,7 +1067,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Policy",
     },
-    "guzuoracatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B3B2A0C82": {
+    "guzuoracatalogAllowBucketNotificationsTogenerateproductcatalogPRODgenerateproductcataloglambda747E1D6C6423E587": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1097,7 +1097,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
     },
     "guzuoracatalogNotifications2A4398B4": {
       "DependsOn": [
-        "guzuoracatalogAllowBucketNotificationsToproductcatalogPRODgenerateproductcataloglambda178F1B8B3B2A0C82",
+        "guzuoracatalogAllowBucketNotificationsTogenerateproductcatalogPRODgenerateproductcataloglambda747E1D6C6423E587",
       ],
       "Properties": {
         "BucketName": "gu-zuora-catalog",

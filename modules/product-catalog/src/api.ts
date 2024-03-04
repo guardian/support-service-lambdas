@@ -1,7 +1,9 @@
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
 
-export const getProductCatalogFromApi = async (stage: string) => {
+export const getProductCatalogFromApi = async (
+	stage: string,
+): Promise<ProductCatalog> => {
 	console.log('getProductCatalogFromApi');
 	const url =
 		stage === 'PROD'
@@ -13,7 +15,7 @@ export const getProductCatalogFromApi = async (stage: string) => {
 
 	const json = await response.json();
 	if (response.ok) {
-		return productCatalogSchema.parse(json) as ProductCatalog;
+		return productCatalogSchema.parse(json);
 	} else {
 		throw new Error(
 			'Response body was undefined when fetching the Product Catalog from S3',
