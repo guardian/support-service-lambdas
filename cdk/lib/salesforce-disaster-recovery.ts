@@ -252,17 +252,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		// "GetBucketVersioning": {
-		//     "Type": "Task",
-		//     "End": true,
-		//     "Parameters": {
-		//       "Bucket.$": "$.Name"
-		//     },
-		//     "ResultPath": "$.BucketVersioningInfo",
-		//     "Resource": "arn:aws:states:::aws-sdk:s3:getBucketVersioning"
-		//   },
-
-		const getManifest = new CustomState(this, 'GetManifest', {
+		const checkMapResult = new CustomState(this, 'CheckMapResult', {
 			stateJson: {
 				Type: 'Task',
 				Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
@@ -303,7 +293,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap.next(getManifest),
+										processCsvInDistributedMap.next(checkMapResult),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
@@ -358,6 +348,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 						actions: ['states:StartExecution'],
 						resources: [stateMachine.stateMachineArn],
 					}),
+					// new PolicyStatement({
+					// 	actions: [
+					// 		'states:RedriveExecution',
+					// 		'states:DescribeExecution',
+					// 		'states:StopExecution',
+					// 	],
+					// 	resources: [`${stateMachine.stateMachineArn}:*`],
+					// }),
 					new PolicyStatement({
 						actions: ['lambda:InvokeFunction'],
 						resources: [updateZuoraAccountsLambda.functionArn],
