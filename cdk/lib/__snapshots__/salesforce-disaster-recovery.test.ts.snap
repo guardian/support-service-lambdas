@@ -257,6 +257,34 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               },
             },
             {
+              "Action": [
+                "states:RedriveExecution",
+                "states:DescribeExecution",
+                "states:StopExecution",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:states:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":execution:",
+                    {
+                      "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+                    },
+                    ":*",
+                  ],
+                ],
+              },
+            },
+            {
               "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
               "Resource": {
@@ -1189,6 +1217,34 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Effect": "Allow",
               "Resource": {
                 "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+              },
+            },
+            {
+              "Action": [
+                "states:RedriveExecution",
+                "states:DescribeExecution",
+                "states:StopExecution",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:states:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":execution:",
+                    {
+                      "Ref": "SalesforceDisasterRecoveryStateMachine6185B29D",
+                    },
+                    ":*",
+                  ],
+                ],
               },
             },
             {

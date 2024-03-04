@@ -348,14 +348,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 						actions: ['states:StartExecution'],
 						resources: [stateMachine.stateMachineArn],
 					}),
-					// new PolicyStatement({
-					// 	actions: [
-					// 		'states:RedriveExecution',
-					// 		'states:DescribeExecution',
-					// 		'states:StopExecution',
-					// 	],
-					// 	resources: [`${stateMachine.stateMachineArn}:*`],
-					// }),
+					new PolicyStatement({
+						actions: [
+							'states:RedriveExecution',
+							'states:DescribeExecution',
+							'states:StopExecution',
+						],
+						resources: [
+							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineArn}:*`,
+						],
+					}),
 					new PolicyStatement({
 						actions: ['lambda:InvokeFunction'],
 						resources: [updateZuoraAccountsLambda.functionArn],
