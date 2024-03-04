@@ -1,9 +1,11 @@
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
+import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
@@ -89,6 +91,27 @@ export class GenerateProductCatalog extends GuStack {
 			domainName: props.domainName,
 			ttl: Duration.hours(1),
 			resourceRecord: 'guardian.map.fastly.net',
+		});
+
+		new GuAlarm(this, 'FailedProductCatalogLambdaAlarm', {
+			app,
+			alarmName: `The ${app} Lambda has failed`,
+			alarmDescription:
+				'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
+			evaluationPeriods: 1,
+			threshold: 1,
+			actionsEnabled: this.stage === 'PROD',
+			snsTopicName: 'retention-dev',
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			metric: new Metric({
+				metricName: 'Errors',
+				namespace: 'AWS/Lambda',
+				statistic: 'Sum',
+				period: Duration.seconds(300),
+				dimensionsMap: {
+					FunctionName: lambda.functionName,
+				},
+			}),
 		});
 	}
 }
