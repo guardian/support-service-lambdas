@@ -320,7 +320,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"arn:aws:s3:::salesforce-disaster-recovery-code/test-2-million-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"test-2-million-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -1255,7 +1255,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"arn:aws:s3:::salesforce-disaster-recovery-code/test-2-million-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"test-2-million-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",

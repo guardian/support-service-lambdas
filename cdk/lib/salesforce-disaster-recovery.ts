@@ -198,7 +198,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							Key: 'arn:aws:s3:::salesforce-disaster-recovery-code/test-2-million-rows.csv',
+							Key: 'test-2-million-rows.csv',
 							// 'Key.$': JsonPath.format(
 							// 	`{}/${queryResultFileName}`,
 							// 	JsonPath.stringAt('$$.Execution.StartTime'),
