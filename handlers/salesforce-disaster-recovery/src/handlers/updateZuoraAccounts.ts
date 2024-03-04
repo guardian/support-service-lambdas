@@ -3,6 +3,11 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { type AccountRow, batchUpdateZuoraAccounts } from '../services';
 
 export const handler = async (event: { Items: AccountRow[] }) => {
+	const rand = Math.random();
+
+	if (rand < 0.5) {
+		throw new Error('test error');
+	}
 	const stage = process.env.STAGE;
 
 	if (!stage) {
