@@ -16,7 +16,7 @@ export const batchUpdateZuoraAccounts = async ({
 	accountRows: AccountRow[];
 }) => {
 	try {
-		const response = await actionUpdate(
+		await actionUpdate(
 			zuoraClient,
 			JSON.stringify({
 				objects: accountRows.map((row) => ({
@@ -27,10 +27,12 @@ export const batchUpdateZuoraAccounts = async ({
 				type: 'Account',
 			}),
 		);
+		throw new Error('Test error');
 
-		return { response };
+		// return { response };
 	} catch (error) {
 		console.error(error);
-		return { error: JSON.stringify(error) };
+		throw error;
+		// return { error: JSON.stringify(error) };
 	}
 };
