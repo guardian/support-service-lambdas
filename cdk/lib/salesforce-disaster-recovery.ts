@@ -270,8 +270,24 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Bucket: bucket.bucketName,
 					Key: '2024-03-04T12:45:30.173Z/912e4a4d-349f-43ce-b350-d3fd59d2c4a7/manifest.json',
 				},
+				ResultSelector: {
+					'Payload.$': JsonPath.stringToJson(JsonPath.stringAt('$.Body')),
+				},
+				OutputPath: '$.Payload',
 			},
 		});
+
+		// const test2 = new CustomState(this, 'Test2', {
+		// 	stateJson: {
+		// 		Type: 'Task',
+		// 		Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
+		// 		Parameters: {
+		// 			Bucket: bucket.bucketName,
+		// 			Key: '2024-03-04T12:45:30.173Z/912e4a4d-349f-43ce-b350-d3fd59d2c4a7/manifest.json',
+		// 		},
+		// 		OutputPath: '$.Body',
+		// 	},
+		// });
 
 		const stateMachine = new StateMachine(
 			this,
