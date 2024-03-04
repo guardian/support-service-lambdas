@@ -1,5 +1,6 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
+import { AlarmsGchat } from '../lib/alarms-gchat';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
@@ -165,3 +166,17 @@ export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
 new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-CODE",stripeWebhookEndpointsCodeProps);
 new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-PROD",stripeWebhookEndpointsProdProps);
 
+new AlarmsGchat(app, 'alarms-gchat-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `alarms-gchat-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new AlarmsGchat(app, 'alarms-gchat-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `alarms-gchat.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
