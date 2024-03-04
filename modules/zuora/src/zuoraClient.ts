@@ -72,8 +72,6 @@ export class ZuoraClient {
 		const json = await response.json();
 		console.log('Response from Zuora was: ', JSON.stringify(json));
 
-		// throw new ZuoraError('request exceeded limit', 429);
-
 		if (response.ok) {
 			return schema.parse(json);
 		} else {
