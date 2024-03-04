@@ -301,6 +301,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 			},
 		);
+		console.log(stateMachine.stateMachineArn);
+		console.log(stateMachine.stateMachineName);
 
 		stateMachine.role.attachInlinePolicy(
 			new Policy(this, 'SalesforceApiHttpInvoke', {
@@ -355,7 +357,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'states:StopExecution',
 						],
 						resources: [
-							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}:*`,
+							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
 						],
 					}),
 					new PolicyStatement({
