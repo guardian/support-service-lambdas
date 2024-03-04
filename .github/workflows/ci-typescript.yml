@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - ad/test-failures
 jobs:
   gu-cdk-build:
     strategy:
