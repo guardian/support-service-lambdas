@@ -4,6 +4,17 @@ import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
 
+class ZuoraError extends Error {
+	constructor(
+		message: string,
+		public code: number,
+	) {
+		super(message);
+		this.name = 'ZuoraError';
+		this.code = code;
+	}
+}
+
 export class ZuoraClient {
 	static async create(stage: Stage) {
 		const credentials = await getOAuthClientCredentials(stage);
@@ -60,12 +71,15 @@ export class ZuoraClient {
 		});
 		const json = await response.json();
 		console.log('Response from Zuora was: ', JSON.stringify(json));
-		if (response.ok) {
-			return schema.parse(json);
-		} else {
-			throw new Error(
-				`Error in ZuoraClient.fetch: ${response.status} ${response.statusText}`,
-			);
-		}
+
+		throw new ZuoraError('request exceeded limit', 429);
+
+		// if (response.ok) {
+		// 	return schema.parse(json);
+		// } else {
+		// 	throw new Error(
+		// 		`Error in ZuoraClient.fetch: ${response.status} ${response.statusText}`,
+		// 	);
+		// }
 	}
 }
