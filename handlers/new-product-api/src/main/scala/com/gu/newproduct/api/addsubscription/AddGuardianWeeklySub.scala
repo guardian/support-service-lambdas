@@ -197,15 +197,31 @@ object AddGuardianWeeklySub {
         zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(
           internalServerError(s"no Zuora id for ${request.planId}!"),
         )
+        ratePlans = request.discountRatePlanId
+          .map(id =>
+            List(
+              ZuoraCreateSubRequestRatePlan(
+                productRatePlanId = id,
+                maybeChargeOverride = None,
+              ),
+              ZuoraCreateSubRequestRatePlan(
+                productRatePlanId = zuoraRatePlanId,
+                maybeChargeOverride = None,
+              ),
+            ),
+          )
+          .getOrElse(
+            List(
+              ZuoraCreateSubRequestRatePlan(
+                productRatePlanId = zuoraRatePlanId,
+                maybeChargeOverride = None,
+              ),
+            ),
+          )
         createSubRequest = ZuoraCreateSubRequest(
           request = request,
           acceptanceDate = request.startDate,
-          ratePlans = List(
-            ZuoraCreateSubRequestRatePlan(
-              productRatePlanId = zuoraRatePlanId,
-              maybeChargeOverride = None,
-            ),
-          ),
+          ratePlans = ratePlans,
         )
       } yield createSubRequest
     }
