@@ -169,14 +169,8 @@ new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-PROD",stripeWebhookEnd
 new AlarmsGchat(app, 'alarms-gchat-CODE', {
 	stack: 'support',
 	stage: 'CODE',
-	domainName: `alarms-gchat-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 new AlarmsGchat(app, 'alarms-gchat-PROD', {
 	stack: 'support',
 	stage: 'PROD',
-	domainName: `alarms-gchat.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });

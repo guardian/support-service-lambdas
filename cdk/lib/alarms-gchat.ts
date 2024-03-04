@@ -1,22 +1,15 @@
-
-import { GuApiLambda } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import {GuStack, GuStringParameter} from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
-import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
-import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
+import {CfnMapping, Duration} from 'aws-cdk-lib';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import {GuSnsLambdaExperimental} from "@guardian/cdk/lib/experimental/patterns";
+import {GuLambdaErrorPercentageMonitoringProps, NoMonitoring} from "@guardian/cdk/lib/constructs/cloudwatch";
 
 export interface AlarmsGchatProps extends GuStackProps {
 	stack: string;
 	stage: string;
-	certificateId: string;
-	domainName: string;
-	hostedZoneId: string;
 }
 
 export class AlarmsGchat extends GuStack {
@@ -32,88 +25,56 @@ export class AlarmsGchat extends GuStack {
 			Stage: this.stage,
 		};
 
-		// ---- API-triggered lambda functions ---- //
-		const lambda = new GuApiLambda(this, `${app}-lambda`, {
+		const parameters = {
+			webhook: new GuStringParameter(this, "webhook", {
+				description: "Google Chat webhook for lambda to fire to",
+			}),
+		};
+		const stageMapping = new CfnMapping(this, "stageMapping", {
+			mapping: {
+				CODE: { alarmActionsEnabled: "FALSE" },
+				PROD: { alarmActionsEnabled: "TRUE" },
+			},
+		});
+
+		const getMonitoringConfiguration = ():
+			| NoMonitoring
+			| GuLambdaErrorPercentageMonitoringProps => {
+			if (this.stage === "PROD"|| this.stage === "CODE") {
+				return {
+					alarmName: `Failed to raise alarm via Google Chat in ${this.stage}`,
+					alarmDescription: "Please check the CloudWatch Alarms dashboard to see which alarms are firing",
+					toleratedErrorPercentage: 0,
+					snsTopicName: "mobile-server-side-email-alert",
+					// We can't use ternaries or other code-based ways of doing this as we synthesise this before applying, meaning this will always return false and therefore CODE
+					actionsEnabled: (stageMapping.findInMap(this.stage, "alarmActionsEnabled") as unknown) as boolean,
+				}
+			}
+			return {
+				noMonitoring: true,
+			};
+		};
+
+
+
+		const lambda =  new GuSnsLambdaExperimental(this, "google-chat-bot-sns-to-gchat", {
 			description:
 				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
-			handler: 'index.handler',
+			handler: "index.handler",
 			runtime: Runtime.NODEJS_18_X,
 			memorySize: 1024,
-			timeout: Duration.seconds(300),
-			environment: commonEnvironmentVariables,
-			// Create an alarm
-			monitoringConfiguration: {
-				http5xxAlarm: { tolerated5xxPercentage: 5 },
-				snsTopicName: 'retention-dev',
+			environment: {
+				WEBHOOK: parameters.webhook.valueAsString,
+				...commonEnvironmentVariables,
 			},
+			timeout: Duration.seconds(15),
+			existingSnsTopic: { externalTopicName: "mobile-server-side" },
+			monitoringConfiguration: getMonitoringConfiguration(),
 			app: app,
-			api: {
-				id: nameWithStage,
-				restApiName: nameWithStage,
-				description: 'API Gateway created by CDK',
-				proxy: true,
-				deployOptions: {
-					stageName: this.stage,
-				},
-			
-			},
-		});
-	
-
-		// ---- Alarms ---- //
-		const alarmName = (shortDescription: string) =>
-			`ALARMS-GCHAT-${this.stage} ${shortDescription}`;
-
-		const alarmDescription = (description: string) =>
-			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
-
-		new GuAlarm(this, 'ApiGateway4XXAlarmCDK', {
-			app,
-			alarmName: alarmName('API gateway 4XX response'),
-			alarmDescription: alarmDescription(
-				'Alarms gchat received an invalid request',
-			),
-			evaluationPeriods: 1,
-			threshold: 1,
-			snsTopicName: 'retention-dev',
-			actionsEnabled: this.stage === 'PROD',
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			metric: new Metric({
-				metricName: '4XXError',
-				namespace: 'AWS/ApiGateway',
-				statistic: 'Sum',
-				period: Duration.seconds(300),
-				dimensionsMap: {
-					ApiName: nameWithStage,
-				},
-			}),
 		});
 
-		// ---- DNS ---- //
-		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
-		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
-			domainName: props.domainName,
-			regionalCertificateArn: certificateArn,
-			endpointConfiguration: {
-				types: ['REGIONAL'],
-			},
-		});
-
-		new CfnBasePathMapping(this, 'BasePathMapping', {
-			domainName: cfnDomainName.ref,
-			restApiId: lambda.api.restApiId,
-			stage: lambda.api.deploymentStage.stageName,
-		});
-
-		new CfnRecordSet(this, 'DNSRecord', {
-			name: props.domainName,
-			type: 'CNAME',
-			hostedZoneId: props.hostedZoneId,
-			ttl: '120',
-			resourceRecords: [cfnDomainName.attrRegionalDomainName],
-		});
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [
