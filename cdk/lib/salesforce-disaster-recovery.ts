@@ -168,8 +168,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			'UpdateZuoraAccountsLambda',
 			{
 				...lambdaDefaultConfig,
-				// timeout: Duration.minutes(15),
-				// memorySize: 10240,
+				timeout: Duration.minutes(15),
+				memorySize: 10240,
 				handler: 'updateZuoraAccounts.handler',
 				functionName: `update-zuora-accounts-${this.stage}`,
 				initialPolicy: [
@@ -198,15 +198,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							Key: 'test-2-million-rows.csv',
-							// 'Key.$': JsonPath.format(
-							// 	`{}/${queryResultFileName}`,
-							// 	JsonPath.stringAt('$$.Execution.StartTime'),
-							// ),
+							// Key: 'test-2-million-rows.csv',
+							'Key.$': JsonPath.format(
+								`{}/${queryResultFileName}`,
+								JsonPath.stringAt('$$.Execution.StartTime'),
+							),
 						},
 					},
 					ItemBatcher: {
-						MaxItemsPerBatch: 50,
+						MaxItemsPerBatch: 5000,
 					},
 					ItemProcessor: {
 						ProcessorConfig: {

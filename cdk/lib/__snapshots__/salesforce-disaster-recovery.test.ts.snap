@@ -320,7 +320,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"test-2-million-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":5000},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -724,7 +724,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         },
         "FunctionName": "update-zuora-accounts-CODE",
         "Handler": "updateZuoraAccounts.handler",
-        "MemorySize": 1024,
+        "MemorySize": 10240,
         "Role": {
           "Fn::GetAtt": [
             "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
@@ -754,7 +754,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -1255,7 +1255,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"test-2-million-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":5000},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -1659,7 +1659,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         },
         "FunctionName": "update-zuora-accounts-PROD",
         "Handler": "updateZuoraAccounts.handler",
-        "MemorySize": 1024,
+        "MemorySize": 10240,
         "Role": {
           "Fn::GetAtt": [
             "UpdateZuoraAccountsLambdaServiceRole31E9D1CD",
@@ -1689,7 +1689,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
     },
