@@ -1,5 +1,5 @@
 import { actionUpdate } from '@modules/zuora/actionUpdate';
-import { type ZuoraClient } from '@modules/zuora/zuoraClient';
+import { type ZuoraClient, type ZuoraError } from '@modules/zuora/zuoraClient';
 
 export interface AccountRow {
 	Id: string;
@@ -32,11 +32,18 @@ export const batchUpdateZuoraAccounts = async ({
 
 		return { response };
 	} catch (error) {
+		const zuoraError = error as ZuoraError;
+		console.log(zuoraError.code);
+		console.log(zuoraError.cause);
+		console.log(zuoraError.message);
+		console.log(zuoraError.name);
+		console.log(zuoraError.stack);
+
 		console.log(typeof error);
 		console.log('error here');
 		console.error(error);
 		console.log(JSON.stringify(error));
 		// console.log(Object.entries(error))
-		return { error: JSON.stringify(error) };
+		return { error: zuoraError };
 	}
 };

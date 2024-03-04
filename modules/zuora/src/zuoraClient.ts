@@ -4,7 +4,7 @@ import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
 
-class ZuoraError extends Error {
+export class ZuoraError extends Error {
 	constructor(
 		message: string,
 		public code: number,
