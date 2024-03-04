@@ -316,7 +316,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetManifest","Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -331,7 +331,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}}}}",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetManifest":{"End":true,"Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Key":"2024-03-04T12:45:30.173Z/912e4a4d-349f-43ce-b350-d3fd59d2c4a7/manifest.json"}}}}",
             ],
           ],
         },
@@ -1251,7 +1255,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetManifest","Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1266,7 +1270,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}}}}",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetManifest":{"End":true,"Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Key":"2024-03-04T12:45:30.173Z/912e4a4d-349f-43ce-b350-d3fd59d2c4a7/manifest.json"}}}}",
             ],
           ],
         },

@@ -251,6 +251,27 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		// "GetBucketVersioning": {
+		//     "Type": "Task",
+		//     "End": true,
+		//     "Parameters": {
+		//       "Bucket.$": "$.Name"
+		//     },
+		//     "ResultPath": "$.BucketVersioningInfo",
+		//     "Resource": "arn:aws:states:::aws-sdk:s3:getBucketVersioning"
+		//   },
+
+		const getManifest = new CustomState(this, 'GetManifest', {
+			stateJson: {
+				Type: 'Task',
+				Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
+				Parameters: {
+					Bucket: bucket.bucketName,
+					Key: '2024-03-04T12:45:30.173Z/912e4a4d-349f-43ce-b350-d3fd59d2c4a7/manifest.json',
+				},
+			},
+		});
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -265,7 +286,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap,
+										processCsvInDistributedMap.next(getManifest),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
