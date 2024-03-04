@@ -316,7 +316,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":100,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1251,7 +1251,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":100,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
