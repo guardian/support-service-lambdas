@@ -270,87 +270,71 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const processMapResult = new Map(this, 'ProcessMapResultFiles', {
-			maxConcurrency: 1,
-			itemsPath: '$.ResultFiles.SUCCEEDED',
-		}).iterator(
-			new CustomState(this, 'ProcessFilesInDistributedMap', {
-				stateJson: {
-					Type: 'Map',
-					MaxConcurrency: 1,
-					ItemReader: {
-						Resource: 'arn:aws:states:::s3:getObject',
-						ReaderConfig: {
-							InputType: 'JSON',
-						},
-						Parameters: {
-							Bucket: bucket.bucketName,
-							'Key.$': '$.Key',
-						},
+		const saveFailedAccountUpdatesToS3 = new LambdaInvoke(
+			this,
+			'SaveFailedAccountUpdatesToS3',
+			{
+				lambdaFunction: new GuLambdaFunction(
+					this,
+					'SaveFailedAccountUpdatesToS3Lambda',
+					{
+						...lambdaDefaultConfig,
+						memorySize: 10240,
+						handler: 'saveFailedAccountUpdatesToS3.handler',
+						functionName: `save-failed-account-updates-to-s3-${this.stage}`,
 					},
-					ItemBatcher: {
-						MaxItemsPerBatch: 1,
-					},
-					ItemProcessor: {
-						ProcessorConfig: {
-							Mode: 'DISTRIBUTED',
-							ExecutionType: 'STANDARD',
-						},
-						StartAt: 'FilterAccountsWithBusinessLogicErrors',
-						States: {
-							FilterAccountsWithBusinessLogicErrors: {
-								Type: 'Pass',
-								Parameters: {
-									'input.$': JsonPath.stringToJson(
-										JsonPath.stringAt('$.Items[0].Input'),
-									),
-									'output.$': JsonPath.stringToJson(
-										JsonPath.stringAt('$.Items[0].Output'),
-									),
-								},
-								End: true,
-							},
-						},
-					},
-					// ResultWriter: {
-					// 	Resource: 'arn:aws:states:::s3:putObject',
-					// 	Parameters: {
-					// 		Bucket: bucket.bucketName,
-					// 		'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
-					// 	},
-					// },
-				},
-			}),
-			// new LambdaInvoke(this, 'UpdateZuoraAccounts', {
-			// 	lambdaFunction: new GuLambdaFunction(
-			// 		this,
-			// 		'UpdateZuoraAccountsLambda',
-			// 		{
-			// 			...lambdaDefaultConfig,
-			// 			timeout: Duration.minutes(15),
-			// 			memorySize: 10240,
-			// 			handler: 'updateZuoraAccounts.handler',
-			// 			functionName: `update-zuora-accounts-${this.stage}`,
-			// 			environment: {
-			// 				...lambdaDefaultConfig.environment,
-			// 				S3_BUCKET: bucket.bucketName,
-			// 			},
-			// 			initialPolicy: [
-			// 				new PolicyStatement({
-			// 					actions: ['secretsmanager:GetSecretValue'],
-			// 					resources: [
-			// 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-			// 					],
-			// 				}),
-			// 				new PolicyStatement({
-			// 					actions: ['s3:GetObject'],
-			// 					resources: [bucket.arnForObjects('*')],
-			// 				}),
-			// 			],
-			// 		},
-			// 	),
-			// }),
+				),
+				payload: TaskInput.fromObject({
+					resultFiles: '$.ResultFiles.SUCCEEDED',
+				}),
+			},
 		);
+
+		// const processMapResult = new Map(this, 'ProcessMapResultFiles', {
+		// 	maxConcurrency: 1,
+		// 	itemsPath: '$.ResultFiles.SUCCEEDED',
+		// }).iterator(
+		// 	new CustomState(this, 'ProcessFilesInDistributedMap', {
+		// 		stateJson: {
+		// 			Type: 'Map',
+		// 			MaxConcurrency: 1,
+		// 			ItemReader: {
+		// 				Resource: 'arn:aws:states:::s3:getObject',
+		// 				ReaderConfig: {
+		// 					InputType: 'JSON',
+		// 				},
+		// 				Parameters: {
+		// 					Bucket: bucket.bucketName,
+		// 					'Key.$': '$.Key',
+		// 				},
+		// 			},
+		// 			ItemBatcher: {
+		// 				MaxItemsPerBatch: 1,
+		// 			},
+		// 			ItemProcessor: {
+		// 				ProcessorConfig: {
+		// 					Mode: 'DISTRIBUTED',
+		// 					ExecutionType: 'STANDARD',
+		// 				},
+		// 				StartAt: 'FilterAccountsWithBusinessLogicErrors',
+		// 				States: {
+		// 					FilterAccountsWithBusinessLogicErrors: {
+		// 						Type: 'Pass',
+		// 						Parameters: {
+		// 							'input.$': JsonPath.stringToJson(
+		// 								JsonPath.stringAt('$.Items[0].Input'),
+		// 							),
+		// 							'output.$': JsonPath.stringToJson(
+		// 								JsonPath.stringAt('$.Items[0].Output'),
+		// 							),
+		// 						},
+		// 						End: true,
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 	}),
+		// );
 
 		const stateMachine = new StateMachine(
 			this,
@@ -368,7 +352,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 									saveSalesforceQueryResultToS3.next(
 										processCsvInDistributedMap
 											.next(getMapResult)
-											.next(processMapResult),
+											.next(saveFailedAccountUpdatesToS3),
+										// .next(processMapResult),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),

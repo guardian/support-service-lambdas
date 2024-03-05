@@ -20,6 +20,7 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
+        - save-failed-account-updates-to-s3-
         - save-salesforce-query-result-to-s3-
         - update-zuora-accounts-
     dependencies: [salesforce-disaster-recovery-cloudformation]
