@@ -255,7 +255,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const checkMapResult = new CustomState(this, 'CheckMapResult', {
+		const getMapResult = new CustomState(this, 'GetMapResult', {
 			stateJson: {
 				Type: 'Task',
 				Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
@@ -284,7 +284,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap.next(checkMapResult),
+										processCsvInDistributedMap.next(getMapResult),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
