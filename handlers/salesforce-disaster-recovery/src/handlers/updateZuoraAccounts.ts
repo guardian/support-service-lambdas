@@ -16,17 +16,12 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 	for (let i = 0; i < event.Items.length; i += 50) {
 		const batch = event.Items.slice(i, i + 50);
 
-		const { response, error } = await batchUpdateZuoraAccounts({
+		const response = await batchUpdateZuoraAccounts({
 			zuoraClient,
 			accountRows: batch,
 		});
 
-		results.push(
-			...batch.map((item, index) => ({
-				id: item.Zuora__Zuora_Id__c,
-				result: response ? response[index] : error,
-			})),
-		);
+		results.push(...response);
 	}
 
 	return results;
