@@ -273,11 +273,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const newMap = new Map(this, 'newMap', {
 			maxConcurrency: 1,
 			itemsPath: '$.ResultFiles.SUCCEEDED',
-			// parameters: {
-			// 	'filePath.$': '$.filePath',
-			// 	'numberOfRecords.$': '$.numberOfRecords',
-			// 	'batchIndex.$': '$$.Map.Item.Value',
-			// },
+			parameters: {
+				'input.$': JsonPath.stringToJson(
+					JsonPath.stringAt('$$.Map.Item.Value.Items.Input'),
+				),
+				'output.$': JsonPath.stringToJson(
+					JsonPath.stringAt('$$.Map.Item.Value.Items.Output'),
+				),
+			},
 		}).iterator(
 			new CustomState(this, 'testtest', {
 				stateJson: {
@@ -287,7 +290,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						Resource: 'arn:aws:states:::s3:getObject',
 						ReaderConfig: {
 							InputType: 'JSON',
-							// CSVHeaderLocation: 'FIRST_ROW',
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
