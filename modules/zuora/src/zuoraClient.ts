@@ -10,6 +10,7 @@ export class ZuoraError extends Error {
 		public code: number,
 	) {
 		super(message);
+		this.code = code;
 		this.name = 'ZuoraError';
 	}
 }

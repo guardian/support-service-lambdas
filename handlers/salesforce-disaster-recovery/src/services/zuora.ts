@@ -19,11 +19,13 @@ export const batchUpdateZuoraAccounts = async ({
 		const response = await actionUpdate(
 			zuoraClient,
 			JSON.stringify({
-				objects: accountRows.map((row) => ({
-					Id: row.Zuora__Zuora_Id__c,
-					CrmId: row.Zuora__Account__c,
-					sfContactId__c: row.Contact__c,
-				})),
+				objects: accountRows
+					.filter((row) => row.Zuora__Zuora_Id__c)
+					.map((row) => ({
+						Id: row.Zuora__Zuora_Id__c,
+						CrmId: row.Zuora__Account__c,
+						sfContactId__c: row.Contact__c,
+					})),
 				type: 'Account',
 			}),
 		);
