@@ -236,6 +236,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 										MaxAttempts: 6,
 										BackoffRate: 2,
 									},
+									// {
+									// 	ErrorEquals:[]
+									// }
 								],
 								End: true,
 							},
@@ -267,18 +270,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		// const test2 = new CustomState(this, 'Test2', {
-		// 	stateJson: {
-		// 		Type: 'Task',
-		// 		Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
-		// 		Parameters: {
-		// 			Bucket: bucket.bucketName,
-		// 			Key: '2024-03-04T12:45:30.173Z/912e4a4d-349f-43ce-b350-d3fd59d2c4a7/manifest.json',
-		// 		},
-		// 		OutputPath: '$.Body',
-		// 	},
-		// });
-
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -301,8 +292,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 			},
 		);
-		console.log(stateMachine.stateMachineArn);
-		console.log(stateMachine.stateMachineName);
 
 		stateMachine.role.attachInlinePolicy(
 			new Policy(this, 'SalesforceApiHttpInvoke', {
