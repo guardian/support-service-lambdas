@@ -270,11 +270,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const processMapResult = new Map(this, 'ProcessMapResult', {
+		const processMapResult = new Map(this, 'ProcessMapResultFiles', {
 			maxConcurrency: 1,
 			itemsPath: '$.ResultFiles.SUCCEEDED',
 		}).iterator(
-			new CustomState(this, 'IsolateBusinessLogicErrors', {
+			new CustomState(this, 'ProcessFilesInDistributedMap', {
 				stateJson: {
 					Type: 'Map',
 					MaxConcurrency: 1,
@@ -288,27 +288,35 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'Key.$': '$.Key',
 						},
 					},
-					ItemSelector: {
-						'input.$': JsonPath.stringToJson(
-							JsonPath.stringAt('$$.Map.Item.Value.Items.Input'),
-						),
-						'output.$': JsonPath.stringToJson(
-							JsonPath.stringAt('$$.Map.Item.Value.Items.Output'),
-						),
-					},
 					ItemBatcher: {
 						MaxItemsPerBatch: 1,
+					},
+					ResultPath: {
+						'input.$': JsonPath.stringToJson(
+							JsonPath.stringAt('$.Items.Input'),
+						),
+						'output.$': JsonPath.stringToJson(
+							JsonPath.stringAt('$.Items.Output'),
+						),
 					},
 					ItemProcessor: {
 						ProcessorConfig: {
 							Mode: 'DISTRIBUTED',
 							ExecutionType: 'STANDARD',
 						},
-						StartAt: 'TestState1',
+						StartAt: 'IsolateAccountsWithBusinessLogicErrors',
 						States: {
-							TestState1: {
+							IsolateAccountsWithBusinessLogicErrors: {
 								Type: 'Pass',
 								End: true,
+								// Parameters: {
+								// 	'input.$': JsonPath.stringToJson(
+								// 		JsonPath.stringAt('$.Items.Input'),
+								// 	),
+								// 	'output.$': JsonPath.stringToJson(
+								// 		JsonPath.stringAt('$.Items.Output'),
+								// 	),
+								// },
 							},
 						},
 					},
