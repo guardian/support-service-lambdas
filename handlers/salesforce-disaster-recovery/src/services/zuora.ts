@@ -1,5 +1,5 @@
 import { actionUpdate } from '@modules/zuora/actionUpdate';
-import { ZuoraError, type ZuoraClient } from '@modules/zuora/zuoraClient';
+import { type ZuoraClient, ZuoraError } from '@modules/zuora/zuoraClient';
 
 export interface AccountRow {
 	Id: string;
