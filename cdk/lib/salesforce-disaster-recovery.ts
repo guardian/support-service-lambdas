@@ -236,9 +236,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 										MaxAttempts: 6,
 										BackoffRate: 2,
 									},
-									// {
-									// 	ErrorEquals:[]
-									// }
+									{
+										ErrorEquals: ['States.TaskFailed'],
+										IntervalSeconds: 2,
+										MaxAttempts: 6,
+										BackoffRate: 2,
+										// Comment: 'Some interesting comments about the field',
+									},
 								],
 								End: true,
 							},
