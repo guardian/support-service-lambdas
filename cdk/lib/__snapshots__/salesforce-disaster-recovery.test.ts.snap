@@ -366,7 +366,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$.Key"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ResultPath":{"input.$":"States.StringToJson($.Items.Input)","output.$":"States.StringToJson($.Items.Output)"},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"IsolateAccountsWithBusinessLogicErrors","States":{"IsolateAccountsWithBusinessLogicErrors":{"Type":"Pass","End":true}}}}}},"ItemsPath":"$.ResultFiles.SUCCEEDED","MaxConcurrency":1}}}",
+              "","Key.$":"$.Key"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"IsolateAccountsWithBusinessLogicErrors","States":{"IsolateAccountsWithBusinessLogicErrors":{"Type":"Pass","End":true,"Parameters":{"input.$":"States.StringToJson($.Items.Input)","output.$":"States.StringToJson($.Items.Output)"}}}}}}},"ItemsPath":"$.ResultFiles.SUCCEEDED","MaxConcurrency":1}}}",
             ],
           ],
         },
@@ -1336,7 +1336,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$.Key"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ResultPath":{"input.$":"States.StringToJson($.Items.Input)","output.$":"States.StringToJson($.Items.Output)"},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"IsolateAccountsWithBusinessLogicErrors","States":{"IsolateAccountsWithBusinessLogicErrors":{"Type":"Pass","End":true}}}}}},"ItemsPath":"$.ResultFiles.SUCCEEDED","MaxConcurrency":1}}}",
+              "","Key.$":"$.Key"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"IsolateAccountsWithBusinessLogicErrors","States":{"IsolateAccountsWithBusinessLogicErrors":{"Type":"Pass","End":true,"Parameters":{"input.$":"States.StringToJson($.Items.Input)","output.$":"States.StringToJson($.Items.Output)"}}}}}}},"ItemsPath":"$.ResultFiles.SUCCEEDED","MaxConcurrency":1}}}",
             ],
           ],
         },

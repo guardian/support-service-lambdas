@@ -291,14 +291,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 					ItemBatcher: {
 						MaxItemsPerBatch: 1,
 					},
-					ResultPath: {
-						'input.$': JsonPath.stringToJson(
-							JsonPath.stringAt('$.Items.Input'),
-						),
-						'output.$': JsonPath.stringToJson(
-							JsonPath.stringAt('$.Items.Output'),
-						),
-					},
 					ItemProcessor: {
 						ProcessorConfig: {
 							Mode: 'DISTRIBUTED',
@@ -309,14 +301,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 							IsolateAccountsWithBusinessLogicErrors: {
 								Type: 'Pass',
 								End: true,
-								// Parameters: {
-								// 	'input.$': JsonPath.stringToJson(
-								// 		JsonPath.stringAt('$.Items.Input'),
-								// 	),
-								// 	'output.$': JsonPath.stringToJson(
-								// 		JsonPath.stringAt('$.Items.Output'),
-								// 	),
-								// },
+								Parameters: {
+									'input.$': JsonPath.stringToJson(
+										JsonPath.stringAt('$.Items.Input'),
+									),
+									'output.$': JsonPath.stringToJson(
+										JsonPath.stringAt('$.Items.Output'),
+									),
+								},
 							},
 						},
 					},
