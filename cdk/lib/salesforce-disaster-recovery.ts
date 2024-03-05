@@ -14,6 +14,8 @@ import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
+	Map,
+	Pass,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -237,13 +239,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 										MaxAttempts: 6,
 										BackoffRate: 2,
 									},
-									// {
-									// 	ErrorEquals: ['States.TaskFailed'],
-									// 	IntervalSeconds: 2,
-									// 	MaxAttempts: 6,
-									// 	BackoffRate: 2,
-									// 	// Comment: 'Some interesting comments about the field',
-									// },
 								],
 								End: true,
 							},
@@ -275,6 +270,112 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
+		const newMap = new Map(this, 'newMap', {
+			maxConcurrency: 1,
+			itemsPath: '$.ResultFiles.SUCCEEDED',
+			// parameters: {
+			// 	'filePath.$': '$.filePath',
+			// 	'numberOfRecords.$': '$.numberOfRecords',
+			// 	'batchIndex.$': '$$.Map.Item.Value',
+			// },
+		}).iterator(
+			new CustomState(this, 'testtest', {
+				stateJson: {
+					Type: 'Map',
+					MaxConcurrency: 1,
+					ItemReader: {
+						Resource: 'arn:aws:states:::s3:getObject',
+						ReaderConfig: {
+							InputType: 'JSON',
+							// CSVHeaderLocation: 'FIRST_ROW',
+						},
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Key.$': '$.Key',
+						},
+					},
+					ItemBatcher: {
+						MaxItemsPerBatch: 1,
+					},
+					ItemProcessor: {
+						ProcessorConfig: {
+							Mode: 'DISTRIBUTED',
+							ExecutionType: 'STANDARD',
+						},
+						StartAt: 'TestState1',
+						States: {
+							TestState1: {
+								Type: 'Pass',
+								End: true,
+							},
+						},
+						// StartAt: 'UpdateZuoraAccounts',
+						// States: {
+						// 	UpdateZuoraAccounts: {
+						// 		Type: 'Task',
+						// 		Resource: 'arn:aws:states:::lambda:invoke',
+						// 		OutputPath: '$.Payload',
+						// 		Parameters: {
+						// 			'Payload.$': '$',
+						// 			FunctionName: updateZuoraAccountsLambda.functionArn,
+						// 		},
+						// 		Retry: [
+						// 			{
+						// 				ErrorEquals: [
+						// 					'Lambda.ServiceException',
+						// 					'Lambda.AWSLambdaException',
+						// 					'Lambda.SdkClientException',
+						// 					'Lambda.TooManyRequestsException',
+						// 				],
+						// 				IntervalSeconds: 2,
+						// 				MaxAttempts: 6,
+						// 				BackoffRate: 2,
+						// 			},
+						// 		],
+						// 		End: true,
+						// 	},
+						// },
+					},
+					// ResultWriter: {
+					// 	Resource: 'arn:aws:states:::s3:putObject',
+					// 	Parameters: {
+					// 		Bucket: bucket.bucketName,
+					// 		'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
+					// 	},
+					// },
+				},
+			}),
+			// new LambdaInvoke(this, 'UpdateZuoraAccounts', {
+			// 	lambdaFunction: new GuLambdaFunction(
+			// 		this,
+			// 		'UpdateZuoraAccountsLambda',
+			// 		{
+			// 			...lambdaDefaultConfig,
+			// 			timeout: Duration.minutes(15),
+			// 			memorySize: 10240,
+			// 			handler: 'updateZuoraAccounts.handler',
+			// 			functionName: `update-zuora-accounts-${this.stage}`,
+			// 			environment: {
+			// 				...lambdaDefaultConfig.environment,
+			// 				S3_BUCKET: bucket.bucketName,
+			// 			},
+			// 			initialPolicy: [
+			// 				new PolicyStatement({
+			// 					actions: ['secretsmanager:GetSecretValue'],
+			// 					resources: [
+			// 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+			// 					],
+			// 				}),
+			// 				new PolicyStatement({
+			// 					actions: ['s3:GetObject'],
+			// 					resources: [bucket.arnForObjects('*')],
+			// 				}),
+			// 			],
+			// 		},
+			// 	),
+			// }),
+		);
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -289,7 +390,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap.next(getMapResult),
+										processCsvInDistributedMap.next(getMapResult).next(newMap),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
