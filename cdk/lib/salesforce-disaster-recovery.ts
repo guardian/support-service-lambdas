@@ -282,6 +282,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						memorySize: 10240,
 						handler: 'saveFailedAccountUpdatesToS3.handler',
 						functionName: `save-failed-account-updates-to-s3-${this.stage}`,
+						environment: {
+							...lambdaDefaultConfig.environment,
+							S3_BUCKET: bucket.bucketName,
+						},
 					},
 				),
 				payload: TaskInput.fromObject({
@@ -289,52 +293,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				}),
 			},
 		);
-
-		// const processMapResult = new Map(this, 'ProcessMapResultFiles', {
-		// 	maxConcurrency: 1,
-		// 	itemsPath: '$.ResultFiles.SUCCEEDED',
-		// }).iterator(
-		// 	new CustomState(this, 'ProcessFilesInDistributedMap', {
-		// 		stateJson: {
-		// 			Type: 'Map',
-		// 			MaxConcurrency: 1,
-		// 			ItemReader: {
-		// 				Resource: 'arn:aws:states:::s3:getObject',
-		// 				ReaderConfig: {
-		// 					InputType: 'JSON',
-		// 				},
-		// 				Parameters: {
-		// 					Bucket: bucket.bucketName,
-		// 					'Key.$': '$.Key',
-		// 				},
-		// 			},
-		// 			ItemBatcher: {
-		// 				MaxItemsPerBatch: 1,
-		// 			},
-		// 			ItemProcessor: {
-		// 				ProcessorConfig: {
-		// 					Mode: 'DISTRIBUTED',
-		// 					ExecutionType: 'STANDARD',
-		// 				},
-		// 				StartAt: 'FilterAccountsWithBusinessLogicErrors',
-		// 				States: {
-		// 					FilterAccountsWithBusinessLogicErrors: {
-		// 						Type: 'Pass',
-		// 						Parameters: {
-		// 							'input.$': JsonPath.stringToJson(
-		// 								JsonPath.stringAt('$.Items[0].Input'),
-		// 							),
-		// 							'output.$': JsonPath.stringToJson(
-		// 								JsonPath.stringAt('$.Items[0].Output'),
-		// 							),
-		// 						},
-		// 						End: true,
-		// 					},
-		// 				},
-		// 			},
-		// 		},
-		// 	}),
-		// );
 
 		const stateMachine = new StateMachine(
 			this,

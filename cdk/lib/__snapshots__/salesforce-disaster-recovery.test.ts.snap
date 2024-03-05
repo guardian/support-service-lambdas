@@ -533,6 +533,9 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
+            "S3_BUCKET": {
+              "Ref": "Bucket83908E77",
+            },
             "STACK": "membership",
             "STAGE": "CODE",
           },
@@ -1745,6 +1748,9 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
+            "S3_BUCKET": {
+              "Ref": "Bucket83908E77",
+            },
             "STACK": "membership",
             "STAGE": "PROD",
           },
