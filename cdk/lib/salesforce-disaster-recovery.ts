@@ -255,146 +255,102 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const testManifest = new CustomState(this, 'TestManifest', {
+		const getMapResult = new CustomState(this, 'GetMapResult', {
 			stateJson: {
-				Type: 'Map',
-				MaxConcurrency: 1,
-				ItemReader: {
-					Resource: 'arn:aws:states:::s3:getObject',
-					ReaderConfig: {
-						InputType: 'MANIFEST',
-					},
-					Parameters: {
-						Bucket: bucket.bucketName,
-						'Key.$': '$.ResultWriterDetails.Key',
-					},
+				Type: 'Task',
+				Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
+				Parameters: {
+					'Bucket.$': JsonPath.stringAt('$.ResultWriterDetails.Bucket'),
+					'Key.$': JsonPath.stringAt('$.ResultWriterDetails.Key'),
 				},
-				ItemBatcher: {
-					MaxItemsPerBatch: 1,
+				ResultSelector: {
+					'Payload.$': JsonPath.stringToJson(JsonPath.stringAt('$.Body')),
 				},
-				ItemProcessor: {
-					ProcessorConfig: {
-						Mode: 'DISTRIBUTED',
-						ExecutionType: 'STANDARD',
-					},
-					StartAt: 'FilterAccountsWithBusinessLogicErrors',
-					States: {
-						FilterAccountsWithBusinessLogicErrors: {
-							Type: 'Pass',
-							// Parameters: {
-							// 	'input.$': JsonPath.stringToJson(
-							// 		JsonPath.stringAt('$.Items[0].Input'),
-							// 	),
-							// 	'output.$': JsonPath.stringToJson(
-							// 		JsonPath.stringAt('$.Items[0].Output'),
-							// 	),
-							// },
-							End: true,
-						},
-					},
-				},
-				// ItemProcessor: {
-				// 	ProcessorConfig: {
-				// 		Mode: 'DISTRIBUTED',
-				// 		ExecutionType: 'STANDARD',
-				// 	},
-				// 	StartAt: 'UpdateZuoraAccounts',
-				// 	States: {
-				// 		UpdateZuoraAccounts: {
-				// 			Type: 'Task',
-				// 			Resource: 'arn:aws:states:::lambda:invoke',
-				// 			OutputPath: '$.Payload',
-				// 			Parameters: {
-				// 				'Payload.$': '$',
-				// 				FunctionName: updateZuoraAccountsLambda.functionArn,
-				// 			},
-				// 			Retry: [
-				// 				{
-				// 					ErrorEquals: [
-				// 						'Lambda.ServiceException',
-				// 						'Lambda.AWSLambdaException',
-				// 						'Lambda.SdkClientException',
-				// 						'Lambda.TooManyRequestsException',
-				// 					],
-				// 					IntervalSeconds: 2,
-				// 					MaxAttempts: 6,
-				// 					BackoffRate: 2,
-				// 				},
-				// 			],
-				// 			End: true,
-				// 		},
-				// 	},
-				// },
-				// ResultWriter: {
-				// 	Resource: 'arn:aws:states:::s3:putObject',
-				// 	Parameters: {
-				// 		Bucket: bucket.bucketName,
-				// 		'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
-				// 	},
-				// },
+				OutputPath: '$.Payload',
 			},
 		});
 
-		// const getMapResult = new CustomState(this, 'GetMapResult', {
-		// 	stateJson: {
-		// 		Type: 'Task',
-		// 		Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
-		// 		Parameters: {
-		// 			'Bucket.$': JsonPath.stringAt('$.ResultWriterDetails.Bucket'),
-		// 			'Key.$': JsonPath.stringAt('$.ResultWriterDetails.Key'),
-		// 		},
-		// 		ResultSelector: {
-		// 			'Payload.$': JsonPath.stringToJson(JsonPath.stringAt('$.Body')),
-		// 		},
-		// 		OutputPath: '$.Payload',
-		// 	},
-		// });
-
-		// const processMapResult = new Map(this, 'ProcessMapResultFiles', {
-		// 	maxConcurrency: 1,
-		// 	itemsPath: '$.ResultFiles.SUCCEEDED',
-		// }).iterator(
-		// 	new CustomState(this, 'ProcessFilesInDistributedMap', {
-		// 		stateJson: {
-		// 			Type: 'Map',
-		// 			MaxConcurrency: 1,
-		// 			ItemReader: {
-		// 				Resource: 'arn:aws:states:::s3:getObject',
-		// 				ReaderConfig: {
-		// 					InputType: 'JSON',
-		// 				},
-		// 				Parameters: {
-		// 					Bucket: bucket.bucketName,
-		// 					'Key.$': '$.Key',
-		// 				},
-		// 			},
-		// 			ItemBatcher: {
-		// 				MaxItemsPerBatch: 1,
-		// 			},
-		// 			ItemProcessor: {
-		// 				ProcessorConfig: {
-		// 					Mode: 'DISTRIBUTED',
-		// 					ExecutionType: 'STANDARD',
-		// 				},
-		// 				StartAt: 'FilterAccountsWithBusinessLogicErrors',
-		// 				States: {
-		// 					FilterAccountsWithBusinessLogicErrors: {
-		// 						Type: 'Pass',
-		// 						Parameters: {
-		// 							'input.$': JsonPath.stringToJson(
-		// 								JsonPath.stringAt('$.Items[0].Input'),
-		// 							),
-		// 							'output.$': JsonPath.stringToJson(
-		// 								JsonPath.stringAt('$.Items[0].Output'),
-		// 							),
-		// 						},
-		// 						End: true,
-		// 					},
-		// 				},
-		// 			},
-		// 		},
-		// 	}),
-		// );
+		const processMapResult = new Map(this, 'ProcessMapResultFiles', {
+			maxConcurrency: 1,
+			itemsPath: '$.ResultFiles.SUCCEEDED',
+		}).iterator(
+			new CustomState(this, 'ProcessFilesInDistributedMap', {
+				stateJson: {
+					Type: 'Map',
+					MaxConcurrency: 1,
+					ItemReader: {
+						Resource: 'arn:aws:states:::s3:getObject',
+						ReaderConfig: {
+							InputType: 'JSON',
+						},
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Key.$': '$.Key',
+						},
+					},
+					ItemBatcher: {
+						MaxItemsPerBatch: 1,
+					},
+					ItemProcessor: {
+						ProcessorConfig: {
+							Mode: 'DISTRIBUTED',
+							ExecutionType: 'STANDARD',
+						},
+						StartAt: 'FilterAccountsWithBusinessLogicErrors',
+						States: {
+							FilterAccountsWithBusinessLogicErrors: {
+								Type: 'Pass',
+								Parameters: {
+									'input.$': JsonPath.stringToJson(
+										JsonPath.stringAt('$.Items[0].Input'),
+									),
+									'output.$': JsonPath.stringToJson(
+										JsonPath.stringAt('$.Items[0].Output'),
+									),
+								},
+								End: true,
+							},
+						},
+					},
+					// ResultWriter: {
+					// 	Resource: 'arn:aws:states:::s3:putObject',
+					// 	Parameters: {
+					// 		Bucket: bucket.bucketName,
+					// 		'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
+					// 	},
+					// },
+				},
+			}),
+			// new LambdaInvoke(this, 'UpdateZuoraAccounts', {
+			// 	lambdaFunction: new GuLambdaFunction(
+			// 		this,
+			// 		'UpdateZuoraAccountsLambda',
+			// 		{
+			// 			...lambdaDefaultConfig,
+			// 			timeout: Duration.minutes(15),
+			// 			memorySize: 10240,
+			// 			handler: 'updateZuoraAccounts.handler',
+			// 			functionName: `update-zuora-accounts-${this.stage}`,
+			// 			environment: {
+			// 				...lambdaDefaultConfig.environment,
+			// 				S3_BUCKET: bucket.bucketName,
+			// 			},
+			// 			initialPolicy: [
+			// 				new PolicyStatement({
+			// 					actions: ['secretsmanager:GetSecretValue'],
+			// 					resources: [
+			// 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+			// 					],
+			// 				}),
+			// 				new PolicyStatement({
+			// 					actions: ['s3:GetObject'],
+			// 					resources: [bucket.arnForObjects('*')],
+			// 				}),
+			// 			],
+			// 		},
+			// 	),
+			// }),
+		);
 
 		const stateMachine = new StateMachine(
 			this,
@@ -410,9 +366,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap.next(testManifest),
-										// .next(getMapResult)
-										// .next(processMapResult),
+										processCsvInDistributedMap
+											.next(getMapResult)
+											.next(processMapResult),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
