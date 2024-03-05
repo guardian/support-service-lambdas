@@ -10,7 +10,6 @@ export class ZuoraError extends Error {
 		public code: number,
 	) {
 		super(message);
-		// this.code = code;
 	}
 }
 
@@ -74,7 +73,9 @@ export class ZuoraClient {
 		if (response.ok) {
 			return schema.parse(json);
 		} else {
-			// console.log(response.headers.get('RateLimit-Reset'));
+			if (response.status === 429) {
+				console.log(response.headers);
+			}
 			throw new ZuoraError(response.statusText, response.status);
 		}
 	}
