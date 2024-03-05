@@ -11,7 +11,6 @@ export class ZuoraError extends Error {
 	) {
 		super(message);
 		this.name = 'ZuoraError';
-		this.code = code;
 	}
 }
 
