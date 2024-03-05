@@ -11,11 +11,10 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
 
-	const rows = event.Items.filter((item) => item.Zuora__Zuora_Id__c);
 	const results = [];
 
-	for (let i = 0; i < rows.length; i += 50) {
-		const batch = rows.slice(i, i + 50);
+	for (let i = 0; i < event.Items.length; i += 50) {
+		const batch = event.Items.slice(i, i + 50);
 
 		const { response, error } = await batchUpdateZuoraAccounts({
 			zuoraClient,
