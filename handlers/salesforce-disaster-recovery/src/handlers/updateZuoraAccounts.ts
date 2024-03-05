@@ -1,14 +1,8 @@
 import { type Stage } from '@modules/stage';
-import { ZuoraClient, ZuoraError } from '@modules/zuora/zuoraClient';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { type AccountRow, batchUpdateZuoraAccounts } from '../services';
 
 export const handler = async (event: { Items: AccountRow[] }) => {
-	const rand = Math.random();
-
-	if (rand < 0.5) {
-		throw new ZuoraError('too many requests', 429);
-	}
-
 	const stage = process.env.STAGE;
 
 	if (!stage) {
