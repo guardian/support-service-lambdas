@@ -74,6 +74,7 @@ export class ZuoraClient {
 		if (response.ok) {
 			return schema.parse(json);
 		} else {
+			// console.log(response.headers.get('RateLimit-Reset'));
 			throw new ZuoraError(response.statusText, response.status);
 		}
 	}
