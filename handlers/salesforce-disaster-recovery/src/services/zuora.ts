@@ -1,5 +1,5 @@
 import { actionUpdate } from '@modules/zuora/actionUpdate';
-import { type ZuoraClient, type ZuoraError } from '@modules/zuora/zuoraClient';
+import { ZuoraError, type ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export interface AccountRow {
 	Id: string;
@@ -33,12 +33,11 @@ export const batchUpdateZuoraAccounts = async ({
 		return { response };
 	} catch (error) {
 		console.error(error);
-		const zuoraError = error as ZuoraError;
 
-		if (zuoraError.code === 429) {
+		if (error instanceof ZuoraError && error.code === 429) {
 			throw error;
 		}
 
-		return { error: zuoraError };
+		return { error };
 	}
 };
