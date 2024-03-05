@@ -286,6 +286,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 							...lambdaDefaultConfig.environment,
 							S3_BUCKET: bucket.bucketName,
 						},
+						initialPolicy: [
+							new PolicyStatement({
+								actions: ['s3:GetObject', 's3:PutObject'],
+								resources: [bucket.arnForObjects('*')],
+							}),
+						],
 					},
 				),
 				payload: TaskInput.fromObject({
