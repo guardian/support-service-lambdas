@@ -296,19 +296,19 @@ export class SalesforceDisasterRecovery extends GuStack {
 							Mode: 'DISTRIBUTED',
 							ExecutionType: 'STANDARD',
 						},
-						StartAt: 'IsolateAccountsWithBusinessLogicErrors',
+						StartAt: 'FilterAccountsWithBusinessLogicErrors',
 						States: {
-							IsolateAccountsWithBusinessLogicErrors: {
+							FilterAccountsWithBusinessLogicErrors: {
 								Type: 'Pass',
-								End: true,
 								Parameters: {
 									'input.$': JsonPath.stringToJson(
-										JsonPath.stringAt('$.Items.Input'),
+										JsonPath.stringAt('$.Items[0].Input'),
 									),
 									'output.$': JsonPath.stringToJson(
-										JsonPath.stringAt('$.Items.Output'),
+										JsonPath.stringAt('$.Items[0].Output'),
 									),
 								},
+								End: true,
 							},
 						},
 					},
