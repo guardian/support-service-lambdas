@@ -289,7 +289,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 					},
 				),
 				payload: TaskInput.fromObject({
-					resultFiles: '$.ResultFiles.SUCCEEDED',
+					// resultFiles: '$.ResultFiles.SUCCEEDED',
+					'resultFiles.$': '$.ResultFiles.SUCCEEDED[0:]',
 				}),
 			},
 		);
