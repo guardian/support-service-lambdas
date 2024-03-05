@@ -7,6 +7,7 @@ import {
 export const handler = async (event: {
 	resultFiles: Array<{ Key: string; Size: number }>;
 }) => {
+	console.log(event);
 	const bucketName = process.env.S3_BUCKET;
 
 	if (!bucketName) {
@@ -16,6 +17,7 @@ export const handler = async (event: {
 	const failures: BatchUpdateZuoraAccountsResponse[] = [];
 
 	for (const file of event.resultFiles) {
+		console.log(file);
 		const fileString = await getFileFromS3({
 			bucketName,
 			filePath: file.Key,
