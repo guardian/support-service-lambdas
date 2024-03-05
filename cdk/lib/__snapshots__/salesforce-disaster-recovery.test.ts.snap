@@ -362,11 +362,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"newMap","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"newMap":{"Type":"Map","End":true,"Parameters":{"input.$.$":"States.StringToJson($$.Map.Item.Value.Items.Input)","output.$.$":"States.StringToJson($$.Map.Item.Value.Items.Output)"},"Iterator":{"StartAt":"testtest","States":{"testtest":{"End":true,"Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"JSON"},"Parameters":{"Bucket":"",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"ProcessMapResult","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"ProcessMapResult":{"Type":"Map","End":true,"Iterator":{"StartAt":"IsolateBusinessLogicErrors","States":{"IsolateBusinessLogicErrors":{"End":true,"Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"JSON"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$.Key"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"TestState1","States":{"TestState1":{"Type":"Pass","End":true}}}}}},"ItemsPath":"$.ResultFiles.SUCCEEDED","MaxConcurrency":1}}}",
+              "","Key.$":"$.Key"}},"ItemSelector":{"input.$":"States.StringToJson($$.Map.Item.Value.Items.Input)","output.$":"States.StringToJson($$.Map.Item.Value.Items.Output)"},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"TestState1","States":{"TestState1":{"Type":"Pass","End":true}}}}}},"ItemsPath":"$.ResultFiles.SUCCEEDED","MaxConcurrency":1}}}",
             ],
           ],
         },
@@ -1332,11 +1332,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"newMap","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"newMap":{"Type":"Map","End":true,"Parameters":{"input.$.$":"States.StringToJson($$.Map.Item.Value.Items.Input)","output.$.$":"States.StringToJson($$.Map.Item.Value.Items.Output)"},"Iterator":{"StartAt":"testtest","States":{"testtest":{"End":true,"Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"JSON"},"Parameters":{"Bucket":"",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"ProcessMapResult","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"ProcessMapResult":{"Type":"Map","End":true,"Iterator":{"StartAt":"IsolateBusinessLogicErrors","States":{"IsolateBusinessLogicErrors":{"End":true,"Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"JSON"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$.Key"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"TestState1","States":{"TestState1":{"Type":"Pass","End":true}}}}}},"ItemsPath":"$.ResultFiles.SUCCEEDED","MaxConcurrency":1}}}",
+              "","Key.$":"$.Key"}},"ItemSelector":{"input.$":"States.StringToJson($$.Map.Item.Value.Items.Input)","output.$":"States.StringToJson($$.Map.Item.Value.Items.Output)"},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"TestState1","States":{"TestState1":{"Type":"Pass","End":true}}}}}},"ItemsPath":"$.ResultFiles.SUCCEEDED","MaxConcurrency":1}}}",
             ],
           ],
         },

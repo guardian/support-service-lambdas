@@ -270,19 +270,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const newMap = new Map(this, 'newMap', {
+		const processMapResult = new Map(this, 'ProcessMapResult', {
 			maxConcurrency: 1,
 			itemsPath: '$.ResultFiles.SUCCEEDED',
-			parameters: {
-				'input.$': JsonPath.stringToJson(
-					JsonPath.stringAt('$$.Map.Item.Value.Items.Input'),
-				),
-				'output.$': JsonPath.stringToJson(
-					JsonPath.stringAt('$$.Map.Item.Value.Items.Output'),
-				),
-			},
 		}).iterator(
-			new CustomState(this, 'testtest', {
+			new CustomState(this, 'IsolateBusinessLogicErrors', {
 				stateJson: {
 					Type: 'Map',
 					MaxConcurrency: 1,
@@ -295,6 +287,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 							Bucket: bucket.bucketName,
 							'Key.$': '$.Key',
 						},
+					},
+					ItemSelector: {
+						'input.$': JsonPath.stringToJson(
+							JsonPath.stringAt('$$.Map.Item.Value.Items.Input'),
+						),
+						'output.$': JsonPath.stringToJson(
+							JsonPath.stringAt('$$.Map.Item.Value.Items.Output'),
+						),
 					},
 					ItemBatcher: {
 						MaxItemsPerBatch: 1,
@@ -311,32 +311,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 								End: true,
 							},
 						},
-						// StartAt: 'UpdateZuoraAccounts',
-						// States: {
-						// 	UpdateZuoraAccounts: {
-						// 		Type: 'Task',
-						// 		Resource: 'arn:aws:states:::lambda:invoke',
-						// 		OutputPath: '$.Payload',
-						// 		Parameters: {
-						// 			'Payload.$': '$',
-						// 			FunctionName: updateZuoraAccountsLambda.functionArn,
-						// 		},
-						// 		Retry: [
-						// 			{
-						// 				ErrorEquals: [
-						// 					'Lambda.ServiceException',
-						// 					'Lambda.AWSLambdaException',
-						// 					'Lambda.SdkClientException',
-						// 					'Lambda.TooManyRequestsException',
-						// 				],
-						// 				IntervalSeconds: 2,
-						// 				MaxAttempts: 6,
-						// 				BackoffRate: 2,
-						// 			},
-						// 		],
-						// 		End: true,
-						// 	},
-						// },
 					},
 					// ResultWriter: {
 					// 	Resource: 'arn:aws:states:::s3:putObject',
@@ -392,7 +366,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap.next(getMapResult).next(newMap),
+										processCsvInDistributedMap
+											.next(getMapResult)
+											.next(processMapResult),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
