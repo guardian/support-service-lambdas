@@ -14,8 +14,6 @@ import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
-	// Map,
-	// Pass,
 	StateMachine,
 	TaskInput,
 	Wait,
