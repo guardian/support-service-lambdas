@@ -24,17 +24,26 @@ export const handler = async (event: {
 		});
 		console.log(fileString);
 
+		// const fileContent = JSON.parse(fileString) as Array<{
+		// 	Input: { Items: AccountRow[] };
+		// 	Output: BatchUpdateZuoraAccountsResponse[];
+		// }>;
+
 		const fileContent = JSON.parse(fileString) as Array<{
-			Input: { Items: AccountRow[] };
-			Output: BatchUpdateZuoraAccountsResponse[];
+			Input: string;
+			Output: string;
 		}>;
+
 		console.log(fileContent);
 		console.log(typeof fileContent[0]?.Input);
 		console.log(typeof fileContent[0]?.Output);
 
 		for (const batch of fileContent) {
-			console.log(batch);
-			failures.push(...batch.Output.filter((item) => !item.success));
+			const results = JSON.parse(
+				batch.Output,
+			) as BatchUpdateZuoraAccountsResponse[];
+
+			failures.push(...results.filter((item) => !item.success));
 		}
 
 		console.log(fileContent);
