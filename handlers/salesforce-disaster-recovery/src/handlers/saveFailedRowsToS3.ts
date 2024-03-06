@@ -17,7 +17,7 @@ export const handler = async (event: {
 		throw new Error('Environment variables not set');
 	}
 
-	const failedUpdates: AccountRowResult[] = [];
+	const failedRows: AccountRowResult[] = [];
 
 	for (const file of resultFiles) {
 		const fileString = await getFileFromS3({
@@ -29,15 +29,15 @@ export const handler = async (event: {
 
 		for (const batch of fileContent) {
 			const output = JSON.parse(batch.Output) as AccountRowResult[];
-			const failedResults = output.filter((item) => !item.Success);
-			failedUpdates.push(...failedResults);
+			const failedResults = output.filter((row) => !row.Success);
+			failedRows.push(...failedResults);
 		}
 	}
 
 	const content = convertArrayToCsv({
-		arr: failedUpdates.map((item) => ({
-			...item,
-			Errors: JSON.stringify(item.Errors),
+		arr: failedRows.map((row) => ({
+			ZuoraAccountId: row.ZuoraAccountId,
+			Errors: JSON.stringify(row.Errors),
 		})),
 	});
 
