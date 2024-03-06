@@ -32,9 +32,16 @@ export const handler = async (event: {
 		}
 	}
 
+	const content = convertArrayToCsv({
+		arr: failedUpdates.map((item) => ({
+			...item,
+			errors: JSON.stringify(item.errors),
+		})),
+	});
+
 	await uploadFileToS3({
 		bucketName,
 		filePath: event.filePath,
-		content: convertArrayToCsv({ arr: failedUpdates }),
+		content,
 	});
 };
