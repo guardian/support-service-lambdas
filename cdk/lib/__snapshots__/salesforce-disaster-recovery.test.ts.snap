@@ -348,11 +348,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"two-rows-one-will-error.csv"}},"ItemBatcher":{"MaxItemsPerBatch":2500},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":2500},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -1584,11 +1584,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":1,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"two-rows-one-will-error.csv"}},"ItemBatcher":{"MaxItemsPerBatch":2500},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":2500},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
