@@ -1,5 +1,8 @@
-import { actionUpdate } from '@modules/zuora/actionUpdate';
-import { type ZuoraClient, ZuoraError } from '@modules/zuora/zuoraClient';
+import {
+	actionUpdate,
+	type ActionUpdateResponse,
+} from '@modules/zuora/actionUpdate';
+import { type ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export interface AccountRow {
 	Id: string;
@@ -8,19 +11,13 @@ export interface AccountRow {
 	Contact__c: string;
 }
 
-export interface BatchUpdateZuoraAccountsResponse {
-	zuoraId: string;
-	success: boolean;
-	result: unknown;
-}
-
 export const batchUpdateZuoraAccounts = async ({
 	zuoraClient,
 	accountRows,
 }: {
 	zuoraClient: ZuoraClient;
 	accountRows: AccountRow[];
-}): Promise<BatchUpdateZuoraAccountsResponse[]> => {
+}): Promise<ActionUpdateResponse> => {
 	try {
 		const response = await actionUpdate(
 			zuoraClient,
@@ -34,26 +31,20 @@ export const batchUpdateZuoraAccounts = async ({
 			}),
 		);
 
-		const formattedResponse = accountRows.map((row, index) => ({
-			zuoraId: row.Zuora__Zuora_Id__c,
-			success: response[index]?.Success ?? false,
-			result: response[index],
-		}));
-
-		return formattedResponse;
+		return response;
 	} catch (error) {
 		console.error(error);
+		throw error;
+		// if (error instanceof ZuoraError && error.code === 429) {
+		// 	throw error;
+		// }
 
-		if (error instanceof ZuoraError && error.code === 429) {
-			throw error;
-		}
+		// const formattedResponse = accountRows.map((row) => ({
+		// 	Id: row.Zuora__Zuora_Id__c,
+		// 	Success: false,
+		// 	Errors: [{ Message: '', Code: '' }],
+		// }));
 
-		const formattedResponse = accountRows.map((row) => ({
-			zuoraId: row.Zuora__Zuora_Id__c,
-			success: false,
-			result: error,
-		}));
-
-		return formattedResponse;
+		// return formattedResponse;
 	}
 };
