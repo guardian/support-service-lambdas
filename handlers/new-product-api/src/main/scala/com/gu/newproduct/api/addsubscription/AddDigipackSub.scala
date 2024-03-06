@@ -49,27 +49,21 @@ class AddDigipackSub(
     zuoraRatePlanId <- getZuoraRateplanId(request.planId)
       .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
       .toAsync
-    ratePlans = request.discountRatePlanId
+    ratePlans = List(
+      ZuoraCreateSubRequestRatePlan(
+        maybeChargeOverride = None,
+        productRatePlanId = zuoraRatePlanId,
+      ),
+    ) ++ request.discountRatePlanId
       .map(id =>
         List(
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = id,
             maybeChargeOverride = None,
           ),
-          ZuoraCreateSubRequestRatePlan(
-            maybeChargeOverride = None,
-            productRatePlanId = zuoraRatePlanId,
-          ),
         ),
       )
-      .getOrElse(
-        List(
-          ZuoraCreateSubRequestRatePlan(
-            maybeChargeOverride = None,
-            productRatePlanId = zuoraRatePlanId,
-          ),
-        ),
-      )
+      .getOrElse(Nil)
 
     createSubRequest = ZuoraCreateSubRequest(
       request = request,

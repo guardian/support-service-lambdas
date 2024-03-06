@@ -143,53 +143,25 @@ object AddGuardianWeeklySub {
           * subscription is used. This is triggered by the contractAcceptanceDate which in this case is pushed forward
           * by 6 weeks to avoid running concurrently with the 6 for 6 period
           */
-
-        ratePlans = request.discountRatePlanId
-          .map(id =>
-            List(
-              ZuoraCreateSubRequestRatePlan(
-                productRatePlanId = id,
-                maybeChargeOverride = None,
-              ),
-              ZuoraCreateSubRequestRatePlan(
-                productRatePlanId = zuora6for6RatePlanAndCharge.productRatePlanId,
-                maybeChargeOverride = Some(
-                  ChargeOverride(
-                    amountMinorUnits = None,
-                    productRatePlanChargeId = zuora6for6RatePlanAndCharge.productRatePlanChargeId,
-                    triggerDate = Some(request.startDate),
-                  ),
-                ),
-              ),
-              ZuoraCreateSubRequestRatePlan(
-                productRatePlanId = zuoraQuarterlyRatePlanId,
-                maybeChargeOverride = None,
-              ),
-            ),
-          )
-          .getOrElse(
-            List(
-              ZuoraCreateSubRequestRatePlan(
-                productRatePlanId = zuora6for6RatePlanAndCharge.productRatePlanId,
-                maybeChargeOverride = Some(
-                  ChargeOverride(
-                    amountMinorUnits = None,
-                    productRatePlanChargeId = zuora6for6RatePlanAndCharge.productRatePlanChargeId,
-                    triggerDate = Some(request.startDate),
-                  ),
-                ),
-              ),
-              ZuoraCreateSubRequestRatePlan(
-                productRatePlanId = zuoraQuarterlyRatePlanId,
-                maybeChargeOverride = None,
-              ),
-            ),
-          )
-
         createSubRequest = ZuoraCreateSubRequest(
           request = request,
           acceptanceDate = request.startDate.plusWeeks(6),
-          ratePlans = ratePlans,
+          ratePlans = List(
+            ZuoraCreateSubRequestRatePlan(
+              productRatePlanId = zuora6for6RatePlanAndCharge.productRatePlanId,
+              maybeChargeOverride = Some(
+                ChargeOverride(
+                  amountMinorUnits = None,
+                  productRatePlanChargeId = zuora6for6RatePlanAndCharge.productRatePlanChargeId,
+                  triggerDate = Some(request.startDate),
+                ),
+              ),
+            ),
+            ZuoraCreateSubRequestRatePlan(
+              productRatePlanId = zuoraQuarterlyRatePlanId,
+              maybeChargeOverride = None,
+            ),
+          ),
         )
       } yield createSubRequest
     } else {
