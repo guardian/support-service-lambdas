@@ -270,35 +270,28 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const saveFailedAccountUpdatesToS3 = new LambdaInvoke(
-			this,
-			'SaveFailedAccountUpdatesToS3',
-			{
-				lambdaFunction: new GuLambdaFunction(
-					this,
-					'SaveFailedAccountUpdatesToS3Lambda',
-					{
-						...lambdaDefaultConfig,
-						memorySize: 10240,
-						handler: 'saveFailedAccountUpdatesToS3.handler',
-						functionName: `save-failed-account-updates-to-s3-${this.stage}`,
-						environment: {
-							...lambdaDefaultConfig.environment,
-							S3_BUCKET: bucket.bucketName,
-						},
-						initialPolicy: [
-							new PolicyStatement({
-								actions: ['s3:GetObject', 's3:PutObject'],
-								resources: [bucket.arnForObjects('*')],
-							}),
-						],
-					},
-				),
-				payload: TaskInput.fromObject({
-					'resultFiles.$': '$.ResultFiles.SUCCEEDED',
-				}),
-			},
-		);
+		const saveFailedRowsToS3 = new LambdaInvoke(this, 'SaveFailedRowsToS3', {
+			lambdaFunction: new GuLambdaFunction(this, 'SaveFailedRowsToS3Lambda', {
+				...lambdaDefaultConfig,
+				memorySize: 10240,
+				handler: 'saveFailedRowsToS3.handler',
+				functionName: `save-failed-rows-to-s3-${this.stage}`,
+				environment: {
+					...lambdaDefaultConfig.environment,
+					S3_BUCKET: bucket.bucketName,
+					FAILED_ROWS_FILE_PATH: 'failed-rows.csv',
+				},
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+				],
+			}),
+			payload: TaskInput.fromObject({
+				'resultFiles.$': '$.ResultFiles.SUCCEEDED',
+			}),
+		});
 
 		const stateMachine = new StateMachine(
 			this,
@@ -316,8 +309,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 									saveSalesforceQueryResultToS3.next(
 										processCsvInDistributedMap
 											.next(getMapResult)
-											.next(saveFailedAccountUpdatesToS3),
-										// .next(processMapResult),
+											.next(saveFailedRowsToS3),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),

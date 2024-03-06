@@ -363,14 +363,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedAccountUpdatesToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedAccountUpdatesToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "SaveFailedAccountUpdatesToS3Lambda136091F6",
+                  "SaveFailedRowsToS3LambdaCBDFFBA6",
                   "Arn",
                 ],
               },
@@ -486,7 +486,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "SaveFailedAccountUpdatesToS3Lambda136091F6",
+                    "SaveFailedRowsToS3LambdaCBDFFBA6",
                     "Arn",
                   ],
                 },
@@ -496,7 +496,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "SaveFailedAccountUpdatesToS3Lambda136091F6",
+                          "SaveFailedRowsToS3LambdaCBDFFBA6",
                           "Arn",
                         ],
                       },
@@ -518,10 +518,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SaveFailedAccountUpdatesToS3Lambda136091F6": {
+    "SaveFailedRowsToS3LambdaCBDFFBA6": {
       "DependsOn": [
-        "SaveFailedAccountUpdatesToS3LambdaServiceRoleDefaultPolicy5A0704BB",
-        "SaveFailedAccountUpdatesToS3LambdaServiceRole6A143D8F",
+        "SaveFailedRowsToS3LambdaServiceRoleDefaultPolicy1999A22D",
+        "SaveFailedRowsToS3LambdaServiceRole27F3CEDA",
       ],
       "Properties": {
         "Code": {
@@ -533,6 +533,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
+            "FAILED_ROWS_FILE_PATH": "failed-rows.csv",
             "S3_BUCKET": {
               "Ref": "Bucket83908E77",
             },
@@ -540,12 +541,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "save-failed-account-updates-to-s3-CODE",
-        "Handler": "saveFailedAccountUpdatesToS3.handler",
+        "FunctionName": "save-failed-rows-to-s3-CODE",
+        "Handler": "saveFailedRowsToS3.handler",
         "MemorySize": 10240,
         "Role": {
           "Fn::GetAtt": [
-            "SaveFailedAccountUpdatesToS3LambdaServiceRole6A143D8F",
+            "SaveFailedRowsToS3LambdaServiceRole27F3CEDA",
             "Arn",
           ],
         },
@@ -576,7 +577,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SaveFailedAccountUpdatesToS3LambdaServiceRole6A143D8F": {
+    "SaveFailedRowsToS3LambdaServiceRole27F3CEDA": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -629,7 +630,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SaveFailedAccountUpdatesToS3LambdaServiceRoleDefaultPolicy5A0704BB": {
+    "SaveFailedRowsToS3LambdaServiceRoleDefaultPolicy1999A22D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -741,10 +742,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SaveFailedAccountUpdatesToS3LambdaServiceRoleDefaultPolicy5A0704BB",
+        "PolicyName": "SaveFailedRowsToS3LambdaServiceRoleDefaultPolicy1999A22D",
         "Roles": [
           {
-            "Ref": "SaveFailedAccountUpdatesToS3LambdaServiceRole6A143D8F",
+            "Ref": "SaveFailedRowsToS3LambdaServiceRole27F3CEDA",
           },
         ],
       },
@@ -1599,14 +1600,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedAccountUpdatesToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedAccountUpdatesToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "SaveFailedAccountUpdatesToS3Lambda136091F6",
+                  "SaveFailedRowsToS3LambdaCBDFFBA6",
                   "Arn",
                 ],
               },
@@ -1722,7 +1723,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "SaveFailedAccountUpdatesToS3Lambda136091F6",
+                    "SaveFailedRowsToS3LambdaCBDFFBA6",
                     "Arn",
                   ],
                 },
@@ -1732,7 +1733,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "SaveFailedAccountUpdatesToS3Lambda136091F6",
+                          "SaveFailedRowsToS3LambdaCBDFFBA6",
                           "Arn",
                         ],
                       },
@@ -1754,10 +1755,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SaveFailedAccountUpdatesToS3Lambda136091F6": {
+    "SaveFailedRowsToS3LambdaCBDFFBA6": {
       "DependsOn": [
-        "SaveFailedAccountUpdatesToS3LambdaServiceRoleDefaultPolicy5A0704BB",
-        "SaveFailedAccountUpdatesToS3LambdaServiceRole6A143D8F",
+        "SaveFailedRowsToS3LambdaServiceRoleDefaultPolicy1999A22D",
+        "SaveFailedRowsToS3LambdaServiceRole27F3CEDA",
       ],
       "Properties": {
         "Code": {
@@ -1769,6 +1770,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
+            "FAILED_ROWS_FILE_PATH": "failed-rows.csv",
             "S3_BUCKET": {
               "Ref": "Bucket83908E77",
             },
@@ -1776,12 +1778,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "save-failed-account-updates-to-s3-PROD",
-        "Handler": "saveFailedAccountUpdatesToS3.handler",
+        "FunctionName": "save-failed-rows-to-s3-PROD",
+        "Handler": "saveFailedRowsToS3.handler",
         "MemorySize": 10240,
         "Role": {
           "Fn::GetAtt": [
-            "SaveFailedAccountUpdatesToS3LambdaServiceRole6A143D8F",
+            "SaveFailedRowsToS3LambdaServiceRole27F3CEDA",
             "Arn",
           ],
         },
@@ -1812,7 +1814,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SaveFailedAccountUpdatesToS3LambdaServiceRole6A143D8F": {
+    "SaveFailedRowsToS3LambdaServiceRole27F3CEDA": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1865,7 +1867,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SaveFailedAccountUpdatesToS3LambdaServiceRoleDefaultPolicy5A0704BB": {
+    "SaveFailedRowsToS3LambdaServiceRoleDefaultPolicy1999A22D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1977,10 +1979,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SaveFailedAccountUpdatesToS3LambdaServiceRoleDefaultPolicy5A0704BB",
+        "PolicyName": "SaveFailedRowsToS3LambdaServiceRoleDefaultPolicy1999A22D",
         "Roles": [
           {
-            "Ref": "SaveFailedAccountUpdatesToS3LambdaServiceRole6A143D8F",
+            "Ref": "SaveFailedRowsToS3LambdaServiceRole27F3CEDA",
           },
         ],
       },
