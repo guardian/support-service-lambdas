@@ -1,9 +1,9 @@
 import {
 	type BatchUpdateZuoraAccountsResponse,
+	convertArrayToCsv,
 	getFileFromS3,
 	uploadFileToS3,
 } from '../services';
-import { convertArrayToCsv } from '../services/csv';
 
 export const handler = async (event: {
 	resultFiles: Array<{ Key: string; Size: number }>;
@@ -36,9 +36,10 @@ export const handler = async (event: {
 
 	const str = convertArrayToCsv({ arr: failedUpdates });
 
-	await uploadFileToS3({
+	const res = await uploadFileToS3({
 		bucketName,
 		filePath,
 		content: str,
 	});
+	console.log(res);
 };
