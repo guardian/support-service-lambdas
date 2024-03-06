@@ -8,7 +8,7 @@ import {
 
 export const handler = async (event: {
 	queryJobId: string;
-	executionStartTime: string;
+	filePath: string;
 }) => {
 	const bucketName = process.env.S3_BUCKET;
 	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
@@ -35,11 +35,7 @@ export const handler = async (event: {
 
 	await uploadFileToS3({
 		bucketName,
-		filePath: `${event.executionStartTime}/before-processing.csv`,
+		filePath: event.filePath,
 		content: csvContent,
 	});
-
-	return {
-		StatusCode: 200,
-	};
 };
