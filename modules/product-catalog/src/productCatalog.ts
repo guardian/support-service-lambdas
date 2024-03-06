@@ -41,9 +41,7 @@ type Product<P extends ProductKey> = {
 };
 
 export type ProductCatalog = {
-	products: {
-		[P in ProductKey]: Product<P>;
-	};
+	[P in ProductKey]: Product<P>;
 };
 
 export class ProductCatalogHelper {
@@ -56,10 +54,10 @@ export class ProductCatalogHelper {
 		zuoraProduct: P,
 		productRatePlan: PRP,
 	) => {
-		return this.catalogData.products[zuoraProduct].ratePlans[productRatePlan];
+		return this.catalogData[zuoraProduct].ratePlans[productRatePlan];
 	};
 	getAllProductDetails = () => {
-		const stageMapping = this.catalogData.products;
+		const stageMapping = this.catalogData;
 		const zuoraProductKeys = Object.keys(stageMapping) as Array<
 			keyof typeof stageMapping
 		>;

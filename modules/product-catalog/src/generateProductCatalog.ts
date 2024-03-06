@@ -81,16 +81,13 @@ export const generateProductCatalog = (
 		isSupportedProduct(product.name),
 	);
 
-	const result = {
-		products: arrayToObject(
-			supportedProducts.map((product) => {
-				const productName = getZuoraProductKey(product.name);
-				return {
-					[productName]: getZuoraProduct(product.productRatePlans),
-				};
-			}),
-		),
-	};
-
+	const result = arrayToObject(
+		supportedProducts.map((product) => {
+			const productName = getZuoraProductKey(product.name);
+			return {
+				[productName]: getZuoraProduct(product.productRatePlans),
+			};
+		}),
+	);
 	return result as ProductCatalog;
 };
