@@ -9,7 +9,7 @@ import {
 export const handler = async (event: {
 	queryJobId: string;
 	filePath: string;
-}) => {
+}): Promise<void> => {
 	const bucketName = process.env.S3_BUCKET;
 	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
 	const salesforceOauthSecretName = process.env.SALESFORCE_OAUTH_SECRET_NAME;
