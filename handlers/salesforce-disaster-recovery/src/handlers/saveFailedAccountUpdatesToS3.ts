@@ -22,11 +22,15 @@ export const handler = async (event: {
 			bucketName,
 			filePath: file.Key,
 		});
+		console.log(fileString);
 
 		const fileContent = JSON.parse(fileString) as Array<{
 			Input: { Items: AccountRow[] };
 			Output: BatchUpdateZuoraAccountsResponse[];
 		}>;
+		console.log(fileContent);
+		console.log(typeof fileContent[0]?.Input);
+		console.log(typeof fileContent[0]?.Output);
 
 		for (const batch of fileContent) {
 			console.log(batch);
