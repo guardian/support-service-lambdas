@@ -42,6 +42,7 @@ object SupporterPlusFields {
   }
 
   def serialise(data: SupporterPlusEmailData): Map[String, String] = Map(
+    "ZuoraSubscriberId" -> data.subscriptionName.value,
     "EmailAddress" -> data.contacts.billTo.email.map(_.value).getOrElse(""),
     "created" -> data.created.toString,
     "amount" -> data.amountMinorUnits.formatted,

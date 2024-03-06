@@ -60,6 +60,7 @@ case class SupporterPlusEmailData(
     plan: Plan,
     contacts: Contacts,
     created: LocalDate,
+    subscriptionName: SubscriptionName,
 ) extends EmailData
 
 case class ContributionsEmailData(

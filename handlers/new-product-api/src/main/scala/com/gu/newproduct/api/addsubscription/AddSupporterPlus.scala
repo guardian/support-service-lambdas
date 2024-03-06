@@ -81,6 +81,7 @@ class AddSupporterPlus(
         amountMinorUnits = amountMinorUnits,
         plan = plan,
         currentDate = getCurrentDate(),
+        subscriptionName = subscriptionName,
       )
       _ <- sendConfirmationEmail(account.sfContactId, supporterPlusEmailData).recoverAndLog(
         "send supporter plus confirmation email",
@@ -128,6 +129,7 @@ object AddSupporterPlus {
 
   def toSupporterPlusEmailData(
       request: AddSubscriptionRequest,
+      subscriptionName: SubscriptionName,
       plan: Plan,
       currency: Currency,
       paymentMethod: PaymentMethod,
@@ -145,6 +147,7 @@ object AddSupporterPlus {
       firstPaymentDate = firstPaymentDate,
       contacts = contacts,
       created = currentDate,
+      subscriptionName = subscriptionName,
     )
 
   def getContributionAmount(totalAmount: AmountMinorUnits, currency: Currency, plan: Plan): AmountMinorUnits = {
