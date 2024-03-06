@@ -10,7 +10,7 @@ export const convertArrayToCsv = <T>({ arr }: { arr: T[] }) => {
 			.map((header) => {
 				const cellValue = String(
 					(row as Record<string, unknown>)[header],
-				).replace(/,/g, ' ');
+				).replace(/,/g, '');
 				return `"${cellValue}"`;
 			})
 			.join(',');
