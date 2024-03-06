@@ -7,11 +7,11 @@ import {
 
 export const handler = async (event: {
 	resultFiles: Array<{ Key: string; Size: number }>;
+	filePath: string;
 }) => {
 	const bucketName = process.env.S3_BUCKET;
-	const filePath = process.env.FAILED_ROWS_FILE_PATH;
 
-	if (!bucketName || !filePath) {
+	if (!bucketName) {
 		throw new Error('Environment variables not set');
 	}
 
@@ -34,12 +34,9 @@ export const handler = async (event: {
 		}
 	}
 
-	const str = convertArrayToCsv({ arr: failedUpdates });
-
-	const res = await uploadFileToS3({
+	await uploadFileToS3({
 		bucketName,
-		filePath,
-		content: str,
+		filePath: event.filePath,
+		content: convertArrayToCsv({ arr: failedUpdates }),
 	});
-	console.log(res);
 };

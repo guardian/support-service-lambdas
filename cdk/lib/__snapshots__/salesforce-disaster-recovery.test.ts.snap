@@ -374,7 +374,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.SUCCEEDED"}}}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.SUCCEEDED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}}}}",
             ],
           ],
         },
@@ -533,7 +533,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
-            "FAILED_ROWS_FILE_PATH": "failed-rows.csv",
             "S3_BUCKET": {
               "Ref": "Bucket83908E77",
             },
@@ -1611,7 +1610,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.SUCCEEDED"}}}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.SUCCEEDED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}}}}",
             ],
           ],
         },
@@ -1770,7 +1769,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery",
-            "FAILED_ROWS_FILE_PATH": "failed-rows.csv",
             "S3_BUCKET": {
               "Ref": "Bucket83908E77",
             },

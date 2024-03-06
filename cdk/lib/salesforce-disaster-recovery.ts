@@ -14,8 +14,8 @@ import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
-	Map,
-	Pass,
+	// Map,
+	// Pass,
 	StateMachine,
 	TaskInput,
 	Wait,
@@ -43,6 +43,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		});
 
 		const queryResultFileName = 'query-result.csv';
+		const failedRowsFileName = 'failed-rows.csv';
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -279,7 +280,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				environment: {
 					...lambdaDefaultConfig.environment,
 					S3_BUCKET: bucket.bucketName,
-					FAILED_ROWS_FILE_PATH: 'failed-rows.csv',
 				},
 				initialPolicy: [
 					new PolicyStatement({
@@ -290,6 +290,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 			payload: TaskInput.fromObject({
 				'resultFiles.$': '$.ResultFiles.SUCCEEDED',
+				filePath: JsonPath.format(
+					`{}/${failedRowsFileName}`,
+					JsonPath.stringAt('$$.Execution.StartTime'),
+				),
 			}),
 		});
 
