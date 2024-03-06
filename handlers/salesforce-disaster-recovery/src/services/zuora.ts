@@ -1,5 +1,5 @@
 import { actionUpdate } from '@modules/zuora/actionUpdate';
-import { type ZuoraClient } from '@modules/zuora/zuoraClient';
+import { type ZuoraClient, ZuoraError } from '@modules/zuora/zuoraClient';
 
 export type AccountRow = {
 	Id: string;
@@ -34,24 +34,24 @@ export const batchUpdateZuoraAccounts = async ({
 			}),
 		);
 
-		return response.map((item, index) => ({
-			ZuoraAccountId: accountRows[index]?.Zuora__Zuora_Id__c ?? '',
-			Success: item.Success,
-			Errors: item.Errors ?? [],
+		return accountRows.map((row, index) => ({
+			ZuoraAccountId: row.Zuora__Zuora_Id__c,
+			Success: response[index]?.Success ?? false,
+			Errors: response[index]?.Errors ?? [],
 		}));
 	} catch (error) {
 		console.error(error);
-		throw error;
-		// if (error instanceof ZuoraError && error.code === 429) {
-		// 	throw error;
-		// }
 
-		// const formattedResponse = accountRows.map((row) => ({
-		// 	Id: row.Zuora__Zuora_Id__c,
-		// 	Success: false,
-		// 	Errors: [{ Message: '', Code: '' }],
-		// }));
-
-		// return formattedResponse;
+		return accountRows.map((row) => ({
+			ZuoraAccountId: row.Zuora__Zuora_Id__c,
+			Success: false,
+			Errors: [
+				{
+					Message:
+						error instanceof Error ? error.message : JSON.stringify(error),
+					Code: error instanceof ZuoraError ? `${error.code}` : 'Unknown Code',
+				},
+			],
+		}));
 	}
 };
