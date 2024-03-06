@@ -1,11 +1,11 @@
-export interface SalesforceOauthCredentials {
+export type SalesforceOauthCredentials = {
 	authorization_endpoint: string;
 	client_id: string;
 	client_secret: string;
 	oauth_http_parameters: {
 		body_parameters: Array<{ key: string; value: string }>;
 	};
-}
+};
 
 export const generateSalesforceAccessToken = async ({
 	credentials,
