@@ -27,7 +27,7 @@ export const handler = async (event: {
 
 		for (const batch of fileContent) {
 			const output = JSON.parse(batch.Output) as AccountRowResult[];
-			const failedResults = output.filter((item) => !item.success);
+			const failedResults = output.filter((item) => !item.Success);
 			failedUpdates.push(...failedResults);
 		}
 	}
@@ -35,7 +35,7 @@ export const handler = async (event: {
 	const content = convertArrayToCsv({
 		arr: failedUpdates.map((item) => ({
 			...item,
-			errors: JSON.stringify(item.errors),
+			Errors: JSON.stringify(item.Errors),
 		})),
 	});
 

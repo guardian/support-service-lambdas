@@ -9,9 +9,9 @@ export type AccountRow = {
 };
 
 export type AccountRowResult = {
-	zuoraId: string;
-	success: boolean;
-	errors: Array<{ Message: string; Code: string }>;
+	ZuoraAccountId: string;
+	Success: boolean;
+	Errors: Array<{ Message: string; Code: string }>;
 };
 
 export const batchUpdateZuoraAccounts = async ({
@@ -35,9 +35,9 @@ export const batchUpdateZuoraAccounts = async ({
 		);
 
 		return response.map((item, index) => ({
-			zuoraId: accountRows[index]?.Zuora__Zuora_Id__c ?? '',
-			success: item.Success,
-			errors: item.Errors ?? [],
+			ZuoraAccountId: accountRows[index]?.Zuora__Zuora_Id__c ?? '',
+			Success: item.Success,
+			Errors: item.Errors ?? [],
 		}));
 	} catch (error) {
 		console.error(error);
