@@ -1,15 +1,18 @@
-import {
-	actionUpdate,
-	type ActionUpdateResponse,
-} from '@modules/zuora/actionUpdate';
+import { actionUpdate } from '@modules/zuora/actionUpdate';
 import { type ZuoraClient } from '@modules/zuora/zuoraClient';
 
-export interface AccountRow {
+export type AccountRow = {
 	Id: string;
 	Zuora__Zuora_Id__c: string;
 	Zuora__Account__c: string;
 	Contact__c: string;
-}
+};
+
+export type AccountRowResult = {
+	zuoraId: string;
+	success: boolean;
+	errors: Array<{ Message: string; Code: string }>;
+};
 
 export const batchUpdateZuoraAccounts = async ({
 	zuoraClient,
@@ -17,7 +20,7 @@ export const batchUpdateZuoraAccounts = async ({
 }: {
 	zuoraClient: ZuoraClient;
 	accountRows: AccountRow[];
-}): Promise<ActionUpdateResponse> => {
+}): Promise<AccountRowResult[]> => {
 	try {
 		const response = await actionUpdate(
 			zuoraClient,
@@ -31,7 +34,11 @@ export const batchUpdateZuoraAccounts = async ({
 			}),
 		);
 
-		return response;
+		return response.map((item, index) => ({
+			zuoraId: accountRows[index]?.Zuora__Zuora_Id__c ?? '',
+			success: item.Success,
+			errors: item.Errors ?? [],
+		}));
 	} catch (error) {
 		console.error(error);
 		throw error;

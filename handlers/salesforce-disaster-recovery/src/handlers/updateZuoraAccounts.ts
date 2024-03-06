@@ -1,11 +1,8 @@
 import { type Stage } from '@modules/stage';
-import { type ActionUpdateResponse } from '@modules/zuora/actionUpdate';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { type AccountRow, batchUpdateZuoraAccounts } from '../services';
 
-export const handler = async (event: {
-	Items: AccountRow[];
-}): Promise<ActionUpdateResponse> => {
+export const handler = async (event: { Items: AccountRow[] }) => {
 	const stage = process.env.STAGE;
 
 	if (!stage) {

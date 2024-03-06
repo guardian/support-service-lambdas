@@ -1,5 +1,9 @@
-import { type ActionUpdateResponse } from '@modules/zuora/actionUpdate';
-import { convertArrayToCsv, getFileFromS3, uploadFileToS3 } from '../services';
+import {
+	type AccountRowResult,
+	convertArrayToCsv,
+	getFileFromS3,
+	uploadFileToS3,
+} from '../services';
 
 export const handler = async (event: {
 	resultFiles: Array<{ Key: string; Size: number }>;
@@ -11,7 +15,7 @@ export const handler = async (event: {
 		throw new Error('Environment variables not set');
 	}
 
-	const failedUpdates: ActionUpdateResponse = [];
+	const failedUpdates: AccountRowResult[] = [];
 
 	for (const file of event.resultFiles) {
 		const fileString = await getFileFromS3({
@@ -22,8 +26,8 @@ export const handler = async (event: {
 		const fileContent = JSON.parse(fileString) as Array<{ Output: string }>;
 
 		for (const batch of fileContent) {
-			const results = JSON.parse(batch.Output) as ActionUpdateResponse;
-			const failedResults = results.filter((item) => !item.Success);
+			const output = JSON.parse(batch.Output) as AccountRowResult[];
+			const failedResults = output.filter((item) => !item.success);
 			failedUpdates.push(...failedResults);
 		}
 	}
