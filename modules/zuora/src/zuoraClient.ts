@@ -50,6 +50,13 @@ export class ZuoraClient {
 		return await this.fetch(path, 'PUT', schema, body);
 	}
 
+	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		schema: T,
+	): Promise<O> {
+		return await this.fetch(path, 'DELETE', schema);
+	}
+
 	private async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		method: string,

@@ -1,6 +1,6 @@
 package com.gu.test
 
-import play.api.libs.json.{JsSuccess, Json, JsonValidationError}
+import play.api.libs.json.{JsSuccess, Json, JsonValidationError, OFormat}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -9,7 +9,7 @@ class JSComparisonTest extends AnyFlatSpec with Matchers {
   import JsonMatchers._
 
   case class Simple(key: String)
-  implicit val sR = Json.format[Simple]
+  implicit val sR: OFormat[Simple] = Json.format[Simple]
 
   it should "handle missed fields as normal" in {
     val testData = """{}"""
@@ -40,9 +40,9 @@ class JSComparisonEmdeddedTest extends AnyFlatSpec with Matchers {
   import JsonMatchers._
 
   case class Simple(key: String)
-  implicit val sR = Json.format[Simple]
+  implicit val sR: OFormat[Simple] = Json.format[Simple]
   case class WithEmbed(embed: JsStringContainingJson[Simple])
-  implicit val wR = Json.format[WithEmbed]
+  implicit val wR: OFormat[WithEmbed] = Json.format[WithEmbed]
 
   it should "handle missed fields as normal" in {
     val testData = """{}"""

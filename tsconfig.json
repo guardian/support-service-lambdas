@@ -32,8 +32,8 @@
     "paths": {
       "@modules/aws/*": ["./modules/aws/src/*"],
       "@modules/zuora/*": ["./modules/zuora/src/*"],
-      "@modules/catalog/*": ["./modules/catalog/src/*"],
-      "@modules/product/*": ["./modules/product/src/*"],
+      "@modules/zuora-catalog/*": ["./modules/zuora-catalog/src/*"],
+      "@modules/product-catalog/*": ["./modules/product-catalog/src/*"],
       "@modules/*": ["./modules/*"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */

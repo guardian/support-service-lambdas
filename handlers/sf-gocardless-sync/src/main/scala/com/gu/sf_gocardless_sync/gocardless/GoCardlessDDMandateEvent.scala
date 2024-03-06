@@ -1,6 +1,5 @@
 package com.gu.sf_gocardless_sync.gocardless
 
-import ai.x.play.json.Jsonx
 import com.gu.sf_gocardless_sync.SyncSharedObjects.{
   BankAccountNumberEnding,
   BankName,
@@ -23,7 +22,7 @@ import play.api.libs.json.{JsValue, Json}
 object GoCardlessDDMandateEvent extends Logging {
 
   case class GoCardlessCustomerBankAccountID(value: String) extends AnyVal
-  implicit val formatCustomerBankAccountID = Jsonx.formatInline[GoCardlessCustomerBankAccountID]
+  implicit val formatCustomerBankAccountID = Json.valueFormat[GoCardlessCustomerBankAccountID]
 
   case class GoCardlessMandateLinks(customer_bank_account: GoCardlessCustomerBankAccountID)
   implicit val linksReads = Json.reads[GoCardlessMandateLinks]

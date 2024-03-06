@@ -1,6 +1,5 @@
 package com.gu.sf_gocardless_sync.salesforce
 
-import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.sf_gocardless_sync.SyncSharedObjects.{
   BankAccountNumberEnding,
@@ -22,10 +21,10 @@ object SalesforceDDMandate extends Logging {
   private val mandateSfObjectsBaseUrl = sfObjectsBaseUrl + "DD_Mandate__c"
 
   case class BillingAccountSfId(value: String) extends AnyVal
-  implicit val formatBillingAccountSfId = Jsonx.formatInline[BillingAccountSfId]
+  implicit val formatBillingAccountSfId = Json.valueFormat[BillingAccountSfId]
 
   case class PaymentMethodSfId(value: String) extends AnyVal
-  implicit val formatPaymentMethodSfId = Jsonx.formatInline[PaymentMethodSfId]
+  implicit val formatPaymentMethodSfId = Json.valueFormat[PaymentMethodSfId]
 
   sealed trait WithMandateSfId {
     def Id: MandateSfId

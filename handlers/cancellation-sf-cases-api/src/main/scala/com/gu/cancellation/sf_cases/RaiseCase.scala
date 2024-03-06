@@ -1,6 +1,5 @@
 package com.gu.cancellation.sf_cases
 
-import ai.x.play.json.Jsonx
 import com.gu.cancellation.sf_cases.Handler.{IdentityId, SfClient}
 import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.salesforce.SalesforceGenericIdLookup
@@ -18,16 +17,16 @@ import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 object RaiseCase {
 
   final case class ProductName(value: String) extends AnyVal
-  implicit val formatProductName = Jsonx.formatInline[ProductName]
+  implicit val formatProductName = Json.valueFormat[ProductName]
 
   final case class Reason(value: String) extends AnyVal
-  implicit val formatReason = Jsonx.formatInline[Reason]
+  implicit val formatReason = Json.valueFormat[Reason]
 
   final case class SubscriptionName(value: String) extends AnyVal
-  implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
+  implicit val formatSubscriptionName = Json.valueFormat[SubscriptionName]
 
   final case class GaDataJsonString(value: String) extends AnyVal
-  implicit val formatGaDataJsonString = Jsonx.formatInline[GaDataJsonString]
+  implicit val formatGaDataJsonString = Json.valueFormat[GaDataJsonString]
 
   final case class ContactIdContainer(Id: String)
   implicit val readsContactIdContainer = Json.reads[ContactIdContainer]

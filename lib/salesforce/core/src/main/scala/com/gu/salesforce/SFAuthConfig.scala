@@ -14,7 +14,7 @@ case class SFAuthConfig(
 
 object SFAuthConfig {
   implicit val reads: Reads[SFAuthConfig] = Json.reads[SFAuthConfig]
-  implicit val location = ConfigLocation[SFAuthConfig](path = "sfAuth", version = 1)
+  implicit val location: ConfigLocation[SFAuthConfig] = ConfigLocation[SFAuthConfig](path = "sfAuth", version = 1)
 }
 
 object SFExportAuthConfig {

@@ -14,6 +14,7 @@ jobs:
           - cancellation-sf-cases-api
           - new-product-api
           - single-contribution-salesforce-writes
+          - stripe-webhook-endpoints
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -82,7 +83,6 @@ jobs:
           - sf-gocardless-sync
           - sf-move-subscriptions-api
           - soft-opt-in-consent-setter
-          - stripe-webhook-endpoints
           - zuora-callout-apis
           - zuora-datalake-export
           - zuora-rer

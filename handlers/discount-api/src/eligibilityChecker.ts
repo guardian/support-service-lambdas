@@ -1,5 +1,4 @@
 import { sum } from '@modules/arrayFunctions';
-import type { ZuoraCatalog } from '@modules/catalog/catalog';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
 import { isNotRemoved } from '@modules/zuora/rateplan';
@@ -8,11 +7,12 @@ import type {
 	RatePlan,
 	ZuoraSubscription,
 } from '@modules/zuora/zuoraSchemas';
+import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { ValidationError } from './errors';
 import { getEligibleProductRatePlanIdsForDiscount } from './productToDiscountMapping';
 
 export class EligibilityChecker {
-	constructor(private catalog: ZuoraCatalog) {}
+	constructor(private catalog: ZuoraCatalogHelper) {}
 
 	getNextBillingDateIfEligible = (
 		subscription: ZuoraSubscription,
