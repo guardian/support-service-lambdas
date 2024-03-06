@@ -42,6 +42,10 @@ export const batchUpdateZuoraAccounts = async ({
 	} catch (error) {
 		console.error(error);
 
+		if (error instanceof ZuoraError && error.code === 429) {
+			throw error;
+		}
+
 		return accountRows.map((row) => ({
 			ZuoraAccountId: row.Zuora__Zuora_Id__c,
 			Success: false,
