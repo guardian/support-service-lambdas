@@ -3,6 +3,8 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { type AccountRow, batchUpdateZuoraAccounts } from '../services';
 
 export const handler = async (event: { Items: AccountRow[] }) => {
+	const { Items } = event;
+
 	const stage = process.env.STAGE;
 
 	if (!stage) {
@@ -13,8 +15,8 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 
 	const results = [];
 
-	for (let i = 0; i < event.Items.length; i += 50) {
-		const batch = event.Items.slice(i, i + 50);
+	for (let i = 0; i < Items.length; i += 50) {
+		const batch = Items.slice(i, i + 50);
 
 		const response = await batchUpdateZuoraAccounts({
 			zuoraClient,

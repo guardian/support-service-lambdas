@@ -10,6 +10,8 @@ export const handler = async (event: {
 	queryJobId: string;
 	filePath: string;
 }): Promise<void> => {
+	const { queryJobId, filePath } = event;
+
 	const bucketName = process.env.S3_BUCKET;
 	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
 	const salesforceOauthSecretName = process.env.SALESFORCE_OAUTH_SECRET_NAME;
@@ -27,15 +29,15 @@ export const handler = async (event: {
 		credentials: salesforceOauthCredentials,
 	});
 
-	const csvContent = await getSalesforceQueryResult({
+	const content = await getSalesforceQueryResult({
 		accessToken: salesforceAccessToken,
-		queryJobId: event.queryJobId,
+		queryJobId,
 		apiDomain: salesforceApiDomain,
 	});
 
 	await uploadFileToS3({
 		bucketName,
-		filePath: event.filePath,
-		content: csvContent,
+		filePath,
+		content,
 	});
 };

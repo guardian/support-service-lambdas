@@ -9,6 +9,8 @@ export const handler = async (event: {
 	resultFiles: Array<{ Key: string; Size: number }>;
 	filePath: string;
 }): Promise<void> => {
+	const { resultFiles, filePath } = event;
+
 	const bucketName = process.env.S3_BUCKET;
 
 	if (!bucketName) {
@@ -17,7 +19,7 @@ export const handler = async (event: {
 
 	const failedUpdates: AccountRowResult[] = [];
 
-	for (const file of event.resultFiles) {
+	for (const file of resultFiles) {
 		const fileString = await getFileFromS3({
 			bucketName,
 			filePath: file.Key,
@@ -41,7 +43,7 @@ export const handler = async (event: {
 
 	await uploadFileToS3({
 		bucketName,
-		filePath: event.filePath,
+		filePath,
 		content,
 	});
 };
