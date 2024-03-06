@@ -23,8 +23,8 @@ export const handler = async (event: {
 
 		for (const batch of fileContent) {
 			const results = JSON.parse(batch.Output) as ActionUpdateResponse;
-
-			failedUpdates.push(...results.filter((item) => !item.Success));
+			const failedResults = results.filter((item) => !item.Success);
+			failedResults.length > 0 && failedUpdates.push(...failedResults);
 		}
 	}
 
