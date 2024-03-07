@@ -59,3 +59,14 @@ export const batchUpdateZuoraAccounts = async ({
 		}));
 	}
 };
+
+export const updateZuoraAccount = async (): Promise<AccountRowResult[]> => {
+	await Promise.resolve();
+	return [
+		{
+			ZuoraAccountId: 'Test',
+			Success: true,
+			Errors: [],
+		},
+	];
+};
