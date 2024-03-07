@@ -13,6 +13,7 @@ deployments:
     parameters:
       templateStagePaths:
         CODE: salesforce-disaster-recovery-CODE.template.json
+        CSBX: salesforce-disaster-recovery-CSBX.template.json
         PROD: salesforce-disaster-recovery-PROD.template.json
   salesforce-disaster-recovery:
     type: aws-lambda
