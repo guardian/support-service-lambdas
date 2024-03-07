@@ -81,6 +81,9 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: 3.451.0
         version: 3.451.0
+      csv-parse:
+        specifier: ^5.5.3
+        version: 5.5.5
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.129
@@ -2905,6 +2908,10 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
     dev: true
+
+  /csv-parse@5.5.5:
+    resolution: {integrity: sha512-erCk7tyU3yLWAhk6wvKxnyPtftuy/6Ak622gOO7BCJ05+TYffnPCJF905wmOQm+BpkX54OdAl8pveJwUdpnCXQ==}
+    dev: false
 
   /dayjs@1.11.10:
     resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
