@@ -175,7 +175,7 @@ object PlanId {
     DigitalVoucherSixday,
     DigitalVoucherSixdayPlus,
   )
-  
+
   val enabledNationalDeliveryPlans = List(
     NationalDeliverySixday,
     NationalDeliveryEveryday,
