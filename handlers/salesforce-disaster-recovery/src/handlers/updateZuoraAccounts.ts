@@ -32,12 +32,24 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 
 	const failedRows = results.filter((row) => !row.Success);
 
-	for (let i = 0; i < failedRows.length; i += 1) {
-		const response = await updateZuoraAccount();
+	for (const failedRow of failedRows) {
+		const rowInput = Items.filter(
+			(item) => item.Zuora__Zuora_Id__c === failedRow.ZuoraAccountId,
+		)[0];
+
+		if (!rowInput) {
+			throw new Error('test');
+		}
+
+		const response = await updateZuoraAccount({
+			zuoraClient,
+			accountRow: rowInput,
+		});
 
 		results.map((previousResult) => {
 			const newResult = response.filter(
-				(row) => row.ZuoraAccountId === previousResult.ZuoraAccountId,
+				(failedRow) =>
+					failedRow.ZuoraAccountId === previousResult.ZuoraAccountId,
 			)[0];
 
 			return newResult ?? previousResult;

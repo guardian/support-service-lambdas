@@ -60,11 +60,18 @@ export const batchUpdateZuoraAccounts = async ({
 	}
 };
 
-export const updateZuoraAccount = async (): Promise<AccountRowResult[]> => {
+export const updateZuoraAccount = async ({
+	zuoraClient,
+	accountRow,
+}: {
+	zuoraClient: ZuoraClient;
+	accountRow: AccountRow;
+}): Promise<AccountRowResult[]> => {
+	console.log(zuoraClient, accountRow);
 	await Promise.resolve();
 	return [
 		{
-			ZuoraAccountId: 'Test',
+			ZuoraAccountId: accountRow.Zuora__Zuora_Id__c,
 			Success: true,
 			Errors: [],
 		},
