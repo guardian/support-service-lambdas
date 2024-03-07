@@ -223,6 +223,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 									'Payload.$': '$',
 									FunctionName: updateZuoraAccountsLambda.functionArn,
 								},
+								// https://docs.aws.amazon.com/step-functions/latest/dg/bp-lambda-serviceexception.html
 								Retry: [
 									{
 										ErrorEquals: [
@@ -234,6 +235,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 										IntervalSeconds: 2,
 										MaxAttempts: 6,
 										BackoffRate: 2,
+									},
+									{
+										ErrorEquals: ['ZuoraError'],
+										IntervalSeconds: 10,
+										MaxAttempts: 5,
+										BackoffRate: 5,
 									},
 								],
 								End: true,

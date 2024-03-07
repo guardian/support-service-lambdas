@@ -359,7 +359,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["ZuoraError"],"IntervalSeconds":10,"MaxAttempts":5,"BackoffRate":5}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1595,7 +1595,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["ZuoraError"],"IntervalSeconds":10,"MaxAttempts":5,"BackoffRate":5}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
