@@ -85,7 +85,7 @@ export const updateZuoraAccount = async ({
 			Errors:
 				response.reasons?.map((reason) => ({
 					Message: reason.message,
-					Code: reason.code,
+					Code: String(reason.code),
 				})) ?? [],
 		};
 	} catch (error) {

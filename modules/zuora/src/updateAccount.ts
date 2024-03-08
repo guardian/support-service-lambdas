@@ -4,7 +4,7 @@ import type { ZuoraClient } from './zuoraClient';
 const responseSchema = z.object({
 	success: z.boolean(),
 	reasons: z.optional(
-		z.array(z.object({ code: z.string(), message: z.string() })),
+		z.array(z.object({ code: z.number(), message: z.string() })),
 	),
 });
 

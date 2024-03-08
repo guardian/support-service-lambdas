@@ -36,7 +36,10 @@ export const handler = async (event: {
 
 	const content = convertArrayToCsv({
 		arr: failedRows.map((row) => ({
-			...row,
+			Id: row.Id,
+			Zuora__Zuora_Id__c: row.Zuora__Zuora_Id__c,
+			Zuora__Account__c: row.Zuora__Account__c,
+			Contact__c: row.Contact__c,
 			Errors: JSON.stringify(row.Errors),
 		})),
 	});
