@@ -83,7 +83,7 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "account name":"someAccountName",
         | "Mandate ID":"mandateId",
         | "sort code":"12-34-56",
-        | "payment method":"Direct Debit",
+        | "Default payment method": "Direct Debit",
         | "first payment date":"Friday, 1 March 2024",
         | "edition":"GB","amount":"12.12",
         | "currency":"£",
@@ -91,7 +91,7 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "EmailAddress":"bill@contact.com",
         | "created":"2024-03-01",
         | "product":"monthly-supporter-plus",
-        | "subscription details":"Discount not applied"
+        | "subscription details":"12.12 £ per month"
         |}
       """.stripMargin
     actualJson shouldBe Json.parse(expected)
@@ -114,7 +114,9 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "edition":"GB",
         | "name":"firstBill",
         | "product":"monthly-supporter-plus",
-        | "subscription details":"Discount not applied"
+        | "subscription details":"12.12 £ per month",
+        | "Default payment method": "Credit/Debit Card",
+        | "first payment date":"Friday, 1 March 2024"
         | }
         """.stripMargin
     Json.toJson(nonDirectDebitData) shouldBe Json.parse(expected)
