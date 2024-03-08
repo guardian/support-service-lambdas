@@ -70,6 +70,7 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
     ),
     currency = GBP,
     deliveryAgentDetails = None,
+    discountMessage = None,
   )
   it should "generate json payload for voucher data with direct debit fields" in {
 

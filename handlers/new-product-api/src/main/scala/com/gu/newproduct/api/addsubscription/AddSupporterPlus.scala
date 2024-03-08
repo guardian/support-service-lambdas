@@ -164,6 +164,7 @@ object AddSupporterPlus {
       contacts = contacts,
       created = currentDate,
       subscriptionName = subscriptionName,
+      discountMessage = request.discountMessage,
     )
 
   def getContributionAmount(totalAmount: AmountMinorUnits, currency: Currency, plan: Plan): AmountMinorUnits = {

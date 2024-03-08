@@ -95,6 +95,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
       acquisitionCase = CaseId("case"),
       planId = NationalDeliveryWeekend,
       discountRatePlanId= None,
+      discountMessage= None,
     )
 
     val futureActual = addVoucherSteps.addProduct(requestInput)

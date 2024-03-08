@@ -2,7 +2,7 @@ package com.gu.newproduct.api.addsubscription.email.supporterPlus
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.{ZuoraAccountId,DiscountMessage}
 import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.email.serialisers.SupporterPlusEmailDataSerialiser._
@@ -68,6 +68,7 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
     contacts = testContacts,
     created = LocalDate.of(2024, 03, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
+    discountMessage = None,
   )
 
   it should "serialise  direct debit supporterPlus Email to json" in {

@@ -81,6 +81,7 @@ class AddDigipackSub(
       paymentMethod = customerData.paymentMethod,
       currency = customerData.account.currency,
       trialPeriod = TrialPeriod(days = trialPeriodDays),
+      discountMessage = request.discountMessage,
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, emailData)
       .recoverAndLog("send digiPack confirmation email")

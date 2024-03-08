@@ -34,6 +34,7 @@ class AddSubscriptionRequestTest extends AnyFlatSpec with Matchers {
       acquisitionCase = CaseId("5006E000005b5cf"),
       planId = MonthlyContribution,
       discountRatePlanId = None,
+      discountMessage = None,
     )
   }
 

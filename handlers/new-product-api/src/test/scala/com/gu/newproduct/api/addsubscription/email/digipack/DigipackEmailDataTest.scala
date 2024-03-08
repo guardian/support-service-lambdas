@@ -69,6 +69,7 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
     ),
     currency = GBP,
     trialPeriod = TrialPeriod(18),
+    discountMessage = None,
   )
   it should "generate json payload for digipack data with direct debit fields" in {
 

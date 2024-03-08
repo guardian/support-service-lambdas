@@ -68,6 +68,7 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
       MandateId("MandateId"),
     ),
     currency = GBP,
+    discountMessage = None,
   )
   it should "generate email fields with direct debit fields" in {
     GuardianWeeklyFields.serialise(directDebitEmailData) should equal(

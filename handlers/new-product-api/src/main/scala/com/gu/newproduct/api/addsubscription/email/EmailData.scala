@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.Formatters._
-import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.{ZuoraAccountId,DiscountMessage}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
@@ -26,6 +26,7 @@ case class PaperEmailData(
     paymentMethod: PaymentMethod,
     currency: Currency,
     deliveryAgentDetails: Option[DeliveryAgentDetails], // only for national delivery
+    discountMessage: Option[DiscountMessage],
 ) extends EmailData
 
 case class DeliveryAgentDetails(
@@ -49,6 +50,7 @@ case class DigipackEmailData(
     paymentMethod: PaymentMethod,
     currency: Currency,
     trialPeriod: TrialPeriod,
+    discountMessage: Option[DiscountMessage],
 ) extends EmailData
 
 case class SupporterPlusEmailData(
@@ -61,6 +63,7 @@ case class SupporterPlusEmailData(
     contacts: Contacts,
     created: LocalDate,
     subscriptionName: SubscriptionName,
+    discountMessage: Option[DiscountMessage],
 ) extends EmailData
 
 case class ContributionsEmailData(
@@ -81,6 +84,7 @@ case class GuardianWeeklyEmailData(
     plan: Plan,
     contacts: Contacts,
     subscriptionName: SubscriptionName,
+    discountMessage: Option[DiscountMessage] ,
 ) extends EmailData
 
 object EmailData {

@@ -19,12 +19,14 @@ case class AddSubscriptionRequest(
     acquisitionCase: CaseId,
     planId: PlanId,
     discountRatePlanId: Option[ProductRatePlanId],
+    discountMessage: Option[DiscountMessage] =None,
 )
 
 case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
 case class DeliveryAgent(value: String) extends AnyVal
 case class CreatedByCSR(value: String) extends AnyVal
+case class DiscountMessage(value: String) extends AnyVal
 object AddSubscriptionRequest {
 
   case class AddSubscriptionRequestWire(
@@ -37,6 +39,7 @@ object AddSubscriptionRequest {
       acquisitionCase: String,
       planId: String,
       discountRatePlanId: Option[String],
+      discountMessage: Option[String],
   ) {
     def toAddSubscriptionRequest = {
       val parsedRequestOrError = for {
@@ -52,6 +55,7 @@ object AddSubscriptionRequest {
         CaseId(acquisitionCase),
         parsedPlanId,
         discountRatePlanId = discountRatePlanId.map(ProductRatePlanId.apply),
+        discountMessage = discountMessage.map(DiscountMessage.apply),
       )
 
       parsedRequestOrError match {
