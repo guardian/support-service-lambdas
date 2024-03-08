@@ -90,7 +90,8 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "account number":"*****mask",
         | "EmailAddress":"bill@contact.com",
         | "created":"2024-03-01",
-        | "product":"monthly-supporter-plus"
+        | "product":"monthly-supporter-plus",
+        | "subscription details":"Discount not applied"
         |}
       """.stripMargin
     actualJson shouldBe Json.parse(expected)
@@ -112,8 +113,9 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "currency":"£",
         | "edition":"GB",
         | "name":"firstBill",
-        | "product":"monthly-supporter-plus"}
-        |
+        | "product":"monthly-supporter-plus",
+        | "subscription details":"Discount not applied"
+        | }
         """.stripMargin
     Json.toJson(nonDirectDebitData) shouldBe Json.parse(expected)
 
