@@ -32,14 +32,17 @@ export const handler = async (event: {
 
 		results.push(...response);
 	}
+	console.log(results);
 
 	const failedRows = results.filter((row) => !row.Success);
+	console.log(failedRows);
 
 	for (const failedRow of failedRows) {
 		const response = await updateZuoraAccount({
 			zuoraClient,
 			accountRow: failedRow,
 		});
+		console.log(response);
 
 		results
 			.filter(
