@@ -298,8 +298,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 		});
 
-		// const
-
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
