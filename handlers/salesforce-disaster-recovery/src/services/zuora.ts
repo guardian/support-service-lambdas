@@ -1,4 +1,5 @@
 import { actionUpdate } from '@modules/zuora/actionUpdate';
+import { updateAccount } from '@modules/zuora/updateAccount';
 import { type ZuoraClient, ZuoraError } from '@modules/zuora/zuoraClient';
 
 export type AccountRow = {
@@ -8,11 +9,12 @@ export type AccountRow = {
 	Contact__c: string;
 };
 
-export type AccountRowResult = {
-	ZuoraAccountId: string;
+type ProcessingResult = {
 	Success: boolean;
 	Errors: Array<{ Message: string; Code: string }>;
 };
+
+export type AccountRowWithResult = AccountRow & ProcessingResult;
 
 export const batchUpdateZuoraAccounts = async ({
 	zuoraClient,
@@ -20,7 +22,7 @@ export const batchUpdateZuoraAccounts = async ({
 }: {
 	zuoraClient: ZuoraClient;
 	accountRows: AccountRow[];
-}): Promise<AccountRowResult[]> => {
+}): Promise<AccountRowWithResult[]> => {
 	try {
 		const response = await actionUpdate(
 			zuoraClient,
@@ -35,7 +37,7 @@ export const batchUpdateZuoraAccounts = async ({
 		);
 
 		return accountRows.map((row, index) => ({
-			ZuoraAccountId: row.Zuora__Zuora_Id__c,
+			...row,
 			Success: response[index]?.Success ?? false,
 			Errors: response[index]?.Errors ?? [],
 		}));
@@ -47,7 +49,7 @@ export const batchUpdateZuoraAccounts = async ({
 		}
 
 		return accountRows.map((row) => ({
-			ZuoraAccountId: row.Zuora__Zuora_Id__c,
+			...row,
 			Success: false,
 			Errors: [
 				{
@@ -66,14 +68,43 @@ export const updateZuoraAccount = async ({
 }: {
 	zuoraClient: ZuoraClient;
 	accountRow: AccountRow;
-}): Promise<AccountRowResult[]> => {
-	console.log(zuoraClient, accountRow);
-	await Promise.resolve();
-	return [
-		{
-			ZuoraAccountId: accountRow.Zuora__Zuora_Id__c,
-			Success: true,
-			Errors: [],
-		},
-	];
+}): Promise<AccountRowWithResult> => {
+	try {
+		const response = await updateAccount(
+			zuoraClient,
+			accountRow.Zuora__Zuora_Id__c,
+			{
+				crmId: accountRow.Zuora__Account__c,
+				sfContactId__c: accountRow.Contact__c,
+			},
+		);
+
+		return {
+			...accountRow,
+			Success: response.success,
+			Errors:
+				response.reasons?.map((reason) => ({
+					Message: reason.message,
+					Code: reason.code,
+				})) ?? [],
+		};
+	} catch (error) {
+		console.error(error);
+
+		if (error instanceof ZuoraError && error.code === 429) {
+			throw error;
+		}
+
+		return {
+			...accountRow,
+			Success: false,
+			Errors: [
+				{
+					Message:
+						error instanceof Error ? error.message : JSON.stringify(error),
+					Code: error instanceof ZuoraError ? `${error.code}` : 'Unknown Code',
+				},
+			],
+		};
+	}
 };

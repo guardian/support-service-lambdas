@@ -2,11 +2,14 @@ import { type Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import {
 	type AccountRow,
+	type AccountRowWithResult,
 	batchUpdateZuoraAccounts,
 	updateZuoraAccount,
 } from '../services';
 
-export const handler = async (event: { Items: AccountRow[] }) => {
+export const handler = async (event: {
+	Items: AccountRow[];
+}): Promise<AccountRowWithResult[]> => {
 	const { Items } = event;
 
 	const stage = process.env.STAGE;
@@ -33,27 +36,16 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 	const failedRows = results.filter((row) => !row.Success);
 
 	for (const failedRow of failedRows) {
-		const rowInput = Items.filter(
-			(item) => item.Zuora__Zuora_Id__c === failedRow.ZuoraAccountId,
-		)[0];
-
-		if (!rowInput) {
-			throw new Error('test');
-		}
-
 		const response = await updateZuoraAccount({
 			zuoraClient,
-			accountRow: rowInput,
+			accountRow: failedRow,
 		});
 
-		results.map((previousResult) => {
-			const newResult = response.filter(
-				(failedRow) =>
-					failedRow.ZuoraAccountId === previousResult.ZuoraAccountId,
-			)[0];
-
-			return newResult ?? previousResult;
-		});
+		results
+			.filter(
+				(result) => result.Zuora__Zuora_Id__c === response.Zuora__Zuora_Id__c,
+			)
+			.map(() => ({ ...response }));
 	}
 
 	return results;
