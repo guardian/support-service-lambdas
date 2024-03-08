@@ -85,6 +85,7 @@ export class ZuoraClient {
 			if (response.status === 429) {
 				console.log(response.headers);
 			}
+
 			throw new ZuoraError(response.statusText, response.status);
 		}
 	}
