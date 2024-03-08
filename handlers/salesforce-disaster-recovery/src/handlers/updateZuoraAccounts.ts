@@ -20,7 +20,7 @@ export const handler = async (event: {
 
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
 
-	const results = [];
+	const batchUpdateResults: AccountRowWithResult[] = [];
 
 	for (let i = 0; i < Items.length; i += 50) {
 		const batch = Items.slice(i, i + 50);
@@ -30,26 +30,28 @@ export const handler = async (event: {
 			accountRows: batch,
 		});
 
-		results.push(...response);
+		batchUpdateResults.push(...response);
 	}
-	console.log(results);
 
-	const failedRows = results.filter((row) => !row.Success);
-	console.log(failedRows);
+	const individualUpdateResults: AccountRowWithResult[] = [];
 
-	for (const failedRow of failedRows) {
+	for (const failedRow of batchUpdateResults.filter((row) => !row.Success)) {
 		const response = await updateZuoraAccount({
 			zuoraClient,
 			accountRow: failedRow,
 		});
-		console.log(response);
 
-		results
-			.filter(
-				(result) => result.Zuora__Zuora_Id__c === response.Zuora__Zuora_Id__c,
-			)
-			.map(() => ({ ...response }));
+		individualUpdateResults.push(response);
 	}
+
+	const results = batchUpdateResults.map(
+		(batchUpdateResult) =>
+			individualUpdateResults.find(
+				(individualUpdateResult) =>
+					individualUpdateResult.Zuora__Zuora_Id__c ===
+					batchUpdateResult.Zuora__Zuora_Id__c,
+			) ?? batchUpdateResult,
+	);
 
 	return results;
 };
