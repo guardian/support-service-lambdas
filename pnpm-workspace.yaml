@@ -1,7 +1,0 @@
-packages:
-  # lambdas
-  - 'handlers/*'
-  # shared code
-  - 'modules/*'
-  # exclude cdk directory for now
-  - '!**/**/cdk'

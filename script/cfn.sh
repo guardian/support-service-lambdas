@@ -3,12 +3,8 @@
 set -e
 set -x
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-ROOT_DIR="${DIR}/.."
-cd "$ROOT_DIR/cdk"
-
-yarn install --frozen-lockfile
-yarn tsc
-yarn lint
-yarn test
-yarn synth
+pnpm i --frozen-lockfile
+pnpm --filter cdk tsc
+pnpm --filter cdk lint
+pnpm --filter cdk test
+pnpm --filter cdk synth
