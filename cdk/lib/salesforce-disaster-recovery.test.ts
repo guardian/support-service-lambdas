@@ -29,9 +29,9 @@ describe('The SalesforceDisasterRecovery stack', () => {
 				salesforceApiDomain:
 					'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com',
 				salesforceApiConnectionResourceId:
-					'salesforce-disaster-recovery-CSBX-salesforce-api/56d7692d-e186-4b5a-9745-9d0a7ce33f1b-8CFMdm',
+					'salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f',
 				salesforceOauthSecretName:
-					'events!connection/salesforce-disaster-recovery-CSBX-salesforce-api/56d7692d-e186-4b5a-9745-9d0a7ce33f1b-8CFMdm',
+					'events!connection/salesforce-disaster-recovery-CSBX-salesforce-api/56d7692d-e186-4b5a-9745-9d0a7ce33f1b',
 				salesforceQueryWaitSeconds: 1,
 			},
 		);
