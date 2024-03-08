@@ -36,7 +36,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Generate CFN templates from GuCDK
-        run: bash ./script/cfn.sh
+        run: pnpm build && pnpm lint && pnpm test && pnpm synth
 
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v2
