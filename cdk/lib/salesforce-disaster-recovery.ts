@@ -190,7 +190,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Map',
-					MaxConcurrency: 10,
+					MaxConcurrency: 20,
 					ItemReader: {
 						Resource: 'arn:aws:states:::s3:getObject',
 						ReaderConfig: {
