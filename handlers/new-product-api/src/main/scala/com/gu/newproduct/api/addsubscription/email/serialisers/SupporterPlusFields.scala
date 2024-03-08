@@ -50,6 +50,7 @@ object SupporterPlusFields {
     "edition" -> data.contacts.billTo.address.country.map(_.alpha2).getOrElse(""),
     "name" -> data.contacts.billTo.firstName.value,
     "product" -> productId(data.plan),
+    "subscription details" -> data.discountMessage,
   ) ++ paymentMethodFields(data.paymentMethod, data.firstPaymentDate)
 
 }
