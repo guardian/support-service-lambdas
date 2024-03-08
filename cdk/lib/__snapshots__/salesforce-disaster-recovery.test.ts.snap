@@ -352,7 +352,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"invalid-ids.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -1588,7 +1588,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"invalid-ids.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -2824,7 +2824,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"invalid-ids.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
