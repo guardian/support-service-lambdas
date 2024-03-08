@@ -20,6 +20,21 @@ describe('The SalesforceDisasterRecovery stack', () => {
 				salesforceQueryWaitSeconds: 1,
 			},
 		);
+		const csbxStack = new SalesforceDisasterRecovery(
+			app,
+			`salesforce-disaster-recovery-CSBX`,
+			{
+				stack: 'membership',
+				stage: 'CSBX',
+				salesforceApiDomain:
+					'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com',
+				salesforceApiConnectionResourceId:
+					'salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f',
+				salesforceOauthSecretName:
+					'events!connection/salesforce-disaster-recovery-CSBX-salesforce-api/56d7692d-e186-4b5a-9745-9d0a7ce33f1b',
+				salesforceQueryWaitSeconds: 1,
+			},
+		);
 		const prodStack = new SalesforceDisasterRecovery(
 			app,
 			`salesforce-disaster-recovery-PROD`,
@@ -35,6 +50,7 @@ describe('The SalesforceDisasterRecovery stack', () => {
 			},
 		);
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
+		expect(Template.fromStack(csbxStack).toJSON()).toMatchSnapshot();
 		expect(Template.fromStack(prodStack).toJSON()).toMatchSnapshot();
 	});
 });

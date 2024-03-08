@@ -4,6 +4,7 @@ regions:
   - eu-west-1
 allowedStages:
   - CODE
+  - CSBX
   - PROD
 deployments:
   salesforce-disaster-recovery-cloudformation:
@@ -12,6 +13,7 @@ deployments:
     parameters:
       templateStagePaths:
         CODE: salesforce-disaster-recovery-CODE.template.json
+        CSBX: salesforce-disaster-recovery-CSBX.template.json
         PROD: salesforce-disaster-recovery-PROD.template.json
   salesforce-disaster-recovery:
     type: aws-lambda

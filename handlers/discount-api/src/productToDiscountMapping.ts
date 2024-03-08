@@ -38,6 +38,7 @@ export type Discount = {
 	effectiveEndDate: string;
 	eligibleProductRatePlanIds: string[];
 };
+
 const ProductToDiscountMapping: {
 	[K in Stage]: {
 		[K in BillingPeriod]: Discount;
@@ -76,6 +77,41 @@ const ProductToDiscountMapping: {
 			effectiveStartDate: '2023-10-23',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: ['2c92c0f94bbffaaa014bc6a4212e205b'],
+		},
+	},
+	CSBX: {
+		Month: {
+			productRatePlanId: '2c92a0ff64176cd40164232c8ec97661',
+			name: 'Cancellation Save Discount - 25% off for 3 months',
+			upToPeriods: 3,
+			upToPeriodsType: 'Months',
+			effectiveStartDate: '2018-06-22',
+			effectiveEndDate: '2099-03-08',
+			eligibleProductRatePlanIds: [
+				'2c92a0fb4edd70c8014edeaa4eae220a',
+				'2c92a0fb4edd70c8014edeaa4e8521fe',
+			],
+		},
+		Quarter: {
+			productRatePlanId: '2c92a0ff64176cd40164232c8ec97661',
+			name: 'Cancellation Save Discount - 25% off for 3 months',
+			upToPeriods: 3,
+			upToPeriodsType: 'Months',
+			effectiveStartDate: '2018-06-22',
+			effectiveEndDate: '2099-03-08',
+			eligibleProductRatePlanIds: [
+				'2c92a0fb4edd70c8014edeaa4eae220a',
+				'2c92a0fb4edd70c8014edeaa4e8521fe',
+			],
+		},
+		Annual: {
+			productRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
+			name: 'Cancellation Save Discount - 25% off for 12 months',
+			upToPeriods: 12,
+			upToPeriodsType: 'Months',
+			effectiveStartDate: '2023-10-26',
+			effectiveEndDate: '2099-03-08',
+			eligibleProductRatePlanIds: ['2c92a0fb4edd70c8014edeaa4e972204'],
 		},
 	},
 	PROD: {
