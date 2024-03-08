@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - ad/invalid-ids
+      - ad/*
 jobs:
   gu-cdk-build:
     strategy:
