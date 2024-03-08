@@ -199,11 +199,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							Key: 'invalid-id.csv',
-							// 'Key.$': JsonPath.format(
-							// 	`{}/${queryResultFileName}`,
-							// 	JsonPath.stringAt('$$.Execution.StartTime'),
-							// ),
+							'Key.$': JsonPath.format(
+								`{}/${queryResultFileName}`,
+								JsonPath.stringAt('$$.Execution.StartTime'),
+							),
 						},
 					},
 					ItemBatcher: {
