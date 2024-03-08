@@ -80,7 +80,11 @@ export class ZuoraClient {
 		if (response.ok) {
 			return schema.parse(json);
 		} else {
-			console.error(response);
+			console.log('response.text');
+			console.error(response.text);
+			console.log('response.body');
+			console.error(response.body);
+
 			if (response.status === 429) {
 				console.log(response.headers);
 			}
