@@ -83,7 +83,7 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "account name":"someAccountName",
         | "Mandate ID":"mandateId",
         | "sort code":"12-34-56",
-        | "Default payment method": "Direct Debit",
+        | "payment method": "Direct Debit",
         | "first payment date":"Friday, 1 March 2024",
         | "edition":"GB","amount":"12.12",
         | "currency":"£",
@@ -115,7 +115,7 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "name":"firstBill",
         | "product":"monthly-supporter-plus",
         | "subscription details":"12.12 £ per month",
-        | "Default payment method": "Credit/Debit Card",
+        | "payment method": "Credit/Debit Card",
         | "first payment date":"Friday, 1 March 2024"
         | }
         """.stripMargin

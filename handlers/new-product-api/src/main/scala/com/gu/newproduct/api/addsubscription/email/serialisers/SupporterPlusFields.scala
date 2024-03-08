@@ -42,12 +42,12 @@ object SupporterPlusFields {
         "sort code" -> sortCode.hyphenated,
         "account name" -> accountName.value,
         "Mandate ID" -> mandateId.value,
-        "Default payment method" -> toDescription(BankTransfer),
+        "payment method" -> "Direct Debit",
         "first payment date" -> firstPaymentDate.format(firstPaymentDateFormat),
       )
     case NonDirectDebitMethod(_, paymentMethodType) =>
       Map(
-        "Default payment method" -> toDescription(paymentMethodType),
+        "payment method" -> toDescription(paymentMethodType),
         "first payment date" -> firstPaymentDate.format(firstPaymentDateFormat),
       )
   }
