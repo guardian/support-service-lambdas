@@ -28,7 +28,7 @@ Finding the GBP price for home delivery of the Saturday Newspaper:
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 
 const catalog = await getProductCatalogFromApi('CODE');
-const price = catalog.products.HomeDelivery.ratePlans.Saturday.pricing.GBP;
+const price = catalog.HomeDelivery.ratePlans.Saturday.pricing.GBP;
 // price is 19.99
 
 ```
@@ -37,7 +37,7 @@ Fetching the Contribution charge id from the Supporter plus product to set the c
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 
 const catalog = await getProductCatalogFromApi('PROD');
-const contributionChargeId = catalog.products.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
+const contributionChargeId = catalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
 ```
 ## Implementation
 The mapping between our object model and Zuora's catalog is defined in the files `generateProductCatalog.ts`, `zuoraToProductNameMapping.ts` and `generateTypeObject.ts`.

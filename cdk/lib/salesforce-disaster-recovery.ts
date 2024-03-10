@@ -40,6 +40,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
+		const queryResultFileName = 'query-result.csv';
+
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
@@ -153,8 +155,98 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 				payload: TaskInput.fromObject({
 					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
-					executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+					filePath: JsonPath.format(
+						`{}/${queryResultFileName}`,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+					),
 				}),
+			},
+		);
+
+		const updateZuoraAccountsLambda = new GuLambdaFunction(
+			this,
+			'UpdateZuoraAccountsLambda',
+			{
+				...lambdaDefaultConfig,
+				timeout: Duration.minutes(15),
+				memorySize: 10240,
+				handler: 'updateZuoraAccounts.handler',
+				functionName: `update-zuora-accounts-${this.stage}`,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
+		const processCsvInDistributedMap = new CustomState(
+			this,
+			'ProcessCsvInDistributedMap',
+			{
+				stateJson: {
+					Type: 'Map',
+					MaxConcurrency: 100,
+					ItemReader: {
+						Resource: 'arn:aws:states:::s3:getObject',
+						ReaderConfig: {
+							InputType: 'CSV',
+							CSVHeaderLocation: 'FIRST_ROW',
+						},
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Key.$': JsonPath.format(
+								`{}/${queryResultFileName}`,
+								JsonPath.stringAt('$$.Execution.StartTime'),
+							),
+						},
+					},
+					ItemBatcher: {
+						MaxItemsPerBatch: 50,
+					},
+					ItemProcessor: {
+						ProcessorConfig: {
+							Mode: 'DISTRIBUTED',
+							ExecutionType: 'STANDARD',
+						},
+						StartAt: 'UpdateZuoraAccounts',
+						States: {
+							UpdateZuoraAccounts: {
+								Type: 'Task',
+								Resource: 'arn:aws:states:::lambda:invoke',
+								OutputPath: '$.Payload',
+								Parameters: {
+									'Payload.$': '$',
+									FunctionName: updateZuoraAccountsLambda.functionArn,
+								},
+								Retry: [
+									{
+										ErrorEquals: [
+											'Lambda.ServiceException',
+											'Lambda.AWSLambdaException',
+											'Lambda.SdkClientException',
+											'Lambda.TooManyRequestsException',
+										],
+										IntervalSeconds: 2,
+										MaxAttempts: 6,
+										BackoffRate: 2,
+									},
+								],
+								End: true,
+							},
+						},
+					},
+					ResultWriter: {
+						Resource: 'arn:aws:states:::s3:putObject',
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
+						},
+					},
+				},
 			},
 		);
 
@@ -171,7 +263,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3,
+									saveSalesforceQueryResultToS3.next(
+										processCsvInDistributedMap,
+									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
@@ -216,6 +310,18 @@ export class SalesforceDisasterRecovery extends GuStack {
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
 						],
+					}),
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+					new PolicyStatement({
+						actions: ['states:StartExecution'],
+						resources: [stateMachine.stateMachineArn],
+					}),
+					new PolicyStatement({
+						actions: ['lambda:InvokeFunction'],
+						resources: [updateZuoraAccountsLambda.functionArn],
 					}),
 				],
 			}),

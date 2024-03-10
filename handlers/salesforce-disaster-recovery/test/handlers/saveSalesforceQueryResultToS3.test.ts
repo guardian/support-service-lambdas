@@ -11,7 +11,7 @@ jest.mock('../../src/services');
 describe('Handler', () => {
 	const mockEvent = {
 		queryJobId: 'mock_query_job_id',
-		executionStartTime: 'mock_execution_start_time',
+		filePath: 'mock_file_path',
 	};
 	const mockEnv = {
 		S3_BUCKET: 'mock_bucket_name',
@@ -52,7 +52,7 @@ describe('Handler', () => {
 
 		const result = await handler(mockEvent);
 
-		expect(result).toEqual({ StatusCode: 200 });
+		expect(result).toEqual(undefined);
 
 		expect(getSecretValue).toHaveBeenCalledWith({
 			secretName: mockEnv.SALESFORCE_OAUTH_SECRET_NAME,
@@ -67,7 +67,7 @@ describe('Handler', () => {
 		});
 		expect(uploadFileToS3).toHaveBeenCalledWith({
 			bucketName: mockEnv.S3_BUCKET,
-			filePath: `${mockEvent.executionStartTime}/before-processing.csv`,
+			filePath: mockEvent.filePath,
 			content: mockCsvContent,
 		});
 	});
