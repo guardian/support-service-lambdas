@@ -39,6 +39,7 @@ export const handler = async (event: {
 				parsedCause.errorMessage,
 			) as AccountRowWithResult[];
 			console.log(errors);
+			failedRows.push(...errors);
 		}
 
 		// const cause = JSON.parse(fileContent.Cause) as {
