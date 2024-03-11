@@ -1,3 +1,4 @@
+import { checkDefined } from '@modules/nullAndUndefined';
 import {
 	generateSalesforceAccessToken,
 	getSalesforceQueryResult,
@@ -12,13 +13,20 @@ export const handler = async (event: {
 }): Promise<void> => {
 	const { queryJobId, filePath } = event;
 
-	const bucketName = process.env.S3_BUCKET;
-	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
-	const salesforceOauthSecretName = process.env.SALESFORCE_OAUTH_SECRET_NAME;
+	const bucketName = checkDefined<string>(
+		process.env.S3_BUCKET,
+		'S3_BUCKET environment variable not set',
+	);
 
-	if (!bucketName || !salesforceApiDomain || !salesforceOauthSecretName) {
-		throw new Error('Environment variables not set');
-	}
+	const salesforceApiDomain = checkDefined<string>(
+		process.env.SALESFORCE_API_DOMAIN,
+		'SALESFORCE_API_DOMAIN environment variable not set',
+	);
+
+	const salesforceOauthSecretName = checkDefined<string>(
+		process.env.SALESFORCE_OAUTH_SECRET_NAME,
+		'SALESFORCE_OAUTH_SECRET_NAME environment variable not set',
+	);
 
 	const salesforceOauthCredentials =
 		await getSecretValue<SalesforceOauthCredentials>({

@@ -1,7 +1,8 @@
 package com.gu.newproduct.api.addsubscription
 
-import java.time.LocalDate
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 
+import java.time.LocalDate
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 
@@ -17,6 +18,7 @@ case class AddSubscriptionRequest(
     amountMinorUnits: Option[AmountMinorUnits],
     acquisitionCase: CaseId,
     planId: PlanId,
+    discountRatePlanId: Option[ProductRatePlanId],
 )
 
 case class CaseId(value: String) extends AnyVal
@@ -34,6 +36,7 @@ object AddSubscriptionRequest {
       amountMinorUnits: Option[Int],
       acquisitionCase: String,
       planId: String,
+      discountRatePlanId: Option[String],
   ) {
     def toAddSubscriptionRequest = {
       val parsedRequestOrError = for {
@@ -48,6 +51,7 @@ object AddSubscriptionRequest {
         amountMinorUnits = amountMinorUnits.map(AmountMinorUnits.apply),
         CaseId(acquisitionCase),
         parsedPlanId,
+        discountRatePlanId = discountRatePlanId.map(ProductRatePlanId.apply),
       )
 
       parsedRequestOrError match {

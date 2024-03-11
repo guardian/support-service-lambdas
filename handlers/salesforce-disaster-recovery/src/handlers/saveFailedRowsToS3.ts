@@ -1,3 +1,4 @@
+import { checkDefined } from '@modules/nullAndUndefined';
 import {
 	type AccountRowWithResult,
 	convertArrayToCsv,
@@ -11,11 +12,10 @@ export const handler = async (event: {
 }): Promise<void> => {
 	const { resultFiles, filePath } = event;
 
-	const bucketName = process.env.S3_BUCKET;
-
-	if (!bucketName) {
-		throw new Error('Environment variables not set');
-	}
+	const bucketName = checkDefined<string>(
+		process.env.S3_BUCKET,
+		'S3_BUCKET environment variable not set',
+	);
 
 	const failedRows: AccountRowWithResult[] = [];
 

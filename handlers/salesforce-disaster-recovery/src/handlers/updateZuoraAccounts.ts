@@ -1,3 +1,4 @@
+import { checkDefined } from '@modules/nullAndUndefined';
 import { type Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import {
@@ -12,11 +13,10 @@ export const handler = async (event: {
 }): Promise<AccountRowWithResult[]> => {
 	const { Items } = event;
 
-	const stage = process.env.STAGE;
-
-	if (!stage) {
-		throw new Error('Environment variables not set');
-	}
+	const stage = checkDefined<string>(
+		process.env.STAGE,
+		'STAGE environment variable not set',
+	);
 
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
 

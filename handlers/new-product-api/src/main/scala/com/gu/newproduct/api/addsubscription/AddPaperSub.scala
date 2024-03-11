@@ -48,15 +48,33 @@ class AddPaperSub(
     zuoraRatePlanId <- getZuoraRateplanId(request.planId)
       .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
       .toAsync
+
+    ratePlans = request.discountRatePlanId
+      .map(id =>
+        List(
+          ZuoraCreateSubRequestRatePlan(
+            productRatePlanId = id,
+            maybeChargeOverride = None,
+          ),
+          ZuoraCreateSubRequestRatePlan(
+            maybeChargeOverride = None,
+            productRatePlanId = zuoraRatePlanId,
+          ),
+        ),
+      )
+      .getOrElse(
+        List(
+          ZuoraCreateSubRequestRatePlan(
+            maybeChargeOverride = None,
+            productRatePlanId = zuoraRatePlanId,
+          ),
+        ),
+      )
+
     createSubRequest = ZuoraCreateSubRequest(
       request = request,
       acceptanceDate = request.startDate,
-      ratePlans = List(
-        ZuoraCreateSubRequestRatePlan(
-          maybeChargeOverride = None,
-          productRatePlanId = zuoraRatePlanId,
-        ),
-      ),
+      ratePlans = ratePlans,
     )
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create paper subscription")
     plan = getPlan(request.planId)
