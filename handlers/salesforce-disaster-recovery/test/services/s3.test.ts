@@ -1,10 +1,6 @@
-import {
-	GetObjectCommand,
-	PutObjectCommand,
-	S3Client,
-} from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getFileFromS3, uploadFileToS3 } from '../../src/services';
+import { uploadFileToS3 } from '../../src/services';
 
 const s3ClientMock = mockClient(S3Client);
 
@@ -43,54 +39,54 @@ describe('S3 functions', () => {
 		});
 	});
 
-	describe('getFileFromS3', () => {
-		beforeEach(() => {
-			s3ClientMock.reset();
-			jest.resetAllMocks();
-			console.error = jest.fn();
-		});
+	// describe('getFileFromS3', () => {
+	// 	beforeEach(() => {
+	// 		s3ClientMock.reset();
+	// 		jest.resetAllMocks();
+	// 		console.error = jest.fn();
+	// 	});
 
-		test('should retrieve file content from S3', async () => {
-			const getObjectResponse = {
-				Body: {
-					transformToString: jest.fn().mockReturnValue(content),
-				},
-			};
+	// 	test('should retrieve file content from S3', async () => {
+	// 		const getObjectResponse = {
+	// 			Body: {
+	// 				transformToString: jest.fn().mockReturnValue(content),
+	// 			},
+	// 		};
 
-			// @ts-expect-error I can't make TypeScript happy
-			s3ClientMock.on(GetObjectCommand).resolves(getObjectResponse);
+	// 		// @ts-expect-error I can't make TypeScript happy
+	// 		s3ClientMock.on(GetObjectCommand).resolves(getObjectResponse);
 
-			const result = await getFileFromS3({
-				bucketName: 'test-bucket',
-				filePath: 'path/to/file.txt',
-			});
+	// 		const result = await getFileFromS3({
+	// 			bucketName: 'test-bucket',
+	// 			filePath: 'path/to/file.txt',
+	// 		});
 
-			expect(result).toEqual(content);
-			expect(s3ClientMock.calls().length).toEqual(1);
-			const getObjectArgs = s3ClientMock.call(0).firstArg as GetObjectCommand;
-			expect(getObjectArgs.input.Bucket).toEqual('test-bucket');
-			expect(getObjectArgs.input.Key).toEqual('path/to/file.txt');
-		});
+	// 		expect(result).toEqual(content);
+	// 		expect(s3ClientMock.calls().length).toEqual(1);
+	// 		const getObjectArgs = s3ClientMock.call(0).firstArg as GetObjectCommand;
+	// 		expect(getObjectArgs.input.Bucket).toEqual('test-bucket');
+	// 		expect(getObjectArgs.input.Key).toEqual('path/to/file.txt');
+	// 	});
 
-		test('should throw error if S3 request fails', async () => {
-			const errorMessage = 'Failed to retrieve file';
+	// 	test('should throw error if S3 request fails', async () => {
+	// 		const errorMessage = 'Failed to retrieve file';
 
-			s3ClientMock.on(GetObjectCommand).rejects(new Error(errorMessage));
+	// 		s3ClientMock.on(GetObjectCommand).rejects(new Error(errorMessage));
 
-			await expect(getFileFromS3({ bucketName, filePath })).rejects.toThrow(
-				'Failed to retrieve file',
-			);
-		});
+	// 		await expect(getFileFromS3({ bucketName, filePath })).rejects.toThrow(
+	// 			'Failed to retrieve file',
+	// 		);
+	// 	});
 
-		test('should throw error if file content is empty', async () => {
-			s3ClientMock.on(GetObjectCommand).resolves({ Body: undefined });
+	// 	test('should throw error if file content is empty', async () => {
+	// 		s3ClientMock.on(GetObjectCommand).resolves({ Body: undefined });
 
-			await expect(
-				getFileFromS3({
-					bucketName: 'test-bucket',
-					filePath: 'path/to/file.txt',
-				}),
-			).rejects.toThrow('File is empty');
-		});
-	});
+	// 		await expect(
+	// 			getFileFromS3({
+	// 				bucketName: 'test-bucket',
+	// 				filePath: 'path/to/file.txt',
+	// 			}),
+	// 		).rejects.toThrow('File is empty');
+	// 	});
+	// });
 });

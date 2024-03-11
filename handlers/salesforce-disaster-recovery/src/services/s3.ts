@@ -47,7 +47,7 @@ export const getFileFromS3 = async ({
 		const response = await s3Client.send(command);
 
 		if (!response.Body) {
-			throw new Error('The file is empty');
+			throw new Error('File is empty');
 		}
 
 		const readStream = response.Body.transformToWebStream();
