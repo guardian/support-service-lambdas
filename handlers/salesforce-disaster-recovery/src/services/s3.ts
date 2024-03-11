@@ -55,6 +55,7 @@ export const getFileFromS3 = async ({
 		const fileContent = response.Body.transformToString();
 		console.log('after');
 		console.log(fileContent);
+		console.log('here');
 
 		return fileContent;
 	} catch (error) {
