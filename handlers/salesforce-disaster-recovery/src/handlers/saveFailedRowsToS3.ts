@@ -28,13 +28,17 @@ export const handler = async (event: {
 
 		const fileContent = JSON.parse(fileString) as Array<{ Cause: string }>;
 
-		for (const item of fileContent) {
-			console.log(item.Cause);
-			const parsedCause = JSON.parse(item.Cause) as {
+		for (const batch of fileContent) {
+			console.log(batch.Cause);
+			const parsedCause = JSON.parse(batch.Cause) as {
 				errorType: string;
 				errorMessage: string;
 			};
 			console.log(parsedCause);
+			const errors = JSON.parse(
+				parsedCause.errorMessage,
+			) as AccountRowWithResult[];
+			console.log(errors);
 		}
 
 		// const cause = JSON.parse(fileContent.Cause) as {
