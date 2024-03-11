@@ -20,10 +20,12 @@ export const handler = async (event: {
 	const failedRows: AccountRowResult[] = [];
 
 	for (const file of resultFiles) {
+		console.log('before calling');
 		const fileString = await getFileFromS3({
 			bucketName,
 			filePath: file.Key,
 		});
+		console.log('after calling');
 
 		const fileContent = JSON.parse(fileString) as Array<{ Output: string }>;
 
