@@ -27,6 +27,7 @@ export const handler = async (event: {
 			bucketName,
 			filePath: file.Key,
 		});
+		console.log(fileString);
 
 		const fileContent = JSON.parse(fileString) as Array<{ Output: string }>;
 		console.log('before');
