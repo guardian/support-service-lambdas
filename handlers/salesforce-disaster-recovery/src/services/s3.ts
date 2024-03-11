@@ -53,6 +53,7 @@ export const getFileFromS3 = async ({
 		const readStream = response.Body.transformToWebStream();
 
 		console.log(readStream);
+		return 'lksdf';
 	} catch (error) {
 		console.error(error);
 		throw error;
