@@ -45,20 +45,13 @@ export const getFileFromS3 = async ({
 		});
 
 		const response = await s3Client.send(command);
+		const fileContent = response.Body?.transformToString();
 
-		if (!response.Body) {
+		if (!fileContent) {
 			throw new Error('File is empty');
 		}
 
-		const readStream = response.Body.transformToWebStream();
-		// @ts-expect-error I can't make TypeScript happy
-		readStream.on('data', (data: unknown) => {
-			console.log('here');
-			console.log(data);
-		});
-
-		console.log(readStream);
-		return 'lksdf';
+		return fileContent;
 	} catch (error) {
 		console.error(error);
 		throw error;
