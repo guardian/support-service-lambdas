@@ -37,6 +37,8 @@ export const handler = async (event: {
 			failedRows.push(...failedResults);
 		}
 	}
+	console.log(failedRows.length);
+
 	console.log('here');
 
 	const content = convertArrayToCsv({
