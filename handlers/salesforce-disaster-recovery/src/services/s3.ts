@@ -52,7 +52,7 @@ export const getFileFromS3 = async ({
 
 		console.log('before');
 		console.log(response.Body);
-		const fileContent = response.Body.transformToString();
+		const fileContent = await response.Body.transformToString();
 		console.log('after');
 		console.log(fileContent);
 		console.log('here');
