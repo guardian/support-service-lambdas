@@ -53,5 +53,11 @@ export const handler = async (event: {
 			) ?? batchUpdateResult,
 	);
 
+	if (results.find((result) => !result.Success)) {
+		throw new Error(
+			JSON.stringify(results.filter((result) => !result.Success)),
+		);
+	}
+
 	return results;
 };

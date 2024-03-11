@@ -25,14 +25,23 @@ export const handler = async (event: {
 			filePath: file.Key,
 		});
 
-		const fileContent = JSON.parse(fileString) as Array<{ Output: string }>;
+		const fileContent = JSON.parse(fileString) as { Cause: string };
+		const cause = JSON.parse(fileContent.Cause) as {
+			errorType: string;
+			errorMessage: string;
+		};
 
-		for (const batch of fileContent) {
-			const output = JSON.parse(batch.Output) as AccountRowWithResult[];
-			const failedResults = output.filter((row) => !row.Success);
-			failedRows.push(...failedResults);
-		}
+		console.log(cause);
+		// for (const account of JSON.parse(
+		// 	fileContent.Cause,
+		// ) as AccountRowWithResult[]) {
+		// 	failedRows.push(account);
+		// 	// const output = JSON.parse(batch.Output) as AccountRowWithResult[];
+		// 	// const failedResults = output.filter((row) => !row.Success);
+		// 	// failedRows.push(...failedResults);
+		// }
 	}
+	// console.log(failedRows);
 
 	const content = convertArrayToCsv({
 		arr: failedRows.map((row) => ({

@@ -191,6 +191,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				stateJson: {
 					Type: 'Map',
 					MaxConcurrency: 10,
+					ToleratedFailurePercentage: 100,
 					ItemReader: {
 						Resource: 'arn:aws:states:::s3:getObject',
 						ReaderConfig: {
@@ -290,7 +291,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				],
 			}),
 			payload: TaskInput.fromObject({
-				'resultFiles.$': '$.ResultFiles.SUCCEEDED',
+				'resultFiles.$': '$.ResultFiles.FAILED',
 				filePath: JsonPath.format(
 					`{}/${failedRowsFileName}`,
 					JsonPath.stringAt('$$.Execution.StartTime'),
