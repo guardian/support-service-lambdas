@@ -76,7 +76,7 @@ describe('Handler', () => {
 		process.env = {};
 
 		await expect(handler(mockEvent)).rejects.toThrow(
-			'Environment variables not set',
+			'S3_BUCKET environment variable not set',
 		);
 
 		expect(getSecretValue).not.toHaveBeenCalled();

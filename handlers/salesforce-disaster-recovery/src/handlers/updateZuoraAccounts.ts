@@ -1,3 +1,4 @@
+import { checkDefined } from '@modules/nullAndUndefined';
 import { type Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { type AccountRow, batchUpdateZuoraAccounts } from '../services';
@@ -5,11 +6,10 @@ import { type AccountRow, batchUpdateZuoraAccounts } from '../services';
 export const handler = async (event: { Items: AccountRow[] }) => {
 	const { Items } = event;
 
-	const stage = process.env.STAGE;
-
-	if (!stage) {
-		throw new Error('Environment variables not set');
-	}
+	const stage = checkDefined<string>(
+		process.env.STAGE,
+		'STAGE environment variable not set',
+	);
 
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
 
