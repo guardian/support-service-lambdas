@@ -11,6 +11,7 @@ export const handler = async (event: {
 	filePath: string;
 }): Promise<void> => {
 	const { resultFiles, filePath } = event;
+	console.log(resultFiles, filePath);
 
 	const bucketName = checkDefined<string>(
 		process.env.S3_BUCKET,

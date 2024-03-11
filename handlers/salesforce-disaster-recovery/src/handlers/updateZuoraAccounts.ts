@@ -54,12 +54,9 @@ export const handler = async (event: {
 	);
 
 	if (results.find((result) => !result.Success)) {
-		throw new Error('TestError', {
-			cause: results.filter((result) => !result.Success),
-		});
-		// throw new Error(
-		// 	JSON.stringify(results.filter((result) => !result.Success)),
-		// );
+		throw new Error(
+			JSON.stringify(results.filter((result) => !result.Success)),
+		);
 	}
 
 	return results;
