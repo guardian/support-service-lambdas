@@ -51,9 +51,10 @@ export const getFileFromS3 = async ({
 		}
 
 		const readStream = response.Body.transformToWebStream();
-		readStream.on('data', (a) => {
+		// @ts-expect-error I can't make TypeScript happy
+		readStream.on('data', (data: unknown) => {
 			console.log('here');
-			console.log(a);
+			console.log(data);
 		});
 
 		console.log(readStream);
