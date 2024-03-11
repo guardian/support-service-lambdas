@@ -29,7 +29,7 @@ export const handler = async (event: {
 		});
 
 		const fileContent = JSON.parse(fileString) as Array<{ Output: string }>;
-
+		console.log('before');
 		for (const batch of fileContent) {
 			console.log('batch');
 			const output = JSON.parse(batch.Output) as AccountRowResult[];
@@ -37,6 +37,7 @@ export const handler = async (event: {
 			failedRows.push(...failedResults);
 		}
 	}
+	console.log('here');
 
 	const content = convertArrayToCsv({
 		arr: failedRows.map((row) => ({
@@ -44,6 +45,7 @@ export const handler = async (event: {
 			Errors: JSON.stringify(row.Errors),
 		})),
 	});
+	console.log('there');
 
 	await uploadFileToS3({
 		bucketName,
