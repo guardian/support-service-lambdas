@@ -52,12 +52,14 @@ export const getFileFromS3 = async ({
 
 		console.log('before');
 		console.log(response.Body);
-		const fileContent = await response.Body.transformToString();
+		// const fileContent = await response.Body.transformToString();
+		console.log(response.Body.transformToWebStream());
 		console.log('after');
-		console.log(fileContent);
+		// console.log(fileContent);
 		console.log('here');
 
-		return fileContent;
+		// return fileContent;
+		return '[]';
 	} catch (error) {
 		console.error(error);
 		throw error;
