@@ -43,18 +43,30 @@ export const getFileFromS3 = async ({
 			Bucket: bucketName,
 			Key: filePath,
 		});
-		console.log(command);
 
 		const response = await s3Client.send(command);
-		console.log(response);
-		const fileContent = response.Body?.transformToString();
-		console.log(fileContent);
-
-		if (!fileContent) {
-			console.log('error');
+		if (!response.Body) {
 			throw new Error('File is empty');
 		}
-		console.log('return');
+
+		// Readable stream to capture the response body
+		const chunks: Uint8Array[] = [];
+		response.Body.on('data', (chunk: Uint8Array) => {
+			chunks.push(chunk);
+		});
+
+		// Promise to resolve when the stream ends
+		const streamEnd = new Promise<void>((resolve, reject) => {
+			response.Body.on('end', () => resolve());
+			response.Body.on('error', (error) => reject(error));
+		});
+
+		// Wait for the stream to end and concatenate all chunks into a single buffer
+		await streamEnd;
+		const buffer = Buffer.concat(chunks);
+
+		// Convert the buffer to a string
+		const fileContent = buffer.toString();
 
 		return fileContent;
 	} catch (error) {
