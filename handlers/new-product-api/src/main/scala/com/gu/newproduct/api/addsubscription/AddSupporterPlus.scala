@@ -61,15 +61,31 @@ class AddSupporterPlus(
         .toAsync
       contributionAmount = getContributionAmount(amountMinorUnits, account.currency, plan)
       chargeOverride = ChargeOverride(Some(contributionAmount), planAndCharge.contributionProductRatePlanChargeId, None)
+      ratePlans = request.discountRatePlanId
+        .map(id =>
+          List(
+            ZuoraCreateSubRequestRatePlan(
+              productRatePlanId = id,
+              maybeChargeOverride = None,
+            ),
+            ZuoraCreateSubRequestRatePlan(
+              productRatePlanId = planAndCharge.productRatePlanId,
+              maybeChargeOverride = Some(chargeOverride),
+            ),
+          ),
+        )
+        .getOrElse(
+          List(
+            ZuoraCreateSubRequestRatePlan(
+              productRatePlanId = planAndCharge.productRatePlanId,
+              maybeChargeOverride = Some(chargeOverride),
+            ),
+          ),
+        )
       zuoraCreateSubRequest = ZuoraCreateSubRequest(
         request = request,
         acceptanceDate = acceptanceDate,
-        ratePlans = List(
-          ZuoraCreateSubRequestRatePlan(
-            productRatePlanId = planAndCharge.productRatePlanId,
-            maybeChargeOverride = Some(chargeOverride),
-          ),
-        ),
+        ratePlans = ratePlans,
       )
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly supporter plus")
       supporterPlusEmailData = toSupporterPlusEmailData(
@@ -91,7 +107,7 @@ class AddSupporterPlus(
 object AddSupporterPlus {
 
   def wireSteps(
-    catalog: Map[PlanId, Plan],
+      catalog: Map[PlanId, Plan],
       zuoraIds: ZuoraIds,
       zuoraClient: Requests,
       isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
