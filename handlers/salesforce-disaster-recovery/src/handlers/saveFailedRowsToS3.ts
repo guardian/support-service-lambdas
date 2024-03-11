@@ -26,13 +26,23 @@ export const handler = async (event: {
 			filePath: file.Key,
 		});
 
-		const fileContent = JSON.parse(fileString) as { Cause: string };
-		const cause = JSON.parse(fileContent.Cause) as {
-			errorType: string;
-			errorMessage: string;
-		};
+		const fileContent = JSON.parse(fileString) as Array<{ Cause: string }>;
 
-		console.log(cause);
+		for (const item of fileContent) {
+			console.log(item.Cause);
+			const parsedCause = JSON.parse(item.Cause) as {
+				errorType: string;
+				errorMessage: string;
+			};
+			console.log(parsedCause);
+		}
+
+		// const cause = JSON.parse(fileContent.Cause) as {
+		// 	errorType: string;
+		// 	errorMessage: string;
+		// };
+
+		// console.log(cause);
 		// for (const account of JSON.parse(
 		// 	fileContent.Cause,
 		// ) as AccountRowWithResult[]) {
