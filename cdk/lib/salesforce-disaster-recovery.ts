@@ -15,7 +15,6 @@ import {
 	DefinitionBody,
 	Fail,
 	JsonPath,
-	Result,
 	StateMachine,
 	Succeed,
 	TaskInput,
@@ -304,15 +303,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 			resultSelector: {
 				failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
 				failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+				failedRowsFileConsoleUrl: JsonPath.format(
+					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+					bucket.bucketName,
+					this.region,
+					JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+				),
 			},
-			// resultSelector: Result.fromObject({
-			// 	modifiedPayload: {
-			// 		totalRowsCount: 30,
-			// 		failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
-			// 		failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
-			// 	},
-			// }),
-			// outputPath: JsonPath.stringAt('$.TaskResult.modifiedPayload'),
 		});
 
 		const stateMachine = new StateMachine(
@@ -333,7 +330,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
 											.next(
-												new Choice(this, 'IsSucceeded')
+												new Choice(this, 'HaveAllRowsSuccedeed')
 													.when(
 														Condition.numberEquals('$.failedRowsCount', 0),
 														new Succeed(this, 'AllRowsHaveSuccedeed'),
