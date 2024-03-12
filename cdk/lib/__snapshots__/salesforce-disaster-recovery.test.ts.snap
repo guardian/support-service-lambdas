@@ -157,14 +157,13 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
     "ProcessingResultEmailTemplate": {
       "Properties": {
         "Template": {
-          "HtmlPart": "
-					<html>
+          "HtmlPart": "<html>
 						<body>
 							<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed</h1>
+							<p>{{field}}</p>
 						</body>
-					</html>
-				",
-          "SubjectPart": "Welcome to our service",
+					</html>",
+          "SubjectPart": "Test",
           "TemplateName": "SalesforceDisasterRecoveryResyncingProcedureResult",
         },
       },
@@ -406,7 +405,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{ \\"name\\": \\"John Doe\\", \\"order_id\\": \\"123456\\" }"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1425,14 +1424,13 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     "ProcessingResultEmailTemplate": {
       "Properties": {
         "Template": {
-          "HtmlPart": "
-					<html>
+          "HtmlPart": "<html>
 						<body>
 							<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed</h1>
+							<p>{{field}}</p>
 						</body>
-					</html>
-				",
-          "SubjectPart": "Welcome to our service",
+					</html>",
+          "SubjectPart": "Test",
           "TemplateName": "SalesforceDisasterRecoveryResyncingProcedureResult",
         },
       },
@@ -1674,7 +1672,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{ \\"name\\": \\"John Doe\\", \\"order_id\\": \\"123456\\" }"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -2693,14 +2691,13 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
     "ProcessingResultEmailTemplate": {
       "Properties": {
         "Template": {
-          "HtmlPart": "
-					<html>
+          "HtmlPart": "<html>
 						<body>
 							<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed</h1>
+							<p>{{field}}</p>
 						</body>
-					</html>
-				",
-          "SubjectPart": "Welcome to our service",
+					</html>",
+          "SubjectPart": "Test",
           "TemplateName": "SalesforceDisasterRecoveryResyncingProcedureResult",
         },
       },
@@ -2942,7 +2939,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{ \\"name\\": \\"John Doe\\", \\"order_id\\": \\"123456\\" }"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
