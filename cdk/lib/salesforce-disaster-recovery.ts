@@ -318,7 +318,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Task',
-					Resource: 'arn:aws:states:::aws-sdk:sesv2:SendEmail',
+					Resource: 'arn:aws:states:::aws-sdk:ses:SendEmail',
 					Parameters: {
 						Destination: {
 							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
@@ -432,6 +432,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 					new PolicyStatement({
 						actions: ['lambda:InvokeFunction'],
 						resources: [updateZuoraAccountsLambda.functionArn],
+					}),
+					new PolicyStatement({
+						actions: ['ses:SendEmail'],
+						resources: ['*'],
 					}),
 				],
 			}),
