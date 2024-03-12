@@ -314,14 +314,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		new CfnTemplate(this, 'ProcessingResultEmailTemplate', {
 			template: {
-				subjectPart: 'Welcome to our service',
-				htmlPart: `
-					<html>
+				subjectPart: 'Test',
+				htmlPart: `<html>
 						<body>
 							<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed</h1>
+							<p>{{field}}</p>
 						</body>
-					</html>
-				`,
+					</html>`,
 				templateName: 'SalesforceDisasterRecoveryResyncingProcedureResult',
 			},
 		});
@@ -339,7 +338,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Source: 'membership.dev@theguardian.com',
 						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
-						TemplateData: `{ "name": "John Doe", "order_id": "123456" }`,
+						TemplateData: JSON.stringify({ field: 'test' }),
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
