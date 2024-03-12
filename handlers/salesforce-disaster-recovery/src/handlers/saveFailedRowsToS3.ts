@@ -11,7 +11,6 @@ export const handler = async (event: {
 	filePath: string;
 }): Promise<void> => {
 	const { resultFiles, filePath } = event;
-	console.log(resultFiles, filePath);
 
 	const bucketName = checkDefined<string>(
 		process.env.S3_BUCKET,
@@ -26,45 +25,30 @@ export const handler = async (event: {
 			filePath: file.Key,
 		});
 
-		const fileContent = JSON.parse(fileString) as Array<{ Cause: string }>;
+		const failedBatches = JSON.parse(fileString) as Array<{ Cause: string }>;
 
-		for (const batch of fileContent) {
-			console.log(batch.Cause);
-			const parsedCause = JSON.parse(batch.Cause) as {
+		for (const batch of failedBatches) {
+			const batchFailureCause = JSON.parse(batch.Cause) as {
 				errorType: string;
 				errorMessage: string;
 			};
-			console.log(parsedCause);
-			const errors = JSON.parse(
-				parsedCause.errorMessage,
+
+			const batchFailedRows = JSON.parse(
+				batchFailureCause.errorMessage,
 			) as AccountRowWithResult[];
-			console.log(errors);
-			failedRows.push(...errors);
+
+			failedRows.push(...batchFailedRows);
 		}
-
-		// const cause = JSON.parse(fileContent.Cause) as {
-		// 	errorType: string;
-		// 	errorMessage: string;
-		// };
-
-		// console.log(cause);
-		// for (const account of JSON.parse(
-		// 	fileContent.Cause,
-		// ) as AccountRowWithResult[]) {
-		// 	failedRows.push(account);
-		// 	// const output = JSON.parse(batch.Output) as AccountRowWithResult[];
-		// 	// const failedResults = output.filter((row) => !row.Success);
-		// 	// failedRows.push(...failedResults);
-		// }
 	}
-	// console.log(failedRows);
+	console.log(failedRows);
 
 	const content = convertArrayToCsv({
 		arr: failedRows.map((row) => ({
-			Id: row.Id,
-			Zuora__Zuora_Id__c: row.Zuora__Zuora_Id__c,
-			Zuora__Account__c: row.Zuora__Account__c,
-			Contact__c: row.Contact__c,
+			...row,
+			// Id: row.Id,
+			// Zuora__Zuora_Id__c: row.Zuora__Zuora_Id__c,
+			// Zuora__Account__c: row.Zuora__Account__c,
+			// Contact__c: row.Contact__c,
 			Errors: JSON.stringify(row.Errors),
 		})),
 	});
