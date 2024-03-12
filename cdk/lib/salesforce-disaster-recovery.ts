@@ -312,32 +312,62 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		// const emailProcessingResult = new CustomState(
-		// 	this,
-		// 	'EmailProcessingResult',
-		// 	{
-		// 		stateJson: {
-		// 			Type: 'Task',
-		// 			Resource: 'arn:aws:states:::aws-sdk:ses:SendEmail',
-		// 			Parameters: {
-		// 				Destination: {
-		// 					ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
-		// 				},
-		// 				Message: {
-		// 					Body: {
-		// 						Text: {
-		// 							Data: 'test',
-		// 						},
-		// 					},
-		// 					Subject: {
-		// 						Data: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
-		// 					},
-		// 				},
-		// 				Source: 'membership.dev@theguardian.com',
+		const emailProcessingResult = new CustomState(
+			this,
+			'EmailProcessingResult',
+			{
+				stateJson: {
+					Type: 'Task',
+					Resource: 'arn:aws:states:::aws-sdk:ses:sendEmail',
+					Parameters: {
+						Destination: {
+							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
+						},
+						Message: {
+							Body: {
+								Text: {
+									Data: 'Test',
+								},
+							},
+							Subject: {
+								Data: 'MyData',
+							},
+						},
+						Source: 'membership.dev@theguardian.com',
+					},
+				},
+			},
+		);
+
+		// {
+		// 	"Comment": "A description of my state machine",
+		// 	"StartAt": "SendEmail",
+		// 	"States": {
+		// 	  "SendEmail": {
+		// 		"Type": "Task",
+		// 		"End": true,
+		// 		"Parameters": {
+		// 		  "Destination": {
+		// 			"ToAddresses": [
+		// 			  "andrea.diotallevi@guardian.co.uk"
+		// 			]
+		// 		  },
+		// 		  "Message": {
+		// 			"Body": {
+		// 			  "Text": {
+		// 				"Data": "Test"
+		// 			  }
 		// 			},
+		// 			"Subject": {
+		// 			  "Data": "MyData"
+		// 			}
+		// 		  },
+		// 		  "Source": "membership.dev@theguardian.com"
 		// 		},
-		// 	},
-		// );
+		// 		"Resource": "arn:aws:states:::aws-sdk:ses:sendEmail"
+		// 	  }
+		// 	}
+		//   }
 
 		const stateMachine = new StateMachine(
 			this,
@@ -356,7 +386,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
-											// .next(emailProcessingResult)
+											.next(emailProcessingResult)
 											.next(
 												new Choice(this, 'HaveAllRowsSuccedeed')
 													.when(
@@ -434,7 +464,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						resources: [updateZuoraAccountsLambda.functionArn],
 					}),
 					new PolicyStatement({
-						actions: ['ses:SendEmail'],
+						actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
 						resources: ['*'],
 					}),
 				],
