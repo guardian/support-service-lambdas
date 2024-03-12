@@ -9,7 +9,7 @@ import {
 export const handler = async (event: {
 	resultFiles: Array<{ Key: string; Size: number }>;
 	filePath: string;
-}): Promise<void> => {
+}) => {
 	const { resultFiles, filePath } = event;
 
 	const bucketName = checkDefined<string>(
@@ -33,22 +33,20 @@ export const handler = async (event: {
 				errorMessage: string;
 			};
 
-			const batchFailedRows = JSON.parse(
+			const failedRowsInBatch = JSON.parse(
 				batchFailureCause.errorMessage,
 			) as AccountRowWithResult[];
 
-			failedRows.push(...batchFailedRows);
+			failedRows.push(...failedRowsInBatch);
 		}
 	}
-	console.log(failedRows);
 
 	const content = convertArrayToCsv({
 		arr: failedRows.map((row) => ({
-			...row,
-			// Id: row.Id,
-			// Zuora__Zuora_Id__c: row.Zuora__Zuora_Id__c,
-			// Zuora__Account__c: row.Zuora__Account__c,
-			// Contact__c: row.Contact__c,
+			Id: row.Id,
+			Zuora__Zuora_Id__c: row.Zuora__Zuora_Id__c,
+			Zuora__Account__c: row.Zuora__Account__c,
+			Contact__c: row.Contact__c,
 			Errors: JSON.stringify(row.Errors),
 		})),
 	});
@@ -58,4 +56,9 @@ export const handler = async (event: {
 		filePath,
 		content,
 	});
+
+	return {
+		failedRowsCount: failedRows.length,
+		failedRowsFilePath: filePath,
+	};
 };

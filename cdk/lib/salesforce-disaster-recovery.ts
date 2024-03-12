@@ -13,8 +13,11 @@ import {
 	Condition,
 	CustomState,
 	DefinitionBody,
+	Fail,
 	JsonPath,
+	Result,
 	StateMachine,
+	Succeed,
 	TaskInput,
 	Wait,
 	WaitTime,
@@ -298,6 +301,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 					JsonPath.stringAt('$$.Execution.StartTime'),
 				),
 			}),
+			resultSelector: Result.fromObject({
+				totalRowsCount: 30,
+				failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
+				failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+			}),
 		});
 
 		const stateMachine = new StateMachine(
@@ -316,7 +324,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 									saveSalesforceQueryResultToS3.next(
 										processCsvInDistributedMap
 											.next(getMapResult)
-											.next(saveFailedRowsToS3),
+											.next(saveFailedRowsToS3)
+											.next(
+												new Choice(this, 'IsSucceeded')
+													.when(
+														Condition.numberGreaterThan('$.failedRowsCount', 0),
+														new Fail(this, 'SomeRowsHaveFailed'),
+													)
+													.otherwise(new Succeed(this, 'AllRowsHaveSuccedeed')),
+											),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
