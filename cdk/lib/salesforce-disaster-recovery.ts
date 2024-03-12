@@ -312,6 +312,33 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
+		const emailProcessingResult = new CustomState(
+			this,
+			'EmailProcessingResult',
+			{
+				stateJson: {
+					Type: 'Task',
+					Resource: 'arn:aws:states:::ses:SendEmail',
+					Parameters: {
+						Destination: {
+							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
+						},
+						Message: {
+							Body: {
+								Text: {
+									Data: 'test',
+								},
+							},
+							Subject: {
+								Data: 'Test',
+							},
+						},
+						Source: 'membership.dev@theguardian.com',
+					},
+				},
+			},
+		);
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -329,6 +356,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
+											.next(emailProcessingResult)
 											.next(
 												new Choice(this, 'HaveAllRowsSuccedeed')
 													.when(
