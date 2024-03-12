@@ -3,6 +3,7 @@ package com.gu.newproduct.api.addsubscription.email.paper
 import java.time.LocalDate
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
+import com.gu.newproduct.api.addsubscription.DiscountMessage
 import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
@@ -72,6 +73,29 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
     deliveryAgentDetails = None,
     discountMessage = None,
   )
+
+  val directDebitVoucherDataWithDiscount = PaperEmailData(
+    plan = Plan(
+      id = VoucherEveryDayPlus,
+      description = PlanDescription("Everyday+"),
+      testStartDateRules,
+      paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month")),
+    ),
+    firstPaymentDate = LocalDate.of(2018, 12, 1),
+    firstPaperDate = LocalDate.of(2018, 11, 1),
+    subscriptionName = SubscriptionName("A-S000SubId"),
+    contacts = contacts,
+    paymentMethod = DirectDebit(
+      ActivePaymentMethod,
+      BankAccountName("someAccountName"),
+      BankAccountNumberMask("*****mask"),
+      SortCode("123456"),
+      MandateId("MandateId"),
+    ),
+    currency = GBP,
+    deliveryAgentDetails = None,
+    discountMessage = Some(DiscountMessage("GBP 10.00 for first 2 months , then GBP 12.25 every 12 months")),
+  )
   it should "generate json payload for voucher data with direct debit fields" in {
 
     val actualJson = Json.toJson(directDebitVoucherData)
@@ -115,6 +139,51 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
 
     actualJson shouldBe Json.parse(expected)
   }
+
+  it should "generate json payload for voucher data(with Discounts) with direct debit fields " in {
+
+    val actualJson = Json.toJson(directDebitVoucherDataWithDiscount)
+
+    val expected =
+      """
+        |{
+        |  "ZuoraSubscriberId" : "A-S000SubId",
+        |  "SubscriberKey" : "bill@contact.com",
+        |  "subscriber_id" : "A-S000SubId",
+        |  "IncludesDigipack" : "true",
+        |  "date_of_first_paper" : "1 November 2018",
+        |  "date_of_first_payment" : "1 December 2018",
+        |  "package" : "Everyday+",
+        |  "subscription_rate" : "GBP 10.00 for first 2 months , then GBP 12.25 every 12 months",
+        |  "bank_account_no" : "*****mask",
+        |  "bank_sort_code" : "12-34-56",
+        |  "account_holder" : "someAccountName",
+        |  "mandate_id" : "MandateId",
+        |  "payment_method" : "Direct Debit",
+        |  "title" : "SoldToTitle",
+        |  "first_name" : "FirstSold",
+        |  "last_name" : "lastSold",
+        |  "EmailAddress" : "bill@contact.com",
+        |
+        |  "billing_address_line_1" : "billToAddress1",
+        |  "billing_address_line_2" : "billToAddress2",
+        |  "billing_address_town" : "billToCity",
+        |  "billing_county" : "billToState",
+        |  "billing_postcode" : "billToPostcode",
+        |  "billing_country" : "United Kingdom",
+        |
+        |  "delivery_address_line_1" : "soldToAddress1",
+        |  "delivery_address_line_2" : "soldToAddress2",
+        |  "delivery_address_town" : "soldToCity",
+        |  "delivery_county" : "soldToState",
+        |  "delivery_postcode" : "soldToPostcode",
+        |  "delivery_country" : "United States"
+        |}
+      """.stripMargin
+
+    actualJson shouldBe Json.parse(expected)
+  }
+
 
   it should "not include direct debit fields if payment method is not direct debit" in {
 

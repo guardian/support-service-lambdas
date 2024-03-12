@@ -2,7 +2,7 @@ package com.gu.newproduct.api.addsubscription.email.supporterPlus
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.{ZuoraAccountId,DiscountMessage}
+import com.gu.newproduct.api.addsubscription.{DiscountMessage, ZuoraAccountId}
 import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.email.serialisers.SupporterPlusEmailDataSerialiser._
@@ -13,6 +13,7 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription}
 import com.gu.newproduct.api.productcatalog.PlanId.{MonthlyContribution, MonthlySupporterPlus}
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
@@ -71,6 +72,25 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
     discountMessage = None,
   )
 
+  val directDebitSupporterPlusDataWithDiscount = SupporterPlusEmailData(
+    accountId = ZuoraAccountId("accountId"),
+    currency = GBP,
+    paymentMethod = DirectDebit(
+      ActivePaymentMethod,
+      BankAccountName("someAccountName"),
+      BankAccountNumberMask("*****mask"),
+      SortCode("123456"),
+      MandateId("mandateId"),
+    ),
+    amountMinorUnits = AmountMinorUnits(20000),
+    firstPaymentDate = LocalDate.of(2024, 03, 1),
+    plan = Plan(id = MonthlySupporterPlus, description = PlanDescription("monthly"), testStartDateRules),
+    contacts = testContacts,
+    created = LocalDate.of(2024, 03, 1),
+    subscriptionName = SubscriptionName("A-S000SubId"),
+    discountMessage = Some(DiscountMessage("164.76 GBP for the next  12 months. Then 200 GBP per year")),
+  )
+
   it should "serialise  direct debit supporterPlus Email to json" in {
 
 
@@ -91,7 +111,7 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "EmailAddress":"bill@contact.com",
         | "created":"2024-03-01",
         | "product":"monthly-supporter-plus",
-        | "subscription details":"12.12 £ per month"
+        | "subscription details":""
         |}
       """.stripMargin
     actualJson shouldBe Json.parse(expected)
@@ -114,13 +134,42 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
         | "edition":"GB",
         | "name":"firstBill",
         | "product":"monthly-supporter-plus",
-        | "subscription details":"12.12 £ per month",
         | "payment method": "Credit/Debit Card",
-        | "first payment date":"Friday, 1 March 2024"
+        | "first payment date":"Friday, 1 March 2024",
+        | "subscription details":""
         | }
         """.stripMargin
     Json.toJson(nonDirectDebitData) shouldBe Json.parse(expected)
 
   }
+
+  it should "serialise  direct debit supporterPlus Email  with Discount to json" in {
+
+
+    val actualJson = Json.toJson(directDebitSupporterPlusDataWithDiscount)
+    val expected =
+      """
+        |{
+        | "ZuoraSubscriberId":"A-S000SubId",
+        | "name":"firstBill",
+        | "account name":"someAccountName",
+        | "Mandate ID":"mandateId",
+        | "sort code":"12-34-56",
+        | "payment method": "Direct Debit",
+        | "first payment date":"Friday, 1 March 2024",
+        | "edition":"GB",
+        | "amount":"200.00",
+        | "currency":"£",
+        | "account number":"*****mask",
+        | "EmailAddress":"bill@contact.com",
+        | "created":"2024-03-01",
+        | "product":"monthly-supporter-plus",
+        | "subscription details":"164.76 GBP for the next  12 months. Then 200 GBP per year"
+        |}
+      """.stripMargin
+    actualJson shouldBe Json.parse(expected)
+
+  }
+
 
 }

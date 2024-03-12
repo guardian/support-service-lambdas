@@ -1,15 +1,15 @@
 package com.gu.newproduct.api.addsubscription.email
 
 import java.time.LocalDate
-
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.Formatters._
-import com.gu.newproduct.api.addsubscription.{ZuoraAccountId,DiscountMessage}
+import com.gu.newproduct.api.addsubscription.{DiscountMessage, ZuoraAccountId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan}
 
 sealed trait EmailData {

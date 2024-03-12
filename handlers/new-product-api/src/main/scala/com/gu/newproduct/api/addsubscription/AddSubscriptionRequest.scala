@@ -19,7 +19,7 @@ case class AddSubscriptionRequest(
     acquisitionCase: CaseId,
     planId: PlanId,
     discountRatePlanId: Option[ProductRatePlanId],
-    discountMessage: Option[DiscountMessage] =None,
+    discountMessage: Option[DiscountMessage],
 )
 
 case class CaseId(value: String) extends AnyVal

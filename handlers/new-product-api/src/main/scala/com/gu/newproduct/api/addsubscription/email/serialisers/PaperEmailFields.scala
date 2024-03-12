@@ -36,7 +36,7 @@ object PaperEmailFields {
       "date_of_first_paper" -> data.firstPaperDate.format(dateformat),
       "date_of_first_payment" -> data.firstPaymentDate.format(dateformat),
       "package" -> data.plan.description.value,
-      "subscription_rate" -> data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse(""),
+      "subscription_rate" -> data.discountMessage.map(_.value).getOrElse(data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")),
     )
   }
 
