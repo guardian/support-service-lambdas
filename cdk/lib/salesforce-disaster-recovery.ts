@@ -203,11 +203,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
+							Key: 'two-rows.csv',
 							// Key: 'two-rows-one-will-error.csv',
-							'Key.$': JsonPath.format(
-								`{}/${queryResultFileName}`,
-								JsonPath.stringAt('$$.Execution.StartTime'),
-							),
+							// 'Key.$': JsonPath.format(
+							// 	`{}/${queryResultFileName}`,
+							// 	JsonPath.stringAt('$$.Execution.StartTime'),
+							// ),
 						},
 					},
 					ItemBatcher: {
@@ -323,7 +324,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						</body>
 					</html>
 				`,
-				templateName: 'SalesforceDisasterRecoveryProcessingResult',
+				templateName: 'SalesforceDisasterRecoveryResyncingProcedureResult',
 			},
 		});
 
@@ -339,7 +340,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
 						},
 						Source: 'membership.dev@theguardian.com',
-						Template: 'SalesforceDisasterRecoveryProcessingResult',
+						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
 						TemplateData: `{ "name": "John Doe", "order_id": "123456" }`,
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
