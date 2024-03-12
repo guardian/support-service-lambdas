@@ -328,10 +328,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 											.next(
 												new Choice(this, 'IsSucceeded')
 													.when(
-														Condition.numberGreaterThan('$.failedRowsCount', 0),
-														new Fail(this, 'SomeRowsHaveFailed'),
+														Condition.numberEquals('$.failedRowsCount', 0),
+														new Succeed(this, 'AllRowsHaveSuccedeed'),
 													)
-													.otherwise(new Succeed(this, 'AllRowsHaveSuccedeed')),
+													.otherwise(new Fail(this, 'SomeRowsHaveFailed')),
 											),
 									),
 								)
