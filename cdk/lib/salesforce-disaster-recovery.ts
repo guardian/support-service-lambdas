@@ -318,7 +318,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Task',
-					Resource: 'arn:aws:states:::ses:SendEmail',
+					Resource: 'arn:aws:states:::aws-sdk:ses:SendEmail',
 					Parameters: {
 						Destination: {
 							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
