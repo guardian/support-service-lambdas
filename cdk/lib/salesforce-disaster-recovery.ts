@@ -8,13 +8,16 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { CfnTemplate } from 'aws-cdk-lib/aws-ses';
 import {
 	Choice,
 	Condition,
 	CustomState,
 	DefinitionBody,
+	Fail,
 	JsonPath,
 	StateMachine,
+	Succeed,
 	TaskInput,
 	Wait,
 	WaitTime,
@@ -191,6 +194,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				stateJson: {
 					Type: 'Map',
 					MaxConcurrency: 20,
+					ToleratedFailurePercentage: 100,
 					ItemReader: {
 						Resource: 'arn:aws:states:::s3:getObject',
 						ReaderConfig: {
@@ -292,13 +296,56 @@ export class SalesforceDisasterRecovery extends GuStack {
 				],
 			}),
 			payload: TaskInput.fromObject({
-				'resultFiles.$': '$.ResultFiles.SUCCEEDED',
+				'resultFiles.$': '$.ResultFiles.FAILED',
 				filePath: JsonPath.format(
 					`{}/${failedRowsFileName}`,
 					JsonPath.stringAt('$$.Execution.StartTime'),
 				),
 			}),
+			resultSelector: {
+				failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
+				failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+				failedRowsFileConsoleUrl: JsonPath.format(
+					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+					bucket.bucketName,
+					this.region,
+					JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+				),
+			},
 		});
+
+		new CfnTemplate(this, 'ProcessingResultEmailTemplate', {
+			template: {
+				subjectPart: 'Test',
+				htmlPart: `<html>
+						<body>
+							<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed</h1>
+							<p>{{field}}</p>
+						</body>
+					</html>`,
+				templateName: 'SalesforceDisasterRecoveryResyncingProcedureResult',
+			},
+		});
+
+		const sendProcessingResultEmail = new CustomState(
+			this,
+			'SendProcessingResultEmail',
+			{
+				stateJson: {
+					Type: 'Task',
+					Resource: 'arn:aws:states:::aws-sdk:ses:sendTemplatedEmail',
+					Parameters: {
+						Destination: {
+							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
+						},
+						Source: 'membership.dev@theguardian.com',
+						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
+						TemplateData: JSON.stringify({ field: 'test' }),
+					},
+					ResultPath: JsonPath.stringAt('$.TaskResult'),
+				},
+			},
+		);
 
 		const stateMachine = new StateMachine(
 			this,
@@ -316,7 +363,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 									saveSalesforceQueryResultToS3.next(
 										processCsvInDistributedMap
 											.next(getMapResult)
-											.next(saveFailedRowsToS3),
+											.next(saveFailedRowsToS3)
+											.next(sendProcessingResultEmail)
+											.next(
+												new Choice(this, 'HaveAllRowsSuccedeed')
+													.when(
+														Condition.numberEquals('$.failedRowsCount', 0),
+														new Succeed(this, 'AllRowsHaveSuccedeed'),
+													)
+													.otherwise(new Fail(this, 'SomeRowsHaveFailed')),
+											),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
@@ -384,6 +440,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 					new PolicyStatement({
 						actions: ['lambda:InvokeFunction'],
 						resources: [updateZuoraAccountsLambda.functionArn],
+					}),
+					new PolicyStatement({
+						actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
+						resources: ['*'],
 					}),
 				],
 			}),
