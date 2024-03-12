@@ -8,9 +8,7 @@ import {
 	updateZuoraAccount,
 } from '../services';
 
-export const handler = async (event: {
-	Items: AccountRow[];
-}): Promise<AccountRowWithResult[]> => {
+export const handler = async (event: { Items: AccountRow[] }) => {
 	const { Items } = event;
 
 	const stage = checkDefined<string>(
@@ -53,5 +51,12 @@ export const handler = async (event: {
 			) ?? batchUpdateResult,
 	);
 
-	return results;
+	return {
+		errors: results
+			.filter((result) => !result.Success)
+			.map((result) => ({
+				Zuora__Zuora_Id__c: result.Zuora__Zuora_Id__c,
+				Errors: result.Errors,
+			})),
+	};
 };
