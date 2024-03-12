@@ -318,7 +318,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Task',
-					Resource: 'arn:aws:states:::aws-sdk:ses:SendEmail',
+					Resource: 'arn:aws:states:::aws-sdk:sesv2:SendEmail',
 					Parameters: {
 						Destination: {
 							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
@@ -330,7 +330,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 								},
 							},
 							Subject: {
-								Data: 'Test',
+								Data: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
 							},
 						},
 						Source: 'membership.dev@theguardian.com',
