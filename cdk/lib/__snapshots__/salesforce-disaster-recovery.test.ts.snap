@@ -368,7 +368,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"EmailProcessingResult","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"HaveAllRowsSuccedeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -387,7 +387,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"EmailProcessingResult":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:SendEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Message":{"Body":{"Text":{"Data":"test"}},"Subject":{"Data":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CODE"}},"Source":"membership.dev@theguardian.com"}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1617,7 +1617,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"EmailProcessingResult","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"HaveAllRowsSuccedeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1636,7 +1636,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"EmailProcessingResult":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:SendEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Message":{"Body":{"Text":{"Data":"test"}},"Subject":{"Data":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CSBX"}},"Source":"membership.dev@theguardian.com"}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -2866,7 +2866,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"EmailProcessingResult","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"HaveAllRowsSuccedeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -2885,7 +2885,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"EmailProcessingResult":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:SendEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Message":{"Body":{"Text":{"Data":"test"}},"Subject":{"Data":"Salesforce Disaster Recovery Re-syncing Procedure Completed For PROD"}},"Source":"membership.dev@theguardian.com"}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
