@@ -8,6 +8,7 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+// import { CfnTemplate } from 'aws-cdk-lib/aws-ses';
 import {
 	Choice,
 	Condition,
@@ -312,6 +313,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
+		// new CfnTemplate(this, 'MyTemplate', {
+		// 	template: {
+		// 		subjectPart: 'Welcome to our service',
+		// 		textPart:
+		// 			'Hello {{name}},\n\nWelcome to our service. Your order ID is {{order_id}}.',
+		// 		templateName: 'MyTemplate',
+		// 	},
+		// });
+
 		const emailProcessingResult = new CustomState(
 			this,
 			'EmailProcessingResult',
@@ -335,39 +345,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Source: 'membership.dev@theguardian.com',
 					},
+					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
 			},
 		);
-
-		// {
-		// 	"Comment": "A description of my state machine",
-		// 	"StartAt": "SendEmail",
-		// 	"States": {
-		// 	  "SendEmail": {
-		// 		"Type": "Task",
-		// 		"End": true,
-		// 		"Parameters": {
-		// 		  "Destination": {
-		// 			"ToAddresses": [
-		// 			  "andrea.diotallevi@guardian.co.uk"
-		// 			]
-		// 		  },
-		// 		  "Message": {
-		// 			"Body": {
-		// 			  "Text": {
-		// 				"Data": "Test"
-		// 			  }
-		// 			},
-		// 			"Subject": {
-		// 			  "Data": "MyData"
-		// 			}
-		// 		  },
-		// 		  "Source": "membership.dev@theguardian.com"
-		// 		},
-		// 		"Resource": "arn:aws:states:::aws-sdk:ses:sendEmail"
-		// 	  }
-		// 	}
-		//   }
 
 		const stateMachine = new StateMachine(
 			this,
