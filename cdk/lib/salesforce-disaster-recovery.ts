@@ -302,10 +302,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 			}),
 			resultSelector: Result.fromObject({
-				totalRowsCount: 30,
-				failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
-				failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+				modifiedPayload: {
+					totalRowsCount: 30,
+					failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
+					failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+				},
 			}),
+			outputPath: JsonPath.stringAt('$.TaskResult.modifiedPayload'),
 		});
 
 		const stateMachine = new StateMachine(
