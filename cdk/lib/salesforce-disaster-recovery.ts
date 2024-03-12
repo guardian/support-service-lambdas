@@ -8,7 +8,7 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-// import { CfnTemplate } from 'aws-cdk-lib/aws-ses';
+import { CfnTemplate } from 'aws-cdk-lib/aws-ses';
 import {
 	Choice,
 	Condition,
@@ -313,40 +313,58 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		// new CfnTemplate(this, 'MyTemplate', {
-		// 	template: {
-		// 		subjectPart: 'Welcome to our service',
-		// 		textPart:
-		// 			'Hello {{name}},\n\nWelcome to our service. Your order ID is {{order_id}}.',
-		// 		templateName: 'MyTemplate',
-		// 	},
-		// });
+		new CfnTemplate(this, 'ProcessingResultEmailTemplate', {
+			template: {
+				subjectPart: 'Welcome to our service',
+				htmlPart: `
+					<html>
+						<body>
+							<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed</h1>
+						</body>
+					</html>
+				`,
+				templateName: 'SalesforceDisasterRecoveryProcessingResult',
+			},
+		});
 
-		const emailProcessingResult = new CustomState(
+		const sendProcessingResultEmail = new CustomState(
 			this,
-			'EmailProcessingResult',
+			'SendProcessingResultEmail',
 			{
 				stateJson: {
 					Type: 'Task',
-					Resource: 'arn:aws:states:::aws-sdk:ses:sendEmail',
+					Resource: 'arn:aws:states:::aws-sdk:ses:sendTemplatedEmail',
 					Parameters: {
 						Destination: {
 							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
 						},
-						Message: {
-							Body: {
-								Text: {
-									Data: 'Test',
-								},
-							},
-							Subject: {
-								Data: 'MyData',
-							},
-						},
 						Source: 'membership.dev@theguardian.com',
+						Template: 'SalesforceDisasterRecoveryProcessingResult',
+						TemplateData: `{ "name": "John Doe", "order_id": "123456" }`,
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
+				// stateJson: {
+				// 	Type: 'Task',
+				// 	Resource: 'arn:aws:states:::aws-sdk:ses:sendEmail',
+				// 	Parameters: {
+				// 		Destination: {
+				// 			ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
+				// 		},
+				// 		Message: {
+				// 			Body: {
+				// 				Text: {
+				// 					Data: 'Test',
+				// 				},
+				// 			},
+				// 			Subject: {
+				// 				Data: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
+				// 			},
+				// 		},
+				// 		Source: 'membership.dev@theguardian.com',
+				// 	},
+				// 	ResultPath: JsonPath.stringAt('$.TaskResult'),
+				// },
 			},
 		);
 
@@ -367,7 +385,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
-											.next(emailProcessingResult)
+											.next(sendProcessingResultEmail)
 											.next(
 												new Choice(this, 'HaveAllRowsSuccedeed')
 													.when(
