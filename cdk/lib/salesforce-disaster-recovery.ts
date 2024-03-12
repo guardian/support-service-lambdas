@@ -202,7 +202,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							// Key: 'two-rows-one-will-error.csv',
 							'Key.$': JsonPath.format(
 								`{}/${queryResultFileName}`,
 								JsonPath.stringAt('$$.Execution.StartTime'),
