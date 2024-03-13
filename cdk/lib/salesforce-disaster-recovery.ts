@@ -308,24 +308,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 			resultSelector: {
 				failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
-				failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
-				failedRowsFileConsoleUrl: JsonPath.format(
-					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
-					bucket.bucketName,
-					this.region,
-					JsonPath.stringAt('$.Payload.failedRowsFilePath'),
-				),
-			},
-		});
-
-		const createBatches = new Pass(this, 'CreateBatches', {
-			parameters: {
-				// input: JsonPath
-				failedRowsFilePath: JsonPath.stringAt('$.failedRowsFilePath'),
-				failedRowsCount: 0,
-				filePath: JsonPath.stringAt('$.Payload.filePath'),
-				numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
-				batchIndexes: JsonPath.arrayRange(0, 1000, 200),
 			},
 		});
 
@@ -337,10 +319,20 @@ export class SalesforceDisasterRecovery extends GuStack {
 				<body>
 					<h4>State machine execution details:</h4>
 					<ul>
+						<li>Link: <a href="<link>">placeholder</a></li>
+						<li>Input: {{input}}</li>
 						<li>Start time: {{executionStartTime}}</li>
 						<li>Duration: 2 hours and 40 minutes</li>
+						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
 				
+					<h4>Processing summary:</h4>
+					<ul>
+						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
+						<li>Number of accounts successfully re-synced: 2,000,000</li>
+						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
+					</ul>
 				
 				</body>
 				</html>`,
@@ -351,14 +343,18 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const buildEmailTemplateData = new Pass(this, 'BuildEmailTemplateData', {
 			parameters: {
 				stage: this.stage,
-				failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
+				input: JsonPath.objectAt('$$.Execution.Input').toString(),
 				executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+				maxConcurrency,
+				failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
+				failedRowsFileConsoleUrl: JsonPath.format(
+					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
+					bucket.bucketName,
+					this.region,
+					JsonPath.stringAt('$$.Execution.StartTime'),
+					failedRowsFileName,
+				),
 			},
-			// result: Result.fromObject({
-			// 	stage: this.stage,
-			// 	'executionStartTime.$': JsonPath.stringAt('$$.Execution.StartTime'),
-			// }),
-			// resultPath: '$.emailTemplateData',
 		});
 
 		const sendProcessingResultEmail = new CustomState(
@@ -375,33 +371,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						Source: 'andrea.diotallevi@guardian.co.uk',
 						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
 						'TemplateData.$': JsonPath.jsonToString(JsonPath.objectAt('$')),
-						// 'TemplateData.$': JSON.stringify({
-						// 	stage: this.stage,
-						// 	'executionStartTime.$': JsonPath.stringAt(
-						// 		'$$.Execution.StartTime',
-						// 	),
-						// }),
-						// 'TemplateData.$': JSON.stringify({
-						// 	stage: this.stage,
-						// 	executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
-						// }),
-						// TemplateData: JsonPath.jsonToString({}),
-						// TemplateData: JSON.stringify({
-						// 	stage: this.stage,
-						// 	input: JsonPath.objectAt('$$.Execution.Input').toString(),
-						// 	executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
-						// 	maxConcurrency,
-						// 	salesforceQueryResultUrl: JsonPath.format(
-						// 		`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
-						// 		bucket.bucketName,
-						// 		this.region,
-						// 		queryResultFileName,
-						// 	),
-						// 	failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
-						// 	failedRowsFileConsoleUrl: JsonPath.stringAt(
-						// 		'$.failedRowsFileConsoleUrl',
-						// 	),
-						// }),
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
