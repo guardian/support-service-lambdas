@@ -318,6 +318,17 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
+		const createBatches = new Pass(this, 'CreateBatches', {
+			parameters: {
+				// input: JsonPath
+				failedRowsFilePath: JsonPath.stringAt('$.failedRowsFilePath'),
+				failedRowsCount: 0,
+				filePath: JsonPath.stringAt('$.Payload.filePath'),
+				numberOfRecords: JsonPath.numberAt('$.Payload.numberOfRecords'),
+				batchIndexes: JsonPath.arrayRange(0, 1000, 200),
+			},
+		});
+
 		new CfnTemplate(this, 'ProcessingResultEmailTemplate', {
 			template: {
 				subjectPart:
@@ -338,11 +349,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 		});
 
 		const buildEmailTemplateData = new Pass(this, 'BuildEmailTemplateData', {
-			result: Result.fromObject({
+			parameters: {
 				stage: this.stage,
+				failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
 				executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
-			}),
-			resultPath: '$.emailTemplateData',
+			},
+			// result: Result.fromObject({
+			// 	stage: this.stage,
+			// 	'executionStartTime.$': JsonPath.stringAt('$$.Execution.StartTime'),
+			// }),
+			// resultPath: '$.emailTemplateData',
 		});
 
 		const sendProcessingResultEmail = new CustomState(
@@ -358,9 +374,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Source: 'andrea.diotallevi@guardian.co.uk',
 						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
-						'TemplateData.$': JsonPath.jsonToString(
-							JsonPath.objectAt('$.emailTemplateData'),
-						),
+						'TemplateData.$': JsonPath.jsonToString(JsonPath.objectAt('$')),
 						// 'TemplateData.$': JSON.stringify({
 						// 	stage: this.stage,
 						// 	'executionStartTime.$': JsonPath.stringAt(
