@@ -77,6 +77,8 @@ Resources:
       MemorySize: 1024
       Runtime: java11
       Timeout: 900
+      Architectures:
+        - arm64
     DependsOn:
       - DeliveryProblemCreditProcessorRole
 

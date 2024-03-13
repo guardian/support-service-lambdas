@@ -87,6 +87,8 @@ Resources:
             MemorySize: 1536
             Runtime: java11
             Timeout: 300
+            Architectures:
+              - arm64
         DependsOn:
         - DeliveryRecordsApiRole
 

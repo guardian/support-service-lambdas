@@ -153,6 +153,8 @@ Resources:
       Tags:
         - Key: lambda:createdBy
           Value: SAM
+      Architectures:
+        - arm64
   ContactUsLambdaApiEventPermissionStage:
     Type: AWS::Lambda::Permission
     Properties:
