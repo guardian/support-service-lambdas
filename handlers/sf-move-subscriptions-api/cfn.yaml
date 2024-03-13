@@ -111,7 +111,7 @@ Resources:
         Fn::GetAtt:
           - sfMoveSubscriptionsFnRole6D1AF23F
           - Arn
-      Runtime: java11
+      Runtime: java21
       Environment:
         Variables:
           App: sf-move-subscriptions-api

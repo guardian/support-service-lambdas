@@ -87,7 +87,7 @@ Resources:
       Role:
         !GetAtt SFBillingAccountRemoverRole.Arn
       MemorySize: 512
-      Runtime: java11
+      Runtime: java21
       Timeout: 900
     DependsOn:
       - SFBillingAccountRemoverRole

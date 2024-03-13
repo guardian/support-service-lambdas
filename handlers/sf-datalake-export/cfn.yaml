@@ -80,7 +80,7 @@ Resources:
       Role:
         !GetAtt StartJobRole.Arn
       MemorySize: 1536
-      Runtime: java11
+      Runtime: java21
       Timeout: 300
       Architectures:
         - arm64
@@ -131,7 +131,7 @@ Resources:
       Role:
         !GetAtt BatchStateRole.Arn
       MemorySize: 1536
-      Runtime: java11
+      Runtime: java21
       Timeout: 300
       Architectures:
         - arm64
@@ -227,7 +227,7 @@ Resources:
       Role:
         !GetAtt DownloadBatchRole.Arn
       MemorySize: 1792
-      Runtime: java11
+      Runtime: java21
       Timeout: 900
       Architectures:
         - arm64
@@ -286,7 +286,7 @@ Resources:
       Role:
         !GetAtt CleanBucketRole.Arn
       MemorySize: 1536
-      Runtime: java11
+      Runtime: java21
       Timeout: 900
       Architectures:
         - arm64
@@ -308,7 +308,7 @@ Resources:
       Role:
         !GetAtt EndJobRole.Arn
       MemorySize: 1536
-      Runtime: java11
+      Runtime: java21
       Timeout: 300
       Architectures:
         - arm64

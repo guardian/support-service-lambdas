@@ -75,7 +75,7 @@ Resources:
       Role:
         !GetAtt DeliveryProblemCreditProcessorRole.Arn
       MemorySize: 1024
-      Runtime: java11
+      Runtime: java21
       Timeout: 900
       Architectures:
         - arm64

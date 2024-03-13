@@ -94,7 +94,7 @@ Resources:
           Stage: !Ref Stage
       Role: !GetAtt FulfilmentDateCalculatorLambdaRole.Arn
       MemorySize: 1536
-      Runtime: java11
+      Runtime: java21
       Timeout: 900
       Architectures:
         - arm64

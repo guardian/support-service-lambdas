@@ -61,7 +61,7 @@ Resources:
                 - "DigitalSubscriptionExpiryRole"
                 - Arn
             MemorySize: 1536
-            Runtime: java11
+            Runtime: java21
             Timeout: 300
             Architectures:
               - arm64
