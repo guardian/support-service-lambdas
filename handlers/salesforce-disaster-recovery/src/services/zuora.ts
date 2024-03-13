@@ -1,12 +1,18 @@
 import { actionUpdate } from '@modules/zuora/actionUpdate';
-import { type ZuoraClient } from '@modules/zuora/zuoraClient';
+import { type ZuoraClient, ZuoraError } from '@modules/zuora/zuoraClient';
 
-export interface AccountRow {
+export type AccountRow = {
 	Id: string;
 	Zuora__Zuora_Id__c: string;
 	Zuora__Account__c: string;
 	Contact__c: string;
-}
+};
+
+export type AccountRowResult = {
+	ZuoraAccountId: string;
+	Success: boolean;
+	Errors: Array<{ Message: string; Code: string }>;
+};
 
 export const batchUpdateZuoraAccounts = async ({
 	zuoraClient,
@@ -14,7 +20,7 @@ export const batchUpdateZuoraAccounts = async ({
 }: {
 	zuoraClient: ZuoraClient;
 	accountRows: AccountRow[];
-}) => {
+}): Promise<AccountRowResult[]> => {
 	try {
 		const response = await actionUpdate(
 			zuoraClient,
@@ -28,9 +34,28 @@ export const batchUpdateZuoraAccounts = async ({
 			}),
 		);
 
-		return { response };
+		return accountRows.map((row, index) => ({
+			ZuoraAccountId: row.Zuora__Zuora_Id__c,
+			Success: response[index]?.Success ?? false,
+			Errors: response[index]?.Errors ?? [],
+		}));
 	} catch (error) {
 		console.error(error);
-		return { error: JSON.stringify(error) };
+
+		if (error instanceof ZuoraError && error.code === 429) {
+			throw error;
+		}
+
+		return accountRows.map((row) => ({
+			ZuoraAccountId: row.Zuora__Zuora_Id__c,
+			Success: false,
+			Errors: [
+				{
+					Message:
+						error instanceof Error ? error.message : JSON.stringify(error),
+					Code: error instanceof ZuoraError ? `${error.code}` : 'Unknown Code',
+				},
+			],
+		}));
 	}
 };

@@ -1,4 +1,4 @@
-export type Stage = 'CODE' | 'PROD';
+export type Stage = 'CODE' | 'CSBX' | 'PROD';
 
 export const stageFromEnvironment = (): Stage => {
 	const stage = process.env.Stage;

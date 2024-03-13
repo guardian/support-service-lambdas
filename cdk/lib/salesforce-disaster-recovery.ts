@@ -41,6 +41,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		});
 
 		const queryResultFileName = 'query-result.csv';
+		const failedRowsFileName = 'failed-rows.csv';
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -189,7 +190,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Map',
-					MaxConcurrency: 100,
+					MaxConcurrency: 10,
 					ItemReader: {
 						Resource: 'arn:aws:states:::s3:getObject',
 						ReaderConfig: {
@@ -234,6 +235,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 										MaxAttempts: 6,
 										BackoffRate: 2,
 									},
+									{
+										ErrorEquals: ['ZuoraError'],
+										IntervalSeconds: 10,
+										MaxAttempts: 5,
+										BackoffRate: 5,
+									},
 								],
 								End: true,
 							},
@@ -250,6 +257,47 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const getMapResult = new CustomState(this, 'GetMapResult', {
+			stateJson: {
+				Type: 'Task',
+				Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
+				Parameters: {
+					'Bucket.$': JsonPath.stringAt('$.ResultWriterDetails.Bucket'),
+					'Key.$': JsonPath.stringAt('$.ResultWriterDetails.Key'),
+				},
+				ResultSelector: {
+					'Payload.$': JsonPath.stringToJson(JsonPath.stringAt('$.Body')),
+				},
+				OutputPath: '$.Payload',
+			},
+		});
+
+		const saveFailedRowsToS3 = new LambdaInvoke(this, 'SaveFailedRowsToS3', {
+			lambdaFunction: new GuLambdaFunction(this, 'SaveFailedRowsToS3Lambda', {
+				...lambdaDefaultConfig,
+				memorySize: 10240,
+				handler: 'saveFailedRowsToS3.handler',
+				functionName: `save-failed-rows-to-s3-${this.stage}`,
+				environment: {
+					...lambdaDefaultConfig.environment,
+					S3_BUCKET: bucket.bucketName,
+				},
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+				],
+			}),
+			payload: TaskInput.fromObject({
+				'resultFiles.$': '$.ResultFiles.SUCCEEDED',
+				filePath: JsonPath.format(
+					`{}/${failedRowsFileName}`,
+					JsonPath.stringAt('$$.Execution.StartTime'),
+				),
+			}),
+		});
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -264,7 +312,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
 									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap,
+										processCsvInDistributedMap
+											.next(getMapResult)
+											.next(saveFailedRowsToS3),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
@@ -318,6 +368,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 					new PolicyStatement({
 						actions: ['states:StartExecution'],
 						resources: [stateMachine.stateMachineArn],
+					}),
+					new PolicyStatement({
+						actions: [
+							'states:RedriveExecution',
+							'states:DescribeExecution',
+							'states:StopExecution',
+						],
+						resources: [
+							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
+						],
 					}),
 					new PolicyStatement({
 						actions: ['lambda:InvokeFunction'],

@@ -46,7 +46,6 @@ jobs:
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
-              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
+              - ./cdk/cdk.out
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip

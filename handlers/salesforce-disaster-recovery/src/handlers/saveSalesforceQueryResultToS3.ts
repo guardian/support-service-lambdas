@@ -1,3 +1,4 @@
+import { checkDefined } from '@modules/nullAndUndefined';
 import {
 	generateSalesforceAccessToken,
 	getSalesforceQueryResult,
@@ -9,14 +10,23 @@ import {
 export const handler = async (event: {
 	queryJobId: string;
 	filePath: string;
-}) => {
-	const bucketName = process.env.S3_BUCKET;
-	const salesforceApiDomain = process.env.SALESFORCE_API_DOMAIN;
-	const salesforceOauthSecretName = process.env.SALESFORCE_OAUTH_SECRET_NAME;
+}): Promise<void> => {
+	const { queryJobId, filePath } = event;
 
-	if (!bucketName || !salesforceApiDomain || !salesforceOauthSecretName) {
-		throw new Error('Environment variables not set');
-	}
+	const bucketName = checkDefined<string>(
+		process.env.S3_BUCKET,
+		'S3_BUCKET environment variable not set',
+	);
+
+	const salesforceApiDomain = checkDefined<string>(
+		process.env.SALESFORCE_API_DOMAIN,
+		'SALESFORCE_API_DOMAIN environment variable not set',
+	);
+
+	const salesforceOauthSecretName = checkDefined<string>(
+		process.env.SALESFORCE_OAUTH_SECRET_NAME,
+		'SALESFORCE_OAUTH_SECRET_NAME environment variable not set',
+	);
 
 	const salesforceOauthCredentials =
 		await getSecretValue<SalesforceOauthCredentials>({
@@ -27,15 +37,15 @@ export const handler = async (event: {
 		credentials: salesforceOauthCredentials,
 	});
 
-	const csvContent = await getSalesforceQueryResult({
+	const content = await getSalesforceQueryResult({
 		accessToken: salesforceAccessToken,
-		queryJobId: event.queryJobId,
+		queryJobId,
 		apiDomain: salesforceApiDomain,
 	});
 
 	await uploadFileToS3({
 		bucketName,
-		filePath: event.filePath,
-		content: csvContent,
+		filePath,
+		content,
 	});
 };

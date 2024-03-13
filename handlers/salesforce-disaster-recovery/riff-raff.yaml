@@ -4,6 +4,7 @@ regions:
   - eu-west-1
 allowedStages:
   - CODE
+  - CSBX
   - PROD
 deployments:
   salesforce-disaster-recovery-cloudformation:
@@ -12,6 +13,7 @@ deployments:
     parameters:
       templateStagePaths:
         CODE: salesforce-disaster-recovery-CODE.template.json
+        CSBX: salesforce-disaster-recovery-CSBX.template.json
         PROD: salesforce-disaster-recovery-PROD.template.json
   salesforce-disaster-recovery:
     type: aws-lambda
@@ -20,6 +22,7 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
+        - save-failed-rows-to-s3-
         - save-salesforce-query-result-to-s3-
         - update-zuora-accounts-
     dependencies: [salesforce-disaster-recovery-cloudformation]
