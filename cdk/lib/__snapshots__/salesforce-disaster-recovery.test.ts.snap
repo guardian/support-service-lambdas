@@ -169,7 +169,155 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SES::Template",
     },
-    "SalesforceApiHttpInvoke9D82CE85": {
+    "SalesforceDisasterRecoveryStateMachine6185B29D": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
+        "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"ProcessCsvInDistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "SaveSalesforceQueryResultToS3Lambda65311A6F",
+                  "Arn",
+                ],
+              },
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "Arn",
+                ],
+              },
+              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["ZuoraError"],"IntervalSeconds":10,"MaxAttempts":5,"BackoffRate":5}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"SendProcessingResultEmail","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "SaveFailedRowsToS3LambdaCBDFFBA6",
+                  "Arn",
+                ],
+              },
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "salesforce-disaster-recovery-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SalesforceDisasterRecoveryStateMachineRole2E3F61EB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": {
+                  "Fn::FindInMap": [
+                    "ServiceprincipalMap",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    "states",
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SalesforceDisasterRecoveryStateMachineRoleAdditionalPolicy1FEB429D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -324,7 +472,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SalesforceApiHttpInvoke9D82CE85",
+        "PolicyName": "SalesforceDisasterRecoveryStateMachineRoleAdditionalPolicy1FEB429D",
         "Roles": [
           {
             "Ref": "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
@@ -332,154 +480,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "SalesforceDisasterRecoveryStateMachine6185B29D": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
-        "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
-      ],
-      "Properties": {
-        "DefinitionString": {
-          "Fn::Join": [
-            "",
-            [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":connection/salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"ProcessCsvInDistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "SaveSalesforceQueryResultToS3Lambda65311A6F",
-                  "Arn",
-                ],
-              },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "UpdateZuoraAccountsLambda64E51B2A",
-                  "Arn",
-                ],
-              },
-              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["ZuoraError"],"IntervalSeconds":10,"MaxAttempts":5,"BackoffRate":5}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"SendProcessingResultEmail","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "SaveFailedRowsToS3LambdaCBDFFBA6",
-                  "Arn",
-                ],
-              },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
-            ],
-          ],
-        },
-        "RoleArn": {
-          "Fn::GetAtt": [
-            "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
-            "Arn",
-          ],
-        },
-        "StateMachineName": "salesforce-disaster-recovery-CODE",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::StepFunctions::StateMachine",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "SalesforceDisasterRecoveryStateMachineRole2E3F61EB": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
     },
     "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B": {
       "Properties": {
@@ -1436,7 +1436,155 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::SES::Template",
     },
-    "SalesforceApiHttpInvoke9D82CE85": {
+    "SalesforceDisasterRecoveryStateMachine6185B29D": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
+        "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":connection/salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":connection/salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"ProcessCsvInDistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "SaveSalesforceQueryResultToS3Lambda65311A6F",
+                  "Arn",
+                ],
+              },
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "Arn",
+                ],
+              },
+              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["ZuoraError"],"IntervalSeconds":10,"MaxAttempts":5,"BackoffRate":5}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"SendProcessingResultEmail","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "SaveFailedRowsToS3LambdaCBDFFBA6",
+                  "Arn",
+                ],
+              },
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "salesforce-disaster-recovery-CSBX",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CSBX",
+          },
+        ],
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SalesforceDisasterRecoveryStateMachineRole2E3F61EB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": {
+                  "Fn::FindInMap": [
+                    "ServiceprincipalMap",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    "states",
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CSBX",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SalesforceDisasterRecoveryStateMachineRoleAdditionalPolicy1FEB429D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1591,7 +1739,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SalesforceApiHttpInvoke9D82CE85",
+        "PolicyName": "SalesforceDisasterRecoveryStateMachineRoleAdditionalPolicy1FEB429D",
         "Roles": [
           {
             "Ref": "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
@@ -1599,154 +1747,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "SalesforceDisasterRecoveryStateMachine6185B29D": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
-        "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
-      ],
-      "Properties": {
-        "DefinitionString": {
-          "Fn::Join": [
-            "",
-            [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":connection/salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":connection/salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"ProcessCsvInDistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "SaveSalesforceQueryResultToS3Lambda65311A6F",
-                  "Arn",
-                ],
-              },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "UpdateZuoraAccountsLambda64E51B2A",
-                  "Arn",
-                ],
-              },
-              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["ZuoraError"],"IntervalSeconds":10,"MaxAttempts":5,"BackoffRate":5}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"SendProcessingResultEmail","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "SaveFailedRowsToS3LambdaCBDFFBA6",
-                  "Arn",
-                ],
-              },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
-            ],
-          ],
-        },
-        "RoleArn": {
-          "Fn::GetAtt": [
-            "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
-            "Arn",
-          ],
-        },
-        "StateMachineName": "salesforce-disaster-recovery-CSBX",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CSBX",
-          },
-        ],
-      },
-      "Type": "AWS::StepFunctions::StateMachine",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "SalesforceDisasterRecoveryStateMachineRole2E3F61EB": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CSBX",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
     },
     "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B": {
       "Properties": {
@@ -2703,7 +2703,155 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::SES::Template",
     },
-    "SalesforceApiHttpInvoke9D82CE85": {
+    "SalesforceDisasterRecoveryStateMachine6185B29D": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
+        "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":30,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"ProcessCsvInDistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "SaveSalesforceQueryResultToS3Lambda65311A6F",
+                  "Arn",
+                ],
+              },
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "UpdateZuoraAccountsLambda64E51B2A",
+                  "Arn",
+                ],
+              },
+              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["ZuoraError"],"IntervalSeconds":10,"MaxAttempts":5,"BackoffRate":5}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"SendProcessingResultEmail","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "SaveFailedRowsToS3LambdaCBDFFBA6",
+                  "Arn",
+                ],
+              },
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "salesforce-disaster-recovery-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SalesforceDisasterRecoveryStateMachineRole2E3F61EB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": {
+                  "Fn::FindInMap": [
+                    "ServiceprincipalMap",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    "states",
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SalesforceDisasterRecoveryStateMachineRoleAdditionalPolicy1FEB429D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2858,7 +3006,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SalesforceApiHttpInvoke9D82CE85",
+        "PolicyName": "SalesforceDisasterRecoveryStateMachineRoleAdditionalPolicy1FEB429D",
         "Roles": [
           {
             "Ref": "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
@@ -2866,154 +3014,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "SalesforceDisasterRecoveryStateMachine6185B29D": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B",
-        "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
-      ],
-      "Properties": {
-        "DefinitionString": {
-          "Fn::Join": [
-            "",
-            [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":30,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":connection/salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e"}}},"IsSalesforceQueryJobCompleted":{"Type":"Choice","Choices":[{"Variable":"$.ResponseBody.state","StringEquals":"JobComplete","Next":"SaveSalesforceQueryResultToS3"}],"Default":"WaitForSalesforceQueryJobToComplete"},"SaveSalesforceQueryResultToS3":{"Next":"ProcessCsvInDistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "SaveSalesforceQueryResultToS3Lambda65311A6F",
-                  "Arn",
-                ],
-              },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "UpdateZuoraAccountsLambda64E51B2A",
-                  "Arn",
-                ],
-              },
-              ""},"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["ZuoraError"],"IntervalSeconds":10,"MaxAttempts":5,"BackoffRate":5}],"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"SendProcessingResultEmail","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "SaveFailedRowsToS3LambdaCBDFFBA6",
-                  "Arn",
-                ],
-              },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"membership.dev@theguardian.com","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"field\\":\\"test\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
-            ],
-          ],
-        },
-        "RoleArn": {
-          "Fn::GetAtt": [
-            "SalesforceDisasterRecoveryStateMachineRole2E3F61EB",
-            "Arn",
-          ],
-        },
-        "StateMachineName": "salesforce-disaster-recovery-PROD",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::StepFunctions::StateMachine",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "SalesforceDisasterRecoveryStateMachineRole2E3F61EB": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
     },
     "SalesforceDisasterRecoveryStateMachineRoleDefaultPolicyDF13C71B": {
       "Properties": {
