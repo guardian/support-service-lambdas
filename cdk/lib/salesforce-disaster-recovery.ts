@@ -380,71 +380,75 @@ export class SalesforceDisasterRecovery extends GuStack {
 		);
 
 		stateMachine.role.attachInlinePolicy(
-			new Policy(this, 'SalesforceApiHttpInvoke', {
-				statements: [
-					new PolicyStatement({
-						actions: ['states:InvokeHTTPEndpoint'],
-						resources: [stateMachine.stateMachineArn],
-						conditions: {
-							StringEquals: {
-								'states:HTTPMethod': 'POST',
-								'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query`,
+			new Policy(
+				this,
+				'SalesforceDisasterRecoveryStateMachineRoleAdditionalPolicy',
+				{
+					statements: [
+						new PolicyStatement({
+							actions: ['states:InvokeHTTPEndpoint'],
+							resources: [stateMachine.stateMachineArn],
+							conditions: {
+								StringEquals: {
+									'states:HTTPMethod': 'POST',
+									'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query`,
+								},
 							},
-						},
-					}),
-					new PolicyStatement({
-						actions: ['states:InvokeHTTPEndpoint'],
-						resources: [stateMachine.stateMachineArn],
-						conditions: {
-							StringEquals: {
-								'states:HTTPMethod': 'GET',
+						}),
+						new PolicyStatement({
+							actions: ['states:InvokeHTTPEndpoint'],
+							resources: [stateMachine.stateMachineArn],
+							conditions: {
+								StringEquals: {
+									'states:HTTPMethod': 'GET',
+								},
+								StringLike: {
+									'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query/*`,
+								},
 							},
-							StringLike: {
-								'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query/*`,
-							},
-						},
-					}),
-					new PolicyStatement({
-						actions: ['events:RetrieveConnectionCredentials'],
-						resources: [salesforceApiConnectionArn],
-					}),
-					new PolicyStatement({
-						actions: [
-							'secretsmanager:GetSecretValue',
-							'secretsmanager:DescribeSecret',
-						],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
-						],
-					}),
-					new PolicyStatement({
-						actions: ['s3:GetObject', 's3:PutObject'],
-						resources: [bucket.arnForObjects('*')],
-					}),
-					new PolicyStatement({
-						actions: ['states:StartExecution'],
-						resources: [stateMachine.stateMachineArn],
-					}),
-					new PolicyStatement({
-						actions: [
-							'states:RedriveExecution',
-							'states:DescribeExecution',
-							'states:StopExecution',
-						],
-						resources: [
-							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
-						],
-					}),
-					new PolicyStatement({
-						actions: ['lambda:InvokeFunction'],
-						resources: [updateZuoraAccountsLambda.functionArn],
-					}),
-					new PolicyStatement({
-						actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
-						resources: ['*'],
-					}),
-				],
-			}),
+						}),
+						new PolicyStatement({
+							actions: ['events:RetrieveConnectionCredentials'],
+							resources: [salesforceApiConnectionArn],
+						}),
+						new PolicyStatement({
+							actions: [
+								'secretsmanager:GetSecretValue',
+								'secretsmanager:DescribeSecret',
+							],
+							resources: [
+								`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
+							],
+						}),
+						new PolicyStatement({
+							actions: ['s3:GetObject', 's3:PutObject'],
+							resources: [bucket.arnForObjects('*')],
+						}),
+						new PolicyStatement({
+							actions: ['states:StartExecution'],
+							resources: [stateMachine.stateMachineArn],
+						}),
+						new PolicyStatement({
+							actions: [
+								'states:RedriveExecution',
+								'states:DescribeExecution',
+								'states:StopExecution',
+							],
+							resources: [
+								`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
+							],
+						}),
+						new PolicyStatement({
+							actions: ['lambda:InvokeFunction'],
+							resources: [updateZuoraAccountsLambda.functionArn],
+						}),
+						new PolicyStatement({
+							actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
+							resources: ['*'],
+						}),
+					],
+				},
+			),
 		);
 	}
 }
