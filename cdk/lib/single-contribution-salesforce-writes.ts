@@ -73,7 +73,7 @@ export class SingleContributionSalesforceWrites extends GuStack {
 
 		const lambda = new GuLambdaFunction(this, `${APP_NAME}-lambda`, {
 			app: APP_NAME,
-			runtime: Runtime.JAVA_11,
+			runtime: Runtime.JAVA_21,
 			fileName: `${APP_NAME}.jar`,
 			functionName: `${APP_NAME}-${props.stage}`,
 			handler:
