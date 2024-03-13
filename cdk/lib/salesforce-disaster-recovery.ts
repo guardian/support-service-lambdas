@@ -346,6 +346,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 				input: JsonPath.objectAt('$$.Execution.Input').toString(),
 				executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
 				maxConcurrency,
+				salesforceQueryResultUrl: JsonPath.format(
+					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
+					bucket.bucketName,
+					this.region,
+					JsonPath.stringAt('$$.Execution.StartTime'),
+					queryResultFileName,
+				),
 				failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
 				failedRowsFileConsoleUrl: JsonPath.format(
 					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
