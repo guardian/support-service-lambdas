@@ -66,5 +66,7 @@ Resources:
       MemorySize: 512
       Runtime: java11
       Timeout: 900
+      Architectures:
+        - arm64
     DependsOn:
       - SfApiUserCredentialsSetterRole

@@ -73,6 +73,8 @@ Resources:
             MemorySize: 3008
             Runtime: java11
             Timeout: 900
+            Architectures:
+              - arm64
         DependsOn:
         - ExportLambdaRole
 
