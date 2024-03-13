@@ -43,6 +43,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
+		const maxConcurrency = 20;
+
 		const queryResultFileName = 'query-result.csv';
 		const failedRowsFileName = 'failed-rows.csv';
 
@@ -193,7 +195,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Map',
-					MaxConcurrency: 10,
+					MaxConcurrency: maxConcurrency,
 					ToleratedFailurePercentage: 100,
 					Comment: `ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches`,
 					ItemReader: {
@@ -319,23 +321,21 @@ export class SalesforceDisasterRecovery extends GuStack {
 					'Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}',
 				htmlPart: `<html>
 				<body>
-				
-					<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}</h1>
-				
-					<p>State machine execution details:</p>
+					<h4>State machine execution details:</h4>
 					<ul>
 						<li>Link: <a href="<link>">placeholder</a></li>
-						<li>Start time: 2024-03-04T12:45:30.173Z</li>
+						<li>Input: {{input}}</li>
+						<li>Start time: {{executionStartTime}}</li>
 						<li>Duration: 2 hours and 40 minutes</li>
-						<li>Max concurrency: 20</li>
+						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
 				
-					<p>Processing summary:</p>
+					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="<link>">placeholder</a></li>
+						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: 20</li>
-						<li>Link to failed rows CSV: <a href="<link>">placeholder</a></li>
+						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
 					</ul>
 				
 				</body>
@@ -357,7 +357,22 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Source: 'andrea.diotallevi@guardian.co.uk',
 						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
-						TemplateData: JSON.stringify({ stage: this.stage }),
+						TemplateData: JSON.stringify({
+							stage: this.stage,
+							input: JsonPath.objectAt('$$.Execution.Input'),
+							executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+							maxConcurrency,
+							salesforceQueryResultUrl: JsonPath.format(
+								`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+								bucket.bucketName,
+								this.region,
+								queryResultFileName,
+							),
+							failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
+							failedRowsFileConsoleUrl: JsonPath.stringAt(
+								'$.failedRowsFileConsoleUrl',
+							),
+						}),
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},

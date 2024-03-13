@@ -159,23 +159,21 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "Template": {
           "HtmlPart": "<html>
 				<body>
-				
-					<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}</h1>
-				
-					<p>State machine execution details:</p>
+					<h4>State machine execution details:</h4>
 					<ul>
 						<li>Link: <a href="<link>">placeholder</a></li>
-						<li>Start time: 2024-03-04T12:45:30.173Z</li>
+						<li>Input: {{input}}</li>
+						<li>Start time: {{executionStartTime}}</li>
 						<li>Duration: 2 hours and 40 minutes</li>
-						<li>Max concurrency: 20</li>
+						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
 				
-					<p>Processing summary:</p>
+					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="<link>">placeholder</a></li>
+						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: 20</li>
-						<li>Link to failed rows CSV: <a href="<link>">placeholder</a></li>
+						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
 					</ul>
 				
 				</body>
@@ -224,7 +222,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":20,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -258,7 +256,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CODE\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CODE\\",\\"input\\":\\"<path:$$.Execution.Input>\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', 'query-result.csv')\\",\\"failedRowsCount\\":$.failedRowsCount,\\"failedRowsFileConsoleUrl\\":\\"$.failedRowsFileConsoleUrl\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1443,23 +1449,21 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "Template": {
           "HtmlPart": "<html>
 				<body>
-				
-					<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}</h1>
-				
-					<p>State machine execution details:</p>
+					<h4>State machine execution details:</h4>
 					<ul>
 						<li>Link: <a href="<link>">placeholder</a></li>
-						<li>Start time: 2024-03-04T12:45:30.173Z</li>
+						<li>Input: {{input}}</li>
+						<li>Start time: {{executionStartTime}}</li>
 						<li>Duration: 2 hours and 40 minutes</li>
-						<li>Max concurrency: 20</li>
+						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
 				
-					<p>Processing summary:</p>
+					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="<link>">placeholder</a></li>
+						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: 20</li>
-						<li>Link to failed rows CSV: <a href="<link>">placeholder</a></li>
+						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
 					</ul>
 				
 				</body>
@@ -1508,7 +1512,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":20,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1542,7 +1546,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CSBX\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CSBX\\",\\"input\\":\\"<path:$$.Execution.Input>\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', 'query-result.csv')\\",\\"failedRowsCount\\":$.failedRowsCount,\\"failedRowsFileConsoleUrl\\":\\"$.failedRowsFileConsoleUrl\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -2727,23 +2739,21 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
         "Template": {
           "HtmlPart": "<html>
 				<body>
-				
-					<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}</h1>
-				
-					<p>State machine execution details:</p>
+					<h4>State machine execution details:</h4>
 					<ul>
 						<li>Link: <a href="<link>">placeholder</a></li>
-						<li>Start time: 2024-03-04T12:45:30.173Z</li>
+						<li>Input: {{input}}</li>
+						<li>Start time: {{executionStartTime}}</li>
 						<li>Duration: 2 hours and 40 minutes</li>
-						<li>Max concurrency: 20</li>
+						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
 				
-					<p>Processing summary:</p>
+					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="<link>">placeholder</a></li>
+						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: 20</li>
-						<li>Link to failed rows CSV: <a href="<link>">placeholder</a></li>
+						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
 					</ul>
 				
 				</body>
@@ -2792,7 +2802,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":20,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -2826,7 +2836,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"PROD\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"PROD\\",\\"input\\":\\"<path:$$.Execution.Input>\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', 'query-result.csv')\\",\\"failedRowsCount\\":$.failedRowsCount,\\"failedRowsFileConsoleUrl\\":\\"$.failedRowsFileConsoleUrl\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
