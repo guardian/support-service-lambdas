@@ -9,7 +9,6 @@ val scala2Settings = Seq(
     "-encoding",
     "UTF-8",
     "-feature",
-    "-target:jvm-1.8",
     "-language:existentials",
     "-language:higherKinds",
     "-language:implicitConversions",
@@ -860,8 +859,8 @@ def genDocsImpl(makeDocsClassName: String): Def.Initialize[Task[Unit]] = {
 initialize := {
   val _ = initialize.value
   assert(
-    List("1.8", "11").contains(sys.props("java.specification.version")),
-    "Java 8 or 11 is required for this project.",
+    sys.props("java.specification.version") == "21",
+    "Java 21 is required for this project, download corretto-21 from File->Project structure.",
   )
 }
 
