@@ -315,13 +315,31 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		new CfnTemplate(this, 'ProcessingResultEmailTemplate', {
 			template: {
-				subjectPart: 'Test',
+				subjectPart:
+					'Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}',
 				htmlPart: `<html>
-						<body>
-							<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed</h1>
-							<p>{{field}}</p>
-						</body>
-					</html>`,
+				<body>
+				
+					<h1>Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}</h1>
+				
+					<p>State machine execution details:</p>
+					<ul>
+						<li>Link: <a href="<link>">placeholder</a></li>
+						<li>Start time: 2024-03-04T12:45:30.173Z</li>
+						<li>Duration: 2 hours and 40 minutes</li>
+						<li>Max concurrency: 20</li>
+					</ul>
+				
+					<p>Processing summary:</p>
+					<ul>
+						<li>Link to initial Salesforce query result CSV: <a href="<link>">placeholder</a></li>
+						<li>Number of accounts successfully re-synced: 2,000,000</li>
+						<li>Number of accounts that failed to update: 20</li>
+						<li>Link to failed rows CSV: <a href="<link>">placeholder</a></li>
+					</ul>
+				
+				</body>
+				</html>`,
 				templateName: 'SalesforceDisasterRecoveryResyncingProcedureResult',
 			},
 		});
@@ -337,9 +355,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 						Destination: {
 							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
 						},
-						Source: 'membership.dev@theguardian.com',
+						Source: 'andrea.diotallevi@guardian.co.uk',
 						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
-						TemplateData: JSON.stringify({ field: 'test' }),
+						TemplateData: JSON.stringify({ stage: this.stage }),
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
