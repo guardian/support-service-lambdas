@@ -324,20 +324,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 				<body>
 					<h4>State machine execution details:</h4>
 					<ul>
-						<li>Link: <a href="<link>">placeholder</a></li>
-						<li>Input: {{input}}</li>
 						<li>Start time: {{executionStartTime}}</li>
 						<li>Duration: 2 hours and 40 minutes</li>
-						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
 				
-					<h4>Processing summary:</h4>
-					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
-						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
-					</ul>
 				
 				</body>
 				</html>`,
