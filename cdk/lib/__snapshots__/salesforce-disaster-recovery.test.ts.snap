@@ -248,7 +248,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CODE","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CODE","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"salesforceQueryResultUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1530,7 +1538,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CSBX","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CSBX","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"salesforceQueryResultUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -2812,7 +2828,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"PROD","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"PROD","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"salesforceQueryResultUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
