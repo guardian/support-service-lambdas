@@ -119,7 +119,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "Runtime": "java11",
+        "Runtime": "java21",
         "Tags": {
           "Stack": "membership",
           "Stage": "TEST",
@@ -193,7 +193,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "Runtime": "java11",
+        "Runtime": "java21",
         "Tags": {
           "Stack": "membership",
           "Stage": "TEST",
