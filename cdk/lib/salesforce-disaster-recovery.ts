@@ -206,10 +206,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							'Key.$': JsonPath.format(
-								`{}/${queryResultFileName}`,
-								JsonPath.stringAt('$$.Execution.StartTime'),
-							),
+							Key: 'two-rows.csv',
+							// 'Key.$': JsonPath.format(
+							// 	`{}/${queryResultFileName}`,
+							// 	JsonPath.stringAt('$$.Execution.StartTime'),
+							// ),
 						},
 					},
 					ItemBatcher: {
@@ -357,22 +358,33 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Source: 'andrea.diotallevi@guardian.co.uk',
 						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
-						TemplateData: JSON.stringify({
+						'TemplateData.$': JSON.stringify({
 							stage: this.stage,
-							input: JsonPath.objectAt('$$.Execution.Input').toString(),
-							executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
-							maxConcurrency,
-							salesforceQueryResultUrl: JsonPath.format(
-								`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
-								bucket.bucketName,
-								this.region,
-								queryResultFileName,
-							),
-							failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
-							failedRowsFileConsoleUrl: JsonPath.stringAt(
-								'$.failedRowsFileConsoleUrl',
+							'executionStartTime.$': JsonPath.stringAt(
+								'$$.Execution.StartTime',
 							),
 						}),
+						// 'TemplateData.$': JSON.stringify({
+						// 	stage: this.stage,
+						// 	executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+						// }),
+						// TemplateData: JsonPath.jsonToString({}),
+						// TemplateData: JSON.stringify({
+						// 	stage: this.stage,
+						// 	input: JsonPath.objectAt('$$.Execution.Input').toString(),
+						// 	executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+						// 	maxConcurrency,
+						// 	salesforceQueryResultUrl: JsonPath.format(
+						// 		`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+						// 		bucket.bucketName,
+						// 		this.region,
+						// 		queryResultFileName,
+						// 	),
+						// 	failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
+						// 	failedRowsFileConsoleUrl: JsonPath.stringAt(
+						// 		'$.failedRowsFileConsoleUrl',
+						// 	),
+						// }),
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},

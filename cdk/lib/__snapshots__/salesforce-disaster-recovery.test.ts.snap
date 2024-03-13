@@ -226,7 +226,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"two-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -256,15 +256,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CODE\\",\\"input\\":\\"$$.Execution.Input\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', 'query-result.csv')\\",\\"failedRowsCount\\":$.failedRowsCount,\\"failedRowsFileConsoleUrl\\":\\"$.failedRowsFileConsoleUrl\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData.$":"{\\"stage\\":\\"CODE\\",\\"executionStartTime.$\\":\\"$$.Execution.StartTime\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1516,7 +1508,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"two-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -1546,15 +1538,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CSBX\\",\\"input\\":\\"$$.Execution.Input\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', 'query-result.csv')\\",\\"failedRowsCount\\":$.failedRowsCount,\\"failedRowsFileConsoleUrl\\":\\"$.failedRowsFileConsoleUrl\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData.$":"{\\"stage\\":\\"CSBX\\",\\"executionStartTime.$\\":\\"$$.Execution.StartTime\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -2806,7 +2790,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"two-rows.csv"}},"ItemBatcher":{"MaxItemsPerBatch":50},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"UpdateZuoraAccounts","States":{"UpdateZuoraAccounts":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "UpdateZuoraAccountsLambda64E51B2A",
@@ -2836,15 +2820,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"PROD\\",\\"input\\":\\"$$.Execution.Input\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', 'query-result.csv')\\",\\"failedRowsCount\\":$.failedRowsCount,\\"failedRowsFileConsoleUrl\\":\\"$.failedRowsFileConsoleUrl\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData.$":"{\\"stage\\":\\"PROD\\",\\"executionStartTime.$\\":\\"$$.Execution.StartTime\\"}"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
