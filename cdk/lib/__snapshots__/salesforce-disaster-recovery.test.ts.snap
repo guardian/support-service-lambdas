@@ -256,7 +256,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CODE\\",\\"input\\":\\"<path:$$.Execution.Input>\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CODE\\",\\"input\\":\\"$$.Execution.Input\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1546,7 +1546,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CSBX\\",\\"input\\":\\"<path:$$.Execution.Input>\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"CSBX\\",\\"input\\":\\"$$.Execution.Input\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -2836,7 +2836,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"PROD\\",\\"input\\":\\"<path:$$.Execution.Input>\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData":"{\\"stage\\":\\"PROD\\",\\"input\\":\\"$$.Execution.Input\\",\\"executionStartTime\\":\\"$$.Execution.StartTime\\",\\"maxConcurrency\\":20,\\"salesforceQueryResultUrl\\":\\"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
               {
                 "Ref": "Bucket83908E77",
               },

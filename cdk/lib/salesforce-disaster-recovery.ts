@@ -359,7 +359,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
 						TemplateData: JSON.stringify({
 							stage: this.stage,
-							input: JsonPath.objectAt('$$.Execution.Input'),
+							input: JsonPath.objectAt('$$.Execution.Input').toString(),
 							executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
 							maxConcurrency,
 							salesforceQueryResultUrl: JsonPath.format(
