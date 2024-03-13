@@ -194,6 +194,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Map',
 					MaxConcurrency: 10,
 					ToleratedFailurePercentage: 100,
+					Comment: `ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches`,
 					ItemReader: {
 						Resource: 'arn:aws:states:::s3:getObject',
 						ReaderConfig: {
