@@ -16,6 +16,8 @@ import {
 	DefinitionBody,
 	Fail,
 	JsonPath,
+	Pass,
+	Result,
 	StateMachine,
 	Succeed,
 	TaskInput,
@@ -335,6 +337,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
+		const buildEmailTemplateData = new Pass(this, 'BuildEmailTemplateData', {
+			result: Result.fromObject({
+				stage: this.stage,
+				executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+			}),
+			resultPath: '$.emailTemplateData',
+		});
+
 		const sendProcessingResultEmail = new CustomState(
 			this,
 			'SendProcessingResultEmail',
@@ -348,12 +358,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Source: 'andrea.diotallevi@guardian.co.uk',
 						Template: 'SalesforceDisasterRecoveryResyncingProcedureResult',
-						'TemplateData.$': JSON.stringify({
-							stage: this.stage,
-							'executionStartTime.$': JsonPath.stringAt(
-								'$$.Execution.StartTime',
-							),
-						}),
+						'TemplateData.$': JsonPath.jsonToString(
+							JsonPath.objectAt('$.emailTemplateData'),
+						),
+						// 'TemplateData.$': JSON.stringify({
+						// 	stage: this.stage,
+						// 	'executionStartTime.$': JsonPath.stringAt(
+						// 		'$$.Execution.StartTime',
+						// 	),
+						// }),
 						// 'TemplateData.$': JSON.stringify({
 						// 	stage: this.stage,
 						// 	executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
@@ -398,6 +411,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
+											.next(buildEmailTemplateData)
 											.next(sendProcessingResultEmail)
 											.next(
 												new Choice(this, 'HaveAllRowsSuccedeed')
