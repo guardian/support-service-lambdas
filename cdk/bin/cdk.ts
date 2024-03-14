@@ -123,7 +123,7 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
 });
 
 export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
-	stack: "membership",
+	stack: "support",
 	stage: "CODE",
 	deployBucket: "membership-dist",
 	certificateId: supportCertificateId,
@@ -132,7 +132,7 @@ export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
 
 }
 export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
-	stack: "membership",
+	stack: "support",
 	stage: "PROD",
 	deployBucket: "membership-dist",
 	certificateId: supportCertificateId,
