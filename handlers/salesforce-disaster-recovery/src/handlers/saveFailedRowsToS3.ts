@@ -1,6 +1,6 @@
 import { checkDefined } from '@modules/nullAndUndefined';
 import {
-	type AccountRowResult,
+	type AccountRowWithResult,
 	convertArrayToCsv,
 	getFileFromS3,
 	uploadFileToS3,
@@ -17,7 +17,7 @@ export const handler = async (event: {
 		'S3_BUCKET environment variable not set',
 	);
 
-	const failedRows: AccountRowResult[] = [];
+	const failedRows: AccountRowWithResult[] = [];
 
 	for (const file of resultFiles) {
 		const fileString = await getFileFromS3({
@@ -28,7 +28,7 @@ export const handler = async (event: {
 		const fileContent = JSON.parse(fileString) as Array<{ Output: string }>;
 
 		for (const batch of fileContent) {
-			const output = JSON.parse(batch.Output) as AccountRowResult[];
+			const output = JSON.parse(batch.Output) as AccountRowWithResult[];
 			const failedResults = output.filter((row) => !row.Success);
 			failedRows.push(...failedResults);
 		}
@@ -36,7 +36,10 @@ export const handler = async (event: {
 
 	const content = convertArrayToCsv({
 		arr: failedRows.map((row) => ({
-			ZuoraAccountId: row.ZuoraAccountId,
+			Id: row.Id,
+			Zuora__Zuora_Id__c: row.Zuora__Zuora_Id__c,
+			Zuora__Account__c: row.Zuora__Account__c,
+			Contact__c: row.Contact__c,
 			Errors: JSON.stringify(row.Errors),
 		})),
 	});

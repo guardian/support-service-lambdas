@@ -1,9 +1,16 @@
 import { checkDefined } from '@modules/nullAndUndefined';
 import { type Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { type AccountRow, batchUpdateZuoraAccounts } from '../services';
+import {
+	type AccountRow,
+	type AccountRowWithResult,
+	batchUpdateZuoraAccounts,
+	updateZuoraAccount,
+} from '../services';
 
-export const handler = async (event: { Items: AccountRow[] }) => {
+export const handler = async (event: {
+	Items: AccountRow[];
+}): Promise<AccountRowWithResult[]> => {
 	const { Items } = event;
 
 	const stage = checkDefined<string>(
@@ -13,7 +20,7 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 
 	const zuoraClient = await ZuoraClient.create(stage as Stage);
 
-	const results = [];
+	const batchUpdateResults: AccountRowWithResult[] = [];
 
 	for (let i = 0; i < Items.length; i += 50) {
 		const batch = Items.slice(i, i + 50);
@@ -23,8 +30,28 @@ export const handler = async (event: { Items: AccountRow[] }) => {
 			accountRows: batch,
 		});
 
-		results.push(...response);
+		batchUpdateResults.push(...response);
 	}
+
+	const individualUpdateResults: AccountRowWithResult[] = [];
+
+	for (const failedRow of batchUpdateResults.filter((row) => !row.Success)) {
+		const response = await updateZuoraAccount({
+			zuoraClient,
+			accountRow: failedRow,
+		});
+
+		individualUpdateResults.push(response);
+	}
+
+	const results = batchUpdateResults.map(
+		(batchUpdateResult) =>
+			individualUpdateResults.find(
+				(individualUpdateResult) =>
+					individualUpdateResult.Zuora__Zuora_Id__c ===
+					batchUpdateResult.Zuora__Zuora_Id__c,
+			) ?? batchUpdateResult,
+	);
 
 	return results;
 };
