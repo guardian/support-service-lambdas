@@ -318,11 +318,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 				<body>
 					<h4>State machine execution details:</h4>
 					<ul>
-						<li>Link: <a href="<link>">placeholder</a></li>
-						<li>Input: {{input}}</li>
-						<li>Start time: {{executionStartTime}}</li>
+						<li>Link: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
+						<li>Input: {{stateMachineInput}}</li>
+						<li>Start time: {{stateMachineExecutionStartTime}}</li>
 						<li>Duration: 2 hours and 40 minutes</li>
-						<li>Max concurrency: {{maxConcurrency}}</li>
+						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
 					</ul>
 					<h4>Processing summary:</h4>
 					<ul>
@@ -340,9 +340,20 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const buildEmailTemplateData = new Pass(this, 'BuildEmailTemplateData', {
 			parameters: {
 				stage: this.stage,
-				input: JsonPath.objectAt('$$.Execution.Input').toString(),
-				executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
-				maxConcurrency,
+				stateMachineExecutionDetailsUrl: JsonPath.format(
+					`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/arn:aws:states:{}:{}:execution:{}:{}`,
+					this.region,
+					this.region,
+					this.region,
+					this.account,
+					JsonPath.stringAt('$$.StateMachine.Name'),
+					JsonPath.stringAt('$$.Execution.Id'),
+				),
+				stateMachineInput: JsonPath.objectAt('$$.Execution.Input').toString(),
+				stateMachineExecutionStartTime: JsonPath.stringAt(
+					'$$.Execution.StartTime',
+				),
+				stateMachineMaxConcurrency: maxConcurrency,
 				queryResultFileUrl: JsonPath.format(
 					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
 					bucket.bucketName,
