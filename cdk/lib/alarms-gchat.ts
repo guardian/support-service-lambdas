@@ -30,11 +30,11 @@ export class AlarmsGchat extends GuStack {
 			Stage: this.stage,
 		};
 
-		const parameters = {
-			webhook: new GuStringParameter(this, 'webhook', {
-				description: 'Google Chat webhook for lambda to fire to',
-			}),
-		};
+		// const parameters = {
+		// 	webhook: new GuStringParameter(this, 'webhook', {
+		// 		description: 'Google Chat webhook for lambda to fire to',
+		// 	}),
+		// };
 		// const stageMapping = new CfnMapping(this, 'stageMapping', {
 		// 	mapping: {
 		// 		CODE: { alarmActionsEnabled: 'FALSE' },
@@ -80,7 +80,7 @@ export class AlarmsGchat extends GuStack {
 				runtime: Runtime.NODEJS_18_X,
 				memorySize: 1024,
 				environment: {
-					WEBHOOK: parameters.webhook.valueAsString,
+					// WEBHOOK: parameters.webhook.valueAsString,
 					...commonEnvironmentVariables,
 				},
 				timeout: Duration.seconds(15),
