@@ -39,8 +39,15 @@ jobs:
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
 
-      - name: Generate CFN templates from GuCDK
-        run: bash ./script/cfn.sh
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm --filter cdk package
 
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v2
