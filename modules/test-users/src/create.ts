@@ -1,4 +1,5 @@
-import { getProductRatePlan } from '@modules/product-catalog/productCatalogMapping';
+import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscribeResponse } from '@modules/zuora/zuoraSchemas';
@@ -102,16 +103,14 @@ export const createSubscribeBody = (
 const stage = 'CODE';
 export const createAccountAndSubscription = async (
 	zuoraClient: ZuoraClient,
+	productCatalog: ProductCatalog,
 ): Promise<ZuoraSubscribeResponse> => {
+	const productRatePlanId =
+		productCatalog.DigitalSubscription.ratePlans.Monthly.id;
 	const path = `/v1/action/subscribe`;
 	const subscribeItems = [
 		{
-			productRatePlanId: getProductRatePlan(
-				stage,
-				'Digital',
-				'DigitalSubscription',
-				'Monthly',
-			).id as string,
+			productRatePlanId,
 		},
 	];
 	const today = dayjs();
@@ -122,6 +121,10 @@ export const createAccountAndSubscription = async (
 
 void (async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
-	const response = await createAccountAndSubscription(zuoraClient);
+	const productCatalog = await getProductCatalogFromApi(stage);
+	const response = await createAccountAndSubscription(
+		zuoraClient,
+		productCatalog,
+	);
 	console.log(response);
 })();

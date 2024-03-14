@@ -43,8 +43,8 @@ export class GenerateProductCatalog extends GuStack {
 			app: app,
 		});
 
-		const zuoraCatalogBucketName: string = 'gu-zuora-catalog';
-		const productCatalogBucketName: string = 'gu-product-catalog';
+		const zuoraCatalogBucketName = 'gu-zuora-catalog';
+		const productCatalogBucketName = 'gu-product-catalog';
 		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}`;
 		const zuoraCatalogBucket = Bucket.fromBucketName(
 			this,
