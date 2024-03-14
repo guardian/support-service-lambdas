@@ -154,22 +154,21 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ResyncingProcedureResultEmailTemplate": {
+    "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
           "HtmlPart": "<html>
 				<body>
-					<h4>State machine execution details:</h4>
+					<h4>State machine details:</h4>
 					<ul>
-						<li>Link: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
+						<li>Link to execution details: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
 						<li>Input: {{stateMachineInput}}</li>
 						<li>Start time: {{stateMachineExecutionStartTime}}</li>
-						<li>Duration: 2 hours and 40 minutes</li>
 						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
 					</ul>
 					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
+						<li>Link to Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
 						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
@@ -177,7 +176,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
 				</body>
 				</html>",
           "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
-          "TemplateName": "SalesforceDisasterRecoveryResyncingProcedureResult",
+          "TemplateName": "ResyncingProcedureResultEmailTemplate2",
         },
       },
       "Type": "AWS::SES::Template",
@@ -278,7 +277,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"ResyncingProcedureResultEmailTemplate2","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1458,22 +1457,21 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ResyncingProcedureResultEmailTemplate": {
+    "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
           "HtmlPart": "<html>
 				<body>
-					<h4>State machine execution details:</h4>
+					<h4>State machine details:</h4>
 					<ul>
-						<li>Link: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
+						<li>Link to execution details: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
 						<li>Input: {{stateMachineInput}}</li>
 						<li>Start time: {{stateMachineExecutionStartTime}}</li>
-						<li>Duration: 2 hours and 40 minutes</li>
 						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
 					</ul>
 					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
+						<li>Link to Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
 						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
@@ -1481,7 +1479,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
 				</body>
 				</html>",
           "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
-          "TemplateName": "SalesforceDisasterRecoveryResyncingProcedureResult",
+          "TemplateName": "ResyncingProcedureResultEmailTemplate2",
         },
       },
       "Type": "AWS::SES::Template",
@@ -1582,7 +1580,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"ResyncingProcedureResultEmailTemplate2","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -2762,22 +2760,21 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ResyncingProcedureResultEmailTemplate": {
+    "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
           "HtmlPart": "<html>
 				<body>
-					<h4>State machine execution details:</h4>
+					<h4>State machine details:</h4>
 					<ul>
-						<li>Link: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
+						<li>Link to execution details: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
 						<li>Input: {{stateMachineInput}}</li>
 						<li>Start time: {{stateMachineExecutionStartTime}}</li>
-						<li>Duration: 2 hours and 40 minutes</li>
 						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
 					</ul>
 					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
+						<li>Link to Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
 						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
@@ -2785,7 +2782,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
 				</body>
 				</html>",
           "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
-          "TemplateName": "SalesforceDisasterRecoveryResyncingProcedureResult",
+          "TemplateName": "ResyncingProcedureResultEmailTemplate2",
         },
       },
       "Type": "AWS::SES::Template",
@@ -2886,7 +2883,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"SalesforceDisasterRecoveryResyncingProcedureResult","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"ResyncingProcedureResultEmailTemplate2","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
