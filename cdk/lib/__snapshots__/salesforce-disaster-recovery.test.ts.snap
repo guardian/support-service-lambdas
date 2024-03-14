@@ -154,7 +154,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ProcessingResultEmailTemplate": {
+    "ResyncingProcedureResultEmailTemplate": {
       "Properties": {
         "Template": {
           "HtmlPart": "<html>
@@ -167,7 +167,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
 						<li>Duration: 2 hours and 40 minutes</li>
 						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
-				
 					<h4>Processing summary:</h4>
 					<ul>
 						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
@@ -175,7 +174,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
 						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
 					</ul>
-				
 				</body>
 				</html>",
           "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
@@ -1444,7 +1442,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ProcessingResultEmailTemplate": {
+    "ResyncingProcedureResultEmailTemplate": {
       "Properties": {
         "Template": {
           "HtmlPart": "<html>
@@ -1457,7 +1455,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
 						<li>Duration: 2 hours and 40 minutes</li>
 						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
-				
 					<h4>Processing summary:</h4>
 					<ul>
 						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
@@ -1465,7 +1462,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
 						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
 					</ul>
-				
 				</body>
 				</html>",
           "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
@@ -2734,7 +2730,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ProcessingResultEmailTemplate": {
+    "ResyncingProcedureResultEmailTemplate": {
       "Properties": {
         "Template": {
           "HtmlPart": "<html>
@@ -2747,7 +2743,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
 						<li>Duration: 2 hours and 40 minutes</li>
 						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
-				
 					<h4>Processing summary:</h4>
 					<ul>
 						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
@@ -2755,7 +2750,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
 						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
 					</ul>
-				
 				</body>
 				</html>",
           "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
