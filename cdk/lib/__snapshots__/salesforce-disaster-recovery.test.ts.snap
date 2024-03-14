@@ -348,7 +348,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -363,7 +363,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"HaveAllRowsSuccedeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -374,7 +382,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.SUCCEEDED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1584,7 +1592,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1599,7 +1607,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"HaveAllRowsSuccedeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1610,7 +1626,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.SUCCEEDED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -2820,7 +2836,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "","Payload":{"queryJobId.$":"$.ResponseBody.id","filePath.$":"States.Format('{}/query-result.csv', $$.Execution.StartTime)"}}},"ProcessCsvInDistributedMap":{"Next":"GetMapResult","Type":"Map","MaxConcurrency":10,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -2835,7 +2851,15 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"HaveAllRowsSuccedeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount","failedRowsFilePath.$":"$.Payload.failedRowsFilePath","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.Payload.failedRowsFilePath)"},"Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2846,7 +2870,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.SUCCEEDED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}}}}",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },

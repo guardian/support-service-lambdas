@@ -13,8 +13,10 @@ import {
 	Condition,
 	CustomState,
 	DefinitionBody,
+	Fail,
 	JsonPath,
 	StateMachine,
+	Succeed,
 	TaskInput,
 	Wait,
 	WaitTime,
@@ -191,6 +193,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 				stateJson: {
 					Type: 'Map',
 					MaxConcurrency: 10,
+					ToleratedFailurePercentage: 100,
+					Comment: `ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches`,
 					ItemReader: {
 						Resource: 'arn:aws:states:::s3:getObject',
 						ReaderConfig: {
@@ -290,12 +294,22 @@ export class SalesforceDisasterRecovery extends GuStack {
 				],
 			}),
 			payload: TaskInput.fromObject({
-				'resultFiles.$': '$.ResultFiles.SUCCEEDED',
+				'resultFiles.$': '$.ResultFiles.FAILED',
 				filePath: JsonPath.format(
 					`{}/${failedRowsFileName}`,
 					JsonPath.stringAt('$$.Execution.StartTime'),
 				),
 			}),
+			resultSelector: {
+				failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
+				failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+				failedRowsFileConsoleUrl: JsonPath.format(
+					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+					bucket.bucketName,
+					this.region,
+					JsonPath.stringAt('$.Payload.failedRowsFilePath'),
+				),
+			},
 		});
 
 		const stateMachine = new StateMachine(
@@ -314,7 +328,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 									saveSalesforceQueryResultToS3.next(
 										processCsvInDistributedMap
 											.next(getMapResult)
-											.next(saveFailedRowsToS3),
+											.next(saveFailedRowsToS3)
+											.next(
+												new Choice(this, 'HaveAllRowsSuccedeed')
+													.when(
+														Condition.numberEquals('$.failedRowsCount', 0),
+														new Succeed(this, 'AllRowsHaveSuccedeed'),
+													)
+													.otherwise(new Fail(this, 'SomeRowsHaveFailed')),
+											),
 									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
