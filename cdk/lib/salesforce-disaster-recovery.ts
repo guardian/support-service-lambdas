@@ -328,10 +328,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 				
 					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
+						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
 					</ul>
 				
 				</body>
@@ -346,7 +346,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				input: JsonPath.objectAt('$$.Execution.Input').toString(),
 				executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
 				maxConcurrency,
-				salesforceQueryResultUrl: JsonPath.format(
+				queryResultFileUrl: JsonPath.format(
 					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
 					bucket.bucketName,
 					this.region,
@@ -354,7 +354,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					queryResultFileName,
 				),
 				failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
-				failedRowsFileConsoleUrl: JsonPath.format(
+				failedRowsFileUrl: JsonPath.format(
 					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
 					bucket.bucketName,
 					this.region,
