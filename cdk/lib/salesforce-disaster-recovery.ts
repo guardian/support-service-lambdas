@@ -17,7 +17,6 @@ import {
 	Fail,
 	JsonPath,
 	Pass,
-	Result,
 	StateMachine,
 	Succeed,
 	TaskInput,
