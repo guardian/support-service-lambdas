@@ -82,6 +82,8 @@ Resources:
       MemorySize: 1536
       Runtime: java11
       Timeout: 300
+      Architectures:
+        - arm64
     DependsOn:
     - StartJobRole
   BatchStateRole:
@@ -131,6 +133,8 @@ Resources:
       MemorySize: 1536
       Runtime: java11
       Timeout: 300
+      Architectures:
+        - arm64
     DependsOn:
     - BatchStateRole
   DownloadBatchRole:
@@ -225,6 +229,8 @@ Resources:
       MemorySize: 1792
       Runtime: java11
       Timeout: 900
+      Architectures:
+        - arm64
     DependsOn:
     - DownloadBatchRole
   EndJobRole:
@@ -282,6 +288,8 @@ Resources:
       MemorySize: 1536
       Runtime: java11
       Timeout: 900
+      Architectures:
+        - arm64
     DependsOn:
       - CleanBucketRole
   EndJob:
@@ -302,6 +310,8 @@ Resources:
       MemorySize: 1536
       Runtime: java11
       Timeout: 300
+      Architectures:
+        - arm64
     DependsOn:
     - EndJobRole
   StatesExecutionRole:

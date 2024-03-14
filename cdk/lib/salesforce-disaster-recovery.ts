@@ -40,6 +40,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
+		const queryResultFileName = 'query-result.csv';
+		const failedRowsFileName = 'failed-rows.csv';
+
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
@@ -153,10 +156,147 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 				payload: TaskInput.fromObject({
 					queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
-					executionStartTime: JsonPath.stringAt('$$.Execution.StartTime'),
+					filePath: JsonPath.format(
+						`{}/${queryResultFileName}`,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+					),
 				}),
 			},
 		);
+
+		const updateZuoraAccountsLambda = new GuLambdaFunction(
+			this,
+			'UpdateZuoraAccountsLambda',
+			{
+				...lambdaDefaultConfig,
+				timeout: Duration.minutes(15),
+				memorySize: 10240,
+				handler: 'updateZuoraAccounts.handler',
+				functionName: `update-zuora-accounts-${this.stage}`,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
+		const processCsvInDistributedMap = new CustomState(
+			this,
+			'ProcessCsvInDistributedMap',
+			{
+				stateJson: {
+					Type: 'Map',
+					MaxConcurrency: 10,
+					ItemReader: {
+						Resource: 'arn:aws:states:::s3:getObject',
+						ReaderConfig: {
+							InputType: 'CSV',
+							CSVHeaderLocation: 'FIRST_ROW',
+						},
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Key.$': JsonPath.format(
+								`{}/${queryResultFileName}`,
+								JsonPath.stringAt('$$.Execution.StartTime'),
+							),
+						},
+					},
+					ItemBatcher: {
+						MaxItemsPerBatch: 50,
+					},
+					ItemProcessor: {
+						ProcessorConfig: {
+							Mode: 'DISTRIBUTED',
+							ExecutionType: 'STANDARD',
+						},
+						StartAt: 'UpdateZuoraAccounts',
+						States: {
+							UpdateZuoraAccounts: {
+								Type: 'Task',
+								Resource: 'arn:aws:states:::lambda:invoke',
+								OutputPath: '$.Payload',
+								Parameters: {
+									'Payload.$': '$',
+									FunctionName: updateZuoraAccountsLambda.functionArn,
+								},
+								Retry: [
+									{
+										ErrorEquals: [
+											'Lambda.ServiceException',
+											'Lambda.AWSLambdaException',
+											'Lambda.SdkClientException',
+											'Lambda.TooManyRequestsException',
+										],
+										IntervalSeconds: 2,
+										MaxAttempts: 6,
+										BackoffRate: 2,
+									},
+									{
+										ErrorEquals: ['ZuoraError'],
+										IntervalSeconds: 10,
+										MaxAttempts: 5,
+										BackoffRate: 5,
+									},
+								],
+								End: true,
+							},
+						},
+					},
+					ResultWriter: {
+						Resource: 'arn:aws:states:::s3:putObject',
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
+						},
+					},
+				},
+			},
+		);
+
+		const getMapResult = new CustomState(this, 'GetMapResult', {
+			stateJson: {
+				Type: 'Task',
+				Resource: 'arn:aws:states:::aws-sdk:s3:getObject',
+				Parameters: {
+					'Bucket.$': JsonPath.stringAt('$.ResultWriterDetails.Bucket'),
+					'Key.$': JsonPath.stringAt('$.ResultWriterDetails.Key'),
+				},
+				ResultSelector: {
+					'Payload.$': JsonPath.stringToJson(JsonPath.stringAt('$.Body')),
+				},
+				OutputPath: '$.Payload',
+			},
+		});
+
+		const saveFailedRowsToS3 = new LambdaInvoke(this, 'SaveFailedRowsToS3', {
+			lambdaFunction: new GuLambdaFunction(this, 'SaveFailedRowsToS3Lambda', {
+				...lambdaDefaultConfig,
+				memorySize: 10240,
+				handler: 'saveFailedRowsToS3.handler',
+				functionName: `save-failed-rows-to-s3-${this.stage}`,
+				environment: {
+					...lambdaDefaultConfig.environment,
+					S3_BUCKET: bucket.bucketName,
+				},
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+				],
+			}),
+			payload: TaskInput.fromObject({
+				'resultFiles.$': '$.ResultFiles.SUCCEEDED',
+				filePath: JsonPath.format(
+					`{}/${failedRowsFileName}`,
+					JsonPath.stringAt('$$.Execution.StartTime'),
+				),
+			}),
+		});
 
 		const stateMachine = new StateMachine(
 			this,
@@ -171,7 +311,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3,
+									saveSalesforceQueryResultToS3.next(
+										processCsvInDistributedMap
+											.next(getMapResult)
+											.next(saveFailedRowsToS3),
+									),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
@@ -216,6 +360,28 @@ export class SalesforceDisasterRecovery extends GuStack {
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
 						],
+					}),
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+					new PolicyStatement({
+						actions: ['states:StartExecution'],
+						resources: [stateMachine.stateMachineArn],
+					}),
+					new PolicyStatement({
+						actions: [
+							'states:RedriveExecution',
+							'states:DescribeExecution',
+							'states:StopExecution',
+						],
+						resources: [
+							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
+						],
+					}),
+					new PolicyStatement({
+						actions: ['lambda:InvokeFunction'],
+						resources: [updateZuoraAccountsLambda.functionArn],
 					}),
 				],
 			}),

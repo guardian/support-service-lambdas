@@ -184,6 +184,8 @@ Resources:
                 SubnetIds: !Ref VpcSubnets
             Role:
               !GetAtt ZuoraBatonSarLambdaRole.Arn
+            Architectures:
+              - arm64
 
     PerformZuoraSarLambda:
         Type: AWS::Lambda::Function
@@ -207,5 +209,7 @@ Resources:
                 SubnetIds: !Ref VpcSubnets
             Role:
               !GetAtt PerformZuoraSarLambdaRole.Arn
+            Architectures:
+              - arm64
         DependsOn:
         - PerformZuoraSarLambdaRole

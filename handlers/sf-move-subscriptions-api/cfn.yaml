@@ -133,6 +133,8 @@ Resources:
         - Key: Stack
           Value: membership
       Timeout: 300
+      Architectures:
+        - arm64
     DependsOn:
       - sfMoveSubscriptionsFnRoleDefaultPolicyBD9AFEB9
       - sfMoveSubscriptionsFnRole6D1AF23F

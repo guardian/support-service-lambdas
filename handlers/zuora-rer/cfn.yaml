@@ -136,6 +136,8 @@ Resources:
             Timeout: 120
             Role:
               !GetAtt ZuoraBatonRerLambdaRole.Arn
+            Architectures:
+              - arm64
 
     PerformZuoraRerLambda:
         Type: AWS::Lambda::Function
@@ -155,5 +157,7 @@ Resources:
             Timeout: 900
             Role:
               !GetAtt PerformZuoraRerLambdaRole.Arn
+            Architectures:
+              - arm64
         DependsOn:
         - PerformZuoraRerLambdaRole

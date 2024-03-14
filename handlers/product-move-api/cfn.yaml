@@ -254,6 +254,8 @@ Resources:
       Tags:
         - Key: lambda:createdBy
           Value: SAM
+      Architectures:
+        - arm64
   ProductMoveApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
@@ -456,6 +458,8 @@ Resources:
       Tags:
         - Key: lambda:createdBy
           Value: SAM
+      Architectures:
+        - arm64
   ProductMoveApiGatewayApiKey:
     Type: AWS::ApiGateway::ApiKey
     DependsOn:

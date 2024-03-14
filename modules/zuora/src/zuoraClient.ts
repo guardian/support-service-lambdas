@@ -4,6 +4,15 @@ import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
 
+export class ZuoraError extends Error {
+	constructor(
+		message: string,
+		public code: number,
+	) {
+		super(message);
+	}
+}
+
 export class ZuoraClient {
 	static async create(stage: Stage) {
 		const credentials = await getOAuthClientCredentials(stage);
@@ -67,12 +76,14 @@ export class ZuoraClient {
 		});
 		const json = await response.json();
 		console.log('Response from Zuora was: ', JSON.stringify(json));
+
 		if (response.ok) {
 			return schema.parse(json);
 		} else {
-			throw new Error(
-				`Error in ZuoraClient.fetch: ${response.status} ${response.statusText}`,
-			);
+			if (response.status === 429) {
+				console.log(response.headers);
+			}
+			throw new ZuoraError(response.statusText, response.status);
 		}
 	}
 }

@@ -36,3 +36,9 @@ export const getSingleOrThrow = <T>(
 
 export const findDuplicates = <T>(array: T[]) =>
 	array.filter((item, index) => array.indexOf(item) !== index);
+export const distinct = <T>(array: T[]) => Array.from(new Set(array));
+export const arrayToObject = <T>(array: Array<Record<string, T>>) => {
+	return array.reduce((acc, val) => {
+		return { ...acc, ...val };
+	}, {});
+};

@@ -1,4 +1,4 @@
-import { getProductRatePlan } from '@modules/product/productCatalogMapping';
+import { getProductRatePlan } from '@modules/product-catalog/productCatalogMapping';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscribeResponse } from '@modules/zuora/zuoraSchemas';

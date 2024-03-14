@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - generate-product-catalog
           - discount-api
           - salesforce-disaster-recovery
     runs-on: ubuntu-latest
@@ -18,7 +19,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
       - uses: actions/setup-node@v4
@@ -45,7 +46,6 @@ jobs:
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
-              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
+              - ./cdk/cdk.out
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
