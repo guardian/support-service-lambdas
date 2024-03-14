@@ -170,10 +170,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
 				
 					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
+						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
 					</ul>
 				
 				</body>
@@ -248,7 +248,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CODE","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"salesforceQueryResultUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CODE","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -256,7 +256,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1460,10 +1460,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
 				
 					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
+						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
 					</ul>
 				
 				</body>
@@ -1538,7 +1538,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CSBX","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"salesforceQueryResultUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CSBX","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1546,7 +1546,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -2750,10 +2750,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
 				
 					<h4>Processing summary:</h4>
 					<ul>
-						<li>Link to initial Salesforce query result CSV: <a href="{{salesforceQueryResultUrl}}">Link</a></li>
+						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
 						<li>Number of accounts successfully re-synced: 2,000,000</li>
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileConsoleUrl}}">Link</a></li>
+						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
 					</ul>
 				
 				</body>
@@ -2828,7 +2828,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"PROD","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"salesforceQueryResultUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"PROD","input.$":"$$.Execution.Input","executionStartTime.$":"$$.Execution.StartTime","maxConcurrency":20,"queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -2836,7 +2836,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileConsoleUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.StartTime, 'query-result.csv')","failedRowsCount.$":"$.failedRowsCount","failedRowsFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
