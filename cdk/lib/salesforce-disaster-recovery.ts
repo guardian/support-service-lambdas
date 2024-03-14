@@ -311,7 +311,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		new CfnTemplate(this, 'ProcessingResultEmailTemplate', {
+		new CfnTemplate(this, 'ResyncingProcedureResultEmailTemplate', {
 			template: {
 				subjectPart:
 					'Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}',
@@ -325,7 +325,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						<li>Duration: 2 hours and 40 minutes</li>
 						<li>Max concurrency: {{maxConcurrency}}</li>
 					</ul>
-				
 					<h4>Processing summary:</h4>
 					<ul>
 						<li>Link to initial Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
@@ -333,7 +332,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
 						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
 					</ul>
-				
 				</body>
 				</html>`,
 				templateName: 'SalesforceDisasterRecoveryResyncingProcedureResult',
