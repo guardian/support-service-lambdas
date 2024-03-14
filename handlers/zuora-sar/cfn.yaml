@@ -176,7 +176,7 @@ Resources:
                 Variables:
                   Stage: !Ref Stage
             MemorySize: 1024
-            Runtime: java11
+            Runtime: java21
             Timeout: 120
             VpcConfig:
                 SecurityGroupIds:
@@ -201,7 +201,7 @@ Resources:
                 Variables:
                     Stage: !Ref Stage
             MemorySize: 1024
-            Runtime: java11
+            Runtime: java21
             Timeout: 900
             VpcConfig:
                 SecurityGroupIds:

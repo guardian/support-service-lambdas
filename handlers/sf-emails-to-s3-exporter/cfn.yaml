@@ -247,7 +247,7 @@ Resources:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/sf-emails-to-s3-exporter/sf-emails-to-s3-exporter.jar
       MemorySize: 512
-      Runtime: java11
+      Runtime: java21
       Timeout: 900
       Environment:
         Variables:
