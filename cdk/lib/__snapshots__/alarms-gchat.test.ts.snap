@@ -4,37 +4,18 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuStringParameter",
       "GuDistributionBucketParameter",
-      "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
+      "GuSnsLambdaExperimental",
     ],
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "alarmsgchatlambdaalarmsgchatCODEEndpointD66301F7": {
+    "googlechatbotsnstogchatTopicName31621335": {
       "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region",
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix",
-            },
-            "/",
-            {
-              "Ref": "alarmsgchatlambdaalarmsgchatCODEDeploymentStageCODE659A56C1",
-            },
-            "/",
-          ],
+        "Fn::GetAtt": [
+          "alarmsgchattopic56F6C617",
+          "TopicName",
         ],
       },
     },
@@ -45,171 +26,35 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "webhook": {
+      "Description": "Google Chat webhook for lambda to fire to",
+      "Type": "String",
+    },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
+    "S3inlinepolicy3B07399A": {
       "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Alarms gchat received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "ALARMS-GCHAT-CODE API gateway 4XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "alarms-gchat-CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmAlarmsgchatCBF26B0A": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "alarms-gchat exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from alarms-gchat (ApiGateway) in CODE",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for alarms-gchat",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "alarms-gchat-CODE",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/alarms-gchat/",
             },
-            "ReturnData": false,
-          },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
           {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "alarms-gchat-CODE",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
+            "Ref": "googlechatbotsnstogchatServiceRole6E143D03",
           },
         ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
       },
-      "Type": "AWS::CloudWatch::Alarm",
+      "Type": "AWS::IAM::Policy",
     },
-    "BasePathMapping": {
+    "alarmsgchattopic56F6C617": {
       "Properties": {
-        "DomainName": {
-          "Ref": "DomainName",
-        },
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-        },
-        "Stage": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODEDeploymentStageCODE659A56C1",
-        },
-      },
-      "Type": "AWS::ApiGateway::BasePathMapping",
-    },
-    "DNSRecord": {
-      "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "alarms-gchat.code.support.guardianapis.com",
-        "ResourceRecords": [
-          {
-            "Fn::GetAtt": [
-              "DomainName",
-              "RegionalDomainName",
-            ],
-          },
-        ],
-        "TTL": "120",
-        "Type": "CNAME",
-      },
-      "Type": "AWS::Route53::RecordSet",
-    },
-    "DomainName": {
-      "Properties": {
-        "DomainName": "alarms-gchat.code.support.guardianapis.com",
-        "EndpointConfiguration": {
-          "Types": [
-            "REGIONAL",
-          ],
-        },
-        "RegionalCertificateArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:acm:eu-west-1:",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
-            ],
-          ],
-        },
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -228,34 +73,14 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
+        "TopicName": "alarms-gchat-topic-CODE",
       },
-      "Type": "AWS::ApiGateway::DomainName",
+      "Type": "AWS::SNS::Topic",
     },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/alarms-gchat/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "alarmsgchatlambdaServiceRole5A5B1889",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmsgchatlambdaB12ACC8E": {
+    "googlechatbotsnstogchat496F36E9": {
       "DependsOn": [
-        "alarmsgchatlambdaServiceRoleDefaultPolicy41CAB6A3",
-        "alarmsgchatlambdaServiceRole5A5B1889",
+        "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9",
+        "googlechatbotsnstogchatServiceRole6E143D03",
       ],
       "Properties": {
         "Code": {
@@ -273,6 +98,9 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
             "STAGE": "CODE",
             "Stack": "membership",
             "Stage": "CODE",
+            "WEBHOOK": {
+              "Ref": "webhook",
+            },
           },
         },
         "FunctionName": "alarms-gchat-CODE",
@@ -280,7 +108,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "alarmsgchatlambdaServiceRole5A5B1889",
+            "googlechatbotsnstogchatServiceRole6E143D03",
             "Arn",
           ],
         },
@@ -307,11 +135,46 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 15,
       },
       "Type": "AWS::Lambda::Function",
     },
-    "alarmsgchatlambdaServiceRole5A5B1889": {
+    "googlechatbotsnstogchatAllowInvokealarmsgchatCODEgooglechatbotsnstogchatSnsExistingIncomingEventsTopic4CE261FCAA86CD34": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "googlechatbotsnstogchat496F36E9",
+            "Arn",
+          ],
+        },
+        "Principal": "sns.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:sns:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Fn::GetAtt": [
+                  "alarmsgchattopic56F6C617",
+                  "TopicName",
+                ],
+              },
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "googlechatbotsnstogchatServiceRole6E143D03": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -364,7 +227,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "alarmsgchatlambdaServiceRoleDefaultPolicy41CAB6A3": {
+    "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -455,106 +318,32 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "alarmsgchatlambdaServiceRoleDefaultPolicy41CAB6A3",
+        "PolicyName": "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9",
         "Roles": [
           {
-            "Ref": "alarmsgchatlambdaServiceRole5A5B1889",
+            "Ref": "googlechatbotsnstogchatServiceRole6E143D03",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "alarmsgchatlambdaalarmsgchatCODE5B6FFF75": {
+    "googlechatbotsnstogchatgooglechatbotsnstogchatSnsExistingIncomingEventsTopic90B77594": {
       "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "alarms-gchat-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-gchat",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEANY56ED6959": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "alarmsgchatlambdaB12ACC8E",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
+        "Endpoint": {
           "Fn::GetAtt": [
-            "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEANYApiPermissionTestalarmsgchatCODEalarmsgchatlambdaalarmsgchatCODE21BD2572ANYF67C2860": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaB12ACC8E",
+            "googlechatbotsnstogchat496F36E9",
             "Arn",
           ],
         },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
+        "Protocol": "lambda",
+        "Region": {
+          "Ref": "AWS::Region",
+        },
+        "TopicArn": {
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
+              "arn:aws:sns:",
               {
                 "Ref": "AWS::Region",
               },
@@ -564,310 +353,16 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
               },
               ":",
               {
-                "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
+                "Fn::GetAtt": [
+                  "alarmsgchattopic56F6C617",
+                  "TopicName",
+                ],
               },
-              "/test-invoke-stage/*/",
             ],
           ],
         },
       },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEANYApiPermissionalarmsgchatCODEalarmsgchatlambdaalarmsgchatCODE21BD2572ANYFF823AAD": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaB12ACC8E",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-              },
-              "/",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatCODEDeploymentStageCODE659A56C1",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEAccount6220B33B": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaalarmsgchatCODECloudWatchRole9EE6B174",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "alarmsgchatlambdaalarmsgchatCODECloudWatchRole9EE6B174": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-gchat",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEDeploymentB587138D97c85d9a34cd683b48b82bdd34e6e7c0": {
-      "DependsOn": [
-        "alarmsgchatlambdaalarmsgchatCODEproxyANY480D28A3",
-        "alarmsgchatlambdaalarmsgchatCODEproxy3D6AFD29",
-        "alarmsgchatlambdaalarmsgchatCODEANY56ED6959",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEDeploymentStageCODE659A56C1": {
-      "DependsOn": [
-        "alarmsgchatlambdaalarmsgchatCODEAccount6220B33B",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODEDeploymentB587138D97c85d9a34cd683b48b82bdd34e6e7c0",
-        },
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-        },
-        "StageName": "CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-gchat",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEproxy3D6AFD29": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEproxyANY480D28A3": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "alarmsgchatlambdaB12ACC8E",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODEproxy3D6AFD29",
-        },
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEproxyANYApiPermissionTestalarmsgchatCODEalarmsgchatlambdaalarmsgchatCODE21BD2572ANYproxyCB753039": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaB12ACC8E",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmsgchatlambdaalarmsgchatCODEproxyANYApiPermissionalarmsgchatCODEalarmsgchatlambdaalarmsgchatCODE21BD2572ANYproxyAA0DA639": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaB12ACC8E",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatCODE5B6FFF75",
-              },
-              "/",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatCODEDeploymentStageCODE659A56C1",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::SNS::Subscription",
     },
   },
 }
@@ -877,37 +372,18 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuStringParameter",
       "GuDistributionBucketParameter",
-      "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
+      "GuSnsLambdaExperimental",
     ],
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "alarmsgchatlambdaalarmsgchatPRODEndpointE485C133": {
+    "googlechatbotsnstogchatTopicName31621335": {
       "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region",
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix",
-            },
-            "/",
-            {
-              "Ref": "alarmsgchatlambdaalarmsgchatPRODDeploymentStagePROD777191FF",
-            },
-            "/",
-          ],
+        "Fn::GetAtt": [
+          "alarmsgchattopic56F6C617",
+          "TopicName",
         ],
       },
     },
@@ -918,171 +394,35 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "webhook": {
+      "Description": "Google Chat webhook for lambda to fire to",
+      "Type": "String",
+    },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
+    "S3inlinepolicy3B07399A": {
       "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Alarms gchat received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "ALARMS-GCHAT-PROD API gateway 4XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "alarms-gchat-PROD",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmAlarmsgchatCBF26B0A": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "alarms-gchat exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from alarms-gchat (ApiGateway) in PROD",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for alarms-gchat",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "alarms-gchat-PROD",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/alarms-gchat/",
             },
-            "ReturnData": false,
-          },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
           {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "alarms-gchat-PROD",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
+            "Ref": "googlechatbotsnstogchatServiceRole6E143D03",
           },
         ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
       },
-      "Type": "AWS::CloudWatch::Alarm",
+      "Type": "AWS::IAM::Policy",
     },
-    "BasePathMapping": {
+    "alarmsgchattopic56F6C617": {
       "Properties": {
-        "DomainName": {
-          "Ref": "DomainName",
-        },
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-        },
-        "Stage": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODDeploymentStagePROD777191FF",
-        },
-      },
-      "Type": "AWS::ApiGateway::BasePathMapping",
-    },
-    "DNSRecord": {
-      "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "alarms-gchat.support.guardianapis.com",
-        "ResourceRecords": [
-          {
-            "Fn::GetAtt": [
-              "DomainName",
-              "RegionalDomainName",
-            ],
-          },
-        ],
-        "TTL": "120",
-        "Type": "CNAME",
-      },
-      "Type": "AWS::Route53::RecordSet",
-    },
-    "DomainName": {
-      "Properties": {
-        "DomainName": "alarms-gchat.support.guardianapis.com",
-        "EndpointConfiguration": {
-          "Types": [
-            "REGIONAL",
-          ],
-        },
-        "RegionalCertificateArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:acm:eu-west-1:",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
-            ],
-          ],
-        },
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -1101,34 +441,14 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
+        "TopicName": "alarms-gchat-topic-PROD",
       },
-      "Type": "AWS::ApiGateway::DomainName",
+      "Type": "AWS::SNS::Topic",
     },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/alarms-gchat/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "alarmsgchatlambdaServiceRole5A5B1889",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmsgchatlambdaB12ACC8E": {
+    "googlechatbotsnstogchat496F36E9": {
       "DependsOn": [
-        "alarmsgchatlambdaServiceRoleDefaultPolicy41CAB6A3",
-        "alarmsgchatlambdaServiceRole5A5B1889",
+        "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9",
+        "googlechatbotsnstogchatServiceRole6E143D03",
       ],
       "Properties": {
         "Code": {
@@ -1146,6 +466,9 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
             "STAGE": "PROD",
             "Stack": "membership",
             "Stage": "PROD",
+            "WEBHOOK": {
+              "Ref": "webhook",
+            },
           },
         },
         "FunctionName": "alarms-gchat-PROD",
@@ -1153,7 +476,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "alarmsgchatlambdaServiceRole5A5B1889",
+            "googlechatbotsnstogchatServiceRole6E143D03",
             "Arn",
           ],
         },
@@ -1180,11 +503,46 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 15,
       },
       "Type": "AWS::Lambda::Function",
     },
-    "alarmsgchatlambdaServiceRole5A5B1889": {
+    "googlechatbotsnstogchatAllowInvokealarmsgchatPRODgooglechatbotsnstogchatSnsExistingIncomingEventsTopic3416B87B209BB21B": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "googlechatbotsnstogchat496F36E9",
+            "Arn",
+          ],
+        },
+        "Principal": "sns.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:sns:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Fn::GetAtt": [
+                  "alarmsgchattopic56F6C617",
+                  "TopicName",
+                ],
+              },
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "googlechatbotsnstogchatServiceRole6E143D03": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1237,7 +595,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "alarmsgchatlambdaServiceRoleDefaultPolicy41CAB6A3": {
+    "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1328,34 +686,32 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "alarmsgchatlambdaServiceRoleDefaultPolicy41CAB6A3",
+        "PolicyName": "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9",
         "Roles": [
           {
-            "Ref": "alarmsgchatlambdaServiceRole5A5B1889",
+            "Ref": "googlechatbotsnstogchatServiceRole6E143D03",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "alarmsgchatlambdaalarmsgchatPRODANYApiPermissionTestalarmsgchatPRODalarmsgchatlambdaalarmsgchatPRODC6B46ECAANYE23D9685": {
+    "googlechatbotsnstogchatgooglechatbotsnstogchatSnsExistingIncomingEventsTopic90B77594": {
       "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
+        "Endpoint": {
           "Fn::GetAtt": [
-            "alarmsgchatlambdaB12ACC8E",
+            "googlechatbotsnstogchat496F36E9",
             "Arn",
           ],
         },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
+        "Protocol": "lambda",
+        "Region": {
+          "Ref": "AWS::Region",
+        },
+        "TopicArn": {
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
+              "arn:aws:sns:",
               {
                 "Ref": "AWS::Region",
               },
@@ -1365,382 +721,16 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
               },
               ":",
               {
-                "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
+                "Fn::GetAtt": [
+                  "alarmsgchattopic56F6C617",
+                  "TopicName",
+                ],
               },
-              "/test-invoke-stage/*/",
             ],
           ],
         },
       },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODANYApiPermissionalarmsgchatPRODalarmsgchatlambdaalarmsgchatPRODC6B46ECAANYDA43C4D9": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaB12ACC8E",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-              },
-              "/",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatPRODDeploymentStagePROD777191FF",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODANYB6A34C35": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "alarmsgchatlambdaB12ACC8E",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODAccountF951FC96": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaalarmsgchatPRODCloudWatchRoleD7DEA263",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODCloudWatchRoleD7DEA263": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-gchat",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODDeploymentF3979C2F605d04dd275661e28b2c6149d0ccebd7": {
-      "DependsOn": [
-        "alarmsgchatlambdaalarmsgchatPRODproxyANY126DF250",
-        "alarmsgchatlambdaalarmsgchatPRODproxyB6969CBF",
-        "alarmsgchatlambdaalarmsgchatPRODANYB6A34C35",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODDeploymentStagePROD777191FF": {
-      "DependsOn": [
-        "alarmsgchatlambdaalarmsgchatPRODAccountF951FC96",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODDeploymentF3979C2F605d04dd275661e28b2c6149d0ccebd7",
-        },
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-gchat",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0": {
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "alarms-gchat-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-gchat",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODproxyANY126DF250": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "alarmsgchatlambdaB12ACC8E",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODproxyB6969CBF",
-        },
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODproxyANYApiPermissionTestalarmsgchatPRODalarmsgchatlambdaalarmsgchatPRODC6B46ECAANYproxyE08FE568": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaB12ACC8E",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODproxyANYApiPermissionalarmsgchatPRODalarmsgchatlambdaalarmsgchatPRODC6B46ECAANYproxyA42EED02": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaB12ACC8E",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-              },
-              "/",
-              {
-                "Ref": "alarmsgchatlambdaalarmsgchatPRODDeploymentStagePROD777191FF",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmsgchatlambdaalarmsgchatPRODproxyB6969CBF": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "alarmsgchatlambdaalarmsgchatPRODFBC7C0A0",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
+      "Type": "AWS::SNS::Subscription",
     },
   },
 }
