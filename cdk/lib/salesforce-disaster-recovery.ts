@@ -310,6 +310,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
+		new GuLambdaFunction(this, 'SendCompletionNotification', {
+			...lambdaDefaultConfig,
+			handler: 'sendCompletionNotification.handler',
+			functionName: `send-completion-notification-${this.stage}`,
+		});
+
 		const resultEmailTemplateName = 'ResyncingProcedureResultEmailTemplate2';
 
 		new CfnTemplate(this, resultEmailTemplateName, {
