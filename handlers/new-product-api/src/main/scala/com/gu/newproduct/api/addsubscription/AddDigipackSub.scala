@@ -7,9 +7,23 @@ import com.gu.newproduct.api.addsubscription.email.serialisers.DigipackEmailData
 import com.gu.newproduct.api.addsubscription.email.digipack.ValidatedAddress
 import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, EtSqsSend, SendConfirmationEmail, TrialPeriod}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation.digipack.{DigipackAccountValidation, DigipackCustomerData, GetDigipackCustomerData}
-import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidateSubscriptions, ValidatedAccount, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.validation.digipack.{
+  DigipackAccountValidation,
+  DigipackCustomerData,
+  GetDigipackCustomerData,
+}
+import com.gu.newproduct.api.addsubscription.validation.{
+  ValidateAccount,
+  ValidatePaymentMethod,
+  ValidateSubscriptions,
+  ValidatedAccount,
+  ValidationResult,
+}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
@@ -30,14 +44,14 @@ import java.time.temporal.ChronoUnit.DAYS
 import scala.concurrent.Future
 
 class AddDigipackSub(
-  currentDate: () => LocalDate,
-  getPlan: PlanId => Plan,
-  getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-  getCustomerData: ZuoraAccountId => ApiGatewayOp[DigipackCustomerData],
-  isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-  validateAddress: BillToAddress => ValidationResult[ValidatedAddress],
-  createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-  sendConfirmationEmail: (Option[SfContactId], DigipackEmailData) => AsyncApiGatewayOp[Unit],
+    currentDate: () => LocalDate,
+    getPlan: PlanId => Plan,
+    getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
+    getCustomerData: ZuoraAccountId => ApiGatewayOp[DigipackCustomerData],
+    isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
+    validateAddress: BillToAddress => ValidationResult[ValidatedAddress],
+    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+    sendConfirmationEmail: (Option[SfContactId], DigipackEmailData) => AsyncApiGatewayOp[Unit],
 ) extends AddSpecificProduct {
   override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- isValidStartDateForPlan(request.planId, request.startDate).toApiGatewayOp.toAsync
@@ -124,11 +138,13 @@ object AddDigipackSub {
       plansWithDigipack: List[ProductRatePlanId],
   ): ZuoraAccountId => ApiGatewayOp[DigipackCustomerData] = {
 
-    val validateAccount: GetAccount.Account => ValidationResult[ValidatedAccount] = (ValidateAccount.apply _).thenValidate(DigipackAccountValidation.apply)
-    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
-      validate = validateAccount,
-      ifNotFoundReturn = Some("Zuora account id is not valid")
-    )
+    val validateAccount: GetAccount.Account => ValidationResult[ValidatedAccount] =
+      (ValidateAccount.apply _).thenValidate(DigipackAccountValidation.apply)
+    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] =
+      GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
+        validate = validateAccount,
+        ifNotFoundReturn = Some("Zuora account id is not valid"),
+      )
     val getValidatedPaymentMethod: GetAccount.PaymentMethodId => ApiGatewayOp[GetPaymentMethod.PaymentMethod] =
       GetPaymentMethod(zuoraClient.get[PaymentMethodWire])(_).andValidateWith(ValidatePaymentMethod.apply)
     val getContacts: ZuoraAccountId => ClientFailableOp[GetContacts.Contacts] = GetContacts(

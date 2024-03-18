@@ -5,15 +5,22 @@ import java.time.format.{DateTimeFormatterBuilder, TextStyle}
 import java.time.temporal.ChronoField.DAY_OF_WEEK
 import java.util.Locale
 
-/**
- *
- * @param today just to be explicit
- * @param deliveryAddressChangeEffectiveDate the date of the first issue [of that day of week] which will reflect any changes to the delivery address made on 'today'
- * @param holidayStopFirstAvailableDate the earliest date [of that day of week] that can be selected as the start of a holiday stop (so we know we can definitely block fulfilment - via the holiday-stop-processor)
- * @param holidayStopProcessorTargetDate the issue date [of that day of week] that the holiday-stop-processor should process the holiday stops for (can be null)
- * @param finalFulfilmentFileGenerationDate not currently consumed but is a useful date for context
- * @param newSubscriptionEarliestStartDate the first available fulfilment start date for that package, if it were taken out today
- */
+/** @param today
+  *   just to be explicit
+  * @param deliveryAddressChangeEffectiveDate
+  *   the date of the first issue [of that day of week] which will reflect any changes to the delivery address made on
+  *   'today'
+  * @param holidayStopFirstAvailableDate
+  *   the earliest date [of that day of week] that can be selected as the start of a holiday stop (so we know we can
+  *   definitely block fulfilment - via the holiday-stop-processor)
+  * @param holidayStopProcessorTargetDate
+  *   the issue date [of that day of week] that the holiday-stop-processor should process the holiday stops for (can be
+  *   null)
+  * @param finalFulfilmentFileGenerationDate
+  *   not currently consumed but is a useful date for context
+  * @param newSubscriptionEarliestStartDate
+  *   the first available fulfilment start date for that package, if it were taken out today
+  */
 case class FulfilmentDates(
     today: LocalDate,
     deliveryAddressChangeEffectiveDate: Option[LocalDate],

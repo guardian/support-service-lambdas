@@ -8,7 +8,7 @@ import play.api.libs.json.{Json, Reads}
 trait GetAgents {
 
   def getAgents(): ClientFailableOp[List[DeliveryAgentRecord]]
-  
+
 }
 class GetAgentsImpl(formRequestMaker: FormRequestMaker) extends GetAgents {
 
@@ -17,21 +17,20 @@ class GetAgentsImpl(formRequestMaker: FormRequestMaker) extends GetAgents {
   def getAgents(): ClientFailableOp[List[DeliveryAgentRecord]] =
     for {
       wireResponse <- formRequestMaker.post[WireResponse](Map(), "/agents")
-    } yield
-      wireResponse.data.agents.map { agent =>
-        import agent._
-        DeliveryAgentRecord(
-          DeliveryAgent(refid.toString),
-          agentname,
-          telephone,
-          town,
-          postcode,
-          address2,
-          email,
-          address1,
-          county
-        )
-      }
+    } yield wireResponse.data.agents.map { agent =>
+      import agent._
+      DeliveryAgentRecord(
+        DeliveryAgent(refid.toString),
+        agentname,
+        telephone,
+        town,
+        postcode,
+        address2,
+        email,
+        address1,
+        county,
+      )
+    }
 
 }
 
@@ -42,39 +41,39 @@ object GetAgents {
   private[client] implicit val agentReads: Reads[WireResponseAgent] = Json.reads
 
   private[client] case class WireResponseAgent(
-    telephone: String,
-    town: String,
-    postcode: String,
-    address2: String,
-    email: String,
-    address1: String,
-    agentname: String,
-    refid: Int,
-    county: String,
+      telephone: String,
+      town: String,
+      postcode: String,
+      address2: String,
+      email: String,
+      address1: String,
+      agentname: String,
+      refid: Int,
+      county: String,
   )
 
   private[client] implicit val responseDataReads: Reads[WireResponseData] = Json.reads
 
   private[client] case class WireResponseData(
-    agents: List[WireResponseAgent],
+      agents: List[WireResponseAgent],
   )
 
   private[client] implicit val responseReads: Reads[WireResponse] = Json.reads
 
   private[client] case class WireResponse(
-    data: WireResponseData,
+      data: WireResponseData,
   )
 
   case class DeliveryAgentRecord(
-    deliveryAgent: DeliveryAgent,
-    agentName: String,
-    telephone: String,
-    town: String,
-    postcode: String,
-    address2: String,
-    email: String,
-    address1: String,
-    county: String,
+      deliveryAgent: DeliveryAgent,
+      agentName: String,
+      telephone: String,
+      town: String,
+      postcode: String,
+      address2: String,
+      email: String,
+      address1: String,
+      county: String,
   )
 
 }

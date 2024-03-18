@@ -22,7 +22,8 @@ import org.scalatest.matchers.should.Matchers
 class GetSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
 
   private def actual(testSubscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] = for {
-    zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
+    zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString)
+      .load[ZuoraRestConfig]
       .toApiGatewayOp("couldn't load config")
     zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
     subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)

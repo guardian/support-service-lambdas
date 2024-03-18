@@ -25,7 +25,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
       maybeInvoiceDate = Some(invoiceDate),
     )
 
-    update.value shouldMatchTo(
+    update.value shouldMatchTo (
       SubscriptionUpdate(
         currentTerm = Some(418),
         currentTermPeriodType = Some("Day"),
@@ -45,7 +45,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
             ),
           ),
         ),
-      ),
+      )
     )
   }
 }

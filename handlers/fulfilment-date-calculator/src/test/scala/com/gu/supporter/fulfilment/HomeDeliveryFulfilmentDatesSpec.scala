@@ -7,7 +7,8 @@ import org.scalatest.matchers.should.Matchers
 
 class HomeDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with DateSupport {
 
-  def apply(today: LocalDate) = HomeDeliveryFulfilmentDates.apply(today,
+  def apply(today: LocalDate) = HomeDeliveryFulfilmentDates.apply(
+    today,
     BankHolidays(Nil), // TODO reuse sampleBankHolidays from LocalDateHelpersSpec with some test cases below
   )
 

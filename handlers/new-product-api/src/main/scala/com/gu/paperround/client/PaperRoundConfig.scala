@@ -5,8 +5,8 @@ import com.gu.util.config.ConfigLocation
 import play.api.libs.json.{Json, Reads}
 
 case class PaperRoundConfig(
-  apiKey: ApiKey,
-  url: String,
+    apiKey: ApiKey,
+    url: String,
 )
 
 object PaperRoundConfig {

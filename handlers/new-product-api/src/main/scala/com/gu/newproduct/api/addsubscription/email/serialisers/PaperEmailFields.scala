@@ -9,8 +9,7 @@ import play.api.libs.json.{Json, Writes}
 import java.time.format.DateTimeFormatter
 
 object PaperEmailDataSerialiser {
-  implicit val writes: Writes[PaperEmailData] = (data: PaperEmailData) =>
-    Json.toJson(PaperEmailFields.serialise(data))
+  implicit val writes: Writes[PaperEmailData] = (data: PaperEmailData) => Json.toJson(PaperEmailFields.serialise(data))
 }
 
 object PaperEmailFields {
@@ -24,7 +23,7 @@ object PaperEmailFields {
       basicFields(data),
       paymentMethodFields(data.paymentMethod),
       addressFields(data.contacts),
-      deliveryAgentFields(data.deliveryAgentDetails)
+      deliveryAgentFields(data.deliveryAgentDetails),
     ).flatten.toMap
 
   private def basicFields(data: PaperEmailData) = {
@@ -36,22 +35,25 @@ object PaperEmailFields {
       "date_of_first_paper" -> data.firstPaperDate.format(dateformat),
       "date_of_first_payment" -> data.firstPaymentDate.format(dateformat),
       "package" -> data.plan.description.value,
-      "subscription_rate" -> data.discountMessage.map(_.value).getOrElse(data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")),
+      "subscription_rate" -> data.discountMessage
+        .map(_.value)
+        .getOrElse(data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")),
     )
   }
 
   def deliveryAgentFields(maybeDeliveryAgentDetails: Option[DeliveryAgentDetails]): Map[String, String] =
     maybeDeliveryAgentDetails match {
-      case Some(deliveryAgentDetails) => Map(
-        "delivery_agent_name" -> deliveryAgentDetails.agentName,
-        "delivery_agent_telephone" -> deliveryAgentDetails.telephone,
-        "delivery_agent_email" -> deliveryAgentDetails.email,
-        "delivery_agent_address1" -> deliveryAgentDetails.address1,
-        "delivery_agent_address2" -> deliveryAgentDetails.address2,
-        "delivery_agent_town" -> deliveryAgentDetails.town,
-        "delivery_agent_county" -> deliveryAgentDetails.county,
-        "delivery_agent_postcode" -> deliveryAgentDetails.postcode,
-      )
+      case Some(deliveryAgentDetails) =>
+        Map(
+          "delivery_agent_name" -> deliveryAgentDetails.agentName,
+          "delivery_agent_telephone" -> deliveryAgentDetails.telephone,
+          "delivery_agent_email" -> deliveryAgentDetails.email,
+          "delivery_agent_address1" -> deliveryAgentDetails.address1,
+          "delivery_agent_address2" -> deliveryAgentDetails.address2,
+          "delivery_agent_town" -> deliveryAgentDetails.town,
+          "delivery_agent_county" -> deliveryAgentDetails.county,
+          "delivery_agent_postcode" -> deliveryAgentDetails.postcode,
+        )
       case None => Map.empty
     }
 

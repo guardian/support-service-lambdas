@@ -1,6 +1,11 @@
 package com.gu.productmove
 
-import software.amazon.awssdk.auth.credentials.{AwsCredentialsProvider, AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProvider,
+  AwsCredentialsProviderChain,
+  EnvironmentVariableCredentialsProvider,
+  ProfileCredentialsProvider,
+}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.secretsmanager.*
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
@@ -124,8 +129,8 @@ class SecretsLive(secretsClient: SecretsManagerClient) extends Secrets {
   }
 
 }
-  
-  object SecretsLive {
+
+object SecretsLive {
 
   val layer: ZLayer[AwsCredentialsProvider, Throwable, Secrets] =
     ZLayer.scoped {

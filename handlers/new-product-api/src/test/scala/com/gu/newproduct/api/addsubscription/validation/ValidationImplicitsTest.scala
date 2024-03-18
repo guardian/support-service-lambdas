@@ -58,7 +58,7 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData(_).andValidateWith(
       validate = validationFunc,
-      ifNotFoundReturn = Some("invalid test data Id")
+      ifNotFoundReturn = Some("invalid test data Id"),
     )
 
     getValidatedData("testId") shouldBe ReturnWithResponse(
