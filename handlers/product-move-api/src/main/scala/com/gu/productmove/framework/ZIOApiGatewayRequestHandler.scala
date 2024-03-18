@@ -47,7 +47,7 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
             _ <- ZIO.log("output: " + new String(loggedOutputStream.toByteArray, StandardCharsets.UTF_8))
             _ = output.write(loggedOutputStream.toByteArray)
             _ = output.close()
-          } yield ()
+          } yield (),
         )
         .getOrThrowFiberFailure()
     }

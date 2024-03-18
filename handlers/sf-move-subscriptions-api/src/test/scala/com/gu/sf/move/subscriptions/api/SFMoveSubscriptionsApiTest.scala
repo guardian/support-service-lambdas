@@ -15,7 +15,11 @@ import org.http4s._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
-class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with DiffShouldMatcher with ZuoraTestBackendMixin {
+class SFMoveSubscriptionsApiTest
+    extends AnyFlatSpec
+    with should.Matchers
+    with DiffShouldMatcher
+    with ZuoraTestBackendMixin {
 
   it should "return SUCCESS for move subscription request if all downstream calls were successful" in {
 
@@ -41,10 +45,10 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
       .get
 
     responseActual.status shouldEqual Status.Ok
-    getBody[MoveSubscriptionApiSuccess](responseActual) shouldMatchTo(
+    getBody[MoveSubscriptionApiSuccess](responseActual) shouldMatchTo (
       MoveSubscriptionApiSuccess(
         MoveSubscriptionAtZuoraAccountResponse("SUCCESS").toString,
-      ),
+      )
     )
   }
 
@@ -72,12 +76,12 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
       .get
 
     responseActual.status shouldEqual Status.InternalServerError
-    getBody[MoveSubscriptionApiError](responseActual) shouldMatchTo(
+    getBody[MoveSubscriptionApiError](responseActual) shouldMatchTo (
       MoveSubscriptionApiError(
         FetchZuoraAccessTokenError(
           accessTokenUnAuthError.body.swap.map(_.reason).getOrElse(throw new RuntimeException),
         ).toString,
-      ),
+      )
     )
   }
 
@@ -104,12 +108,12 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
       .get
 
     responseActual.status shouldEqual Status.InternalServerError
-    getBody[MoveSubscriptionApiError](responseActual) shouldMatchTo(
+    getBody[MoveSubscriptionApiError](responseActual) shouldMatchTo (
       MoveSubscriptionApiError(
         FetchZuoraSubscriptionError(
           fetchSubscriptionFailedRes.body.swap.map(_.reason).getOrElse(throw new RuntimeException),
         ).toString,
-      ),
+      )
     )
   }
 
@@ -136,12 +140,12 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
       .get
 
     responseActual.status shouldEqual Status.InternalServerError
-    getBody[MoveSubscriptionApiError](responseActual) shouldMatchTo(
+    getBody[MoveSubscriptionApiError](responseActual) shouldMatchTo (
       MoveSubscriptionApiError(
         UpdateZuoraAccountError(
           updateAccountFailedRes.body.swap.map(_.reason).getOrElse(throw new RuntimeException),
         ).toString,
-      ),
+      )
     )
   }
 
@@ -169,10 +173,10 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
       .get
 
     responseActual.status shouldEqual Status.Ok
-    getBody[MoveSubscriptionApiSuccess](responseActual) shouldMatchTo(
+    getBody[MoveSubscriptionApiSuccess](responseActual) shouldMatchTo (
       MoveSubscriptionApiSuccess(
         MoveSubscriptionAtZuoraAccountResponse("SUCCESS_DRY_RUN").toString,
-      ),
+      )
     )
   }
 

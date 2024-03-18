@@ -22,9 +22,10 @@ object ReportsLambda extends Logging {
 
     val lambdaResponse = for {
       request <- ParseRequest[REQUEST](lambdaIO.inputStream).toEither
-      config <- LoadConfigModule(stage, fetchString).load[ZuoraRestConfig].left.map(configError =>
-        LambdaException(configError.error),
-      )
+      config <- LoadConfigModule(stage, fetchString)
+        .load[ZuoraRestConfig]
+        .left
+        .map(configError => LambdaException(configError.error))
       aquaCall = wireCall(config)
       callResponse <- aquaCall(request).toDisjunction.left.map(error => LambdaException(error.message))
     } yield callResponse

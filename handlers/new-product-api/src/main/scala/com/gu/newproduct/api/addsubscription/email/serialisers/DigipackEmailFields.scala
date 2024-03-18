@@ -47,7 +47,9 @@ object DigipackEmailFields {
       "Date of first payment" -> data.firstPaymentDate.format(dateformat),
       "Currency" -> data.currency.glyph,
       "Trial period" -> data.trialPeriod.days.toString,
-      "Subscription details" ->  data.discountMessage.map(_.value).getOrElse(paymentPLan.map(_.description).getOrElse("")),
+      "Subscription details" -> data.discountMessage
+        .map(_.value)
+        .getOrElse(paymentPLan.map(_.description).getOrElse("")),
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts.billTo)
 
   }

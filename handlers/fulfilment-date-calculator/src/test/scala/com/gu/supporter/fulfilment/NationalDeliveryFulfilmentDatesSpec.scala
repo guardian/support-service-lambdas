@@ -8,9 +8,8 @@ import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-/**
- * useful for debugging, run to show dates in the console
- */
+/** useful for debugging, run to show dates in the console
+  */
 object TestPrintDates {
 
   import NationalDeliveryFulfilmentDatesSpec._
@@ -24,7 +23,9 @@ object TestPrintDates {
 
   private def printDates(dateToPrint: FulfilmentDates => LocalDate): Unit = {
     List(monday___, tuesday__, wednesday, thursday_, friday___, saturday_, sunday___).foreach { day =>
-      val hsp = NationalDeliveryFulfilmentDates(day, makeBankHolidays()).map { case (k, v) => (k, dateDebug(dateToPrint(v))) }.mkString("\n  ")
+      val hsp = NationalDeliveryFulfilmentDates(day, makeBankHolidays())
+        .map { case (k, v) => (k, dateDebug(dateToPrint(v))) }
+        .mkString("\n  ")
       println(dateDebug(day) + ":\n  " + hsp)
     }
   }
@@ -65,7 +66,9 @@ object NationalDeliveryFulfilmentDatesSpec extends DateSupport {
   private val saturday_NextNextNext = "2019-12-28"
   private val sunday___NextNextNext = "2019-12-29"
 
-  def makeBankHolidays(dates: String*): BankHolidays = BankHolidays(dates.map((Event.apply _).compose(LocalDate.parse)).toList)
+  def makeBankHolidays(dates: String*): BankHolidays = BankHolidays(
+    dates.map((Event.apply _).compose(LocalDate.parse)).toList,
+  )
 
   def dateDebug(localDate: LocalDate): String =
     localDate.format(DateTimeFormatter.ofPattern("E d"))
@@ -84,12 +87,15 @@ class NationalDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with
     def on(today: String, bankHolidays: BankHolidays = makeBankHolidays()) = new {
       def shouldProcessHolidayStopsFor(expected: LocalDate*): Assertion = {
         withClue("checking stops for " + dateDebug(today) + ": ") {
-          NationalDeliveryFulfilmentDates(today, bankHolidays).values.flatMap(_.holidayStopProcessorTargetDate).toList.sorted shouldBe expected.toList
+          NationalDeliveryFulfilmentDates(today, bankHolidays).values
+            .flatMap(_.holidayStopProcessorTargetDate)
+            .toList
+            .sorted shouldBe expected.toList
         }
       }
     }
     def easterWeekend = on(_, makeBankHolidays(friday___, monday___Next))
-    
+
     on(wednesday).shouldProcessHolidayStopsFor(friday___)
     on(thursday_).shouldProcessHolidayStopsFor(saturday_, sunday___, monday___Next)
     on(friday___).shouldProcessHolidayStopsFor(tuesday__Next)
@@ -104,7 +110,13 @@ class NationalDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with
     on(sunday___Next).shouldProcessHolidayStopsFor()
 
     withClue("EASTER: ") {
-      easterWeekend(wednesday).shouldProcessHolidayStopsFor(friday___, saturday_, sunday___, monday___Next, tuesday__Next)
+      easterWeekend(wednesday).shouldProcessHolidayStopsFor(
+        friday___,
+        saturday_,
+        sunday___,
+        monday___Next,
+        tuesday__Next,
+      )
       easterWeekend(thursday_).shouldProcessHolidayStopsFor(wednesdayNext)
       easterWeekend(friday___).shouldProcessHolidayStopsFor()
       easterWeekend(saturday_).shouldProcessHolidayStopsFor()
@@ -113,9 +125,14 @@ class NationalDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with
       easterWeekend(tuesday__Next).shouldProcessHolidayStopsFor(thursday_Next)
     }
   }
-  
-  private def assertEffectiveDates(today: LocalDate, paperDay: String, expectedEffectiveCoverDate: LocalDate, bankHolidays: BankHolidays = makeBankHolidays()) =
-    withClue("effective date for " + dateDebug(today) + s" for $paperDay's issue: " ) {
+
+  private def assertEffectiveDates(
+      today: LocalDate,
+      paperDay: String,
+      expectedEffectiveCoverDate: LocalDate,
+      bankHolidays: BankHolidays = makeBankHolidays(),
+  ) =
+    withClue("effective date for " + dateDebug(today) + s" for $paperDay's issue: ") {
       val datesForTodayPaperDay = NationalDeliveryFulfilmentDates(today, bankHolidays)(paperDay)
       withClue("holidayStopFirstAvailableDate") {
         datesForTodayPaperDay.holidayStopFirstAvailableDate should equalDate(expectedEffectiveCoverDate)
@@ -139,42 +156,74 @@ class NationalDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with
     assertEffectiveDates(today = thursday_, paperDay = "Tuesday", expectedEffectiveCoverDate = tuesday__Next)
     assertEffectiveDates(today = friday___, paperDay = "Tuesday", expectedEffectiveCoverDate = tuesday__NextNext)
     assertEffectiveDates(today = thursday_Next, paperDay = "Tuesday", expectedEffectiveCoverDate = tuesday__NextNext)
-    assertEffectiveDates(today = friday___Next, paperDay = "Tuesday", expectedEffectiveCoverDate = tuesday__NextNextNext)
+    assertEffectiveDates(
+      today = friday___Next,
+      paperDay = "Tuesday",
+      expectedEffectiveCoverDate = tuesday__NextNextNext,
+    )
   }
 
   "WEDNESDAY" should "have correct effective dates" in {
     assertEffectiveDates(today = sunday___, paperDay = "Wednesday", expectedEffectiveCoverDate = wednesdayNext)
     assertEffectiveDates(today = monday___Next, paperDay = "Wednesday", expectedEffectiveCoverDate = wednesdayNextNext)
     assertEffectiveDates(today = sunday___Next, paperDay = "Wednesday", expectedEffectiveCoverDate = wednesdayNextNext)
-    assertEffectiveDates(today = monday___NextNext, paperDay = "Wednesday", expectedEffectiveCoverDate = wednesdayNextNextNext)
+    assertEffectiveDates(
+      today = monday___NextNext,
+      paperDay = "Wednesday",
+      expectedEffectiveCoverDate = wednesdayNextNextNext,
+    )
   }
 
   "THURSDAY" should "have correct effective dates" in {
     assertEffectiveDates(today = monday___Next, paperDay = "Thursday", expectedEffectiveCoverDate = thursday_Next)
     assertEffectiveDates(today = tuesday__Next, paperDay = "Thursday", expectedEffectiveCoverDate = thursday_NextNext)
-    assertEffectiveDates(today = monday___NextNext, paperDay = "Thursday", expectedEffectiveCoverDate = thursday_NextNext)
-    assertEffectiveDates(today = tuesday__NextNext, paperDay = "Thursday", expectedEffectiveCoverDate = thursday_NextNextNext)
+    assertEffectiveDates(
+      today = monday___NextNext,
+      paperDay = "Thursday",
+      expectedEffectiveCoverDate = thursday_NextNext,
+    )
+    assertEffectiveDates(
+      today = tuesday__NextNext,
+      paperDay = "Thursday",
+      expectedEffectiveCoverDate = thursday_NextNextNext,
+    )
   }
 
   "FRIDAY" should "have correct effective dates" in {
     assertEffectiveDates(today = tuesday__Next, paperDay = "Friday", expectedEffectiveCoverDate = friday___Next)
     assertEffectiveDates(today = wednesdayNext, paperDay = "Friday", expectedEffectiveCoverDate = friday___NextNext)
     assertEffectiveDates(today = tuesday__NextNext, paperDay = "Friday", expectedEffectiveCoverDate = friday___NextNext)
-    assertEffectiveDates(today = wednesdayNextNext, paperDay = "Friday", expectedEffectiveCoverDate = friday___NextNextNext)
+    assertEffectiveDates(
+      today = wednesdayNextNext,
+      paperDay = "Friday",
+      expectedEffectiveCoverDate = friday___NextNextNext,
+    )
   }
 
   "SATURDAY" should "have correct effective dates" in {
     assertEffectiveDates(today = wednesdayNext, paperDay = "Saturday", expectedEffectiveCoverDate = saturday_Next)
     assertEffectiveDates(today = thursday_Next, paperDay = "Saturday", expectedEffectiveCoverDate = saturday_NextNext)
-    assertEffectiveDates(today = wednesdayNextNext, paperDay = "Saturday", expectedEffectiveCoverDate = saturday_NextNext)
-    assertEffectiveDates(today = thursday_NextNext, paperDay = "Saturday", expectedEffectiveCoverDate = saturday_NextNextNext)
+    assertEffectiveDates(
+      today = wednesdayNextNext,
+      paperDay = "Saturday",
+      expectedEffectiveCoverDate = saturday_NextNext,
+    )
+    assertEffectiveDates(
+      today = thursday_NextNext,
+      paperDay = "Saturday",
+      expectedEffectiveCoverDate = saturday_NextNextNext,
+    )
   }
 
   "SUNDAY" should "have correct effective dates" in {
     assertEffectiveDates(today = wednesdayNext, paperDay = "Sunday", expectedEffectiveCoverDate = sunday___Next)
     assertEffectiveDates(today = thursday_Next, paperDay = "Sunday", expectedEffectiveCoverDate = sunday___NextNext)
     assertEffectiveDates(today = wednesdayNextNext, paperDay = "Sunday", expectedEffectiveCoverDate = sunday___NextNext)
-    assertEffectiveDates(today = thursday_NextNext, paperDay = "Sunday", expectedEffectiveCoverDate = sunday___NextNextNext)
+    assertEffectiveDates(
+      today = thursday_NextNext,
+      paperDay = "Sunday",
+      expectedEffectiveCoverDate = sunday___NextNextNext,
+    )
   }
 
   private def assertOnEasterWeekend(today: LocalDate, paperDay: String, expectedEffectiveCoverDate: LocalDate) =
@@ -205,28 +254,48 @@ class NationalDeliveryFulfilmentDatesSpec extends AnyFlatSpec with Matchers with
     assertOnEasterWeekend(today = tuesday__, paperDay = "Monday", expectedEffectiveCoverDate = monday___Next)
     assertOnEasterWeekend(today = wednesday, paperDay = "Monday", expectedEffectiveCoverDate = monday___NextNext)
     assertOnEasterWeekend(today = wednesdayNext, paperDay = "Monday", expectedEffectiveCoverDate = monday___NextNext)
-    assertOnEasterWeekend(today = thursday_Next, paperDay = "Monday", expectedEffectiveCoverDate = monday___NextNextNext)
+    assertOnEasterWeekend(
+      today = thursday_Next,
+      paperDay = "Monday",
+      expectedEffectiveCoverDate = monday___NextNextNext,
+    )
   }
 
   "TUESDAY around easter week" should "have correct effective dates" in {
     assertOnEasterWeekend(today = tuesday__, paperDay = "Tuesday", expectedEffectiveCoverDate = tuesday__Next)
     assertOnEasterWeekend(today = wednesday, paperDay = "Tuesday", expectedEffectiveCoverDate = tuesday__NextNext)
     assertOnEasterWeekend(today = thursday_Next, paperDay = "Tuesday", expectedEffectiveCoverDate = tuesday__NextNext)
-    assertOnEasterWeekend(today = friday___Next, paperDay = "Tuesday", expectedEffectiveCoverDate = tuesday__NextNextNext)
+    assertOnEasterWeekend(
+      today = friday___Next,
+      paperDay = "Tuesday",
+      expectedEffectiveCoverDate = tuesday__NextNextNext,
+    )
   }
 
   "WEDNESDAY around easter week" should "have correct effective dates" in {
     assertOnEasterWeekend(today = wednesday, paperDay = "Wednesday", expectedEffectiveCoverDate = wednesdayNext)
     assertOnEasterWeekend(today = thursday_, paperDay = "Wednesday", expectedEffectiveCoverDate = wednesdayNextNext)
     assertOnEasterWeekend(today = sunday___Next, paperDay = "Wednesday", expectedEffectiveCoverDate = wednesdayNextNext)
-    assertOnEasterWeekend(today = monday___NextNext, paperDay = "Wednesday", expectedEffectiveCoverDate = wednesdayNextNextNext)
+    assertOnEasterWeekend(
+      today = monday___NextNext,
+      paperDay = "Wednesday",
+      expectedEffectiveCoverDate = wednesdayNextNextNext,
+    )
   }
 
   "THURSDAY around easter week" should "have correct effective dates" in {
     assertOnEasterWeekend(today = monday___Next, paperDay = "Thursday", expectedEffectiveCoverDate = thursday_Next)
     assertOnEasterWeekend(today = tuesday__Next, paperDay = "Thursday", expectedEffectiveCoverDate = thursday_NextNext)
-    assertOnEasterWeekend(today = monday___NextNext, paperDay = "Thursday", expectedEffectiveCoverDate = thursday_NextNext)
-    assertOnEasterWeekend(today = tuesday__NextNext, paperDay = "Thursday", expectedEffectiveCoverDate = thursday_NextNextNext)
+    assertOnEasterWeekend(
+      today = monday___NextNext,
+      paperDay = "Thursday",
+      expectedEffectiveCoverDate = thursday_NextNext,
+    )
+    assertOnEasterWeekend(
+      today = tuesday__NextNext,
+      paperDay = "Thursday",
+      expectedEffectiveCoverDate = thursday_NextNextNext,
+    )
   }
 
 }

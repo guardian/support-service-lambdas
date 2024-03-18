@@ -1,7 +1,7 @@
 import Dependencies.*
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.12",
+  ThisBuild / scalaVersion := "2.13.13",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.3.1",
+  scalaVersion := "3.3.3",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -107,7 +107,7 @@ lazy val zuora = library(
 
 lazy val `salesforce-core` = library(
   project in file("lib/salesforce/core"),
-  Seq(`config-core`)
+  Seq(`config-core`),
 )
   .settings(
     libraryDependencies ++= Seq(playJson),
@@ -256,13 +256,13 @@ val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->com
 
 lazy val `zuora-reports` = library(
   project in file("lib/zuora-reports"),
-  Seq(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  Seq(zuora, handler, effectsDepIncludingTestFolder, testDep),
 )
   .settings(dependencyOverrides ++= jacksonDependencies)
 
 lazy val `fulfilment-dates` = library(
   project in file("lib/fulfilment-dates"),
-  Seq(`effects-s3`, `config-core`, testDep, `zuora-core`)
+  Seq(`effects-s3`, `config-core`, testDep, `zuora-core`),
 )
   .settings(
     libraryDependencies ++= Seq(catsCore, circe, circeParser),
@@ -270,8 +270,8 @@ lazy val `fulfilment-dates` = library(
   )
 
 lazy val `google-bigquery` = library(
-    project in file("lib/google-bigquery"),
-  Seq(testDep, `config-core`, `effects-s3` % "test", handler % "test")
+  project in file("lib/google-bigquery"),
+  Seq(testDep, `config-core`, `effects-s3` % "test", handler % "test"),
 )
   .settings(
     libraryDependencies ++= Seq(googleBigQuery, playJson) ++ logging,
@@ -279,7 +279,7 @@ lazy val `google-bigquery` = library(
 
 lazy val `zuora-baton` = library(
   project in file("lib/zuora-baton"),
-  Seq(zuora, `config-core`)
+  Seq(zuora, `config-core`),
 )
   .settings(
     libraryDependencies ++= Seq(playJson),
@@ -305,7 +305,7 @@ lazy val `zuora-core` = library(project in file("lib/zuora-core"))
 lazy val `zuora-models` = library(
   project in file("lib/zuora-models"),
   Seq(`config-core`),
-  scala3Settings
+  scala3Settings,
 )
   .settings(
     libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
@@ -331,7 +331,7 @@ lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-cli
 
 lazy val `imovo-sttp-test-stub` = library(
   project in file("lib/imovo/imovo-sttp-test-stub"),
-  Seq(`imovo-sttp-client`)
+  Seq(`imovo-sttp-client`),
 )
   .settings(
     libraryDependencies ++= Seq(scalatest),
@@ -637,7 +637,7 @@ lazy val `product-move-api` = lambdaProject(
     awsSQS,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
-    "dev.zio" %% "zio-logging-slf4j" % "2.1.13",
+    "dev.zio" %% "zio-logging-slf4j" % "2.1.17",
     "dev.zio" %% "zio-test" % zio2Version % Test,
     "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,

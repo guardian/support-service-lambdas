@@ -17,18 +17,18 @@ trait CreateDeliveryProblemService[F[_]] {
 }
 
 case class DeliveryRecordToLink(
-  id: String,
-  creditAmount: Option[Double],
-  invoiceDate: Option[LocalDate],
+    id: String,
+    creditAmount: Option[Double],
+    invoiceDate: Option[LocalDate],
 )
 
 case class CreateDeliveryProblem(
-  productName: String,
-  description: Option[String],
-  problemType: String,
-  deliveryRecords: List[DeliveryRecordToLink],
-  repeatDeliveryProblem: Option[Boolean],
-  newContactPhoneNumbers: Option[SFApiContactPhoneNumbers],
+    productName: String,
+    description: Option[String],
+    problemType: String,
+    deliveryRecords: List[DeliveryRecordToLink],
+    repeatDeliveryProblem: Option[Boolean],
+    newContactPhoneNumbers: Option[SFApiContactPhoneNumbers],
 ) {
   val isHomeDelivery: Boolean = productName == "Home Delivery"
 
@@ -37,8 +37,8 @@ case class CreateDeliveryProblem(
   val status: String =
     if (
       isHomeDelivery ||
-        repeatDeliveryProblem.contains(true) ||
-        isNotAutoCredit
+      repeatDeliveryProblem.contains(true) ||
+      isNotAutoCredit
     ) "New"
     else "Closed"
 

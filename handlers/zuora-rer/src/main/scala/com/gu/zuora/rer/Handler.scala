@@ -43,10 +43,12 @@ object Handler {
 
   def handleRer(input: InputStream, output: OutputStream): Either[ConfigFailure, Unit] = {
     val loadConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
-    loadConfig.load[ZuoraRerConfig].map(config => {
-      val rerLambda = ZuoraRerHandler(S3Helper, config)
-      rerLambda.handleRequest(input, output)
-    })
+    loadConfig
+      .load[ZuoraRerConfig]
+      .map(config => {
+        val rerLambda = ZuoraRerHandler(S3Helper, config)
+        rerLambda.handleRequest(input, output)
+      })
   }
 
   def handlePerformRer(
