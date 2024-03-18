@@ -39,7 +39,7 @@ object Dependencies {
   // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
+  val circeConfig = "io.circe" %% "circe-config" % "0.10.1"
   val playJson = "org.playframework" %% "play-json" % "3.0.1"
 
   // upickle here is a temporary redundancy of circe while we are migrating to it
