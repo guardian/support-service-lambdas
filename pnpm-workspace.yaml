@@ -3,5 +3,5 @@ packages:
   - 'handlers/*'
   # shared code
   - 'modules/*'
-  # exclude cdk directory for now
-  - '!**/**/cdk'
+  # cdk directory
+  - 'cdk'
