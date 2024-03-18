@@ -93,7 +93,8 @@ class AddPaperSub(
       deliveryAgentDetails = deliveryAgentRecord.map { record =>
         import record._
         DeliveryAgentDetails(agentName, telephone, email, address1, address2, town, county, postcode)
-      }
+      } ,
+      discountMessage = request.discountMessage,
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, paperEmailData)
       .recoverAndLog("send paper confirmation email")
