@@ -16,6 +16,7 @@ void (async () => {
 		zuoraClient,
 		subscriptionNumber,
 		dayjs(),
+		true,
 	);
 	console.log(response);
 })();
