@@ -7,7 +7,6 @@ exports[`The generate product catalog stack matches the snapshot 1`] = `
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuCname",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -233,47 +232,6 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "FailedProductCatalogLambdaAlarm543E56AB": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
-        "AlarmName": "The generate-product-catalog Lambda has failed",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "FunctionName",
-            "Value": {
-              "Ref": "generateproductcataloglambda1E6192C7",
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "Errors",
-        "Namespace": "AWS/Lambda",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
     },
     "NS1DNSentry": {
       "Properties": {
