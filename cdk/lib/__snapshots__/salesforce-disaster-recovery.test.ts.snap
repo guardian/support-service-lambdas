@@ -155,30 +155,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ProcessCompletedTopic47214A93": {
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "TopicName": "salesforce-disaster-recovery-CODE-process-completed",
-      },
-      "Type": "AWS::SNS::Topic",
-    },
     "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
@@ -304,7 +280,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               },
               "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
               {
-                "Ref": "ProcessCompletedTopic47214A93",
+                "Ref": "SnsTopic2C1570A4",
               },
               ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
@@ -538,7 +514,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               "Action": "sns:Publish",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "ProcessCompletedTopic47214A93",
+                "Ref": "SnsTopic2C1570A4",
               },
             },
           ],
@@ -1335,6 +1311,40 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SnsTopic2C1570A4": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "TopicName": "salesforce-disaster-recovery-CODE",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "SnsTopicandreadiotalleviguardiancouk14E3B4F6": {
+      "Properties": {
+        "Endpoint": "andrea.diotallevi@guardian.co.uk",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "SnsTopic2C1570A4",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
     "UpdateZuoraAccountsLambda64E51B2A": {
       "DependsOn": [
         "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786",
@@ -1722,30 +1732,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ProcessCompletedTopic47214A93": {
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CSBX",
-          },
-        ],
-        "TopicName": "salesforce-disaster-recovery-CSBX-process-completed",
-      },
-      "Type": "AWS::SNS::Topic",
-    },
     "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
@@ -1871,7 +1857,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               },
               "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
               {
-                "Ref": "ProcessCompletedTopic47214A93",
+                "Ref": "SnsTopic2C1570A4",
               },
               ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
@@ -2105,7 +2091,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Action": "sns:Publish",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "ProcessCompletedTopic47214A93",
+                "Ref": "SnsTopic2C1570A4",
               },
             },
           ],
@@ -2902,6 +2888,40 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SnsTopic2C1570A4": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CSBX",
+          },
+        ],
+        "TopicName": "salesforce-disaster-recovery-CSBX",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "SnsTopicandreadiotalleviguardiancouk14E3B4F6": {
+      "Properties": {
+        "Endpoint": "andrea.diotallevi@guardian.co.uk",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "SnsTopic2C1570A4",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
     "UpdateZuoraAccountsLambda64E51B2A": {
       "DependsOn": [
         "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786",
@@ -3289,30 +3309,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "ProcessCompletedTopic47214A93": {
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "TopicName": "salesforce-disaster-recovery-PROD-process-completed",
-      },
-      "Type": "AWS::SNS::Topic",
-    },
     "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
@@ -3438,7 +3434,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               },
               "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
               {
-                "Ref": "ProcessCompletedTopic47214A93",
+                "Ref": "SnsTopic2C1570A4",
               },
               ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
@@ -3672,7 +3668,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               "Action": "sns:Publish",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "ProcessCompletedTopic47214A93",
+                "Ref": "SnsTopic2C1570A4",
               },
             },
           ],
@@ -4468,6 +4464,40 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "SnsTopic2C1570A4": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TopicName": "salesforce-disaster-recovery-PROD",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "SnsTopicandreadiotalleviguardiancouk14E3B4F6": {
+      "Properties": {
+        "Endpoint": "andrea.diotallevi@guardian.co.uk",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "SnsTopic2C1570A4",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
     "UpdateZuoraAccountsLambda64E51B2A": {
       "DependsOn": [

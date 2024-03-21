@@ -10,6 +10,7 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { CfnTemplate } from 'aws-cdk-lib/aws-ses';
 import { Topic } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import {
 	Choice,
 	Condition,
@@ -50,9 +51,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const maxConcurrency = 20;
 
-		const processCompletedTopic = new Topic(this, 'ProcessCompletedTopic', {
-			topicName: `${app}-${this.stage}-process-completed`,
+		const snsTopic = new Topic(this, 'SnsTopic', {
+			topicName: `${app}-${this.stage}`,
 		});
+
+		snsTopic.addSubscription(
+			new EmailSubscription('andrea.diotallevi@guardian.co.uk'),
+		);
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -418,7 +423,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Parameters: {
 						Subject: 'subject test',
 						Message: 'test message',
-						TopicArn: processCompletedTopic.topicArn,
+						TopicArn: snsTopic.topicArn,
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
@@ -549,7 +554,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						}),
 						new PolicyStatement({
 							actions: ['sns:Publish'],
-							resources: [processCompletedTopic.topicArn],
+							resources: [snsTopic.topicArn],
 						}),
 					],
 				},
