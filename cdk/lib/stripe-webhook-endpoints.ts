@@ -1,4 +1,4 @@
-import path from "path";
+// import path from "path";
 import {GuApiGatewayWithLambdaByPath} from "@guardian/cdk";
 import {GuAlarm} from "@guardian/cdk/lib/constructs/cloudwatch";
 import type {GuStackProps} from "@guardian/cdk/lib/constructs/core";
@@ -11,7 +11,7 @@ import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Effect,  Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {Runtime} from "aws-cdk-lib/aws-lambda";
 import {CfnRecordSet} from "aws-cdk-lib/aws-route53";
-import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
+// import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 
 export interface StripeWebhookEndpointsProps extends GuStackProps {
     stack: string;
@@ -29,10 +29,10 @@ export class StripeWebhookEndpoints extends GuStack {
         const app = "stripe-webhook-endpoints";
 
         // ---- Existing CFN template ---- //
-        const yamlTemplateFilePath = path.join(__dirname, "../..", "handlers/stripe-webhook-endpoints/cfn.yaml");
-        const yamlDefinedResources =  new CfnInclude(this, "YamlTemplate", {
-            templateFile: yamlTemplateFilePath,
-        });
+        // const yamlTemplateFilePath = path.join(__dirname, "../..", "handlers/stripe-webhook-endpoints/cfn.yaml");
+        // const yamlDefinedResources =  new CfnInclude(this, "YamlTemplate", {
+        //     templateFile: yamlTemplateFilePath,
+        // });
 
         // ---- API-triggered lambda functions ---- //
 
