@@ -420,7 +420,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Parameters: {
 						TopicArn: snsTopic.topicArn,
 						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
-						Message: `<a href="https://www.w3schools.com">Visit W3Schools.com!</a>`,
+						'Message.$': JsonPath.format(
+							`
+							Link to state machine execution details: {}\n
+							Link to accounts that failed to update: {}
+						`,
+							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
+							JsonPath.stringAt('$.failedRowsFileUrl'),
+						),
+						// Message: `<a href="https://www.w3schools.com">Visit W3Schools.com!</a>`,
 						// 'Subject.$':JsonPath.format(`Salesforce Disaster Recovery Re-syncing Procedure Completed For {}`,this.st)
 						// 'ApiEndpoint.$': JsonPath.format(
 						// 	`${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}`,
