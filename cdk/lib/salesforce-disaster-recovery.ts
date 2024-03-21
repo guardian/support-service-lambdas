@@ -423,9 +423,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						'Message.$': JsonPath.format(
 							`
 							Link to state machine execution details: {}\n
-							Link to accounts that failed to update: {}
+							Link to accounts that failed to update ({failedRowsCount}): {}\n
 						`,
 							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
+							JsonPath.stringAt('$.failedRowsCount'),
 							JsonPath.stringAt('$.failedRowsFileUrl'),
 						),
 						// Message: `<a href="https://www.w3schools.com">Visit W3Schools.com!</a>`,
