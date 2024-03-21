@@ -310,14 +310,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		new LambdaInvoke(this, 'SendCompletionNotification', {
+		new LambdaInvoke(this, 'SendCompletionNotification2', {
 			lambdaFunction: new GuLambdaFunction(
 				this,
-				'SendCompletionNotificationLambda',
+				'SendCompletionNotificationLambda2',
 				{
 					...lambdaDefaultConfig,
 					handler: 'sendCompletionNotification.handler',
-					functionName: `send-completion-notification-${this.stage}`,
+					functionName: `send-completion-notification-2-${this.stage}`,
 					initialPolicy: [
 						new PolicyStatement({
 							actions: ['sns:Publish'],

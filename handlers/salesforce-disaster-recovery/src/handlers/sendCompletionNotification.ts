@@ -29,7 +29,7 @@ export const handler = async (event: {
 
 	const res = await client.notify({
 		subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${stage}`,
-		message: `Zuora accounts with errors: ${failedRowsCount}.`,
+		message: `Number of accounts that failed to update: ${failedRowsCount}.`,
 		actions: [
 			{
 				url: stateMachineExecutionDetailsUrl,
@@ -37,7 +37,7 @@ export const handler = async (event: {
 			},
 			{
 				url: failedRowsFileUrl,
-				cta: 'Failed rows file',
+				cta: 'Failed accounts',
 			},
 		],
 		target: {
