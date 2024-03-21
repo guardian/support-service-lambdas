@@ -506,11 +506,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": "*",
             },
-            {
-              "Action": "sns:Publish",
-              "Effect": "Allow",
-              "Resource": "arn:aws:sns:eu-west-1:865473395570:AndreaTest",
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -1136,6 +1131,26 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sns:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":AndreaTest",
+                  ],
+                ],
+              },
+            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -2023,11 +2038,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Effect": "Allow",
               "Resource": "*",
             },
-            {
-              "Action": "sns:Publish",
-              "Effect": "Allow",
-              "Resource": "arn:aws:sns:eu-west-1:865473395570:AndreaTest",
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -2653,6 +2663,26 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sns:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":AndreaTest",
+                  ],
+                ],
+              },
+            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -3540,11 +3570,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               "Effect": "Allow",
               "Resource": "*",
             },
-            {
-              "Action": "sns:Publish",
-              "Effect": "Allow",
-              "Resource": "arn:aws:sns:eu-west-1:865473395570:AndreaTest",
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -4170,6 +4195,26 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sns:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":AndreaTest",
+                  ],
+                ],
+              },
+            },
             {
               "Action": [
                 "s3:GetObject*",

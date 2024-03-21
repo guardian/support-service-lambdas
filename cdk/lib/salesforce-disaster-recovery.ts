@@ -314,6 +314,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 			...lambdaDefaultConfig,
 			handler: 'sendCompletionNotification.handler',
 			functionName: `send-completion-notification-${this.stage}`,
+			initialPolicy: [
+				new PolicyStatement({
+					actions: ['sns:Publish'],
+					resources: [`arn:aws:sns:${this.region}:${this.account}:AndreaTest`],
+				}),
+			],
 		});
 
 		const resultEmailTemplateName = 'ResyncingProcedureResultEmailTemplate2';
@@ -500,10 +506,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 						new PolicyStatement({
 							actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
 							resources: ['*'],
-						}),
-						new PolicyStatement({
-							actions: ['sns:Publish'],
-							resources: ['arn:aws:sns:eu-west-1:865473395570:AndreaTest'],
 						}),
 					],
 				},

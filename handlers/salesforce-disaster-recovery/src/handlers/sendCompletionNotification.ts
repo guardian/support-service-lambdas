@@ -3,7 +3,17 @@ import { checkDefined } from '@modules/nullAndUndefined';
 
 const client = new Anghammarad();
 
-export const handler = async (event: unknown) => {
+export const handler = async (event: {
+	stateMachineExecutionDetailsUrl: string;
+	failedRowsFileUrl: string;
+	failedRowsCount: number;
+}) => {
+	const {
+		stateMachineExecutionDetailsUrl,
+		failedRowsFileUrl,
+		failedRowsCount,
+	} = event;
+
 	const stack = checkDefined<string>(
 		process.env.STACK,
 		'STACK environment variable not set',
@@ -17,12 +27,19 @@ export const handler = async (event: unknown) => {
 		'APP environment variable not set',
 	);
 
-	console.log(event);
 	const res = await client.notify({
-		subject: 'Salesforce Disaster Recovery Re-syncing Procedure Completed',
-		message:
-			"Hi there, something has happened which we'd like to tell you about",
-		actions: [{ url: 'https://example.com', cta: 'Test cta' }],
+		subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${stage}`,
+		message: `Zuora accounts with errors: ${failedRowsCount}.`,
+		actions: [
+			{
+				url: stateMachineExecutionDetailsUrl,
+				cta: 'State machine execution details',
+			},
+			{
+				url: failedRowsFileUrl,
+				cta: 'Failed rows file',
+			},
+		],
 		target: {
 			Stack: stack,
 			Stage: stage,
