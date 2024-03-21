@@ -1107,10 +1107,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotificationLambda78F0F5B7": {
+    "SendCompletionNotificationLambda2D1212841": {
       "DependsOn": [
-        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
-        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
+        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
       ],
       "Properties": {
         "Code": {
@@ -1126,12 +1126,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "send-completion-notification-CODE",
+        "FunctionName": "send-completion-notification-2-CODE",
         "Handler": "sendCompletionNotification.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
             "Arn",
           ],
         },
@@ -1162,7 +1162,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
+    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1215,7 +1215,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
+    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1326,10 +1326,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
           },
         ],
       },
@@ -2674,10 +2674,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotificationLambda78F0F5B7": {
+    "SendCompletionNotificationLambda2D1212841": {
       "DependsOn": [
-        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
-        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
+        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
       ],
       "Properties": {
         "Code": {
@@ -2693,12 +2693,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "CSBX",
           },
         },
-        "FunctionName": "send-completion-notification-CSBX",
+        "FunctionName": "send-completion-notification-2-CSBX",
         "Handler": "sendCompletionNotification.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
             "Arn",
           ],
         },
@@ -2729,7 +2729,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
+    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -2782,7 +2782,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
+    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2893,10 +2893,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
           },
         ],
       },
@@ -4241,10 +4241,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotificationLambda78F0F5B7": {
+    "SendCompletionNotificationLambda2D1212841": {
       "DependsOn": [
-        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
-        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
+        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
       ],
       "Properties": {
         "Code": {
@@ -4260,12 +4260,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "send-completion-notification-PROD",
+        "FunctionName": "send-completion-notification-2-PROD",
         "Handler": "sendCompletionNotification.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
             "Arn",
           ],
         },
@@ -4296,7 +4296,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
+    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -4349,7 +4349,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
+    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -4460,10 +4460,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
+            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
           },
         ],
       },
