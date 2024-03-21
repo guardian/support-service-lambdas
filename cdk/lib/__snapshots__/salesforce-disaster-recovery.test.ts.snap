@@ -246,7 +246,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CODE","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/arn:aws:states:{}:{}:execution:{}:{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CODE","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
@@ -254,15 +254,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', '",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -282,7 +274,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CODE","Message.$":"States.Format('\\n\\t\\t\\t\\t\\t\\t\\tLink to state machine execution details: {}\\n\\n\\t\\t\\t\\t\\t\\t\\tLink to accounts that failed to update ({}): {}\\n\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CODE","Message.$":"States.Format('State machine execution details: {}\\nAccounts that failed to update ({}): {}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1823,7 +1815,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CSBX","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/arn:aws:states:{}:{}:execution:{}:{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CSBX","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
@@ -1831,15 +1823,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', '",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1859,7 +1843,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CSBX","Message.$":"States.Format('\\n\\t\\t\\t\\t\\t\\t\\tLink to state machine execution details: {}\\n\\n\\t\\t\\t\\t\\t\\t\\tLink to accounts that failed to update ({}): {}\\n\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CSBX","Message.$":"States.Format('State machine execution details: {}\\nAccounts that failed to update ({}): {}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -3400,7 +3384,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"PROD","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/arn:aws:states:{}:{}:execution:{}:{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"PROD","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
@@ -3408,15 +3392,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', '",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -3436,7 +3412,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For PROD","Message.$":"States.Format('\\n\\t\\t\\t\\t\\t\\t\\tLink to state machine execution details: {}\\n\\n\\t\\t\\t\\t\\t\\t\\tLink to accounts that failed to update ({}): {}\\n\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For PROD","Message.$":"States.Format('State machine execution details: {}\\nAccounts that failed to update ({}): {}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },

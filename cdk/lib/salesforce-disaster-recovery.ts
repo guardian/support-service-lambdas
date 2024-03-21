@@ -380,12 +380,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 			parameters: {
 				stage: this.stage,
 				stateMachineExecutionDetailsUrl: JsonPath.format(
-					`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/arn:aws:states:{}:{}:execution:{}:{}`,
+					`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}`,
 					this.region,
 					this.region,
-					this.region,
-					this.account,
-					JsonPath.stringAt('$$.StateMachine.Name'),
 					JsonPath.stringAt('$$.Execution.Id'),
 				),
 				stateMachineInput: JsonPath.objectAt('$$.Execution.Input').toString(),
@@ -421,31 +418,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 						TopicArn: snsTopic.topicArn,
 						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
 						'Message.$': JsonPath.format(
-							`
-							Link to state machine execution details: {}\n
-							Link to accounts that failed to update ({}): {}\n
+							`State machine execution details: {}\nAccounts that failed to update ({}): {}
 						`,
 							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
 							JsonPath.stringAt('$.failedRowsCount'),
 							JsonPath.stringAt('$.failedRowsFileUrl'),
 						),
-						// Message: `<a href="https://www.w3schools.com">Visit W3Schools.com!</a>`,
-						// 'Subject.$':JsonPath.format(`Salesforce Disaster Recovery Re-syncing Procedure Completed For {}`,this.st)
-						// 'ApiEndpoint.$': JsonPath.format(
-						// 	`${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}`,
-						// 	JsonPath.stringAt('$.ResponseBody.id'),
-						// ),
-						// Method: 'GET',
-						// Authentication: {
-						// 	ConnectionArn: salesforceApiConnectionArn,
-						// },
 					},
-					// 'Parameters.$': JsonPath.jsonToString(JsonPath.objectAt('$')),
-					// Parameters: {
-					// 	Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For`,
-					// 	Message: 'test message',
-					// 	TopicArn: snsTopic.topicArn,
-					// },
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
 			},
