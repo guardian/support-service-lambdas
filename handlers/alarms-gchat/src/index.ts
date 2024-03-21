@@ -3,6 +3,10 @@ import type {
 	SNSEvent
 } from 'aws-lambda';
 
+interface AlarmMessage {
+	AlarmName: string;
+}
+
 export const handler: Handler = async (
 	event: SNSEvent,
 ): Promise<null> => {
@@ -16,13 +20,13 @@ export const handler: Handler = async (
 	}
 
 	const messages: string[] = event.Records.map(record => {
-		const message = JSON.parse(record.Sns.Message);
+		const message = JSON.parse(record.Sns.Message) as AlarmMessage;
 		return `Uh oh, ${message.AlarmName} has triggered!`
 	});
 
 	const responses = messages.map(message => {
 		console.log(`Sending: ${message}`);
-		fetch(webhookUrl, {
+		return fetch(webhookUrl, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
@@ -32,7 +36,9 @@ export const handler: Handler = async (
 	});
 
 	return Promise.all(responses).then((responses) => {
-		console.log(`Responses: ${responses}`);
+		responses.forEach(response => {
+			console.log(`Response: ${response.status}`);
+		});
 		return null
 	})
 };
