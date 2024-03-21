@@ -30,7 +30,7 @@ export const handler = async (event: unknown) => {
 		},
 		channel: RequestedChannel.Email,
 		sourceSystem: stack,
-		topicArn: 'AndreaTest',
+		topicArn: 'arn:aws:sns:eu-west-1:865473395570:AndreaTest',
 	});
 	console.log(res);
 };
