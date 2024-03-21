@@ -71,7 +71,7 @@ Resources:
         Fn::GetAtt:
           - ProductMoveApiLambdaRole
           - Arn
-      Runtime: java11
+      Runtime: java21
       Timeout: 300
       Environment:
         Variables:
@@ -242,7 +242,7 @@ Resources:
         Fn::GetAtt:
           - SalesforceTrackingLambdaRole
           - Arn
-      Runtime: java11
+      Runtime: java21
       Timeout: 300
       Environment:
         Variables:
@@ -254,6 +254,8 @@ Resources:
       Tags:
         - Key: lambda:createdBy
           Value: SAM
+      Architectures:
+        - arm64
   ProductMoveApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
@@ -444,7 +446,7 @@ Resources:
         Fn::GetAtt:
           - RefundLambdaRole
           - Arn
-      Runtime: java11
+      Runtime: java21
       Timeout: 300
       Environment:
         Variables:
@@ -456,6 +458,8 @@ Resources:
       Tags:
         - Key: lambda:createdBy
           Value: SAM
+      Architectures:
+        - arm64
   ProductMoveApiGatewayApiKey:
     Type: AWS::ApiGateway::ApiKey
     DependsOn:

@@ -80,8 +80,10 @@ Resources:
         - "GoCardlessSalesForceSyncRole"
         - Arn
       MemorySize: 1536 # TODO review this amount of memory is required
-      Runtime: java11
+      Runtime: java21
       Timeout: 240 # kills if still running after 4mins to avoid clashes with next run
+      Architectures:
+        - arm64
 
 
   GoCardlessSalesForceSyncScheduleRule:

@@ -106,7 +106,7 @@ Resources:
         Fn::GetAtt:
           - DigitalVoucherCancellationProcessorFnRole9BC677A8
           - Arn
-      Runtime: java11
+      Runtime: java21
       Environment:
         Variables:
           App: digital-voucher-cancellation-processor
@@ -128,6 +128,8 @@ Resources:
         - Key: Stack
           Value: membership
       Timeout: 300
+      Architectures:
+        - arm64
     DependsOn:
       - DigitalVoucherCancellationProcessorFnRoleDefaultPolicy0592FCB9
       - DigitalVoucherCancellationProcessorFnRole9BC677A8

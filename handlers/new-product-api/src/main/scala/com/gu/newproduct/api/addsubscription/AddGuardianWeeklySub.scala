@@ -63,6 +63,7 @@ class AddGuardianWeeklySub(
       paymentMethod = customerData.paymentMethod,
       currency = customerData.account.currency,
       subscriptionName = subscriptionName,
+      discountMessage = request.discountMessage,
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, guardianWeeklyEmailData)
       .recoverAndLog("send guardian weekly confirmation email")

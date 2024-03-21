@@ -10,12 +10,12 @@
 		"new-lambda": "pnpm hygen new-lambda api-gateway && pnpm install && cd ./cdk && yarn lint --fix && yarn test -u && git add ./lib/__snapshots__/*.test.ts.snap"
 	},
 	"devDependencies": {
-		"@guardian/eslint-config-typescript": "^7.0.0",
+		"@guardian/eslint-config-typescript": "8.0.1",
 		"@guardian/prettier": "^5.0.0",
-		"@types/jest": "^29.5.10",
-		"@types/node": "^20.9.0",
+		"@types/jest": "^29.5.12",
+		"@types/node": "^20.11.27",
 		"esbuild": "^0.19.5",
-		"eslint": "^8.53.0",
+		"eslint": "^8.57.0",
 		"eslint-import-resolver-typescript": "^3.6.1",
 		"eslint-plugin-import": "^2.29.1",
 		"hygen": "^6.2.11",

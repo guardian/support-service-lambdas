@@ -43,8 +43,8 @@ export class GenerateProductCatalog extends GuStack {
 			app: app,
 		});
 
-		const zuoraCatalogBucketName: string = 'gu-zuora-catalog';
-		const productCatalogBucketName: string = 'gu-product-catalog';
+		const zuoraCatalogBucketName = 'gu-zuora-catalog';
+		const productCatalogBucketName = 'gu-product-catalog';
 		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}`;
 		const zuoraCatalogBucket = Bucket.fromBucketName(
 			this,
@@ -93,25 +93,27 @@ export class GenerateProductCatalog extends GuStack {
 			resourceRecord: 'guardian.map.fastly.net',
 		});
 
-		new GuAlarm(this, 'FailedProductCatalogLambdaAlarm', {
-			app,
-			alarmName: `The ${app} Lambda has failed`,
-			alarmDescription:
-				'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
-			evaluationPeriods: 1,
-			threshold: 1,
-			actionsEnabled: this.stage === 'PROD',
-			snsTopicName: 'retention-dev',
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			metric: new Metric({
-				metricName: 'Errors',
-				namespace: 'AWS/Lambda',
-				statistic: 'Sum',
-				period: Duration.seconds(300),
-				dimensionsMap: {
-					FunctionName: lambda.functionName,
-				},
-			}),
-		});
+		if (this.stage === 'PROD') {
+			new GuAlarm(this, `FailedProductCatalogLambdaAlarm`, {
+				app,
+				alarmName: `The ${app} Lambda has failed`,
+				alarmDescription:
+					'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
+				evaluationPeriods: 1,
+				threshold: 1,
+				snsTopicName: 'retention-dev',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: 'Sum',
+					period: Duration.seconds(300),
+					dimensionsMap: {
+						FunctionName: lambda.functionName,
+					},
+				}),
+			});
+		}
 	}
 }

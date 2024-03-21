@@ -36,9 +36,6 @@ jobs:
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           aws-region: eu-west-1
 
-      - name: Generate CFN templates from GuCDK
-        run: bash ./script/cfn.sh
-
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v2
         with:

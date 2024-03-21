@@ -134,7 +134,7 @@ Resources:
         Fn::GetAtt:
           - ContactUsLambdaRole
           - Arn
-      Runtime: java11
+      Runtime: java21
       Timeout: 60
       Environment:
         Variables:
@@ -153,6 +153,8 @@ Resources:
       Tags:
         - Key: lambda:createdBy
           Value: SAM
+      Architectures:
+        - arm64
   ContactUsLambdaApiEventPermissionStage:
     Type: AWS::Lambda::Permission
     Properties:

@@ -132,10 +132,12 @@ Resources:
                 Variables:
                   Stage: !Ref Stage
             MemorySize: 1024
-            Runtime: java11
+            Runtime: java21
             Timeout: 120
             Role:
               !GetAtt ZuoraBatonRerLambdaRole.Arn
+            Architectures:
+              - arm64
 
     PerformZuoraRerLambda:
         Type: AWS::Lambda::Function
@@ -151,9 +153,11 @@ Resources:
                 Variables:
                     Stage: !Ref Stage
             MemorySize: 1024
-            Runtime: java11
+            Runtime: java21
             Timeout: 900
             Role:
               !GetAtt PerformZuoraRerLambdaRole.Arn
+            Architectures:
+              - arm64
         DependsOn:
         - PerformZuoraRerLambdaRole
