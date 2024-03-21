@@ -466,10 +466,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 							resources: [updateZuoraAccountsLambda.functionArn],
 						}),
 						new PolicyStatement({
-							actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
-							resources: ['*'],
-						}),
-						new PolicyStatement({
 							actions: ['sns:Publish'],
 							resources: [snsTopic.topicArn],
 						}),

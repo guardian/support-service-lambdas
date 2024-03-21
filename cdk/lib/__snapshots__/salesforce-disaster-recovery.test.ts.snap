@@ -467,14 +467,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               },
             },
             {
-              "Action": [
-                "ses:SendEmail",
-                "ses:SendTemplatedEmail",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
               "Action": "sns:Publish",
               "Effect": "Allow",
               "Resource": {
@@ -1780,14 +1772,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               },
             },
             {
-              "Action": [
-                "ses:SendEmail",
-                "ses:SendTemplatedEmail",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
               "Action": "sns:Publish",
               "Effect": "Allow",
               "Resource": {
@@ -3091,14 +3075,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-            },
-            {
-              "Action": [
-                "ses:SendEmail",
-                "ses:SendTemplatedEmail",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
             },
             {
               "Action": "sns:Publish",
