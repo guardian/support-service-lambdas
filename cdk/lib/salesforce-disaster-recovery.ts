@@ -318,67 +318,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		new LambdaInvoke(this, 'SendCompletionNotification2', {
-			lambdaFunction: new GuLambdaFunction(
-				this,
-				'SendCompletionNotificationLambda2',
-				{
-					...lambdaDefaultConfig,
-					handler: 'sendCompletionNotification.handler',
-					functionName: `send-completion-notification-2-${this.stage}`,
-					initialPolicy: [
-						new PolicyStatement({
-							actions: ['sns:Publish'],
-							resources: [
-								`arn:aws:sns:${this.region}:${this.account}:AndreaTest`,
-							],
-						}),
-					],
-				},
-			),
-			payload: TaskInput.fromObject({
-				stateMachineExecutionDetailsUrl: '',
-				failedRowsFileUrl: '',
-				failedRowsCount: 0,
-				// queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
-				// filePath: JsonPath.format(
-				// 	`{}/${queryResultFileName}`,
-				// 	JsonPath.stringAt('$$.Execution.StartTime'),
-				// ),
-			}),
-		});
-
-		const resultEmailTemplateName = 'ResyncingProcedureResultEmailTemplate2';
-
-		new CfnTemplate(this, resultEmailTemplateName, {
-			template: {
-				subjectPart:
-					'Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}',
-				htmlPart: `<html>
-				<body>
-					<h4>State machine details:</h4>
-					<ul>
-						<li>Link to execution details: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
-						<li>Input: {{stateMachineInput}}</li>
-						<li>Start time: {{stateMachineExecutionStartTime}}</li>
-						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
-					</ul>
-					<h4>Processing summary:</h4>
-					<ul>
-						<li>Link to Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
-						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
-					</ul>
-				</body>
-				</html>`,
-				templateName: resultEmailTemplateName,
-			},
-		});
-
-		const buildEmailTemplateData = new Pass(this, 'BuildEmailTemplateData', {
+		const buildEmailData = new Pass(this, 'BuildEmailData', {
 			parameters: {
-				stage: this.stage,
 				stateMachineExecutionDetailsUrl: JsonPath.format(
 					`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}`,
 					this.region,
@@ -448,7 +389,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
-											.next(buildEmailTemplateData)
+											.next(buildEmailData)
 											.next(sendProcessingResultEmail)
 											.next(
 												new Choice(this, 'HaveAllRowsSuccedeed')
