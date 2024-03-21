@@ -117,7 +117,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
-      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -154,33 +153,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
-    },
-    "ResyncingProcedureResultEmailTemplate2": {
-      "Properties": {
-        "Template": {
-          "HtmlPart": "<html>
-				<body>
-					<h4>State machine details:</h4>
-					<ul>
-						<li>Link to execution details: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
-						<li>Input: {{stateMachineInput}}</li>
-						<li>Start time: {{stateMachineExecutionStartTime}}</li>
-						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
-					</ul>
-					<h4>Processing summary:</h4>
-					<ul>
-						<li>Link to Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
-						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
-					</ul>
-				</body>
-				</html>",
-          "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
-          "TemplateName": "ResyncingProcedureResultEmailTemplate2",
-        },
-      },
-      "Type": "AWS::SES::Template",
     },
     "SalesforceDisasterRecoveryStateMachine6185B29D": {
       "DeletionPolicy": "Delete",
@@ -235,7 +207,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"BuildEmailTemplateData","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount"},"Resource":"arn:",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"ConstructEmailData","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount"},"Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -246,7 +218,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CODE","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"ConstructEmailData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
@@ -254,7 +226,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.Id)","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -270,7 +242,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcedureSummaryEmail"},"SendProcedureSummaryEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },
@@ -1075,234 +1047,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotificationLambda2D1212841": {
-      "DependsOn": [
-        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/CODE/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "salesforce-disaster-recovery",
-            "STACK": "membership",
-            "STAGE": "CODE",
-          },
-        },
-        "FunctionName": "send-completion-notification-2-CODE",
-        "Handler": "sendCompletionNotification.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sns:Publish",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sns:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":AndreaTest",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/CODE/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/salesforce-disaster-recovery",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/salesforce-disaster-recovery/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "Roles": [
-          {
-            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "SnsTopic2C1570A4": {
       "Properties": {
         "Tags": [
@@ -1686,7 +1430,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
-      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1723,33 +1466,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
-    },
-    "ResyncingProcedureResultEmailTemplate2": {
-      "Properties": {
-        "Template": {
-          "HtmlPart": "<html>
-				<body>
-					<h4>State machine details:</h4>
-					<ul>
-						<li>Link to execution details: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
-						<li>Input: {{stateMachineInput}}</li>
-						<li>Start time: {{stateMachineExecutionStartTime}}</li>
-						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
-					</ul>
-					<h4>Processing summary:</h4>
-					<ul>
-						<li>Link to Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
-						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
-					</ul>
-				</body>
-				</html>",
-          "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
-          "TemplateName": "ResyncingProcedureResultEmailTemplate2",
-        },
-      },
-      "Type": "AWS::SES::Template",
     },
     "SalesforceDisasterRecoveryStateMachine6185B29D": {
       "DeletionPolicy": "Delete",
@@ -1804,7 +1520,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"BuildEmailTemplateData","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount"},"Resource":"arn:",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"ConstructEmailData","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount"},"Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1815,7 +1531,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"CSBX","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"ConstructEmailData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
@@ -1823,7 +1539,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.Id)","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1839,7 +1555,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcedureSummaryEmail"},"SendProcedureSummaryEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },
@@ -2644,234 +2360,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotificationLambda2D1212841": {
-      "DependsOn": [
-        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/CSBX/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "salesforce-disaster-recovery",
-            "STACK": "membership",
-            "STAGE": "CSBX",
-          },
-        },
-        "FunctionName": "send-completion-notification-2-CSBX",
-        "Handler": "sendCompletionNotification.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CSBX",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CSBX",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sns:Publish",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sns:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":AndreaTest",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/CSBX/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CSBX/membership/salesforce-disaster-recovery",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CSBX/membership/salesforce-disaster-recovery/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "Roles": [
-          {
-            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "SnsTopic2C1570A4": {
       "Properties": {
         "Tags": [
@@ -3255,7 +2743,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
-      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -3292,33 +2779,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
-    },
-    "ResyncingProcedureResultEmailTemplate2": {
-      "Properties": {
-        "Template": {
-          "HtmlPart": "<html>
-				<body>
-					<h4>State machine details:</h4>
-					<ul>
-						<li>Link to execution details: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
-						<li>Input: {{stateMachineInput}}</li>
-						<li>Start time: {{stateMachineExecutionStartTime}}</li>
-						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
-					</ul>
-					<h4>Processing summary:</h4>
-					<ul>
-						<li>Link to Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
-						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
-					</ul>
-				</body>
-				</html>",
-          "SubjectPart": "Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}",
-          "TemplateName": "ResyncingProcedureResultEmailTemplate2",
-        },
-      },
-      "Type": "AWS::SES::Template",
     },
     "SalesforceDisasterRecoveryStateMachine6185B29D": {
       "DeletionPolicy": "Delete",
@@ -3373,7 +2833,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"BuildEmailTemplateData","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount"},"Resource":"arn:",
+              "","Prefix.$":"$$.Execution.StartTime"}}},"GetMapResult":{"Next":"SaveFailedRowsToS3","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"SaveFailedRowsToS3":{"Next":"ConstructEmailData","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"failedRowsCount.$":"$.Payload.failedRowsCount"},"Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -3384,7 +2844,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"BuildEmailTemplateData":{"Type":"Pass","Parameters":{"stage":"PROD","stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"ConstructEmailData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
@@ -3392,7 +2852,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.Execution.Id)","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -3408,7 +2868,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcedureSummaryEmail"},"SendProcedureSummaryEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },
@@ -4208,234 +3668,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
         "Roles": [
           {
             "Ref": "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SendCompletionNotificationLambda2D1212841": {
-      "DependsOn": [
-        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/PROD/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "salesforce-disaster-recovery",
-            "STACK": "membership",
-            "STAGE": "PROD",
-          },
-        },
-        "FunctionName": "send-completion-notification-2-PROD",
-        "Handler": "sendCompletionNotification.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sns:Publish",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sns:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":AndreaTest",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/PROD/salesforce-disaster-recovery/salesforce-disaster-recovery.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/salesforce-disaster-recovery",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/salesforce-disaster-recovery/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "Roles": [
-          {
-            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
           },
         ],
       },

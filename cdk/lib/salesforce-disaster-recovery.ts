@@ -8,7 +8,6 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { CfnTemplate } from 'aws-cdk-lib/aws-ses';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import {
@@ -318,17 +317,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const buildEmailData = new Pass(this, 'BuildEmailData', {
+		const constructEmailData = new Pass(this, 'ConstructEmailData', {
 			parameters: {
 				stateMachineExecutionDetailsUrl: JsonPath.format(
 					`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}`,
 					this.region,
 					this.region,
 					JsonPath.stringAt('$$.Execution.Id'),
-				),
-				stateMachineInput: JsonPath.objectAt('$$.Execution.Input').toString(),
-				stateMachineExecutionStartTime: JsonPath.stringAt(
-					'$$.Execution.StartTime',
 				),
 				queryResultFileUrl: JsonPath.format(
 					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
@@ -348,9 +343,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const sendProcessingResultEmail = new CustomState(
+		const sendProcedureSummaryEmail = new CustomState(
 			this,
-			'SendProcessingResultEmail',
+			'SendProcedureSummaryEmail',
 			{
 				stateJson: {
 					Type: 'Task',
@@ -389,8 +384,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
-											.next(buildEmailData)
-											.next(sendProcessingResultEmail)
+											.next(constructEmailData)
+											.next(sendProcedureSummaryEmail)
 											.next(
 												new Choice(this, 'HaveAllRowsSuccedeed')
 													.when(
