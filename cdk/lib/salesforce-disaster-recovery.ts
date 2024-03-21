@@ -9,6 +9,7 @@ import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { CfnTemplate } from 'aws-cdk-lib/aws-ses';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	Choice,
 	Condition,
@@ -44,10 +45,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
-		const maxConcurrency = 20;
-
 		const queryResultFileName = 'query-result.csv';
 		const failedRowsFileName = 'failed-rows.csv';
+
+		const maxConcurrency = 20;
+
+		const processCompletedTopic = new Topic(this, 'ProcessCompletedTopic', {
+			topicName: `${app}-${this.stage}-process-completed`,
+		});
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -310,14 +315,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		new LambdaInvoke(this, 'SendCompletionNotification2', {
+		new LambdaInvoke(this, 'SendCompletionNotification', {
 			lambdaFunction: new GuLambdaFunction(
 				this,
-				'SendCompletionNotificationLambda2',
+				'SendCompletionNotificationLambda',
 				{
 					...lambdaDefaultConfig,
 					handler: 'sendCompletionNotification.handler',
-					functionName: `send-completion-notification-2-${this.stage}`,
+					functionName: `send-completion-notification-${this.stage}`,
 					initialPolicy: [
 						new PolicyStatement({
 							actions: ['sns:Publish'],
@@ -409,19 +414,36 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Task',
-					Resource: 'arn:aws:states:::aws-sdk:ses:sendTemplatedEmail',
+					Resource: 'arn:aws:states:::aws-sdk:sns:Publish',
 					Parameters: {
-						Destination: {
-							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
-						},
-						Source: 'andrea.diotallevi@guardian.co.uk',
-						Template: resultEmailTemplateName,
-						'TemplateData.$': JsonPath.jsonToString(JsonPath.objectAt('$')),
+						Subject: 'subject test',
+						Message: 'test message',
+						TopicArn: processCompletedTopic.topicArn,
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
 			},
 		);
+
+		// const sendProcessingResultEmail = new CustomState(
+		// 	this,
+		// 	'SendProcessingResultEmail',
+		// 	{
+		// 		stateJson: {
+		// 			Type: 'Task',
+		// 			Resource: 'arn:aws:states:::aws-sdk:ses:sendTemplatedEmail',
+		// 			Parameters: {
+		// 				Destination: {
+		// 					ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
+		// 				},
+		// 				Source: 'andrea.diotallevi@guardian.co.uk',
+		// 				Template: resultEmailTemplateName,
+		// 				'TemplateData.$': JsonPath.jsonToString(JsonPath.objectAt('$')),
+		// 			},
+		// 			ResultPath: JsonPath.stringAt('$.TaskResult'),
+		// 		},
+		// 	},
+		// );
 
 		const stateMachine = new StateMachine(
 			this,
@@ -524,6 +546,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						new PolicyStatement({
 							actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
 							resources: ['*'],
+						}),
+						new PolicyStatement({
+							actions: ['sns:Publish'],
+							resources: [processCompletedTopic.topicArn],
 						}),
 					],
 				},

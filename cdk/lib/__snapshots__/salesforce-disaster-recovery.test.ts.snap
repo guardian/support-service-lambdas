@@ -155,6 +155,30 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "ProcessCompletedTopic47214A93": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "TopicName": "salesforce-disaster-recovery-CODE-process-completed",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
     "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
@@ -278,7 +302,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"ResyncingProcedureResultEmailTemplate2","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:sns:Publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              {
+                "Ref": "ProcessCompletedTopic47214A93",
+              },
+              ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -505,6 +533,13 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ProcessCompletedTopic47214A93",
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -1072,10 +1107,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotificationLambda2D1212841": {
+    "SendCompletionNotificationLambda78F0F5B7": {
       "DependsOn": [
-        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
       ],
       "Properties": {
         "Code": {
@@ -1091,12 +1126,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "send-completion-notification-2-CODE",
+        "FunctionName": "send-completion-notification-CODE",
         "Handler": "sendCompletionNotification.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
             "Arn",
           ],
         },
@@ -1127,7 +1162,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
+    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1180,7 +1215,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
+    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1291,10 +1326,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
+        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
           },
         ],
       },
@@ -1687,6 +1722,30 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "ProcessCompletedTopic47214A93": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CSBX",
+          },
+        ],
+        "TopicName": "salesforce-disaster-recovery-CSBX-process-completed",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
     "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
@@ -1810,7 +1869,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"ResyncingProcedureResultEmailTemplate2","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:sns:Publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              {
+                "Ref": "ProcessCompletedTopic47214A93",
+              },
+              ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -2037,6 +2100,13 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ProcessCompletedTopic47214A93",
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -2604,10 +2674,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotificationLambda2D1212841": {
+    "SendCompletionNotificationLambda78F0F5B7": {
       "DependsOn": [
-        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
       ],
       "Properties": {
         "Code": {
@@ -2623,12 +2693,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "STAGE": "CSBX",
           },
         },
-        "FunctionName": "send-completion-notification-2-CSBX",
+        "FunctionName": "send-completion-notification-CSBX",
         "Handler": "sendCompletionNotification.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
             "Arn",
           ],
         },
@@ -2659,7 +2729,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
+    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -2712,7 +2782,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
+    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2823,10 +2893,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
+        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
           },
         ],
       },
@@ -3219,6 +3289,30 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "ProcessCompletedTopic47214A93": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TopicName": "salesforce-disaster-recovery-PROD-process-completed",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
     "ResyncingProcedureResultEmailTemplate2": {
       "Properties": {
         "Template": {
@@ -3342,7 +3436,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:ses:sendTemplatedEmail","Parameters":{"Destination":{"ToAddresses":["andrea.diotallevi@guardian.co.uk"]},"Source":"andrea.diotallevi@guardian.co.uk","Template":"ResyncingProcedureResultEmailTemplate2","TemplateData.$":"States.JsonToString($)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:sns:Publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              {
+                "Ref": "ProcessCompletedTopic47214A93",
+              },
+              ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -3569,6 +3667,13 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ProcessCompletedTopic47214A93",
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -4136,10 +4241,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotificationLambda2D1212841": {
+    "SendCompletionNotificationLambda78F0F5B7": {
       "DependsOn": [
-        "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
-        "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
       ],
       "Properties": {
         "Code": {
@@ -4155,12 +4260,12 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "send-completion-notification-2-PROD",
+        "FunctionName": "send-completion-notification-PROD",
         "Handler": "sendCompletionNotification.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
             "Arn",
           ],
         },
@@ -4191,7 +4296,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationLambda2ServiceRole79C4D3E6": {
+    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -4244,7 +4349,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D": {
+    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -4355,10 +4460,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationLambda2ServiceRoleDefaultPolicyF1F7E05D",
+        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationLambda2ServiceRole79C4D3E6",
+            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
           },
         ],
       },
