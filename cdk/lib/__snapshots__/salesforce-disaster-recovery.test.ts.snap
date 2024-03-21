@@ -302,7 +302,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:sns:Publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
               {
                 "Ref": "ProcessCompletedTopic47214A93",
               },
@@ -1869,7 +1869,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:sns:Publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
               {
                 "Ref": "ProcessCompletedTopic47214A93",
               },
@@ -3436,7 +3436,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::aws-sdk:sns:Publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
               {
                 "Ref": "ProcessCompletedTopic47214A93",
               },

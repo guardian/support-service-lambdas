@@ -414,7 +414,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Task',
-					Resource: 'arn:aws:states:::aws-sdk:sns:Publish',
+					Resource: 'arn:aws:states:::sns:publish',
 					Parameters: {
 						Subject: 'subject test',
 						Message: 'test message',
