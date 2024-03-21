@@ -501,6 +501,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 							actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
 							resources: ['*'],
 						}),
+						new PolicyStatement({
+							actions: ['sns:Publish'],
+							resources: ['arn:aws:sns:eu-west-1:865473395570:AndreaTest'],
+						}),
 					],
 				},
 			),
