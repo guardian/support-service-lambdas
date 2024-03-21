@@ -5,6 +5,8 @@ import type {
 
 interface AlarmMessage {
 	AlarmName: string;
+	AlarmDescription?: string;
+	NewStateReason: string;
 }
 
 export const handler: Handler = async (
@@ -21,7 +23,7 @@ export const handler: Handler = async (
 
 	const messages: string[] = event.Records.map(record => {
 		const message = JSON.parse(record.Sns.Message) as AlarmMessage;
-		return `Uh oh, ${message.AlarmName} has triggered!`
+		return `ALARM: ${message.AlarmName} has triggered!\n\nDescription: ${message.AlarmDescription ?? ''}\n\nReason: ${message.NewStateReason}}`
 	});
 
 	const responses = messages.map(message => {
