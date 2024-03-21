@@ -1072,10 +1072,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotification3D02847A": {
+    "SendCompletionNotificationLambda78F0F5B7": {
       "DependsOn": [
-        "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE",
-        "SendCompletionNotificationServiceRoleECF3388A",
+        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
       ],
       "Properties": {
         "Code": {
@@ -1096,7 +1096,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationServiceRoleECF3388A",
+            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
             "Arn",
           ],
         },
@@ -1127,7 +1127,60 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE": {
+    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "salesforce-disaster-recovery",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1238,67 +1291,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE",
+        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationServiceRoleECF3388A",
+            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "SendCompletionNotificationServiceRoleECF3388A": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
     },
     "UpdateZuoraAccountsLambda64E51B2A": {
       "DependsOn": [
@@ -2604,10 +2604,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotification3D02847A": {
+    "SendCompletionNotificationLambda78F0F5B7": {
       "DependsOn": [
-        "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE",
-        "SendCompletionNotificationServiceRoleECF3388A",
+        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
       ],
       "Properties": {
         "Code": {
@@ -2628,7 +2628,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationServiceRoleECF3388A",
+            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
             "Arn",
           ],
         },
@@ -2659,7 +2659,60 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE": {
+    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "salesforce-disaster-recovery",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CSBX",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2770,67 +2823,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE",
+        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationServiceRoleECF3388A",
+            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "SendCompletionNotificationServiceRoleECF3388A": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CSBX",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
     },
     "UpdateZuoraAccountsLambda64E51B2A": {
       "DependsOn": [
@@ -4136,10 +4136,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SendCompletionNotification3D02847A": {
+    "SendCompletionNotificationLambda78F0F5B7": {
       "DependsOn": [
-        "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE",
-        "SendCompletionNotificationServiceRoleECF3388A",
+        "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
+        "SendCompletionNotificationLambdaServiceRole8B28AA8A",
       ],
       "Properties": {
         "Code": {
@@ -4160,7 +4160,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SendCompletionNotificationServiceRoleECF3388A",
+            "SendCompletionNotificationLambdaServiceRole8B28AA8A",
             "Arn",
           ],
         },
@@ -4191,7 +4191,60 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE": {
+    "SendCompletionNotificationLambdaServiceRole8B28AA8A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "salesforce-disaster-recovery",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -4302,67 +4355,14 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SendCompletionNotificationServiceRoleDefaultPolicyE95231DE",
+        "PolicyName": "SendCompletionNotificationLambdaServiceRoleDefaultPolicy30BE6E2B",
         "Roles": [
           {
-            "Ref": "SendCompletionNotificationServiceRoleECF3388A",
+            "Ref": "SendCompletionNotificationLambdaServiceRole8B28AA8A",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "SendCompletionNotificationServiceRoleECF3388A": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
     },
     "UpdateZuoraAccountsLambda64E51B2A": {
       "DependsOn": [

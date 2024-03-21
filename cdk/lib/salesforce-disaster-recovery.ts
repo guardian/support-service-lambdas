@@ -310,16 +310,34 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		new GuLambdaFunction(this, 'SendCompletionNotification', {
-			...lambdaDefaultConfig,
-			handler: 'sendCompletionNotification.handler',
-			functionName: `send-completion-notification-${this.stage}`,
-			initialPolicy: [
-				new PolicyStatement({
-					actions: ['sns:Publish'],
-					resources: [`arn:aws:sns:${this.region}:${this.account}:AndreaTest`],
-				}),
-			],
+		new LambdaInvoke(this, 'SendCompletionNotification', {
+			lambdaFunction: new GuLambdaFunction(
+				this,
+				'SendCompletionNotificationLambda',
+				{
+					...lambdaDefaultConfig,
+					handler: 'sendCompletionNotification.handler',
+					functionName: `send-completion-notification-${this.stage}`,
+					initialPolicy: [
+						new PolicyStatement({
+							actions: ['sns:Publish'],
+							resources: [
+								`arn:aws:sns:${this.region}:${this.account}:AndreaTest`,
+							],
+						}),
+					],
+				},
+			),
+			payload: TaskInput.fromObject({
+				stateMachineExecutionDetailsUrl: '',
+				failedRowsFileUrl: '',
+				failedRowsCount: 0,
+				// queryJobId: JsonPath.stringAt('$.ResponseBody.id'),
+				// filePath: JsonPath.format(
+				// 	`{}/${queryResultFileName}`,
+				// 	JsonPath.stringAt('$$.Execution.StartTime'),
+				// ),
+			}),
 		});
 
 		const resultEmailTemplateName = 'ResyncingProcedureResultEmailTemplate2';
