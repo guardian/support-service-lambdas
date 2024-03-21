@@ -30,7 +30,7 @@ export class StripeWebhookEndpoints extends GuStack {
 
         // ---- Existing CFN template ---- //
         const yamlTemplateFilePath = path.join(__dirname, "../..", "handlers/stripe-webhook-endpoints/cfn.yaml");
-        const yamlDefinedResources =  new CfnInclude(this, "YamlTemplate", {
+        new CfnInclude(this, "YamlTemplate", {
             templateFile: yamlTemplateFilePath,
         });
 
