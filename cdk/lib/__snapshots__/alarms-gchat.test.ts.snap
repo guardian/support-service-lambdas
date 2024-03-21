@@ -4,6 +4,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuSnsLambdaExperimental",
     ],
@@ -24,6 +25,10 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "webhook": {
+      "Description": "Google Chat webhook for lambda to fire to",
+      "Type": "String",
     },
   },
   "Resources": {
@@ -93,6 +98,9 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
             "STAGE": "CODE",
             "Stack": "membership",
             "Stage": "CODE",
+            "WEBHOOK": {
+              "Ref": "webhook",
+            },
           },
         },
         "FunctionName": "alarms-gchat-CODE",
@@ -364,6 +372,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuSnsLambdaExperimental",
     ],
@@ -384,6 +393,10 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "webhook": {
+      "Description": "Google Chat webhook for lambda to fire to",
+      "Type": "String",
     },
   },
   "Resources": {
@@ -453,6 +466,9 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
             "STAGE": "PROD",
             "Stack": "membership",
             "Stage": "PROD",
+            "WEBHOOK": {
+              "Ref": "webhook",
+            },
           },
         },
         "FunctionName": "alarms-gchat-PROD",

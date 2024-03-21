@@ -1,13 +1,13 @@
-import type {
-	GuLambdaErrorPercentageMonitoringProps,
-	NoMonitoring,
-} from '@guardian/cdk/lib/constructs/cloudwatch';
+// import type {
+// 	GuLambdaErrorPercentageMonitoringProps,
+// 	NoMonitoring,
+// } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack, GuStringParameter } from '@guardian/cdk/lib/constructs/core';
 import { GuSnsLambdaExperimental } from '@guardian/cdk/lib/experimental/patterns';
 import type { App } from 'aws-cdk-lib';
-import { CfnMapping, Duration } from 'aws-cdk-lib';
-import { SnsTopic } from 'aws-cdk-lib/aws-events-targets';
+import { Duration } from 'aws-cdk-lib';
+// import { SnsTopic } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -30,11 +30,11 @@ export class AlarmsGchat extends GuStack {
 			Stage: this.stage,
 		};
 
-		// const parameters = {
-		// 	webhook: new GuStringParameter(this, 'webhook', {
-		// 		description: 'Google Chat webhook for lambda to fire to',
-		// 	}),
-		// };
+		const parameters = {
+			webhook: new GuStringParameter(this, 'webhook', {
+				description: 'Google Chat webhook for lambda to fire to',
+			}),
+		};
 		// const stageMapping = new CfnMapping(this, 'stageMapping', {
 		// 	mapping: {
 		// 		CODE: { alarmActionsEnabled: 'FALSE' },
@@ -80,7 +80,7 @@ export class AlarmsGchat extends GuStack {
 				runtime: Runtime.NODEJS_18_X,
 				memorySize: 1024,
 				environment: {
-					// WEBHOOK: parameters.webhook.valueAsString,
+					WEBHOOK: parameters.webhook.valueAsString,
 					...commonEnvironmentVariables,
 				},
 				timeout: Duration.seconds(15),
