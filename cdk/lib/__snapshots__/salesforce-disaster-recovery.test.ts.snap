@@ -246,7 +246,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CODE","Message.$":"States.Format('State machine execution details: {}\\nAccounts to update: {}\\nAccounts that failed to update ({}): {}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CODE","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1551,7 +1551,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CSBX","Message.$":"States.Format('State machine execution details: {}\\nAccounts to update: {}\\nAccounts that failed to update ({}): {}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CSBX","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -2856,7 +2856,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For PROD","Message.$":"States.Format('State machine execution details: {}\\nAccounts to update: {}\\nAccounts that failed to update ({}): {}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For PROD","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
