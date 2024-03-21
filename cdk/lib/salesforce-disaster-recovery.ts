@@ -423,7 +423,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						'Message.$': JsonPath.format(
 							`
 							Link to state machine execution details: {}\n
-							Link to accounts that failed to update ({failedRowsCount}): {}\n
+							Link to accounts that failed to update ({}): {}\n
 						`,
 							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
 							JsonPath.stringAt('$.failedRowsCount'),
