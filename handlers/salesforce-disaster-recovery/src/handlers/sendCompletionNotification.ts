@@ -18,7 +18,7 @@ export const handler = async (event: unknown) => {
 	);
 
 	console.log(event);
-	client.notify({
+	const res = await client.notify({
 		subject: 'Salesforce Disaster Recovery Re-syncing Procedure Completed',
 		message:
 			"Hi there, something has happened which we'd like to tell you about",
@@ -32,6 +32,5 @@ export const handler = async (event: unknown) => {
 		sourceSystem: stack,
 		topicArn: 'AndreaTest',
 	});
-
-	await Promise.resolve();
+	console.log(res);
 };
