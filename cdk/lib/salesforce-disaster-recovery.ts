@@ -49,8 +49,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const queryResultFileName = 'query-result.csv';
 		const failedRowsFileName = 'failed-rows.csv';
 
-		const maxConcurrency = 20;
-
 		const snsTopic = new Topic(this, 'SnsTopic', {
 			topicName: `${app}-${this.stage}`,
 		});
@@ -206,7 +204,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Map',
-					MaxConcurrency: maxConcurrency,
+					MaxConcurrency: 20,
 					ToleratedFailurePercentage: 100,
 					Comment: `ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches`,
 					ItemReader: {
@@ -394,7 +392,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				stateMachineExecutionStartTime: JsonPath.stringAt(
 					'$$.Execution.StartTime',
 				),
-				stateMachineMaxConcurrency: maxConcurrency,
 				queryResultFileUrl: JsonPath.format(
 					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
 					bucket.bucketName,
@@ -421,34 +418,29 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::sns:publish',
 					Parameters: {
-						Subject: 'subject test',
-						Message: 'test message',
 						TopicArn: snsTopic.topicArn,
+						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
+						Message: `<a href="https://www.w3schools.com">Visit W3Schools.com!</a>`,
+						// 'Subject.$':JsonPath.format(`Salesforce Disaster Recovery Re-syncing Procedure Completed For {}`,this.st)
+						// 'ApiEndpoint.$': JsonPath.format(
+						// 	`${props.salesforceApiDomain}/services/data/v59.0/jobs/query/{}`,
+						// 	JsonPath.stringAt('$.ResponseBody.id'),
+						// ),
+						// Method: 'GET',
+						// Authentication: {
+						// 	ConnectionArn: salesforceApiConnectionArn,
+						// },
 					},
+					// 'Parameters.$': JsonPath.jsonToString(JsonPath.objectAt('$')),
+					// Parameters: {
+					// 	Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For`,
+					// 	Message: 'test message',
+					// 	TopicArn: snsTopic.topicArn,
+					// },
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
 			},
 		);
-
-		// const sendProcessingResultEmail = new CustomState(
-		// 	this,
-		// 	'SendProcessingResultEmail',
-		// 	{
-		// 		stateJson: {
-		// 			Type: 'Task',
-		// 			Resource: 'arn:aws:states:::aws-sdk:ses:sendTemplatedEmail',
-		// 			Parameters: {
-		// 				Destination: {
-		// 					ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
-		// 				},
-		// 				Source: 'andrea.diotallevi@guardian.co.uk',
-		// 				Template: resultEmailTemplateName,
-		// 				'TemplateData.$': JsonPath.jsonToString(JsonPath.objectAt('$')),
-		// 			},
-		// 			ResultPath: JsonPath.stringAt('$.TaskResult'),
-		// 		},
-		// 	},
-		// );
 
 		const stateMachine = new StateMachine(
 			this,

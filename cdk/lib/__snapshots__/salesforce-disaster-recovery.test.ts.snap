@@ -262,7 +262,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","stateMachineMaxConcurrency":20,"queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -278,11 +278,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CODE","Message":"<a href=\\"https://www.w3schools.com\\">Visit W3Schools.com!</a>"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1839,7 +1839,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","stateMachineMaxConcurrency":20,"queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -1855,11 +1855,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CSBX","Message":"<a href=\\"https://www.w3schools.com\\">Visit W3Schools.com!</a>"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -3416,7 +3416,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","stateMachineMaxConcurrency":20,"queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
+              "', $$.StateMachine.Name, $$.Execution.Id)","stateMachineInput.$":"$$.Execution.Input","stateMachineExecutionStartTime.$":"$$.Execution.StartTime","queryResultFileUrl.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}', '",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -3432,11 +3432,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"Subject":"subject test","Message":"test message","TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcessingResultEmail"},"SendProcessingResultEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              ""},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For PROD","Message":"<a href=\\"https://www.w3schools.com\\">Visit W3Schools.com!</a>"},"ResultPath":"$.TaskResult"},"HaveAllRowsSuccedeed":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSuccedeed"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSuccedeed":{"Type":"Succeed"}}}",
             ],
           ],
         },
