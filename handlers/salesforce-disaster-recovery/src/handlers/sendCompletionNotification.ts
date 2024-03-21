@@ -45,7 +45,7 @@ export const handler = async (event: {
 			Stage: stage,
 			App: app,
 		},
-		channel: RequestedChannel.Email,
+		channel: RequestedChannel.All,
 		sourceSystem: stack,
 		topicArn: 'arn:aws:sns:eu-west-1:865473395570:AndreaTest',
 	});
