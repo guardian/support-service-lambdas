@@ -78,6 +78,12 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.11.27)(typescript@5.3.3)
 
+  handlers/alarms-gchat:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.132
+        version: 8.10.134
+
   handlers/discount-api:
     dependencies:
       dayjs:
@@ -98,7 +104,7 @@ importers:
         version: 3.451.0
       '@types/aws-lambda':
         specifier: ^8.10.129
-        version: 8.10.129
+        version: 8.10.134
 
   handlers/salesforce-disaster-recovery:
     dependencies:
@@ -2443,6 +2449,10 @@ packages:
 
   /@types/aws-lambda@8.10.129:
     resolution: {integrity: sha512-0Rl7CpTPVws5cp0Ui1gZh4Q+TXC65bXVwTOGoI2RKW45dxWzyZGbjIX0uFjFYdIJ8vnD45y584rIIqvD2vBBfQ==}
+    dev: true
+
+  /@types/aws-lambda@8.10.134:
+    resolution: {integrity: sha512-cfv422ivDMO+EeA3N4YcshbTHBL+5lLXe+Uz+4HXvIcsCuWvqNFpOs28ZprL8NA3qRCzt95ETiNAJDn4IcC/PA==}
     dev: true
 
   /@types/babel__core@7.20.5:

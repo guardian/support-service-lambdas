@@ -2,18 +2,6 @@
 
 exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
 {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Conditions": {
-    "IsProd": {
-      "Fn::Equals": [
-        {
-          "Ref": "Stage",
-        },
-        "PROD",
-      ],
-    },
-  },
-  "Description": "Endpoints to handle stripe webhooks",
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
@@ -55,33 +43,10 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
     },
   },
   "Parameters": {
-    "App": {
-      "Default": "stripe-webhook-endpoints",
-      "Description": "Endpoints to handle stripe webhooks",
-      "Type": "String",
-    },
-    "DeployBucket": {
-      "Default": "membership-dist",
-      "Description": "Bucket to copy files to",
-      "Type": "String",
-    },
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "Stack": {
-      "Default": "membership",
-      "Description": "Stack name",
-      "Type": "String",
-    },
-    "Stage": {
-      "AllowedValues": [
-        "CODE",
-        "PROD",
-      ],
-      "Description": "Set by RiffRaff on each deploy",
-      "Type": "String",
     },
   },
   "Resources": {
@@ -250,92 +215,6 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
-    "CustomerUpdatedLambda": {
-      "Properties": {
-        "CodeUri": {
-          "Bucket": {
-            "Ref": "DeployBucket",
-          },
-          "Key": {
-            "Fn::Sub": "\${Stack}/\${Stage}/\${App}/\${App}.jar",
-          },
-        },
-        "Description": "A lambda for handling customer updates",
-        "Environment": {
-          "Variables": {
-            "App": "stripe-customer-updated",
-            "Stack": {
-              "Ref": "Stack",
-            },
-            "Stage": {
-              "Ref": "Stage",
-            },
-          },
-        },
-        "Events": {
-          "AcquisitionEvent": {
-            "Properties": {
-              "Method": "post",
-              "Path": "/customer-updated",
-              "RequestParameters": [
-                "method.request.querystring.apiToken",
-              ],
-            },
-            "Type": "Api",
-          },
-        },
-        "FunctionName": {
-          "Fn::Sub": "stripe-customer-updated-\${Stage}",
-        },
-        "Handler": "com.gu.stripeCardUpdated.Lambda::apply",
-        "MemorySize": 1536,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole",
-          {
-            "Statement": {
-              "Action": [
-                "ssm:GetParametersByPath",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Sub": "arn:aws:ssm:\${AWS::Region}:\${AWS::AccountId}:parameter/\${Stage}/membership/payment-intent-issues",
-                },
-              ],
-            },
-          },
-          {
-            "Statement": [
-              {
-                "Action": "s3:GetObject",
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:s3::*:membership-dist/*",
-                  {
-                    "Fn::Sub": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/\${Stage}/zuoraRest-\${Stage}.*.json",
-                  },
-                  {
-                    "Fn::Sub": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/\${Stage}/trustedApi-\${Stage}.*.json",
-                  },
-                  {
-                    "Fn::Sub": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/\${Stage}/stripe-\${Stage}.*.json",
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-        "Runtime": "java21",
-        "Tags": {
-          "Stack": "support",
-          "Stage": "CODE",
-          "gu:cdk:version": "TEST",
-          "gu:repo": "guardian/support-service-lambdas",
-        },
-        "Timeout": 900,
-      },
-      "Type": "AWS::Serverless::Function",
-    },
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
@@ -352,80 +231,6 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Type": "CNAME",
       },
       "Type": "AWS::Route53::RecordSet",
-    },
-    "PaymentIntentIssuesLambda": {
-      "Properties": {
-        "CodeUri": {
-          "Bucket": {
-            "Ref": "DeployBucket",
-          },
-          "Key": {
-            "Fn::Sub": "\${Stack}/\${Stage}/\${App}/\${App}.jar",
-          },
-        },
-        "Description": "A lambda for handling payment intent issues (cancellation, failure, action required)",
-        "Environment": {
-          "Variables": {
-            "App": "payment-intent-issues",
-            "Stack": {
-              "Ref": "Stack",
-            },
-            "Stage": {
-              "Ref": "Stage",
-            },
-          },
-        },
-        "Events": {
-          "AcquisitionEvent": {
-            "Properties": {
-              "Method": "post",
-              "Path": "/payment-intent-issue",
-            },
-            "Type": "Api",
-          },
-        },
-        "FunctionName": {
-          "Fn::Sub": "stripe-payment-intent-issues-\${Stage}",
-        },
-        "Handler": "com.gu.paymentIntentIssues.Lambda::handler",
-        "MemorySize": 512,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole",
-          {
-            "Statement": {
-              "Action": [
-                "ssm:GetParametersByPath",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Sub": "arn:aws:ssm:\${AWS::Region}:\${AWS::AccountId}:parameter/\${Stage}/membership/payment-intent-issues",
-                },
-              ],
-            },
-          },
-          {
-            "Statement": [
-              {
-                "Action": "s3:GetObject",
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:s3::*:membership-dist/*",
-                ],
-              },
-            ],
-          },
-        ],
-        "Runtime": "java21",
-        "Tags": {
-          "Stack": "support",
-          "Stage": "CODE",
-          "gu:cdk:version": "TEST",
-          "gu:repo": "guardian/support-service-lambdas",
-        },
-        "Timeout": 300,
-      },
-      "Type": "AWS::Serverless::Function",
     },
     "RestApi0C43BF4B": {
       "Properties": {
@@ -1388,24 +1193,11 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Policy",
     },
   },
-  "Transform": "AWS::Serverless-2016-10-31",
 }
 `;
 
 exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
 {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Conditions": {
-    "IsProd": {
-      "Fn::Equals": [
-        {
-          "Ref": "Stage",
-        },
-        "PROD",
-      ],
-    },
-  },
-  "Description": "Endpoints to handle stripe webhooks",
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
@@ -1447,33 +1239,10 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
     },
   },
   "Parameters": {
-    "App": {
-      "Default": "stripe-webhook-endpoints",
-      "Description": "Endpoints to handle stripe webhooks",
-      "Type": "String",
-    },
-    "DeployBucket": {
-      "Default": "membership-dist",
-      "Description": "Bucket to copy files to",
-      "Type": "String",
-    },
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "Stack": {
-      "Default": "membership",
-      "Description": "Stack name",
-      "Type": "String",
-    },
-    "Stage": {
-      "AllowedValues": [
-        "CODE",
-        "PROD",
-      ],
-      "Description": "Set by RiffRaff on each deploy",
-      "Type": "String",
     },
   },
   "Resources": {
@@ -1642,92 +1411,6 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
-    "CustomerUpdatedLambda": {
-      "Properties": {
-        "CodeUri": {
-          "Bucket": {
-            "Ref": "DeployBucket",
-          },
-          "Key": {
-            "Fn::Sub": "\${Stack}/\${Stage}/\${App}/\${App}.jar",
-          },
-        },
-        "Description": "A lambda for handling customer updates",
-        "Environment": {
-          "Variables": {
-            "App": "stripe-customer-updated",
-            "Stack": {
-              "Ref": "Stack",
-            },
-            "Stage": {
-              "Ref": "Stage",
-            },
-          },
-        },
-        "Events": {
-          "AcquisitionEvent": {
-            "Properties": {
-              "Method": "post",
-              "Path": "/customer-updated",
-              "RequestParameters": [
-                "method.request.querystring.apiToken",
-              ],
-            },
-            "Type": "Api",
-          },
-        },
-        "FunctionName": {
-          "Fn::Sub": "stripe-customer-updated-\${Stage}",
-        },
-        "Handler": "com.gu.stripeCardUpdated.Lambda::apply",
-        "MemorySize": 1536,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole",
-          {
-            "Statement": {
-              "Action": [
-                "ssm:GetParametersByPath",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Sub": "arn:aws:ssm:\${AWS::Region}:\${AWS::AccountId}:parameter/\${Stage}/membership/payment-intent-issues",
-                },
-              ],
-            },
-          },
-          {
-            "Statement": [
-              {
-                "Action": "s3:GetObject",
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:s3::*:membership-dist/*",
-                  {
-                    "Fn::Sub": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/\${Stage}/zuoraRest-\${Stage}.*.json",
-                  },
-                  {
-                    "Fn::Sub": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/\${Stage}/trustedApi-\${Stage}.*.json",
-                  },
-                  {
-                    "Fn::Sub": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/\${Stage}/stripe-\${Stage}.*.json",
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-        "Runtime": "java11",
-        "Tags": {
-          "Stack": "support",
-          "Stage": "PROD",
-          "gu:cdk:version": "TEST",
-          "gu:repo": "guardian/support-service-lambdas",
-        },
-        "Timeout": 900,
-      },
-      "Type": "AWS::Serverless::Function",
-    },
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
@@ -1744,80 +1427,6 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Type": "CNAME",
       },
       "Type": "AWS::Route53::RecordSet",
-    },
-    "PaymentIntentIssuesLambda": {
-      "Properties": {
-        "CodeUri": {
-          "Bucket": {
-            "Ref": "DeployBucket",
-          },
-          "Key": {
-            "Fn::Sub": "\${Stack}/\${Stage}/\${App}/\${App}.jar",
-          },
-        },
-        "Description": "A lambda for handling payment intent issues (cancellation, failure, action required)",
-        "Environment": {
-          "Variables": {
-            "App": "payment-intent-issues",
-            "Stack": {
-              "Ref": "Stack",
-            },
-            "Stage": {
-              "Ref": "Stage",
-            },
-          },
-        },
-        "Events": {
-          "AcquisitionEvent": {
-            "Properties": {
-              "Method": "post",
-              "Path": "/payment-intent-issue",
-            },
-            "Type": "Api",
-          },
-        },
-        "FunctionName": {
-          "Fn::Sub": "stripe-payment-intent-issues-\${Stage}",
-        },
-        "Handler": "com.gu.paymentIntentIssues.Lambda::handler",
-        "MemorySize": 512,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole",
-          {
-            "Statement": {
-              "Action": [
-                "ssm:GetParametersByPath",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Sub": "arn:aws:ssm:\${AWS::Region}:\${AWS::AccountId}:parameter/\${Stage}/membership/payment-intent-issues",
-                },
-              ],
-            },
-          },
-          {
-            "Statement": [
-              {
-                "Action": "s3:GetObject",
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:s3::*:membership-dist/*",
-                ],
-              },
-            ],
-          },
-        ],
-        "Runtime": "java11",
-        "Tags": {
-          "Stack": "support",
-          "Stage": "PROD",
-          "gu:cdk:version": "TEST",
-          "gu:repo": "guardian/support-service-lambdas",
-        },
-        "Timeout": 300,
-      },
-      "Type": "AWS::Serverless::Function",
     },
     "RestApi0C43BF4B": {
       "Properties": {
@@ -2780,6 +2389,5 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Policy",
     },
   },
-  "Transform": "AWS::Serverless-2016-10-31",
 }
 `;
