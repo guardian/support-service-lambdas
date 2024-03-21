@@ -23,7 +23,7 @@ export const handler: Handler = async (
 
 	const messages: string[] = event.Records.map(record => {
 		const message = JSON.parse(record.Sns.Message) as AlarmMessage;
-		return `ALARM: ${message.AlarmName} has triggered!\n\nDescription: ${message.AlarmDescription ?? ''}\n\nReason: ${message.NewStateReason}}`
+		return `*ALARM:* ${message.AlarmName} has triggered!\n\n*Description:* ${message.AlarmDescription ?? ''}\n\n*Reason:* ${message.NewStateReason}}`
 	});
 
 	const responses = messages.map(message => {
