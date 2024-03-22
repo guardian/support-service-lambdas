@@ -1,1 +1,1 @@
-cd cdk && yarn test
+cd cdk && yarn lint && yarn test
