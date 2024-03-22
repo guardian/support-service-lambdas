@@ -79,7 +79,7 @@ export class ZuoraClient {
 			body,
 		});
 		const json = await response.json();
-		console.log('Response from Zuora was: ', JSON.stringify(json));
+		console.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
 		if (response.ok) {
 			return schema.parse(json);

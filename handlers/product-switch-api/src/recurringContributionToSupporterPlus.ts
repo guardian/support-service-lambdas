@@ -7,7 +7,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import { productSwitchRequestSchema } from './requestSchema';
+import { productSwitchRequestSchema } from './schemas';
 
 export const performSwitch = async (
 	stage: Stage,
