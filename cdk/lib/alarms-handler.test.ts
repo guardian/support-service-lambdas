@@ -1,16 +1,15 @@
-
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { AlarmsGchat } from './alarms-gchat';
+import { AlarmsHandler } from './alarms-handler';
 
 describe('The Alarms gchat stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const codeStack = new AlarmsGchat(app, 'alarms-gchat-CODE', {
+		const codeStack = new AlarmsHandler(app, 'alarms-handler-CODE', {
 			stack: 'membership',
 			stage: 'CODE',
 		});
-		const prodStack = new AlarmsGchat(app, 'alarms-gchat-PROD', {
+		const prodStack = new AlarmsHandler(app, 'alarms-handler-PROD', {
 			stack: 'membership',
 			stage: 'PROD',
 		});

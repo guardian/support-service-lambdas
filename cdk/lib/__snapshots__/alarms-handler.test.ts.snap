@@ -14,7 +14,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
     "googlechatbotsnstogchatTopicName31621335": {
       "Value": {
         "Fn::GetAtt": [
-          "alarmsgchattopic56F6C617",
+          "alarmshandlertopic003C974E",
           "TopicName",
         ],
       },
@@ -39,7 +39,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/alarms-gchat/",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/alarms-handler/",
             },
           ],
           "Version": "2012-10-17",
@@ -53,7 +53,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "alarmsgchattopic56F6C617": {
+    "alarmshandlertopic003C974E": {
       "Properties": {
         "Tags": [
           {
@@ -73,7 +73,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "TopicName": "alarms-gchat-topic-CODE",
+        "TopicName": "alarms-handler-topic-CODE",
       },
       "Type": "AWS::SNS::Topic",
     },
@@ -87,13 +87,13 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/alarms-gchat/alarms-gchat.zip",
+          "S3Key": "membership/CODE/alarms-handler/alarms-handler.zip",
         },
         "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
-            "APP": "alarms-gchat",
-            "App": "alarms-gchat",
+            "APP": "alarms-handler",
+            "App": "alarms-handler",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stack": "membership",
@@ -103,7 +103,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
             },
           },
         },
-        "FunctionName": "alarms-gchat-CODE",
+        "FunctionName": "alarms-handler-CODE",
         "Handler": "index.handler",
         "MemorySize": 1024,
         "Role": {
@@ -116,7 +116,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "alarms-gchat",
+            "Value": "alarms-handler",
           },
           {
             "Key": "gu:cdk:version",
@@ -139,7 +139,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "googlechatbotsnstogchatAllowInvokealarmsgchatCODEgooglechatbotsnstogchatSnsExistingIncomingEventsTopic4CE261FCAA86CD34": {
+    "googlechatbotsnstogchatAllowInvokealarmshandlerCODEgooglechatbotsnstogchatSnsExistingIncomingEventsTopic1711B9267B4D7CB9": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -164,7 +164,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
               ":",
               {
                 "Fn::GetAtt": [
-                  "alarmsgchattopic56F6C617",
+                  "alarmshandlertopic003C974E",
                   "TopicName",
                 ],
               },
@@ -205,7 +205,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "alarms-gchat",
+            "Value": "alarms-handler",
           },
           {
             "Key": "gu:cdk:version",
@@ -266,7 +266,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/alarms-gchat/alarms-gchat.zip",
+                      "/membership/CODE/alarms-handler/alarms-handler.zip",
                     ],
                   ],
                 },
@@ -287,7 +287,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/alarms-gchat",
+                    ":parameter/CODE/membership/alarms-handler",
                   ],
                 ],
               },
@@ -310,7 +310,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/alarms-gchat/*",
+                    ":parameter/CODE/membership/alarms-handler/*",
                   ],
                 ],
               },
@@ -354,7 +354,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
               ":",
               {
                 "Fn::GetAtt": [
-                  "alarmsgchattopic56F6C617",
+                  "alarmshandlertopic003C974E",
                   "TopicName",
                 ],
               },
@@ -382,7 +382,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
     "googlechatbotsnstogchatTopicName31621335": {
       "Value": {
         "Fn::GetAtt": [
-          "alarmsgchattopic56F6C617",
+          "alarmshandlertopic003C974E",
           "TopicName",
         ],
       },
@@ -407,7 +407,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/alarms-gchat/",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/alarms-handler/",
             },
           ],
           "Version": "2012-10-17",
@@ -421,7 +421,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "alarmsgchattopic56F6C617": {
+    "alarmshandlertopic003C974E": {
       "Properties": {
         "Tags": [
           {
@@ -441,7 +441,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "TopicName": "alarms-gchat-topic-PROD",
+        "TopicName": "alarms-handler-topic-PROD",
       },
       "Type": "AWS::SNS::Topic",
     },
@@ -455,13 +455,13 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/alarms-gchat/alarms-gchat.zip",
+          "S3Key": "membership/PROD/alarms-handler/alarms-handler.zip",
         },
         "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
-            "APP": "alarms-gchat",
-            "App": "alarms-gchat",
+            "APP": "alarms-handler",
+            "App": "alarms-handler",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stack": "membership",
@@ -471,7 +471,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
             },
           },
         },
-        "FunctionName": "alarms-gchat-PROD",
+        "FunctionName": "alarms-handler-PROD",
         "Handler": "index.handler",
         "MemorySize": 1024,
         "Role": {
@@ -484,7 +484,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "alarms-gchat",
+            "Value": "alarms-handler",
           },
           {
             "Key": "gu:cdk:version",
@@ -507,7 +507,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "googlechatbotsnstogchatAllowInvokealarmsgchatPRODgooglechatbotsnstogchatSnsExistingIncomingEventsTopic3416B87B209BB21B": {
+    "googlechatbotsnstogchatAllowInvokealarmshandlerPRODgooglechatbotsnstogchatSnsExistingIncomingEventsTopicF13F54B948A766C4": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -532,7 +532,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
               ":",
               {
                 "Fn::GetAtt": [
-                  "alarmsgchattopic56F6C617",
+                  "alarmshandlertopic003C974E",
                   "TopicName",
                 ],
               },
@@ -573,7 +573,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "alarms-gchat",
+            "Value": "alarms-handler",
           },
           {
             "Key": "gu:cdk:version",
@@ -634,7 +634,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/alarms-gchat/alarms-gchat.zip",
+                      "/membership/PROD/alarms-handler/alarms-handler.zip",
                     ],
                   ],
                 },
@@ -655,7 +655,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/alarms-gchat",
+                    ":parameter/PROD/membership/alarms-handler",
                   ],
                 ],
               },
@@ -678,7 +678,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/alarms-gchat/*",
+                    ":parameter/PROD/membership/alarms-handler/*",
                   ],
                 ],
               },
@@ -722,7 +722,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
               ":",
               {
                 "Fn::GetAtt": [
-                  "alarmsgchattopic56F6C617",
+                  "alarmshandlertopic003C974E",
                   "TopicName",
                 ],
               },

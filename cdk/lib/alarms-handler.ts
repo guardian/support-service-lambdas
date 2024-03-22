@@ -12,16 +12,16 @@ import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 
-export interface AlarmsGchatProps extends GuStackProps {
+export interface AlarmsHandlerProps extends GuStackProps {
 	stack: string;
 	stage: string;
 }
 
-export class AlarmsGchat extends GuStack {
-	constructor(scope: App, id: string, props: AlarmsGchatProps) {
+export class AlarmsHandler extends GuStack {
+	constructor(scope: App, id: string, props: AlarmsHandlerProps) {
 		super(scope, id, props);
 
-		const app = 'alarms-gchat';
+		const app = 'alarms-handler';
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {

@@ -7,7 +7,7 @@ workspace {
 
         existingApplication = softwareSystem "Existing application"
 
-        membershipAlarmsHandler = softwareSystem "Membership Alarms Handler" "System in charge of routing AWS membership alarms to the right destinations" {
+        AlarmsHandler = softwareSystem "Membership Alarms Handler" "System in charge of routing AWS membership alarms to the right destinations" {
             snsTopic = container "SNS Topic"
             queue = container "Queue"
             lambda = container "Lambda"
@@ -28,7 +28,7 @@ workspace {
             autoLayout
         }
         
-        container membershipAlarmsHandler "SystemContainer" {
+        container AlarmsHandler "SystemContainer" {
             include *
             autoLayout
         }

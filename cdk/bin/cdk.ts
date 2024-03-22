@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
-import { AlarmsGchat } from '../lib/alarms-gchat';
+import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
@@ -12,8 +12,8 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
-import type { StripeWebhookEndpointsProps  } from '../lib/stripe-webhook-endpoints';
-import  { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
+import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -145,32 +145,38 @@ new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
 });
 
 export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
-	stack: "support",
-	stage: "CODE",
-	deployBucket: "membership-dist",
+	stack: 'support',
+	stage: 'CODE',
+	deployBucket: 'membership-dist',
 	certificateId: supportCertificateId,
 	domainName: `stripe-webhook-endpoints-code.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
-
-}
+};
 export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
-	stack: "support",
-	stage: "PROD",
-	deployBucket: "membership-dist",
+	stack: 'support',
+	stage: 'PROD',
+	deployBucket: 'membership-dist',
 	certificateId: supportCertificateId,
-	domainName:  `stripe-webhook-endpoints-prod.${supportApisDomain}`,
+	domainName: `stripe-webhook-endpoints-prod.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
-}
+};
 
+new StripeWebhookEndpoints(
+	app,
+	'stripe-webhook-endpoints-CODE',
+	stripeWebhookEndpointsCodeProps,
+);
+new StripeWebhookEndpoints(
+	app,
+	'stripe-webhook-endpoints-PROD',
+	stripeWebhookEndpointsProdProps,
+);
 
-new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-CODE",stripeWebhookEndpointsCodeProps);
-new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-PROD",stripeWebhookEndpointsProdProps);
-
-new AlarmsGchat(app, 'alarms-gchat-CODE', {
+new AlarmsHandler(app, 'alarms-handler-CODE', {
 	stack: 'support',
 	stage: 'CODE',
 });
-new AlarmsGchat(app, 'alarms-gchat-PROD', {
+new AlarmsHandler(app, 'alarms-handler-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
