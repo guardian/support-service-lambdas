@@ -3673,9 +3673,9 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::SNS::Topic",
     },
-    "SnsTopicandreadiotalleviguardiancouk14E3B4F6": {
+    "SnsTopicreaderrevenuedevguardiancoukD20937B5": {
       "Properties": {
-        "Endpoint": "andrea.diotallevi@guardian.co.uk",
+        "Endpoint": "reader.revenue.dev@guardian.co.uk",
         "Protocol": "email",
         "TopicArn": {
           "Ref": "SnsTopic2C1570A4",
