@@ -67,7 +67,7 @@ export class AlarmsHandler extends GuStack {
 			alarmDescription: `There was an error in the lambda function that handles CloudWatch alarms.`,
 			metric: deadLetterQueue
 				.metric('ApproximateNumberOfMessagesVisible')
-				.with({ statistic: 'Sum', period: Duration.hours(1) }),
+				.with({ statistic: 'Sum', period: Duration.minutes(1) }),
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			threshold: 0,
 			evaluationPeriods: 24,
