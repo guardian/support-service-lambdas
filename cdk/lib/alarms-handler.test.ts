@@ -2,7 +2,7 @@ import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { AlarmsHandler } from './alarms-handler';
 
-describe('The Alarms gchat stack', () => {
+describe('The alarms-handler stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 		const codeStack = new AlarmsHandler(app, 'alarms-handler-CODE', {
