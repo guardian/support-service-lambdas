@@ -32,7 +32,7 @@ export class AlarmsHandler extends GuStack {
 
 		const parameters = {
 			webhook: new GuStringParameter(this, `${app}-webhook`, {
-				description: 'Google Chat webhook',
+				description: 'Google Chat webhook URL',
 				default: 'default',
 			}),
 		};
@@ -63,8 +63,8 @@ export class AlarmsHandler extends GuStack {
 		new GuAlarm(this, `${app}-alarm`, {
 			app: app,
 			snsTopicName: snsTopic.topicName,
-			alarmName: `${this.stage}: Failed to handle a Cloud Watch Alarm.`,
-			alarmDescription: `There was an error in the lambda function that handles Cloud Watch Alarms.`,
+			alarmName: `${this.stage}: Failed to handle CloudWatch alarm.`,
+			alarmDescription: `There was an error in the lambda function that handles CloudWatch alarms.`,
 			metric: deadLetterQueue
 				.metric('ApproximateNumberOfMessagesVisible')
 				.with({ statistic: 'Sum', period: Duration.hours(1) }),
