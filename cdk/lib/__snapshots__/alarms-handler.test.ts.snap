@@ -6,19 +6,9 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuStringParameter",
       "GuDistributionBucketParameter",
-      "GuSnsLambdaExperimental",
+      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
-  },
-  "Outputs": {
-    "googlechatbotsnstogchatTopicName31621335": {
-      "Value": {
-        "Fn::GetAtt": [
-          "alarmshandlertopic003C974E",
-          "TopicName",
-        ],
-      },
-    },
   },
   "Parameters": {
     "DistributionBucketName": {
@@ -26,61 +16,16 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "webhook": {
-      "Description": "Google Chat webhook for lambda to fire to",
+    "alarmshandlerwebhook": {
+      "Description": "Google Chat webhook",
       "Type": "String",
     },
   },
   "Resources": {
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/alarms-handler/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "googlechatbotsnstogchatServiceRole6E143D03",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmshandlertopic003C974E": {
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "TopicName": "alarms-handler-topic-CODE",
-      },
-      "Type": "AWS::SNS::Topic",
-    },
-    "googlechatbotsnstogchat496F36E9": {
+    "alarmshandlerlambda383D2BAA": {
       "DependsOn": [
-        "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9",
-        "googlechatbotsnstogchatServiceRole6E143D03",
+        "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6",
+        "alarmshandlerlambdaServiceRole3953DF7F",
       ],
       "Properties": {
         "Code": {
@@ -89,17 +34,13 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/alarms-handler/alarms-handler.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "App": "alarms-handler",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stack": "membership",
-            "Stage": "CODE",
             "WEBHOOK": {
-              "Ref": "webhook",
+              "Ref": "alarmshandlerwebhook",
             },
           },
         },
@@ -108,11 +49,11 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "googlechatbotsnstogchatServiceRole6E143D03",
+            "alarmshandlerlambdaServiceRole3953DF7F",
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Tags": [
           {
             "Key": "App",
@@ -139,42 +80,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "googlechatbotsnstogchatAllowInvokealarmshandlerCODEgooglechatbotsnstogchatSnsExistingIncomingEventsTopic1711B9267B4D7CB9": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "googlechatbotsnstogchat496F36E9",
-            "Arn",
-          ],
-        },
-        "Principal": "sns.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:sns:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Fn::GetAtt": [
-                  "alarmshandlertopic003C974E",
-                  "TopicName",
-                ],
-              },
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "googlechatbotsnstogchatServiceRole6E143D03": {
+    "alarmshandlerlambdaServiceRole3953DF7F": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -227,10 +133,26 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9": {
+    "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "alarmshandlerqueue255509D6",
+                  "Arn",
+                ],
+              },
+            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -318,108 +240,116 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9",
+        "PolicyName": "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6",
         "Roles": [
           {
-            "Ref": "googlechatbotsnstogchatServiceRole6E143D03",
+            "Ref": "alarmshandlerlambdaServiceRole3953DF7F",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "googlechatbotsnstogchatgooglechatbotsnstogchatSnsExistingIncomingEventsTopic90B77594": {
+    "alarmshandlerlambdaSqsEventSourcealarmshandlerCODEalarmshandlerqueue16858B0A6ACA8CB7": {
       "Properties": {
-        "Endpoint": {
+        "EventSourceArn": {
           "Fn::GetAtt": [
-            "googlechatbotsnstogchat496F36E9",
+            "alarmshandlerqueue255509D6",
             "Arn",
           ],
         },
-        "Protocol": "lambda",
-        "Region": {
-          "Ref": "AWS::Region",
-        },
-        "TopicArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:sns:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Fn::GetAtt": [
-                  "alarmshandlertopic003C974E",
-                  "TopicName",
-                ],
-              },
-            ],
-          ],
+        "FunctionName": {
+          "Ref": "alarmshandlerlambda383D2BAA",
         },
       },
-      "Type": "AWS::SNS::Subscription",
+      "Type": "AWS::Lambda::EventSourceMapping",
     },
-  },
-}
-`;
-
-exports[`The Alarms gchat stack matches the snapshot 2`] = `
-{
-  "Metadata": {
-    "gu:cdk:constructs": [
-      "GuStringParameter",
-      "GuDistributionBucketParameter",
-      "GuSnsLambdaExperimental",
-    ],
-    "gu:cdk:version": "TEST",
-  },
-  "Outputs": {
-    "googlechatbotsnstogchatTopicName31621335": {
-      "Value": {
-        "Fn::GetAtt": [
-          "alarmshandlertopic003C974E",
-          "TopicName",
+    "alarmshandlerqueue255509D6": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "alarms-handler-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersalarmshandlerqueueC7A67616",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
         ],
       },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
     },
-  },
-  "Parameters": {
-    "DistributionBucketName": {
-      "Default": "/account/services/artifact.bucket",
-      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "webhook": {
-      "Description": "Google Chat webhook for lambda to fire to",
-      "Type": "String",
-    },
-  },
-  "Resources": {
-    "S3inlinepolicy3B07399A": {
+    "alarmshandlerqueuePolicy2451CBBF": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Ref": "alarmshandlertopic003C974E",
+                  },
+                },
+              },
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/alarms-handler/",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "alarmshandlerqueue255509D6",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
+        "Queues": [
           {
-            "Ref": "googlechatbotsnstogchatServiceRole6E143D03",
+            "Ref": "alarmshandlerqueue255509D6",
           },
         ],
       },
-      "Type": "AWS::IAM::Policy",
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "alarmshandlerqueuealarmshandlerCODEalarmshandlertopic53848409AA067E1C": {
+      "DependsOn": [
+        "alarmshandlerqueuePolicy2451CBBF",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "alarmshandlerqueue255509D6",
+            "Arn",
+          ],
+        },
+        "Protocol": "sqs",
+        "TopicArn": {
+          "Ref": "alarmshandlertopic003C974E",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
     "alarmshandlertopic003C974E": {
       "Properties": {
@@ -438,17 +368,70 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stage",
-            "Value": "PROD",
+            "Value": "CODE",
           },
         ],
-        "TopicName": "alarms-handler-topic-PROD",
+        "TopicName": "alarms-handler-topic-CODE",
       },
       "Type": "AWS::SNS::Topic",
     },
-    "googlechatbotsnstogchat496F36E9": {
+    "deadlettersalarmshandlerqueueC7A67616": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "dead-letters-alarms-handler-queue-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+}
+`;
+
+exports[`The Alarms gchat stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuStringParameter",
+      "GuDistributionBucketParameter",
+      "GuLambdaFunction",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "alarmshandlerwebhook": {
+      "Description": "Google Chat webhook",
+      "Type": "String",
+    },
+  },
+  "Resources": {
+    "alarmshandlerlambda383D2BAA": {
       "DependsOn": [
-        "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9",
-        "googlechatbotsnstogchatServiceRole6E143D03",
+        "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6",
+        "alarmshandlerlambdaServiceRole3953DF7F",
       ],
       "Properties": {
         "Code": {
@@ -457,17 +440,13 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/alarms-handler/alarms-handler.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "App": "alarms-handler",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stack": "membership",
-            "Stage": "PROD",
             "WEBHOOK": {
-              "Ref": "webhook",
+              "Ref": "alarmshandlerwebhook",
             },
           },
         },
@@ -476,11 +455,11 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "googlechatbotsnstogchatServiceRole6E143D03",
+            "alarmshandlerlambdaServiceRole3953DF7F",
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Tags": [
           {
             "Key": "App",
@@ -507,42 +486,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "googlechatbotsnstogchatAllowInvokealarmshandlerPRODgooglechatbotsnstogchatSnsExistingIncomingEventsTopicF13F54B948A766C4": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "googlechatbotsnstogchat496F36E9",
-            "Arn",
-          ],
-        },
-        "Principal": "sns.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:sns:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Fn::GetAtt": [
-                  "alarmshandlertopic003C974E",
-                  "TopicName",
-                ],
-              },
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "googlechatbotsnstogchatServiceRole6E143D03": {
+    "alarmshandlerlambdaServiceRole3953DF7F": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -595,10 +539,26 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9": {
+    "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "alarmshandlerqueue255509D6",
+                  "Arn",
+                ],
+              },
+            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -686,51 +646,167 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "googlechatbotsnstogchatServiceRoleDefaultPolicyF93B28A9",
+        "PolicyName": "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6",
         "Roles": [
           {
-            "Ref": "googlechatbotsnstogchatServiceRole6E143D03",
+            "Ref": "alarmshandlerlambdaServiceRole3953DF7F",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "googlechatbotsnstogchatgooglechatbotsnstogchatSnsExistingIncomingEventsTopic90B77594": {
+    "alarmshandlerlambdaSqsEventSourcealarmshandlerPRODalarmshandlerqueue21D5C3E59ECCFD65": {
       "Properties": {
-        "Endpoint": {
+        "EventSourceArn": {
           "Fn::GetAtt": [
-            "googlechatbotsnstogchat496F36E9",
+            "alarmshandlerqueue255509D6",
             "Arn",
           ],
         },
-        "Protocol": "lambda",
-        "Region": {
-          "Ref": "AWS::Region",
+        "FunctionName": {
+          "Ref": "alarmshandlerlambda383D2BAA",
         },
-        "TopicArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:sns:",
-              {
-                "Ref": "AWS::Region",
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "alarmshandlerqueue255509D6": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "alarms-handler-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersalarmshandlerqueueC7A67616",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "alarmshandlerqueuePolicy2451CBBF": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Ref": "alarmshandlertopic003C974E",
+                  },
+                },
               },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
               },
-              ":",
-              {
+              "Resource": {
                 "Fn::GetAtt": [
-                  "alarmshandlertopic003C974E",
-                  "TopicName",
+                  "alarmshandlerqueue255509D6",
+                  "Arn",
                 ],
               },
-            ],
+            },
           ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "alarmshandlerqueue255509D6",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "alarmshandlerqueuealarmshandlerPRODalarmshandlertopic952FCC2B727BB750": {
+      "DependsOn": [
+        "alarmshandlerqueuePolicy2451CBBF",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "alarmshandlerqueue255509D6",
+            "Arn",
+          ],
+        },
+        "Protocol": "sqs",
+        "TopicArn": {
+          "Ref": "alarmshandlertopic003C974E",
         },
       },
       "Type": "AWS::SNS::Subscription",
+    },
+    "alarmshandlertopic003C974E": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TopicName": "alarms-handler-topic-PROD",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "deadlettersalarmshandlerqueueC7A67616": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "dead-letters-alarms-handler-queue-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
     },
   },
 }
