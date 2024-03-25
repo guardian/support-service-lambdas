@@ -1,8 +1,10 @@
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack, GuStringParameter } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
+import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -57,5 +59,19 @@ export class AlarmsHandler extends GuStack {
 		});
 
 		snsTopic.addSubscription(new SqsSubscription(queue));
+
+		new GuAlarm(this, `${app}-alarm`, {
+			app: app,
+			snsTopicName: snsTopic.topicName,
+			alarmName: `${this.stage}: Failed to handle a Cloud Watch Alarm.`,
+			alarmDescription: `There was an error in the lambda function that handles Cloud Watch Alarms.`,
+			metric: deadLetterQueue
+				.metric('ApproximateNumberOfMessagesVisible')
+				.with({ statistic: 'Sum', period: Duration.hours(1) }),
+			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+			threshold: 0,
+			evaluationPeriods: 24,
+			actionsEnabled: this.stage === 'PROD',
+		});
 	}
 }

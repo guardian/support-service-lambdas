@@ -7,6 +7,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -23,6 +24,56 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "alarmshandleralarm5F97F469": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":",
+                {
+                  "Fn::GetAtt": [
+                    "alarmshandlertopic003C974E",
+                    "TopicName",
+                  ],
+                },
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "There was an error in the lambda function that handles Cloud Watch Alarms.",
+        "AlarmName": "CODE: Failed to handle a Cloud Watch Alarm.",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadlettersalarmshandlerqueueC7A67616",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 24,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 0,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "alarmshandlerlambda383D2BAA": {
       "DependsOn": [
         "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6",
@@ -414,6 +465,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -430,6 +482,56 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "alarmshandleralarm5F97F469": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":",
+                {
+                  "Fn::GetAtt": [
+                    "alarmshandlertopic003C974E",
+                    "TopicName",
+                  ],
+                },
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "There was an error in the lambda function that handles Cloud Watch Alarms.",
+        "AlarmName": "PROD: Failed to handle a Cloud Watch Alarm.",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadlettersalarmshandlerqueueC7A67616",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 24,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 0,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "alarmshandlerlambda383D2BAA": {
       "DependsOn": [
         "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6",
