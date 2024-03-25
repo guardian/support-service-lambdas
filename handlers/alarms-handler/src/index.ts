@@ -1,5 +1,5 @@
-import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import { checkDefined } from '@modules/nullAndUndefined';
+import type { SQSEvent, SQSRecord } from 'aws-lambda';
 
 // interface AlarmMessage {
 // 	AlarmName: string;
@@ -8,6 +8,8 @@ import { checkDefined } from '@modules/nullAndUndefined';
 // }
 
 export const handler = async (event: SQSEvent): Promise<void> => {
+	await Promise.resolve();
+
 	const webhookUrl = checkDefined<string>(
 		process.env.WEBHOOK,
 		'WEBHOOK environment variable not set',
