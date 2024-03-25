@@ -8,12 +8,12 @@ interface AlarmMessage {
 }
 
 export const handler = async (event: SQSEvent): Promise<void> => {
-	const webhookUrl = checkDefined<string>(
-		process.env.WEBHOOK,
-		'WEBHOOK environment variable not set',
-	);
-
 	try {
+		const webhookUrl = checkDefined<string>(
+			process.env.WEBHOOK,
+			'WEBHOOK environment variable not set',
+		);
+
 		for (const record of event.Records) {
 			console.log(record);
 			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];

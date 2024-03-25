@@ -19,7 +19,7 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
     },
     "alarmshandlerwebhook": {
       "Default": "default",
-      "Description": "Google Chat webhook",
+      "Description": "Google Chat webhook URL",
       "Type": "String",
     },
   },
@@ -51,8 +51,8 @@ exports[`The Alarms gchat stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "AlarmDescription": "There was an error in the lambda function that handles Cloud Watch Alarms.",
-        "AlarmName": "CODE: Failed to handle a Cloud Watch Alarm.",
+        "AlarmDescription": "There was an error in the lambda function that handles CloudWatch alarms.",
+        "AlarmName": "CODE: Failed to handle CloudWatch alarm.",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
@@ -477,7 +477,7 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
     },
     "alarmshandlerwebhook": {
       "Default": "default",
-      "Description": "Google Chat webhook",
+      "Description": "Google Chat webhook URL",
       "Type": "String",
     },
   },
@@ -509,8 +509,8 @@ exports[`The Alarms gchat stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "There was an error in the lambda function that handles Cloud Watch Alarms.",
-        "AlarmName": "PROD: Failed to handle a Cloud Watch Alarm.",
+        "AlarmDescription": "There was an error in the lambda function that handles CloudWatch alarms.",
+        "AlarmName": "PROD: Failed to handle CloudWatch alarm.",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
