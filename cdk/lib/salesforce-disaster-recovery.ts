@@ -8,7 +8,8 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { CfnTemplate } from 'aws-cdk-lib/aws-ses';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import {
 	Choice,
 	Condition,
@@ -44,10 +45,18 @@ export class SalesforceDisasterRecovery extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
-		const maxConcurrency = 20;
-
 		const queryResultFileName = 'query-result.csv';
 		const failedRowsFileName = 'failed-rows.csv';
+
+		const snsTopic = new Topic(this, 'SnsTopic', {
+			topicName: `${app}-${this.stage}`,
+		});
+
+		snsTopic.addSubscription(
+			this.stage === 'PROD'
+				? new EmailSubscription('reader.revenue.dev@guardian.co.uk')
+				: new EmailSubscription('andrea.diotallevi@guardian.co.uk'),
+		);
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -196,7 +205,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Map',
-					MaxConcurrency: maxConcurrency,
+					MaxConcurrency: 20,
 					ToleratedFailurePercentage: 100,
 					Comment: `ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches`,
 					ItemReader: {
@@ -207,11 +216,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							Key: 'two-rows.csv',
-							// 'Key.$': JsonPath.format(
-							// 	`{}/${queryResultFileName}`,
-							// 	JsonPath.stringAt('$$.Execution.StartTime'),
-							// ),
+							'Key.$': JsonPath.format(
+								`{}/${queryResultFileName}`,
+								JsonPath.stringAt('$$.Execution.StartTime'),
+							),
 						},
 					},
 					ItemBatcher: {
@@ -310,57 +318,14 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		new GuLambdaFunction(this, 'SendCompletionNotification', {
-			...lambdaDefaultConfig,
-			handler: 'sendCompletionNotification.handler',
-			functionName: `send-completion-notification-${this.stage}`,
-		});
-
-		const resultEmailTemplateName = 'ResyncingProcedureResultEmailTemplate2';
-
-		new CfnTemplate(this, resultEmailTemplateName, {
-			template: {
-				subjectPart:
-					'Salesforce Disaster Recovery Re-syncing Procedure Completed For {{stage}}',
-				htmlPart: `<html>
-				<body>
-					<h4>State machine details:</h4>
-					<ul>
-						<li>Link to execution details: <a href="{{stateMachineExecutionDetailsUrl}}">Link</a></li>
-						<li>Input: {{stateMachineInput}}</li>
-						<li>Start time: {{stateMachineExecutionStartTime}}</li>
-						<li>Max concurrency: {{stateMachineMaxConcurrency}}</li>
-					</ul>
-					<h4>Processing summary:</h4>
-					<ul>
-						<li>Link to Salesforce query result CSV: <a href="{{queryResultFileUrl}}">Link</a></li>
-						<li>Number of accounts successfully re-synced: 2,000,000</li>
-						<li>Number of accounts that failed to update: {{failedRowsCount}}</li>
-						<li>Link to failed rows CSV: <a href="{{failedRowsFileUrl}}">Link</a></li>
-					</ul>
-				</body>
-				</html>`,
-				templateName: resultEmailTemplateName,
-			},
-		});
-
-		const buildEmailTemplateData = new Pass(this, 'BuildEmailTemplateData', {
+		const constructEmailData = new Pass(this, 'ConstructEmailData', {
 			parameters: {
-				stage: this.stage,
 				stateMachineExecutionDetailsUrl: JsonPath.format(
-					`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/arn:aws:states:{}:{}:execution:{}:{}`,
+					`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}`,
 					this.region,
 					this.region,
-					this.region,
-					this.account,
-					JsonPath.stringAt('$$.StateMachine.Name'),
 					JsonPath.stringAt('$$.Execution.Id'),
 				),
-				stateMachineInput: JsonPath.objectAt('$$.Execution.Input').toString(),
-				stateMachineExecutionStartTime: JsonPath.stringAt(
-					'$$.Execution.StartTime',
-				),
-				stateMachineMaxConcurrency: maxConcurrency,
 				queryResultFileUrl: JsonPath.format(
 					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
 					bucket.bucketName,
@@ -379,20 +344,24 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const sendProcessingResultEmail = new CustomState(
+		const sendProcedureSummaryEmail = new CustomState(
 			this,
-			'SendProcessingResultEmail',
+			'SendProcedureSummaryEmail',
 			{
 				stateJson: {
 					Type: 'Task',
-					Resource: 'arn:aws:states:::aws-sdk:ses:sendTemplatedEmail',
+					Resource: 'arn:aws:states:::sns:publish',
 					Parameters: {
-						Destination: {
-							ToAddresses: ['andrea.diotallevi@guardian.co.uk'],
-						},
-						Source: 'andrea.diotallevi@guardian.co.uk',
-						Template: resultEmailTemplateName,
-						'TemplateData.$': JsonPath.jsonToString(JsonPath.objectAt('$')),
+						TopicArn: snsTopic.topicArn,
+						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
+						'Message.$': JsonPath.format(
+							`State machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
+						`,
+							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
+							JsonPath.stringAt('$.queryResultFileUrl'),
+							JsonPath.stringAt('$.failedRowsCount'),
+							JsonPath.stringAt('$.failedRowsFileUrl'),
+						),
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
@@ -416,8 +385,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
-											.next(buildEmailTemplateData)
-											.next(sendProcessingResultEmail)
+											.next(constructEmailData)
+											.next(sendProcedureSummaryEmail)
 											.next(
 												new Choice(this, 'HaveAllRowsSuccedeed')
 													.when(
@@ -498,8 +467,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 							resources: [updateZuoraAccountsLambda.functionArn],
 						}),
 						new PolicyStatement({
-							actions: ['ses:SendEmail', 'ses:SendTemplatedEmail'],
-							resources: ['*'],
+							actions: ['sns:Publish'],
+							resources: [snsTopic.topicArn],
 						}),
 					],
 				},
