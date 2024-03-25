@@ -21,6 +21,14 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		for (const record of event.Records) {
 			const recordBody = JSON.parse(record.body) as SQSRecord;
 			console.log(recordBody);
+
+			fetch(webhookUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					text: '',
+				}),
+			});
 			// const snsMessage = recordBody.body as SNSEventRecord;
 			// const stripeEvent = body.detail as Stripe.CheckoutSessionCompletedEvent;
 			// const sessionId = stripeEvent.data.object.id;
@@ -55,16 +63,16 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 // 		}\n\n*Reason:* ${message.NewStateReason}}`;
 // 	});
 
-// 	const responses = messages.map((message) => {
-// 		console.log(`Sending: ${message}`);
-// 		return fetch(webhookUrl, {
-// 			method: 'POST',
-// 			headers: { 'Content-Type': 'application/json' },
-// 			body: JSON.stringify({
-// 				text: message,
-// 			}),
-// 		});
-// 	});
+const responses = messages.map((message) => {
+	console.log(`Sending: ${message}`);
+	return fetch(webhookUrl, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			text: message,
+		}),
+	});
+});
 
 // 	return Promise.all(responses).then((responses) => {
 // 		responses.forEach((response) => {
