@@ -1,5 +1,5 @@
-import { checkDefined } from '@modules/nullAndUndefined';
-import type { SQSEvent } from 'aws-lambda';
+// import { checkDefined } from '@modules/nullAndUndefined';
+import type { SNSEventRecord, SQSEvent } from 'aws-lambda';
 
 interface AlarmMessage {
 	AlarmName: string;
@@ -10,24 +10,24 @@ interface AlarmMessage {
 export const handler = async (event: SQSEvent): Promise<void> => {
 	await Promise.resolve();
 
-	const webhookUrl = checkDefined<string>(
-		process.env.WEBHOOK,
-		'WEBHOOK environment variable not set',
-	);
-
-	console.log(webhookUrl);
+	// const webhookUrl = checkDefined<string>(
+	// 	process.env.WEBHOOK,
+	// 	'WEBHOOK environment variable not set',
+	// );
 
 	try {
 		for (const record of event.Records) {
-			const recordBody = JSON.parse(record.body) as AlarmMessage;
+			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
 			console.log(recordBody);
-			// const message = {} as AlarmMessage;
+			const message = JSON.parse(recordBody.Message) as AlarmMessage;
 
-			// const text = `*ALARM:* ${
-			// 	message.AlarmName
-			// } has triggered!\n\n*Description:* ${
-			// 	message.AlarmDescription ?? ''
-			// }\n\n*Reason:* ${message.NewStateReason}}`;
+			const text = `*ALARM:* ${
+				message.AlarmName
+			} has triggered!\n\n*Description:* ${
+				message.AlarmDescription ?? ''
+			}\n\n*Reason:* ${message.NewStateReason}}`;
+
+			console.log(text);
 
 			// await fetch(webhookUrl, {
 			// 	method: 'POST',
