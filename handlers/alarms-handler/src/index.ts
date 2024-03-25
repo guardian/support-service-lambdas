@@ -1,11 +1,11 @@
 import { checkDefined } from '@modules/nullAndUndefined';
-import type { SQSEvent, SQSRecord } from 'aws-lambda';
+import type { SQSEvent } from 'aws-lambda';
 
-// interface AlarmMessage {
-// 	AlarmName: string;
-// 	AlarmDescription?: string;
-// 	NewStateReason: string;
-// }
+interface AlarmMessage {
+	AlarmName: string;
+	AlarmDescription?: string;
+	NewStateReason: string;
+}
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	await Promise.resolve();
@@ -19,16 +19,21 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 	try {
 		for (const record of event.Records) {
-			const recordBody = JSON.parse(record.body) as SQSRecord;
+			const recordBody = JSON.parse(record.body) as AlarmMessage;
 			console.log(recordBody);
+			// const message = {} as AlarmMessage;
 
-			fetch(webhookUrl, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					text: '',
-				}),
-			});
+			// const text = `*ALARM:* ${
+			// 	message.AlarmName
+			// } has triggered!\n\n*Description:* ${
+			// 	message.AlarmDescription ?? ''
+			// }\n\n*Reason:* ${message.NewStateReason}}`;
+
+			// await fetch(webhookUrl, {
+			// 	method: 'POST',
+			// 	headers: { 'Content-Type': 'application/json' },
+			// 	body: JSON.stringify({ text }),
+			// });
 			// const snsMessage = recordBody.body as SNSEventRecord;
 			// const stripeEvent = body.detail as Stripe.CheckoutSessionCompletedEvent;
 			// const sessionId = stripeEvent.data.object.id;
@@ -46,33 +51,23 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	}
 };
 
-// export const handler: Handler = async (event: SQSEvent): Promise<null> => {
-// 	console.log(`Input is ${JSON.stringify(event)}`);
+// const messages: string[] = event.Records.map((record) => {
+// 	const message = JSON.parse(record.Sns.Message) as AlarmMessage;
+// 	return `*ALARM:* ${message.AlarmName} has triggered!\n\n*Description:* ${
+// 		message.AlarmDescription ?? ''
+// 	}\n\n*Reason:* ${message.NewStateReason}}`;
+// });
 
-// 	const webhookUrl = process.env.WEBHOOK;
-
-// 	if (!webhookUrl) {
-// 		console.error('No webhook provided');
-// 		return null;
-// 	}
-
-// 	const messages: string[] = event.Records.map((record) => {
-// 		const message = JSON.parse(record.Sns.Message) as AlarmMessage;
-// 		return `*ALARM:* ${message.AlarmName} has triggered!\n\n*Description:* ${
-// 			message.AlarmDescription ?? ''
-// 		}\n\n*Reason:* ${message.NewStateReason}}`;
+// const responses = messages.map((message) => {
+// 	console.log(`Sending: ${message}`);
+// 	return fetch(webhookUrl, {
+// 		method: 'POST',
+// 		headers: { 'Content-Type': 'application/json' },
+// 		body: JSON.stringify({
+// 			text: message,
+// 		}),
 // 	});
-
-const responses = messages.map((message) => {
-	console.log(`Sending: ${message}`);
-	return fetch(webhookUrl, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			text: message,
-		}),
-	});
-});
+// });
 
 // 	return Promise.all(responses).then((responses) => {
 // 		responses.forEach((response) => {
