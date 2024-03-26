@@ -14,6 +14,9 @@ const getSubscriptionWithOwnerCheck = async (
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
 ) => {
+	console.log(
+		`Checking subscription ${subscriptionNumber} is owned by the currently logged in user`,
+	);
 	const identityId = checkDefined(
 		headers['x-identity-id'],
 		'Identity ID not found in request',
@@ -25,6 +28,9 @@ const getSubscriptionWithOwnerCheck = async (
 			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityId}`,
 		);
 	}
+	console.log(
+		`Subscription ${subscriptionNumber} is owned by identity user ${identityId}`,
+	);
 	return subscription;
 };
 export const contributionToSupporterPlusEndpoint = async (
@@ -34,6 +40,7 @@ export const contributionToSupporterPlusEndpoint = async (
 	subscriptionNumber: string,
 ) => {
 	const zuoraClient = await ZuoraClient.create(stage);
+	console.log('Loading the product catalog');
 	const productCatalog = await getProductCatalogFromApi(stage);
 	console.log('Getting the subscription details from Zuora');
 	const subscription = await getSubscriptionWithOwnerCheck(
