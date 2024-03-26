@@ -17,13 +17,20 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		for (const record of event.Records) {
 			console.log(record);
 			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
-			const message = JSON.parse(recordBody.Message) as AlarmMessage;
 
-			const text = `*ALARM:* ${
-				message.AlarmName
-			} has triggered!\n\n*Description:* ${
-				message.AlarmDescription ?? ''
-			}\n\n*Reason:* ${message.NewStateReason}`;
+			let text: string;
+
+			try {
+				const message = JSON.parse(recordBody.Message) as AlarmMessage;
+
+				text = `*ALARM:* ${
+					message.AlarmName
+				} has triggered!\n\n*Description:* ${
+					message.AlarmDescription ?? ''
+				}\n\n*Reason:* ${message.NewStateReason}`;
+			} catch (error) {
+				text = recordBody.Message;
+			}
 
 			await fetch(webhookUrl, {
 				method: 'POST',
