@@ -52,7 +52,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "There was an error in the lambda function that handles CloudWatch alarms.",
-        "AlarmName": "CODE: Failed to handle CloudWatch alarm.",
+        "AlarmName": "CODE: Failed to handle CloudWatch alarm",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
@@ -510,7 +510,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "There was an error in the lambda function that handles CloudWatch alarms.",
-        "AlarmName": "PROD: Failed to handle CloudWatch alarm.",
+        "AlarmName": "PROD: Failed to handle CloudWatch alarm",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
