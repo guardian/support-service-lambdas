@@ -63,7 +63,7 @@ export class AlarmsHandler extends GuStack {
 		new GuAlarm(this, `${app}-alarm`, {
 			app: app,
 			snsTopicName: snsTopic.topicName,
-			alarmName: `Failed to handle CloudWatch alarm.`,
+			alarmName: `${this.stage}: Failed to handle CloudWatch alarm.`,
 			alarmDescription: `There was an error in the lambda function that handles CloudWatch alarms.`,
 			metric: deadLetterQueue
 				.metric('ApproximateNumberOfMessagesVisible')
