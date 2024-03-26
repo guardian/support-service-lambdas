@@ -11,7 +11,7 @@ jobs:
       matrix:
         subproject:
           - generate-product-catalog
-          - alarms-gchat
+          - alarms-handler
           - discount-api
           - salesforce-disaster-recovery
     runs-on: ubuntu-latest
