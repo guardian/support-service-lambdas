@@ -1,3 +1,4 @@
+import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
@@ -5,7 +6,6 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import { discountEndpoint } from './discountEndpoint';
-import { ValidationError } from './errors';
 
 const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (

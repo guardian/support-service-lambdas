@@ -2,10 +2,10 @@
  * This is a unit test, it can be run by the `pnpm test` command, and will be run by the CI/CD pipeline
  *
  */
-import { zuoraDateFormat } from '@modules/zuora/common';
-import dayjs from 'dayjs';
+import { previewResponseFromZuoraResponse } from '../src/contributionToSupporterPlus';
 import type { ProductSwitchRequestBody } from '../src/schemas';
 import { productSwitchRequestSchema } from '../src/schemas';
+import { parseUrlPath } from '../src/urlParsing';
 
 test('request body serialisation', () => {
 	const result: ProductSwitchRequestBody = productSwitchRequestSchema.parse({
@@ -13,6 +13,32 @@ test('request body serialisation', () => {
 		preview: false,
 	});
 	expect(result.price).toEqual(10);
+});
+
+test('url parsing', () => {
+	const successfulParsing = parseUrlPath(
+		'/recurring-contribution-to-supporter-plus/A-S00504165',
+	);
+	expect(successfulParsing.switchType).toEqual(
+		'recurring-contribution-to-supporter-plus',
+	);
+	expect(successfulParsing.subscriptionNumber).toEqual('A-S00504165');
+
+	const incorrectSwitchType = '/membership-to-digital-subscription/A-S00504165';
+	expect(() => {
+		parseUrlPath(incorrectSwitchType);
+	}).toThrow(
+		"Couldn't parse switch type and subscription number from url /membership-to-digital-subscription/A-S00504165",
+	);
+
+	const invalidSubscriptionNumber =
+		'/recurring-contribution-to-supporter-plus/A00000';
+	expect(() => {
+		parseUrlPath(invalidSubscriptionNumber);
+	}).toThrow(
+		"Couldn't parse switch type and subscription number from url /recurring-contribution-to-supporter-plus/A00000",
+	);
+	//expect(validPath.subscriptionNumber).toEqual('A-S00504165');
 });
 
 test('preview amounts are correct', () => {
@@ -31,15 +57,12 @@ test('preview amounts are correct', () => {
 							serviceEndDate: '2025-03-20',
 							amountWithoutTax: 95.0,
 							taxAmount: 0.0,
-							chargeDescription: '',
 							chargeName: 'Subscription',
-							chargeNumber: null,
 							processingType: 'Charge',
 							productName: 'Supporter Plus',
 							productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
 							unitPrice: 95.0,
 							subscriptionNumber: 'A-S00504165',
-							orderLineItemNumber: null,
 							additionalInfo: {
 								quantity: 1,
 								unitOfMeasure: '',
@@ -92,26 +115,6 @@ test('preview amounts are correct', () => {
 		},
 	};
 
-	const invoice = apiResponse.previewResult.invoices[0];
-	const contributionRefundAmount = invoice?.invoiceItems.find(
-		(invoiceItem) => invoiceItem.productName === 'Contributor',
-	)?.amountWithoutTax;
-
-	const supporterPlusInvoiceItem = invoice?.invoiceItems.find(
-		(invoiceItem) =>
-			invoiceItem.productName === 'Supporter Plus' &&
-			invoiceItem.chargeName === 'Subscription',
-	);
-
-	const output = {
-		amountPayableToday: invoice?.amount,
-		contributionRefundAmount,
-		supporterPlusPurchaseAmount: supporterPlusInvoiceItem?.unitPrice,
-		nextPaymentDate: zuoraDateFormat(
-			dayjs(supporterPlusInvoiceItem?.serviceEndDate).add(1, 'days'),
-		),
-	};
-
 	const expectedOutput = {
 		amountPayableToday: 63.2,
 		contributionRefundAmount: -31.8,
@@ -119,5 +122,11 @@ test('preview amounts are correct', () => {
 		nextPaymentDate: '2025-03-21',
 	};
 
-	expect(output).toStrictEqual(expectedOutput);
+	expect(
+		previewResponseFromZuoraResponse(
+			apiResponse,
+			'2c92c0f85e2d19af015e3896e84d092e',
+			'8ad08e1a858672180185880566606fad',
+		),
+	).toStrictEqual(expectedOutput);
 });

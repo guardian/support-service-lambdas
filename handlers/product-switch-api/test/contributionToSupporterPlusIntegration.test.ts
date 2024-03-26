@@ -5,36 +5,39 @@
  */
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { switchToSupporterPlus } from '../src/contributionToSupporterPlus';
-
-const testData = [['A00500556', 'A-S00504165']] as const;
+import { doSwitch, preview } from '../src/contributionToSupporterPlus';
+import { getCatalogIds } from '../src/helpers';
 
 describe('product-switching behaviour', () => {
-	it('can preview a recurring contribution switch', async () => {
+	it('can preview an annual recurring contribution switch', async () => {
+		const accountNumber = 'A00701136';
+		const subscriptionNumber = 'A-S00695309';
 		const zuoraClient = await ZuoraClient.create('CODE');
 		const productCatalog = await getProductCatalogFromApi('CODE');
-		const accountData = testData[0];
-		const result = await switchToSupporterPlus(
+		const catalogIds = getCatalogIds(productCatalog, 'Annual');
+
+		const result = await preview(
 			zuoraClient,
-			productCatalog,
-			accountData[0],
-			accountData[1],
-			true,
+			accountNumber,
+			subscriptionNumber,
+			catalogIds,
 		);
-		expect(result.success).toBe(true);
+		expect(result.supporterPlusPurchaseAmount).toBe(120);
 	});
 	it(
-		'can switch a recurring contribution',
+		'can switch an annual recurring contribution',
 		async () => {
+			const accountNumber = 'A00432390';
+			const subscriptionNumber = 'A-S00439620';
 			const zuoraClient = await ZuoraClient.create('CODE');
 			const productCatalog = await getProductCatalogFromApi('CODE');
-			const accountData = testData[0];
-			const result = await switchToSupporterPlus(
+
+			const result = await doSwitch(
 				zuoraClient,
-				productCatalog,
-				accountData[0],
-				accountData[1],
-				false,
+				accountNumber,
+				subscriptionNumber,
+				productCatalog.Contribution.ratePlans.Annual.id,
+				productCatalog.SupporterPlus.ratePlans.Annual.id,
 			);
 			expect(result.success).toBe(true);
 		},
