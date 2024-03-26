@@ -27,8 +27,8 @@ describe('product-switching behaviour', () => {
 	it(
 		'can switch an annual recurring contribution',
 		async () => {
-			const accountNumber = 'A00432390';
-			const subscriptionNumber = 'A-S00439620';
+			const accountNumber = 'A00432368';
+			const subscriptionNumber = 'A-S00439599';
 			const zuoraClient = await ZuoraClient.create('CODE');
 			const productCatalog = await getProductCatalogFromApi('CODE');
 

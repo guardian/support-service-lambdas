@@ -43,3 +43,10 @@ export const zuoraPreviewResponseSchema = z.object({
 });
 
 export type ZuoraPreviewResponse = z.infer<typeof zuoraPreviewResponseSchema>;
+
+export const zuoraSwitchResponseSchema = z.object({
+	success: z.boolean(),
+	reasons: z.optional(z.array(z.object({ message: z.string() }))),
+});
+
+export type ZuoraSwitchResponse = z.infer<typeof zuoraSwitchResponseSchema>;

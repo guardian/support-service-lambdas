@@ -6,15 +6,15 @@ import type {
 	ZuoraSubscription,
 	ZuoraSuccessResponse,
 } from '@modules/zuora/zuoraSchemas';
-import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { CatalogIds } from './helpers';
 import { getBillingPeriodFromSubscription, getCatalogIds } from './helpers';
-import type { ZuoraPreviewResponse } from './schemas';
+import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import {
 	productSwitchRequestSchema,
 	zuoraPreviewResponseSchema,
+	zuoraSwitchResponseSchema,
 } from './schemas';
 
 export type PreviewResponse = {
@@ -108,11 +108,15 @@ export const preview = async (
 		JSON.stringify(requestBody),
 		zuoraPreviewResponseSchema,
 	);
-	return previewResponseFromZuoraResponse(
-		zuoraResponse,
-		catalogIds.contributionChargeId,
-		catalogIds.supporterPlusChargeId,
-	);
+	if (zuoraResponse.success) {
+		return previewResponseFromZuoraResponse(
+			zuoraResponse,
+			catalogIds.contributionChargeId,
+			catalogIds.supporterPlusChargeId,
+		);
+	} else {
+		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
+	}
 };
 export const doSwitch = async (
 	zuoraClient: ZuoraClient,
@@ -129,11 +133,16 @@ export const doSwitch = async (
 		supporterPlusProductRatePlanId,
 		false,
 	);
-	return await zuoraClient.post(
+	const zuoraResponse: ZuoraSwitchResponse = await zuoraClient.post(
 		'v1/orders',
 		JSON.stringify(requestBody),
-		zuoraSuccessResponseSchema,
+		zuoraSwitchResponseSchema,
 	);
+	if (zuoraResponse.success) {
+		return zuoraResponse;
+	} else {
+		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
+	}
 };
 
 export const buildRequestBody = (
