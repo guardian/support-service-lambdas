@@ -33,7 +33,6 @@ export class AlarmsHandler extends GuStack {
 		const parameters = {
 			webhook: new GuStringParameter(this, `${app}-webhook`, {
 				description: 'Google Chat webhook URL',
-				default: 'default',
 			}),
 		};
 

@@ -18,7 +18,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "alarmshandlerwebhook": {
-      "Default": "default",
       "Description": "Google Chat webhook URL",
       "Type": "String",
     },
@@ -476,7 +475,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "alarmshandlerwebhook": {
-      "Default": "default",
       "Description": "Google Chat webhook URL",
       "Type": "String",
     },
