@@ -20,7 +20,7 @@ echo "Creating stack $PROJECT_NAME"
 echo "Building lambda package"
 pnpm --filter $PROJECT_NAME package
 
-s3Bucket=`aws ssm get-parameter --name /account/services/artifact.bucket --query "Parameter.Value" --output text`
+s3Bucket=`aws ssm get-parameter --name /account/services/artifact.bucket --query "Parameter.Value" --output text --profile membership --region eu-west-1`
 s3Path="support/CODE/$PROJECT_NAME/$PROJECT_NAME.zip"
 zipFile="./handlers/$PROJECT_NAME/target/$PROJECT_NAME.zip"
 
@@ -34,7 +34,7 @@ echo "Creating stack"
 aws cloudformation create-stack \
   --capabilities '["CAPABILITY_AUTO_EXPAND", "CAPABILITY_NAMED_IAM", "CAPABILITY_IAM"]'  \
   --stack-name "support-CODE-$PROJECT_NAME" \
-  --tags Key=Stage,Value=CODE Key=App,Value=$PROJECT_NAME Key=Stack,Value=$support\
+  --tags Key=Stage,Value=CODE Key=App,Value=$PROJECT_NAME Key=Stack,Value=support\
   --template-body "file://cdk/cdk.out/$PROJECT_NAME-CODE.template.json" \
   --profile membership \
   --region eu-west-1 \
