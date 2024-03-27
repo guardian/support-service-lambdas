@@ -1,11 +1,14 @@
-
 import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { ApiKeySourceType , CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ApiKeySourceType,
+	CfnBasePathMapping,
+	CfnDomainName,
+} from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -57,15 +60,14 @@ export class ProductSwitchApi extends GuStack {
 				deployOptions: {
 					stageName: this.stage,
 				},
-			
+
 				apiKeySourceType: ApiKeySourceType.HEADER,
 				defaultMethodOptions: {
 					apiKeyRequired: true,
 				},
-			
 			},
 		});
-	
+
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
 			description: 'REST endpoints for product-switch-api>',
@@ -79,12 +81,11 @@ export class ProductSwitchApi extends GuStack {
 
 		// create api key
 		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
-		apiKeyName: `${app}-key-${this.stage}`,
+			apiKeyName: `${app}-key-${this.stage}`,
 		});
 
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
-	
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
@@ -144,11 +145,30 @@ export class ProductSwitchApi extends GuStack {
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
-					resources: [`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`],
+					resources: [
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+					],
 				}),
 			],
 		});
 
+		const secretsManagerPolicy: Policy = new Policy(
+			this,
+			'Secrets Manager policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 	}
 }
