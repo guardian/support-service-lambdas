@@ -1,7 +1,18 @@
 #!/bin/sh
 
+# This script will build the lambda and cdk for the provided project, upload the lambda package to S3,
+# and then call create-stack with the AWS Cli. It will fail if the stack already exists,
+# in this case use update-stack.
+# Usage: ./create-stack.sh [project name]
+# eg. ./create-stack.sh discount-api
+
 # Exit if any of these commands fail
 set -e
+
+if [ $# -lt 1 ]; then
+  echo "please provide the project name as an argument, eg. ./create-stack.sh discount-api"
+  exit 2
+fi
 
 PROJECT_NAME="$1"
 echo "Creating stack $PROJECT_NAME"

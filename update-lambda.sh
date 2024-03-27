@@ -1,7 +1,17 @@
 #!/bin/sh
 
+# This script will build the provided project, copy the zip file to S3 and then call
+# `update-function-code` with the AWS Cli to update the lambda.
+# Usage: ./update-lambda.sh [project name]
+# eg. ./update-lambda.sh discount-api
+
 # Exit if any of these commands fail
 set -e
+
+if [ $# -lt 1 ]; then
+  echo "please provide the project name as an argument, eg. ./update-lambda.sh discount-api"
+  exit 2
+fi
 
 PROJECT_NAME="$1"
 echo "Updating lambda $PROJECT_NAME"
