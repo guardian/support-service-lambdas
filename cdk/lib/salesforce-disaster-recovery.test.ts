@@ -27,7 +27,7 @@ describe('The SalesforceDisasterRecovery stack', () => {
 				stack: 'membership',
 				stage: 'CSBX',
 				salesforceApiDomain:
-					'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com',
+					'https://gnmtouchpoint--partial24.sandbox.my.salesforce.com',
 				salesforceApiConnectionResourceId:
 					'salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f',
 				salesforceOauthSecretName:

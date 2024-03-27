@@ -1470,7 +1470,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
+              "{"StartAt":"CreateSalesforceQueryJob","States":{"CreateSalesforceQueryJob":{"Next":"WaitForSalesforceQueryJobToComplete","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint":"https://gnmtouchpoint--partial24.sandbox.my.salesforce.com/services/data/v59.0/jobs/query","Method":"POST","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -1478,7 +1478,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":connection/salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
+              ":connection/salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f"},"RequestBody":{"operation":"query","query.$":"$.query"}},"Retry":[{"ErrorEquals":["States.Http.StatusCode.400"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":5,"MaxAttempts":3,"BackoffRate":2}]},"WaitForSalesforceQueryJobToComplete":{"Type":"Wait","Seconds":1,"Next":"GetSalesforceQueryJobStatus"},"GetSalesforceQueryJobStatus":{"Next":"IsSalesforceQueryJobCompleted","Type":"Task","Resource":"arn:aws:states:::http:invoke","Parameters":{"ApiEndpoint.$":"States.Format('https://gnmtouchpoint--partial24.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/{}', $.ResponseBody.id)","Method":"GET","Authentication":{"ConnectionArn":"arn:aws:events:",
               {
                 "Ref": "AWS::Region",
               },
@@ -1635,7 +1635,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               "Action": "states:InvokeHTTPEndpoint",
               "Condition": {
                 "StringEquals": {
-                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query",
+                  "states:HTTPEndpoint": "https://gnmtouchpoint--partial24.sandbox.my.salesforce.com/services/data/v59.0/jobs/query",
                   "states:HTTPMethod": "POST",
                 },
               },
@@ -1651,7 +1651,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "states:HTTPMethod": "GET",
                 },
                 "StringLike": {
-                  "states:HTTPEndpoint": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/*",
+                  "states:HTTPEndpoint": "https://gnmtouchpoint--partial24.sandbox.my.salesforce.com/services/data/v59.0/jobs/query/*",
                 },
               },
               "Effect": "Allow",
@@ -2108,7 +2108,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
             "S3_BUCKET": {
               "Ref": "Bucket83908E77",
             },
-            "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--dev1.sandbox.my.salesforce.com",
+            "SALESFORCE_API_DOMAIN": "https://gnmtouchpoint--partial24.sandbox.my.salesforce.com",
             "SALESFORCE_OAUTH_SECRET_NAME": "events!connection/salesforce-disaster-recovery-CSBX-salesforce-api/56d7692d-e186-4b5a-9745-9d0a7ce33f1b",
             "STACK": "membership",
             "STAGE": "CSBX",
