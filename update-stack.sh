@@ -23,6 +23,7 @@ aws cloudformation update-stack \
   --stack-name "support-CODE-$PROJECT_NAME" \
   --template-body "file://cdk/cdk.out/$PROJECT_NAME-CODE.template.json" \
   --profile membership \
+  --region eu-west-1 \
   > /dev/null
 
 echo -e "\nStack update has been started, check progress in the AWS console.";
