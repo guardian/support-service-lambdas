@@ -114,7 +114,8 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {
 new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CSBX', {
 	stack: 'membership',
 	stage: 'CSBX',
-	salesforceApiDomain: 'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com',
+	salesforceApiDomain:
+		'https://gnmtouchpoint--partial24.sandbox.my.salesforce.com',
 	salesforceApiConnectionResourceId:
 		'salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f',
 	salesforceOauthSecretName:
