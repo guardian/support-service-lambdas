@@ -4,7 +4,7 @@ type TypeObject = typeof typeObject;
 
 type ProductKey = keyof TypeObject;
 
-type ProductRatePlanKey<P extends ProductKey> =
+export type ProductRatePlanKey<P extends ProductKey> =
 	keyof TypeObject[P]['productRatePlans'];
 
 type ProductRatePlanChargeKey<

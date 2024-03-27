@@ -1,11 +1,13 @@
 import { ValidationError } from '@modules/errors';
+import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { discountEndpoint } from './discountEndpoint';
+import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
+import { parseUrlPath } from './urlParsing';
 
 const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (
@@ -18,21 +20,26 @@ export const handler: Handler = async (
 };
 
 const routeRequest = async (event: APIGatewayProxyEvent) => {
+	const parsedUrlPath = parseUrlPath(event.path);
 	try {
-		switch (true) {
-			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
-				console.log('Applying a discount');
-				return await discountEndpoint(stage, false, event.headers, event.body);
-			}
-			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
-				console.log('Previewing discount');
-				return await discountEndpoint(stage, true, event.headers, event.body);
-			}
-			default:
-				return {
-					body: 'Not found',
-					statusCode: 404,
-				};
+		if (
+			parsedUrlPath.switchType === 'recurring-contribution-to-supporter-plus'
+		) {
+			const requestBody = checkDefined(
+				event.body,
+				'No request body was provided in call to recurring-contribution-to-supporter-plus',
+			);
+			return await contributionToSupporterPlusEndpoint(
+				stage,
+				event.headers,
+				requestBody,
+				parsedUrlPath.subscriptionNumber,
+			);
+		} else {
+			return {
+				body: 'Not found',
+				statusCode: 404,
+			};
 		}
 	} catch (error) {
 		console.log('Caught error in index.ts ', error);

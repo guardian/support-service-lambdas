@@ -44,6 +44,7 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
+		true,
 	);
 	expect(cancellationResult.success).toEqual(true);
 }, 30000);
@@ -77,6 +78,7 @@ test('Subscriptions on the old price are not eligible', async () => {
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
+		true,
 	);
 	expect(cancellationResult.success).toEqual(true);
 }, 30000);
@@ -114,6 +116,7 @@ test('Subscriptions on the new price are eligible', async () => {
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
+		true,
 	);
 	expect(cancellationResult.success).toEqual(true);
 }, 30000);

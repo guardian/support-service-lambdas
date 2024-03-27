@@ -2,7 +2,8 @@
   "name": "test-users",
   "version": "1.0.0",
   "scripts": {
-    "createSubscription": "ts-node ./src/create.ts",
+    "createDigitalSubscription": "ts-node ./src/createDigitalSubscription.ts",
+    "createAnnualContribution": "ts-node ./src/createAnnualContribution.ts",
     "cancelSubscription": "ts-node ./src/cancel.ts",
     "deleteAccount": "ts-node ./src/deleteAccount.ts"
   },

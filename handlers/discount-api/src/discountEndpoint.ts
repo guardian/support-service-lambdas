@@ -1,4 +1,5 @@
 import { sum } from '@modules/arrayFunctions';
+import { ValidationError } from '@modules/errors';
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
@@ -11,7 +12,6 @@ import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
-import { ValidationError } from './errors';
 import type { Discount } from './productToDiscountMapping';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
 import { applyDiscountSchema } from './requestSchema';
