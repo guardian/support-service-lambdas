@@ -34,6 +34,7 @@ echo "Creating stack"
 aws cloudformation create-stack \
   --capabilities '["CAPABILITY_AUTO_EXPAND", "CAPABILITY_NAMED_IAM", "CAPABILITY_IAM"]'  \
   --stack-name "support-CODE-$PROJECT_NAME" \
+  --tags Key=Stage,Value=CODE Key=App,Value=$PROJECT_NAME Key=Stack,Value=$support\
   --template-body "file://cdk/cdk.out/$PROJECT_NAME-CODE.template.json" \
   --profile membership \
   > /dev/null
