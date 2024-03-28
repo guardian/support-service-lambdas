@@ -59,8 +59,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 		)
 			.split(',')
 			.forEach((email) => {
-				console.log('LOGGGGG');
-				console.log(email);
 				snsTopic.addSubscription(new EmailSubscription(email));
 			});
 
