@@ -1079,16 +1079,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "SnsTopicandreadiotalleviguardiancouk14E3B4F6": {
-      "Properties": {
-        "Endpoint": "andrea.diotallevi@guardian.co.uk",
-        "Protocol": "email",
-        "TopicArn": {
-          "Ref": "SnsTopic2C1570A4",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
-    },
     "UpdateZuoraAccountsLambda64E51B2A": {
       "DependsOn": [
         "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786",
@@ -2400,16 +2390,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "SnsTopicandreadiotalleviguardiancouk14E3B4F6": {
-      "Properties": {
-        "Endpoint": "andrea.diotallevi@guardian.co.uk",
-        "Protocol": "email",
-        "TopicArn": {
-          "Ref": "SnsTopic2C1570A4",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
-    },
     "UpdateZuoraAccountsLambda64E51B2A": {
       "DependsOn": [
         "UpdateZuoraAccountsLambdaServiceRoleDefaultPolicy98EA0786",
@@ -3714,16 +3694,6 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
         "Endpoint": {
           "Ref": "SsmParameterValuePRODmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailscsvC96584B6F00A464EAD1953AFF4B05118Parameter",
         },
-        "Protocol": "email",
-        "TopicArn": {
-          "Ref": "SnsTopic2C1570A4",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
-    },
-    "SnsTopicreaderrevenuedevguardiancoukD20937B5": {
-      "Properties": {
-        "Endpoint": "reader.revenue.dev@guardian.co.uk",
         "Protocol": "email",
         "TopicArn": {
           "Ref": "SnsTopic2C1570A4",

@@ -62,12 +62,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				snsTopic.addSubscription(new EmailSubscription(email));
 			});
 
-		snsTopic.addSubscription(
-			this.stage === 'PROD'
-				? new EmailSubscription('reader.revenue.dev@guardian.co.uk')
-				: new EmailSubscription('andrea.diotallevi@guardian.co.uk'),
-		);
-
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
