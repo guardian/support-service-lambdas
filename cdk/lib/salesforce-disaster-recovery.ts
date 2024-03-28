@@ -10,6 +10,7 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import {
 	Choice,
 	Condition,
@@ -51,6 +52,15 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const snsTopic = new Topic(this, 'SnsTopic', {
 			topicName: `${app}-${this.stage}`,
 		});
+
+		StringParameter.valueForStringParameter(
+			this,
+			`/${this.stage}/membership/salesforce-disaster-recovery/sns-topic-subscription-emails-csv`,
+		)
+			.split(',')
+			.forEach((email) => {
+				snsTopic.addSubscription(new EmailSubscription(email));
+			});
 
 		snsTopic.addSubscription(
 			this.stage === 'PROD'
