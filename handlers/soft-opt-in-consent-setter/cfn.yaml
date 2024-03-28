@@ -45,7 +45,7 @@ Resources:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar
       MemorySize: 512
-      Runtime: java21
+      Runtime: java11
       Timeout: 900
       Environment:
         Variables:
@@ -99,7 +99,7 @@ Resources:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar
       MemorySize: 512
-      Runtime: java21
+      Runtime: java11
       Timeout: 300
       Environment:
         Variables:
