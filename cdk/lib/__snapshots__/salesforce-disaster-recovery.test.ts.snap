@@ -126,8 +126,8 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "SsmParameterValueCODEmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailscsvC96584B6F00A464EAD1953AFF4B05118Parameter": {
-      "Default": "/CODE/membership/salesforce-disaster-recovery/sns-topic-subscription-emails-csv",
+    "SsmParameterValueCODEmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/CODE/membership/salesforce-disaster-recovery/sns-topic-subscription-email",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -1070,7 +1070,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
     "SnsTopicTokenSubscription1D5A46B4F": {
       "Properties": {
         "Endpoint": {
-          "Ref": "SsmParameterValueCODEmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailscsvC96584B6F00A464EAD1953AFF4B05118Parameter",
+          "Ref": "SsmParameterValueCODEmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter",
         },
         "Protocol": "email",
         "TopicArn": {
@@ -1437,8 +1437,8 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "SsmParameterValueCSBXmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailscsvC96584B6F00A464EAD1953AFF4B05118Parameter": {
-      "Default": "/CSBX/membership/salesforce-disaster-recovery/sns-topic-subscription-emails-csv",
+    "SsmParameterValueCSBXmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/CSBX/membership/salesforce-disaster-recovery/sns-topic-subscription-email",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -2381,7 +2381,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     "SnsTopicTokenSubscription1D5A46B4F": {
       "Properties": {
         "Endpoint": {
-          "Ref": "SsmParameterValueCSBXmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailscsvC96584B6F00A464EAD1953AFF4B05118Parameter",
+          "Ref": "SsmParameterValueCSBXmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter",
         },
         "Protocol": "email",
         "TopicArn": {
@@ -2748,8 +2748,8 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "SsmParameterValuePRODmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailscsvC96584B6F00A464EAD1953AFF4B05118Parameter": {
-      "Default": "/PROD/membership/salesforce-disaster-recovery/sns-topic-subscription-emails-csv",
+    "SsmParameterValuePRODmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/PROD/membership/salesforce-disaster-recovery/sns-topic-subscription-email",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -3692,7 +3692,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
     "SnsTopicTokenSubscription1D5A46B4F": {
       "Properties": {
         "Endpoint": {
-          "Ref": "SsmParameterValuePRODmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailscsvC96584B6F00A464EAD1953AFF4B05118Parameter",
+          "Ref": "SsmParameterValuePRODmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter",
         },
         "Protocol": "email",
         "TopicArn": {

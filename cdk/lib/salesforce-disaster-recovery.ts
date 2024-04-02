@@ -53,14 +53,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 			topicName: `${app}-${this.stage}`,
 		});
 
-		StringParameter.valueForStringParameter(
+		const snsTopicSubscriptionEmail = StringParameter.valueForStringParameter(
 			this,
-			`/${this.stage}/membership/salesforce-disaster-recovery/sns-topic-subscription-emails-csv`,
-		)
-			.split(',')
-			.forEach((email) => {
-				snsTopic.addSubscription(new EmailSubscription(email));
-			});
+			`/${this.stage}/membership/salesforce-disaster-recovery/sns-topic-subscription-email`,
+		);
+
+		snsTopic.addSubscription(new EmailSubscription(snsTopicSubscriptionEmail));
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
