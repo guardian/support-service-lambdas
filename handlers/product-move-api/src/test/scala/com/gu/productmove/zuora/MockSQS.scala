@@ -1,7 +1,7 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.refund.{RefundInput, InvoicingApiRefundInput}
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.{EmailMessage, SQS}
 import com.gu.productmove.zuora.GetSubscription
