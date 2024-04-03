@@ -1,7 +1,7 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.refund.{RefundInput, InvoicingApiRefundInput}
+import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.{EmailMessage, SQS}
 import com.gu.productmove.zuora.GetSubscription
@@ -33,14 +33,6 @@ class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput,
     responses.get(refundInput) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(InternalServerError(s"wrong input, refund input was $refundInput"))
-  }
-
-  override def queueInvoicingApiRefund(invoicingApiRefundInput : InvoicingApiRefundInput): ZIO[Any, ErrorResponse, Unit] = {
-    addRequest(invoicingApiRefundInput)
-
-    responses.get(invoicingApiRefundInput) match
-      case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(InternalServerError(s"wrong input, refund input was $invoicingApiRefundInput"))
   }
   override def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, ErrorResponse, Unit] = {
     addRequest(salesforceRecordInput)
