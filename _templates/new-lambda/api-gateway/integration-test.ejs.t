@@ -1,8 +1,8 @@
 ---
 # This template creates a jest integration test for the new lambda
 
-to: handlers/<%=lambdaName%>/test/contributionToSupporterPlusIntegration.test.ts
-sh: git add handlers/<%=lambdaName%>/test/contributionToSupporterPlusIntegration.test.ts
+to: handlers/<%=lambdaName%>/test/firstIntegration.test.ts
+sh: git add handlers/<%=lambdaName%>/test/firstIntegration.test.ts
 ---
 /**
 * This is an integration test, the `@group integration` tag ensures that it will only be run by the `pnpm it-test`

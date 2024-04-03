@@ -1,8 +1,8 @@
 ---
 # This template creates a jest test for the new lambda
 
-to: handlers/<%=lambdaName%>/test/contributionToSupporterPlus.test.ts
-sh: git add handlers/<%=lambdaName%>/test/contributionToSupporterPlus.test.ts
+to: handlers/<%=lambdaName%>/test/firstTest.test.ts
+sh: git add handlers/<%=lambdaName%>/test/firstTest.test.ts
 ---
 /**
 * This is a unit test, it can be run by the `pnpm test` command, and will be run by the CI/CD pipeline
