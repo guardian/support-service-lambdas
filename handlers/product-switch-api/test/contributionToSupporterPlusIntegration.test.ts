@@ -6,7 +6,7 @@
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { doSwitch, preview } from '../src/contributionToSupporterPlus';
-import { getCatalogIds } from '../src/helpers';
+import { getCatalogInformation } from '../src/helpers';
 
 describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch', async () => {
@@ -14,7 +14,7 @@ describe('product-switching behaviour', () => {
 		const subscriptionNumber = 'A-S00695309';
 		const zuoraClient = await ZuoraClient.create('CODE');
 		const productCatalog = await getProductCatalogFromApi('CODE');
-		const catalogIds = getCatalogIds(productCatalog, 'Annual');
+		const catalogIds = getCatalogInformation(productCatalog, 'Annual');
 
 		const result = await preview(
 			zuoraClient,

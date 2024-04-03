@@ -1,15 +1,21 @@
 import { checkDefined } from '@modules/nullAndUndefined';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { prettyPrint } from '@modules/prettyPrint';
+import type {
+	ProductCatalog,
+	ProductCurrency,
+} from '@modules/product-catalog/productCatalog';
+import { isValidProductCurrency } from '@modules/product-catalog/productCatalog';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
+	RatePlan,
 	ZuoraSubscription,
 	ZuoraSuccessResponse,
 } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { CatalogIds } from './helpers';
-import { getBillingPeriodFromSubscription, getCatalogIds } from './helpers';
+import type { CatalogInformation } from './helpers';
+import { getCatalogInformation, getFirstContributionRatePlan } from './helpers';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import {
 	productSwitchRequestSchema,
@@ -24,6 +30,20 @@ export type PreviewResponse = {
 	nextPaymentDate: string;
 };
 
+const getCurrency = (
+	contributionRatePlan: RatePlan,
+): ProductCurrency<'SupporterPlus'> => {
+	const currency = checkDefined(
+		contributionRatePlan.ratePlanCharges[0]?.currency,
+		'No currency found on the rate plan charge',
+	);
+
+	if (isValidProductCurrency('SupporterPlus', currency)) {
+		return currency;
+	}
+	throw new Error(`Unsupported currency ${currency}`);
+};
+
 export const switchToSupporterPlus = async (
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
@@ -31,26 +51,43 @@ export const switchToSupporterPlus = async (
 	body: string,
 ) => {
 	const input = productSwitchRequestSchema.parse(JSON.parse(body));
-	const billingPeriod = getBillingPeriodFromSubscription(
+	const contributionRatePlan = getFirstContributionRatePlan(
 		productCatalog,
 		subscription,
 	);
-	const catalogIds = getCatalogIds(productCatalog, billingPeriod);
+
+	const billingPeriod = checkDefined(
+		contributionRatePlan.ratePlanCharges[0]?.billingPeriod,
+		`No rate plan charge found on the rate plan ${prettyPrint(
+			contributionRatePlan,
+		)}`,
+	);
+	const currency = getCurrency(contributionRatePlan);
+
+	const catalogInformation = getCatalogInformation(
+		productCatalog,
+		billingPeriod,
+		currency,
+	);
+
+	const contributionAmount =
+		input.price - catalogInformation.supporterPlusPrice;
 
 	if (input.preview) {
 		return await preview(
 			zuoraClient,
 			subscription.accountNumber,
 			subscription.subscriptionNumber,
-			catalogIds,
+			contributionAmount,
+			catalogInformation,
 		);
 	} else {
 		return await doSwitch(
 			zuoraClient,
 			subscription.accountNumber,
 			subscription.subscriptionNumber,
-			catalogIds.contributionProductRatePlanId,
-			catalogIds.supporterPlusProductRatePlanId,
+			contributionAmount,
+			catalogInformation,
 		);
 	}
 };
@@ -93,14 +130,15 @@ export const preview = async (
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
 	subscriptionNumber: string,
-	catalogIds: CatalogIds,
+	contributionAmount: number,
+	catalogInformation: CatalogInformation,
 ): Promise<PreviewResponse> => {
 	const requestBody = buildRequestBody(
 		dayjs(),
 		accountNumber,
 		subscriptionNumber,
-		catalogIds.contributionProductRatePlanId,
-		catalogIds.supporterPlusProductRatePlanId,
+		contributionAmount,
+		catalogInformation,
 		true,
 	);
 	const zuoraResponse: ZuoraPreviewResponse = await zuoraClient.post(
@@ -111,8 +149,8 @@ export const preview = async (
 	if (zuoraResponse.success) {
 		return previewResponseFromZuoraResponse(
 			zuoraResponse,
-			catalogIds.contributionChargeId,
-			catalogIds.supporterPlusChargeId,
+			catalogInformation.contributionChargeId,
+			catalogInformation.supporterPlusChargeId,
 		);
 	} else {
 		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
@@ -122,15 +160,15 @@ export const doSwitch = async (
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
 	subscriptionNumber: string,
-	contributionProductRatePlanId: string,
-	supporterPlusProductRatePlanId: string,
+	contributionAmount: number,
+	catalogInformation: CatalogInformation,
 ): Promise<ZuoraSuccessResponse> => {
 	const requestBody = buildRequestBody(
 		dayjs(),
 		accountNumber,
 		subscriptionNumber,
-		contributionProductRatePlanId,
-		supporterPlusProductRatePlanId,
+		contributionAmount,
+		catalogInformation,
 		false,
 	);
 	const zuoraResponse: ZuoraSwitchResponse = await zuoraClient.post(
@@ -149,8 +187,8 @@ export const buildRequestBody = (
 	orderDate: Dayjs,
 	accountNumber: string,
 	subscriptionNumber: string,
-	productRatePlanToRemoveId: string,
-	newProductRatePlanId: string,
+	contributionAmount: number,
+	catalogInformation: CatalogInformation,
 	preview: boolean,
 ) => {
 	const options = preview
@@ -192,10 +230,23 @@ export const buildRequestBody = (
 							},
 						],
 						changePlan: {
-							productRatePlanId: productRatePlanToRemoveId,
+							productRatePlanId:
+								catalogInformation.contributionProductRatePlanId,
 							subType: 'Upgrade',
 							newProductRatePlan: {
-								productRatePlanId: newProductRatePlanId,
+								productRatePlanId:
+									catalogInformation.supporterPlusProductRatePlanId,
+								chargeOverrides: [
+									{
+										productRatePlanChargeId:
+											catalogInformation.contributionChargeId,
+										pricing: {
+											recurringFlatFee: {
+												listPrice: contributionAmount,
+											},
+										},
+									},
+								],
 							},
 						},
 					},

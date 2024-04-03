@@ -1,16 +1,20 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type {
+	ProductCatalog,
+	ProductCurrency,
+} from '@modules/product-catalog/productCatalog';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 
-export type CatalogIds = {
+export type CatalogInformation = {
+	supporterPlusPrice: number;
 	contributionProductRatePlanId: string;
 	supporterPlusProductRatePlanId: string;
 	contributionChargeId: string;
 	supporterPlusChargeId: string;
 };
-const getFirstContributionRatePlan = (
+export const getFirstContributionRatePlan = (
 	productCatalog: ProductCatalog,
 	subscription: ZuoraSubscription,
 ) => {
@@ -29,28 +33,17 @@ const getFirstContributionRatePlan = (
 		)}`,
 	);
 };
-export const getBillingPeriodFromSubscription = (
-	productCatalog: ProductCatalog,
-	subscription: ZuoraSubscription,
-) => {
-	const contributionProductRatePlan = getFirstContributionRatePlan(
-		productCatalog,
-		subscription,
-	);
-	return checkDefined(
-		contributionProductRatePlan.ratePlanCharges[0]?.billingPeriod,
-		`No rate plan charge found on the rate plan ${prettyPrint(
-			contributionProductRatePlan,
-		)}`,
-	);
-};
-export const getCatalogIds = (
+
+export const getCatalogInformation = (
 	productCatalog: ProductCatalog,
 	billingPeriod: BillingPeriod,
-) => {
+	currency: ProductCurrency<'SupporterPlus'>,
+): CatalogInformation => {
 	switch (billingPeriod) {
 		case 'Annual':
 			return {
+				supporterPlusPrice:
+					productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency],
 				contributionProductRatePlanId:
 					productCatalog.Contribution.ratePlans.Annual.id,
 				supporterPlusProductRatePlanId:
@@ -62,6 +55,8 @@ export const getCatalogIds = (
 			};
 		case 'Month':
 			return {
+				supporterPlusPrice:
+					productCatalog.SupporterPlus.ratePlans.Monthly.pricing[currency],
 				contributionProductRatePlanId:
 					productCatalog.Contribution.ratePlans.Monthly.id,
 				supporterPlusProductRatePlanId:

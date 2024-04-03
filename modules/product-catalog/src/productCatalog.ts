@@ -1,9 +1,9 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
-import type { typeObject } from '@modules/product-catalog/typeObject';
+import { typeObject } from '@modules/product-catalog/typeObject';
 
 type TypeObject = typeof typeObject;
 
-type ProductKey = keyof TypeObject;
+export type ProductKey = keyof TypeObject;
 
 export type ProductRatePlanKey<P extends ProductKey> =
 	keyof TypeObject[P]['productRatePlans'];
@@ -13,7 +13,7 @@ type ProductRatePlanChargeKey<
 	PRP extends ProductRatePlanKey<P>,
 > = keyof TypeObject[P]['productRatePlans'][PRP];
 
-type ProductCurrency<P extends ProductKey> =
+export type ProductCurrency<P extends ProductKey> =
 	TypeObject[P]['currencies'][number];
 
 type ProductPrice<P extends ProductKey> = {
@@ -46,8 +46,15 @@ export type ProductCatalog = {
 	[P in ProductKey]: Product<P>;
 };
 
+export const isValidProductCurrency = <P extends ProductKey>(
+	product: P,
+	maybeCurrency: string,
+): maybeCurrency is ProductCurrency<P> => {
+	return !!typeObject[product].currencies.find((c) => c === maybeCurrency);
+};
+
 export class ProductCatalogHelper {
-	constructor(private catalogData: ProductCatalog) { }
+	constructor(private catalogData: ProductCatalog) {}
 
 	getProductRatePlan = <
 		P extends ProductKey,
