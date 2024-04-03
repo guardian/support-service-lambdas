@@ -126,6 +126,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "SsmParameterValueCODEmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/CODE/membership/salesforce-disaster-recovery/sns-topic-subscription-email",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
   },
   "Resources": {
     "Bucket83908E77": {
@@ -1063,9 +1067,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SNS::Topic",
     },
-    "SnsTopicandreadiotalleviguardiancouk14E3B4F6": {
+    "SnsTopicTokenSubscription1D5A46B4F": {
       "Properties": {
-        "Endpoint": "andrea.diotallevi@guardian.co.uk",
+        "Endpoint": {
+          "Ref": "SsmParameterValueCODEmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
         "Protocol": "email",
         "TopicArn": {
           "Ref": "SnsTopic2C1570A4",
@@ -1429,6 +1435,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "SsmParameterValueCSBXmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/CSBX/membership/salesforce-disaster-recovery/sns-topic-subscription-email",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -2368,9 +2378,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
       },
       "Type": "AWS::SNS::Topic",
     },
-    "SnsTopicandreadiotalleviguardiancouk14E3B4F6": {
+    "SnsTopicTokenSubscription1D5A46B4F": {
       "Properties": {
-        "Endpoint": "andrea.diotallevi@guardian.co.uk",
+        "Endpoint": {
+          "Ref": "SsmParameterValueCSBXmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
         "Protocol": "email",
         "TopicArn": {
           "Ref": "SnsTopic2C1570A4",
@@ -2734,6 +2746,10 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "SsmParameterValuePRODmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/PROD/membership/salesforce-disaster-recovery/sns-topic-subscription-email",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -3673,9 +3689,11 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
       },
       "Type": "AWS::SNS::Topic",
     },
-    "SnsTopicreaderrevenuedevguardiancoukD20937B5": {
+    "SnsTopicTokenSubscription1D5A46B4F": {
       "Properties": {
-        "Endpoint": "reader.revenue.dev@guardian.co.uk",
+        "Endpoint": {
+          "Ref": "SsmParameterValuePRODmembershipsalesforcedisasterrecoverysnstopicsubscriptionemailC96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
         "Protocol": "email",
         "TopicArn": {
           "Ref": "SnsTopic2C1570A4",

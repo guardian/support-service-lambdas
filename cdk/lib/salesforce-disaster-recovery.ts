@@ -10,6 +10,7 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import {
 	Choice,
 	Condition,
@@ -52,11 +53,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 			topicName: `${app}-${this.stage}`,
 		});
 
-		snsTopic.addSubscription(
-			this.stage === 'PROD'
-				? new EmailSubscription('reader.revenue.dev@guardian.co.uk')
-				: new EmailSubscription('andrea.diotallevi@guardian.co.uk'),
+		const snsTopicSubscriptionEmail = StringParameter.valueForStringParameter(
+			this,
+			`/${this.stage}/membership/salesforce-disaster-recovery/sns-topic-subscription-email`,
 		);
+
+		snsTopic.addSubscription(new EmailSubscription(snsTopicSubscriptionEmail));
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
