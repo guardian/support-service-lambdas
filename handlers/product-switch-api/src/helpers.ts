@@ -8,11 +8,16 @@ import type {
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 
 export type CatalogInformation = {
-	supporterPlusPrice: number;
-	contributionProductRatePlanId: string;
-	supporterPlusProductRatePlanId: string;
-	contributionChargeId: string;
-	supporterPlusChargeId: string;
+	supporterPlus: {
+		price: number;
+		productRatePlanId: string;
+		subscriptionChargeId: string;
+		contributionChargeId: string;
+	};
+	contribution: {
+		productRatePlanId: string;
+		chargeId: string;
+	};
 };
 export const getFirstContributionRatePlan = (
 	productCatalog: ProductCatalog,
@@ -42,30 +47,43 @@ export const getCatalogInformation = (
 	switch (billingPeriod) {
 		case 'Annual':
 			return {
-				supporterPlusPrice:
-					productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency],
-				contributionProductRatePlanId:
-					productCatalog.Contribution.ratePlans.Annual.id,
-				supporterPlusProductRatePlanId:
-					productCatalog.SupporterPlus.ratePlans.Annual.id,
-				contributionChargeId:
-					productCatalog.Contribution.ratePlans.Annual.charges.Contribution.id,
-				supporterPlusChargeId:
-					productCatalog.SupporterPlus.ratePlans.Annual.charges.Subscription.id,
+				supporterPlus: {
+					price:
+						productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency],
+					productRatePlanId: productCatalog.SupporterPlus.ratePlans.Annual.id,
+					subscriptionChargeId:
+						productCatalog.SupporterPlus.ratePlans.Annual.charges.Subscription
+							.id,
+					contributionChargeId:
+						productCatalog.SupporterPlus.ratePlans.Annual.charges.Contribution
+							.id,
+				},
+				contribution: {
+					productRatePlanId: productCatalog.Contribution.ratePlans.Annual.id,
+					chargeId:
+						productCatalog.Contribution.ratePlans.Annual.charges.Contribution
+							.id,
+				},
 			};
 		case 'Month':
 			return {
-				supporterPlusPrice:
-					productCatalog.SupporterPlus.ratePlans.Monthly.pricing[currency],
-				contributionProductRatePlanId:
-					productCatalog.Contribution.ratePlans.Monthly.id,
-				supporterPlusProductRatePlanId:
-					productCatalog.SupporterPlus.ratePlans.Monthly.id,
-				contributionChargeId:
-					productCatalog.Contribution.ratePlans.Monthly.charges.Contribution.id,
-				supporterPlusChargeId:
-					productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription
-						.id,
+				supporterPlus: {
+					price:
+						productCatalog.SupporterPlus.ratePlans.Monthly.pricing[currency],
+					productRatePlanId: productCatalog.SupporterPlus.ratePlans.Monthly.id,
+					subscriptionChargeId:
+						productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription
+							.id,
+					contributionChargeId:
+						productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution
+							.id,
+				},
+				contribution: {
+					productRatePlanId: productCatalog.Contribution.ratePlans.Monthly.id,
+					chargeId:
+						productCatalog.Contribution.ratePlans.Monthly.charges.Contribution
+							.id,
+				},
 			};
 		default:
 			throw new Error(`Unsupported billing period ${billingPeriod}`);

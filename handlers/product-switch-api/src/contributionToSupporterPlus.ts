@@ -71,7 +71,7 @@ export const switchToSupporterPlus = async (
 	);
 
 	const contributionAmount =
-		input.price - catalogInformation.supporterPlusPrice;
+		input.price - catalogInformation.supporterPlus.price;
 
 	if (input.preview) {
 		return await preview(
@@ -94,8 +94,7 @@ export const switchToSupporterPlus = async (
 
 export const previewResponseFromZuoraResponse = (
 	zuoraResponse: ZuoraPreviewResponse,
-	contributionChargeId: string,
-	supporterPlusChargeId: string,
+	catalogInformation: CatalogInformation,
 ): PreviewResponse => {
 	const invoice = checkDefined(
 		zuoraResponse.previewResult?.invoices[0],
@@ -104,15 +103,26 @@ export const previewResponseFromZuoraResponse = (
 	const contributionRefundAmount = checkDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
-				invoiceItem.productRatePlanChargeId === contributionChargeId,
+				invoiceItem.productRatePlanChargeId ===
+				catalogInformation.contribution.chargeId,
 		)?.amountWithoutTax,
 		'No contribution refund amount found in the preview response',
 	);
 
-	const supporterPlusInvoiceItem = checkDefined(
+	const supporterPlusSubscriptionInvoiceItem = checkDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
-				invoiceItem.productRatePlanChargeId === supporterPlusChargeId,
+				invoiceItem.productRatePlanChargeId ===
+				catalogInformation.supporterPlus.subscriptionChargeId,
+		),
+		'No supporter plus invoice item found in the preview response',
+	);
+
+	const supporterPlusContributionItem = checkDefined(
+		invoice.invoiceItems.find(
+			(invoiceItem) =>
+				invoiceItem.productRatePlanChargeId ===
+				catalogInformation.supporterPlus.contributionChargeId,
 		),
 		'No supporter plus invoice item found in the preview response',
 	);
@@ -120,9 +130,11 @@ export const previewResponseFromZuoraResponse = (
 	return {
 		amountPayableToday: invoice.amount,
 		contributionRefundAmount,
-		supporterPlusPurchaseAmount: supporterPlusInvoiceItem.unitPrice,
+		supporterPlusPurchaseAmount:
+			supporterPlusSubscriptionInvoiceItem.unitPrice +
+			supporterPlusContributionItem.unitPrice,
 		nextPaymentDate: zuoraDateFormat(
-			dayjs(supporterPlusInvoiceItem.serviceEndDate).add(1, 'days'),
+			dayjs(supporterPlusSubscriptionInvoiceItem.serviceEndDate).add(1, 'days'),
 		),
 	};
 };
@@ -147,11 +159,7 @@ export const preview = async (
 		zuoraPreviewResponseSchema,
 	);
 	if (zuoraResponse.success) {
-		return previewResponseFromZuoraResponse(
-			zuoraResponse,
-			catalogInformation.contributionChargeId,
-			catalogInformation.supporterPlusChargeId,
-		);
+		return previewResponseFromZuoraResponse(zuoraResponse, catalogInformation);
 	} else {
 		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
 	}
@@ -231,15 +239,15 @@ export const buildRequestBody = (
 						],
 						changePlan: {
 							productRatePlanId:
-								catalogInformation.contributionProductRatePlanId,
+								catalogInformation.contribution.productRatePlanId,
 							subType: 'Upgrade',
 							newProductRatePlan: {
 								productRatePlanId:
-									catalogInformation.supporterPlusProductRatePlanId,
+									catalogInformation.supporterPlus.productRatePlanId,
 								chargeOverrides: [
 									{
 										productRatePlanChargeId:
-											catalogInformation.contributionChargeId,
+											catalogInformation.supporterPlus.contributionChargeId,
 										pricing: {
 											recurringFlatFee: {
 												listPrice: contributionAmount,
