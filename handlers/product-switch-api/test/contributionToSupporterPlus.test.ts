@@ -123,10 +123,17 @@ test('preview amounts are correct', () => {
 	};
 
 	expect(
-		previewResponseFromZuoraResponse(
-			apiResponse,
-			'2c92c0f85e2d19af015e3896e84d092e',
-			'8ad08e1a858672180185880566606fad',
-		),
+		previewResponseFromZuoraResponse(apiResponse, {
+			supporterPlus: {
+				price: 95,
+				productRatePlanId: 'not_used',
+				subscriptionChargeId: '8ad08e1a858672180185880566606fad',
+				contributionChargeId: '8ad096ca858682bb0185881568385d73',
+			},
+			contribution: {
+				productRatePlanId: 'not_used',
+				chargeId: '2c92c0f85e2d19af015e3896e84d092e',
+			},
+		}),
 	).toStrictEqual(expectedOutput);
 });
