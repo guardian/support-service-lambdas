@@ -1,7 +1,7 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.refund.{RefundInput,InvoicingApiRefundInput}
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.{EmailMessage, SQS}
 import com.gu.productmove.zuora.GetSubscription
@@ -12,11 +12,11 @@ import zio.{IO, ZIO}
 
 import scala.collection.mutable.ArrayBuffer
 
-class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit]) extends SQS {
-  val requests: ArrayBuffer[EmailMessage | RefundInput | SalesforceRecordInput] =
+class MockSQS(responses: Map[EmailMessage | RefundInput | InvoicingApiRefundInput | SalesforceRecordInput, Unit]) extends SQS {
+  val requests: ArrayBuffer[EmailMessage | RefundInput | InvoicingApiRefundInput | SalesforceRecordInput] =
     ArrayBuffer.empty // we need to remember the side effects
 
-  def addRequest(request: EmailMessage | RefundInput | SalesforceRecordInput): Unit =
+  def addRequest(request: EmailMessage | RefundInput | InvoicingApiRefundInput | SalesforceRecordInput): Unit =
     requests += request
 
   override def sendEmail(message: EmailMessage): ZIO[Any, ErrorResponse, Unit] = {
@@ -34,6 +34,14 @@ class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput,
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(InternalServerError(s"wrong input, refund input was $refundInput"))
   }
+
+  override def queueInvoicingApiRefund(invoicingApiRefundInput: InvoicingApiRefundInput): ZIO[Any, ErrorResponse, Unit] = {
+    addRequest(invoicingApiRefundInput)
+
+    responses.get(invoicingApiRefundInput) match
+      case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
+      case None => ZIO.fail(InternalServerError(s"wrong input, refund input was $invoicingApiRefundInput"))
+  }
   override def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, ErrorResponse, Unit] = {
     addRequest(salesforceRecordInput)
 
@@ -44,6 +52,6 @@ class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput,
 }
 
 object MockSQS {
-  def requests: ZIO[MockSQS, Nothing, List[EmailMessage | RefundInput | SalesforceRecordInput]] =
+  def requests: ZIO[MockSQS, Nothing, List[EmailMessage | RefundInput |InvoicingApiRefundInput | SalesforceRecordInput]] =
     ZIO.serviceWith[MockSQS](_.requests.toList)
 }

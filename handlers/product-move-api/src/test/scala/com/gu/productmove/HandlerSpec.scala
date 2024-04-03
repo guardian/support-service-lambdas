@@ -30,7 +30,7 @@ import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, Subscript
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.mocks.MockInvoicingApiRefund
-import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.refund.{RefundInput,InvoicingApiRefundInput}
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetAccount.{
   AccountSubscription,
@@ -107,7 +107,7 @@ object HandlerSpec extends ZIOSpecDefault {
     val termRenewalStubs = Map(termRenewalInputsShouldBe -> termRenewalResponse)
     val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)
     val getAccountStubs2 = Map(AccountNumber("accountNumber") -> getAccountResponse2)
-    val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+    val sqsStubs: Map[EmailMessage | RefundInput | InvoicingApiRefundInput | SalesforceRecordInput, Unit] =
       Map(emailMessageBody -> (), salesforceRecordInput2 -> ())
     val dynamoStubs = Map(supporterRatePlanItem1 -> ())
     val getPaymentMethodResponse = PaymentMethodResponse(
@@ -131,7 +131,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
           (subscriptionName, expectedRequestBodyLowCharge)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
-        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+        val sqsStubs: Map[EmailMessage | RefundInput | InvoicingApiRefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageLowCharge -> (), salesforceRecordInput4 -> ())
         val dynamoStubs = Map(supporterRatePlanItem2 -> ())
 
@@ -212,7 +212,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
-        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+        val sqsStubs: Map[EmailMessage | RefundInput |InvoicingApiRefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageBodyNoPaymentOrRefund -> (), salesforceRecordInput3 -> ())
 
         val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
@@ -292,7 +292,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type to-recurring-contribution",
         )
-        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+        val sqsStubs: Map[EmailMessage | RefundInput | InvoicingApiRefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())
 
         val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++

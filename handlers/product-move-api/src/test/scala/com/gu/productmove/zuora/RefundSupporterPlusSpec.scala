@@ -41,6 +41,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               GetInvoiceLive.layer,
               InvoiceItemAdjustmentLive.layer,
               SecretsLive.layer,
+              SQSLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,
@@ -65,6 +66,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               GetInvoiceLive.layer,
               InvoiceItemAdjustmentLive.layer,
               SecretsLive.layer,
+              SQSLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,
