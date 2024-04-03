@@ -35,6 +35,13 @@ class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput,
       case None => ZIO.fail(InternalServerError(s"wrong input, refund input was $refundInput"))
   }
 
+  override def queueInvoicingApiRefund(invoicingApiRefundInput : InvoicingApiRefundInput): ZIO[Any, ErrorResponse, Unit] = {
+    addRequest(invoicingApiRefundInput)
+
+    responses.get(invoicingApiRefundInput) match
+      case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
+      case None => ZIO.fail(InternalServerError(s"wrong input, refund input was $invoicingApiRefundInput"))
+  }
   override def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, ErrorResponse, Unit] = {
     addRequest(salesforceRecordInput)
 

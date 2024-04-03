@@ -2,11 +2,12 @@ package com.gu.productmove.refund
 
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive, SQS}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
 import zio.Task
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
+import com.gu.productmove.refund.InvoicingApiRefundInput
 import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
@@ -49,7 +50,8 @@ object RefundSupporterPlus {
       with AwsS3
       with GetRefundInvoiceDetails
       with GetInvoice
-      with InvoiceItemAdjustment,
+      with InvoiceItemAdjustment
+      with SQS,
     ErrorResponse,
     Unit,
   ] = {
@@ -58,9 +60,8 @@ object RefundSupporterPlus {
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
       refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
       _ <- ZIO.log(s"Amount to refund is ${refundInvoiceDetails.refundAmount}")
-      _ <- InvoicingApiRefund.refund(
-        refundInput.subscriptionName,
-        refundInvoiceDetails.refundAmount,
+      _ <- SQS.queueInvoicingApiRefund(
+        InvoicingApiRefundInput(refundInput.subscriptionName, refundInvoiceDetails.refundAmount),
       )
       _ <- ensureThatNegativeInvoiceBalanceIsZero(refundInvoiceDetails)
     } yield ()

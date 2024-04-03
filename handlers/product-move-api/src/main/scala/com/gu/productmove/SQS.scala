@@ -5,7 +5,7 @@ import com.gu.newproduct.api.productcatalog.BillingPeriod
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.refund.RefundInput
+import com.gu.productmove.refund.{RefundInput, InvoicingApiRefundInput}
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetAccount.{BillToContact, GetAccountResponse}
 import org.joda.time.format.DateTimeFormat
@@ -26,6 +26,8 @@ trait SQS {
 
   def queueRefund(refundInput: RefundInput): ZIO[Any, ErrorResponse, Unit]
 
+  def queueInvoicingApiRefund(invoicingApiRefundInput: InvoicingApiRefundInput): ZIO[Any, ErrorResponse, Unit]
+
   def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[Any, ErrorResponse, Unit]
 }
 
@@ -38,6 +40,9 @@ object SQS {
     ZIO.environmentWithZIO(_.get.queueRefund(refundInput))
   }
 
+  def queueInvoicingApiRefund(invoicingApiRefundInput: InvoicingApiRefundInput): ZIO[SQS, ErrorResponse, Unit] = {
+    ZIO.environmentWithZIO(_.get.queueInvoicingApiRefund(invoicingApiRefundInput))
+  }
   def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): ZIO[SQS, ErrorResponse, Unit] = {
     ZIO.environmentWithZIO(_.get.queueSalesforceTracking(salesforceRecordInput))
   }
@@ -53,6 +58,7 @@ object SQSLive {
       emailQueueName = EmailQueueName.value
       emailQueueUrlResponse <- getQueue(emailQueueName, sqsClient)
       refundQueueUrlResponse <- getQueue(s"product-switch-refund-${stage.toString}", sqsClient)
+      invoicingApiRefundQueueUrlResponse <- getQueue(s"invoicing-api-refund-lambda-queue-${stage.toString}", sqsClient)
       salesforceTrackingQueueUrlResponse <- getQueue(s"product-switch-salesforce-tracking-${stage.toString}", sqsClient)
     } yield new SQS {
       override def sendEmail(message: EmailMessage): ZIO[Any, ErrorResponse, Unit] =
@@ -118,6 +124,29 @@ object SQSLive {
             }
           _ <- ZIO.log(
             s"Successfully sent refund message for subscription number: ${refundInput.subscriptionName}",
+          )
+        } yield ()
+
+      override def queueInvoicingApiRefund(
+          invoicingApiRefundInput: InvoicingApiRefundInput,
+      ): ZIO[Any, ErrorResponse, Unit] =
+        for {
+          _ <- ZIO
+            .fromCompletableFuture {
+              sqsClient.sendMessage(
+                SendMessageRequest.builder
+                  .queueUrl(invoicingApiRefundQueueUrlResponse.queueUrl)
+                  .messageBody(invoicingApiRefundInput.toJson)
+                  .build(),
+              )
+            }
+            .mapError { ex =>
+              InternalServerError(
+                s"Failed to send sqs invoicing api refund message with subscription Number: ${invoicingApiRefundInput.subscriptionName} with error: ${ex.toString}",
+              )
+            }
+          _ <- ZIO.log(
+            s"Successfully sent invoicing api refund message for subscription number: ${invoicingApiRefundInput.subscriptionName}",
           )
         } yield ()
 
