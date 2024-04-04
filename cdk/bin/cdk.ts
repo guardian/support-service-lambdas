@@ -12,7 +12,6 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
-import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 
 const app = new App();
@@ -145,33 +144,14 @@ new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
 	domainName: 'product-catalog.guardianapis.com',
 });
 
-export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
-	stack: 'support',
+new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-CODE', {
+	stack: 'membership',
 	stage: 'CODE',
-	deployBucket: 'membership-dist',
-	certificateId: supportCertificateId,
-	domainName: `stripe-webhook-endpoints-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-};
-export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
-	stack: 'support',
+});
+new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-PROD', {
+	stack: 'membership',
 	stage: 'PROD',
-	deployBucket: 'membership-dist',
-	certificateId: supportCertificateId,
-	domainName: `stripe-webhook-endpoints-prod.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-};
-
-new StripeWebhookEndpoints(
-	app,
-	'stripe-webhook-endpoints-CODE',
-	stripeWebhookEndpointsCodeProps,
-);
-new StripeWebhookEndpoints(
-	app,
-	'stripe-webhook-endpoints-PROD',
-	stripeWebhookEndpointsProdProps,
-);
+});
 
 new AlarmsHandler(app, 'alarms-handler-CODE', {
 	stack: 'support',
