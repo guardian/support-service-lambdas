@@ -15,6 +15,6 @@ sh: git add handlers/<%=lambdaName%>/package.json
     "package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr <%=lambdaName%>.zip ./*.js"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.132"
+    "@types/aws-lambda": "^8.10.129"
   }
 }
