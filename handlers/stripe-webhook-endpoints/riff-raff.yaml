@@ -24,4 +24,3 @@ deployments:
         - stripe-payment-intent-issues-
         - stripe-customer-updated-
     dependencies: [stripe-webhook-endpoints-cloudformation]
-

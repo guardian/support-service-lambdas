@@ -1,5 +1,6 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
+import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
@@ -149,5 +150,14 @@ new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-CODE', {
 });
 new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-PROD', {
 	stack: 'membership',
+	stage: 'PROD',
+});
+
+new AlarmsHandler(app, 'alarms-handler-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new AlarmsHandler(app, 'alarms-handler-PROD', {
+	stack: 'support',
 	stage: 'PROD',
 });
