@@ -5,21 +5,21 @@ workspace {
         googleChat = softwareSystem "Google Chat" "Group messaging for professional collaboration" "SaaS"
         trello = softwareSystem "Trello" "Project management tool" "SaaS"
 
-        existingApplication = softwareSystem "Existing application"
+        existingApplication = softwareSystem "Existing application" "Any existing application within the AWS membership account"
 
-        AlarmsHandler = softwareSystem "Membership Alarms Handler" "System in charge of routing AWS membership alarms to the right destinations" {
-            snsTopic = container "SNS Topic"
-            queue = container "Queue"
-            lambda = container "Lambda"
+        AlarmsHandler = softwareSystem "Alarms Handler" "System in charge of routing AWS membership alarms to the right destinations" {
+            snsTopic = container "Topic" "Receives all alarms within the AWS membership account" "SNS" ""
+            queue = container "Queue" "Stores alarm events with DLQ to handle errors" "SQS" "Queue"
+            lambda = container "Function" "Consumes all alarm events and directs them to the appropriate destinations" "Lambda"
         }
 
-        existingApplication -> snsTopic "Triggers"
-        snsTopic -> queue "Sends message"
-        queue -> lambda "Sends message"
-        lambda -> googleChat "Starts thread if alarm is urgent"
-        lambda -> trello "Creates card always"
-        dev -> googleChat "Is notified by"
-        dev -> trello "Views"
+        existingApplication -> snsTopic "Triggers" "Cloud Watch"
+        snsTopic -> queue "Sends message" "AWS Events"
+        queue -> lambda "Sends message" "AWS Events"
+        lambda -> googleChat "Starts thread if alarm is urgent" "Webhook"
+        lambda -> trello "Creates card always" "HTTP"
+        dev -> googleChat "Is notified by" "Chat message"
+        dev -> trello "Views" "Dasbhoard"
     }
 
     views {
@@ -42,6 +42,10 @@ workspace {
 
             element "Database" {
                 shape Cylinder
+            }
+
+            element "Queue" {
+                shape Pipe
             }
 
             element "File" {
