@@ -305,13 +305,14 @@ Resources:
   RefundQueue:
     Type: AWS::SQS::Queue
     Properties:
-      VisibilityTimeout: 3000
+      VisibilityTimeout: 86400
+      MessageRetentionPeriod: 604800
       QueueName:
         Fn::Sub: product-switch-refund-${Stage}
       RedrivePolicy:
         deadLetterTargetArn:
           Fn::GetAtt: RefundDeadLetterQueue.Arn
-        maxReceiveCount: 1
+        maxReceiveCount: 14
   RefundLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -386,27 +387,27 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
-  RefundLambdaFailureAlarm:
+  RefundLambdaDeadLetterQueueAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsProd
     Properties:
       AlarmActions:
         - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
       AlarmName:
-        Fn::Sub: An error in the refund lambda ${Stage}. Please check the logs to
+        Fn::Sub: A new message in the refund lambda dead letter queue${Stage}. Please check the logs to
           diagnose and redrive the product-switch-refund-dead-letter-${Stage} SQS
           queue when ready.
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Namespace: AWS/Lambda
-      MetricName: Errors
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
       Dimensions:
-        - Name: FunctionName
+        - Name: QueueName
           Value:
-            Ref: RefundLambda
+            Ref: RefundDeadLetterQueue
       Statistic: Sum
       Period: 60
       EvaluationPeriods: 1
-      Threshold: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
   ProductMoveApiLambdaDocsRedirectPermissionStage:
     Type: AWS::Lambda::Permission
     Properties:
