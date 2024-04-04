@@ -1,7 +1,7 @@
 stacks:
-- membership
+  - membership
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
@@ -23,7 +23,4 @@ deployments:
       functionNames:
         - stripe-payment-intent-issues-
         - stripe-customer-updated-
-        - stripe-payment-intent-issues-cdk-
-        - stripe-customer-updated-cdk-
     dependencies: [stripe-webhook-endpoints-cloudformation]
-
