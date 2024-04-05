@@ -305,14 +305,14 @@ Resources:
   RefundQueue:
     Type: AWS::SQS::Queue
     Properties:
-      VisibilityTimeout: 3000
+      VisibilityTimeout: 43200
       MessageRetentionPeriod: 604800
       QueueName:
         Fn::Sub: product-switch-refund-${Stage}
       RedrivePolicy:
         deadLetterTargetArn:
           Fn::GetAtt: RefundDeadLetterQueue.Arn
-        maxReceiveCount: 1
+        maxReceiveCount: 14
   RefundLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -389,6 +389,7 @@ Resources:
       TreatMissingData: notBreaching
   RefundLambdaDeadLetterQueueAlarm:
     Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
     Properties:
       AlarmActions:
         - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
