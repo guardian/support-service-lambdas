@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError,InternalServerError}
 import zio.Task
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
@@ -58,6 +58,7 @@ object RefundSupporterPlus {
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
       refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
       _ <- ZIO.log(s"Amount to refund is ${refundInvoiceDetails.refundAmount}")
+      _ <- ZIO.fail(InternalServerError("An error occurred during refund"))
       _ <- InvoicingApiRefund.refund(
         refundInput.subscriptionName,
         refundInvoiceDetails.refundAmount,

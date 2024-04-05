@@ -305,14 +305,14 @@ Resources:
   RefundQueue:
     Type: AWS::SQS::Queue
     Properties:
-      VisibilityTimeout: 86400
+      VisibilityTimeout: 3000
       MessageRetentionPeriod: 604800
       QueueName:
         Fn::Sub: product-switch-refund-${Stage}
       RedrivePolicy:
         deadLetterTargetArn:
           Fn::GetAtt: RefundDeadLetterQueue.Arn
-        maxReceiveCount: 14
+        maxReceiveCount: 1
   RefundLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -400,8 +400,7 @@ Resources:
       MetricName: ApproximateNumberOfMessagesVisible
       Dimensions:
         - Name: QueueName
-          Value:
-            Ref: RefundDeadLetterQueue
+          Value: !GetAtt RefundDeadLetterQueue.QueueName
       Statistic: Sum
       Period: 60
       EvaluationPeriods: 1
