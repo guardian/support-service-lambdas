@@ -39,7 +39,7 @@ object ZuoraCatalogWireModel {
 
   def sumPrices(prices: Seq[Price]): Option[AmountMinorUnits] = {
 
-    def doubleToMinorUnitsInt(amount: Double): Int = (amount * 100).toInt
+    def doubleToMinorUnitsInt(amount: Double): Int = (BigDecimal(amount) * 100).toInt
     val optionalAmounts: Seq[Option[Double]] = prices.map(_.price)
     val allAmounts = optionalAmounts.flatten.map(doubleToMinorUnitsInt)
     if (allAmounts.isEmpty) None
