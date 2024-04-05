@@ -1,6 +1,7 @@
 import { checkDefined } from '@modules/nullAndUndefined';
 
-const regex = /\/(recurring-contribution-to-supporter-plus)\/(A-S\d+)/;
+const regex =
+	/\/product-move\/(recurring-contribution-to-supporter-plus)\/(A-S\d+)/;
 export const parseUrlPath = (urlPath: string) => {
 	const match = urlPath.match(regex);
 	const switchType = checkDefined(

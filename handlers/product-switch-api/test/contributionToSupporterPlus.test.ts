@@ -17,28 +17,36 @@ test('request body serialisation', () => {
 
 test('url parsing', () => {
 	const successfulParsing = parseUrlPath(
-		'/recurring-contribution-to-supporter-plus/A-S00504165',
+		'/product-move/recurring-contribution-to-supporter-plus/A-S00504165',
 	);
 	expect(successfulParsing.switchType).toEqual(
 		'recurring-contribution-to-supporter-plus',
 	);
 	expect(successfulParsing.subscriptionNumber).toEqual('A-S00504165');
 
-	const incorrectSwitchType = '/membership-to-digital-subscription/A-S00504165';
+	const incorrectSwitchType =
+		'/product-move/membership-to-digital-subscription/A-S00504165';
 	expect(() => {
 		parseUrlPath(incorrectSwitchType);
 	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /membership-to-digital-subscription/A-S00504165",
+		"Couldn't parse switch type and subscription number from url /product-move/membership-to-digital-subscription/A-S00504165",
 	);
 
 	const invalidSubscriptionNumber =
-		'/recurring-contribution-to-supporter-plus/A00000';
+		'/product-move/recurring-contribution-to-supporter-plus/A00000';
 	expect(() => {
 		parseUrlPath(invalidSubscriptionNumber);
 	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /recurring-contribution-to-supporter-plus/A00000",
+		"Couldn't parse switch type and subscription number from url /product-move/recurring-contribution-to-supporter-plus/A00000",
 	);
-	//expect(validPath.subscriptionNumber).toEqual('A-S00504165');
+
+	const missingPathPrefix =
+		'/recurring-contribution-to-supporter-plus/A-S00504165';
+	expect(() => {
+		parseUrlPath(missingPathPrefix);
+	}).toThrow(
+		"Couldn't parse switch type and subscription number from url /recurring-contribution-to-supporter-plus/A-S00504165",
+	);
 });
 
 test('preview amounts are correct', () => {
