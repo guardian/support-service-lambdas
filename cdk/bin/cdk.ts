@@ -145,21 +145,21 @@ new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
 });
 
 export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
-	stack: "support",
+	stack: "membership",
 	stage: "CODE",
 	deployBucket: "membership-dist",
-	certificateId: supportCertificateId,
-	domainName: `stripe-webhook-endpoints-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
+	certificateId: membershipCertificateId,
+	domainName: `stripe-webhook-endpoints-code.${membershipApisDomain}`,
+	hostedZoneId: membershipHostedZoneId,
 
 }
 export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
-	stack: "support",
+	stack: "membership",
 	stage: "PROD",
 	deployBucket: "membership-dist",
-	certificateId: supportCertificateId,
-	domainName:  `stripe-webhook-endpoints-prod.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
+	certificateId: membershipCertificateId,
+	domainName:  `stripe-webhook-endpoints-prod.${membershipApisDomain}`,
+	hostedZoneId: membershipHostedZoneId,
 }
 
 
