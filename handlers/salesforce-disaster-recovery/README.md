@@ -8,9 +8,13 @@
 
 ## Diagram
 
-For context, this application is the implementation of the "Salesforce Disaster Recovery" system below.
+For context, this application is the implementation of the "Salesforce Disaster Recovery" system below:
 
-![landscape diagram](./docs/landscape.svg 'Landscape Diagram')
+![landscape diagram](./docs/c4-landscape-diagram.png 'Landscape Diagram')
+
+A more detailed diagram below:
+
+![landscape diagram](./docs/c4-container-diagram.png 'Container Diagram')
 
 ## How to visualise diagrams in `vscode`
 
