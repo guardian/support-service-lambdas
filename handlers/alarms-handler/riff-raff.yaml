@@ -1,0 +1,25 @@
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  alarms-handler-cloudformation:
+    type: cloud-formation
+    app: alarms-handler
+    parameters:
+      templateStagePaths:
+        CODE: alarms-handler-CODE.template.json
+        PROD: alarms-handler-PROD.template.json
+
+  alarms-handler:
+    type: aws-lambda
+    parameters:
+      fileName: alarms-handler.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - alarms-handler-
+    dependencies: [alarms-handler-cloudformation]

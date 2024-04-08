@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription.email.serialisers
 
 import com.gu.newproduct.api.addsubscription.email.EmailData.paymentMethodFields
+import com.gu.newproduct.api.addsubscription.DiscountMessage
 import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
 import com.gu.newproduct.api.productcatalog.Plan
 import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
@@ -37,7 +38,7 @@ object GuardianWeeklyFields {
     "subscriber_id" -> data.subscriptionName.value,
     "date_of_first_paper" -> data.firstPaymentDate.format(firstPaymentDateFormat),
     "date_of_first_payment" -> data.firstPaymentDate.format(firstPaymentDateFormat),
-    "subscription_rate" -> data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse(""),
+    "subscription_rate" -> data.discountMessage.map(_.value).getOrElse(data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")),
   ) ++ paymentMethodFields(data.paymentMethod)
 
 }

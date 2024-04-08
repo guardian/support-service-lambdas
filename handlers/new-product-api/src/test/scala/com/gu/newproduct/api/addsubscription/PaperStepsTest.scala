@@ -93,7 +93,9 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
       createdByCSR = CreatedByCSR("bob"),
       amountMinorUnits = None,
       acquisitionCase = CaseId("case"),
-      planId = NationalDeliveryWeekend
+      planId = NationalDeliveryWeekend,
+      discountRatePlanId= None,
+      discountMessage= None,
     )
 
     val futureActual = addVoucherSteps.addProduct(requestInput)

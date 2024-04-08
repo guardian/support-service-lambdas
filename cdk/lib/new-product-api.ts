@@ -28,7 +28,7 @@ export class NewProductApi extends GuStack {
     // ---- Miscellaneous constants ---- //
     const isProd = this.stage === 'PROD';
     const app = "new-product-api";
-    const runtime = Runtime.JAVA_11;
+    const runtime = Runtime.JAVA_21;
     const fileName = "new-product-api.jar";
     const memorySize = 1536;
     const timeout = Duration.seconds(300);

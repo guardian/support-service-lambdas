@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription.email.serialisers
 
 import com.gu.newproduct.api.addsubscription.Formatters._
+import com.gu.newproduct.api.addsubscription.DiscountMessage
 import com.gu.newproduct.api.addsubscription.email.DigipackEmailData
 import com.gu.newproduct.api.addsubscription.email.EmailData._
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
@@ -46,7 +47,7 @@ object DigipackEmailFields {
       "Date of first payment" -> data.firstPaymentDate.format(dateformat),
       "Currency" -> data.currency.glyph,
       "Trial period" -> data.trialPeriod.days.toString,
-      "Subscription details" -> paymentPLan.map(_.description).getOrElse(""),
+      "Subscription details" ->  data.discountMessage.map(_.value).getOrElse(paymentPLan.map(_.description).getOrElse("")),
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts.billTo)
 
   }

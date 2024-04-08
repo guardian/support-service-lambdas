@@ -35,7 +35,7 @@ Resources:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/dev-env-cleaner/dev-env-cleaner.jar
       MemorySize: 2048
-      Runtime: java11
+      Runtime: java21
       Timeout: 900
       Environment:
         Variables:

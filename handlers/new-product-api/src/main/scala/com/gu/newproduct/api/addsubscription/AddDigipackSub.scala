@@ -49,15 +49,26 @@ class AddDigipackSub(
     zuoraRatePlanId <- getZuoraRateplanId(request.planId)
       .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
       .toAsync
+    ratePlans = List(
+      ZuoraCreateSubRequestRatePlan(
+        maybeChargeOverride = None,
+        productRatePlanId = zuoraRatePlanId,
+      ),
+    ) ++ request.discountRatePlanId
+      .map(id =>
+        List(
+          ZuoraCreateSubRequestRatePlan(
+            productRatePlanId = id,
+            maybeChargeOverride = None,
+          ),
+        ),
+      )
+      .getOrElse(Nil)
+
     createSubRequest = ZuoraCreateSubRequest(
       request = request,
       acceptanceDate = request.startDate,
-      ratePlans = List(
-        ZuoraCreateSubRequestRatePlan(
-          maybeChargeOverride = None,
-          productRatePlanId = zuoraRatePlanId,
-        ),
-      ),
+      ratePlans = ratePlans,
     )
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create digiPack subscription")
     plan = getPlan(request.planId)
@@ -70,6 +81,7 @@ class AddDigipackSub(
       paymentMethod = customerData.paymentMethod,
       currency = customerData.account.currency,
       trialPeriod = TrialPeriod(days = trialPeriodDays),
+      discountMessage = request.discountMessage,
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, emailData)
       .recoverAndLog("send digiPack confirmation email")
@@ -79,7 +91,7 @@ class AddDigipackSub(
 object AddDigipackSub {
 
   def wireSteps(
-    catalog: Map[PlanId, Plan],
+      catalog: Map[PlanId, Plan],
       zuoraIds: ZuoraIds,
       zuoraClient: Requests,
       isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],

@@ -31,7 +31,7 @@ Resources:
     Properties:
       FunctionName: !Sub stripe-payment-intent-issues-${Stage}
       Description: A lambda for handling payment intent issues (cancellation, failure, action required)
-      Runtime: java11
+      Runtime: java21
       Handler: com.gu.paymentIntentIssues.Lambda::handler
       MemorySize: 512
       Timeout: 300
@@ -67,7 +67,7 @@ Resources:
     Properties:
       FunctionName: !Sub stripe-customer-updated-${Stage}
       Description: A lambda for handling customer updates
-      Runtime: java11
+      Runtime: java21
       Handler: com.gu.stripeCardUpdated.Lambda::apply
       MemorySize: 1536
       Timeout: 900

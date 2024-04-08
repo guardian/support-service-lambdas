@@ -10,6 +10,8 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - generate-product-catalog
+          - alarms-handler
           - discount-api
           - salesforce-disaster-recovery
     runs-on: ubuntu-latest
@@ -18,7 +20,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
       - uses: actions/setup-node@v4
@@ -34,9 +36,6 @@ jobs:
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           aws-region: eu-west-1
 
-      - name: Generate CFN templates from GuCDK
-        run: bash ./script/cfn.sh
-
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v2
         with:
@@ -45,7 +44,6 @@ jobs:
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
-              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
+              - ./cdk/cdk.out
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip

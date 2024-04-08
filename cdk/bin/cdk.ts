@@ -1,8 +1,10 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
+import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
+import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
@@ -10,6 +12,7 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -105,6 +108,19 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {
 	salesforceApiDomain: 'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com',
 	salesforceApiConnectionResourceId:
 		'salesforce-disaster-recovery-CODE-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f',
+	salesforceOauthSecretName:
+		'events!connection/salesforce-disaster-recovery-CODE-salesforce-api/e2792d75-414a-48f3-89a1-5e8eac15f627',
+	salesforceQueryWaitSeconds: 1,
+});
+new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CSBX', {
+	stack: 'membership',
+	stage: 'CSBX',
+	salesforceApiDomain:
+		'https://gnmtouchpoint--partial24.sandbox.my.salesforce.com',
+	salesforceApiConnectionResourceId:
+		'salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f',
+	salesforceOauthSecretName:
+		'events!connection/salesforce-disaster-recovery-CSBX-salesforce-api/56d7692d-e186-4b5a-9745-9d0a7ce33f1b',
 	salesforceQueryWaitSeconds: 1,
 });
 new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
@@ -113,5 +129,35 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
 	salesforceApiDomain: 'https://gnmtouchpoint.my.salesforce.com',
 	salesforceApiConnectionResourceId:
 		'salesforce-disaster-recovery-PROD-salesforce-api/e6e43d71-2fd7-45cf-a051-0e901dbd170e',
+	salesforceOauthSecretName:
+		'events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3',
 	salesforceQueryWaitSeconds: 30,
+});
+new GenerateProductCatalog(app, 'generate-product-catalog-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: 'product-catalog.code.dev-guardianapis.com',
+});
+new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: 'product-catalog.guardianapis.com',
+});
+
+new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+});
+new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-PROD', {
+	stack: 'membership',
+	stage: 'PROD',
+});
+
+new AlarmsHandler(app, 'alarms-handler-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new AlarmsHandler(app, 'alarms-handler-PROD', {
+	stack: 'support',
+	stage: 'PROD',
 });

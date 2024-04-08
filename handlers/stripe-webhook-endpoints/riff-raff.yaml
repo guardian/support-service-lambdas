@@ -6,18 +6,21 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  stripe-webhook-endpoints:
-    type: aws-lambda
-    parameters:
-      bucket: membership-dist
-      functionNames:
-      - stripe-payment-intent-issues-
-      - stripe-customer-updated-
-      fileName: stripe-webhook-endpoints.jar
-      prefixStack: false
-    dependencies: [ cfn ]
-  cfn:
+  stripe-webhook-endpoints-cloudformation:
     type: cloud-formation
     app: stripe-webhook-endpoints
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: stripe-webhook-endpoints-CODE.template.json
+        PROD: stripe-webhook-endpoints-PROD.template.json
+
+  stripe-webhook-endpoints:
+    type: aws-lambda
+    parameters:
+      fileName: stripe-webhook-endpoints.jar
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - stripe-payment-intent-issues-
+        - stripe-customer-updated-
+    dependencies: [stripe-webhook-endpoints-cloudformation]

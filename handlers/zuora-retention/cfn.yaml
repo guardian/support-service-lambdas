@@ -238,8 +238,10 @@ Resources:
             Role:
                 !GetAtt ZuoraQuerierRole.Arn
             MemorySize: 1536
-            Runtime: java11
+            Runtime: java21
             Timeout: 300
+            Architectures:
+              - arm64
         DependsOn:
         - ZuoraQuerierRole
     ZuoraRetentionJobResult:
@@ -258,8 +260,10 @@ Resources:
             Role:
                 !GetAtt ZuoraResultsRole.Arn
             MemorySize: 1536
-            Runtime: java11
+            Runtime: java21
             Timeout: 300
+            Architectures:
+              - arm64
         DependsOn:
         - ZuoraResultsRole
     ZuoraRetentionFileFetcher:
@@ -278,8 +282,10 @@ Resources:
             Role:
                 !GetAtt ZuoraFileFetcherRole.Arn
             MemorySize: 1536
-            Runtime: java11
+            Runtime: java21
             Timeout: 300
+            Architectures:
+              - arm64
         DependsOn:
         - ZuoraFileFetcherRole
     ZuoraRetentionFilter:
@@ -298,8 +304,10 @@ Resources:
                 Role:
                     !GetAtt FilterRole.Arn
                 MemorySize: 1536
-                Runtime: java11
+                Runtime: java21
                 Timeout: 300
+                Architectures:
+                  - arm64
             DependsOn:
             - FilterRole
     ZuoraRetentionAccountUpdater:
@@ -318,8 +326,10 @@ Resources:
                 Role:
                     !GetAtt UpdaterRole.Arn
                 MemorySize: 1536
-                Runtime: java11
+                Runtime: java21
                 Timeout: 300
+                Architectures:
+                  - arm64
             DependsOn:
             - UpdaterRole
     StatesExecutionRole:

@@ -63,6 +63,7 @@ class AddGuardianWeeklySub(
       paymentMethod = customerData.paymentMethod,
       currency = customerData.account.currency,
       subscriptionName = subscriptionName,
+      discountMessage = request.discountMessage,
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, guardianWeeklyEmailData)
       .recoverAndLog("send guardian weekly confirmation email")
@@ -72,7 +73,7 @@ class AddGuardianWeeklySub(
 object AddGuardianWeeklySub {
 
   def wireSteps(
-    catalog: Map[PlanId, Plan],
+      catalog: Map[PlanId, Plan],
       zuoraIds: ZuoraIds,
       zuoraClient: Requests,
       isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
@@ -169,15 +170,31 @@ object AddGuardianWeeklySub {
         zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(
           internalServerError(s"no Zuora id for ${request.planId}!"),
         )
+        ratePlans = request.discountRatePlanId
+          .map(id =>
+            List(
+              ZuoraCreateSubRequestRatePlan(
+                productRatePlanId = id,
+                maybeChargeOverride = None,
+              ),
+              ZuoraCreateSubRequestRatePlan(
+                productRatePlanId = zuoraRatePlanId,
+                maybeChargeOverride = None,
+              ),
+            ),
+          )
+          .getOrElse(
+            List(
+              ZuoraCreateSubRequestRatePlan(
+                productRatePlanId = zuoraRatePlanId,
+                maybeChargeOverride = None,
+              ),
+            ),
+          )
         createSubRequest = ZuoraCreateSubRequest(
           request = request,
           acceptanceDate = request.startDate,
-          ratePlans = List(
-            ZuoraCreateSubRequestRatePlan(
-              productRatePlanId = zuoraRatePlanId,
-              maybeChargeOverride = None,
-            ),
-          ),
+          ratePlans = ratePlans,
         )
       } yield createSubRequest
     }

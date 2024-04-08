@@ -187,6 +187,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub soft-opt-in-consent-setter-dead-letter-queue-${Stage}
+      MessageRetentionPeriod: 864000
 
   SQSTrigger:
     Type: AWS::Lambda::EventSourceMapping

@@ -1,0 +1,15 @@
+{
+  "name": "product-catalog",
+  "version": "1.0.0",
+  "scripts": {
+    "generateTypes": "ts-node src/generateTypeObject.ts",
+    "updateSnapshots": "jest -u --group=-integration",
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "zod": "^3.22.4"
+  }
+}

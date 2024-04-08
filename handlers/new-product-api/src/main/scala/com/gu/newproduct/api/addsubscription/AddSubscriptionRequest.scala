@@ -1,7 +1,8 @@
 package com.gu.newproduct.api.addsubscription
 
-import java.time.LocalDate
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 
+import java.time.LocalDate
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 
@@ -17,12 +18,15 @@ case class AddSubscriptionRequest(
     amountMinorUnits: Option[AmountMinorUnits],
     acquisitionCase: CaseId,
     planId: PlanId,
+    discountRatePlanId: Option[ProductRatePlanId],
+    discountMessage: Option[DiscountMessage],
 )
 
 case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
 case class DeliveryAgent(value: String) extends AnyVal
 case class CreatedByCSR(value: String) extends AnyVal
+case class DiscountMessage(value: String) extends AnyVal
 object AddSubscriptionRequest {
 
   case class AddSubscriptionRequestWire(
@@ -34,6 +38,8 @@ object AddSubscriptionRequest {
       amountMinorUnits: Option[Int],
       acquisitionCase: String,
       planId: String,
+      discountRatePlanId: Option[String],
+      discountMessage: Option[String],
   ) {
     def toAddSubscriptionRequest = {
       val parsedRequestOrError = for {
@@ -48,6 +54,8 @@ object AddSubscriptionRequest {
         amountMinorUnits = amountMinorUnits.map(AmountMinorUnits.apply),
         CaseId(acquisitionCase),
         parsedPlanId,
+        discountRatePlanId = discountRatePlanId.map(ProductRatePlanId.apply),
+        discountMessage = discountMessage.map(DiscountMessage.apply),
       )
 
       parsedRequestOrError match {

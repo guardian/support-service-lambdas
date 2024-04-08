@@ -7,6 +7,10 @@ If you are deploying a lambda for the first time you will need to follow these s
 ![riff raff screenshot](./riff-raff.png)
 1. go back to the deploy screen and deploy as normal (all the tasks)
 1. set up [continuous deployment](https://riffraff.gutools.co.uk/deployment/continuous) for future deploys (optional)
+### Update 27/04/2024 - As an alternative to the process described above, for Typescript lambdas you can use the `create-stack.sh` script in the root of the repo to build your lambda, upload the zip to S3 and then create the stack using your cloudformation.
+eg. from the root of the repo run
+
+```./create-stack.sh my-new-lambda```
 
 ## Typescript lambdas
 ### Api Gateway with a custom domain name

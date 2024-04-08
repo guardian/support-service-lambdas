@@ -125,11 +125,11 @@ export class DiscountApi extends GuStack {
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
-		new GuAlarm(this, 'ApiGateway4XXAlarmCDK', {
+		new GuAlarm(this, 'ApiGateway5XXAlarmCDK', {
 			app,
-			alarmName: alarmName('API gateway 4XX response'),
+			alarmName: alarmName('Discount-api 5XX response'),
 			alarmDescription: alarmDescription(
-				'Discount api received an invalid request',
+				'Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-PROD',
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
@@ -137,7 +137,7 @@ export class DiscountApi extends GuStack {
 			actionsEnabled: this.stage === 'PROD',
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
-				metricName: '4XXError',
+				metricName: '5XXError',
 				namespace: 'AWS/ApiGateway',
 				statistic: 'Sum',
 				period: Duration.seconds(300),

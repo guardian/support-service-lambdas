@@ -33,6 +33,8 @@ class AddSubscriptionRequestTest extends AnyFlatSpec with Matchers {
       amountMinorUnits = Some(AmountMinorUnits(123)),
       acquisitionCase = CaseId("5006E000005b5cf"),
       planId = MonthlyContribution,
+      discountRatePlanId = None,
+      discountMessage = None,
     )
   }
 

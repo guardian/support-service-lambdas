@@ -32,7 +32,7 @@ export class BatchEmailSender extends GuStack {
             app,
             handler: "com.gu.batchemailsender.api.batchemail.Handler::apply",
             functionName: `batch-email-sender-${this.stage}`,
-            runtime: Runtime.JAVA_11,
+            runtime: Runtime.JAVA_21,
             fileName: "batch-email-sender.jar",
             memorySize: 1536,
             timeout: Duration.seconds(300),

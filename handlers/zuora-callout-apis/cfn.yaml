@@ -1,0 +1,191 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Handles auto-cancellations for membership and subscriptions, using API Gateway and Lambda, plus stripe PM updates
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+    ApiName:
+        Type: String
+        AllowedValues:
+            - zuora-auto-cancel-api-CODE
+            - zuora-auto-cancel-api-PROD
+        Default: zuora-auto-cancel-api-CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Resources:
+    ZuoraAutoCancelRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: !Sub ZuoraAutoCancel-${Stage}
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: "*"
+                - PolicyName: SQSPutInQueue
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: sqs:*
+                            Resource:
+                              - Fn::ImportValue:
+                                  !Sub "comms-${Stage}-EmailQueueArn"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/exactTarget-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/stripe-${Stage}.*.json
+    ZuoraAutoCancelLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Handles auto-cancellations for membership and subscriptions
+            FunctionName:
+                !Sub zuora-auto-cancel-${Stage}
+            Code:
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/zuora-callout-apis/zuora-callout-apis.jar
+            Handler: com.gu.autoCancel.AutoCancelHandler::handleRequest
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+                  EmailQueueName:
+                    Fn::ImportValue:
+                      !Sub "comms-${Stage}-EmailQueueName"
+            Role:
+                Fn::GetAtt:
+                - ZuoraAutoCancelRole
+                - Arn
+            MemorySize: 1536
+            Runtime: java21
+            Timeout: 300
+            Architectures:
+              - arm64
+        DependsOn:
+        - ZuoraAutoCancelRole
+
+    ZuoraAutoCancelAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub zuora-auto-cancel-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: ZuoraAutoCancelLambda
+
+    ZuoraAutoCancelProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref ZuoraAutoCancelAPI
+            ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
+            PathPart: auto-cancel
+        DependsOn: ZuoraAutoCancelAPI
+
+    ZuoraAutoCancelMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            RestApiId: !Ref ZuoraAutoCancelAPI
+            ResourceId: !Ref ZuoraAutoCancelProxyResource
+            HttpMethod: POST
+            RequestParameters:
+              method.request.querystring.apiClientId: true
+              method.request.querystring.apiToken: true
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZuoraAutoCancelLambda.Arn}/invocations
+        DependsOn:
+        - ZuoraAutoCancelAPI
+        - ZuoraAutoCancelLambda
+        - ZuoraAutoCancelProxyResource
+
+    ZuoraAutoCancelAPI:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: Zuora sends a callout to this endpoint to initiate an auto-cancellation on an overdue subscription
+            Name: !Sub ${ApiName}
+
+    ZuoraAutoCancelAPIStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for zuora-auto-cancel-api
+            RestApiId: !Ref ZuoraAutoCancelAPI
+            DeploymentId: !Ref ZuoraAutoCancelAPIDeployment
+            StageName: !Sub ${Stage}
+        DependsOn: ZuoraAutoCancelMethod
+
+    ZuoraAutoCancelAPIDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys zuora-auto-cancel-api into an environment/stage
+            RestApiId: !Ref ZuoraAutoCancelAPI
+        DependsOn: ZuoraAutoCancelMethod
+
+    5xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        AlarmName: !Sub 5XX rate from ${ApiName}
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !Sub ${ApiName}
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 5XXError
+        Namespace: AWS/ApiGateway
+        Period: 300
+        Statistic: Sum
+        Threshold: 10
+        TreatMissingData: notBreaching
+
+    4xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        AlarmName: !Sub 4XX rate from ${ApiName}
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !Sub ${ApiName}
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 4XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+        TreatMissingData: notBreaching
+
