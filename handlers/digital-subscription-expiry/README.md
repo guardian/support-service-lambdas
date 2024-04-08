@@ -1,5 +1,11 @@
 # digital subscription expiry lambdas
 
+## HOWTO generate an emergency token (CAS code) for customer service teams
+1. get janus credentials
+2. edit src/test/scala/GenerateEmergencyToken.scala for the reqired expiry
+3. run it and your token should be displayed in the console
+
+
 Lambda to determine if a the user has an active subscription that allows them to download the digital edition.
 
 Sample request: 
