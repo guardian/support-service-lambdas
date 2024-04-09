@@ -8,10 +8,7 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
-export interface Props extends GuStackProps {
-	stack: string;
-	stage: string;
-}
+export interface Props extends GuStackProps {}
 
 export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 	constructor(scope: App, id: string, props: Props) {
