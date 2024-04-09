@@ -107,7 +107,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "Impact - Stripe Webhook Endpoints received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "STRIPE-WEBHOOK-ENDPOINTS-CDK- CODE API gateway 4XX response",
+        "AlarmName": "Stripe Webhook Endpoints CDK CODE API gateway 4XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -146,7 +146,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "stripe-webhook-endpoints-CODE exceeded 1% 5XX error rate",
-        "AlarmName": "STRIPE-WEBHOOK-ENDPOINTS-CDK- CODE API gateway 5XX error",
+        "AlarmName": "Stripe Webhook Endpoints CDK CODE API gateway 5XX error",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
@@ -1499,7 +1499,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "Impact - Stripe Webhook Endpoints received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "STRIPE-WEBHOOK-ENDPOINTS-CDK- PROD API gateway 4XX response",
+        "AlarmName": "Stripe Webhook Endpoints CDK PROD API gateway 4XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1538,7 +1538,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "stripe-webhook-endpoints-PROD exceeded 1% 5XX error rate",
-        "AlarmName": "STRIPE-WEBHOOK-ENDPOINTS-CDK- PROD API gateway 5XX error",
+        "AlarmName": "Stripe Webhook Endpoints CDK PROD API gateway 5XX error",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {

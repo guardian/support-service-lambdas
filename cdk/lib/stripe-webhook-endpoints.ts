@@ -16,7 +16,6 @@ import {CfnInclude} from "aws-cdk-lib/cloudformation-include";
 export interface StripeWebhookEndpointsProps extends GuStackProps {
     stack: string;
     stage: string;
-    deployBucket: string;
     certificateId: string;
     domainName: string;
     hostedZoneId: string;
@@ -36,7 +35,6 @@ export class StripeWebhookEndpoints extends GuStack {
 
         // ---- API-triggered lambda functions ---- //
 
-        //PaymentIntentIssuesLambda
         const paymentIntentIssuesLambda = new GuLambdaFunction(this,"payment-intent-issues-cdk-lambda", {
                 app: app,
                 description: "A lambda for handling payment intent issues (cancellation, failure, action required)",
@@ -54,7 +52,6 @@ export class StripeWebhookEndpoints extends GuStack {
             }
         );
 
-        //CustomerUpdatedLambda
         const customerUpdatedLambda = new GuLambdaFunction(this, "customer-updated-cdk-lambda", {
                 app: app,
                 description: "A lambda for handling customer updates",
@@ -99,7 +96,7 @@ export class StripeWebhookEndpoints extends GuStack {
 
         // ---- Alarms ---- //
         const alarmName = (shortDescription: string) =>
-            `STRIPE-WEBHOOK-ENDPOINTS-CDK- ${this.stage} ${shortDescription}`;
+            `Stripe Webhook Endpoints CDK ${this.stage} ${shortDescription}`;
 
         const alarmDescription = (description: string) =>
             `Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
@@ -189,7 +186,7 @@ export class StripeWebhookEndpoints extends GuStack {
             ],
         });
 
-        const s3InlinePolicy: Policy = new Policy(this, "S3 inline policy", {
+        const s3InlinePolicyForPaymentIntentIssues: Policy = new Policy(this, "S3 inline policy", {
             statements: [
                 new PolicyStatement({
                     effect: Effect.ALLOW,
@@ -215,7 +212,7 @@ export class StripeWebhookEndpoints extends GuStack {
         });
 
         paymentIntentIssuesLambda.role?.attachInlinePolicy(ssmInlinePolicy);
-        paymentIntentIssuesLambda.role?.attachInlinePolicy(s3InlinePolicy);
+        paymentIntentIssuesLambda.role?.attachInlinePolicy(s3InlinePolicyForPaymentIntentIssues);
         customerUpdatedLambda.role?.attachInlinePolicy(ssmInlinePolicy);
         customerUpdatedLambda.role?.attachInlinePolicy(s3InlinePolicyForCustomerUpdated);
     }
