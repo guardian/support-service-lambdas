@@ -15,6 +15,7 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 
 		const app = 'salesforce-disaster-recovery-health-check';
 		// Comment
+		// Comment
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
