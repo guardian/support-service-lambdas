@@ -16,7 +16,7 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 
 		const stateMachine = StateMachine.fromStateMachineName(
 			this,
-			'sdf',
+			'stateMachine',
 			`salesforce-disaster-recovery-${this.stage}`,
 		);
 
@@ -38,8 +38,16 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			monitoringConfiguration: { noMonitoring: true },
 			initialPolicy: [
 				new PolicyStatement({
-					actions: ['states:StartExecution', 'states:DescribeExecution'],
-					resources: [stateMachine.stateMachineArn],
+					actions: ['states:StartExecution'],
+					resources: [
+						`arn:aws:states:${this.region}:${this.account}:stateMachine:salesforce-disaster-recovery-${this.stage}`,
+					],
+				}),
+				new PolicyStatement({
+					actions: ['states:DescribeExecution'],
+					resources: [
+						`arn:aws:states:${this.region}:${this.account}:execution:salesforce-disaster-recovery-${this.stage}:*`,
+					],
 				}),
 			],
 		});
