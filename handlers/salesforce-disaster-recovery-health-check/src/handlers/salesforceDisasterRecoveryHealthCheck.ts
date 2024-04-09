@@ -4,15 +4,16 @@ import { StepFunctions } from 'aws-sdk';
 
 const stepfunctions = new StepFunctions();
 
-export const handler: Handler = async (event: unknown) => {
-	console.log(`Input is ${JSON.stringify(event)}`);
-
-	const input = JSON.stringify(event);
-
+export const handler: Handler = async () => {
 	const stateMachineArn = checkDefined<string>(
 		process.env.STATE_MACHINE_ARN,
 		'STATE_MACHINE_ARN environment variable not set',
 	);
+
+	const input = JSON.stringify({
+		query:
+			"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c FROM Zuora__CustomerAccount__c WHERE Zuora__Zuora_Id__c = 'wrongid'",
+	});
 
 	try {
 		const startExecutionResponse = await stepfunctions
@@ -36,6 +37,7 @@ export const handler: Handler = async (event: unknown) => {
 			status = describeExecutionResponse.status;
 			if (status !== 'RUNNING') {
 				console.log('Execution result:', describeExecutionResponse);
+				console.log(describeExecutionResponse.status);
 			}
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 		}
