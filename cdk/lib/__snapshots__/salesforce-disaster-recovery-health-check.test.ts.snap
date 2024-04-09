@@ -5,39 +5,9 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
+      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
-  },
-  "Outputs": {
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEEndpoint9110E286": {
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region",
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix",
-            },
-            "/",
-            {
-              "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEDeploymentStageCODE459E575B",
-            },
-            "/",
-          ],
-        ],
-      },
-    },
   },
   "Parameters": {
     "DistributionBucketName": {
@@ -47,215 +17,10 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Salesforce disaster recovery health check received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "SALESFORCE-DISASTER-RECOVERY-HEALTH-CHECK-CODE API gateway 4XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "salesforce-disaster-recovery-health-check-CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmSalesforcedisasterrecoveryhealthcheck3A85BE91": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "salesforce-disaster-recovery-health-check exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from salesforce-disaster-recovery-health-check (ApiGateway) in CODE",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for salesforce-disaster-recovery-health-check",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "salesforce-disaster-recovery-health-check-CODE",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "salesforce-disaster-recovery-health-check-CODE",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "BasePathMapping": {
-      "Properties": {
-        "DomainName": {
-          "Ref": "DomainName",
-        },
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-        },
-        "Stage": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEDeploymentStageCODE459E575B",
-        },
-      },
-      "Type": "AWS::ApiGateway::BasePathMapping",
-    },
-    "DNSRecord": {
-      "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "salesforce-disaster-recovery-health-check.code.support.guardianapis.com",
-        "ResourceRecords": [
-          {
-            "Fn::GetAtt": [
-              "DomainName",
-              "RegionalDomainName",
-            ],
-          },
-        ],
-        "TTL": "120",
-        "Type": "CNAME",
-      },
-      "Type": "AWS::Route53::RecordSet",
-    },
-    "DomainName": {
-      "Properties": {
-        "DomainName": "salesforce-disaster-recovery-health-check.code.support.guardianapis.com",
-        "EndpointConfiguration": {
-          "Types": [
-            "REGIONAL",
-          ],
-        },
-        "RegionalCertificateArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:acm:eu-west-1:",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
-            ],
-          ],
-        },
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::DomainName",
-    },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/salesforce-disaster-recovery-health-check/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1": {
+    "SaveSalesforceQueryResultToS3Lambda65311A6F": {
       "DependsOn": [
-        "salesforcedisasterrecoveryhealthchecklambdaServiceRoleDefaultPolicy340E6BDB",
-        "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA",
+        "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
+        "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
       ],
       "Properties": {
         "Code": {
@@ -264,27 +29,23 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           },
           "S3Key": "membership/CODE/salesforce-disaster-recovery-health-check/salesforce-disaster-recovery-health-check.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery-health-check",
-            "App": "salesforce-disaster-recovery-health-check",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stack": "membership",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "salesforce-disaster-recovery-health-check-CODE",
-        "Handler": "index.handler",
+        "Handler": "salesforceDisasterRecoveryHealthCheck.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA",
+            "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Tags": [
           {
             "Key": "App",
@@ -311,7 +72,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::Lambda::Function",
     },
-    "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA": {
+    "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -364,7 +125,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::IAM::Role",
     },
-    "salesforcedisasterrecoveryhealthchecklambdaServiceRoleDefaultPolicy340E6BDB": {
+    "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -455,419 +216,14 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "salesforcedisasterrecoveryhealthchecklambdaServiceRoleDefaultPolicy340E6BDB",
+        "PolicyName": "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
         "Roles": [
           {
-            "Ref": "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA",
+            "Ref": "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850": {
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "salesforce-disaster-recovery-health-check-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery-health-check",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEANYA0196F4B": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEANYApiPermissionTestsalesforcedisasterrecoveryhealthcheckCODEsalesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE5403ECECANY4EF16916": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEANYApiPermissionsalesforcedisasterrecoveryhealthcheckCODEsalesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE5403ECECANYAEEA1AAC": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-              },
-              "/",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEDeploymentStageCODE459E575B",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEAccountC6F08297": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODECloudWatchRoleE38988B4",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODECloudWatchRoleE38988B4": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery-health-check",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEDeploymentE6363B6D3d69841f32129fcb5842b52be4ab9fd8": {
-      "DependsOn": [
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEproxyANY03996C78",
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEproxy6D13AB73",
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEANYA0196F4B",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEDeploymentStageCODE459E575B": {
-      "DependsOn": [
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEAccountC6F08297",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEDeploymentE6363B6D3d69841f32129fcb5842b52be4ab9fd8",
-        },
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-        },
-        "StageName": "CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery-health-check",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEproxy6D13AB73": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEproxyANY03996C78": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEproxy6D13AB73",
-        },
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEproxyANYApiPermissionTestsalesforcedisasterrecoveryhealthcheckCODEsalesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE5403ECDA42171F": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEproxyANYApiPermissionsalesforcedisasterrecoveryhealthcheckCODEsalesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE5403ECECAN448D2A5E": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODE10375850",
-              },
-              "/",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckCODEDeploymentStageCODE459E575B",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
     },
   },
 }
@@ -878,39 +234,9 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
+      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
-  },
-  "Outputs": {
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODEndpoint480C596B": {
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region",
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix",
-            },
-            "/",
-            {
-              "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDeploymentStagePRODDA45FA7C",
-            },
-            "/",
-          ],
-        ],
-      },
-    },
   },
   "Parameters": {
     "DistributionBucketName": {
@@ -920,215 +246,10 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Salesforce disaster recovery health check received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "SALESFORCE-DISASTER-RECOVERY-HEALTH-CHECK-PROD API gateway 4XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "salesforce-disaster-recovery-health-check-PROD",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmSalesforcedisasterrecoveryhealthcheck3A85BE91": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "salesforce-disaster-recovery-health-check exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from salesforce-disaster-recovery-health-check (ApiGateway) in PROD",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for salesforce-disaster-recovery-health-check",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "salesforce-disaster-recovery-health-check-PROD",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "salesforce-disaster-recovery-health-check-PROD",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "BasePathMapping": {
-      "Properties": {
-        "DomainName": {
-          "Ref": "DomainName",
-        },
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-        },
-        "Stage": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDeploymentStagePRODDA45FA7C",
-        },
-      },
-      "Type": "AWS::ApiGateway::BasePathMapping",
-    },
-    "DNSRecord": {
-      "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "salesforce-disaster-recovery-health-check.support.guardianapis.com",
-        "ResourceRecords": [
-          {
-            "Fn::GetAtt": [
-              "DomainName",
-              "RegionalDomainName",
-            ],
-          },
-        ],
-        "TTL": "120",
-        "Type": "CNAME",
-      },
-      "Type": "AWS::Route53::RecordSet",
-    },
-    "DomainName": {
-      "Properties": {
-        "DomainName": "salesforce-disaster-recovery-health-check.support.guardianapis.com",
-        "EndpointConfiguration": {
-          "Types": [
-            "REGIONAL",
-          ],
-        },
-        "RegionalCertificateArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:acm:eu-west-1:",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
-            ],
-          ],
-        },
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::DomainName",
-    },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/salesforce-disaster-recovery-health-check/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1": {
+    "SaveSalesforceQueryResultToS3Lambda65311A6F": {
       "DependsOn": [
-        "salesforcedisasterrecoveryhealthchecklambdaServiceRoleDefaultPolicy340E6BDB",
-        "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA",
+        "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
+        "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
       ],
       "Properties": {
         "Code": {
@@ -1137,27 +258,23 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           },
           "S3Key": "membership/PROD/salesforce-disaster-recovery-health-check/salesforce-disaster-recovery-health-check.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery-health-check",
-            "App": "salesforce-disaster-recovery-health-check",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stack": "membership",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "salesforce-disaster-recovery-health-check-PROD",
-        "Handler": "index.handler",
+        "Handler": "salesforceDisasterRecoveryHealthCheck.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA",
+            "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Tags": [
           {
             "Key": "App",
@@ -1184,7 +301,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::Lambda::Function",
     },
-    "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA": {
+    "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1237,7 +354,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::IAM::Role",
     },
-    "salesforcedisasterrecoveryhealthchecklambdaServiceRoleDefaultPolicy340E6BDB": {
+    "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1328,419 +445,14 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "salesforcedisasterrecoveryhealthchecklambdaServiceRoleDefaultPolicy340E6BDB",
+        "PolicyName": "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
         "Roles": [
           {
-            "Ref": "salesforcedisasterrecoveryhealthchecklambdaServiceRole899E89DA",
+            "Ref": "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODANYApiPermissionTestsalesforcedisasterrecoveryhealthcheckPRODsalesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDA0A8D99ANYA86653BA": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODANYApiPermissionsalesforcedisasterrecoveryhealthcheckPRODsalesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDA0A8D99ANYA7CB932C": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-              },
-              "/",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDeploymentStagePRODDA45FA7C",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODANYF6646281": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODAccountEA63B81E": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODCloudWatchRoleAEE0A07D",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODCloudWatchRoleAEE0A07D": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery-health-check",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDeploymentCE0469E32d5aebba4f07d31a33e2e5d0f7d2b927": {
-      "DependsOn": [
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODproxyANY1E334986",
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODproxy4486EA99",
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODANYF6646281",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDeploymentStagePRODDA45FA7C": {
-      "DependsOn": [
-        "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODAccountEA63B81E",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDeploymentCE0469E32d5aebba4f07d31a33e2e5d0f7d2b927",
-        },
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery-health-check",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699": {
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "salesforce-disaster-recovery-health-check-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "salesforce-disaster-recovery-health-check",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODproxy4486EA99": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODproxyANY1E334986": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODproxy4486EA99",
-        },
-        "RestApiId": {
-          "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODproxyANYApiPermissionTestsalesforcedisasterrecoveryhealthcheckPRODsalesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDA0A8D6B2739CA": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODproxyANYApiPermissionsalesforcedisasterrecoveryhealthcheckPRODsalesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDA0A8D99ANC90FEDA2": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecklambdaCD83FDF1",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODE1E76699",
-              },
-              "/",
-              {
-                "Ref": "salesforcedisasterrecoveryhealthchecklambdasalesforcedisasterrecoveryhealthcheckPRODDeploymentStagePRODDA45FA7C",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
     },
   },
 }
