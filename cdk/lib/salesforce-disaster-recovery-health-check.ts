@@ -4,6 +4,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Schedule } from 'aws-cdk-lib/aws-events';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 
@@ -35,6 +36,18 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			functionName: `${app}-${this.stage}`,
 			rules: [{ schedule: Schedule.cron({ minute: '0', hour: '9' }) }],
 			monitoringConfiguration: { noMonitoring: true },
+			initialPolicy: [
+				new PolicyStatement({
+					actions: ['states:StartExecution', 'states:DescribeExecution'],
+					resources: [stateMachine.stateMachineArn],
+				}),
+			],
 		});
 	}
 }
+
+// lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+// 	actions: ['states:StartExecution', 'states:DescribeExecution'],
+// 	resources: ['arn:aws:states:REGION:ACCOUNT_ID:stateMachine:YOUR_STATE_MACHINE_NAME'] // replace placeholders
+//   }));
+//   topic.grantPublish(lambdaFunction);
