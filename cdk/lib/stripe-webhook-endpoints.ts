@@ -43,8 +43,8 @@ export class StripeWebhookEndpoints extends GuStack {
                 functionName: `stripe-payment-intent-issues-cdk-${this.stage}`,
                 fileName: `${app}.jar`,
                 handler: "com.gu.paymentIntentIssues.Lambda::handler",
-                runtime: Runtime.JAVA_11,
-                memorySize: 512,
+                runtime: Runtime.JAVA_21,
+                memorySize: 1536,
                 timeout: Duration.seconds(300),
                 environment: {
                     App: app,
@@ -61,7 +61,7 @@ export class StripeWebhookEndpoints extends GuStack {
                 functionName: `stripe-customer-updated-cdk-${this.stage}`,
                 fileName: `${app}.jar`,
                 handler: "com.gu.stripeCardUpdated.Lambda::apply",
-                runtime: Runtime.JAVA_11,
+                runtime: Runtime.JAVA_21,
                 memorySize: 1536,
                 timeout: Duration.seconds(900),
                 environment: {

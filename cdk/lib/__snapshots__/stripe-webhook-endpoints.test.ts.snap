@@ -995,7 +995,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "java11",
+        "Runtime": "java21",
         "Tags": [
           {
             "Key": "App",
@@ -1200,14 +1200,14 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         },
         "FunctionName": "stripe-payment-intent-issues-cdk-CODE",
         "Handler": "com.gu.paymentIntentIssues.Lambda::handler",
-        "MemorySize": 512,
+        "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
             "paymentintentissuescdklambdaServiceRole5EF38E3E",
             "Arn",
           ],
         },
-        "Runtime": "java11",
+        "Runtime": "java21",
         "Tags": [
           {
             "Key": "App",
@@ -2387,7 +2387,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
             "Arn",
           ],
         },
-        "Runtime": "java11",
+        "Runtime": "java21",
         "Tags": [
           {
             "Key": "App",
@@ -2592,14 +2592,14 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         },
         "FunctionName": "stripe-payment-intent-issues-cdk-PROD",
         "Handler": "com.gu.paymentIntentIssues.Lambda::handler",
-        "MemorySize": 512,
+        "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
             "paymentintentissuescdklambdaServiceRole5EF38E3E",
             "Arn",
           ],
         },
-        "Runtime": "java11",
+        "Runtime": "java21",
         "Tags": [
           {
             "Key": "App",
