@@ -305,8 +305,8 @@ Resources:
   RefundQueue:
     Type: AWS::SQS::Queue
     Properties:
-      VisibilityTimeout: 43200
-      MessageRetentionPeriod: 604800
+      VisibilityTimeout: 43200 # 12 hours
+      MessageRetentionPeriod: 606600 # 7 days +30 minutes
       QueueName:
         Fn::Sub: product-switch-refund-${Stage}
       RedrivePolicy:
