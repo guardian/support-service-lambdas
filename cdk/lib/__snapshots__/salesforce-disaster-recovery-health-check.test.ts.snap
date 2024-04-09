@@ -5,7 +5,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
+      "GuScheduledLambda",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -17,10 +17,10 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
     },
   },
   "Resources": {
-    "SaveSalesforceQueryResultToS3Lambda65311A6F": {
+    "salesforcedisasterrecoveryhealthcheck7A2C7C8E": {
       "DependsOn": [
-        "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
-        "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
+        "salesforcedisasterrecoveryhealthcheckServiceRoleDefaultPolicy0ACEC506",
+        "salesforcedisasterrecoveryhealthcheckServiceRoleAAFD4114",
       ],
       "Properties": {
         "Code": {
@@ -37,11 +37,11 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           },
         },
         "FunctionName": "salesforce-disaster-recovery-health-check-CODE",
-        "Handler": "salesforceDisasterRecoveryHealthCheck.handler",
+        "Handler": "dist/lambda/main.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
+            "salesforcedisasterrecoveryhealthcheckServiceRoleAAFD4114",
             "Arn",
           ],
         },
@@ -72,7 +72,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327": {
+    "salesforcedisasterrecoveryhealthcheckServiceRoleAAFD4114": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -125,7 +125,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::IAM::Role",
     },
-    "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC": {
+    "salesforcedisasterrecoveryhealthcheckServiceRoleDefaultPolicy0ACEC506": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -216,14 +216,51 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
+        "PolicyName": "salesforcedisasterrecoveryhealthcheckServiceRoleDefaultPolicy0ACEC506",
         "Roles": [
           {
-            "Ref": "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
+            "Ref": "salesforcedisasterrecoveryhealthcheckServiceRoleAAFD4114",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090AllowEventRulesalesforcedisasterrecoveryhealthcheckCODEsalesforcedisasterrecoveryhealthcheck1E72AB499146667B": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "salesforcedisasterrecoveryhealthcheck7A2C7C8E",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090E13FC178",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090E13FC178": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 9 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "salesforcedisasterrecoveryhealthcheck7A2C7C8E",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
     },
   },
 }
@@ -234,7 +271,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
+      "GuScheduledLambda",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -246,10 +283,10 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
     },
   },
   "Resources": {
-    "SaveSalesforceQueryResultToS3Lambda65311A6F": {
+    "salesforcedisasterrecoveryhealthcheck7A2C7C8E": {
       "DependsOn": [
-        "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
-        "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
+        "salesforcedisasterrecoveryhealthcheckServiceRoleDefaultPolicy0ACEC506",
+        "salesforcedisasterrecoveryhealthcheckServiceRoleAAFD4114",
       ],
       "Properties": {
         "Code": {
@@ -266,11 +303,11 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           },
         },
         "FunctionName": "salesforce-disaster-recovery-health-check-PROD",
-        "Handler": "salesforceDisasterRecoveryHealthCheck.handler",
+        "Handler": "dist/lambda/main.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
+            "salesforcedisasterrecoveryhealthcheckServiceRoleAAFD4114",
             "Arn",
           ],
         },
@@ -301,7 +338,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::Lambda::Function",
     },
-    "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327": {
+    "salesforcedisasterrecoveryhealthcheckServiceRoleAAFD4114": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -354,7 +391,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::IAM::Role",
     },
-    "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC": {
+    "salesforcedisasterrecoveryhealthcheckServiceRoleDefaultPolicy0ACEC506": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -445,14 +482,51 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SaveSalesforceQueryResultToS3LambdaServiceRoleDefaultPolicyA0D4E7AC",
+        "PolicyName": "salesforcedisasterrecoveryhealthcheckServiceRoleDefaultPolicy0ACEC506",
         "Roles": [
           {
-            "Ref": "SaveSalesforceQueryResultToS3LambdaServiceRole8B0CC327",
+            "Ref": "salesforcedisasterrecoveryhealthcheckServiceRoleAAFD4114",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090AllowEventRulesalesforcedisasterrecoveryhealthcheckPRODsalesforcedisasterrecoveryhealthcheck330F201C012EB046": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "salesforcedisasterrecoveryhealthcheck7A2C7C8E",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090E13FC178",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090E13FC178": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 9 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "salesforcedisasterrecoveryhealthcheck7A2C7C8E",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
     },
   },
 }

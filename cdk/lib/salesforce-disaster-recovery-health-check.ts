@@ -1,11 +1,10 @@
+import { GuScheduledLambda } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import {
-	type GuFunctionProps,
-	GuLambdaFunction,
-} from '@guardian/cdk/lib/constructs/lambda';
+import { type GuFunctionProps } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
+import { Schedule } from 'aws-cdk-lib/aws-events';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 export interface Props extends GuStackProps {}
@@ -28,10 +27,12 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
-		new GuLambdaFunction(this, 'SaveSalesforceQueryResultToS3Lambda', {
+		new GuScheduledLambda(this, 'salesforce-disaster-recovery-health-check', {
 			...lambdaDefaultConfig,
-			handler: 'salesforceDisasterRecoveryHealthCheck.handler',
+			handler: 'dist/lambda/main.handler',
 			functionName: `${app}-${this.stage}`,
+			rules: [{ schedule: Schedule.cron({ minute: '0', hour: '9' }) }],
+			monitoringConfiguration: { noMonitoring: true },
 		});
 	}
 }
