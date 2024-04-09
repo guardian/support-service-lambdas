@@ -37,7 +37,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           },
         },
         "FunctionName": "salesforce-disaster-recovery-health-check-CODE",
-        "Handler": "dist/lambda/main.handler",
+        "Handler": "salesforceDisasterRecoveryHealthCheck.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -303,7 +303,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
           },
         },
         "FunctionName": "salesforce-disaster-recovery-health-check-PROD",
-        "Handler": "dist/lambda/main.handler",
+        "Handler": "salesforceDisasterRecoveryHealthCheck.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [

@@ -14,8 +14,6 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 		super(scope, id, props);
 
 		const app = 'salesforce-disaster-recovery-health-check';
-		// Comment
-		// Comment
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -31,7 +29,7 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 
 		new GuScheduledLambda(this, 'salesforce-disaster-recovery-health-check', {
 			...lambdaDefaultConfig,
-			handler: 'dist/lambda/main.handler',
+			handler: 'salesforceDisasterRecoveryHealthCheck.handler',
 			functionName: `${app}-${this.stage}`,
 			rules: [{ schedule: Schedule.cron({ minute: '0', hour: '9' }) }],
 			monitoringConfiguration: { noMonitoring: true },
