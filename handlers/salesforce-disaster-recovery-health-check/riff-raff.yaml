@@ -1,5 +1,5 @@
 stacks:
-  - support
+  - membership
 regions:
   - eu-west-1
 allowedStages:
