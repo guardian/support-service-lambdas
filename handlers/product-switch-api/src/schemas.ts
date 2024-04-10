@@ -50,3 +50,18 @@ export const zuoraSwitchResponseSchema = z.object({
 });
 
 export type ZuoraSwitchResponse = z.infer<typeof zuoraSwitchResponseSchema>;
+
+export const zuoraGetAmendmentResponseSchema = z.object({
+	success: z.boolean(),
+	id: z.optional(z.string()),
+	status: z.optional(z.string()),
+	type: z.optional(z.string()),
+	customerAcceptanceDate: z.optional(z.string()),
+	reasons: z.optional(
+		z.array(z.object({ code: z.number(), message: z.string() })),
+	),
+});
+
+export type ZuoraGetAmendmentResponse = z.infer<
+	typeof zuoraGetAmendmentResponseSchema
+>;

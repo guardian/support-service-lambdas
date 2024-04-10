@@ -14,6 +14,7 @@ import type {
 } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './helpers';
 import { getCatalogInformation, getFirstContributionRatePlan } from './helpers';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
@@ -164,6 +165,7 @@ export const preview = async (
 		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
 	}
 };
+
 export const doSwitch = async (
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
@@ -171,6 +173,9 @@ export const doSwitch = async (
 	contributionAmount: number,
 	catalogInformation: CatalogInformation,
 ): Promise<ZuoraSuccessResponse> => {
+	//If the sub has a pending amount change amemdment, we need to remove it
+	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
+
 	const requestBody = buildRequestBody(
 		dayjs(),
 		accountNumber,
@@ -213,6 +218,52 @@ export const buildRequestBody = (
 					collectPayment: true,
 				},
 		  };
+	const renewalStuff = preview
+		? []
+		: [
+				{
+					type: 'TermsAndConditions',
+					triggerDates: [
+						{
+							name: 'ContractEffective',
+							triggerDate: zuoraDateFormat(orderDate),
+						},
+						{
+							name: 'ServiceActivation',
+							triggerDate: zuoraDateFormat(orderDate),
+						},
+						{
+							name: 'CustomerAcceptance',
+							triggerDate: zuoraDateFormat(orderDate),
+						},
+					],
+					termsAndConditions: {
+						lastTerm: {
+							termType: 'TERMED',
+							endDate: zuoraDateFormat(orderDate),
+						},
+					},
+				},
+				{
+					type: 'RenewSubscription',
+					triggerDates: [
+						{
+							name: 'ContractEffective',
+							triggerDate: zuoraDateFormat(orderDate),
+						},
+						{
+							name: 'ServiceActivation',
+							triggerDate: zuoraDateFormat(orderDate),
+						},
+						{
+							name: 'CustomerAcceptance',
+							triggerDate: zuoraDateFormat(orderDate),
+						},
+					],
+					renewSubscription: {},
+				},
+		  ];
+
 	return {
 		orderDate: zuoraDateFormat(orderDate),
 		existingAccountNumber: accountNumber,
@@ -258,6 +309,7 @@ export const buildRequestBody = (
 							},
 						},
 					},
+					...renewalStuff,
 				],
 			},
 		],

@@ -3,12 +3,21 @@
  *
  * @group integration
  */
+import console from 'console';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { doSwitch, preview } from '../src/contributionToSupporterPlus';
 import { getCatalogInformation } from '../src/helpers';
+
+const jestConsole = console;
+beforeEach(() => {
+	global.console = console;
+});
+afterEach(() => {
+	global.console = jestConsole;
+});
 
 describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch with an additional contribution element', async () => {
@@ -70,8 +79,8 @@ describe('product-switching behaviour', () => {
 	it(
 		'can switch an annual recurring contribution',
 		async () => {
-			const accountNumber = 'A00251726';
-			const subscriptionNumber = 'A-S00267726';
+			const accountNumber = 'A00714188';
+			const subscriptionNumber = 'A-S00707842';
 			const zuoraClient = await ZuoraClient.create('CODE');
 			const productCatalog = await getProductCatalogFromApi('CODE');
 			const catalogInformation = getCatalogInformation(
