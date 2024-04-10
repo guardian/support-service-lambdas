@@ -21,21 +21,21 @@ afterEach(() => {
 
 describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch with an additional contribution element', async () => {
-		const accountNumber = 'A00701136';
-		const subscriptionNumber = 'A-S00695309';
+		const accountNumber = 'A00562643';
+		const subscriptionNumber = 'A-S00563443';
 		const zuoraClient = await ZuoraClient.create('CODE');
 		const productCatalog = await getProductCatalogFromApi('CODE');
 		const catalogInformation = getCatalogInformation(
 			productCatalog,
-			'Annual',
-			'USD',
+			'Month',
+			'GBP',
 		);
 
 		const result = await preview(
 			zuoraClient,
 			accountNumber,
 			subscriptionNumber,
-			25,
+			0,
 			catalogInformation,
 		);
 
@@ -77,15 +77,15 @@ describe('product-switching behaviour', () => {
 		expect(result).toStrictEqual(expectedResult);
 	});
 	it(
-		'can switch an annual recurring contribution',
+		'can switch a recurring contribution',
 		async () => {
-			const accountNumber = 'A00714188';
-			const subscriptionNumber = 'A-S00707842';
+			const accountNumber = 'A00888905';
+			const subscriptionNumber = 'A-S00875248';
 			const zuoraClient = await ZuoraClient.create('CODE');
 			const productCatalog = await getProductCatalogFromApi('CODE');
 			const catalogInformation = getCatalogInformation(
 				productCatalog,
-				'Annual',
+				'Month',
 				'GBP',
 			);
 
@@ -93,7 +93,8 @@ describe('product-switching behaviour', () => {
 				zuoraClient,
 				accountNumber,
 				subscriptionNumber,
-				25,
+				0,
+				false,
 				catalogInformation,
 			);
 			expect(result.success).toBe(true);

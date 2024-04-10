@@ -74,6 +74,8 @@ export const switchToSupporterPlus = async (
 	const contributionAmount =
 		input.price - catalogInformation.supporterPlus.price;
 
+	const startNewTerm = !dayjs(subscription.termStartDate).isSame(dayjs());
+
 	if (input.preview) {
 		return await preview(
 			zuoraClient,
@@ -88,6 +90,7 @@ export const switchToSupporterPlus = async (
 			subscription.accountNumber,
 			subscription.subscriptionNumber,
 			contributionAmount,
+			startNewTerm,
 			catalogInformation,
 		);
 	}
@@ -153,6 +156,7 @@ export const preview = async (
 		contributionAmount,
 		catalogInformation,
 		true,
+		false,
 	);
 	const zuoraResponse: ZuoraPreviewResponse = await zuoraClient.post(
 		'v1/orders/preview',
@@ -171,9 +175,10 @@ export const doSwitch = async (
 	accountNumber: string,
 	subscriptionNumber: string,
 	contributionAmount: number,
+	startNewTerm: boolean,
 	catalogInformation: CatalogInformation,
 ): Promise<ZuoraSuccessResponse> => {
-	//If the sub has a pending amount change amemdment, we need to remove it
+	//If the sub has a pending amount change amendment, we need to remove it
 	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
 
 	const requestBody = buildRequestBody(
@@ -183,6 +188,7 @@ export const doSwitch = async (
 		contributionAmount,
 		catalogInformation,
 		false,
+		startNewTerm,
 	);
 	const zuoraResponse: ZuoraSwitchResponse = await zuoraClient.post(
 		'v1/orders',
@@ -203,6 +209,7 @@ export const buildRequestBody = (
 	contributionAmount: number,
 	catalogInformation: CatalogInformation,
 	preview: boolean,
+	startNewTerm: boolean,
 ) => {
 	const options = preview
 		? {
@@ -218,9 +225,8 @@ export const buildRequestBody = (
 					collectPayment: true,
 				},
 		  };
-	const renewalStuff = preview
-		? []
-		: [
+	const newTermOrderActions = startNewTerm
+		? [
 				{
 					type: 'TermsAndConditions',
 					triggerDates: [
@@ -262,7 +268,8 @@ export const buildRequestBody = (
 					],
 					renewSubscription: {},
 				},
-		  ];
+		  ]
+		: [];
 
 	return {
 		orderDate: zuoraDateFormat(orderDate),
@@ -309,7 +316,7 @@ export const buildRequestBody = (
 							},
 						},
 					},
-					...renewalStuff,
+					...newTermOrderActions,
 				],
 			},
 		],
