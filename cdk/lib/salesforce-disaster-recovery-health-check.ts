@@ -8,8 +8,9 @@ import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
+	CustomState,
 	DefinitionBody,
-	Pass,
+	// Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 
@@ -74,18 +75,29 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			],
 		});
 
-		const state1 = new Pass(this, 'pass1');
-		const state2 = new Pass(this, 'pass2');
-		const state3 = new Pass(this, 'pass3');
+		const startExecution = new CustomState(this, 'StartExecution', {
+			stateJson: {
+				Type: 'Task',
+				Resource: 'arn:aws:states:::states:startExecution.sync:2',
+				Parameters: {
+					StateMachineArn: stateMachine.stateMachineArn,
+					Input: {
+						query:
+							"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c FROM Zuora__CustomerAccount__c WHERE CreatedDate = YESTERDAY AND Zuora__Status__c = 'Active'",
+					},
+					Name: `health-check-${new Date()
+						.toISOString()
+						.replace(/[:\-.]/g, '')}`,
+				},
+			},
+		});
 
 		const testStateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryHealthCheckStateMachine',
 			{
 				stateMachineName: `${app}-${this.stage}`,
-				definitionBody: DefinitionBody.fromChainable(
-					state1.next(state2.next(state3)),
-				),
+				definitionBody: DefinitionBody.fromChainable(startExecution),
 			},
 		);
 
