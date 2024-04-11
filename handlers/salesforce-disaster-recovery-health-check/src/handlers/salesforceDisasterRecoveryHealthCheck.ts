@@ -15,7 +15,7 @@ export const handler: Handler = async () => {
 			"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c FROM Zuora__CustomerAccount__c WHERE CreatedDate = YESTERDAY AND Zuora__Status__c = 'Active'",
 	});
 
-	const dateString = new Date().toISOString().replace(/[:\-\.]/g, '');
+	const dateString = new Date().toISOString().replace(/[:\-.]/g, '');
 	const executionName = `health-check-${dateString}`;
 
 	try {
