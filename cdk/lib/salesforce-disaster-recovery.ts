@@ -370,6 +370,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const haveAllRowsSuccedeed = new Choice(this, 'HaveAllRowsSuccedeed')
+			.when(
+				Condition.numberEquals('$.failedRowsCount', 0),
+				new Succeed(this, 'AllRowsHaveSuccedeed'),
+			)
+			.otherwise(new Fail(this, 'SomeRowsHaveFailed'));
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -387,15 +394,20 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
-											.next(constructEmailData)
-											.next(sendProcedureSummaryEmail)
 											.next(
-												new Choice(this, 'HaveAllRowsSuccedeed')
+												new Choice(this, 'IsHealthCheck')
 													.when(
-														Condition.numberEquals('$.failedRowsCount', 0),
-														new Succeed(this, 'AllRowsHaveSuccedeed'),
+														Condition.stringMatches(
+															'$$.Execution.Name',
+															'health-check-*',
+														),
+														haveAllRowsSuccedeed,
 													)
-													.otherwise(new Fail(this, 'SomeRowsHaveFailed')),
+													.otherwise(
+														constructEmailData
+															.next(sendProcedureSummaryEmail)
+															.next(haveAllRowsSuccedeed),
+													),
 											),
 									),
 								)
