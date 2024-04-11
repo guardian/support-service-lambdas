@@ -3,13 +3,13 @@ import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 const snsClient = new SNSClient({ region: process.env.region });
 
 export const publishSnsMessage = async ({
+	topicArn,
 	subject,
 	message,
-	topicArn,
 }: {
+	topicArn: string;
 	subject: string;
 	message: string;
-	topicArn: string;
 }) => {
 	try {
 		const command = new PublishCommand({

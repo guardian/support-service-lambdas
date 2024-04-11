@@ -60,10 +60,17 @@ export const handler: Handler = async () => {
 
 				if (status === 'SUCCEEDED') return;
 
-				throw new Error(describeExecutionResponse.cause);
+				await publishSnsMessage({
+					topicArn,
+					subject: `Health Check Failed For ${stage} Salesforce Disaster Recovery State Machine`,
+					message: `Execution details:\nhttps://${process.env.region}.console.aws.amazon.com/states/home?region=${process.env.region}#/executions/details/${executionArn}`,
+				});
+
+				return 'HEALTH CHECK PASSED';
 			}
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 		}
+		return 'HEALTH CHECK PASSED';
 	} catch (error) {
 		console.error(error);
 
@@ -72,5 +79,7 @@ export const handler: Handler = async () => {
 			message: typeof error === 'string' ? error : JSON.stringify(error),
 			topicArn,
 		});
+
+		return 'HEALTH CHECK FAILED';
 	}
 };
