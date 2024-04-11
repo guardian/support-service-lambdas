@@ -322,7 +322,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 
 		const constructNotificationData = new Pass(
 			this,
-			'CconstructNotificationData',
+			'ConstructNotificationData',
 			{
 				parameters: {
 					stateMachineExecutionDetailsUrl: JsonPath.format(

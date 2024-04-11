@@ -222,7 +222,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"IsHealthCheck":{"Type":"Choice","Choices":[{"Variable":"$$.Execution.Name","StringMatches":"health-check-*","Next":"HaveAllRowsSuccedeed"}],"Default":"CconstructNotificationData"},"CconstructNotificationData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"IsHealthCheck":{"Type":"Choice","Choices":[{"Variable":"$$.Execution.Name","StringMatches":"health-check-*","Next":"HaveAllRowsSuccedeed"}],"Default":"ConstructNotificationData"},"ConstructNotificationData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
@@ -1533,7 +1533,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"IsHealthCheck":{"Type":"Choice","Choices":[{"Variable":"$$.Execution.Name","StringMatches":"health-check-*","Next":"HaveAllRowsSuccedeed"}],"Default":"CconstructNotificationData"},"CconstructNotificationData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"IsHealthCheck":{"Type":"Choice","Choices":[{"Variable":"$$.Execution.Name","StringMatches":"health-check-*","Next":"HaveAllRowsSuccedeed"}],"Default":"ConstructNotificationData"},"ConstructNotificationData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
@@ -2844,7 +2844,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
                   "Arn",
                 ],
               },
-              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"IsHealthCheck":{"Type":"Choice","Choices":[{"Variable":"$$.Execution.Name","StringMatches":"health-check-*","Next":"HaveAllRowsSuccedeed"}],"Default":"CconstructNotificationData"},"CconstructNotificationData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
+              "","Payload":{"resultFiles.$":"$.ResultFiles.FAILED","filePath.$":"States.Format('{}/failed-rows.csv', $$.Execution.StartTime)"}}},"IsHealthCheck":{"Type":"Choice","Choices":[{"Variable":"$$.Execution.Name","StringMatches":"health-check-*","Next":"HaveAllRowsSuccedeed"}],"Default":"ConstructNotificationData"},"ConstructNotificationData":{"Type":"Pass","Parameters":{"stateMachineExecutionDetailsUrl.$":"States.Format('https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}', '",
               {
                 "Ref": "AWS::Region",
               },
