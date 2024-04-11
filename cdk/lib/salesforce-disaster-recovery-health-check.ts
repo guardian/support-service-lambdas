@@ -12,6 +12,8 @@ import {
 	DefinitionBody,
 	// Pass,
 	StateMachine,
+	Wait,
+	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 
 export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
@@ -76,6 +78,8 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			],
 		});
 
+		// TEST BELOW WIP
+
 		const startExecution = new CustomState(this, 'StartExecution', {
 			stateJson: {
 				Type: 'Task',
@@ -93,12 +97,34 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			},
 		});
 
+		const waitForExecutionToComplete = new Wait(
+			this,
+			'WaitForExecutionToComplete',
+			{
+				time: WaitTime.duration(Duration.seconds(5)),
+			},
+		);
+
+		const describeExecution = new CustomState(this, 'DescribeExecution', {
+			stateJson: {
+				Type: 'Task',
+				Resource: 'arn:aws:states:::aws-sdk:sfn:describeExecution',
+				Parameters: {
+					ExecutionArn: '',
+				},
+			},
+		});
+
 		const testStateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryHealthCheckStateMachine',
 			{
 				stateMachineName: `${app}-${this.stage}`,
-				definitionBody: DefinitionBody.fromChainable(startExecution),
+				definitionBody: DefinitionBody.fromChainable(
+					startExecution.next(
+						waitForExecutionToComplete.next(describeExecution),
+					),
+				),
 			},
 		);
 
