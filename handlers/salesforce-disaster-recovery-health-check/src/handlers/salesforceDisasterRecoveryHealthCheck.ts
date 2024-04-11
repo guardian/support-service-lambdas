@@ -62,7 +62,7 @@ export const handler: Handler = async () => {
 		console.error(error);
 
 		await publishSnsMessage({
-			message: JSON.stringify(error),
+			message: typeof error === 'string' ? error : JSON.stringify(error),
 			topicArn,
 		});
 	}
