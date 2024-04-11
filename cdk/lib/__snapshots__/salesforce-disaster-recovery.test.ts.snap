@@ -246,7 +246,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcedureSummaryEmail"},"SendProcedureSummaryEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendCompletionNotification"},"SendCompletionNotification":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },
@@ -1557,7 +1557,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcedureSummaryEmail"},"SendProcedureSummaryEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendCompletionNotification"},"SendCompletionNotification":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },
@@ -2868,7 +2868,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendProcedureSummaryEmail"},"SendProcedureSummaryEmail":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
+              "', $$.Execution.StartTime, 'failed-rows.csv')"},"Next":"SendCompletionNotification"},"SendCompletionNotification":{"Next":"HaveAllRowsSuccedeed","Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"",
               {
                 "Ref": "SnsTopic2C1570A4",
               },

@@ -346,9 +346,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const sendProcedureSummaryEmail = new CustomState(
+		const sendCompletionNotification = new CustomState(
 			this,
-			'SendProcedureSummaryEmail',
+			'SendCompletionNotification',
 			{
 				stateJson: {
 					Type: 'Task',
@@ -388,7 +388,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
 											.next(constructEmailData)
-											.next(sendProcedureSummaryEmail)
+											.next(sendCompletionNotification)
 											.next(
 												new Choice(this, 'HaveAllRowsSuccedeed')
 													.when(
