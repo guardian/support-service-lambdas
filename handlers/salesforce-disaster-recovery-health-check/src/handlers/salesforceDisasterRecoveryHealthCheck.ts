@@ -71,7 +71,7 @@ export const handler: Handler = async () => {
 					message: `Execution details:\nhttps://${region}.console.aws.amazon.com/states/home?region=${region}#/executions/details/${executionArn}`,
 				});
 
-				return 'HEALTH CHECK PASSED';
+				return 'HEALTH CHECK FAILED';
 			}
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 		}
