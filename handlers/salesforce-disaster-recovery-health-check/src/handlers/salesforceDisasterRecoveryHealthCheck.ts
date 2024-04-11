@@ -4,6 +4,11 @@ import { publishSnsMessage } from '../services/sns';
 import { describeExecution, startExecution } from '../services/step-functions';
 
 export const handler: Handler = async () => {
+	const stage = checkDefined<string>(
+		process.env.STAGE,
+		'STAGE environment variable not set',
+	);
+
 	const topicArn = checkDefined<string>(
 		process.env.SNS_TOPIC_ARN,
 		'SNS_TOPIC_ARN environment variable not set',
@@ -62,6 +67,7 @@ export const handler: Handler = async () => {
 		console.error(error);
 
 		await publishSnsMessage({
+			subject: `Health Check Failed For ${stage} Salesforce Disaster Recovery State Machine`,
 			message: typeof error === 'string' ? error : JSON.stringify(error),
 			topicArn,
 		});
