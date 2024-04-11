@@ -3,10 +3,15 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { Schedule } from 'aws-cdk-lib/aws-events';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
+import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
+import {
+	DefinitionBody,
+	Pass,
+	StateMachine,
+} from 'aws-cdk-lib/aws-stepfunctions';
 
 export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -67,6 +72,51 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 					resources: [snsTopicArn],
 				}),
 			],
+		});
+
+		const state1 = new Pass(this, 'pass1');
+		const state2 = new Pass(this, 'pass2');
+		const state3 = new Pass(this, 'pass3');
+
+		const testStateMachine = new StateMachine(
+			this,
+			'SalesforceDisasterRecoveryHealthCheckStateMachine',
+			{
+				stateMachineName: `${app}-${this.stage}`,
+				definitionBody: DefinitionBody.fromChainable(
+					state1.next(state2.next(state3)),
+				),
+			},
+		);
+
+		testStateMachine.role.attachInlinePolicy(
+			new Policy(
+				this,
+				'SalesforceDisasterRecoveryHealthCheckStateMachineRoleAdditionalPolicy',
+				{
+					statements: [
+						new PolicyStatement({
+							actions: ['states:StartExecution'],
+							resources: [stateMachine.stateMachineArn],
+						}),
+						new PolicyStatement({
+							actions: ['sns:Publish'],
+							resources: [snsTopicArn],
+						}),
+					],
+				},
+			),
+		);
+
+		new Rule(this, 'Rule', {
+			schedule: Schedule.cron({
+				minute: '0',
+				hour: '6',
+				weekDay: 'MON',
+				month: '*',
+				year: '*',
+			}),
+			targets: [new SfnStateMachine(testStateMachine)],
 		});
 	}
 }
