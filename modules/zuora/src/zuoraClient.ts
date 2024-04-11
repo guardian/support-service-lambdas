@@ -38,16 +38,18 @@ export class ZuoraClient {
 		path: string,
 		body: string,
 		schema: T,
+		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(path, 'POST', schema, body);
+		return await this.fetch(path, 'POST', schema, body, headers);
 	}
 
 	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		body: string,
 		schema: T,
+		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(path, 'PUT', schema, body);
+		return await this.fetch(path, 'PUT', schema, body, headers);
 	}
 
 	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -62,6 +64,7 @@ export class ZuoraClient {
 		method: string,
 		schema: T,
 		body?: string,
+		headers?: Record<string, string>,
 	): Promise<O> {
 		const bearerToken = await this.tokenProvider.getBearerToken();
 		const url = `${this.zuoraServerUrl}/${path.replace(/^\//, '')}`;
@@ -71,6 +74,7 @@ export class ZuoraClient {
 			headers: {
 				Authorization: `Bearer ${bearerToken.access_token}`,
 				'Content-Type': 'application/json',
+				...headers,
 			},
 			body,
 		});
