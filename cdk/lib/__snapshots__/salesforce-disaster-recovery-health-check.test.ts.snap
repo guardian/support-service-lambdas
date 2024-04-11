@@ -32,6 +32,9 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery-health-check",
+            "REGION": {
+              "Ref": "AWS::Region",
+            },
             "SNS_TOPIC_ARN": {
               "Fn::Join": [
                 "",
@@ -394,6 +397,9 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery-health-check",
+            "REGION": {
+              "Ref": "AWS::Region",
+            },
             "SNS_TOPIC_ARN": {
               "Fn::Join": [
                 "",
