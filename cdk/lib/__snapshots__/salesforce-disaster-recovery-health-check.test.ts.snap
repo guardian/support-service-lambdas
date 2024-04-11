@@ -169,7 +169,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:salesforce-disaster-recovery-CODE","Input":{"query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c FROM Zuora__CustomerAccount__c WHERE CreatedDate = YESTERDAY AND Zuora__Status__c = 'Active'"},"Name":"health-check-20240411T155805327Z"}},"WaitForExecutionToComplete":{"Type":"Wait","Seconds":5,"Next":"DescribeExecution"},"DescribeExecution":{"End":true,"Type":"Task","Resource":"arn:aws:states:::aws-sdk:sfn:describeExecution","Parameters":{"ExecutionArn":""}}}}",
+              ":stateMachine:salesforce-disaster-recovery-CODE","Input":{"query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c FROM Zuora__CustomerAccount__c WHERE CreatedDate = YESTERDAY AND Zuora__Status__c = 'Active'"},"Name":"health-check-sfn"}},"WaitForExecutionToComplete":{"Type":"Wait","Seconds":5,"Next":"DescribeExecution"},"DescribeExecution":{"End":true,"Type":"Task","Resource":"arn:aws:states:::aws-sdk:sfn:describeExecution","Parameters":{"ExecutionArn":""}}}}",
             ],
           ],
         },
@@ -880,7 +880,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:salesforce-disaster-recovery-PROD","Input":{"query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c FROM Zuora__CustomerAccount__c WHERE CreatedDate = YESTERDAY AND Zuora__Status__c = 'Active'"},"Name":"health-check-20240411T155805357Z"}},"WaitForExecutionToComplete":{"Type":"Wait","Seconds":5,"Next":"DescribeExecution"},"DescribeExecution":{"End":true,"Type":"Task","Resource":"arn:aws:states:::aws-sdk:sfn:describeExecution","Parameters":{"ExecutionArn":""}}}}",
+              ":stateMachine:salesforce-disaster-recovery-PROD","Input":{"query":"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c FROM Zuora__CustomerAccount__c WHERE CreatedDate = YESTERDAY AND Zuora__Status__c = 'Active'"},"Name":"health-check-sfn"}},"WaitForExecutionToComplete":{"Type":"Wait","Seconds":5,"Next":"DescribeExecution"},"DescribeExecution":{"End":true,"Type":"Task","Resource":"arn:aws:states:::aws-sdk:sfn:describeExecution","Parameters":{"ExecutionArn":""}}}}",
             ],
           ],
         },

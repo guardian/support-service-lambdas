@@ -90,9 +90,10 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 						query:
 							"SELECT Id, Zuora__Zuora_Id__c, Zuora__Account__c, Contact__c FROM Zuora__CustomerAccount__c WHERE CreatedDate = YESTERDAY AND Zuora__Status__c = 'Active'",
 					},
-					Name: `health-check-${new Date()
-						.toISOString()
-						.replace(/[:\-.]/g, '')}`,
+					Name: `health-check-sfn`,
+					// Name: `health-check-${new Date()
+					// 	.toISOString()
+					// 	.replace(/[:\-.]/g, '')}`,
 				},
 			},
 		});
