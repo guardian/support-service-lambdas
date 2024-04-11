@@ -1,9 +1,7 @@
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { Handler } from 'aws-lambda';
-import { SNS, StepFunctions } from 'aws-sdk';
-
-const stepfunctions = new StepFunctions();
-const sns = new SNS();
+import { publishSnsMessage } from '../services/sns';
+import { describeExecution, startExecution } from '../services/step-functions';
 
 export const handler: Handler = async () => {
 	const topicArn = checkDefined<string>(
@@ -25,24 +23,29 @@ export const handler: Handler = async () => {
 	const executionName = `health-check-${dateString}`;
 
 	try {
-		const startExecutionResponse = await stepfunctions
-			.startExecution({
-				stateMachineArn: stateMachineArn,
-				input: input,
-				name: executionName,
-			})
-			.promise();
+		const startExecutionResponse = await startExecution({
+			stateMachineArn,
+			input,
+			name: executionName,
+		});
 
 		const executionArn = startExecutionResponse.executionArn;
+
+		if (executionArn === undefined) {
+			throw new Error('Execution ARN is undefined');
+		}
+
 		console.log('Execution started:', executionArn);
 
 		let status = 'RUNNING';
 		while (status === 'RUNNING') {
-			const describeExecutionResponse = await stepfunctions
-				.describeExecution({
-					executionArn: executionArn,
-				})
-				.promise();
+			const describeExecutionResponse = await describeExecution({
+				executionArn,
+			});
+
+			if (describeExecutionResponse.status === undefined) {
+				throw new Error('Execution status is undefined');
+			}
 
 			status = describeExecutionResponse.status;
 
@@ -53,7 +56,7 @@ export const handler: Handler = async () => {
 
 				await publishSnsMessage({
 					message: JSON.stringify(describeExecutionResponse),
-					topicArn: topicArn,
+					topicArn,
 				});
 			}
 			await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -62,22 +65,8 @@ export const handler: Handler = async () => {
 		console.error('Failed to execute state machine:', error);
 
 		await publishSnsMessage({
-			message: 'ERROR',
-			topicArn: topicArn,
+			message: JSON.stringify(error),
+			topicArn,
 		});
 	}
-};
-
-const publishSnsMessage = async ({
-	message,
-	topicArn,
-}: {
-	message: string;
-	topicArn: string;
-}) => {
-	const params: SNS.PublishInput = {
-		Message: message,
-		TopicArn: topicArn,
-	};
-	await sns.publish(params).promise();
 };
