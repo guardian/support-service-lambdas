@@ -285,28 +285,9 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::IAM::Policy",
     },
-    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090AllowEventRulesalesforcedisasterrecoveryhealthcheckCODEsalesforcedisasterrecoveryhealthcheck1E72AB499146667B": {
+    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron06MON05DCAE5E4": {
       "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthcheck7A2C7C8E",
-            "Arn",
-          ],
-        },
-        "Principal": "events.amazonaws.com",
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090E13FC178",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090E13FC178": {
-      "Properties": {
-        "ScheduleExpression": "cron(0 9 * * ? *)",
+        "ScheduleExpression": "cron(0 6 ? * MON *)",
         "State": "ENABLED",
         "Targets": [
           {
@@ -321,6 +302,25 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
         ],
       },
       "Type": "AWS::Events::Rule",
+    },
+    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron06MON0AllowEventRulesalesforcedisasterrecoveryhealthcheckCODEsalesforcedisasterrecoveryhealthcheck1E72AB495CD3090A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "salesforcedisasterrecoveryhealthcheck7A2C7C8E",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron06MON05DCAE5E4",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
   },
 }
@@ -611,28 +611,9 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
       },
       "Type": "AWS::IAM::Policy",
     },
-    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090AllowEventRulesalesforcedisasterrecoveryhealthcheckPRODsalesforcedisasterrecoveryhealthcheck330F201C012EB046": {
+    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron06MON05DCAE5E4": {
       "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthcheck7A2C7C8E",
-            "Arn",
-          ],
-        },
-        "Principal": "events.amazonaws.com",
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090E13FC178",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron090E13FC178": {
-      "Properties": {
-        "ScheduleExpression": "cron(0 9 * * ? *)",
+        "ScheduleExpression": "cron(0 6 ? * MON *)",
         "State": "ENABLED",
         "Targets": [
           {
@@ -647,6 +628,25 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
         ],
       },
       "Type": "AWS::Events::Rule",
+    },
+    "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron06MON0AllowEventRulesalesforcedisasterrecoveryhealthcheckPRODsalesforcedisasterrecoveryhealthcheck330F201C9F7FB4EF": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "salesforcedisasterrecoveryhealthcheck7A2C7C8E",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "salesforcedisasterrecoveryhealthchecksalesforcedisasterrecoveryhealthcheckcron06MON05DCAE5E4",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
   },
 }

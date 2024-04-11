@@ -34,7 +34,17 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			},
 			handler: 'salesforceDisasterRecoveryHealthCheck.handler',
 			functionName: `${app}-${this.stage}`,
-			rules: [{ schedule: Schedule.cron({ minute: '0', hour: '9' }) }],
+			rules: [
+				{
+					schedule: Schedule.cron({
+						minute: '0',
+						hour: '6',
+						weekDay: 'MON',
+						month: '*',
+						year: '*',
+					}),
+				},
+			],
 			monitoringConfiguration: { noMonitoring: true },
 			initialPolicy: [
 				new PolicyStatement({
