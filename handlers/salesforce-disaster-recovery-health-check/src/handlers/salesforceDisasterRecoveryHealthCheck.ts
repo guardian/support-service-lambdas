@@ -54,15 +54,12 @@ export const handler: Handler = async () => {
 
 				if (status === 'SUCCEEDED') return;
 
-				await publishSnsMessage({
-					message: JSON.stringify(describeExecutionResponse),
-					topicArn,
-				});
+				throw new Error(describeExecutionResponse.cause);
 			}
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 		}
 	} catch (error) {
-		console.error('Failed to execute state machine:', error);
+		console.error(error);
 
 		await publishSnsMessage({
 			message: JSON.stringify(error),
