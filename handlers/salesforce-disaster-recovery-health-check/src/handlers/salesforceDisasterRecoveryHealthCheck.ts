@@ -20,6 +20,7 @@ export const handler: Handler = async () => {
 			.startExecution({
 				stateMachineArn: stateMachineArn,
 				input: input,
+				name: 'health-check-test',
 			})
 			.promise();
 
