@@ -9,6 +9,11 @@ export const handler: Handler = async () => {
 		'STAGE environment variable not set',
 	);
 
+	const region = checkDefined<string>(
+		process.env.REGION,
+		'REGION environment variable not set',
+	);
+
 	const topicArn = checkDefined<string>(
 		process.env.SNS_TOPIC_ARN,
 		'SNS_TOPIC_ARN environment variable not set',
@@ -63,10 +68,10 @@ export const handler: Handler = async () => {
 				await publishSnsMessage({
 					topicArn,
 					subject: `Health Check Failed For ${stage} Salesforce Disaster Recovery State Machine`,
-					message: `Execution details:\nhttps://${process.env.region}.console.aws.amazon.com/states/home?region=${process.env.region}#/executions/details/${executionArn}`,
+					message: `Execution details:\nhttps://${region}.console.aws.amazon.com/states/home?region=${region}#/executions/details/${executionArn}`,
 				});
 
-				return 'HEALTH CHECK PASSED';
+				return 'HEALTH CHECK FAILED';
 			}
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 		}
