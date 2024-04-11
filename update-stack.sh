@@ -20,7 +20,7 @@ pnpm --filter cdk test-update && pnpm --filter cdk package
 
 aws cloudformation update-stack \
   --capabilities '["CAPABILITY_AUTO_EXPAND", "CAPABILITY_NAMED_IAM", "CAPABILITY_IAM"]'  \
-  --stack-name "membership-CODE-$PROJECT_NAME" \
+  --stack-name "support-CODE-$PROJECT_NAME" \
   --template-body "file://cdk/cdk.out/$PROJECT_NAME-CODE.template.json" \
   --profile membership \
   --region eu-west-1 \
