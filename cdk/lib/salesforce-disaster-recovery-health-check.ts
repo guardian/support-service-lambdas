@@ -14,6 +14,8 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 
 		const app = 'salesforce-disaster-recovery-health-check';
 
+		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:salesforce-disaster-recovery-${this.stage}`;
+
 		const stateMachine = StateMachine.fromStateMachineName(
 			this,
 			'stateMachine',
@@ -30,6 +32,7 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 				APP: app,
 				STACK: this.stack,
 				STAGE: this.stage,
+				SNS_TOPIC_ARN: snsTopicArn,
 				STATE_MACHINE_ARN: stateMachine.stateMachineArn,
 			},
 			handler: 'salesforceDisasterRecoveryHealthCheck.handler',
@@ -59,13 +62,11 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 						`arn:aws:states:${this.region}:${this.account}:execution:salesforce-disaster-recovery-${this.stage}:*`,
 					],
 				}),
+				new PolicyStatement({
+					actions: ['sns:Publish'],
+					resources: [snsTopicArn],
+				}),
 			],
 		});
 	}
 }
-
-// lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
-// 	actions: ['states:StartExecution', 'states:DescribeExecution'],
-// 	resources: ['arn:aws:states:REGION:ACCOUNT_ID:stateMachine:YOUR_STATE_MACHINE_NAME'] // replace placeholders
-//   }));
-//   topic.grantPublish(lambdaFunction);

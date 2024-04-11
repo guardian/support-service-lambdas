@@ -32,6 +32,22 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery-health-check",
+            "SNS_TOPIC_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:sns:",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":salesforce-disaster-recovery-CODE",
+                ],
+              ],
+            },
             "STACK": "membership",
             "STAGE": "CODE",
             "STATE_MACHINE_ARN": {
@@ -185,6 +201,26 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
                       "Ref": "AWS::AccountId",
                     },
                     ":execution:salesforce-disaster-recovery-CODE:*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sns:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":salesforce-disaster-recovery-CODE",
                   ],
                 ],
               },
@@ -358,6 +394,22 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
         "Environment": {
           "Variables": {
             "APP": "salesforce-disaster-recovery-health-check",
+            "SNS_TOPIC_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:sns:",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":salesforce-disaster-recovery-PROD",
+                ],
+              ],
+            },
             "STACK": "membership",
             "STAGE": "PROD",
             "STATE_MACHINE_ARN": {
@@ -511,6 +563,26 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
                       "Ref": "AWS::AccountId",
                     },
                     ":execution:salesforce-disaster-recovery-PROD:*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sns:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":salesforce-disaster-recovery-PROD",
                   ],
                 ],
               },
