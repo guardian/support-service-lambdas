@@ -6,6 +6,8 @@
 
 - [Design document for KR1](https://docs.google.com/document/d/1_KxFtfKU3-3-PSzaAYG90uONa05AVgoBmyBDyu5SC5c)
 
+- [Runbook](https://docs.google.com/document/d/1_KxFtfKU3-3-PSzaAYG90uONa05AVgoBmyBDyu5SC5c/edit#heading=h.2r6eh2y6rjut)
+
 ## Diagram
 
 For context, this application is the implementation of the "Salesforce Disaster Recovery" system below:
