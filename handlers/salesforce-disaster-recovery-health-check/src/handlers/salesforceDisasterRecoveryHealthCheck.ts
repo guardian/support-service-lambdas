@@ -39,11 +39,10 @@ export const handler: Handler = async () => {
 			name: executionName,
 		});
 
-		const executionArn = startExecutionResponse.executionArn;
-
-		if (executionArn === undefined) {
-			throw new Error('Execution ARN is undefined');
-		}
+		const executionArn = checkDefined<string>(
+			startExecutionResponse.executionArn,
+			'Execution ARN is undefined',
+		);
 
 		console.log('Execution started:', executionArn);
 
@@ -53,11 +52,10 @@ export const handler: Handler = async () => {
 				executionArn,
 			});
 
-			if (describeExecutionResponse.status === undefined) {
-				throw new Error('Execution status is undefined');
-			}
-
-			status = describeExecutionResponse.status;
+			status = checkDefined<string>(
+				describeExecutionResponse.status,
+				'Execution status is undefined',
+			);
 
 			if (status !== 'RUNNING') {
 				console.log('Execution result:', describeExecutionResponse);
