@@ -1,0 +1,1 @@
+A module to enable sending of emails from Typescript code via Braze and [membership-workflow](https://github.com/guardian/membership-workflow/) 
