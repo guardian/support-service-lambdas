@@ -1,9 +1,10 @@
 import { checkDefined } from '@modules/nullAndUndefined';
-import type { Handler } from 'aws-lambda';
 import { publishSnsMessage } from '../services/sns';
 import { describeExecution, startExecution } from '../services/step-functions';
 
-export const handler: Handler = async () => {
+export const handler = async (): Promise<
+	'HEALTH CHECK PASSED' | 'HEALTH CHECK FAILED'
+> => {
 	const stage = checkDefined<string>(
 		process.env.STAGE,
 		'STAGE environment variable not set',
@@ -60,7 +61,7 @@ export const handler: Handler = async () => {
 			if (status !== 'RUNNING') {
 				console.log('Execution result:', describeExecutionResponse);
 
-				if (status === 'SUCCEEDED') return;
+				if (status === 'SUCCEEDED') return 'HEALTH CHECK PASSED';
 
 				await publishSnsMessage({
 					topicArn,
