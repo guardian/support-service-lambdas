@@ -8,9 +8,14 @@ import type { EmailMessage } from '@modules/email/email';
 import { sendEmail } from '@modules/email/email';
 
 test('Email', async () => {
+	// To test an actual email, replace the emailAddress with your email address and the stage with 'PROD'
+	// this will send an recurring contribution to supporter plus switch email
+	const stage = 'CODE';
+	const emailAddress = 'test@thegulocal.com';
+
 	const emailMessage: EmailMessage = {
 		To: {
-			Address: 'rupert.bates@theguardian.com',
+			Address: emailAddress,
 			ContactAttributes: {
 				SubscriberAttributes: {
 					first_name: 'Support',
@@ -28,6 +33,6 @@ test('Email', async () => {
 		SfContactId: '0035I00000VUYThQAP',
 	};
 
-	const result = await sendEmail('PROD', emailMessage);
+	const result = await sendEmail(stage, emailMessage);
 	expect(result.MessageId?.length).toBeGreaterThan(0);
 });

@@ -11,7 +11,7 @@ export type EmailPayload = {
 };
 
 export type DataExtensionName =
-	| 'SV_RCtoSP_Switch'
+	| 'SV_RCtoSP_Switch' // recurring contribution to supporter plus switch
 	| 'subscription-cancelled-email';
 
 export type EmailMessage = {
