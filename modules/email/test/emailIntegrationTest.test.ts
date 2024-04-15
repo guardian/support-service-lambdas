@@ -4,7 +4,7 @@
  * @group integration
  */
 import type { EmailMessage } from '@modules/email/email';
-import { sendEmail } from '@modules/email/email';
+import { DataExtensionNames, sendEmail } from '@modules/email/email';
 
 test('Email', async () => {
 	// To test an actual email, replace the emailAddress with your email address and the stage with 'PROD'
@@ -36,7 +36,8 @@ test('Email', async () => {
 				},
 			},
 		},
-		DataExtensionName: 'SV_RCtoSP_Switch',
+		DataExtensionName:
+			DataExtensionNames.recurringContributionToSupporterPlusSwitch,
 		SfContactId: '0035I00000VUYThQAP',
 	};
 
