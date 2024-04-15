@@ -187,13 +187,14 @@ object Handler extends LazyLogging {
       consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
-      if (consents.nonEmpty)
+      if (consents.nonEmpty) {
         sendConsentsReq(
           identityId,
           consentsCalculator.buildConsentsBody(consents, state = false),
         )
-      else
+      } else {
         Right(())
+      }
     }
 
     Metrics.put(event = "cancellations_to_process", cancelledSubs.size)
@@ -209,7 +210,8 @@ object Handler extends LazyLogging {
               sub.Product__c,
               associatedActiveNonGiftSubs.map(_.Product__c).toSet,
             )
-            _ <- sendCancellationConsents(sub.Buyer__r.IdentityID__c, consents)
+            consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
+            _ <- sendCancellationConsents(sub.Buyer__r.IdentityID__c, consentWithoutSimilarProducts)
           } yield ()
 
         logErrors(updateResult)

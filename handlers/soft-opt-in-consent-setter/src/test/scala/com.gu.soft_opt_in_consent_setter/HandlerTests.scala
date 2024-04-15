@@ -147,7 +147,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     mockSendConsentsReq
       .expects(
         "someIdentityId",
-        "[\n  {\n    \"id\" : \"your_support_onboarding\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"similar_guardian_products\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
+        "[\n  {\n    \"id\" : \"your_support_onboarding\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
       )
       .returning(Right(()))
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
