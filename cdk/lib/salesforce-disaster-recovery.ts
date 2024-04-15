@@ -320,35 +320,39 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		});
 
-		const constructEmailData = new Pass(this, 'ConstructEmailData', {
-			parameters: {
-				stateMachineExecutionDetailsUrl: JsonPath.format(
-					`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}`,
-					this.region,
-					this.region,
-					JsonPath.stringAt('$$.Execution.Id'),
-				),
-				queryResultFileUrl: JsonPath.format(
-					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
-					bucket.bucketName,
-					this.region,
-					JsonPath.stringAt('$$.Execution.StartTime'),
-					queryResultFileName,
-				),
-				failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
-				failedRowsFileUrl: JsonPath.format(
-					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
-					bucket.bucketName,
-					this.region,
-					JsonPath.stringAt('$$.Execution.StartTime'),
-					failedRowsFileName,
-				),
-			},
-		});
-
-		const sendProcedureSummaryEmail = new CustomState(
+		const constructNotificationData = new Pass(
 			this,
-			'SendProcedureSummaryEmail',
+			'ConstructNotificationData',
+			{
+				parameters: {
+					stateMachineExecutionDetailsUrl: JsonPath.format(
+						`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}`,
+						this.region,
+						this.region,
+						JsonPath.stringAt('$$.Execution.Id'),
+					),
+					queryResultFileUrl: JsonPath.format(
+						`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
+						bucket.bucketName,
+						this.region,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+						queryResultFileName,
+					),
+					failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
+					failedRowsFileUrl: JsonPath.format(
+						`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
+						bucket.bucketName,
+						this.region,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+						failedRowsFileName,
+					),
+				},
+			},
+		);
+
+		const sendCompletionNotification = new CustomState(
+			this,
+			'SendCompletionNotification',
 			{
 				stateJson: {
 					Type: 'Task',
@@ -370,6 +374,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
+		const haveAllRowsSuccedeed = new Choice(this, 'HaveAllRowsSuccedeed')
+			.when(
+				Condition.numberEquals('$.failedRowsCount', 0),
+				new Succeed(this, 'AllRowsHaveSuccedeed'),
+			)
+			.otherwise(new Fail(this, 'SomeRowsHaveFailed'));
+
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -387,15 +398,20 @@ export class SalesforceDisasterRecovery extends GuStack {
 										processCsvInDistributedMap
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
-											.next(constructEmailData)
-											.next(sendProcedureSummaryEmail)
 											.next(
-												new Choice(this, 'HaveAllRowsSuccedeed')
+												new Choice(this, 'IsHealthCheck')
 													.when(
-														Condition.numberEquals('$.failedRowsCount', 0),
-														new Succeed(this, 'AllRowsHaveSuccedeed'),
+														Condition.stringMatches(
+															'$$.Execution.Name',
+															'health-check-*',
+														),
+														haveAllRowsSuccedeed,
 													)
-													.otherwise(new Fail(this, 'SomeRowsHaveFailed')),
+													.otherwise(
+														constructNotificationData
+															.next(sendCompletionNotification)
+															.next(haveAllRowsSuccedeed),
+													),
 											),
 									),
 								)

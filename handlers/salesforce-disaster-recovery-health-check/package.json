@@ -1,0 +1,18 @@
+{
+	"name": "salesforce-disaster-recovery-health-check",
+	"scripts": {
+		"test": "jest --group=-integration",
+		"it-test": "jest --group=integration",
+		"type-check": "tsc --noEmit",
+		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target src/handlers/*.ts",
+		"lint": "eslint src/**/*.ts",
+		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr salesforce-disaster-recovery-health-check.zip ./*.js"
+	},
+	"devDependencies": {
+		"@types/aws-lambda": "^8.10.129"
+	},
+	"dependencies": {
+		"@aws-sdk/client-sfn": "^3.552.0",
+		"@aws-sdk/client-sns": "^3.552.0"
+	}
+}

@@ -8,6 +8,7 @@ import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
+import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
@@ -172,3 +173,19 @@ new AlarmsHandler(app, 'alarms-handler-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
+new SalesforceDisasterRecoveryHealthCheck(
+	app,
+	'salesforce-disaster-recovery-health-check-CODE',
+	{
+		stack: 'membership',
+		stage: 'CODE',
+	},
+);
+new SalesforceDisasterRecoveryHealthCheck(
+	app,
+	'salesforce-disaster-recovery-health-check-PROD',
+	{
+		stack: 'membership',
+		stage: 'PROD',
+	},
+);
