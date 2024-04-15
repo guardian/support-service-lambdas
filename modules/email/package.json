@@ -6,7 +6,6 @@
     "it-test": "jest --group=integration"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "3.451.0",
-    "dayjs": "^1.11.10"
+    "@aws-sdk/client-sqs": "3.451.0"
   }
 }

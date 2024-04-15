@@ -3,7 +3,6 @@
  *
  * @group integration
  */
-import dayjs from 'dayjs';
 import type { EmailMessage } from '@modules/email/email';
 import { sendEmail } from '@modules/email/email';
 
@@ -12,6 +11,11 @@ test('Email', async () => {
 	// this will send an recurring contribution to supporter plus switch email
 	const stage = 'CODE';
 	const emailAddress = 'test@thegulocal.com';
+	const formatOptions: Intl.DateTimeFormatOptions = {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	};
 
 	const emailMessage: EmailMessage = {
 		To: {
@@ -23,7 +27,10 @@ test('Email', async () => {
 					currency: '£',
 					price: '10',
 					first_payment_amount: '7',
-					date_of_first_payment: dayjs().format('DD MMMM YYYY'),
+					date_of_first_payment: new Date().toLocaleDateString(
+						'en-UK',
+						formatOptions,
+					),
 					payment_frequency: 'Monthly',
 					subscription_id: 'AS-123456',
 				},

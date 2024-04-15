@@ -139,9 +139,6 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: 3.451.0
         version: 3.451.0
-      dayjs:
-        specifier: ^1.11.10
-        version: 1.11.10
 
   modules/product-catalog:
     devDependencies:
