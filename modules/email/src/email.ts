@@ -10,10 +10,13 @@ export type EmailPayload = {
 		SubscriberAttributes: Record<string, string>;
 	};
 };
+export const DataExtensionNames = {
+	recurringContributionToSupporterPlusSwitch: 'SV_RCtoSP_Switch',
+	subscriptionCancelledEmail: 'subscription-cancelled-email',
+} as const;
 
 export type DataExtensionName =
-	| 'SV_RCtoSP_Switch' // recurring contribution to supporter plus switch
-	| 'subscription-cancelled-email';
+	(typeof DataExtensionNames)[keyof typeof DataExtensionNames];
 
 export type EmailMessage = {
 	To: EmailPayload;
