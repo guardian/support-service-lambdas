@@ -27,8 +27,11 @@ def assertSubscriptionBelongsToIdentityUser(
     _ <- (maybeIdentityId, account.basicInfo.IdentityId__c) match
       case (None, _) => ZIO.unit
       case (Some(identityIdToCheck), Some(actualIdentityId)) if identityIdToCheck == actualIdentityId => ZIO.unit
-      case (Some(identityIdToCheck), actual) =>
-        ZIO.fail(BadRequest(s"logged in identity id $identityIdToCheck doesn't match $actual on $subscriptionName"))
+      case (Some(identityIdToCheck), actual) => for {
+        _ <- ZIO.log(s"logged in identity id $identityIdToCheck doesn't match $actual on $subscriptionName")
+        safeUserFacingMessage = s"logged in identity id $identityIdToCheck doesn't match the expected one for $subscriptionName"
+        badRequest <- ZIO.fail(BadRequest(safeUserFacingMessage))
+      } yield badRequest
   } yield (subscription, account)
 
 class ProductMoveEndpointSteps(

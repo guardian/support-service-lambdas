@@ -76,7 +76,7 @@ trait ZuoraClient {
 // This detects that and stops straight away.
 object ZuoraRestBody {
 
-  case class ZuoraClientError(message: String, reasons: List[Reason]) extends Throwable
+  case class ZuoraClientError(message: String, reasons: List[Reason]) extends Throwable(message)
 
   // the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success property, and instead returns `size: "0"` if nothing was found
   // Zuora either returns a "success" property with a lower or upper case starting letter, hence the need for SuccessCheckLowercase and SuccessCheckCapitalised enums
@@ -112,7 +112,7 @@ object ZuoraRestBody {
           zuoraResponse <- attemptDecode[ZuoraSuccessLowercase](body)
           _ <-
             if (zuoraResponse.success) Right(())
-            else Left(ZuoraClientError("", zuoraResponse.reasons.getOrElse(Nil)))
+            else Left(ZuoraClientError(body, zuoraResponse.reasons.getOrElse(Nil)))
         } yield ()
 
       case ZuoraSuccessCheck.SuccessCheckCapitalised =>
@@ -120,7 +120,7 @@ object ZuoraRestBody {
           zuoraResponse <- attemptDecode[ZuoraSuccessCapitalised](body)
           _ <-
             if (zuoraResponse.Success) Right(())
-            else Left(ZuoraClientError("", zuoraResponse.reasons.getOrElse(Nil)))
+            else Left(ZuoraClientError(body, zuoraResponse.reasons.getOrElse(Nil)))
         } yield ()
       case ZuoraSuccessCheck.None => Right(())
     }

@@ -62,6 +62,18 @@ import scala.concurrent.Future
 
 // this is the description for just the one endpoint
 object SubscriptionCancelEndpoint {
+
+  // run this to test locally via console with some hard coded data
+  def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
+    run(
+      "A-S00878246",
+      ExpectedInput(
+        "mma_value_for_money",// valid pick list value
+      ),
+      IdentityId("200235444"),
+    ),
+  )
+
   val server: sttp.tapir.server.ServerEndpoint.Full[
     Unit,
     Unit,
