@@ -14,5 +14,6 @@ jobs:
       ORG: the-guardian-cuu
       SKIP_NODE: true
       EXCLUDE: handlers
+      JAVA_VERSION: 21
     secrets:
        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
