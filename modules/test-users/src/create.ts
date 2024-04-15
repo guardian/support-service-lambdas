@@ -1,11 +1,8 @@
-import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscribeResponse } from '@modules/zuora/zuoraSchemas';
 import { zuoraSubscribeResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 
 type SubscribeItem = {
 	productRatePlanId: string;
@@ -14,10 +11,23 @@ type SubscribeItem = {
 		price: number;
 	};
 };
-export const createSubscribeBody = (
-	subscribeItems: SubscribeItem[],
-	subscriptionDate: Dayjs,
-) => {
+
+type SubscriptionDetails = {
+	contractEffectiveDate: Dayjs;
+	customerAcceptanceDate: Dayjs;
+	firstName: string;
+	lastName: string;
+	email: string;
+	subscribeItems: SubscribeItem[];
+};
+export const createSubscribeBody = ({
+	contractEffectiveDate,
+	customerAcceptanceDate,
+	firstName,
+	lastName,
+	email,
+	subscribeItems,
+}: SubscriptionDetails) => {
 	const ratePlanData = subscribeItems.map((subscribeItem) => {
 		const chargeOverride = subscribeItem.chargeOverride
 			? {
@@ -47,7 +57,7 @@ export const createSubscribeBody = (
 		subscribes: [
 			{
 				Account: {
-					Name: 'Test User',
+					Name: `${firstName} ${lastName}`,
 					Currency: 'GBP',
 					CrmId: '0019E00002QSysUQAT', // The Saleforce Account ID
 					IdentityId__c: '200175946',
@@ -62,15 +72,15 @@ export const createSubscribeBody = (
 					sfContactId__c: '0039E00001rm02wQAA',
 				},
 				BillToContact: {
-					FirstName: 'Test',
-					LastName: 'User',
-					WorkEmail: 'test.user@thegulocal.com',
+					FirstName: firstName,
+					LastName: lastName,
+					WorkEmail: email,
 					Country: 'GB',
 				},
 				PaymentMethod: {
-					FirstName: 'Test',
-					LastName: 'User',
-					BankTransferAccountName: 'Test User',
+					FirstName: firstName,
+					LastName: lastName,
+					BankTransferAccountName: `${firstName} ${lastName}`,
 					BankCode: '200000',
 					BankTransferAccountNumber: '55779911',
 					Country: 'GB',
@@ -81,11 +91,9 @@ export const createSubscribeBody = (
 				SubscriptionData: {
 					RatePlanData: ratePlanData,
 					Subscription: {
-						ContractEffectiveDate: zuoraDateFormat(subscriptionDate),
-						ContractAcceptanceDate: zuoraDateFormat(
-							subscriptionDate.add(16, 'day'),
-						),
-						TermStartDate: zuoraDateFormat(subscriptionDate),
+						ContractEffectiveDate: zuoraDateFormat(contractEffectiveDate),
+						ContractAcceptanceDate: zuoraDateFormat(customerAcceptanceDate),
+						TermStartDate: zuoraDateFormat(contractEffectiveDate),
 						AutoRenew: true,
 						InitialTermPeriodType: 'Month',
 						InitialTerm: 12,
@@ -100,31 +108,11 @@ export const createSubscribeBody = (
 	};
 };
 
-const stage = 'CODE';
 export const createAccountAndSubscription = async (
 	zuoraClient: ZuoraClient,
-	productCatalog: ProductCatalog,
+	subscriptionDetails: SubscriptionDetails,
 ): Promise<ZuoraSubscribeResponse> => {
-	const productRatePlanId =
-		productCatalog.DigitalSubscription.ratePlans.Monthly.id;
 	const path = `/v1/action/subscribe`;
-	const subscribeItems = [
-		{
-			productRatePlanId,
-		},
-	];
-	const today = dayjs();
-	const body = JSON.stringify(createSubscribeBody(subscribeItems, today));
-
+	const body = JSON.stringify(createSubscribeBody(subscriptionDetails));
 	return zuoraClient.post(path, body, zuoraSubscribeResponseSchema);
 };
-
-void (async () => {
-	const zuoraClient = await ZuoraClient.create(stage);
-	const productCatalog = await getProductCatalogFromApi(stage);
-	const response = await createAccountAndSubscription(
-		zuoraClient,
-		productCatalog,
-	);
-	console.log(response);
-})();
