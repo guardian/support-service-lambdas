@@ -377,9 +377,13 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const haveAllRowsSucceeded = new Choice(this, 'HaveAllRowsSucceeded')
 			.when(
 				Condition.numberEquals('$.failedRowsCount', 0),
-				new Succeed(this, 'AllRowsHaveSucceeded'),
+				new Pass(this, 'AllRowsHaveSucceeded'),
 			)
-			.otherwise(new Fail(this, 'SomeRowsHaveFailed'));
+			.otherwise(
+				new Pass(this, 'SomeRowsHaveFailed', {
+					comment: "View the 'failed-rows.csv' file for more details.",
+				}),
+			);
 
 		const stateMachine = new StateMachine(
 			this,

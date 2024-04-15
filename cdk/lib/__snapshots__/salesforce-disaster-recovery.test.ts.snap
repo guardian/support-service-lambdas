@@ -250,7 +250,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 1`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CODE","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSucceeded":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSucceeded"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSucceeded":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CODE","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSucceeded":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSucceeded"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Pass","Comment":"View the 'failed-rows.csv' file for more details.","End":true},"AllRowsHaveSucceeded":{"Type":"Pass","End":true}}}",
             ],
           ],
         },
@@ -1561,7 +1561,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 2`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CSBX","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSucceeded":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSucceeded"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSucceeded":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For CSBX","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSucceeded":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSucceeded"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Pass","Comment":"View the 'failed-rows.csv' file for more details.","End":true},"AllRowsHaveSucceeded":{"Type":"Pass","End":true}}}",
             ],
           ],
         },
@@ -2872,7 +2872,7 @@ exports[`The SalesforceDisasterRecovery stack matches the snapshot 3`] = `
               {
                 "Ref": "SnsTopic2C1570A4",
               },
-              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For PROD","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSucceeded":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSucceeded"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Fail"},"AllRowsHaveSucceeded":{"Type":"Succeed"}}}",
+              "","Subject":"Salesforce Disaster Recovery Re-syncing Procedure Completed For PROD","Message.$":"States.Format('State machine execution details:\\n{}\\n\\nAccounts to sync:\\n{}\\n\\nAccounts that failed to update ({}):\\n{}\\n\\t\\t\\t\\t\\t\\t', $.stateMachineExecutionDetailsUrl, $.queryResultFileUrl, $.failedRowsCount, $.failedRowsFileUrl)"},"ResultPath":"$.TaskResult"},"HaveAllRowsSucceeded":{"Type":"Choice","Choices":[{"Variable":"$.failedRowsCount","NumericEquals":0,"Next":"AllRowsHaveSucceeded"}],"Default":"SomeRowsHaveFailed"},"SomeRowsHaveFailed":{"Type":"Pass","Comment":"View the 'failed-rows.csv' file for more details.","End":true},"AllRowsHaveSucceeded":{"Type":"Pass","End":true}}}",
             ],
           ],
         },
