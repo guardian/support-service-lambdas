@@ -374,10 +374,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const haveAllRowsSuccedeed = new Choice(this, 'HaveAllRowsSuccedeed')
+		const haveAllRowsSucceeded = new Choice(this, 'HaveAllRowsSucceeded')
 			.when(
 				Condition.numberEquals('$.failedRowsCount', 0),
-				new Succeed(this, 'AllRowsHaveSuccedeed'),
+				new Succeed(this, 'AllRowsHaveSucceeded'),
 			)
 			.otherwise(new Fail(this, 'SomeRowsHaveFailed'));
 
@@ -405,12 +405,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 															'$$.Execution.Name',
 															'health-check-*',
 														),
-														haveAllRowsSuccedeed,
+														haveAllRowsSucceeded,
 													)
 													.otherwise(
 														constructNotificationData
 															.next(sendCompletionNotification)
-															.next(haveAllRowsSuccedeed),
+															.next(haveAllRowsSucceeded),
 													),
 											),
 									),
