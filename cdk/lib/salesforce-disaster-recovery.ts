@@ -372,17 +372,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			},
 		);
 
-		const haveAllRowsSucceeded = new Choice(this, 'HaveAllRowsSucceeded')
-			.when(
-				Condition.numberEquals('$.failedRowsCount', 0),
-				new Pass(this, 'AllRowsHaveSucceeded'),
-			)
-			.otherwise(
-				new Pass(this, 'SomeRowsHaveFailed', {
-					comment: "View the 'failed-rows.csv' file for more details.",
-				}),
-			);
-
 		const stateMachine = new StateMachine(
 			this,
 			'SalesforceDisasterRecoveryStateMachine',
@@ -401,19 +390,32 @@ export class SalesforceDisasterRecovery extends GuStack {
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
 											.next(
-												new Choice(this, 'IsHealthCheck')
-													.when(
+												new Choice(this, 'IsHealthCheck').when(
+													Condition.not(
 														Condition.stringMatches(
 															'$$.Execution.Name',
 															'health-check-*',
 														),
-														haveAllRowsSucceeded,
-													)
-													.otherwise(
-														constructNotificationData
-															.next(sendCompletionNotification)
-															.next(haveAllRowsSucceeded),
 													),
+													constructNotificationData
+														.next(sendCompletionNotification)
+														.next(
+															new Choice(this, 'HaveAllRowsSucceeded')
+																.when(
+																	Condition.numberEquals(
+																		'$.failedRowsCount',
+																		0,
+																	),
+																	new Pass(this, 'AllRowsHaveSucceeded'),
+																)
+																.otherwise(
+																	new Pass(this, 'SomeRowsHaveFailed', {
+																		comment:
+																			"View the 'failed-rows.csv' file for more details.",
+																	}),
+																),
+														),
+												),
 											),
 									),
 								)
