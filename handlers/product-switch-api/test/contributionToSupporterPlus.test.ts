@@ -2,7 +2,10 @@
  * This is a unit test, it can be run by the `pnpm test` command, and will be run by the CI/CD pipeline
  *
  */
+import type { EmailMessageWithUserId } from '@modules/email/email';
+import dayjs from 'dayjs';
 import { previewResponseFromZuoraResponse } from '../src/contributionToSupporterPlus';
+import { buildEmailMessage } from '../src/productSwitchEmail';
 import type { ProductSwitchRequestBody } from '../src/schemas';
 import { productSwitchRequestSchema } from '../src/schemas';
 import { parseUrlPath } from '../src/urlParsing';
@@ -132,8 +135,13 @@ test('preview amounts are correct', () => {
 
 	expect(
 		previewResponseFromZuoraResponse(apiResponse, {
+			billingAmount: 95,
+			billingPeriod: 'Annual',
+			productPrice: 95,
+			contributionAmount: 0,
+			currency: 'GBP',
+			startNewTerm: true,
 			supporterPlus: {
-				price: 95,
 				productRatePlanId: 'not_used',
 				subscriptionChargeId: '8ad08e1a858672180185880566606fad',
 				contributionChargeId: '8ad096ca858682bb0185881568385d73',
@@ -144,4 +152,42 @@ test('preview amounts are correct', () => {
 			},
 		}),
 	).toStrictEqual(expectedOutput);
+});
+
+test('Email message body is correct', () => {
+	const emailAddress = 'test@thegulocal.com';
+	const dateOfFirstPayment = dayjs('2024-04-16');
+	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
+		dateOfFirstPayment,
+		emailAddress,
+		'test',
+		'user',
+		'GBP',
+		10,
+		5.6,
+		'Month',
+		'A-S123456',
+		'123456789',
+	);
+
+	const expectedOutput = {
+		To: {
+			Address: 'test@thegulocal.com',
+			ContactAttributes: {
+				SubscriberAttributes: {
+					first_name: 'test',
+					last_name: 'user',
+					currency: '£',
+					price: '10.00',
+					first_payment_amount: '5.60',
+					date_of_first_payment: '16 April 2024',
+					payment_frequency: 'Monthly',
+					subscription_id: 'A-S123456',
+				},
+			},
+		},
+		DataExtensionName: 'SV_RCtoSP_Switch',
+		IdentityUserId: '123456789',
+	};
+	expect(emailMessage).toStrictEqual(expectedOutput);
 });

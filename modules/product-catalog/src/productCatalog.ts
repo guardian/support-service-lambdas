@@ -53,6 +53,21 @@ export const isValidProductCurrency = <P extends ProductKey>(
 	return !!typeObject[product].currencies.find((c) => c === maybeCurrency);
 };
 
+export const getCurrencyGlyph = (currency: string) => {
+	switch (currency) {
+		case 'GBP':
+			return '£';
+		case 'EUR':
+			return '€';
+		case 'AUD':
+		case 'CAD':
+		case 'NZD':
+		case 'USD':
+			return '$';
+	}
+	throw new Error(`Unsupported currency ${currency}`);
+};
+
 export class ProductCatalogHelper {
 	constructor(private catalogData: ProductCatalog) {}
 

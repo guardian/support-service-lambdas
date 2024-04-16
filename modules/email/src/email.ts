@@ -4,6 +4,28 @@ import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { Stage } from '@modules/stage';
 
+type Either<T, Keys extends keyof T = keyof T> = Pick<
+	T,
+	Exclude<keyof T, Keys>
+> &
+	{
+		[K in Keys]-?: Required<Pick<T, K>> &
+			Partial<Record<Exclude<Keys, K>, undefined>>;
+	}[Keys];
+
+// The EmailMessageWithUserId type ensures that the message has either a SfContactId or an IdentityUserId
+export type EmailMessageWithUserId = Either<
+	EmailMessage,
+	'SfContactId' | 'IdentityUserId'
+>;
+
+export type EmailMessage = {
+	To: EmailPayload;
+	DataExtensionName: DataExtensionName;
+	SfContactId?: string;
+	IdentityUserId?: string;
+};
+
 export type EmailPayload = {
 	Address: string; // email address
 	ContactAttributes: {
@@ -18,16 +40,9 @@ export const DataExtensionNames = {
 export type DataExtensionName =
 	(typeof DataExtensionNames)[keyof typeof DataExtensionNames];
 
-export type EmailMessage = {
-	To: EmailPayload;
-	DataExtensionName: DataExtensionName;
-	SfContactId: string;
-	IdentityUserId?: string;
-};
-
 export const sendEmail = async (
 	stage: Stage,
-	emailMessage: EmailMessage,
+	emailMessage: EmailMessageWithUserId,
 ): Promise<SendMessageCommandOutput> => {
 	const queueName = `braze-emails-${stage}`;
 	const client = new SQSClient(awsConfig);

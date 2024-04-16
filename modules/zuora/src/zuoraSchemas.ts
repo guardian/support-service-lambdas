@@ -78,9 +78,16 @@ export const zuoraAccountBasicInfoSchema = z
 		identityId: obj.IdentityId__c,
 	}));
 
+export const billToContactSchema = z.object({
+	firstName: z.string(),
+	lastName: z.string(),
+	workEmail: z.string(),
+});
+
 export const zuoraAccountSchema = z.object({
 	success: z.boolean(),
 	basicInfo: zuoraAccountBasicInfoSchema,
+	billToContact: billToContactSchema,
 });
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 
