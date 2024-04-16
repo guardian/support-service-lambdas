@@ -272,12 +272,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
 						},
 					},
-					Catch: [
-						{
-							ErrorEquals: ['States.ItemReaderFailed'],
-							Next: endState.id,
-						},
-					],
 				},
 			},
 		);
@@ -393,49 +387,62 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap
-											.next(getMapResult)
-											.next(saveFailedRowsToS3)
-											.next(
-												new Choice(this, 'IsHealthCheck')
-													.when(
-														Condition.stringMatches(
-															'$$.Execution.Name',
-															'health-check-*',
-														),
-														endState,
-													)
-													.otherwise(
-														constructNotificationData
-															.next(sendCompletionNotification)
-															.next(
-																new Choice(this, 'HaveAllAccountsBeenResynced')
-																	.when(
-																		Condition.numberEquals(
-																			'$.failedRowsCount',
-																			0,
-																		),
-																		new Pass(
+									new Choice(this, 'IsCsvEmpty')
+										.when(
+											Condition.numberEquals(
+												'$.ResponseBody.numberRecordsProcessed',
+												0,
+											),
+											endState,
+										)
+										.otherwise(
+											saveSalesforceQueryResultToS3.next(
+												processCsvInDistributedMap
+													.next(getMapResult)
+													.next(saveFailedRowsToS3)
+													.next(
+														new Choice(this, 'IsHealthCheck')
+															.when(
+																Condition.stringMatches(
+																	'$$.Execution.Name',
+																	'health-check-*',
+																),
+																endState,
+															)
+															.otherwise(
+																constructNotificationData
+																	.next(sendCompletionNotification)
+																	.next(
+																		new Choice(
 																			this,
-																			'AllAccountsHaveBeenResynced',
-																		).next(endState),
-																	)
-																	.otherwise(
-																		new Pass(
-																			this,
-																			'SomeAccountsHaveFailedToUpdate',
-																		).next(
-																			new Pass(
-																				this,
-																				'ViewStateInputFailedRowsFileToDebugFailedRows',
-																			).next(endState),
-																		),
+																			'HaveAllAccountsBeenResynced',
+																		)
+																			.when(
+																				Condition.numberEquals(
+																					'$.failedRowsCount',
+																					0,
+																				),
+																				new Pass(
+																					this,
+																					'AllAccountsHaveBeenResynced',
+																				).next(endState),
+																			)
+																			.otherwise(
+																				new Pass(
+																					this,
+																					'SomeAccountsHaveFailedToUpdate',
+																				).next(
+																					new Pass(
+																						this,
+																						'ViewStateInputFailedRowsFileToDebugFailedRows',
+																					).next(endState),
+																				),
+																			),
 																	),
 															),
 													),
 											),
-									),
+										),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
