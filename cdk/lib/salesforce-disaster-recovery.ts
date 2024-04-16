@@ -428,7 +428,11 @@ export class SalesforceDisasterRecovery extends GuStack {
 																			.otherwise(
 																				new Pass(
 																					this,
-																					"SomeAccountsHaveFailedToUpdate (To debug the failed account updates, please check the 'failedRowsFileUrl' key in the input data for this stage. It contains the URL to a CSV file named 'failed-rows.csv'. Download and open this file to review the rows that failed to update.)",
+																					'SomeAccountsHaveFailedToUpdate',
+																					{
+																						comment:
+																							"To debug the failed account updates, please check the 'failedRowsFileUrl' key in the input data for this stage. It contains the URL to a CSV file named 'failed-rows.csv'. Download and open this file to review the rows that failed to update.",
+																					},
 																				),
 																			),
 																	),
