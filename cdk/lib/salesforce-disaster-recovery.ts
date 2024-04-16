@@ -427,7 +427,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 																					'SomeAccountsHaveFailedToUpdate',
 																					{
 																						stateName:
-																							'SomeAccountsHaveFailedToUpdate (read state comment for details on how to debug)',
+																							'SomeAccountsHaveFailedToUpdate\n(read state comment for details on how to debug)',
 																						comment:
 																							"To debug the failed account updates, please check the 'failedRowsFileUrl' key in the input data for this stage. It contains the URL to a CSV file named 'failed-rows.csv'. Download and open this file to review the rows that failed to update.",
 																					},
