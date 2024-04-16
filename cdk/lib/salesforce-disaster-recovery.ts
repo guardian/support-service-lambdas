@@ -359,8 +359,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 						TopicArn: snsTopic.topicArn,
 						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
 						'Message.$': JsonPath.format(
-							`State machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
+							`This notification is part of the Salesforce Disaster Recovery procedure explained in the runbook below:\n{}\n\nState machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
 						`,
+							'https://docs.google.com/document/d/1_KxFtfKU3-3-PSzaAYG90uONa05AVgoBmyBDyu5SC5c/edit#heading=h.2r6eh2y6rjut',
 							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
 							JsonPath.stringAt('$.queryResultFileUrl'),
 							JsonPath.stringAt('$.failedRowsCount'),
