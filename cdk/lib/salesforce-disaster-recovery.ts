@@ -359,12 +359,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 						TopicArn: snsTopic.topicArn,
 						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
 						'Message.$': JsonPath.format(
-							`State machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
-						`,
+							`This health check is in place to make sure the Salesforce Disaster Recovery resyncing tool is available at all times.\nPlease review the state machine execution details below to figure out the cause of the failure:\n{}`,
 							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
-							JsonPath.stringAt('$.queryResultFileUrl'),
-							JsonPath.stringAt('$.failedRowsCount'),
-							JsonPath.stringAt('$.failedRowsFileUrl'),
 						),
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
@@ -430,6 +426,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 																					this,
 																					'SomeAccountsHaveFailedToUpdate',
 																					{
+																						stateName:
+																							'SomeAccountsHaveFailedToUpdate (read state comment for details on how to debug)',
 																						comment:
 																							"To debug the failed account updates, please check the 'failedRowsFileUrl' key in the input data for this stage. It contains the URL to a CSV file named 'failed-rows.csv'. Download and open this file to review the rows that failed to update.",
 																					},
