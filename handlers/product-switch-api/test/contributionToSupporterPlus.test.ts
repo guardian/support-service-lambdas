@@ -135,13 +135,8 @@ test('preview amounts are correct', () => {
 
 	expect(
 		previewResponseFromZuoraResponse(apiResponse, {
-			billingAmount: 95,
-			billingPeriod: 'Annual',
-			productPrice: 95,
-			contributionAmount: 0,
-			currency: 'GBP',
-			startNewTerm: true,
 			supporterPlus: {
+				price: 95,
 				productRatePlanId: 'not_used',
 				subscriptionChargeId: '8ad08e1a858672180185880566606fad',
 				contributionChargeId: '8ad096ca858682bb0185881568385d73',

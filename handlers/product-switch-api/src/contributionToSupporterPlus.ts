@@ -4,14 +4,15 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
-import type { BillingInformation } from './billingInformation';
+import type { CatalogInformation } from './catalogInformation';
 import { sendRecurringContributionToSupporterPlusEmail } from './productSwitchEmail';
+import { sendSalesforceTracking } from './salesforceTracking';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import {
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
 } from './schemas';
-import type { ProductSwitchInformation } from './userInformation';
+import type { SwitchInformation } from './switchInformation';
 
 export type PreviewResponse = {
 	amountPayableToday: number;
@@ -22,23 +23,21 @@ export type PreviewResponse = {
 
 export const switchToSupporterPlus = async (
 	zuoraClient: ZuoraClient,
-	productSwitchInformation: ProductSwitchInformation,
+	productSwitchInformation: SwitchInformation,
 ) => {
-	if (productSwitchInformation.preview) {
-		await preview(zuoraClient, productSwitchInformation);
-	} else {
-		const paidAmount = await doSwitch(zuoraClient, productSwitchInformation);
+	const paidAmount = await doSwitch(zuoraClient, productSwitchInformation);
 
-		await sendRecurringContributionToSupporterPlusEmail(
-			paidAmount,
-			productSwitchInformation,
-		);
-	}
+	await sendRecurringContributionToSupporterPlusEmail(
+		paidAmount,
+		productSwitchInformation,
+	);
+
+	await sendSalesforceTracking(productSwitchInformation, paidAmount);
 };
 
 export const previewResponseFromZuoraResponse = (
 	zuoraResponse: ZuoraPreviewResponse,
-	billingInformation: BillingInformation,
+	catalogInformation: CatalogInformation,
 ): PreviewResponse => {
 	const invoice = checkDefined(
 		zuoraResponse.previewResult?.invoices[0],
@@ -48,7 +47,7 @@ export const previewResponseFromZuoraResponse = (
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
-				billingInformation.contribution.chargeId,
+				catalogInformation.contribution.chargeId,
 		)?.amountWithoutTax,
 		'No contribution refund amount found in the preview response',
 	);
@@ -57,7 +56,7 @@ export const previewResponseFromZuoraResponse = (
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
-				billingInformation.supporterPlus.subscriptionChargeId,
+				catalogInformation.supporterPlus.subscriptionChargeId,
 		),
 		'No supporter plus invoice item found in the preview response',
 	);
@@ -66,7 +65,7 @@ export const previewResponseFromZuoraResponse = (
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
-				billingInformation.supporterPlus.contributionChargeId,
+				catalogInformation.supporterPlus.contributionChargeId,
 		),
 		'No supporter plus invoice item found in the preview response',
 	);
@@ -84,9 +83,12 @@ export const previewResponseFromZuoraResponse = (
 };
 export const preview = async (
 	zuoraClient: ZuoraClient,
-	productSwitchInformation: ProductSwitchInformation,
+	productSwitchInformation: SwitchInformation,
 ): Promise<PreviewResponse> => {
-	const requestBody = buildRequestBody(dayjs(), productSwitchInformation, true);
+	const requestBody = buildPreviewRequestBody(
+		dayjs(),
+		productSwitchInformation,
+	);
 	const zuoraResponse: ZuoraPreviewResponse = await zuoraClient.post(
 		'v1/orders/preview',
 		JSON.stringify(requestBody),
@@ -95,7 +97,7 @@ export const preview = async (
 	if (zuoraResponse.success) {
 		return previewResponseFromZuoraResponse(
 			zuoraResponse,
-			productSwitchInformation.billingInformation,
+			productSwitchInformation.catalog,
 		);
 	} else {
 		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
@@ -104,18 +106,13 @@ export const preview = async (
 
 export const doSwitch = async (
 	zuoraClient: ZuoraClient,
-	productSwitchInformation: ProductSwitchInformation,
+	productSwitchInformation: SwitchInformation,
 ): Promise<number> => {
-	const { subscriptionNumber } =
-		productSwitchInformation.subscriptionInformation;
+	const { subscriptionNumber } = productSwitchInformation.subscription;
 	//If the sub has a pending amount change amendment, we need to remove it
 	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
 
-	const requestBody = buildRequestBody(
-		dayjs(),
-		productSwitchInformation,
-		false,
-	);
+	const requestBody = buildSwitchRequestBody(dayjs(), productSwitchInformation);
 	const zuoraResponse: ZuoraSwitchResponse = await zuoraClient.post(
 		'v1/orders',
 		JSON.stringify(requestBody),
@@ -134,30 +131,83 @@ export const doSwitch = async (
 	);
 };
 
-export const buildRequestBody = (
+const buildChangePlanOrderAction = (
 	orderDate: Dayjs,
-	productSwitchInformation: ProductSwitchInformation,
-	preview: boolean,
+	catalog: CatalogInformation,
+	contributionAmount: number,
 ) => {
-	const { startNewTerm, contributionAmount } =
-		productSwitchInformation.billingInformation;
+	return {
+		type: 'ChangePlan',
+		triggerDates: [
+			{
+				name: 'ContractEffective',
+				triggerDate: zuoraDateFormat(orderDate),
+			},
+			{
+				name: 'ServiceActivation',
+				triggerDate: zuoraDateFormat(orderDate),
+			},
+			{
+				name: 'CustomerAcceptance',
+				triggerDate: zuoraDateFormat(orderDate),
+			},
+		],
+		changePlan: {
+			productRatePlanId: catalog.contribution.productRatePlanId,
+			subType: 'Upgrade',
+			newProductRatePlan: {
+				productRatePlanId: catalog.supporterPlus.productRatePlanId,
+				chargeOverrides: [
+					{
+						productRatePlanChargeId: catalog.supporterPlus.contributionChargeId,
+						pricing: {
+							recurringFlatFee: {
+								listPrice: contributionAmount,
+							},
+						},
+					},
+				],
+			},
+		},
+	};
+};
+
+const buildPreviewRequestBody = (
+	orderDate: Dayjs,
+	productSwitchInformation: SwitchInformation,
+) => {
+	const { contributionAmount, catalog } = productSwitchInformation;
 	const { accountNumber, subscriptionNumber } =
-		productSwitchInformation.subscriptionInformation;
-	const catalogInformation = productSwitchInformation.billingInformation;
-	const options = preview
-		? {
-				previewOptions: {
-					previewThruType: 'SpecificDate',
-					previewTypes: ['BillingDocs'],
-					specificPreviewThruDate: zuoraDateFormat(orderDate),
-				},
-		  }
-		: {
-				processingOptions: {
-					runBilling: true,
-					collectPayment: true,
-				},
-		  };
+		productSwitchInformation.subscription;
+
+	return {
+		orderDate: zuoraDateFormat(orderDate),
+		existingAccountNumber: accountNumber,
+		previewOptions: {
+			previewThruType: 'SpecificDate',
+			previewTypes: ['BillingDocs'],
+			specificPreviewThruDate: zuoraDateFormat(orderDate),
+		},
+		subscriptions: [
+			{
+				subscriptionNumber,
+				orderActions: [
+					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
+				],
+			},
+		],
+	};
+};
+
+export const buildSwitchRequestBody = (
+	orderDate: Dayjs,
+	productSwitchInformation: SwitchInformation,
+) => {
+	const { startNewTerm, contributionAmount, catalog } =
+		productSwitchInformation;
+	const { accountNumber, subscriptionNumber } =
+		productSwitchInformation.subscription;
+
 	const newTermOrderActions = startNewTerm
 		? [
 				{
@@ -207,48 +257,15 @@ export const buildRequestBody = (
 	return {
 		orderDate: zuoraDateFormat(orderDate),
 		existingAccountNumber: accountNumber,
-		...options,
+		processingOptions: {
+			runBilling: true,
+			collectPayment: true,
+		},
 		subscriptions: [
 			{
 				subscriptionNumber,
 				orderActions: [
-					{
-						type: 'ChangePlan',
-						triggerDates: [
-							{
-								name: 'ContractEffective',
-								triggerDate: zuoraDateFormat(orderDate),
-							},
-							{
-								name: 'ServiceActivation',
-								triggerDate: zuoraDateFormat(orderDate),
-							},
-							{
-								name: 'CustomerAcceptance',
-								triggerDate: zuoraDateFormat(orderDate),
-							},
-						],
-						changePlan: {
-							productRatePlanId:
-								catalogInformation.contribution.productRatePlanId,
-							subType: 'Upgrade',
-							newProductRatePlan: {
-								productRatePlanId:
-									catalogInformation.supporterPlus.productRatePlanId,
-								chargeOverrides: [
-									{
-										productRatePlanChargeId:
-											catalogInformation.supporterPlus.contributionChargeId,
-										pricing: {
-											recurringFlatFee: {
-												listPrice: contributionAmount,
-											},
-										},
-									},
-								],
-							},
-						},
-					},
+					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
 					...newTermOrderActions,
 				],
 			},

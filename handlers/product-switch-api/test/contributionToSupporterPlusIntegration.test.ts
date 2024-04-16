@@ -9,7 +9,7 @@ import { zuoraDateFormat } from '@modules/zuora/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { doSwitch, preview } from '../src/contributionToSupporterPlus';
-import { getSwitchInformationWithOwnerCheck } from '../src/userInformation';
+import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
 
 const jestConsole = console;
 beforeEach(() => {
@@ -24,37 +24,37 @@ describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch with an additional contribution element', async () => {
 		const subscriptionNumber = 'A-S00527544';
 		const identityId = '200110678';
+		const input = { price: 20, preview: true };
 		const zuoraClient = await ZuoraClient.create(stage);
 		const productCatalog = await getProductCatalogFromApi(stage);
 
 		const switchInformation = await getSwitchInformationWithOwnerCheck(
 			stage,
-			true,
+			input,
 			zuoraClient,
 			productCatalog,
 			identityId,
 			subscriptionNumber,
-			20,
 		);
 
 		const result = await preview(zuoraClient, switchInformation);
 
-		expect(result.supporterPlusPurchaseAmount).toEqual(10);
+		expect(result.supporterPlusPurchaseAmount).toEqual(20);
 	});
 	it('can preview an annual recurring contribution switch at catalog price', async () => {
 		const subscriptionNumber = 'A-S00695309';
 		const identityId = '200111098';
+		const input = { price: 120, preview: true };
 		const zuoraClient = await ZuoraClient.create('CODE');
 		const productCatalog = await getProductCatalogFromApi('CODE');
 
 		const switchInformation = await getSwitchInformationWithOwnerCheck(
 			stage,
-			true,
+			input,
 			zuoraClient,
 			productCatalog,
 			identityId,
 			subscriptionNumber,
-			120,
 		);
 
 		const result = await preview(zuoraClient, switchInformation);
@@ -72,16 +72,16 @@ describe('product-switching behaviour', () => {
 			// To run this test you will need to find a recurring contribution which hasn't been switched to supporter plus
 			const subscriptionNumber = 'A-S00732420';
 			const identityId = '109663794';
+			const input = { price: 10, preview: false };
 			const zuoraClient = await ZuoraClient.create('CODE');
 			const productCatalog = await getProductCatalogFromApi('CODE');
 			const switchInformation = await getSwitchInformationWithOwnerCheck(
 				stage,
-				false,
+				input,
 				zuoraClient,
 				productCatalog,
 				identityId,
 				subscriptionNumber,
-				10,
 			);
 
 			const paidAmount = await doSwitch(zuoraClient, switchInformation);

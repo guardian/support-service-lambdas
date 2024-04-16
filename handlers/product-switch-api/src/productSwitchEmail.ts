@@ -5,7 +5,7 @@ import type { ProductCurrency } from '@modules/product-catalog/productCatalog';
 import { getCurrencyGlyph } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { ProductSwitchInformation } from './userInformation';
+import type { SwitchInformation } from './switchInformation';
 
 export const buildEmailMessage = (
 	dateOfFirstPayment: Dayjs,
@@ -43,14 +43,12 @@ export const buildEmailMessage = (
 
 export const sendRecurringContributionToSupporterPlusEmail = async (
 	firstPaymentAmount: number,
-	productSwitchInformation: ProductSwitchInformation,
+	switchInformation: SwitchInformation,
 ) => {
 	const { emailAddress, firstName, lastName, identityId } =
-		productSwitchInformation.userInformation;
-	const { currency, productPrice, billingPeriod } =
-		productSwitchInformation.billingInformation;
-	const { subscriptionNumber } =
-		productSwitchInformation.subscriptionInformation;
+		switchInformation.user;
+	const { subscriptionNumber, currency, billingPeriod } =
+		switchInformation.subscription;
 
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 		dayjs(),
@@ -58,12 +56,12 @@ export const sendRecurringContributionToSupporterPlusEmail = async (
 		firstName,
 		lastName,
 		currency,
-		productPrice,
+		switchInformation.input.price,
 		firstPaymentAmount,
 		billingPeriod,
 		subscriptionNumber,
 		identityId,
 	);
 
-	return await sendEmail(productSwitchInformation.stage, emailMessage);
+	return await sendEmail(switchInformation.stage, emailMessage);
 };

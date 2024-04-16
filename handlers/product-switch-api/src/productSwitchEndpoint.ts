@@ -3,9 +3,9 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
-import { switchToSupporterPlus } from './contributionToSupporterPlus';
+import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
 import { productSwitchRequestSchema } from './schemas';
-import { getSwitchInformationWithOwnerCheck } from './userInformation';
+import { getSwitchInformationWithOwnerCheck } from './switchInformation';
 
 export const contributionToSupporterPlusEndpoint = async (
 	stage: Stage,
@@ -25,14 +25,16 @@ export const contributionToSupporterPlusEndpoint = async (
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		stage,
-		input.preview,
+		input,
 		zuoraClient,
 		productCatalog,
 		identityId,
 		subscriptionNumber,
-		input.price,
 	);
-	const response = await switchToSupporterPlus(zuoraClient, switchInformation);
+	const response = input.preview
+		? await preview(zuoraClient, switchInformation)
+		: await switchToSupporterPlus(zuoraClient, switchInformation);
+
 	return {
 		body: JSON.stringify(response),
 		statusCode: 200,
