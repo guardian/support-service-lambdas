@@ -396,7 +396,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 															'$$.Execution.Name',
 															'health-check-*',
 														),
-														new Pass(this, 'SkipTheRemainingStates'),
+														new Pass(this, 'SkipRemainingStates'),
 													)
 													.otherwise(
 														constructNotificationData
