@@ -385,7 +385,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									new Choice(this, 'IsCsvEmpty')
+									new Choice(this, 'AreThereAccountsToResync')
 										.when(
 											Condition.numberEquals(
 												'$.ResponseBody.numberRecordsProcessed',
