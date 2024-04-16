@@ -390,7 +390,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
 											.next(
-												new Choice(this, 'IsHealthCheck').when(
+												new Choice(this, 'IsNotHealthCheck').when(
 													Condition.not(
 														Condition.stringMatches(
 															'$$.Execution.Name',
