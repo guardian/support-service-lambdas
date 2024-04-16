@@ -70,6 +70,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
+		const endState = new Pass(this, 'EndState', {});
+
 		const createSalesforceQueryJob = new CustomState(
 			this,
 			'CreateSalesforceQueryJob',
@@ -270,6 +272,12 @@ export class SalesforceDisasterRecovery extends GuStack {
 							'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
 						},
 					},
+					Catch: [
+						{
+							ErrorEquals: ['States.ItemReaderFailed'],
+							Next: endState.id,
+						},
+					],
 				},
 			},
 		);
@@ -396,7 +404,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 															'$$.Execution.Name',
 															'health-check-*',
 														),
-														new Pass(this, 'SkipRemainingStates'),
+														endState,
 													)
 													.otherwise(
 														constructNotificationData
@@ -411,7 +419,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 																		new Pass(
 																			this,
 																			'AllAccountsHaveBeenResynced',
-																		),
+																		).next(endState),
 																	)
 																	.otherwise(
 																		new Pass(
@@ -421,7 +429,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 																			new Pass(
 																				this,
 																				'ViewStateInputFailedRowsFileToDebugFailedRows',
-																			),
+																			).next(endState),
 																		),
 																	),
 															),
