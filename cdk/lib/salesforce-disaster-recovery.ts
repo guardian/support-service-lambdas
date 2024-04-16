@@ -70,8 +70,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
-		const endState = new Pass(this, 'EndState', {});
-
 		const createSalesforceQueryJob = new CustomState(
 			this,
 			'CreateSalesforceQueryJob',
@@ -393,7 +391,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 												'$.ResponseBody.numberRecordsProcessed',
 												0,
 											),
-											endState,
+											new Pass(this, 'NoAccountsToResync'),
 										)
 										.otherwise(
 											saveSalesforceQueryResultToS3.next(
@@ -407,7 +405,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 																	'$$.Execution.Name',
 																	'health-check-*',
 																),
-																endState,
+																new Pass(this, 'HealthCheckSuccessful'),
 															)
 															.otherwise(
 																constructNotificationData
@@ -425,7 +423,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 																				new Pass(
 																					this,
 																					'AllAccountsHaveBeenResynced',
-																				).next(endState),
+																				),
 																			)
 																			.otherwise(
 																				new Pass(
@@ -435,7 +433,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 																					new Pass(
 																						this,
 																						'ViewStateInputFailedRowsFileToDebugFailedRows',
-																					).next(endState),
+																					),
 																				),
 																			),
 																	),
