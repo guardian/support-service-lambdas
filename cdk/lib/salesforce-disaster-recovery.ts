@@ -390,32 +390,34 @@ export class SalesforceDisasterRecovery extends GuStack {
 											.next(getMapResult)
 											.next(saveFailedRowsToS3)
 											.next(
-												new Choice(this, 'IsNotHealthCheck').when(
-													Condition.not(
+												new Choice(this, 'IsHealthCheck')
+													.when(
 														Condition.stringMatches(
 															'$$.Execution.Name',
 															'health-check-*',
 														),
-													),
-													constructNotificationData
-														.next(sendCompletionNotification)
-														.next(
-															new Choice(this, 'HaveAllRowsSucceeded')
-																.when(
-																	Condition.numberEquals(
-																		'$.failedRowsCount',
-																		0,
+														new Pass(this, 'SkipTheRemainingStates'),
+													)
+													.otherwise(
+														constructNotificationData
+															.next(sendCompletionNotification)
+															.next(
+																new Choice(this, 'HaveAllRowsSucceeded')
+																	.when(
+																		Condition.numberEquals(
+																			'$.failedRowsCount',
+																			0,
+																		),
+																		new Pass(this, 'AllRowsHaveSucceeded'),
+																	)
+																	.otherwise(
+																		new Pass(this, 'SomeRowsHaveFailed', {
+																			comment:
+																				"View the 'failed-rows.csv' file for more details.",
+																		}),
 																	),
-																	new Pass(this, 'AllRowsHaveSucceeded'),
-																)
-																.otherwise(
-																	new Pass(this, 'SomeRowsHaveFailed', {
-																		comment:
-																			"View the 'failed-rows.csv' file for more details.",
-																	}),
-																),
-														),
-												),
+															),
+													),
 											),
 									),
 								)
@@ -424,7 +426,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 			},
 		);
-
+		``;
 		stateMachine.role.attachInlinePolicy(
 			new Policy(
 				this,
