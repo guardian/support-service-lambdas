@@ -402,19 +402,27 @@ export class SalesforceDisasterRecovery extends GuStack {
 														constructNotificationData
 															.next(sendCompletionNotification)
 															.next(
-																new Choice(this, 'HaveAllRowsSucceeded')
+																new Choice(this, 'HaveAllAccountsBeenResynced')
 																	.when(
 																		Condition.numberEquals(
 																			'$.failedRowsCount',
 																			0,
 																		),
-																		new Pass(this, 'AllRowsHaveSucceeded'),
+																		new Pass(
+																			this,
+																			'AllAccountsHaveBeenResynced',
+																		),
 																	)
 																	.otherwise(
-																		new Pass(this, 'SomeRowsHaveFailed', {
-																			comment:
-																				"View the 'failed-rows.csv' file for more details.",
-																		}),
+																		new Pass(
+																			this,
+																			'SomeAccountsHaveFailedToUpdate',
+																		).next(
+																			new Pass(
+																				this,
+																				'ViewStateInputFailedRowsFileToDebugFailedRows',
+																			),
+																		),
 																	),
 															),
 													),
@@ -426,7 +434,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				),
 			},
 		);
-		``;
+
 		stateMachine.role.attachInlinePolicy(
 			new Policy(
 				this,
