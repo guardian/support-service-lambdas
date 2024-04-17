@@ -5,6 +5,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   "Contribution": {
     "ratePlans": {
       "Annual": {
+        "billingPeriod": "Annual",
         "charges": {
           "Contribution": {
             "id": "2c92a0fc5e1dc084015e37f58c7b0f34",
@@ -21,6 +22,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Monthly": {
+        "billingPeriod": "Month",
         "charges": {
           "Contribution": {
             "id": "2c92a0fc5aacfadd015ad250bf2c6d38",
@@ -41,6 +43,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   "DigitalSubscription": {
     "ratePlans": {
       "Annual": {
+        "billingPeriod": "Annual",
         "charges": {
           "Subscription": {
             "id": "2c92a0fb4edd70c9014edeaa5001218c",
@@ -57,6 +60,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Monthly": {
+        "billingPeriod": "Month",
         "charges": {
           "Subscription": {
             "id": "2c92a0fb4edd70c9014edeaa50342192",
@@ -109,6 +113,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyDomestic": {
     "ratePlans": {
       "Annual": {
+        "billingPeriod": "Annual",
         "charges": {
           "Subscription": {
             "id": "2c92a0fe6619b4b901661aa8e6811695",
@@ -125,6 +130,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Monthly": {
+        "billingPeriod": "Month",
         "charges": {
           "Subscription": {
             "id": "2c92a0fd79ac64b00179ae3f9d704962",
@@ -141,6 +147,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "OneYearGift": {
+        "billingPeriod": "Annual",
         "charges": {
           "Subscription": {
             "id": "2c92a0ff67cebd0d0167f0a1a85b2350",
@@ -157,6 +164,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Quarterly": {
+        "billingPeriod": "Quarter",
         "charges": {
           "Subscription": {
             "id": "2c92a0fe6619b4b601661aa8b74e623f",
@@ -172,23 +180,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 90,
         },
       },
-      "SixWeekly": {
-        "charges": {
-          "Subscription": {
-            "id": "2c92a0086619bf8901661aaac95d5800",
-          },
-        },
-        "id": "2c92a0086619bf8901661aaac94257fe",
-        "pricing": {
-          "AUD": 6,
-          "CAD": 6,
-          "EUR": 6,
-          "GBP": 6,
-          "NZD": 6,
-          "USD": 6,
-        },
-      },
       "ThreeMonthGift": {
+        "billingPeriod": "Quarter",
         "charges": {
           "Subscription": {
             "id": "2c92a00e6dd988e2016df853875d74c6",
@@ -209,6 +202,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyRestOfWorld": {
     "ratePlans": {
       "Annual": {
+        "billingPeriod": "Annual",
         "charges": {
           "Subscription": {
             "id": "2c92a0fe6619b4b601661ab3002f2653",
@@ -225,6 +219,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Monthly": {
+        "billingPeriod": "Month",
         "charges": {
           "Monthly": {
             "id": "2c92a0ff79ac64e30179ae4566cb3a86",
@@ -237,6 +232,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "OneYearGift": {
+        "billingPeriod": "Annual",
         "charges": {
           "Subscription": {
             "id": "2c92a0ff67cebd140167f0a2f68912ed",
@@ -253,6 +249,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Quarterly": {
+        "billingPeriod": "Quarter",
         "charges": {
           "Subscription": {
             "id": "2c92a0ff6619bf8b01661ab2d0396eb2",
@@ -268,23 +265,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 99,
         },
       },
-      "SixWeekly": {
-        "charges": {
-          "Subscription": {
-            "id": "2c92a0086619bf8901661ab546091b23",
-          },
-        },
-        "id": "2c92a0086619bf8901661ab545f51b21",
-        "pricing": {
-          "AUD": 6,
-          "CAD": 6,
-          "EUR": 6,
-          "GBP": 6,
-          "NZD": 6,
-          "USD": 6,
-        },
-      },
       "ThreeMonthGift": {
+        "billingPeriod": "Quarter",
         "charges": {
           "Subscription": {
             "id": "2c92a0076dd9892e016df8503e936c4a",
@@ -305,6 +287,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   "HomeDelivery": {
     "ratePlans": {
       "Everyday": {
+        "billingPeriod": "Month",
         "charges": {
           "Friday": {
             "id": "2c92a0fd560d13880156136b73770f1e",
@@ -334,6 +317,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Saturday": {
+        "billingPeriod": "Month",
         "charges": {
           "Saturday": {
             "id": "2c92a0fd5e1dcf0d015e3cb39d207ddf",
@@ -345,6 +329,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Sixday": {
+        "billingPeriod": "Month",
         "charges": {
           "Friday": {
             "id": "2c92a0ff560d311b0156136f2b50531f",
@@ -371,6 +356,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Sunday": {
+        "billingPeriod": "Month",
         "charges": {
           "Sunday": {
             "id": "2c92a0ff5af9b657015b0fea5bb83fa8",
@@ -382,6 +368,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Weekend": {
+        "billingPeriod": "Month",
         "charges": {
           "Saturday": {
             "id": "2c92a0fd5614305c01561dc88fb875d0",
@@ -400,6 +387,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   "NationalDelivery": {
     "ratePlans": {
       "Everyday": {
+        "billingPeriod": "Month",
         "charges": {
           "Friday": {
             "id": "8a12999f8a268c57018a27ebe44c14b6",
@@ -429,6 +417,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Sixday": {
+        "billingPeriod": "Month",
         "charges": {
           "Friday": {
             "id": "8a12999f8a268c57018a27ebfecb18c7",
@@ -455,6 +444,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Weekend": {
+        "billingPeriod": "Month",
         "charges": {
           "Saturday": {
             "id": "8a12999f8a268c57018a27ebe949151d",
@@ -473,6 +463,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   "SubscriptionCard": {
     "ratePlans": {
       "Everyday": {
+        "billingPeriod": "Month",
         "charges": {
           "Friday": {
             "id": "2c92a00870ec598001710740c91d2f4d",
@@ -502,6 +493,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Saturday": {
+        "billingPeriod": "Month",
         "charges": {
           "Saturday": {
             "id": "2c92a00870ec598001710740ce042fcb",
@@ -513,6 +505,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Sixday": {
+        "billingPeriod": "Month",
         "charges": {
           "Friday": {
             "id": "2c92a00870ec598001710740cb4e2f6b",
@@ -539,6 +532,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Sunday": {
+        "billingPeriod": "Month",
         "charges": {
           "Sunday": {
             "id": "2c92a00870ec598001710740d1103019",
@@ -550,6 +544,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Weekend": {
+        "billingPeriod": "Month",
         "charges": {
           "Saturday": {
             "id": "2c92a00870ec598001710740d28e3024",
@@ -568,6 +563,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   "SupporterPlus": {
     "ratePlans": {
       "Annual": {
+        "billingPeriod": "Annual",
         "charges": {
           "Contribution": {
             "id": "8a12892d85fc6df4018602451322287f",
@@ -587,6 +583,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
       },
       "Monthly": {
+        "billingPeriod": "Month",
         "charges": {
           "Contribution": {
             "id": "8a128d7085fc6dec01860234cd075270",
@@ -676,9 +673,6 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Quarterly": {
         "Subscription": {},
       },
-      "SixWeekly": {
-        "Subscription": {},
-      },
       "ThreeMonthGift": {
         "Subscription": {},
       },
@@ -700,9 +694,6 @@ exports[`Generated product catalog types match snapshot 1`] = `
         "Subscription": {},
       },
       "Quarterly": {
-        "Subscription": {},
-      },
-      "SixWeekly": {
         "Subscription": {},
       },
       "ThreeMonthGift": {
