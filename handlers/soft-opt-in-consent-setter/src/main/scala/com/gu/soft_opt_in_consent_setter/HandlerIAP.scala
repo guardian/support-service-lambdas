@@ -220,7 +220,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       sfConnector: SalesforceConnector,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
-      if (consents.nonEmpty)
+      if (consents.nonEmpty) {
         for {
           _ <- {
             val consentsBody = consentsCalculator.buildConsentsBody(consents, state = false)
@@ -230,8 +230,9 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             sendConsentsReq(identityId, consentsBody)
           }
         } yield ()
-      else
+      } else {
         Right(())
+      }
     }
 
     for {
@@ -248,7 +249,8 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
         messageBody.productName,
         productNames.toSet,
       )
-      _ <- sendCancellationConsents(messageBody.identityId, consents)
+      consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
+      _ <- sendCancellationConsents(messageBody.identityId, consentWithoutSimilarProducts)
     } yield ()
   }
 
