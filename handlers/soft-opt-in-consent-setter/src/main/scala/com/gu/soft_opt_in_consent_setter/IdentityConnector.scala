@@ -3,8 +3,9 @@ package com.gu.soft_opt_in_consent_setter
 import com.gu.soft_opt_in_consent_setter.models.{IdentityConfig, SoftOptInError}
 import scalaj.http.{Http, HttpResponse}
 import scala.util.Try
+import com.typesafe.scalalogging.LazyLogging
 
-class IdentityConnector(config: IdentityConfig) {
+class IdentityConnector(config: IdentityConfig) extends LazyLogging {
 
   def sendConsentsReq(identityId: String, body: String): Either[SoftOptInError, Unit] = {
     handleConsentsResp(
@@ -14,6 +15,7 @@ class IdentityConnector(config: IdentityConfig) {
   }
 
   def sendReq(url: String, body: String): Either[Throwable, HttpResponse[String]] = {
+    logger.info(s"consents update request: url: ${url}, body: ${body}")
     Try(
       Http(url)
         .header("Content-Type", "application/json")
