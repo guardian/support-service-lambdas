@@ -5,27 +5,27 @@ import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck
 import sttp.client3.basicRequest
 import sttp.model.Uri
 import zio.json.*
-import zio.{IO, ULayer, URLayer, ZIO, ZLayer}
+import zio.{IO, RIO, Task, ULayer, URLayer, ZIO, ZLayer}
 
 object ZuoraGetLive:
   val layer: URLayer[ZuoraClient, ZuoraGet] = ZLayer.fromFunction(ZuoraGetLive(_))
 
-private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
+class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
 
-  override def get[T: JsonDecoder](
+  override def get[Response: JsonDecoder](
       relativeUrl: Uri,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[ErrorResponse, T] =
+  ): Task[Response] =
     for {
       response <- zuoraClient.send(basicRequest.get(relativeUrl))
-      parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[T](response, zuoraSuccessCheck))
+      parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck))
     } yield parsedBody
 
   override def post[Request: JsonEncoder, Response: JsonDecoder](
       relativeUrl: Uri,
       input: Request,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[ErrorResponse, Response] =
+  ): Task[Response] =
     for {
       _ <- ZIO.log(s"Sending POST to $relativeUrl with body ${input.toJson}")
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).post(relativeUrl))
@@ -37,7 +37,7 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
       relativeUrl: Uri,
       input: Request,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[ErrorResponse, Response] =
+  ): Task[Response] =
     for {
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).put(relativeUrl))
       parsedBody <- ZIO.fromEither(
@@ -46,39 +46,17 @@ private class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
     } yield parsedBody
 
 trait ZuoraGet:
-  def get[T: JsonDecoder](
+  def get[Response: JsonDecoder](
       relativeUrl: Uri,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[ErrorResponse, T]
+  ): Task[Response]
   def post[Request: JsonEncoder, Response: JsonDecoder](
       relativeUrl: Uri,
       input: Request,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[ErrorResponse, Response]
+  ): Task[Response]
   def put[Request: JsonEncoder, Response: JsonDecoder](
       relativeUrl: Uri,
       input: Request,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): IO[ErrorResponse, Response]
-
-object ZuoraGet {
-  def get[T: JsonDecoder](
-      relativeUrl: Uri,
-      zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): ZIO[ZuoraGet, ErrorResponse, T] =
-    ZIO.serviceWithZIO[ZuoraGet](_.get(relativeUrl, zuoraSuccessCheck))
-
-  def post[Request: JsonEncoder, Response: JsonDecoder](
-      relativeUrl: Uri,
-      input: Request,
-      zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): ZIO[ZuoraGet, ErrorResponse, Response] =
-    ZIO.serviceWithZIO[ZuoraGet](_.post(relativeUrl, input, zuoraSuccessCheck))
-
-  def put[Request: JsonEncoder, Response: JsonDecoder](
-      relativeUrl: Uri,
-      input: Request,
-      zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
-  ): ZIO[ZuoraGet, ErrorResponse, Response] =
-    ZIO.serviceWithZIO[ZuoraGet](_.put(relativeUrl, input, zuoraSuccessCheck))
-}
+  ): Task[Response]

@@ -2,7 +2,7 @@ package com.gu.productmove.zuora.model
 
 import zio.json.{JsonDecoder, JsonEncoder}
 
-case class SubscriptionName(value: String)
+case class SubscriptionName(value: String) extends AnyVal
 
 object SubscriptionName {
   given JsonDecoder[SubscriptionName] = JsonDecoder.string.map(SubscriptionName(_))

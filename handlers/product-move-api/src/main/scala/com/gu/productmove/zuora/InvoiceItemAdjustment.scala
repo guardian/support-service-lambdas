@@ -31,7 +31,7 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
       invoiceItemId: String,
       adjustmentType: String,
       sourceType: String,
-  ): IO[ErrorResponse, InvoiceItemAdjustmentResult] =
+  ): Task[InvoiceItemAdjustmentResult] =
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
       response <- zuoraGet.post[PostBody, InvoiceItemAdjustmentResult](
@@ -43,7 +43,7 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
 
   def batchUpdate(
       invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
-  ): IO[ErrorResponse, List[InvoiceItemAdjustmentResult]] =
+  ): Task[List[InvoiceItemAdjustmentResult]] =
     for {
       today <- Clock.currentDateTime.map(_.toLocalDate)
       response <- zuoraGet.post[InvoiceItemAdjustmentsWriteRequest, List[InvoiceItemAdjustmentResult]](
@@ -59,12 +59,12 @@ trait InvoiceItemAdjustment:
       amount: BigDecimal,
       invoiceItemId: String,
       adjustmentType: String,
-      sourceType: String,
-  ): IO[ErrorResponse, InvoiceItemAdjustmentResult]
+      sourceType: String = "InvoiceDetail",
+  ): Task[InvoiceItemAdjustmentResult]
 
   def batchUpdate(
       invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
-  ): IO[ErrorResponse, List[InvoiceItemAdjustmentResult]]
+  ): Task[List[InvoiceItemAdjustmentResult]]
 
 object InvoiceItemAdjustment {
 
@@ -95,11 +95,11 @@ object InvoiceItemAdjustment {
       invoiceItemId: String,
       adjustmentType: String,
       sourceType: String = "InvoiceDetail",
-  ): ZIO[InvoiceItemAdjustment, ErrorResponse, InvoiceItemAdjustmentResult] =
+  ): RIO[InvoiceItemAdjustment, InvoiceItemAdjustmentResult] =
     ZIO.serviceWithZIO[InvoiceItemAdjustment](_.update(invoiceId, amount, invoiceItemId, adjustmentType, sourceType))
 
   def batchUpdate(
       invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
-  ): ZIO[InvoiceItemAdjustment, ErrorResponse, List[InvoiceItemAdjustmentResult]] =
+  ): RIO[InvoiceItemAdjustment, List[InvoiceItemAdjustmentResult]] =
     ZIO.serviceWithZIO[InvoiceItemAdjustment](_.batchUpdate(invoiceItemAdjustments))
 }

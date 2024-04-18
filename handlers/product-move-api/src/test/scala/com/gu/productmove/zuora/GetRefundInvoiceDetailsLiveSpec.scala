@@ -5,10 +5,9 @@ import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.ExpectedInput
 import com.gu.productmove.refund.RefundSupporterPlus
 import com.gu.productmove.zuora.TaxDetails
-import com.gu.productmove.zuora.SubscriptionCancelSpec.{suite, test}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import zio.{Scope, ZLayer}
+import zio.*
 import zio.test.Assertion.{equalTo, isSome}
 import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assertTrue, assert}
 

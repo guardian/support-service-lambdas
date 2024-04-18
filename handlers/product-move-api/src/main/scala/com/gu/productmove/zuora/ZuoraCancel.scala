@@ -22,7 +22,7 @@ trait ZuoraCancel:
   def cancel(
       subscriptionName: SubscriptionName,
       cancellationEffectiveDate: LocalDate,
-  ): ZIO[Any, ErrorResponse, CancellationResponse]
+  ): Task[CancellationResponse]
 
 object ZuoraCancelLive:
   val layer: URLayer[ZuoraGet, ZuoraCancel] = ZLayer.fromFunction(ZuoraCancelLive(_))
@@ -31,7 +31,7 @@ private class ZuoraCancelLive(zuoraGet: ZuoraGet) extends ZuoraCancel:
   override def cancel(
       subscriptionName: SubscriptionName,
       cancellationEffectiveDate: LocalDate,
-  ): ZIO[Any, ErrorResponse, CancellationResponse] = {
+  ): Task[CancellationResponse] = {
     val cancellationRequest = CancellationRequest(cancellationEffectiveDate)
 
     zuoraGet.put[CancellationRequest, CancellationResponse](
@@ -44,7 +44,7 @@ object ZuoraCancel {
   def cancel(
       subscriptionName: SubscriptionName,
       cancellationEffectiveDate: LocalDate,
-  ): ZIO[ZuoraCancel, ErrorResponse, CancellationResponse] =
+  ): RIO[ZuoraCancel, CancellationResponse] =
     ZIO.serviceWithZIO[ZuoraCancel](_.cancel(subscriptionName, cancellationEffectiveDate))
 }
 

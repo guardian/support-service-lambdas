@@ -4,7 +4,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse,
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.CreateSubscriptionResponse
-import zio.{IO, ZIO}
+import zio.*
 
 class MockSubscribe(responses: Map[(String, String), CreateSubscriptionResponse]) extends Subscribe {
 
@@ -15,12 +15,13 @@ class MockSubscribe(responses: Map[(String, String), CreateSubscriptionResponse]
   override def create(
       zuoraAccountId: String,
       targetProductId: String,
-  ): ZIO[Any, ErrorResponse, CreateSubscriptionResponse] = {
-    mutableStore = (zuoraAccountId, targetProductId) :: mutableStore
+  ): Task[CreateSubscriptionResponse] = {
+    val params = (zuoraAccountId, targetProductId)
+    mutableStore = params :: mutableStore
 
-    responses.get((zuoraAccountId, targetProductId)) match
+    responses.get(params) match
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None => ZIO.fail(InternalServerError(s"success = false"))
+      case None => ZIO.fail(new Throwable(s"mock: success = false subscribe: " + params))
   }
 }
 

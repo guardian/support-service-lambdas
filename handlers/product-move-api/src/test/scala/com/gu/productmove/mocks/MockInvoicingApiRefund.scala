@@ -5,7 +5,7 @@ import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.zuora.MockGetAccount
 import com.gu.productmove.zuora.model.SubscriptionName
-import zio.ZIO
+import zio.*
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -14,11 +14,11 @@ class MockInvoicingApiRefund(val refundStubs: Map[(SubscriptionName, BigDecimal)
     extends InvoicingApiRefund {
   val requests: ArrayBuffer[(SubscriptionName, BigDecimal)] = ArrayBuffer.empty
 
-  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): ZIO[Any, ErrorResponse, RefundResponse] = {
+  def refund(subscriptionName: SubscriptionName, amount: BigDecimal): Task[RefundResponse] = {
     requests += ((subscriptionName, amount))
     refundStubs.get(subscriptionName, amount) match {
       case Some(response) => ZIO.succeed(response)
-      case None => ZIO.fail(InternalServerError(s"No response stubbed for input: (${subscriptionName.value}, $amount)"))
+      case None => ZIO.fail(new Throwable(s"No response stubbed for input: (${subscriptionName.value}, $amount)"))
     }
   }
 }

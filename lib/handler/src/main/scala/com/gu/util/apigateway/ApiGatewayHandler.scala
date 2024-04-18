@@ -1,14 +1,13 @@
 package com.gu.util.apigateway
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandlerParams.UrlParamsWire
 import com.gu.util.apigateway.ApiGatewayResponse.outputForAPIGateway
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types._
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -21,7 +20,7 @@ object ApiGatewayHandlerParams {
   case class UrlParamsWire(isHealthcheck: Option[String]) {
     def toApiHandlerParams = ApiGatewayHandlerParams(isHealthcheck.contains("true"))
   }
-  implicit val wireReads = Json.reads[UrlParamsWire]
+  implicit val wireReads: Reads[UrlParamsWire] = Json.reads[UrlParamsWire]
 }
 
 object ApiGatewayHandler extends Logging {

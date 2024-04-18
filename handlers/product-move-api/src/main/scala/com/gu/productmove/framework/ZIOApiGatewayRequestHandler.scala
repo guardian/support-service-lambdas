@@ -2,7 +2,7 @@ package com.gu.productmove.framework
 
 import com.amazonaws.services.lambda.runtime.*
 import com.amazonaws.services.lambda.runtime.events.*
-import com.gu.productmove
+import com.gu.productmove.endpoint
 import io.circe.*
 import io.circe.generic.semiauto.*
 import io.circe.syntax.*
@@ -47,7 +47,7 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
             _ <- ZIO.log("output: " + new String(loggedOutputStream.toByteArray, StandardCharsets.UTF_8))
             _ = output.write(loggedOutputStream.toByteArray)
             _ = output.close()
-          } yield ()
+          } yield (),
         )
         .getOrThrowFiberFailure()
     }

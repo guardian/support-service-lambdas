@@ -648,7 +648,7 @@ lazy val `product-move-api` = lambdaProject(
     awsSecretsManager,
     upickle,
   ),
-  Seq(`zuora-models`, `effects-sqs`, `new-product-api`),
+  Seq(`zuora-models`, `effects-sqs`),
   scala3Settings ++ Seq(
     excludeDependencies ++= Seq(
       ExclusionRule("org.typelevel", "cats-kernel_2.13"),

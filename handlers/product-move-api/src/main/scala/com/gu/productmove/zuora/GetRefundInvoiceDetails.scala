@@ -29,7 +29,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
     s"select Id, ChargeAmount, TaxAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
   private def getTaxationItemsQuery(invoiceId: String) =
     s"select Id, InvoiceItemId, InvoiceId from TaxationItem where InvoiceId = '$invoiceId'"
-  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, RefundInvoiceDetails] = {
+  override def get(subscriptionName: SubscriptionName): Task[RefundInvoiceDetails] = {
     for {
       invoiceItems <- zuoraGet
         .post[PostBody, InvoiceItemsResponse](
@@ -81,12 +81,12 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
   }
   private def invoiceIncludesTax(invoiceItems: List[InvoiceItem]) =
     invoiceItems.exists(_.TaxAmount > 0)
-  private def getNegativeInvoice(items: List[InvoiceItem]): ZIO[Any, ErrorResponse, (String, List[InvoiceItem])] =
+  private def getNegativeInvoice(items: List[InvoiceItem]): Task[(String, List[InvoiceItem])] =
     getInvoicesSortedByDate(items).headOption
       .map(ZIO.succeed(_))
       .getOrElse(
         ZIO.fail(
-          InternalServerError(
+          new Throwable(
             s"Empty list of invoice items in response $items this is an error " +
               s"as we need the cancellation invoice items to carry out a refund",
           ),
@@ -102,13 +102,13 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
   }
   private def getLastPaidInvoice(
       items: List[InvoiceItem],
-  ): ZIO[Any, InternalServerError, (String, List[InvoiceItem])] = {
+  ): Task[(String, List[InvoiceItem])] = {
     val sorted = getInvoicesSortedByDate(items)
     sorted.tail.headOption
       .map(ZIO.succeed(_))
       .getOrElse(
         ZIO.fail(
-          InternalServerError(
+          new Throwable(
             s"There was only one invoice item in response $items this is an error " +
               s"as we need the cancellation invoice items to carry out a refund",
           ),
@@ -147,7 +147,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
 }
 
 trait GetRefundInvoiceDetails {
-  def get(subscriptionName: SubscriptionName): IO[ErrorResponse, RefundInvoiceDetails]
+  def get(subscriptionName: SubscriptionName): Task[RefundInvoiceDetails]
 }
 case class RefundInvoiceDetails(
     refundAmount: BigDecimal,
@@ -169,6 +169,6 @@ case class InvoiceItemWithTaxDetails(
 object GetRefundInvoiceDetails {
   def get(
       subscriptionName: SubscriptionName,
-  ): ZIO[GetRefundInvoiceDetails, ErrorResponse, RefundInvoiceDetails] =
+  ): RIO[GetRefundInvoiceDetails, RefundInvoiceDetails] =
     ZIO.serviceWithZIO[GetRefundInvoiceDetails](_.get(subscriptionName))
 }

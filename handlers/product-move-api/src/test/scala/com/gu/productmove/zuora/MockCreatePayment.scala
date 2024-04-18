@@ -3,7 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
-import zio.{IO, ZIO}
+import zio.*
 
 import java.time.LocalDate
 
@@ -21,7 +21,7 @@ class MockCreatePayment(
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
-  ): IO[ErrorResponse, CreatePaymentResponse] = {
+  ): Task[CreatePaymentResponse] = {
     mutableStore = invoiceId :: mutableStore
     ZIO.succeed(response)
   }

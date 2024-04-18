@@ -17,10 +17,7 @@ object SubscriptionCancelEndpointTypes {
         "mma_other",
       ) // also "mma_value_for_money" , "mma_support_another_way" , "mma_financial_circumstances", etc
       reason: String,
-  )
-
-  given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
-  given JsonEncoder[ExpectedInput] = DeriveJsonEncoder.gen[ExpectedInput] // needed to keep tapir happy
+  ) derives JsonCodec
 
   given Schema[ExpectedInput] = inlineSchema(Schema.derived)
 

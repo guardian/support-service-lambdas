@@ -3,20 +3,19 @@ package com.gu.productmove.endpoint.updateamount
 import cats.data.NonEmptyList
 import com.gu.i18n
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.AmountLimits
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, ZuoraIds}
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpointTypes.ExpectedInput
 import com.gu.productmove.endpoint.updateamount.ZIOExtension.{asNonEmptyList, asSingle}
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlanCharge}
-import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.*
+import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.{EmailMessage, SQS}
 import com.gu.util.config
-import com.gu.productmove.zuora.given_JsonDecoder_SubscriptionUpdateResponse
-import zio.{IO, RIO, ZIO}
+import zio.{IO, RIO, Task, ZIO}
 
 object UpdateSupporterPlusAmountSteps {
 
@@ -24,7 +23,11 @@ object UpdateSupporterPlusAmountSteps {
     GetSubscription with GetAccount with SubscriptionUpdate with SQS with Stage,
     OutputBody,
   ] = {
-    (for {
+    val maybeResult: ZIO[
+      SQS with SubscriptionUpdate with Stage with GetAccount with GetSubscription,
+      OutputBody | Throwable,
+      Success,
+    ] = for {
       _ <- ZIO.log(s"PostData: ${postData.toString}")
 
       subscription <- GetSubscription.get(subscriptionName)
@@ -67,24 +70,29 @@ object UpdateSupporterPlusAmountSteps {
 
       billingPeriod <- supporterPlusData.contributionCharge.billingPeriod.value
 
-      _ <- SQS.sendEmail(
-        EmailMessage.updateAmountEmail(
-          account,
-          postData.newPaymentAmount,
-          account.basicInfo.currency,
-          billingPeriod,
-          applyFromDate,
-        ),
-      )
+      _ <- SQS
+        .sendEmail(
+          EmailMessage.updateAmountEmail(
+            account,
+            postData.newPaymentAmount,
+            account.basicInfo.currency,
+            billingPeriod,
+            applyFromDate,
+          ),
+        )
     } yield Success(
       s"Successfully updated payment amount for Supporter Plus subscription ${subscriptionName.value} with amount ${postData.newPaymentAmount}",
-    )).fold(error => error, success => success)
+    )
+    maybeResult.catchAll {
+      case failure: OutputBody => ZIO.succeed(failure)
+      case other: Throwable => ZIO.fail(other)
+    }
   }
 
   private def getSupporterPlusData(
       subscription: GetSubscriptionResponse,
       ids: SupporterPlusZuoraIds,
-  ): ZIO[Any, ErrorResponse, SupporterPlusCharges] =
+  ): Task[SupporterPlusCharges] =
     for {
       ratePlan <- asSingle(subscription.ratePlans.filterNot(_.lastChangeType.contains("Remove")), "ratePlan")
       charges <- asNonEmptyList(ratePlan.ratePlanCharges, "ratePlanCharge")
@@ -94,7 +102,7 @@ object UpdateSupporterPlusAmountSteps {
           case multiple => Left(multiple.toString)
         }
         if (errors.nonEmpty)
-          ZIO.fail(InternalServerError("subscription had duplicate charges")).logError(s"errors: $errors")
+          ZIO.fail(new Throwable("subscription had duplicate charges")).logError(s"errors: $errors")
         else ZIO.succeed(chargesById.toMap)
       }
       chargeIdsOfInterest = {
@@ -117,7 +125,7 @@ object UpdateSupporterPlusAmountSteps {
           ZIO.succeed(SupporterPlusCharges(ratePlan.id, contr, true, BigDecimal(annual.price.get)))
         case List(None, None, None, Some(monthly), None, Some(contr)) if monthly.price.isDefined =>
           ZIO.succeed(SupporterPlusCharges(ratePlan.id, contr, false, BigDecimal(monthly.price.get)))
-        case other => ZIO.fail(InternalServerError("subscription was not in valid state")).logError(s"charges: $other")
+        case other => ZIO.fail(new Throwable("subscription was not in valid state")).logError(s"charges: $other")
 
     } yield supporterPlusCharges
 
@@ -135,7 +143,7 @@ object UpdateSupporterPlusAmountSteps {
       currency: com.gu.i18n.Currency,
       amount: BigDecimal,
       isAnnual: Boolean,
-  ): ZIO[Any, ErrorResponse, Unit] = {
+  ): IO[BadRequest, Unit] = {
     val limitsForCurrency = AmountLimits.supporterPlusLimitsfor(currency)
     val limits = if (isAnnual) limitsForCurrency.annual else limitsForCurrency.monthly
     for {
@@ -158,13 +166,13 @@ object UpdateSupporterPlusAmountSteps {
 }
 
 extension (currency: Currency)
-  def toI18nCurrency: ZIO[Any, InternalServerError, i18n.Currency] =
-    ZIO.fromOption(com.gu.i18n.Currency.fromString(currency.code)).orElseFail(InternalServerError("incorrect currency"))
+  def toI18nCurrency: Task[i18n.Currency] =
+    ZIO.fromOption(com.gu.i18n.Currency.fromString(currency.code)).orElseFail(new Throwable("incorrect currency"))
 
 extension (billingPeriod: BillingPeriod)
-  def value: IO[ErrorResponse, String] =
+  def value: Task[String] =
     billingPeriod match {
       case Monthly => ZIO.succeed("month")
       case Annual => ZIO.succeed("annual")
-      case _ => ZIO.fail(InternalServerError(s"Unrecognised billing period $billingPeriod"))
+      case _ => ZIO.fail(new Throwable(s"Unrecognised billing period $billingPeriod"))
     }
