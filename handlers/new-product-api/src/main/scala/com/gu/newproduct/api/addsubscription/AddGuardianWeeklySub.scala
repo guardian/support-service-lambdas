@@ -36,8 +36,6 @@ class AddGuardianWeeklySub(
   validateAddress: (BillToAddress, SoldToAddress) => ValidationResult[Unit],
   createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
   sendConfirmationEmail: (Option[SfContactId], GuardianWeeklyEmailData) => AsyncApiGatewayOp[Unit],
-  sixForSixPlanId: PlanId,
-  quarterlyPlanId: PlanId,
 ) extends AddSpecificProduct {
   override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
@@ -49,10 +47,7 @@ class AddGuardianWeeklySub(
     ).toApiGatewayOp.toAsync
     createSubRequest <- createCreateSubRequest(
       request,
-      sixForSixPlanId,
-      quarterlyPlanId,
       getZuoraRateplanId,
-      getPlanAndCharge,
     ).toAsync
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create guardian weekly subscription")
     plan = getPlan(request.planId)
@@ -81,8 +76,6 @@ object AddGuardianWeeklySub {
       createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
       emailQueueName: QueueName,
-      sixForSixPlanId: PlanId,
-      quarterlyPlanId: PlanId,
   ): AddSpecificProduct = {
     val guardianWeeklySqsQueueSend = awsSQSSend(emailQueueName)
     val guardianWeeklyBrazeConfirmationSqsSend = EtSqsSend[GuardianWeeklyEmailData](guardianWeeklySqsQueueSend) _
@@ -97,8 +90,6 @@ object AddGuardianWeeklySub {
       isValidAddressForPlan,
       createSubscription,
       sendConfirmationEmail,
-      sixForSixPlanId,
-      quarterlyPlanId,
     )
   }
 
@@ -124,48 +115,8 @@ object AddGuardianWeeklySub {
 
   def createCreateSubRequest(
       request: AddSubscriptionRequest,
-      sixForSixPlanId: PlanId,
-      quarterlyPlanId: PlanId,
       getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-      getPlanAndCharge: PlanId => Option[HasPlanAndChargeIds],
   ): ApiGatewayOp[ZuoraCreateSubRequest] = {
-    if (request.planId == sixForSixPlanId) {
-      for {
-        zuora6for6RatePlanAndCharge <- getPlanAndCharge(sixForSixPlanId)
-          .toApiGatewayContinueProcessing(internalServerError(s"no Zuora ids for ${request.planId}!"))
-        zuoraQuarterlyRatePlanId <- getZuoraRateplanId(quarterlyPlanId)
-          .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${quarterlyPlanId}!"))
-
-        /** The following logic was implement for consistency with the support-frontend:
-          * https://github.com/guardian/support-frontend/blob/main/support-workers/src/main/scala/com/gu/zuora/ProductSubscriptionBuilders.scala
-          *
-          * 6 for 6 subs are modeled in zuora as a sub with two rate plans. The inital 6 week period is given a 'trigger
-          * date' of the first issue date selected by the user. After the initial 6 weeks the normal 3 quarterly
-          * subscription is used. This is triggered by the contractAcceptanceDate which in this case is pushed forward
-          * by 6 weeks to avoid running concurrently with the 6 for 6 period
-          */
-        createSubRequest = ZuoraCreateSubRequest(
-          request = request,
-          acceptanceDate = request.startDate.plusWeeks(6),
-          ratePlans = List(
-            ZuoraCreateSubRequestRatePlan(
-              productRatePlanId = zuora6for6RatePlanAndCharge.productRatePlanId,
-              maybeChargeOverride = Some(
-                ChargeOverride(
-                  amountMinorUnits = None,
-                  productRatePlanChargeId = zuora6for6RatePlanAndCharge.productRatePlanChargeId,
-                  triggerDate = Some(request.startDate),
-                ),
-              ),
-            ),
-            ZuoraCreateSubRequestRatePlan(
-              productRatePlanId = zuoraQuarterlyRatePlanId,
-              maybeChargeOverride = None,
-            ),
-          ),
-        )
-      } yield createSubRequest
-    } else {
       for {
         zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(
           internalServerError(s"no Zuora id for ${request.planId}!"),
@@ -197,6 +148,5 @@ object AddGuardianWeeklySub {
           ratePlans = ratePlans,
         )
       } yield createSubRequest
-    }
   }
 }

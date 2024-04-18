@@ -166,8 +166,6 @@ object Steps {
         createSubscription,
         awsSQSSend,
         EmailQueueName,
-        GuardianWeeklyDomestic6for6,
-        GuardianWeeklyDomesticQuarterly,
       )
 
       guardianWeeklyROWStep = AddGuardianWeeklySub.wireSteps(
@@ -179,8 +177,6 @@ object Steps {
         createSubscription,
         awsSQSSend,
         EmailQueueName,
-        GuardianWeeklyROW6for6,
-        GuardianWeeklyROWQuarterly,
       )
 
       addSubSteps = new handleRequest(
