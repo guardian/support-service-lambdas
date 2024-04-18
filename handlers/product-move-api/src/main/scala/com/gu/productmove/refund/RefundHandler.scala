@@ -37,7 +37,7 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
     }
   }
 
-  def runZio(refundInput: RefundInput, context: Context) =
+  def runZio(refundInput: RefundInput, context: Context) = {
     val runtime = Runtime.default
     Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
@@ -57,10 +57,12 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
             InvoiceItemAdjustmentLive.layer,
             SecretsLive.layer,
           ),
-      ) match
+      ) match {
         case Exit.Success(value) => value
         case Exit.Failure(cause) =>
           context.getLogger.log("Failed with: " + cause.toString)
           throw new RuntimeException("Refund failed with error: " + cause.toString)
+      }
     }
+  }
 }

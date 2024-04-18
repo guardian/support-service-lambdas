@@ -28,7 +28,7 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
     }
   }
 
-  def runZio(salesforceRecordInput: SalesforceRecordInput, context: Context) =
+  def runZio(salesforceRecordInput: SalesforceRecordInput, context: Context) = {
     val runtime = Runtime.default
     Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
@@ -42,10 +42,12 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
             AwsCredentialsLive.layer,
             GuStageLive.layer,
           ),
-      ) match
+      ) match {
         case Exit.Success(value) => value
         case Exit.Failure(cause) =>
           context.getLogger.log("Failed with: " + cause.toString)
           throw new RuntimeException("Salesforce record creation failed with error: " + cause.toString)
+      }
     }
+  }
 }

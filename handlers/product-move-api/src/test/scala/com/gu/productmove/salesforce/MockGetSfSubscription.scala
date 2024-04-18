@@ -13,9 +13,10 @@ class MockGetSfSubscription(responses: Map[String, GetSfSubscriptionResponse]) e
   override def get(subscriptionName: String): Task[GetSfSubscriptionResponse] = {
     mutableStore = subscriptionName :: mutableStore
 
-    responses.get(subscriptionName) match
+    responses.get(subscriptionName) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"Salesforce error message"))
+    }
   }
 }
 

@@ -13,10 +13,11 @@ given JsonEncoder[RequestBody] = DeriveJsonEncoder.gen[RequestBody]
 case class Res(Id: String)
 given JsonDecoder[Res] = DeriveJsonDecoder.gen[Res]
 
-object CreditBalanceAdjustmentLive:
+object CreditBalanceAdjustmentLive {
   val layer: URLayer[ZuoraGet, CreditBalanceAdjustment] = ZLayer.fromFunction(CreditBalanceAdjustmentLive(_))
+}
 
-private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBalanceAdjustment:
+private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBalanceAdjustment {
   override def adjust(
       amount: BigDecimal,
       comment: String,
@@ -31,14 +32,16 @@ private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBala
       ZuoraSuccessCheck.SuccessCheckCapitalised,
     )
   }
+}
 
-trait CreditBalanceAdjustment:
+trait CreditBalanceAdjustment {
   def adjust(
       amount: BigDecimal,
       comment: String,
       invoiceId: String,
       `type`: String,
   ): RIO[CreditBalanceAdjustment, Res]
+}
 
 object CreditBalanceAdjustment {
   def adjust(

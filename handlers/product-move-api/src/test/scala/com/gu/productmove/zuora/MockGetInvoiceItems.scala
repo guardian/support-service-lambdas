@@ -17,9 +17,10 @@ class MockGetInvoiceItems(
   override def get(invoiceId: String): Task[GetInvoiceItemsResponse] = {
     mutableStore = invoiceId :: mutableStore
 
-    response.get(invoiceId) match
+    response.get(invoiceId) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"mock: success = false: getInvoiceItems: " + invoiceId))
+    }
   }
 }
 

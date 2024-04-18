@@ -9,13 +9,14 @@ import zio.{Clock, Task, ZIO}
 
 import java.time.LocalDate
 
-trait TermRenewal:
+trait TermRenewal {
   def renewSubscription(
       subscriptionName: SubscriptionName,
       runBilling: Boolean,
   ): Task[RenewalResponse]
+}
 
-class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
+class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal {
   /*
   Start a new term for this subscription from today.
   This is to avoid problems with charges not aligning correctly with the term and resulting in unpredictable
@@ -51,6 +52,7 @@ class TermRenewalLive(zuoraGet: ZuoraGet) extends TermRenewal:
         zuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
       )
   }
+}
 
 case class RenewalRequest(
     contractEffectiveDate: LocalDate,

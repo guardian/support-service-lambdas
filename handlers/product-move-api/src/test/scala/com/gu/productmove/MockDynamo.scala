@@ -19,9 +19,10 @@ class MockDynamo(responses: Map[SupporterRatePlanItem, Unit]) extends Dynamo {
   override def writeItem(item: SupporterRatePlanItem): Task[Unit] = {
     mutableStore = item :: mutableStore
 
-    responses.get(item) match
+    responses.get(item) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"wrong input, item was $item"))
+    }
   }
 }
 

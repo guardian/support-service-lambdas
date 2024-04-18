@@ -45,7 +45,7 @@ object ZuoraClientLive {
 }
 
 private class ZuoraClientLive(val baseUrl: Uri, sttpClient: SttpBackend[Task, Any], zuoraRestConfig: ZuoraRestConfig)
-    extends ZuoraClient:
+    extends ZuoraClient {
 
   override def send(request: Request[Either[String, String], Any]): Task[String] = {
     val absoluteUri = baseUrl.resolve(request.uri)
@@ -64,6 +64,7 @@ private class ZuoraClientLive(val baseUrl: Uri, sttpClient: SttpBackend[Task, An
       .map(_.body.left.map(e => new Throwable("response failure: " + e)))
       .absolve
   }
+}
 
 trait ZuoraClient {
 
@@ -80,8 +81,9 @@ object ZuoraRestBody {
 
   // the `/v1/object/` endpoint which we are using to get the user's payment method does not have a success property, and instead returns `size: "0"` if nothing was found
   // Zuora either returns a "success" property with a lower or upper case starting letter, hence the need for SuccessCheckLowercase and SuccessCheckCapitalised enums
-  enum ZuoraSuccessCheck:
+  enum ZuoraSuccessCheck {
     case SuccessCheckSize, SuccessCheckLowercase, SuccessCheckCapitalised, None
+  }
 
   case class Reason(
       code: Int,

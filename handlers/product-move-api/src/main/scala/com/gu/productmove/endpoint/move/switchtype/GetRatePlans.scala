@@ -99,7 +99,7 @@ class GetRatePlans(
       price: BigDecimal,
       currency: Currency,
       billingPeriod: BillingPeriod,
-  ): Task[BigDecimal] =
+  ): Task[BigDecimal] = {
     // work out how much of what the user is paying can be treated as a contribution (total amount - cost of sub)
     val catalogPlanId =
       if (billingPeriod == Monthly)
@@ -108,6 +108,7 @@ class GetRatePlans(
         AnnualSupporterPlus
     getSubscriptionPriceInMinorUnits(catalogPlanId, currency)
       .map(subscriptionChargePrice => price - (subscriptionChargePrice.value / 100))
+  }
 
   def getSupporterPlusRatePlanIds(billingPeriod: BillingPeriod): ZIO[Any, Throwable, SupporterPlusRatePlanIds] = for {
     productSwitchRatePlanIds <- ZIO.fromEither(getProductSwitchRatePlanIds(billingPeriod))

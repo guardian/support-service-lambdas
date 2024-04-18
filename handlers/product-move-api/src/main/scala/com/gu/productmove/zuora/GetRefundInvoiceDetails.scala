@@ -20,9 +20,10 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.collection.immutable.ListMap
 import math.Ordered.orderingToOrdered
 
-object GetRefundInvoiceDetailsLive:
+object GetRefundInvoiceDetailsLive {
   val layer: URLayer[ZuoraGet, GetRefundInvoiceDetails] =
     ZLayer.fromFunction(GetRefundInvoiceDetailsLive(_))
+}
 
 private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundInvoiceDetails {
   private def getInvoiceItemsQuery(subscriptionName: SubscriptionName) =

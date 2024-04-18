@@ -22,10 +22,11 @@ object Dynamo {
 
 object DynamoLive {
   private def getStage(stage: Stage) = {
-    stage match
+    stage match {
       case Stage.CODE =>
         CODE
       case Stage.PROD => PROD
+    }
   }
 
   val layer: RLayer[Stage, Dynamo] =

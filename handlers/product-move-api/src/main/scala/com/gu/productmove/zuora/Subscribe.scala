@@ -23,13 +23,15 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-trait Subscribe:
+trait Subscribe {
   def create(zuoraAccountId: String, targetProductId: String): RIO[Stage, CreateSubscriptionResponse]
+}
 
-object SubscribeLive:
+object SubscribeLive {
   val layer: URLayer[ZuoraGet, Subscribe] = ZLayer.fromFunction(SubscribeLive(_))
+}
 
-private class SubscribeLive(zuoraGet: ZuoraGet) extends Subscribe:
+private class SubscribeLive(zuoraGet: ZuoraGet) extends Subscribe {
   override def create(
       zuoraAccountId: String,
       targetProductId: String,
@@ -39,6 +41,7 @@ private class SubscribeLive(zuoraGet: ZuoraGet) extends Subscribe:
       response <- zuoraGet.post[SubscribeRequest, CreateSubscriptionResponse](uri"subscriptions", subscribeRequest)
     } yield response
   }
+}
 
 object Subscribe {
   def create(

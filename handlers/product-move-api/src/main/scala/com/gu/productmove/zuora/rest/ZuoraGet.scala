@@ -7,10 +7,11 @@ import sttp.model.Uri
 import zio.json.*
 import zio.{IO, RIO, Task, ULayer, URLayer, ZIO, ZLayer}
 
-object ZuoraGetLive:
+object ZuoraGetLive {
   val layer: URLayer[ZuoraClient, ZuoraGet] = ZLayer.fromFunction(ZuoraGetLive(_))
+}
 
-class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
+class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet {
 
   override def get[Response: JsonDecoder](
       relativeUrl: Uri,
@@ -44,8 +45,9 @@ class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet:
         ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck),
       )
     } yield parsedBody
+}
 
-trait ZuoraGet:
+trait ZuoraGet {
   def get[Response: JsonDecoder](
       relativeUrl: Uri,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
@@ -60,3 +62,4 @@ trait ZuoraGet:
       input: Request,
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): Task[Response]
+}

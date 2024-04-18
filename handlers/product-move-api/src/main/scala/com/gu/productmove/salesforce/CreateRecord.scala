@@ -18,18 +18,21 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-object CreateRecordLive:
+object CreateRecordLive {
   val layer: URLayer[SalesforceClient, CreateRecord] = ZLayer.fromFunction(CreateRecordLive(_))
+}
 
-private class CreateRecordLive(salesforceClient: SalesforceClient) extends CreateRecord:
+private class CreateRecordLive(salesforceClient: SalesforceClient) extends CreateRecord {
   override def create(requestBody: CreateRecordRequest): Task[CreateRecordResponse] =
     salesforceClient.post[CreateRecordRequest, CreateRecordResponse](
       requestBody,
       uri"/services/data/v55.0/sobjects/Subscription_Rate_Plan_Update__c/",
     )
+}
 
-trait CreateRecord:
+trait CreateRecord {
   def create(requestBody: CreateRecordRequest): Task[CreateRecordResponse]
+}
 
 object CreateRecord {
   case class CreateRecordRequest(

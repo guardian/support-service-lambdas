@@ -13,9 +13,10 @@ class MockGetSubscription(responses: Map[SubscriptionName, GetSubscription.GetSu
   override def get(subscriptionName: SubscriptionName): Task[GetSubscription.GetSubscriptionResponse] = {
     requests += subscriptionName
 
-    responses.get(subscriptionName) match
+    responses.get(subscriptionName) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"mock: success = false, subscription not found: ${subscriptionName.value}"))
+    }
   }
 }
 

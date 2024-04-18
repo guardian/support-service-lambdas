@@ -24,7 +24,7 @@ import java.time.*
 object ProductMoveSpec {
 
   @main
-  def runSwitchLocally(): Unit =
+  def runSwitchLocally(): Unit = {
     val postData = ExpectedInput(
       price = 120,
       preview = false,
@@ -32,11 +32,13 @@ object ProductMoveSpec {
       caseId = None,
     )
     runTest(postData, "A-S00702950")
+  }
 
   @main
-  def runSwitchPreviewLocally(): Unit =
+  def runSwitchPreviewLocally(): Unit = {
     val postData = ExpectedInput(95, true, None, None)
     runTest(postData, "A-S00716446")
+  }
 
   private def runTest(postData: ExpectedInput, subscriptionName: String): Unit = {
     val output =

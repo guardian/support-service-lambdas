@@ -17,17 +17,19 @@ class MockGetAccount(
   override def get(accountNumber: AccountNumber): Task[GetAccount.GetAccountResponse] = {
     mutableStore = accountNumber :: mutableStore
 
-    accountResponse.get(accountNumber) match
+    accountResponse.get(accountNumber) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"mock: success = false, getAccount: $accountNumber"))
+    }
   }
 
   override def getPaymentMethod(paymentMethodId: String): Task[PaymentMethodResponse] = {
     mutableStore = paymentMethodId :: mutableStore
 
-    paymentResponse.get(paymentMethodId) match
+    paymentResponse.get(paymentMethodId) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"mock: success = false, getPaymentMethod: $paymentMethodId"))
+    }
   }
 }
 

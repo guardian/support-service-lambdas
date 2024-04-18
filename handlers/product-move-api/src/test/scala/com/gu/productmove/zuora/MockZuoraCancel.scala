@@ -18,7 +18,7 @@ class MockZuoraCancel(responses: Map[(SubscriptionName, LocalDate), Cancellation
   ): Task[CancellationResponse] = {
     mutableStore = (subscriptionName, chargedThroughDate) :: mutableStore
 
-    responses.get((subscriptionName, chargedThroughDate)) match
+    responses.get((subscriptionName, chargedThroughDate)) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None =>
         ZIO.fail(
@@ -26,6 +26,7 @@ class MockZuoraCancel(responses: Map[(SubscriptionName, LocalDate), Cancellation
             s"MockZuoraCancel: no response stubbed for parameters: (${subscriptionName.value}, $chargedThroughDate)",
           ),
         )
+    }
   }
 }
 

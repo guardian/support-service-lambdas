@@ -128,7 +128,7 @@ object RefundSupporterPlus {
             SourceType = "InvoiceDetail",
           ),
         )
-      val taxAdjustment = invoiceItem.TaxDetails match
+      val taxAdjustment = invoiceItem.TaxDetails match {
         case Some(taxDetails) =>
           List(
             InvoiceItemAdjustment.PostBody(
@@ -140,6 +140,7 @@ object RefundSupporterPlus {
             ),
           )
         case None => Nil
+      }
 
       chargeAdjustment ++ taxAdjustment
     }

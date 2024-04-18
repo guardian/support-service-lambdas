@@ -9,16 +9,18 @@ import zio.{RIO, Task, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-trait SubscriptionUpdate:
+trait SubscriptionUpdate {
   def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
   ): Task[R]
+}
 
-object SubscriptionUpdateLive:
+object SubscriptionUpdateLive {
   val layer: URLayer[ZuoraGet, SubscriptionUpdate] = ZLayer.fromFunction(SubscriptionUpdateLive(_))
+}
 
-class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpdate:
+class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpdate {
   override def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
@@ -28,6 +30,7 @@ class SubscriptionUpdateLive(zuoraGet: ZuoraGet) extends SubscriptionUpdate:
       requestBody,
     )
   }
+}
 
 object SubscriptionUpdate {
   def update[R: JsonDecoder](

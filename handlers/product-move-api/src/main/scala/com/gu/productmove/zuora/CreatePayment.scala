@@ -22,7 +22,7 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-trait CreatePayment:
+trait CreatePayment {
   def create(
       accountId: String,
       invoiceId: String,
@@ -30,11 +30,13 @@ trait CreatePayment:
       amount: BigDecimal,
       today: LocalDate,
   ): Task[CreatePaymentResponse]
+}
 
-object CreatePaymentLive:
+object CreatePaymentLive {
   val layer: URLayer[ZuoraGet, CreatePayment] = ZLayer.fromFunction(CreatePaymentLive(_))
+}
 
-private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment:
+private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment {
   override def create(
       accountId: String,
       invoiceId: String,
@@ -62,6 +64,7 @@ private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment:
       )
     _ <- ZIO.log(s"Successfully created payment")
   } yield response
+}
 
 object CreatePayment {
   def create(

@@ -21,10 +21,11 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.collection.immutable.ListMap
 import scala.math.Ordered.orderingToOrdered
 
-object InvoiceItemAdjustmentLive:
+object InvoiceItemAdjustmentLive {
   val layer: URLayer[ZuoraGet, InvoiceItemAdjustment] = ZLayer.fromFunction(InvoiceItemAdjustmentLive(_))
+}
 
-private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemAdjustment:
+private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemAdjustment {
   override def update(
       invoiceId: String,
       amount: BigDecimal,
@@ -52,8 +53,9 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
         ZuoraRestBody.ZuoraSuccessCheck.None,
       )
     } yield response
+}
 
-trait InvoiceItemAdjustment:
+trait InvoiceItemAdjustment {
   def update(
       invoiceId: String,
       amount: BigDecimal,
@@ -65,6 +67,7 @@ trait InvoiceItemAdjustment:
   def batchUpdate(
       invoiceItemAdjustments: List[InvoiceItemAdjustment.PostBody],
   ): Task[List[InvoiceItemAdjustmentResult]]
+}
 
 object InvoiceItemAdjustment {
 

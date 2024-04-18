@@ -144,7 +144,7 @@ case class Billing(
 enum Currency(
     val code: String,
     val symbol: String,
-):
+) {
   // The MVP only accepts GBP
   case GBP extends Currency("GBP", "£")
   case USD extends Currency("USD", "$")
@@ -153,6 +153,7 @@ enum Currency(
   case CAD extends Currency("CAD", "$")
   case EUR extends Currency("EUR", "€")
   case UnrecognizedCurrency extends Currency("", "")
+}
 
 object Currency {
   val websiteSupportedCurrencies = List(
@@ -196,10 +197,11 @@ object Currency {
 }
 
 // tapir doesn't support scala 3 enums (yet), hence the need for custom codec https://github.com/softwaremill/tapir/pull/1824#discussion_r913111720
-enum TimeUnit:
+enum TimeUnit {
   case month, year
+}
 
-object TimeUnit:
+object TimeUnit {
   given JsonCodec[TimeUnit] = DeriveJsonCodec.gen[TimeUnit]
 
   given Schema[TimeUnit] =
@@ -211,6 +213,7 @@ object TimeUnit:
       case "Annual" => TimeUnit.year
     }
   }
+}
 
 @encodedName("trial")
 @description("An optional free trial that begins when a subscription begins\nand lasts for a given number of days.")

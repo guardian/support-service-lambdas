@@ -116,7 +116,7 @@ object UpdateSupporterPlusAmountSteps {
           monthlyV2.contributionProductRatePlanChargeId,
         ).map(_.value)
       }
-      supporterPlusCharges <- chargeIdsOfInterest.map(chargesById.get) match
+      supporterPlusCharges <- chargeIdsOfInterest.map(chargesById.get) match {
         case List(Some(annual), None, None, None, None, None) =>
           ZIO.succeed(SupporterPlusCharges(ratePlan.id, annual, true, BigDecimal(0)))
         case List(None, Some(monthly), None, None, None, None) =>
@@ -126,6 +126,7 @@ object UpdateSupporterPlusAmountSteps {
         case List(None, None, None, Some(monthly), None, Some(contr)) if monthly.price.isDefined =>
           ZIO.succeed(SupporterPlusCharges(ratePlan.id, contr, false, BigDecimal(monthly.price.get)))
         case other => ZIO.fail(new Throwable("subscription was not in valid state")).logError(s"charges: $other")
+      }
 
     } yield supporterPlusCharges
 
@@ -165,14 +166,16 @@ object UpdateSupporterPlusAmountSteps {
 
 }
 
-extension (currency: Currency)
+extension (currency: Currency) {
   def toI18nCurrency: Task[i18n.Currency] =
     ZIO.fromOption(com.gu.i18n.Currency.fromString(currency.code)).orElseFail(new Throwable("incorrect currency"))
+}
 
-extension (billingPeriod: BillingPeriod)
+extension (billingPeriod: BillingPeriod) {
   def value: Task[String] =
     billingPeriod match {
       case Monthly => ZIO.succeed("month")
       case Annual => ZIO.succeed("annual")
       case _ => ZIO.fail(new Throwable(s"Unrecognised billing period $billingPeriod"))
     }
+}

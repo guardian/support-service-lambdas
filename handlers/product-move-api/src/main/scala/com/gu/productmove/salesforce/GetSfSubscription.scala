@@ -17,17 +17,20 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-object GetSfSubscriptionLive:
+object GetSfSubscriptionLive {
   val layer: URLayer[SalesforceClient, GetSfSubscription] = ZLayer.fromFunction(GetSfSubscriptionLive(_))
+}
 
-private class GetSfSubscriptionLive(salesforceClient: SalesforceClient) extends GetSfSubscription:
+private class GetSfSubscriptionLive(salesforceClient: SalesforceClient) extends GetSfSubscription {
   override def get(subscriptionNumber: String): Task[GetSfSubscriptionResponse] =
     salesforceClient.get[GetSfSubscriptionResponse](
       uri"/services/data/v55.0/sobjects/SF_Subscription__c/Name/$subscriptionNumber",
     )
+}
 
-trait GetSfSubscription:
+trait GetSfSubscription {
   def get(subscriptionNumber: String): Task[GetSfSubscriptionResponse]
+}
 
 object GetSfSubscription {
 

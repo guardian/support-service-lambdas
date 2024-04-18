@@ -24,17 +24,19 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-trait ZuoraSetCancellationReason:
+trait ZuoraSetCancellationReason {
   def update(
       subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
       userCancellationReason: String,
   ): Task[UpdateResponse]
+}
 
-object ZuoraSetCancellationReasonLive:
+object ZuoraSetCancellationReasonLive {
   val layer: URLayer[ZuoraGet, ZuoraSetCancellationReason] = ZLayer.fromFunction(ZuoraSetCancellationReasonLive(_))
+}
 
-private class ZuoraSetCancellationReasonLive(zuoraGet: ZuoraGet) extends ZuoraSetCancellationReason:
+private class ZuoraSetCancellationReasonLive(zuoraGet: ZuoraGet) extends ZuoraSetCancellationReason {
   override def update(
       subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
@@ -47,6 +49,7 @@ private class ZuoraSetCancellationReasonLive(zuoraGet: ZuoraGet) extends ZuoraSe
       updateRequest,
     )
   }
+}
 
 object ZuoraSetCancellationReason {
   def update(

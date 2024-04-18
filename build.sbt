@@ -37,6 +37,7 @@ val scala3Settings = Seq(
     "-Xmax-inlines",
     "256",
     "-Yretain-trees",
+    "-no-indent",
   ),
   Test / fork := true,
   autoCompilerPlugins := true,

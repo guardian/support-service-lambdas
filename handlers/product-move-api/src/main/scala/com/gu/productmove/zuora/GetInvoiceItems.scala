@@ -21,18 +21,21 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.collection.immutable.ListMap
 import scala.math.Ordered.orderingToOrdered
 
-object GetInvoiceItemsLive:
+object GetInvoiceItemsLive {
   val layer: URLayer[ZuoraGet, GetInvoiceItems] = ZLayer.fromFunction(GetInvoiceItemsLive(_))
+}
 
-private class GetInvoiceItemsLive(zuoraGet: ZuoraGet) extends GetInvoiceItems:
+private class GetInvoiceItemsLive(zuoraGet: ZuoraGet) extends GetInvoiceItems {
   override def get(invoiceId: String): Task[GetInvoiceItemsResponse] =
     zuoraGet.get[GetInvoiceItemsResponse](
       uri"invoices/$invoiceId/items",
       ZuoraRestBody.ZuoraSuccessCheck.None,
     )
+}
 
-trait GetInvoiceItems:
+trait GetInvoiceItems {
   def get(invoiceId: String): Task[GetInvoiceItemsResponse]
+}
 
 object GetInvoiceItems {
 
