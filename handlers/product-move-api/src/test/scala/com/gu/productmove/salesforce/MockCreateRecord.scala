@@ -13,9 +13,10 @@ class MockCreateRecord(responses: Map[CreateRecordRequest, CreateRecordResponse]
   override def create(createRecordRequest: CreateRecordRequest): Task[CreateRecordResponse] = {
     mutableStore = createRecordRequest :: mutableStore
 
-    responses.get(createRecordRequest) match
+    responses.get(createRecordRequest) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"Salesforce error message"))
+    }
   }
 }
 

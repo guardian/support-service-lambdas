@@ -88,20 +88,23 @@ class SecretsLive(secretsClient: SecretsManagerClient, stage: Stage) extends Sec
     }
   }
 
-  def getInvoicingAPISecrets: Task[InvoicingAPISecrets] =
+  def getInvoicingAPISecrets: Task[InvoicingAPISecrets] = {
     val secretId: String = s"$stage/InvoicingApi"
     val secretJsonString = getJSONString(secretId)
     parseInvoicingAPISecretsJSONString(secretJsonString)
+  }
 
-  def getZuoraApiUserSecrets: Try[ZuoraApiUserSecrets] =
+  def getZuoraApiUserSecrets: Try[ZuoraApiUserSecrets] = {
     val secretId: String = s"$stage/Zuora/User/ZuoraApiUser"
     val secretJsonString = getJSONString(secretId)
     parseZuoraApiUserSecretsJSONString(secretJsonString)
+  }
 
-  def getSalesforceSSLSecrets: Task[SalesforceSSLSecrets] =
+  def getSalesforceSSLSecrets: Task[SalesforceSSLSecrets] = {
     val secretId: String = s"$stage/Salesforce/User/SupportServiceLambdas"
     val secretJsonString = getJSONString(secretId)
     parseSalesforceSSLSecretsJSONString(secretJsonString)
+  }
 
 }
 

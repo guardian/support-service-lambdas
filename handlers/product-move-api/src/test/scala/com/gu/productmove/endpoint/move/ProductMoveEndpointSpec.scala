@@ -76,7 +76,7 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
   }
 
   private def mockGetAccount(expectedAccountNumber: String, identityIdToReturn: Option[String]) = {
-    new GetAccount:
+    new GetAccount {
       override def get(subscriptionNumber: AccountNumber): Task[GetAccountResponse] =
         if (subscriptionNumber.value == expectedAccountNumber)
           ZIO.succeed(
@@ -90,18 +90,20 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
           ZIO.fail(new Throwable(s"accountid: $subscriptionNumber"))
 
       override def getPaymentMethod(paymentMethodId: String): Task[GetAccount.PaymentMethodResponse] = ???
+    }
   }
 
   private def mockGetSubscription(expectedSubName: String, accountNumberToReturn: String) = {
-    new GetSubscription:
+    new GetSubscription {
       override def get(subscriptionName: SubscriptionName): Task[GetSubscriptionResponse] =
         if (subscriptionName.value == expectedSubName)
           ZIO.succeed(GetSubscriptionResponse("", "", AccountNumber(accountNumberToReturn), LocalDate.EPOCH, Nil))
         else
           ZIO.fail(new Throwable("subscriptionName: " + subscriptionName))
+    }
   }
 
-  class MockRecurringContributionToSupporterPlus extends RecurringContributionToSupporterPlus:
+  class MockRecurringContributionToSupporterPlus extends RecurringContributionToSupporterPlus {
     var wasCalled = false
 
     override def run(
@@ -109,8 +111,10 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
         postData: ExpectedInput,
         subscription: GetSubscriptionResponse,
         account: GetAccountResponse,
-    ): UIO[ProductMoveEndpointTypes.OutputBody] =
+    ): UIO[ProductMoveEndpointTypes.OutputBody] = {
       wasCalled = true
       ZIO.succeed(null)
+    }
+  }
 
 }

@@ -70,7 +70,7 @@ object SubscriptionCancelEndpointStepsSpec extends ZIOSpecDefault {
   }
 
   private def mockGetAccount(expectedAccountNumber: String, identityIdToReturn: Option[String]) = {
-    new GetAccount:
+    new GetAccount {
       override def get(subscriptionNumber: AccountNumber): Task[GetAccountResponse] =
         if (subscriptionNumber.value == expectedAccountNumber)
           ZIO.succeed(
@@ -84,15 +84,17 @@ object SubscriptionCancelEndpointStepsSpec extends ZIOSpecDefault {
           ZIO.fail(new Throwable(s"accountid: $subscriptionNumber"))
 
       override def getPaymentMethod(paymentMethodId: String): Task[GetAccount.PaymentMethodResponse] = ???
+    }
   }
 
   private def mockGetSubscription(expectedSubName: String, accountNumberToReturn: String) = {
-    new GetSubscription:
+    new GetSubscription {
       override def get(subscriptionName: SubscriptionName): Task[GetSubscriptionResponse] =
         if (subscriptionName.value == expectedSubName)
           ZIO.succeed(GetSubscriptionResponse("", "", AccountNumber(accountNumberToReturn), LocalDate.EPOCH, Nil))
         else
           ZIO.fail(new Throwable("subscriptionName: " + subscriptionName))
+    }
   }
 
 }

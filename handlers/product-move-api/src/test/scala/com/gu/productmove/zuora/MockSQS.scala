@@ -22,25 +22,28 @@ class MockSQS(responses: Map[EmailMessage | RefundInput | SalesforceRecordInput,
   override def sendEmail(message: EmailMessage): Task[Unit] = {
     addRequest(message)
 
-    responses.get(message) match
+    responses.get(message) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"MockSQS: Not stubbed for message: $message"))
+    }
   }
 
   override def queueRefund(refundInput: RefundInput): Task[Unit] = {
     addRequest(refundInput)
 
-    responses.get(refundInput) match
+    responses.get(refundInput) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"wrong input, refund input was $refundInput"))
+    }
   }
 
   override def queueSalesforceTracking(salesforceRecordInput: SalesforceRecordInput): Task[Unit] = {
     addRequest(salesforceRecordInput)
 
-    responses.get(salesforceRecordInput) match
+    responses.get(salesforceRecordInput) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"wrong input, salesforce record input was $salesforceRecordInput"))
+    }
   }
 }
 

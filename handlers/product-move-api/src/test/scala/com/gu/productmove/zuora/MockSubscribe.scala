@@ -19,9 +19,10 @@ class MockSubscribe(responses: Map[(String, String), CreateSubscriptionResponse]
     val params = (zuoraAccountId, targetProductId)
     mutableStore = params :: mutableStore
 
-    responses.get(params) match
+    responses.get(params) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"mock: success = false subscribe: " + params))
+    }
   }
 }
 

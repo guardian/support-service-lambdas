@@ -38,7 +38,7 @@ object LambdaEndpoint {
       )
 
     }
-    result match
+    result match {
       case Exit.Success(value) =>
         println(s"program succeeded with: $value")
       case Exit.Failure(cause) =>
@@ -49,6 +49,7 @@ object LambdaEndpoint {
         }
         println(shortcause.prettyPrint)
         println("(Cause filtered for clarity)")
+    }
 
     println("for more verbose logging change constants in LambdaEndpoint.scala")
   }

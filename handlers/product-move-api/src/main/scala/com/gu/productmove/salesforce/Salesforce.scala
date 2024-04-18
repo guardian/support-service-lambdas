@@ -28,7 +28,7 @@ object Salesforce {
 
   def createSfRecord(
       salesforceRecordInput: SalesforceRecordInput,
-  ): RIO[CreateRecord with GetSfSubscription, Unit] =
+  ): RIO[CreateRecord with GetSfSubscription, Unit] = {
     import salesforceRecordInput.*
 
     for {
@@ -49,4 +49,5 @@ object Salesforce {
       )
       _ <- CreateRecord.create(request)
     } yield ()
+  }
 }

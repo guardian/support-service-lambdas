@@ -25,7 +25,7 @@ object AwsS3Live {
 
 }
 
-class AwsS3Live(s3Client: S3Client) extends AwsS3:
+class AwsS3Live(s3Client: S3Client) extends AwsS3 {
 
   override def getObject(bucket: String, key: String): Task[String] =
     ZIO
@@ -38,6 +38,7 @@ class AwsS3Live(s3Client: S3Client) extends AwsS3:
         val response = s3Client.getObjectAsBytes(objectRequest)
         response.asUtf8String()
       }
+}
 
 trait AwsS3 {
   def getObject(bucket: String, key: String): Task[String]

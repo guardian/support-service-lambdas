@@ -25,21 +25,24 @@ import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode.HALF_UP
 import scala.util.Try
 
-object GetAccountLive:
+object GetAccountLive {
   val layer: URLayer[ZuoraGet, GetAccount] = ZLayer.fromFunction(GetAccountLive(_))
+}
 
-private class GetAccountLive(zuoraGet: ZuoraGet) extends GetAccount:
+private class GetAccountLive(zuoraGet: ZuoraGet) extends GetAccount {
   override def get(accountNumber: AccountNumber): Task[GetAccountResponse] =
     zuoraGet
       .get[GetAccountResponse](uri"accounts/${accountNumber.value}/summary", ZuoraSuccessCheck.SuccessCheckLowercase)
 
   override def getPaymentMethod(paymentMethodId: String): Task[PaymentMethodResponse] =
     zuoraGet.get[PaymentMethodResponse](uri"object/payment-method/$paymentMethodId", ZuoraSuccessCheck.SuccessCheckSize)
+}
 
-trait GetAccount:
+trait GetAccount {
   def get(subscriptionNumber: AccountNumber): Task[GetAccountResponse]
 
   def getPaymentMethod(paymentMethodId: String): Task[PaymentMethodResponse]
+}
 
 object GetAccount {
   case class PaymentMethodResponse(NumConsecutiveFailures: Int)

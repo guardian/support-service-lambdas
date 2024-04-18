@@ -24,14 +24,17 @@ def assertSubscriptionBelongsToIdentityUser(
   for {
     subscription <- getSubscription.get(subscriptionName)
     account <- getAccount.get(subscription.accountNumber)
-    _ <- (maybeIdentityId, account.basicInfo.IdentityId__c) match
+    _ <- (maybeIdentityId, account.basicInfo.IdentityId__c) match {
       case (None, _) => ZIO.unit
       case (Some(identityIdToCheck), Some(actualIdentityId)) if identityIdToCheck == actualIdentityId => ZIO.unit
-      case (Some(identityIdToCheck), actual) => for {
-        _ <- ZIO.log(s"logged in identity id $identityIdToCheck doesn't match $actual on $subscriptionName")
-        safeUserFacingMessage = s"logged in identity id $identityIdToCheck doesn't match the expected one for $subscriptionName"
-        badRequest <- ZIO.fail(BadRequest(safeUserFacingMessage))
-      } yield badRequest
+      case (Some(identityIdToCheck), actual) =>
+        for {
+          _ <- ZIO.log(s"logged in identity id $identityIdToCheck doesn't match $actual on $subscriptionName")
+          safeUserFacingMessage =
+            s"logged in identity id $identityIdToCheck doesn't match the expected one for $subscriptionName"
+          badRequest <- ZIO.fail(BadRequest(safeUserFacingMessage))
+        } yield badRequest
+    }
   } yield (subscription, account)
 
 class ProductMoveEndpointSteps(
@@ -39,13 +42,13 @@ class ProductMoveEndpointSteps(
     toRecurringContribution: ToRecurringContribution,
     getSubscription: GetSubscription,
     getAccount: GetAccount,
-):
+) {
   def runWithLayers(
       switchType: SwitchType,
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
       maybeIdentityId: Option[IdentityId],
-  ): Task[OutputBody] =
+  ): Task[OutputBody] = {
     val maybeResult: IO[OutputBody | Throwable, OutputBody] = for {
       subscriptionAccount <- assertSubscriptionBelongsToIdentityUser(
         getSubscription,
@@ -63,8 +66,9 @@ class ProductMoveEndpointSteps(
       }
     } yield outputBody
     maybeResult.catchAll(recoverErrors)
+  }
 
-end ProductMoveEndpointSteps
+} // end ProductMoveEndpointSteps
 
 // update a subscription, integration error https://developer.zuora.com/api-references/api/operation/PUT_Subscription/
 private val PutSubscriptionIntegrationError = 53500099
@@ -77,8 +81,9 @@ def recoverErrors(err: OutputBody | Throwable): Task[OutputBody] = err match {
 }
 
 def stringFor(billingPeriod: BillingPeriod) = {
-  billingPeriod match
+  billingPeriod match {
     case Monthly => "monthly"
     case Annual => "annually"
     case other => other.toString // should not happen
+  }
 }

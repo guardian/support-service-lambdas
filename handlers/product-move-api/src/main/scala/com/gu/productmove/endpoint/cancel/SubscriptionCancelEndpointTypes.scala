@@ -8,8 +8,9 @@ import zio.json.*
 //has to be a separate file due to https://github.com/lampepfl/dotty/issues/12498#issuecomment-973991160
 object SubscriptionCancelEndpointTypes {
 
-  enum RefundType:
+  enum RefundType {
     case Asynchronous, Synchronous, NoRefund
+  }
 
   case class ExpectedInput(
       @description("User cancellation reason - from a picklist.")

@@ -174,12 +174,13 @@ object SQSLive {
   private def getQueue(
       queueName: String,
       sqsClient: SqsClient,
-  ): Try[GetQueueUrlResponse] =
+  ): Try[GetQueueUrlResponse] = {
     val queueUrl = GetQueueUrlRequest.builder.queueName(queueName).build()
 
     Try(
       sqsClient.getQueueUrl(queueUrl),
     ).toEither.left.map { ex => new Throwable(s"Failed to get sqs queue name: $queueName", ex) }.toTry
+  }
 
   private def impl(creds: AwsCredentialsProvider): Try[SqsClient] =
     Try(

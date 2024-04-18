@@ -17,10 +17,11 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-object GetCatalogueLive:
+object GetCatalogueLive {
   val layer: URLayer[AwsS3 with Stage, GetCatalogue] = ZLayer.fromFunction(GetCatalogueLive(_, _))
+}
 
-class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
+class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue {
   private val zuoraCatalogueBucket = "gu-zuora-catalog"
 
   private def key(stage: Stage) = {
@@ -37,9 +38,11 @@ class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue:
         .fromEither(summon[JsonDecoder[ZuoraProductCatalogue]].decodeJson(fileContent))
         .mapError(x => new Throwable("issue decoding catalog: " + x))
     } yield zuoraCatalogue
+}
 
-trait GetCatalogue:
+trait GetCatalogue {
   def get: Task[ZuoraProductCatalogue]
+}
 
 object GetCatalogue {
   def get: RIO[GetCatalogue, ZuoraProductCatalogue] = ZIO.serviceWithZIO[GetCatalogue](_.get)

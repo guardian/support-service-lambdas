@@ -16,17 +16,20 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-object GetSubscriptionToCancelLive:
+object GetSubscriptionToCancelLive {
   val layer: URLayer[ZuoraGet, GetSubscriptionToCancel] = ZLayer.fromFunction(GetSubscriptionToCancelLive(_))
+}
 
-private class GetSubscriptionToCancelLive(zuoraGet: ZuoraGet) extends GetSubscriptionToCancel:
+private class GetSubscriptionToCancelLive(zuoraGet: ZuoraGet) extends GetSubscriptionToCancel {
   override def get(subscriptionName: SubscriptionName): Task[GetSubscriptionToCancelResponse] =
     zuoraGet.get[GetSubscriptionToCancelResponse](
       uri"subscriptions/${subscriptionName.value}?charge-detail=current-segment",
     )
+}
 
-trait GetSubscriptionToCancel:
+trait GetSubscriptionToCancel {
   def get(subscriptionName: SubscriptionName): Task[GetSubscriptionToCancelResponse]
+}
 
 object GetSubscriptionToCancel {
 

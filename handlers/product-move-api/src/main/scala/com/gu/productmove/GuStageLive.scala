@@ -3,8 +3,9 @@ package com.gu.productmove
 import zio.{Layer, System, Task, ZIO, ZLayer}
 
 object GuStageLive {
-  enum Stage:
+  enum Stage {
     case PROD, CODE
+  }
 
   val layer: Layer[Throwable, Stage] =
     ZLayer {

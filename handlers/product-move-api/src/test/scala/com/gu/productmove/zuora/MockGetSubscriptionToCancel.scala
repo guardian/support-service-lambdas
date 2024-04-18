@@ -15,7 +15,7 @@ class MockGetSubscriptionToCancel(responses: Map[SubscriptionName, GetSubscripti
   override def get(subscriptionName: SubscriptionName): Task[GetSubscriptionToCancelResponse] = {
     requests += subscriptionName
 
-    responses.get(subscriptionName) match
+    responses.get(subscriptionName) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None =>
         ZIO.fail(
@@ -23,6 +23,7 @@ class MockGetSubscriptionToCancel(responses: Map[SubscriptionName, GetSubscripti
             s"MockGetSubscriptionToCancel: No response stubbed for subscriptionId: ${subscriptionName.value}",
           ),
         )
+    }
   }
 }
 

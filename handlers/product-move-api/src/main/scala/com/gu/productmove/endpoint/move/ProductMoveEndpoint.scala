@@ -156,7 +156,7 @@ object ProductMoveEndpoint {
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
       maybeIdentityId: Option[IdentityId],
-  ): Task[Right[Nothing, OutputBody]] =
+  ): Task[Right[Nothing, OutputBody]] = {
     val stage = GuStageLive.get
     val getCatalogueLive = new GetCatalogueLive(
       AwsS3Live(AwsS3Live.impl(AwsCredentialsLive.impl)),
@@ -220,5 +220,6 @@ object ProductMoveEndpoint {
         CreatePaymentLive.layer,
         SecretsLive.layer,
       )
+  }
 
 }
