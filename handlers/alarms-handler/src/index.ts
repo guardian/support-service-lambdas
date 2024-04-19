@@ -1,5 +1,5 @@
-import { checkDefined } from '@modules/nullAndUndefined';
 import type { SNSEventRecord, SQSEvent } from 'aws-lambda';
+import {buildWebhookMappings} from "./alarmMappings";
 
 interface AlarmMessage {
 	AlarmName: string;
@@ -9,16 +9,15 @@ interface AlarmMessage {
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
-		const webhookUrl = checkDefined<string>(
-			process.env.WEBHOOK,
-			'WEBHOOK environment variable not set',
-		);
+		const webhookMappings = buildWebhookMappings();
 
 		for (const record of event.Records) {
 			console.log(record);
 			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
 
 			let text: string;
+
+			// TODO - get alarm ARN from the message, fetch the alarm's tags from AWS, and lookup the correct webhook based on the app
 
 			try {
 				const message = JSON.parse(recordBody.Message) as AlarmMessage;
