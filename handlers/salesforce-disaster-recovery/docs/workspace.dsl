@@ -4,7 +4,8 @@ workspace {
 
     model {
         // People
-        dev = person "Guardian Developer" "A software developer within the Guardian"
+        dev = person "Guardian Developer"
+        csr = person "Customer Service Representative"
 
         // SaaS
         zuora = softwareSystem "Zuora" "Subscription management SaaS platform" "Database, SaaS"
@@ -24,25 +25,40 @@ workspace {
         }
 
         // Relationships
-        maliciousSoftware -> salesforce "1. Compromises data in" "Attacks"
-        dev -> ownBackup "2. Triggers after a data loss event" "Dashboard"
-        ownBackup -> salesforce "3. Restores data with new IDs" "Third party system"
-        zuora -> salesforce "7. Synchronizes data from Zuora to" "Zuora 360"
-        dev -> stateMachine "4. Triggers after the Own Backup has completed" "AWS Console"
-        stateMachine -> salesforce "5. Reads the new IDs from" "Salesforce Bulk API"
-        stateMachine -> queryResultCsv "5A. Saves CSV to process in" "SDK"
-        stateMachine -> zuora "6. Updates the compromised accounts with the new Salesforce IDs in" "Zuora API"
-        stateMachine -> failedRowsCsv "6A. Saves accounts that failed to update in" "SDK"
-        dev -> failedRowsCsv "7. Debugs accounts that failed to update" "AWS Console"
+        maliciousSoftware -> salesforce "Compromises data in" 
+        dev -> ownBackup "Triggers after a data loss event" 
+        ownBackup -> salesforce "Restores data with new IDs" 
+        zuora -> salesforce "Synchronizes data from Zuora to" 
+        dev -> stateMachine "Triggers after the Own Backup has completed"
+        stateMachine -> salesforce "Reads the new IDs from" 
+        stateMachine -> queryResultCsv "Saves CSV to process in" "SDK"
+        stateMachine -> zuora "Updates the compromised accounts with the new IDs in" 
+        stateMachine -> failedRowsCsv "Saves accounts that failed to update in" 
+        dev -> failedRowsCsv "Debugs accounts that failed to update" 
+        csr -> salesforce "Supports customers via"
+
+        iteration1 = softwareSystem "Iteration 1" {
+            container1 = container "Containerised solution"
+            container1 -> zuora "Updates accounts"
+            container1 -> salesforce "Gets CSV from"
+        }
     }
 
     views {
          systemlandscape "SystemLandscape" {
             include *
+            exclude ->ownBackup
+            exclude ->maliciousSoftware
+            exclude ->salesforceDisasterRecovery
             autoLayout
         }
         
         container salesforceDisasterRecovery "SystemContainer" {
+            include *
+            autoLayout
+        }
+
+        container iteration1 "Iteration1" {
             include *
             autoLayout
         }
