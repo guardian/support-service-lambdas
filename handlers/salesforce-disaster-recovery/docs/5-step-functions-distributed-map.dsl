@@ -19,12 +19,12 @@ workspace {
             lambda3 = softwareSystem "Lambda N"
            
 
-            map -> lambda2 "Handles batches"
-            map -> lambda3 "Handles batches"
+            map -> lambda2 "Handles execution"
+            map -> lambda3 "Handles execution"
             map -> s3 "Gets CSV from"
             map -> s3 "Saves back results to S3"
-            lambda2 -> zuora "Updates accounts"
-            lambda3 -> zuora "Updates accounts"
+            lambda2 -> zuora "Updates batch of 50 accounts"
+            lambda3 -> zuora "Updates batch of 50 accounts"
         }
     }
 

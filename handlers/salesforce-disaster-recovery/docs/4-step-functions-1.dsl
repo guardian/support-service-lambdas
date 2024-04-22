@@ -14,18 +14,18 @@ workspace {
         group "State machine" {
 
             map = softwareSystem "Inline Map"
-            lambda = softwareSystem "Lambda"
+            lambda = softwareSystem "Custom Lambda"
 
             lambda1 = softwareSystem "Lambda 1"
             lambda2 = softwareSystem "Lambda N"
 
 
             lambda -> s3 "Gets CSV from"
-            lambda -> map "Pass data to"
-            map -> lambda1 "Creates chunk data"
-            map -> lambda2 "Creates chunk data"
-            lambda1 -> zuora "Updates accounts"
-            lambda2 -> zuora "Updates accounts"
+            lambda -> map "Creates chunks array"
+            map -> lambda1 "Handles execution"
+            map -> lambda2 "Handles execution"
+            lambda1 -> zuora "Updates batch of 50 accounts"
+            lambda2 -> zuora "Updates batch of 50 accounts"
         }
     }
 

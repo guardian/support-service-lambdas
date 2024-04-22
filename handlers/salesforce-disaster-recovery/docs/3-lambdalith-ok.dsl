@@ -17,7 +17,7 @@ workspace {
             lambda -> lambda "Restarts every 15 minutes"
             // lambda2 = softwareSystem "Lambda 2"
             lambda -> s3 "Gets CSV from"
-            lambda -> zuora "Updates accounts"
+            lambda -> zuora "Updates as many accounts as possible"
         }
     }
 

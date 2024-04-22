@@ -15,16 +15,16 @@ workspace {
 
             map = softwareSystem "Distributed Map"
 
-            dsk1 = softwareSystem "SDK HTTP invoke 1"
-            dsk2 = softwareSystem "SDK HTTP invoke N"
+            dsk1 = softwareSystem "SDK HTTP Task 1"
+            dsk2 = softwareSystem "SDK HTTP Task N"
            
 
-            map -> dsk1 "Handles batches"
-            map -> dsk2 "Handles batches"
+            map -> dsk1 "Handles execution"
+            map -> dsk2 "Handles execution"
             map -> s3 "Gets CSV from"
             map -> s3 "Saves back results to S3"
-            dsk1 -> zuora "Updates accounts"
-            dsk2 -> zuora "Updates accounts"
+            dsk1 -> zuora "Updates batch of 50 accounts"
+            dsk2 -> zuora "Updates batch of 50 accounts"
         }
     }
 

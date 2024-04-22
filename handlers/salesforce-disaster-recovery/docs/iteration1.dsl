@@ -11,7 +11,7 @@ workspace {
         zuora = softwareSystem "Zuora" "" "Database, SaaS"
         s3 = softwareSystem "S3" "" "Database, SaaS"
 
-        iteration1 = softwareSystem "Containerised solution"
+        iteration1 = softwareSystem "Server"
         iteration1 -> s3 "Gets CSV from"
         iteration1 -> zuora "Updates accounts"
     }

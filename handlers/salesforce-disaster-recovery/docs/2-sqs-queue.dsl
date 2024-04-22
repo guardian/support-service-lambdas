@@ -11,9 +11,9 @@ workspace {
         zuora = softwareSystem "Zuora" "" "Database, SaaS"
         s3 = softwareSystem "S3" "" "Database, SaaS"
 
-        lambda1 = softwareSystem "Fetch lambda"
-        lambda2 = softwareSystem "Concurrent lambda 1"
-        lambda3 = softwareSystem "Concurrent lambda N"
+        lambda1 = softwareSystem "Custom lambda"
+        lambda2 = softwareSystem "Lambda 1"
+        lambda3 = softwareSystem "Lambda N"
         queue = softwareSystem "SQS Queue" "" "Queue"
         queue -> lambda2 "Polls"
         queue -> lambda3 "Polls"
