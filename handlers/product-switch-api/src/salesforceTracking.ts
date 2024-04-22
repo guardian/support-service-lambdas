@@ -17,8 +17,8 @@ export type SalesforceTrackingInput = {
 	caseId?: string;
 };
 export const sendSalesforceTracking = async (
-	switchInformation: SwitchInformation,
 	paidAmount: number,
+	switchInformation: SwitchInformation,
 ) => {
 	const queueName = `product-switch-salesforce-tracking-${switchInformation.stage}`;
 	const client = new SQSClient(awsConfig);

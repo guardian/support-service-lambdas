@@ -41,7 +41,7 @@ export const buildEmailMessage = (
 	};
 };
 
-export const sendRecurringContributionToSupporterPlusEmail = async (
+export const sendThankYouEmail = async (
 	firstPaymentAmount: number,
 	switchInformation: SwitchInformation,
 ) => {

@@ -5,13 +5,14 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
-import { sendRecurringContributionToSupporterPlusEmail } from './productSwitchEmail';
+import { sendThankYouEmail } from './productSwitchEmail';
 import { sendSalesforceTracking } from './salesforceTracking';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import {
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
 } from './schemas';
+import { sendToSupporterProductData } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
 
 export type PreviewResponse = {
@@ -27,12 +28,11 @@ export const switchToSupporterPlus = async (
 ) => {
 	const paidAmount = await doSwitch(zuoraClient, productSwitchInformation);
 
-	await sendRecurringContributionToSupporterPlusEmail(
-		paidAmount,
-		productSwitchInformation,
-	);
+	await sendThankYouEmail(paidAmount, productSwitchInformation);
 
-	await sendSalesforceTracking(productSwitchInformation, paidAmount);
+	await sendSalesforceTracking(paidAmount, productSwitchInformation);
+
+	await sendToSupporterProductData(productSwitchInformation);
 };
 
 export const previewResponseFromZuoraResponse = (
