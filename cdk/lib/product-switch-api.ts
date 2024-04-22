@@ -168,7 +168,21 @@ export class ProductSwitchApi extends GuStack {
 			},
 		);
 
+		const sqsPolicy: Policy = new Policy(this, 'SQS policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
+					resources: [
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+						`arn:aws:sqs:${this.region}:${this.account}:supporter-product-data-${this.stage}`,
+					],
+				}),
+			],
+		});
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
+		lambda.role?.attachInlinePolicy(sqsPolicy);
 	}
 }
