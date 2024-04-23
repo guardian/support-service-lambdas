@@ -1,8 +1,8 @@
 import {CloudWatchClient, ListTagsForResourceCommand} from "@aws-sdk/client-cloudwatch";
-import {Tag} from "@aws-sdk/client-cloudwatch/dist-types/models/models_0";
-import {
+import type {
     ListTagsForResourceCommandOutput
 } from "@aws-sdk/client-cloudwatch/dist-types/commands/ListTagsForResourceCommand";
+import type {Tag} from "@aws-sdk/client-cloudwatch/dist-types/models/models_0";
 
 const getTags = (alarmArn: string): Promise<Tag[]> => {
     const client = new CloudWatchClient({ region: "eu-west-1" });
