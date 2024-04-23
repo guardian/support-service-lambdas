@@ -24,8 +24,8 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Description": "GROWTH Team Google Chat webhook URL",
       "Type": "String",
     },
-    "alarmshandlerPEwebhook": {
-      "Description": "P&E Team Google Chat webhook URL",
+    "alarmshandlerPPwebhook": {
+      "Description": "PP Team Google Chat webhook URL",
       "Type": "String",
     },
     "alarmshandlerSREwebhook": {
@@ -106,8 +106,8 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             "GROWTH_WEBHOOK": {
               "Ref": "alarmshandlerGROWTHwebhook",
             },
-            "P&E_WEBHOOK": {
-              "Ref": "alarmshandlerPEwebhook",
+            "PP_WEBHOOK": {
+              "Ref": "alarmshandlerPPwebhook",
             },
             "SRE_WEBHOOK": {
               "Ref": "alarmshandlerSREwebhook",
@@ -505,8 +505,8 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Description": "GROWTH Team Google Chat webhook URL",
       "Type": "String",
     },
-    "alarmshandlerPEwebhook": {
-      "Description": "P&E Team Google Chat webhook URL",
+    "alarmshandlerPPwebhook": {
+      "Description": "PP Team Google Chat webhook URL",
       "Type": "String",
     },
     "alarmshandlerSREwebhook": {
@@ -587,8 +587,8 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             "GROWTH_WEBHOOK": {
               "Ref": "alarmshandlerGROWTHwebhook",
             },
-            "P&E_WEBHOOK": {
-              "Ref": "alarmshandlerPEwebhook",
+            "PP_WEBHOOK": {
+              "Ref": "alarmshandlerPPwebhook",
             },
             "SRE_WEBHOOK": {
               "Ref": "alarmshandlerSREwebhook",

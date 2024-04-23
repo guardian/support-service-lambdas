@@ -1,6 +1,6 @@
 import { checkDefined } from '@modules/nullAndUndefined';
 
-type Team = 'Value' | 'Growth' | 'P&P' | 'SRE';
+type Team = 'Value' | 'Growth' | 'PP' | 'SRE';
 
 const appToTeamMappings: Record<string, Team> = {
     'apps-metering: ': 'Growth',

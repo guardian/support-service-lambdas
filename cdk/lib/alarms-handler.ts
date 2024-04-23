@@ -49,7 +49,7 @@ export class AlarmsHandler extends GuStack {
 				STACK: this.stack,
 				STAGE: this.stage,
 				GROWTH_WEBHOOK: buildWebhookParameter('GROWTH').valueAsString,
-				'P&E_WEBHOOK': buildWebhookParameter('P&E').valueAsString,
+				'PP_WEBHOOK': buildWebhookParameter('PP').valueAsString,
 				VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
 				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
 			},
