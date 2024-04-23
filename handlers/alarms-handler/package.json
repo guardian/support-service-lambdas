@@ -8,6 +8,9 @@
 		"lint": "eslint src/**/*.ts",
 		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr alarms-handler.zip ./*.js"
 	},
+	"dependencies": {
+		"@aws-sdk/client-cloudwatch": "^3.556.0"
+	},
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.132"
 	}

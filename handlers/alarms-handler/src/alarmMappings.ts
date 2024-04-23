@@ -1,13 +1,19 @@
 import { checkDefined } from '@modules/nullAndUndefined';
 
-type Team = 'Value' | 'Growth' | 'P&P';
+type Team = 'Value' | 'Growth' | 'P&P' | 'SRE';
 
 const appToTeamMappings: Record<string, Team> = {
     'apps-metering: ': 'Growth',
+    'gchat-test-app': 'SRE',
 }
 
-export const getTeam = (appName: string): Team | undefined => {
-    return appToTeamMappings[appName];
+export const getTeam = (appName: string): Team => {
+    const team = appToTeamMappings[appName];
+    if (!team) {
+        console.log(`No team found for app: ${appName}, defaulting to SRE`);
+        return 'SRE';
+    }
+    return team;
 }
 
 export const buildWebhookMappings = (): Record<Team, string> => {
@@ -19,5 +25,6 @@ export const buildWebhookMappings = (): Record<Team, string> => {
         Value: getEnvironmentVariable('Value'),
         Growth: getEnvironmentVariable('Growth'),
         'P&P': getEnvironmentVariable('P&P'),
+        SRE: getEnvironmentVariable('SRE'),
     }
 }
