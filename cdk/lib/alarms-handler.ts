@@ -5,6 +5,7 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
+import {Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -35,7 +36,7 @@ export class AlarmsHandler extends GuStack {
 				description: `${team} Team Google Chat webhook URL`,
 			});
 
-		new GuLambdaFunction(this, `${app}-lambda`, {
+		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
@@ -54,6 +55,19 @@ export class AlarmsHandler extends GuStack {
 				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
 			},
 		});
+
+		lambda.role?.attachInlinePolicy(new Policy(
+			this,
+			`${app}-cloudwatch-policy`,
+			{
+				statements: [
+					new PolicyStatement({
+						actions: ['cloudwatch:ListTagsForResource'],
+						resources: ['*'],
+					}),
+				],
+			},
+		));
 
 		const snsTopic = new Topic(this, `${app}-topic`, {
 			topicName: `${app}-topic-${this.stage}`,

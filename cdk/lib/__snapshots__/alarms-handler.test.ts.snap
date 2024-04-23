@@ -88,6 +88,27 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
+    "alarmshandlercloudwatchpolicy7746710B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:ListTagsForResource",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlercloudwatchpolicy7746710B",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerlambdaServiceRole3953DF7F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "alarmshandlerlambda383D2BAA": {
       "DependsOn": [
         "alarmshandlerlambdaServiceRoleDefaultPolicyFEF447F6",
@@ -568,6 +589,27 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "Threshold": 0,
       },
       "Type": "AWS::CloudWatch::Alarm",
+    },
+    "alarmshandlercloudwatchpolicy7746710B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:ListTagsForResource",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlercloudwatchpolicy7746710B",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerlambdaServiceRole3953DF7F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "alarmshandlerlambda383D2BAA": {
       "DependsOn": [
