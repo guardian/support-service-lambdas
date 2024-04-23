@@ -24,7 +24,7 @@ export const buildWebhookMappings = (): Record<Team, string> => {
     return {
         Value: getEnvironmentVariable('Value'),
         Growth: getEnvironmentVariable('Growth'),
-        'P&P': getEnvironmentVariable('P&P'),
+        PP: getEnvironmentVariable('PP'),
         SRE: getEnvironmentVariable('SRE'),
     }
 }
