@@ -30,11 +30,10 @@ export class AlarmsHandler extends GuStack {
 			},
 		});
 
-		const parameters = {
-			webhook: new GuStringParameter(this, `${app}-webhook`, {
-				description: 'Google Chat webhook URL',
-			}),
-		};
+		const buildWebhookParameter = (team: string): GuStringParameter =>
+			new GuStringParameter(this, `${app}-${team}-webhook`, {
+				description: `${team} Team Google Chat webhook URL`,
+			});
 
 		new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
@@ -49,7 +48,10 @@ export class AlarmsHandler extends GuStack {
 				APP: app,
 				STACK: this.stack,
 				STAGE: this.stage,
-				WEBHOOK: parameters.webhook.valueAsString,
+				GROWTH_WEBHOOK: buildWebhookParameter('GROWTH').valueAsString,
+				'P&E_WEBHOOK': buildWebhookParameter('P&E').valueAsString,
+				VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
+				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
 			},
 		});
 

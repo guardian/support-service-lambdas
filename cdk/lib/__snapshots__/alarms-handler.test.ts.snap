@@ -5,6 +5,9 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuStringParameter",
+      "GuStringParameter",
+      "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -17,8 +20,20 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlerwebhook": {
-      "Description": "Google Chat webhook URL",
+    "alarmshandlerGROWTHwebhook": {
+      "Description": "GROWTH Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlerPEwebhook": {
+      "Description": "P&E Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlerSREwebhook": {
+      "Description": "SRE Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlerVALUEwebhook": {
+      "Description": "VALUE Team Google Chat webhook URL",
       "Type": "String",
     },
   },
@@ -88,10 +103,19 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
+            "GROWTH_WEBHOOK": {
+              "Ref": "alarmshandlerGROWTHwebhook",
+            },
+            "P&E_WEBHOOK": {
+              "Ref": "alarmshandlerPEwebhook",
+            },
+            "SRE_WEBHOOK": {
+              "Ref": "alarmshandlerSREwebhook",
+            },
             "STACK": "membership",
             "STAGE": "CODE",
-            "WEBHOOK": {
-              "Ref": "alarmshandlerwebhook",
+            "VALUE_WEBHOOK": {
+              "Ref": "alarmshandlerVALUEwebhook",
             },
           },
         },
@@ -462,6 +486,9 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuStringParameter",
+      "GuStringParameter",
+      "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -474,8 +501,20 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlerwebhook": {
-      "Description": "Google Chat webhook URL",
+    "alarmshandlerGROWTHwebhook": {
+      "Description": "GROWTH Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlerPEwebhook": {
+      "Description": "P&E Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlerSREwebhook": {
+      "Description": "SRE Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlerVALUEwebhook": {
+      "Description": "VALUE Team Google Chat webhook URL",
       "Type": "String",
     },
   },
@@ -545,10 +584,19 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
+            "GROWTH_WEBHOOK": {
+              "Ref": "alarmshandlerGROWTHwebhook",
+            },
+            "P&E_WEBHOOK": {
+              "Ref": "alarmshandlerPEwebhook",
+            },
+            "SRE_WEBHOOK": {
+              "Ref": "alarmshandlerSREwebhook",
+            },
             "STACK": "membership",
             "STAGE": "PROD",
-            "WEBHOOK": {
-              "Ref": "alarmshandlerwebhook",
+            "VALUE_WEBHOOK": {
+              "Ref": "alarmshandlerVALUEwebhook",
             },
           },
         },
