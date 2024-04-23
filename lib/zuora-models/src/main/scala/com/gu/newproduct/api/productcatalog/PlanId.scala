@@ -68,19 +68,9 @@ object PlanId {
   case object DigipackMonthly extends PlanId("digipack_monthly") with DigipackPlanId
 
   case object DigipackAnnual extends PlanId("digipack_annual") with DigipackPlanId
-
-  case object GuardianWeeklyDomestic6for6 extends PlanId("guardian_weekly_domestic_6for6") with GuardianWeeklyDomestic
-
-  case object GuardianWeeklyDomesticQuarterly
-      extends PlanId("guardian_weekly_domestic_quarterly")
-      with GuardianWeeklyDomestic
-
+  
   case object GuardianWeeklyDomesticAnnual extends PlanId("guardian_weekly_domestic_annual") with GuardianWeeklyDomestic
-
-  case object GuardianWeeklyROW6for6 extends PlanId("guardian_weekly_row_6for6") with GuardianWeeklyRow
-
-  case object GuardianWeeklyROWQuarterly extends PlanId("guardian_weekly_row_quarterly") with GuardianWeeklyRow
-
+  
   case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyRow
 
   case object DigitalVoucherWeekend extends PlanId("digital_voucher_weekend") with DigitalVoucherPlanId
@@ -152,14 +142,10 @@ object PlanId {
   )
 
   val enabledGuardianWeeklyDomesticPlans = List(
-    GuardianWeeklyDomestic6for6,
-    GuardianWeeklyDomesticQuarterly,
     GuardianWeeklyDomesticAnnual,
   )
 
   val enabledGuardianWeeklyROWPlans = List(
-    GuardianWeeklyROW6for6,
-    GuardianWeeklyROWQuarterly,
     GuardianWeeklyROWAnnual,
   )
 

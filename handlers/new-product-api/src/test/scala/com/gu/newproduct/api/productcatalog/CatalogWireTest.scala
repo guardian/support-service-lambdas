@@ -64,30 +64,10 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
         Currency.GBP -> AmountMinorUnits(66666),
         Currency.USD -> AmountMinorUnits(66665),
       )
-    case GuardianWeeklyDomestic6for6 =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(1111111),
-        Currency.USD -> AmountMinorUnits(11111111),
-      )
-    case GuardianWeeklyDomesticQuarterly =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(2222222),
-        Currency.USD -> AmountMinorUnits(22222222),
-      )
     case GuardianWeeklyDomesticAnnual =>
       Map(
         Currency.GBP -> AmountMinorUnits(3333333),
         Currency.USD -> AmountMinorUnits(33333333),
-      )
-    case GuardianWeeklyROW6for6 =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(4444444),
-        Currency.USD -> AmountMinorUnits(44444444),
-      )
-    case GuardianWeeklyROWQuarterly =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(5555555),
-        Currency.USD -> AmountMinorUnits(55555555),
       )
     case GuardianWeeklyROWAnnual =>
       Map(
