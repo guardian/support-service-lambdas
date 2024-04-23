@@ -108,18 +108,26 @@ object ZuoraIds {
   }
 
   case class GuardianWeeklyDomesticIds(
+      monthly: ProductRatePlanId,
+      quarterly: ProductRatePlanId,
       annual: ProductRatePlanId,
   ) {
     val zuoraRatePlanIdByApiPlanId = Map(
+      GuardianWeeklyDomesticMonthly -> monthly,
+      GuardianWeeklyDomesticQuarterly -> quarterly,
       GuardianWeeklyDomesticAnnual -> annual,
     )
     val zuoraRatePlanIdToApiPlanId = zuoraRatePlanIdByApiPlanId.map(_.swap)
   }
 
   case class GuardianWeeklyROWIds(
+      monthly: ProductRatePlanId,
+      quarterly: ProductRatePlanId,
       annual: ProductRatePlanId,
   ) {
     val zuoraRatePlanIdByApiPlanId = Map(
+      GuardianWeeklyROWMonthly -> monthly,
+      GuardianWeeklyROWQuarterly -> quarterly,
       GuardianWeeklyROWAnnual -> annual,
     )
     val apiPlanIdZuoraRatePlanIdBy = zuoraRatePlanIdByApiPlanId.map(_.swap)
@@ -191,7 +199,7 @@ object ZuoraIds {
 
     def apiIdToPlanAndCharge: Map[PlanId, HasPlanAndChargeIds] =
       supporterPlusZuoraIds.planAndChargeByApiPlanId ++
-        contributionsZuoraIds.planAndChargeByApiPlanId 
+        contributionsZuoraIds.planAndChargeByApiPlanId
 
   }
 
@@ -260,9 +268,13 @@ object ZuoraIds {
           annual = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4e972204"),
         ),
         GuardianWeeklyDomesticIds(
+          monthly = ProductRatePlanId("2c92a0fd79ac64b00179ae3f9d474960"),
+          quarterly = ProductRatePlanId("2c92a0fe6619b4b301661aa494392ee2"),
           annual = ProductRatePlanId("2c92a0fe6619b4b901661aa8e66c1692"),
         ),
         GuardianWeeklyROWIds(
+          monthly = ProductRatePlanId("2c92a0ff79ac64e30179ae45669b3a83"),
+          quarterly = ProductRatePlanId("2c92a0086619bf8901661ab02752722f"),
           annual = ProductRatePlanId("2c92a0fe6619b4b601661ab300222651"),
         ),
         DigitalVoucherZuoraIds(
@@ -343,9 +355,13 @@ object ZuoraIds {
           annual = ProductRatePlanId("2c92c0f94bbffaaa014bc6a4212e205b"),
         ),
         GuardianWeeklyDomesticIds(
+          monthly = ProductRatePlanId("2c92c0f878ac40300178acaa04bb401d"),
+          quarterly = ProductRatePlanId("2c92c0f965dc30640165f150c0956859"),
           annual = ProductRatePlanId("2c92c0f965d280590165f16b1b9946c2"),
         ),
         GuardianWeeklyROWIds(
+          monthly = ProductRatePlanId("2c92c0f878ac402c0178acb3a90a3620"),
+          quarterly = ProductRatePlanId("2c92c0f965f2122101660fb81b745a06"),
           annual = ProductRatePlanId("2c92c0f965f2122101660fb33ed24a45"),
         ),
         DigitalVoucherZuoraIds(

@@ -14,7 +14,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
 }
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
-import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomesticAnnual}
+import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomesticMonthly, GuardianWeeklyDomesticQuarterly}
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
@@ -33,14 +33,17 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
-  val annualTestRatePlanZuoraId = ProductRatePlanId("annual-zuora-rate-plan-id")
-  val annualTestRatePlanChargeZuoraId = ProductRatePlanChargeId("annual-zuora-rate-plan-charge-id")
-  val annualRatePlan =
-    Plan(GuardianWeeklyDomesticAnnual, PlanDescription("GW Oct 18 - Annual - Domestic"), testStartDateRules)
+  val quarterlyTestRatePlanZuoraId = ProductRatePlanId("quarterly-zuora-rate-plan-id")
+  val monthlyTestRatePlanZuoraId = ProductRatePlanId("monthly-zuora-rate-plan-id")
+  val monthlyTestRatePlanChargeZuoraId = ProductRatePlanChargeId("monthly-zuora-rate-plan-charge-id")
 
   val newSubscriptionName = "A-Sxxxxxxxx"
   val testFirstPaymentDate = LocalDate.of(2018, 7, 18)
   val testZuoraAccountId = ZuoraAccountId("acccc")
+  val quarterlyRatePlan =
+    Plan(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), testStartDateRules)
+  val monthlyRatePlan =
+    Plan(GuardianWeeklyDomesticMonthly, PlanDescription("GW Oct 18 - Monthly - Domestic"), testStartDateRules)
   val testCaseId = CaseId("case")
   val testAcquistionSource = AcquisitionSource("CSR")
   val testCSR = CreatedByCSR("bob")
@@ -58,16 +61,16 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
 
   def stubGetZuoraId(planId: PlanId) = {
     planId match {
-      case GuardianWeeklyDomesticAnnual => Some(annualTestRatePlanZuoraId)
+      case GuardianWeeklyDomesticQuarterly => Some(quarterlyTestRatePlanZuoraId)
+      case GuardianWeeklyDomesticMonthly => Some(monthlyTestRatePlanZuoraId)
       case _ => fail()
     }
   }
 
   def stubGetPlanAndCharge(planId: PlanId): Option[PlanAndCharge] = {
     planId match {
-      case GuardianWeeklyDomesticAnnual =>
-        Some(PlanAndCharge(annualTestRatePlanZuoraId, annualTestRatePlanChargeZuoraId))
-
+      case GuardianWeeklyDomesticMonthly =>
+        Some(PlanAndCharge(monthlyTestRatePlanZuoraId, monthlyTestRatePlanChargeZuoraId))
       case _ => fail()
     }
   }
@@ -91,7 +94,8 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
 
   def stubGetPlan(planId: PlanId) = {
     planId match {
-      case GuardianWeeklyDomesticAnnual => annualRatePlan
+      case GuardianWeeklyDomesticQuarterly => quarterlyRatePlan
+      case GuardianWeeklyDomesticMonthly => monthlyRatePlan
       case _ => fail()
     }
   }
@@ -103,8 +107,8 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
 
   it should "create subscription for non 6-for-6 rate plan" in {
     def stubCreate(
-        request: CreateSubscription.ZuoraCreateSubRequest,
-    ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+                    request: CreateSubscription.ZuoraCreateSubRequest,
+                  ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       request shouldBe ZuoraCreateSubRequest(
         accountId = testZuoraAccountId,
         acceptanceDate = testFirstPaymentDate,
@@ -114,7 +118,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
         deliveryAgent = None,
         ratePlans = List(
           ZuoraCreateSubRequestRatePlan(
-            productRatePlanId = annualTestRatePlanZuoraId,
+            productRatePlanId = quarterlyTestRatePlanZuoraId,
             maybeChargeOverride = None,
           ),
         ),
@@ -127,10 +131,10 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       stubGetZuoraId,
       stubGetPlanAndCharge,
       stubGetVoucherCustomerData,
-      stubValidateStartDate(GuardianWeeklyDomesticAnnual),
+      stubValidateStartDate(GuardianWeeklyDomesticQuarterly),
       stubValidateAddress,
       stubCreate,
-      stubSendEmail(annualRatePlan),
+      stubSendEmail(quarterlyRatePlan),
     )
 
     val futureActual = new handleRequest(
@@ -153,7 +157,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
                 "zuoraAccountId" -> JsString(testZuoraAccountId.value),
                 "acquisitionSource" -> JsString(testAcquistionSource.value),
                 "createdByCSR" -> JsString(testCSR.value),
-                "planId" -> JsString(GuardianWeeklyDomesticAnnual.name),
+                "planId" -> JsString(GuardianWeeklyDomesticQuarterly.name),
               ),
             ),
           ),

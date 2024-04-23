@@ -13,6 +13,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.Subscripti
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
+import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomesticMonthly, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROWMonthly, GuardianWeeklyROWQuarterly}
 import com.gu.newproduct.api.productcatalog._
 import com.gu.paperround.client.{GetAgents, PaperRoundConfig, PaperRoundRestRequestMaker}
 import com.gu.util.Logging

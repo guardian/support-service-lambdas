@@ -445,8 +445,8 @@
   }, {
     "label" : "Guardian Weekly - Domestic",
     "plans" : [ {
-      "id" : "guardian_weekly_domestic_6for6",
-      "label" : "GW Oct 18 - Six for Six - Domestic",
+      "id" : "guardian_weekly_domestic_monthly",
+      "label" : "GW Oct 18 - Monthly - Domestic",
       "startDateRules" : {
         "daysOfWeek" : [ "Friday" ],
         "selectableWindow" : {
@@ -457,15 +457,15 @@
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
         "amount" : 11111.11,
-        "billingPeriod" : "SixWeeks",
-        "description" : "GBP 11111.11 for the first six weeks"
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 11111.11 every month"
       }, {
         "currencyCode" : "USD",
         "amount" : 111111.11,
-        "billingPeriod" : "SixWeeks",
-        "description" : "USD 111111.11 for the first six weeks"
+        "billingPeriod" : "Monthly",
+        "description" : "USD 111111.11 every month"
       } ],
-      "paymentPlan" : "GBP 11111.11 for the first six weeks"
+      "paymentPlan" : "GBP 11111.11 every month"
     }, {
       "id" : "guardian_weekly_domestic_quarterly",
       "label" : "GW Oct 18 - Quarterly - Domestic",
@@ -515,8 +515,8 @@
   }, {
     "label" : "Guardian Weekly - ROW",
     "plans" : [ {
-      "id" : "guardian_weekly_row_6for6",
-      "label" : "GW Oct 18 - Six for Six - ROW",
+      "id" : "guardian_weekly_row_monthly",
+      "label" : "GW Oct 18 - Monthly - ROW",
       "startDateRules" : {
         "daysOfWeek" : [ "Friday" ],
         "selectableWindow" : {
@@ -527,15 +527,15 @@
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
         "amount" : 44444.44,
-        "billingPeriod" : "SixWeeks",
-        "description" : "GBP 44444.44 for the first six weeks"
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 44444.44 every month"
       }, {
         "currencyCode" : "USD",
         "amount" : 444444.44,
-        "billingPeriod" : "SixWeeks",
-        "description" : "USD 444444.44 for the first six weeks"
+        "billingPeriod" : "Monthly",
+        "description" : "USD 444444.44 every month"
       } ],
-      "paymentPlan" : "GBP 44444.44 for the first six weeks"
+      "paymentPlan" : "GBP 44444.44 every month"
     }, {
       "id" : "guardian_weekly_row_quarterly",
       "label" : "GW Oct 18 - Quarterly - ROW",
