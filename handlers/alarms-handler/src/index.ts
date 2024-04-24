@@ -1,15 +1,18 @@
 import type { SNSEventRecord, SQSEvent } from 'aws-lambda';
-import {buildWebhookMappings, getTeam} from "./alarmMappings";
-import {getAppNameTag} from "./cloudwatch";
+import { z } from 'zod';
+import { buildWebhookMappings, getTeam } from "./alarmMappings";
+import { getAppNameTag } from "./cloudwatch";
 
 const webhookMappings = buildWebhookMappings();
 
-interface AlarmMessage {
-	AlarmArn: string;
-	AlarmName: string;
-	AlarmDescription?: string;
-	NewStateReason: string;
-}
+const alarmMessageSchema = z.object({
+	AlarmArn: z.string(),
+	AlarmName: z.string(),
+	AlarmDescription: z.string().optional(),
+	NewStateReason: z.string(),
+});
+
+type AlarmMessage = z.infer<typeof alarmMessageSchema>;
 
 const getWebhookUrl = async (message: AlarmMessage): Promise<string> => {
 	const appName = await getAppNameTag(message.AlarmArn);
@@ -22,9 +25,7 @@ const getWebhookUrl = async (message: AlarmMessage): Promise<string> => {
 	}
 }
 
-const processMessage = async (rawMessage: string): Promise<void> => {
-	const message = JSON.parse(rawMessage) as AlarmMessage;
-
+const processCloudwatchMessage = async (message: AlarmMessage): Promise<void> => {
 	const webhookUrl = await getWebhookUrl(message);
 
 	const text = `*ALARM:* ${
@@ -40,13 +41,28 @@ const processMessage = async (rawMessage: string): Promise<void> => {
 	});
 }
 
+// Not a cloudwatch alarm, just send the whole message to the SRE channel
+const processOtherMessage = async (message: string): Promise<void> => {
+	await fetch(webhookMappings['SRE'], {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: message,
+	});
+}
+
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
 		for (const record of event.Records) {
 			console.log(record);
 			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
 
-			await processMessage(recordBody.Message);
+			const alarmMessage = alarmMessageSchema.safeParse(recordBody.Message);
+			if (alarmMessage.success) {
+				await processCloudwatchMessage(alarmMessage.data);
+			} else {
+				console.log(`Message is not a cloudwatch alarm: ${alarmMessage.error.message}`);
+				await processOtherMessage(recordBody.Message);
+			}
 		}
 	} catch (error) {
 		console.error(error);
