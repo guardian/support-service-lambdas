@@ -3,7 +3,7 @@ import { checkDefined } from '@modules/nullAndUndefined';
 type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
 
 const appToTeamMappings: Record<string, Team> = {
-    'apps-metering: ': 'GROWTH',
+    'apps-metering': 'GROWTH',
     'gchat-test-app': 'SRE',
 }
 
