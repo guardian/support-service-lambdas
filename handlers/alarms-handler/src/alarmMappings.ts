@@ -1,9 +1,9 @@
 import { checkDefined } from '@modules/nullAndUndefined';
 
-type Team = 'Value' | 'Growth' | 'PP' | 'SRE';
+type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
 
 const appToTeamMappings: Record<string, Team> = {
-    'apps-metering: ': 'Growth',
+    'apps-metering: ': 'GROWTH',
     'gchat-test-app': 'SRE',
 }
 
@@ -25,8 +25,8 @@ export const buildWebhookMappings = (): Record<Team, string> => {
         );
     }
     return {
-        Value: getEnvironmentVariable('Value'),
-        Growth: getEnvironmentVariable('Growth'),
+        VALUE: getEnvironmentVariable('VALUE'),
+        GROWTH: getEnvironmentVariable('GROWTH'),
         PP: getEnvironmentVariable('PP'),
         SRE: getEnvironmentVariable('SRE'),
     }
