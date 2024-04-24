@@ -50,17 +50,25 @@ const processOtherMessage = async (message: string): Promise<void> => {
 	});
 }
 
+const parseMessage = (message: string): AlarmMessage | null => {
+	try {
+		return alarmMessageSchema.parse(JSON.parse(message));
+	} catch (error) {
+		return null;
+	}
+}
+
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
 		for (const record of event.Records) {
 			console.log(record);
 			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
+			const alarmMessage = parseMessage(recordBody.Message);
 
-			const alarmMessage = alarmMessageSchema.safeParse(JSON.parse(recordBody.Message));
-			if (alarmMessage.success) {
-				await processCloudwatchMessage(alarmMessage.data);
+			if (alarmMessage) {
+				await processCloudwatchMessage(alarmMessage);
 			} else {
-				console.log(`Message is not a cloudwatch alarm: ${alarmMessage.error.message}`);
+				console.log('Message is not a cloudwatch alarm, sending to SRE channel');
 				await processOtherMessage(recordBody.Message);
 			}
 		}
