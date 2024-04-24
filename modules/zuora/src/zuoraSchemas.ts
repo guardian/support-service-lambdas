@@ -115,7 +115,15 @@ export const zuoraSuccessResponseSchema = z.object({
 	success: z.boolean(),
 });
 
+export const zuoraUpperCaseSuccessResponseSchema = z.object({
+	Success: z.boolean(),
+});
+
 export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
+
+export type ZuoraUpperCaseSuccessResponse = z.infer<
+	typeof zuoraUpperCaseSuccessResponseSchema
+>;
 
 // --------------- Billing preview ---------------
 export const billingPreviewSchema = z.object({
@@ -156,6 +164,15 @@ export const addDiscountPreviewSchema = z.object({
 export type AddDiscountPreview = z.infer<typeof addDiscountPreviewSchema>;
 
 // --------------- Invoice Items ---------------
+export const getInvoiceSchema = z.object({
+	success: z.boolean(),
+	id: z.string(),
+	amount: z.number(),
+	amountWithoutTax: z.number(),
+});
+
+export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
+
 export const getInvoiceItemsSchema = z.object({
 	success: z.boolean(),
 	invoiceItems: z.array(

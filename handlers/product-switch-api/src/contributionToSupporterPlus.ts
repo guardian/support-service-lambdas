@@ -33,7 +33,7 @@ export const switchToSupporterPlus = async (
 		zuoraClient,
 		switchResponse,
 		productSwitchInformation.catalog.supporterPlus.subscriptionChargeId,
-		productSwitchInformation.subscription.accountNumber,
+		productSwitchInformation.account.id,
 		productSwitchInformation.account.defaultPaymentMethodId,
 	);
 
@@ -265,7 +265,7 @@ export const buildSwitchRequestBody = (
 		existingAccountNumber: accountNumber,
 		processingOptions: {
 			runBilling: true,
-			collectPayment: true,
+			collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
 		},
 		subscriptions: [
 			{

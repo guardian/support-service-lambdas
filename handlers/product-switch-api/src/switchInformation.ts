@@ -18,6 +18,7 @@ import { getCatalogInformation } from './catalogInformation';
 import type { ProductSwitchRequestBody } from './schemas';
 
 export type AccountInformation = {
+	id: string;
 	identityId: string;
 	emailAddress: string;
 	firstName: string;
@@ -45,12 +46,13 @@ export type SwitchInformation = {
 	catalog: CatalogInformation;
 };
 
-const getUserInformation = async (
+const getAccountInformation = async (
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
 ): Promise<AccountInformation> => {
 	const account = await getAccount(zuoraClient, accountNumber);
 	return {
+		id: account.basicInfo.id,
 		identityId: account.basicInfo.identityId,
 		emailAddress: account.billToContact.workEmail,
 		firstName: account.billToContact.firstName,
@@ -106,7 +108,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 		`Checking subscription ${subscriptionNumber} is owned by the currently logged in user`,
 	);
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-	const userInformation = await getUserInformation(
+	const userInformation = await getAccountInformation(
 		zuoraClient,
 		subscription.accountNumber,
 	);

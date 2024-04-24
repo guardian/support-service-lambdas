@@ -6,9 +6,11 @@
 import console from 'console';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { zuoraDateFormat } from '@modules/zuora/common';
+import { createPayment } from '@modules/zuora/payment';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { doSwitch, preview } from '../src/contributionToSupporterPlus';
+import { adjustNonCollectedInvoice } from '../src/payment';
 import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
 
 const jestConsole = console;
@@ -70,8 +72,8 @@ describe('product-switching behaviour', () => {
 		'can switch a recurring contribution',
 		async () => {
 			// To run this test you will need to find a recurring contribution which hasn't been switched to supporter plus
-			const subscriptionNumber = 'A-S00732420';
-			const identityId = '109663794';
+			const subscriptionNumber = 'A-S00296219';
+			const identityId = '200003401';
 			const input = { price: 10, preview: false };
 			const zuoraClient = await ZuoraClient.create('CODE');
 			const productCatalog = await getProductCatalogFromApi('CODE');
@@ -84,8 +86,46 @@ describe('product-switching behaviour', () => {
 				subscriptionNumber,
 			);
 
-			const paidAmount = await doSwitch(zuoraClient, switchInformation);
-			expect(paidAmount).toBeGreaterThan(0);
+			const response = await doSwitch(zuoraClient, switchInformation);
+			expect(response.success).toEqual(true);
+		},
+		1000 * 60,
+	);
+	it(
+		'can take a payment after a switch',
+		async () => {
+			// To run this test you will need to find a recurring contribution which has been switched to supporter plus but payment hasn't been taken
+			const accountId = '8ad08e01852870ed01852acfb3113c90';
+			const zuoraClient = await ZuoraClient.create('CODE');
+			const invoiceId = '8ad093fb8f0f4d13018f10416bf103a8';
+			const defaultPaymentMethodId = '8ad08e01852870ed01852acfb32f3c94';
+
+			await createPayment(
+				zuoraClient,
+				invoiceId,
+				5,
+				accountId,
+				defaultPaymentMethodId,
+				dayjs(),
+			);
+		},
+		1000 * 60,
+	);
+	it(
+		'can adjust an invoice to zero',
+		async () => {
+			// To run this test you will need to find a recurring contribution which has been switched to supporter plus but payment hasn't been taken
+			const zuoraClient = await ZuoraClient.create('CODE');
+			const invoiceId = '8ad093788f0f4d2b018f105fe4357ff1';
+
+			const response = await adjustNonCollectedInvoice(
+				zuoraClient,
+				invoiceId,
+				1.33,
+				'8ad08cbd8586721c01858804e3715378',
+			);
+
+			expect(response.Success).toBe(true);
 		},
 		1000 * 60,
 	);

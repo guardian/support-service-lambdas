@@ -1,13 +1,17 @@
 import { checkDefined } from '@modules/nullAndUndefined';
-import { creditInvoice, getInvoiceItems } from '@modules/zuora/invoice';
+import {
+	creditInvoice,
+	getInvoice,
+	getInvoiceItems,
+} from '@modules/zuora/invoice';
 import { createPayment } from '@modules/zuora/payment';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import type { ZuoraSwitchResponse } from './schemas';
 
-const adjustNonCollectedInvoice = async (
+export const adjustNonCollectedInvoice = async (
 	zuoraClient: ZuoraClient,
-	invoiceId: string,
+	invoiceId: string, // this must be an id, NOT the invoice number
 	paymentAmount: number,
 	supporterPlusChargeId: string,
 ) => {
@@ -21,7 +25,7 @@ const adjustNonCollectedInvoice = async (
 		`No supporter plus invoice item found in the invoice ${invoiceId}`,
 	);
 	const adjustmentResult = await creditInvoice(
-		new Date(),
+		dayjs(),
 		zuoraClient,
 		invoiceId,
 		supporterPlusInvoiceItem.id,
@@ -41,27 +45,32 @@ export const takePaymentOrAdjustInvoice = async (
 	accountId: string,
 	paymentMethodId: string,
 ) => {
-	if (!switchResponse.paidAmount || !switchResponse.invoiceId) {
-		throw new Error('Missing paid amount or invoice ID in switch response');
-	}
+	const invoiceNumber = checkDefined(
+		switchResponse.invoiceNumbers?.at(0),
+		'No invoice number found in the switch response',
+	);
 
-	if (switchResponse.paidAmount < 0.5) {
+	const invoice = await getInvoice(zuoraClient, invoiceNumber);
+	const amountPayableToday = invoice.amount;
+	const invoiceId = invoice.id;
+
+	if (amountPayableToday < 0.5) {
 		await adjustNonCollectedInvoice(
 			zuoraClient,
-			switchResponse.invoiceId,
-			switchResponse.paidAmount,
+			invoiceId,
+			amountPayableToday,
 			supporterPlusChargeId,
 		);
 		return 0;
 	} else {
 		await createPayment(
 			zuoraClient,
-			switchResponse.invoiceId,
-			switchResponse.paidAmount,
+			invoiceId,
+			amountPayableToday,
 			accountId,
 			paymentMethodId,
 			dayjs(),
 		);
-		return switchResponse.paidAmount;
+		return amountPayableToday;
 	}
 };
