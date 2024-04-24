@@ -45,7 +45,6 @@ const processCloudwatchMessage = async (message: AlarmMessage): Promise<void> =>
 const processOtherMessage = async (message: string): Promise<void> => {
 	await fetch(webhookMappings['SRE'], {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
 		body: message,
 	});
 }
