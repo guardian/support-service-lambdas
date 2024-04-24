@@ -56,7 +56,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			console.log(record);
 			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
 
-			const alarmMessage = alarmMessageSchema.safeParse(recordBody.Message);
+			const alarmMessage = alarmMessageSchema.safeParse(JSON.parse(recordBody.Message));
 			if (alarmMessage.success) {
 				await processCloudwatchMessage(alarmMessage.data);
 			} else {
