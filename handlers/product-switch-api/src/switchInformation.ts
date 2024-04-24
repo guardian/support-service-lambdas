@@ -17,11 +17,12 @@ import type { CatalogInformation } from './catalogInformation';
 import { getCatalogInformation } from './catalogInformation';
 import type { ProductSwitchRequestBody } from './schemas';
 
-export type UserInformation = {
+export type AccountInformation = {
 	identityId: string;
 	emailAddress: string;
 	firstName: string;
 	lastName: string;
+	defaultPaymentMethodId: string;
 };
 
 export type SubscriptionInformation = {
@@ -39,7 +40,7 @@ export type SwitchInformation = {
 	input: ProductSwitchRequestBody;
 	startNewTerm: boolean;
 	contributionAmount: number;
-	user: UserInformation;
+	account: AccountInformation;
 	subscription: SubscriptionInformation;
 	catalog: CatalogInformation;
 };
@@ -47,13 +48,14 @@ export type SwitchInformation = {
 const getUserInformation = async (
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
-): Promise<UserInformation> => {
+): Promise<AccountInformation> => {
 	const account = await getAccount(zuoraClient, accountNumber);
 	return {
 		identityId: account.basicInfo.identityId,
 		emailAddress: account.billToContact.workEmail,
 		firstName: account.billToContact.firstName,
 		lastName: account.billToContact.lastName,
+		defaultPaymentMethodId: account.billingAndPayment.defaultPaymentMethodId,
 	};
 };
 
@@ -159,7 +161,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 		input,
 		startNewTerm,
 		contributionAmount,
-		user: userInformation,
+		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,
 	};

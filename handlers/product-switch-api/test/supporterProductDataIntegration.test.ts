@@ -1,4 +1,6 @@
-// @group: integration
+/**
+ * @group integration
+ */
 
 import { sendToSupporterProductData } from '../src/supporterProductData';
 import type { SwitchInformation } from '../src/switchInformation';
@@ -12,11 +14,12 @@ test('supporter product data', async () => {
 		},
 		startNewTerm: true,
 		contributionAmount: 0,
-		user: {
+		account: {
 			identityId: '999999111',
 			emailAddress: 'emailAddress',
 			firstName: 'firstName',
 			lastName: 'lastName',
+			defaultPaymentMethodId: 'defaultPaymentMethodId',
 		},
 		subscription: {
 			billingPeriod: 'Month',

@@ -5,6 +5,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
+import { takePaymentOrAdjustInvoice } from './payment';
 import { sendThankYouEmail } from './productSwitchEmail';
 import { sendSalesforceTracking } from './salesforceTracking';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
@@ -26,7 +27,15 @@ export const switchToSupporterPlus = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
 ) => {
-	const paidAmount = await doSwitch(zuoraClient, productSwitchInformation);
+	const switchResponse = await doSwitch(zuoraClient, productSwitchInformation);
+
+	const paidAmount = await takePaymentOrAdjustInvoice(
+		zuoraClient,
+		switchResponse,
+		productSwitchInformation.catalog.supporterPlus.subscriptionChargeId,
+		productSwitchInformation.subscription.accountNumber,
+		productSwitchInformation.account.defaultPaymentMethodId,
+	);
 
 	await sendThankYouEmail(paidAmount, productSwitchInformation);
 
@@ -107,7 +116,7 @@ export const preview = async (
 export const doSwitch = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
-): Promise<number> => {
+): Promise<ZuoraSwitchResponse> => {
 	const { subscriptionNumber } = productSwitchInformation.subscription;
 	//If the sub has a pending amount change amendment, we need to remove it
 	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
@@ -125,10 +134,7 @@ export const doSwitch = async (
 		);
 	}
 
-	return checkDefined(
-		zuoraResponse.paidAmount,
-		'No paid amount found in the response',
-	);
+	return zuoraResponse;
 };
 
 const buildChangePlanOrderAction = (

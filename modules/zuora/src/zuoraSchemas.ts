@@ -84,9 +84,15 @@ export const billToContactSchema = z.object({
 	workEmail: z.string(),
 });
 
+export const billingAndPaymentSchema = z.object({
+	currency: z.string(),
+	defaultPaymentMethodId: z.string(),
+});
+
 export const zuoraAccountSchema = z.object({
 	success: z.boolean(),
 	basicInfo: zuoraAccountBasicInfoSchema,
+	billingAndPayment: billingAndPaymentSchema,
 	billToContact: billToContactSchema,
 });
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
@@ -148,3 +154,26 @@ export const addDiscountPreviewSchema = z.object({
 });
 
 export type AddDiscountPreview = z.infer<typeof addDiscountPreviewSchema>;
+
+// --------------- Invoice Items ---------------
+export const getInvoiceItemsSchema = z.object({
+	success: z.boolean(),
+	invoiceItems: z.array(
+		z.object({
+			id: z.string(),
+			productRatePlanChargeId: z.string(),
+		}),
+	),
+});
+
+export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
+
+// --------------- Invoice Item Adjustment ---------------
+export const invoiceItemAdjustmentResultSchema = z.object({
+	Success: z.boolean(),
+	Id: z.string().optional(),
+});
+
+export type InvoiceItemAdjustmentResult = z.infer<
+	typeof invoiceItemAdjustmentResultSchema
+>;

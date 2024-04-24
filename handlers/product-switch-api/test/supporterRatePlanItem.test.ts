@@ -3,43 +3,48 @@ import dayjs from 'dayjs';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
 import type { SwitchInformation } from '../src/switchInformation';
 
-test('supporterRatePlanItemFromSwitchInformation works with no contribution element', () => {
-	const switchInformation: SwitchInformation = {
-		stage: 'CODE',
-		input: {
+const getSwitchInformation = (
+	contributionAmount: number,
+): SwitchInformation => ({
+	stage: 'CODE',
+	input: {
+		price: 1,
+		preview: false,
+	},
+	startNewTerm: true,
+	contributionAmount,
+	account: {
+		identityId: 'identityId',
+		emailAddress: 'emailAddress',
+		firstName: 'firstName',
+		lastName: 'lastName',
+		defaultPaymentMethodId: 'defaultPaymentMethodId',
+	},
+	subscription: {
+		billingPeriod: 'Month',
+		subscriptionNumber: 'subscriptionNumber',
+		accountNumber: 'accountNumber',
+		previousProductName: 'previousProductName',
+		previousRatePlanName: 'previousRatePlanName',
+		previousAmount: 1,
+		currency: 'GBP',
+	},
+	catalog: {
+		supporterPlus: {
+			productRatePlanId: 'supporterPlusProductRatePlanId',
 			price: 1,
-			preview: false,
+			subscriptionChargeId: 'subscriptionChargeId',
+			contributionChargeId: 'contributionChargeId',
 		},
-		startNewTerm: true,
-		contributionAmount: 0,
-		user: {
-			identityId: 'identityId',
-			emailAddress: 'emailAddress',
-			firstName: 'firstName',
-			lastName: 'lastName',
+		contribution: {
+			productRatePlanId: 'contributionProductRatePlanId',
+			chargeId: 'chargeId',
 		},
-		subscription: {
-			billingPeriod: 'Month',
-			subscriptionNumber: 'subscriptionNumber',
-			accountNumber: 'accountNumber',
-			previousProductName: 'previousProductName',
-			previousRatePlanName: 'previousRatePlanName',
-			previousAmount: 1,
-			currency: 'GBP',
-		},
-		catalog: {
-			supporterPlus: {
-				productRatePlanId: 'supporterPlusProductRatePlanId',
-				price: 1,
-				subscriptionChargeId: 'subscriptionChargeId',
-				contributionChargeId: 'contributionChargeId',
-			},
-			contribution: {
-				productRatePlanId: 'contributionProductRatePlanId',
-				chargeId: 'chargeId',
-			},
-		},
-	};
+	},
+});
+
+test('supporterRatePlanItemFromSwitchInformation works with no contribution element', () => {
+	const switchInformation: SwitchInformation = getSwitchInformation(0);
 
 	expect(
 		supporterRatePlanItemFromSwitchInformation(switchInformation),
@@ -54,42 +59,7 @@ test('supporterRatePlanItemFromSwitchInformation works with no contribution elem
 });
 
 test('supporterRatePlanItemFromSwitchInformation works with a contribution element', () => {
-	const switchInformation: SwitchInformation = {
-		stage: 'CODE',
-		input: {
-			price: 1,
-			preview: false,
-		},
-		startNewTerm: true,
-		contributionAmount: 10,
-		user: {
-			identityId: 'identityId',
-			emailAddress: 'emailAddress',
-			firstName: 'firstName',
-			lastName: 'lastName',
-		},
-		subscription: {
-			billingPeriod: 'Month',
-			subscriptionNumber: 'subscriptionNumber',
-			accountNumber: 'accountNumber',
-			previousProductName: 'previousProductName',
-			previousRatePlanName: 'previousRatePlanName',
-			previousAmount: 1,
-			currency: 'GBP',
-		},
-		catalog: {
-			supporterPlus: {
-				productRatePlanId: 'supporterPlusProductRatePlanId',
-				price: 1,
-				subscriptionChargeId: 'subscriptionChargeId',
-				contributionChargeId: 'contributionChargeId',
-			},
-			contribution: {
-				productRatePlanId: 'contributionProductRatePlanId',
-				chargeId: 'chargeId',
-			},
-		},
-	};
+	const switchInformation: SwitchInformation = getSwitchInformation(10);
 
 	expect(
 		supporterRatePlanItemFromSwitchInformation(switchInformation),

@@ -37,7 +37,7 @@ export const supporterRatePlanItemFromSwitchInformation = (
 
 	return {
 		subscriptionName: switchInformation.subscription.subscriptionNumber,
-		identityId: switchInformation.user.identityId,
+		identityId: switchInformation.account.identityId,
 		productRatePlanId:
 			switchInformation.catalog.supporterPlus.productRatePlanId,
 		productRatePlanName,

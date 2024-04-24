@@ -46,7 +46,7 @@ export const sendThankYouEmail = async (
 	switchInformation: SwitchInformation,
 ) => {
 	const { emailAddress, firstName, lastName, identityId } =
-		switchInformation.user;
+		switchInformation.account;
 	const { subscriptionNumber, currency, billingPeriod } =
 		switchInformation.subscription;
 
