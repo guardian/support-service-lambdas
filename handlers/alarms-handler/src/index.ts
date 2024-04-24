@@ -1,42 +1,76 @@
-import { checkDefined } from '@modules/nullAndUndefined';
 import type { SNSEventRecord, SQSEvent } from 'aws-lambda';
+import { z } from 'zod';
+import { buildWebhookMappings, getTeam } from "./alarmMappings";
+import { getAppNameTag } from "./cloudwatch";
 
-interface AlarmMessage {
-	AlarmName: string;
-	AlarmDescription?: string;
-	NewStateReason: string;
+const webhookMappings = buildWebhookMappings();
+
+const alarmMessageSchema = z.object({
+	AlarmArn: z.string(),
+	AlarmName: z.string(),
+	AlarmDescription: z.string().optional(),
+	NewStateReason: z.string(),
+});
+
+type AlarmMessage = z.infer<typeof alarmMessageSchema>;
+
+const getWebhookUrl = async (message: AlarmMessage): Promise<string> => {
+	const appName = await getAppNameTag(message.AlarmArn);
+	if (!appName) {
+		console.log(`Unable to find App tag for alarm ARN: ${message.AlarmArn}, defaulting to SRE`);
+		return webhookMappings['SRE'];
+	} else {
+		const teamName = getTeam(appName);
+		return webhookMappings[teamName];
+	}
+}
+
+const processCloudwatchMessage = async (message: AlarmMessage): Promise<void> => {
+	const webhookUrl = await getWebhookUrl(message);
+
+	const text = `*ALARM:* ${
+		message.AlarmName
+	} has triggered!\n\n*Description:* ${
+		message.AlarmDescription ?? ''
+	}\n\n*Reason:* ${message.NewStateReason}`;
+
+	await fetch(webhookUrl, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ text }),
+	});
+}
+
+// Not a cloudwatch alarm, just send the whole message to the SRE channel
+const processOtherMessage = async (message: string): Promise<void> => {
+	await fetch(webhookMappings['SRE'], {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ text: message }),
+	});
+}
+
+const parseMessage = (message: string): AlarmMessage | null => {
+	try {
+		return alarmMessageSchema.parse(JSON.parse(message));
+	} catch (error) {
+		return null;
+	}
 }
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
-		const webhookUrl = checkDefined<string>(
-			process.env.WEBHOOK,
-			'WEBHOOK environment variable not set',
-		);
-
 		for (const record of event.Records) {
 			console.log(record);
 			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
+			const alarmMessage = parseMessage(recordBody.Message);
 
-			let text: string;
-
-			try {
-				const message = JSON.parse(recordBody.Message) as AlarmMessage;
-
-				text = `*ALARM:* ${
-					message.AlarmName
-				} has triggered!\n\n*Description:* ${
-					message.AlarmDescription ?? ''
-				}\n\n*Reason:* ${message.NewStateReason}`;
-			} catch (error) {
-				text = recordBody.Message;
+			if (alarmMessage) {
+				await processCloudwatchMessage(alarmMessage);
+			} else {
+				console.log('Message is not a cloudwatch alarm, sending to SRE channel');
+				await processOtherMessage(recordBody.Message);
 			}
-
-			await fetch(webhookUrl, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ text }),
-			});
 		}
 	} catch (error) {
 		console.error(error);

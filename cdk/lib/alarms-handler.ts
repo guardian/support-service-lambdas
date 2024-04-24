@@ -5,6 +5,7 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
+import {Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -30,13 +31,12 @@ export class AlarmsHandler extends GuStack {
 			},
 		});
 
-		const parameters = {
-			webhook: new GuStringParameter(this, `${app}-webhook`, {
-				description: 'Google Chat webhook URL',
-			}),
-		};
+		const buildWebhookParameter = (team: string): GuStringParameter =>
+			new GuStringParameter(this, `${app}-${team}-webhook`, {
+				description: `${team} Team Google Chat webhook URL`,
+			});
 
-		new GuLambdaFunction(this, `${app}-lambda`, {
+		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
@@ -49,9 +49,25 @@ export class AlarmsHandler extends GuStack {
 				APP: app,
 				STACK: this.stack,
 				STAGE: this.stage,
-				WEBHOOK: parameters.webhook.valueAsString,
+				GROWTH_WEBHOOK: buildWebhookParameter('GROWTH').valueAsString,
+				PP_WEBHOOK: buildWebhookParameter('PP').valueAsString,
+				VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
+				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
 			},
 		});
+
+		lambda.role?.attachInlinePolicy(new Policy(
+			this,
+			`${app}-cloudwatch-policy`,
+			{
+				statements: [
+					new PolicyStatement({
+						actions: ['cloudwatch:ListTagsForResource'],
+						resources: ['*'],
+					}),
+				],
+			},
+		));
 
 		const snsTopic = new Topic(this, `${app}-topic`, {
 			topicName: `${app}-topic-${this.stage}`,
