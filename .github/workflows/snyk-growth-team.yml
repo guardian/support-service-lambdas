@@ -3,8 +3,6 @@ name: Snyk growth team
 on:
   pull_request:
   push:
-    paths:
-      - 'handlers/batch-email-sender/**'
     branches:
       - main
   workflow_dispatch:
@@ -17,6 +15,7 @@ jobs:
       ORG: the-guardian-cuu
       SKIP_NODE: true
 #      EXCLUDE: handlers
+      PROJECT_FILE: handlers/alarms-handler/package.json
       JAVA_VERSION: 21
     secrets:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
