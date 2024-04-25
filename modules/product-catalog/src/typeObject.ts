@@ -68,6 +68,22 @@ export const typeObject = {
       "Annual": {
         "Subscription": {},
         "Contribution": {}
+      },
+      "SupporterPlusAndGuardianWeeklyRowMonthly": {
+        "SupporterPlusSubscription": {},
+        "GuardianWeeklySubscription": {}
+      },
+      "SupporterPlusAndGuardianWeeklyRowAnnual": {
+        "SupporterPlusSubscription": {},
+        "GuardianWeeklySubscription": {}
+      },
+      "SupporterPlusAndGuardianWeeklyDomesticAnnual": {
+        "SupporterPlusSubscription": {},
+        "GuardianWeeklySubscription": {}
+      },
+      "SupporterPlusAndGuardianWeeklyDomesticMonthly": {
+        "SupporterPlusSubscription": {},
+        "GuardianWeeklySubscription": {}
       }
     }
   },

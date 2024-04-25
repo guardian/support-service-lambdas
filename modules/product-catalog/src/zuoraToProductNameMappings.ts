@@ -20,10 +20,10 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Supporter Plus V2 - Annual': 'Annual',
 	'Supporter Plus V2 & Guardian Weekly ROW - Monthly':
 		'SupporterPlusAndGuardianWeeklyRowMonthly',
-	'Supporter Plus V2 & Guardian Weekly ROW - Annual':
-		'SupporterPlusAndGuardianWeeklyRowAnnual',
 	'Supporter Plus V2 & Guardian Weekly Domestic - Monthly':
 		'SupporterPlusAndGuardianWeeklyDomesticMonthly',
+	'Supporter Plus V2 & Guardian Weekly ROW - Annual':
+		'SupporterPlusAndGuardianWeeklyRowAnnual',
 	'Supporter Plus V2 & Guardian Weekly Domestic - Annual':
 		'SupporterPlusAndGuardianWeeklyDomesticAnnual',
 	'GW Oct 18 - Annual - ROW': 'Annual',
@@ -78,6 +78,12 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	Wednesday: 'Wednesday',
 	Thursday: 'Thursday',
 	Friday: 'Friday',
+	'Bundle - Supporter Plus V2 - Monthly': 'SupporterPlusSubscription',
+	'Bundle - Supporter Plus V2 - Annual': 'SupporterPlusSubscription',
+	'Bundle - GW Oct 18 - Monthly - ROW': 'GuardianWeeklySubscription',
+	'Bundle - GW Oct 18 - Monthly - Domestic': 'GuardianWeeklySubscription',
+	'Bundle - GW Oct 18 - Annual - ROW': 'GuardianWeeklySubscription',
+	'Bundle - GW Oct 18 - Annual - Domestic': 'GuardianWeeklySubscription',
 } as const;
 export const getZuoraProductKey = (product: string): string => {
 	return checkDefined(
