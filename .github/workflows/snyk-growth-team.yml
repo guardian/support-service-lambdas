@@ -1,11 +1,12 @@
 name: Snyk growth team
 
 on:
+  pull_request:
   push:
     paths:
       - 'handlers/batch-email-sender/**'
-#    branches:
-#      - main
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
