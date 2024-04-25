@@ -1,0 +1,21 @@
+name: Snyk
+
+on:
+  push:
+    paths:
+      - 'handlers/batch-email-sender/**'
+#    branches:
+#      - main
+  workflow_dispatch:
+
+jobs:
+  security:
+    uses: guardian/.github/.github/workflows/sbt-node-snyk.yml@main
+    with:
+      DEBUG: true
+      ORG: the-guardian-cuu
+      SKIP_NODE: true
+#      EXCLUDE: handlers
+      JAVA_VERSION: 21
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
