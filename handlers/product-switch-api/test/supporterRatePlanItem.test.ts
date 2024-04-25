@@ -14,6 +14,7 @@ const getSwitchInformation = (
 	startNewTerm: true,
 	contributionAmount,
 	account: {
+		id: 'accountId',
 		identityId: 'identityId',
 		emailAddress: 'emailAddress',
 		firstName: 'firstName',

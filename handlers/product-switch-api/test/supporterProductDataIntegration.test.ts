@@ -15,6 +15,7 @@ test('supporter product data', async () => {
 		startNewTerm: true,
 		contributionAmount: 0,
 		account: {
+			id: 'accountId',
 			identityId: '999999111',
 			emailAddress: 'emailAddress',
 			firstName: 'firstName',
