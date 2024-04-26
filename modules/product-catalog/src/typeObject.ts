@@ -69,21 +69,21 @@ export const typeObject = {
         "Subscription": {},
         "Contribution": {}
       },
-      "SupporterPlusAndGuardianWeeklyRowMonthly": {
-        "SupporterPlusSubscription": {},
-        "GuardianWeeklySubscription": {}
-      },
-      "SupporterPlusAndGuardianWeeklyRowAnnual": {
-        "SupporterPlusSubscription": {},
-        "GuardianWeeklySubscription": {}
+      "SupporterPlusAndGuardianWeeklyDomesticMonthly": {
+        "SupporterPlus": {},
+        "GuardianWeekly": {}
       },
       "SupporterPlusAndGuardianWeeklyDomesticAnnual": {
-        "SupporterPlusSubscription": {},
-        "GuardianWeeklySubscription": {}
+        "SupporterPlus": {},
+        "GuardianWeekly": {}
       },
-      "SupporterPlusAndGuardianWeeklyDomesticMonthly": {
-        "SupporterPlusSubscription": {},
-        "GuardianWeeklySubscription": {}
+      "SupporterPlusAndGuardianWeeklyRowAnnual": {
+        "SupporterPlus": {},
+        "GuardianWeekly": {}
+      },
+      "SupporterPlusAndGuardianWeeklyRowMonthly": {
+        "SupporterPlus": {},
+        "GuardianWeekly": {}
       }
     }
   },
