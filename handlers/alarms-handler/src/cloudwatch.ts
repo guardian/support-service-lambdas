@@ -16,6 +16,7 @@ const getTags = (alarmArn: string): Promise<Tag[]> => {
 
 export const getAppNameTag = (alarmArn: string): Promise<string | undefined> => {
     return getTags(alarmArn).then((tags: Tag[]) => {
+        console.log({tags});
         return tags.find((tag: Tag) => tag.Key === 'App')?.Value;
     });
 };
