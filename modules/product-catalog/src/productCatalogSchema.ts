@@ -1,3 +1,4 @@
+import { BillingPeriodValues } from '@modules/billingPeriod';
 import { z } from 'zod';
 
 export const productCatalogSchema = z.object({
@@ -14,6 +15,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			ThreeMonthGift: z.object({
 				id: z.string(),
@@ -26,6 +28,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			OneYearGift: z.object({
 				id: z.string(),
@@ -38,6 +41,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Monthly: z.object({
 				id: z.string(),
@@ -50,6 +54,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 		}),
 	}),
@@ -67,6 +72,7 @@ export const productCatalogSchema = z.object({
 					Tuesday: z.object({ id: z.string() }),
 					Thursday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Sixday: z.object({
 				id: z.string(),
@@ -79,6 +85,7 @@ export const productCatalogSchema = z.object({
 					Monday: z.object({ id: z.string() }),
 					Saturday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Weekend: z.object({
 				id: z.string(),
@@ -87,16 +94,19 @@ export const productCatalogSchema = z.object({
 					Saturday: z.object({ id: z.string() }),
 					Sunday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Saturday: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({ Saturday: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Sunday: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({ Sunday: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 		}),
 	}),
@@ -114,6 +124,7 @@ export const productCatalogSchema = z.object({
 					Saturday: z.object({ id: z.string() }),
 					Sunday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Weekend: z.object({
 				id: z.string(),
@@ -122,6 +133,7 @@ export const productCatalogSchema = z.object({
 					Saturday: z.object({ id: z.string() }),
 					Sunday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Sixday: z.object({
 				id: z.string(),
@@ -134,6 +146,7 @@ export const productCatalogSchema = z.object({
 					Friday: z.object({ id: z.string() }),
 					Saturday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 		}),
 	}),
@@ -153,6 +166,7 @@ export const productCatalogSchema = z.object({
 					Subscription: z.object({ id: z.string() }),
 					Contribution: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Annual: z.object({
 				id: z.string(),
@@ -168,6 +182,7 @@ export const productCatalogSchema = z.object({
 					Subscription: z.object({ id: z.string() }),
 					Contribution: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 		}),
 	}),
@@ -177,31 +192,37 @@ export const productCatalogSchema = z.object({
 				id: z.string(),
 				pricing: z.object({ USD: z.number(), GBP: z.number() }),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			OneYearGift: z.object({
 				id: z.string(),
 				pricing: z.object({ USD: z.number(), GBP: z.number() }),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			SixWeekly: z.object({
 				id: z.string(),
 				pricing: z.object({ USD: z.number(), GBP: z.number() }),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Quarterly: z.object({
 				id: z.string(),
 				pricing: z.object({ USD: z.number(), GBP: z.number() }),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Annual: z.object({
 				id: z.string(),
 				pricing: z.object({ USD: z.number(), GBP: z.number() }),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Monthly: z.object({
 				id: z.string(),
 				pricing: z.object({ USD: z.number(), GBP: z.number() }),
 				charges: z.object({ Monthly: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 		}),
 	}),
@@ -218,6 +239,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			SixWeekly: z.object({
 				id: z.string(),
@@ -230,6 +252,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Quarterly: z.object({
 				id: z.string(),
@@ -242,6 +265,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Annual: z.object({
 				id: z.string(),
@@ -254,6 +278,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Monthly: z.object({
 				id: z.string(),
@@ -266,6 +291,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			OneYearGift: z.object({
 				id: z.string(),
@@ -278,6 +304,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 		}),
 	}),
@@ -295,6 +322,7 @@ export const productCatalogSchema = z.object({
 					Saturday: z.object({ id: z.string() }),
 					Sunday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Weekend: z.object({
 				id: z.string(),
@@ -303,6 +331,7 @@ export const productCatalogSchema = z.object({
 					Saturday: z.object({ id: z.string() }),
 					Sunday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Sixday: z.object({
 				id: z.string(),
@@ -315,16 +344,19 @@ export const productCatalogSchema = z.object({
 					Tuesday: z.object({ id: z.string() }),
 					Monday: z.object({ id: z.string() }),
 				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Sunday: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({ Sunday: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Saturday: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({ Saturday: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 		}),
 	}),
@@ -341,6 +373,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 			Monthly: z.object({
 				id: z.string(),
@@ -353,6 +386,7 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
 		}),
 	}),
