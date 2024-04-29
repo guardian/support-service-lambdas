@@ -61,14 +61,6 @@ export const typeObject = {
       "AUD"
     ],
     "productRatePlans": {
-      "Monthly": {
-        "Subscription": {},
-        "Contribution": {}
-      },
-      "Annual": {
-        "Contribution": {},
-        "Subscription": {}
-      },
       "SupporterPlusAndGuardianWeeklyDomesticMonthly": {
         "SupporterPlus": {},
         "GuardianWeekly": {}
@@ -84,6 +76,15 @@ export const typeObject = {
       "SupporterPlusAndGuardianWeeklyRowMonthly": {
         "SupporterPlus": {},
         "GuardianWeekly": {}
+      },
+      "Monthly": {
+        "Subscription": {},
+        "Contribution": {}
+      },
+      "Annual": {
+        "Subscription": {},
+        "Contribution": {}
+      }
     }
   },
   "GuardianWeeklyRestOfWorld": {
