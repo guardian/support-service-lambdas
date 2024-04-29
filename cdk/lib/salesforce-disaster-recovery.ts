@@ -16,11 +16,9 @@ import {
 	Condition,
 	CustomState,
 	DefinitionBody,
-	Fail,
 	JsonPath,
 	Pass,
 	StateMachine,
-	Succeed,
 	TaskInput,
 	Wait,
 	WaitTime,
@@ -361,8 +359,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 						TopicArn: snsTopic.topicArn,
 						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
 						'Message.$': JsonPath.format(
-							`State machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
+							`This notification is part of the Salesforce Disaster Recovery procedure explained in the runbook below:\n{}\n\nState machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
 						`,
+							'https://docs.google.com/document/d/1_KxFtfKU3-3-PSzaAYG90uONa05AVgoBmyBDyu5SC5c/edit#heading=h.2r6eh2y6rjut',
 							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
 							JsonPath.stringAt('$.queryResultFileUrl'),
 							JsonPath.stringAt('$.failedRowsCount'),
@@ -373,13 +372,6 @@ export class SalesforceDisasterRecovery extends GuStack {
 				},
 			},
 		);
-
-		const haveAllRowsSuccedeed = new Choice(this, 'HaveAllRowsSuccedeed')
-			.when(
-				Condition.numberEquals('$.failedRowsCount', 0),
-				new Succeed(this, 'AllRowsHaveSuccedeed'),
-			)
-			.otherwise(new Fail(this, 'SomeRowsHaveFailed'));
 
 		const stateMachine = new StateMachine(
 			this,
@@ -394,26 +386,61 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap
-											.next(getMapResult)
-											.next(saveFailedRowsToS3)
-											.next(
-												new Choice(this, 'IsHealthCheck')
-													.when(
-														Condition.stringMatches(
-															'$$.Execution.Name',
-															'health-check-*',
-														),
-														haveAllRowsSuccedeed,
-													)
-													.otherwise(
-														constructNotificationData
-															.next(sendCompletionNotification)
-															.next(haveAllRowsSuccedeed),
+									new Choice(this, 'AreThereAccountsToResync')
+										.when(
+											Condition.numberEquals(
+												'$.ResponseBody.numberRecordsProcessed',
+												0,
+											),
+											new Pass(this, 'NoAccountsToResync'),
+										)
+										.otherwise(
+											saveSalesforceQueryResultToS3.next(
+												processCsvInDistributedMap
+													.next(getMapResult)
+													.next(saveFailedRowsToS3)
+													.next(
+														new Choice(this, 'IsHealthCheck')
+															.when(
+																Condition.stringMatches(
+																	'$$.Execution.Name',
+																	'health-check-*',
+																),
+																new Pass(this, 'HealthCheckSuccessful'),
+															)
+															.otherwise(
+																constructNotificationData
+																	.next(sendCompletionNotification)
+																	.next(
+																		new Choice(
+																			this,
+																			'HaveAllAccountsBeenResynced',
+																		)
+																			.when(
+																				Condition.numberEquals(
+																					'$.failedRowsCount',
+																					0,
+																				),
+																				new Pass(
+																					this,
+																					'AllAccountsHaveBeenResynced',
+																				),
+																			)
+																			.otherwise(
+																				new Pass(
+																					this,
+																					'SomeAccountsHaveFailedToUpdate',
+																					{
+																						stateName:
+																							"SomeAccountsHaveFailedToUpdate - Open state input 'failedRowsFileUrl' to debug",
+																					},
+																				),
+																			),
+																	),
+															),
 													),
 											),
-									),
+										),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),

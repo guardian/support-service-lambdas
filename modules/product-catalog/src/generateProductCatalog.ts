@@ -1,4 +1,5 @@
 import { arrayToObject } from '@modules/arrayFunctions';
+import { isBillingPeriod } from '@modules/billingPeriod';
 import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
@@ -50,6 +51,37 @@ const getProductRatePlanCharges = (
 		}),
 	);
 };
+
+/**
+ * We use this to hoist billing period from the `productRatePlanCharges` up into the `ratePlans`
+ * if-and-only-if all the charges have the same `billingPeriod`.
+ */
+const getBillingPeriod = (productRatePlan: ZuoraProductRatePlan) => {
+	const billingPeriods = new Set(
+		productRatePlan.productRatePlanCharges.map(
+			(productRatePlanCharge) => productRatePlanCharge.billingPeriod,
+		),
+	);
+	if (billingPeriods.size > 1) {
+		const errorList = [...billingPeriods].join(',');
+		throw new Error(
+			`Product rate plan ${productRatePlan.name} has multiple billingPeriods ${errorList}`,
+		);
+	}
+
+	const [billingPeriod] = billingPeriods;
+	// billingPeriod as null is valid from Zuora, which is used for one-time charges e.g. gifts
+	if (billingPeriod === null) {
+		return;
+	}
+
+	if (!isBillingPeriod(billingPeriod)) {
+		throw new ReferenceError(`Unexpected billing period ${billingPeriod}`);
+	}
+
+	return billingPeriod;
+};
+
 const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 	return {
 		ratePlans: arrayToObject(
@@ -58,6 +90,7 @@ const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 					isSupportedProductRatePlan(productRatePlan.name),
 				)
 				.map((productRatePlan) => {
+					const billingPeriod = getBillingPeriod(productRatePlan);
 					const productRatePlanKey = getProductRatePlanKey(
 						productRatePlan.name,
 					);
@@ -68,6 +101,7 @@ const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 							charges: getProductRatePlanCharges(
 								productRatePlan.productRatePlanCharges,
 							),
+							...(billingPeriod && { billingPeriod }),
 						},
 					};
 				}),

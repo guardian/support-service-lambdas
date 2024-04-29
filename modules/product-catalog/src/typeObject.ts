@@ -29,25 +29,25 @@ export const typeObject = {
     ],
     "productRatePlans": {
       "Sixday": {
-        "Saturday": {},
-        "Friday": {},
-        "Thursday": {},
-        "Wednesday": {},
+        "Monday": {},
         "Tuesday": {},
-        "Monday": {}
-      },
-      "Weekend": {
-        "Sunday": {},
+        "Wednesday": {},
+        "Thursday": {},
+        "Friday": {},
         "Saturday": {}
       },
-      "Everyday": {
-        "Sunday": {},
+      "Weekend": {
         "Saturday": {},
-        "Friday": {},
-        "Thursday": {},
-        "Wednesday": {},
+        "Sunday": {}
+      },
+      "Everyday": {
+        "Monday": {},
         "Tuesday": {},
-        "Monday": {}
+        "Wednesday": {},
+        "Thursday": {},
+        "Friday": {},
+        "Saturday": {},
+        "Sunday": {}
       }
     }
   },
@@ -62,12 +62,12 @@ export const typeObject = {
     ],
     "productRatePlans": {
       "Monthly": {
-        "Contribution": {},
-        "Subscription": {}
-      },
-      "Annual": {
         "Subscription": {},
         "Contribution": {}
+      },
+      "Annual": {
+        "Contribution": {},
+        "Subscription": {}
       },
       "SupporterPlusAndGuardianWeeklyDomesticMonthly": {
         "SupporterPlus": {},
@@ -84,7 +84,6 @@ export const typeObject = {
       "SupporterPlusAndGuardianWeeklyRowMonthly": {
         "SupporterPlus": {},
         "GuardianWeekly": {}
-      }
     }
   },
   "GuardianWeeklyRestOfWorld": {
@@ -100,9 +99,6 @@ export const typeObject = {
         "Subscription": {}
       },
       "Annual": {
-        "Subscription": {}
-      },
-      "SixWeekly": {
         "Subscription": {}
       },
       "Quarterly": {
@@ -137,9 +133,6 @@ export const typeObject = {
       },
       "ThreeMonthGift": {
         "Subscription": {}
-      },
-      "SixWeekly": {
-        "Subscription": {}
       }
     }
   },
@@ -148,6 +141,14 @@ export const typeObject = {
       "GBP"
     ],
     "productRatePlans": {
+      "Sixday": {
+        "Friday": {},
+        "Monday": {},
+        "Tuesday": {},
+        "Thursday": {},
+        "Wednesday": {},
+        "Saturday": {}
+      },
       "Everyday": {
         "Monday": {},
         "Tuesday": {},
@@ -160,14 +161,6 @@ export const typeObject = {
       "Weekend": {
         "Saturday": {},
         "Sunday": {}
-      },
-      "Sixday": {
-        "Saturday": {},
-        "Friday": {},
-        "Monday": {},
-        "Tuesday": {},
-        "Thursday": {},
-        "Wednesday": {}
       },
       "Sunday": {
         "Sunday": {}
@@ -200,6 +193,18 @@ export const typeObject = {
       "GBP"
     ],
     "productRatePlans": {
+      "Everyday": {
+        "Sunday": {},
+        "Wednesday": {},
+        "Friday": {},
+        "Thursday": {},
+        "Monday": {},
+        "Tuesday": {},
+        "Saturday": {}
+      },
+      "Sunday": {
+        "Sunday": {}
+      },
       "Sixday": {
         "Wednesday": {},
         "Friday": {},
@@ -208,21 +213,9 @@ export const typeObject = {
         "Tuesday": {},
         "Saturday": {}
       },
-      "Everyday": {
-        "Tuesday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Wednesday": {},
-        "Friday": {},
-        "Thursday": {},
-        "Monday": {}
-      },
       "Weekend": {
         "Sunday": {},
         "Saturday": {}
-      },
-      "Sunday": {
-        "Sunday": {}
       },
       "Saturday": {
         "Saturday": {}

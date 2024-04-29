@@ -1,3 +1,4 @@
+import type { BillingPeriod } from '@modules/billingPeriod';
 import type { typeObject } from '@modules/product-catalog/typeObject';
 
 type TypeObject = typeof typeObject;
@@ -32,6 +33,7 @@ type ProductRatePlan<
 	charges: {
 		[PRPC in ProductRatePlanChargeKey<P, PRP>]: ProductRatePlanCharge;
 	};
+	billingPeriod?: BillingPeriod;
 };
 
 type Product<P extends ProductKey> = {
@@ -45,7 +47,7 @@ export type ProductCatalog = {
 };
 
 export class ProductCatalogHelper {
-	constructor(private catalogData: ProductCatalog) {}
+	constructor(private catalogData: ProductCatalog) { }
 
 	getProductRatePlan = <
 		P extends ProductKey,

@@ -66,7 +66,7 @@ export const handler = async (): Promise<
 				await publishSnsMessage({
 					topicArn,
 					subject: `Health Check Failed For ${stage} Salesforce Disaster Recovery State Machine`,
-					message: `Execution details:\nhttps://${region}.console.aws.amazon.com/states/home?region=${region}#/executions/details/${executionArn}`,
+					message: `This health check is in place to make sure the Salesforce Disaster Recovery resyncing tool is available at all times.\n\nPlease review the state machine execution details below to figure out the cause of the failure:\n\nhttps://${region}.console.aws.amazon.com/states/home?region=${region}#/executions/details/${executionArn}`,
 				});
 
 				return 'HEALTH CHECK FAILED';
