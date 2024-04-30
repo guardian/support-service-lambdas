@@ -38,7 +38,7 @@ export class ProductSwitchApi extends GuStack {
 		// ---- API-triggered lambda functions ---- //
 		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
-				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
+				'An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo',
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
@@ -54,7 +54,7 @@ export class ProductSwitchApi extends GuStack {
 			api: {
 				id: nameWithStage,
 				restApiName: nameWithStage,
-				description: 'API Gateway created by CDK',
+				description: `API Gateway endpoint for the ${nameWithStage} lambda`,
 				proxy: true,
 				deployOptions: {
 					stageName: this.stage,
@@ -69,7 +69,7 @@ export class ProductSwitchApi extends GuStack {
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
-			description: 'REST endpoints for product-switch-api>',
+			description: 'REST endpoints for product-switch-api',
 			apiStages: [
 				{
 					stage: lambda.api.deploymentStage,

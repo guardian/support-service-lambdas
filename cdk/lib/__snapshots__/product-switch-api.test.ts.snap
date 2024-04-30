@@ -6,8 +6,6 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -47,118 +45,6 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Product switch api received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "PRODUCT-SWITCH-API-CODE API gateway 4XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "product-switch-api-CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmProductswitchapiA7532E7F": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "product-switch-api exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from product-switch-api (ApiGateway) in CODE",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for product-switch-api",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "product-switch-api-CODE",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "product-switch-api-CODE",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "BasePathMapping": {
       "Properties": {
         "DomainName": {
@@ -357,7 +243,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/product-switch-api/product-switch-api.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "product-switch-api",
@@ -377,7 +263,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Tags": [
           {
             "Key": "App",
@@ -560,7 +446,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
     "productswitchapilambdaproductswitchapiCODE34905765": {
       "Properties": {
         "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
+        "Description": "API Gateway endpoint for the product-switch-api-CODE lambda",
         "Name": "product-switch-api-CODE",
         "Tags": [
           {
@@ -780,14 +666,14 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "productswitchapilambdaproductswitchapiCODEDeployment4EE627F9a38567143081b904af6dfdb9b7b45a57": {
+    "productswitchapilambdaproductswitchapiCODEDeployment4EE627F93aeea53542802ca6e90fed8e74be15e1": {
       "DependsOn": [
         "productswitchapilambdaproductswitchapiCODEproxyANYA8660462",
         "productswitchapilambdaproductswitchapiCODEproxy466471EA",
         "productswitchapilambdaproductswitchapiCODEANY9F9E62A7",
       ],
       "Properties": {
-        "Description": "API Gateway created by CDK",
+        "Description": "API Gateway endpoint for the product-switch-api-CODE lambda",
         "RestApiId": {
           "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
         },
@@ -800,7 +686,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "productswitchapilambdaproductswitchapiCODEDeployment4EE627F9a38567143081b904af6dfdb9b7b45a57",
+          "Ref": "productswitchapilambdaproductswitchapiCODEDeployment4EE627F93aeea53542802ca6e90fed8e74be15e1",
         },
         "RestApiId": {
           "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
@@ -844,7 +730,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for product-switch-api>",
+        "Description": "REST endpoints for product-switch-api",
         "Tags": [
           {
             "Key": "App",
@@ -1066,7 +952,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
+      "GuAlarm",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -1107,7 +993,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
+    "ApiGateway5XXAlarmCDK11905206": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1128,8 +1014,8 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "Impact - Product switch api received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "PRODUCT-SWITCH-API-PROD API gateway 4XX response",
+        "AlarmDescription": "Impact - Product switch api returned a 500 response, please check the logs to diagnose the issue.. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "PRODUCT-SWITCH-API-PROD API gateway 5XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1138,84 +1024,11 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
         ],
         "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
+        "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
         "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmProductswitchapiA7532E7F": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":retention-dev",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "product-switch-api exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from product-switch-api (ApiGateway) in PROD",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for product-switch-api",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "product-switch-api-PROD",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "product-switch-api-PROD",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -1290,6 +1103,47 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "ProductSwitchFailureAlarm3912A544": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - Product switch lambda failed, please check the logs to diagnose the issue.. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "PRODUCT-SWITCH-API-PROD An error occurred in the Product Switch lambda",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "productswitchapilambdaDA3EBA76",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "S3inlinepolicy3B07399A": {
       "Properties": {
@@ -1417,7 +1271,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/product-switch-api/product-switch-api.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "product-switch-api",
@@ -1437,7 +1291,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Tags": [
           {
             "Key": "App",
@@ -1620,7 +1474,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
     "productswitchapilambdaproductswitchapiPROD165D4330": {
       "Properties": {
         "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
+        "Description": "API Gateway endpoint for the product-switch-api-PROD lambda",
         "Name": "product-switch-api-PROD",
         "Tags": [
           {
@@ -1840,14 +1694,14 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E5c0181aaa43c34269de37b185e00da24": {
+    "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E10b3d9ec051db83c05137457d9ec752a": {
       "DependsOn": [
         "productswitchapilambdaproductswitchapiPRODproxyANY4B70B834",
         "productswitchapilambdaproductswitchapiPRODproxy05CF61E1",
         "productswitchapilambdaproductswitchapiPRODANY623BDD80",
       ],
       "Properties": {
-        "Description": "API Gateway created by CDK",
+        "Description": "API Gateway endpoint for the product-switch-api-PROD lambda",
         "RestApiId": {
           "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
         },
@@ -1860,7 +1714,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E5c0181aaa43c34269de37b185e00da24",
+          "Ref": "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E10b3d9ec051db83c05137457d9ec752a",
         },
         "RestApiId": {
           "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
@@ -1904,7 +1758,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for product-switch-api>",
+        "Description": "REST endpoints for product-switch-api",
         "Tags": [
           {
             "Key": "App",
