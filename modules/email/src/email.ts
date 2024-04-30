@@ -4,27 +4,22 @@ import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { Stage } from '@modules/stage';
 
-type Either<T, Keys extends keyof T = keyof T> = Pick<
-	T,
-	Exclude<keyof T, Keys>
-> &
-	{
-		[K in Keys]-?: Required<Pick<T, K>> &
-			Partial<Record<Exclude<Keys, K>, undefined>>;
-	}[Keys];
-
-// The EmailMessageWithUserId type ensures that the message has either a SfContactId or an IdentityUserId
-export type EmailMessageWithUserId = Either<
-	EmailMessage,
-	'SfContactId' | 'IdentityUserId'
->;
-
-export type EmailMessage = {
+type EmailMessage = {
 	To: EmailPayload;
 	DataExtensionName: DataExtensionName;
-	SfContactId?: string;
-	IdentityUserId?: string;
 };
+
+export type EmailMessageWithSfContactId = EmailMessage & {
+	SfContactId: string;
+};
+
+export type EmailMessageWithIdentityUserId = EmailMessage & {
+	IdentityUserId: string;
+};
+
+export type EmailMessageWithUserId =
+	| EmailMessageWithSfContactId
+	| EmailMessageWithIdentityUserId;
 
 export type EmailPayload = {
 	Address: string; // email address
