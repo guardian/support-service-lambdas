@@ -8,7 +8,14 @@ import type { CatalogInformation } from './catalogInformation';
 import { takePaymentOrAdjustInvoice } from './payment';
 import { sendThankYouEmail } from './productSwitchEmail';
 import { sendSalesforceTracking } from './salesforceTracking';
-import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
+import type {
+	ChangePlanOrderAction,
+	CreateOrderRequest,
+	OrderAction,
+	PreviewOrderRequest,
+	ZuoraPreviewResponse,
+	ZuoraSwitchResponse,
+} from './schemas';
 import {
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
@@ -26,7 +33,7 @@ export type PreviewResponse = {
 export const switchToSupporterPlus = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
-) => {
+): Promise<void> => {
 	const switchResponse = await doSwitch(zuoraClient, productSwitchInformation);
 
 	const paidAmount = await takePaymentOrAdjustInvoice(
@@ -94,7 +101,7 @@ export const preview = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
 ): Promise<PreviewResponse> => {
-	const requestBody = buildPreviewRequestBody(
+	const requestBody: PreviewOrderRequest = buildPreviewRequestBody(
 		dayjs(),
 		productSwitchInformation,
 	);
@@ -141,7 +148,7 @@ const buildChangePlanOrderAction = (
 	orderDate: Dayjs,
 	catalog: CatalogInformation,
 	contributionAmount: number,
-) => {
+): ChangePlanOrderAction => {
 	return {
 		type: 'ChangePlan',
 		triggerDates: [
@@ -181,7 +188,7 @@ const buildChangePlanOrderAction = (
 const buildPreviewRequestBody = (
 	orderDate: Dayjs,
 	productSwitchInformation: SwitchInformation,
-) => {
+): PreviewOrderRequest => {
 	const { contributionAmount, catalog } = productSwitchInformation;
 	const { accountNumber, subscriptionNumber } =
 		productSwitchInformation.subscription;
@@ -208,13 +215,13 @@ const buildPreviewRequestBody = (
 export const buildSwitchRequestBody = (
 	orderDate: Dayjs,
 	productSwitchInformation: SwitchInformation,
-) => {
+): CreateOrderRequest => {
 	const { startNewTerm, contributionAmount, catalog } =
 		productSwitchInformation;
 	const { accountNumber, subscriptionNumber } =
 		productSwitchInformation.subscription;
 
-	const newTermOrderActions = startNewTerm
+	const newTermOrderActions: OrderAction[] = startNewTerm
 		? [
 				{
 					type: 'TermsAndConditions',

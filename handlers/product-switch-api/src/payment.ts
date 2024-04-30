@@ -44,7 +44,7 @@ export const takePaymentOrAdjustInvoice = async (
 	supporterPlusChargeId: string,
 	accountId: string,
 	paymentMethodId: string,
-) => {
+): Promise<number> => {
 	const invoiceNumber = checkDefined(
 		switchResponse.invoiceNumbers?.at(0),
 		'No invoice number found in the switch response',
