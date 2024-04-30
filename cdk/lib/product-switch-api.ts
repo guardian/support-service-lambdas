@@ -48,8 +48,7 @@ export class ProductSwitchApi extends GuStack {
 			environment: commonEnvironmentVariables,
 			// Create an alarm
 			monitoringConfiguration: {
-				http5xxAlarm: { tolerated5xxPercentage: 5 },
-				snsTopicName: 'retention-dev',
+				noMonitoring: true,
 			},
 			app: app,
 			api: {
@@ -86,35 +85,6 @@ export class ProductSwitchApi extends GuStack {
 
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
-
-		// ---- Alarms ---- //
-		const alarmName = (shortDescription: string) =>
-			`PRODUCT-SWITCH-API-${this.stage} ${shortDescription}`;
-
-		const alarmDescription = (description: string) =>
-			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
-
-		new GuAlarm(this, 'ApiGateway4XXAlarmCDK', {
-			app,
-			alarmName: alarmName('API gateway 4XX response'),
-			alarmDescription: alarmDescription(
-				'Product switch api received an invalid request',
-			),
-			evaluationPeriods: 1,
-			threshold: 1,
-			snsTopicName: 'retention-dev',
-			actionsEnabled: this.stage === 'PROD',
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			metric: new Metric({
-				metricName: '4XXError',
-				namespace: 'AWS/ApiGateway',
-				statistic: 'Sum',
-				period: Duration.seconds(300),
-				dimensionsMap: {
-					ApiName: nameWithStage,
-				},
-			}),
-		});
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
@@ -184,5 +154,57 @@ export class ProductSwitchApi extends GuStack {
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 		lambda.role?.attachInlinePolicy(sqsPolicy);
+
+		// ---- Alarms ---- //
+		const alarmName = (shortDescription: string) =>
+			`PRODUCT-SWITCH-API-${this.stage} ${shortDescription}`;
+
+		const alarmDescription = (description: string) =>
+			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
+
+		if (this.stage === 'PROD') {
+			new GuAlarm(this, 'ApiGateway5XXAlarmCDK', {
+				app,
+				alarmName: alarmName('API gateway 5XX response'),
+				alarmDescription: alarmDescription(
+					'Product switch api returned a 500 response, please check the logs to diagnose the issue.',
+				),
+				evaluationPeriods: 1,
+				threshold: 1,
+				snsTopicName: 'retention-dev',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: '5XXError',
+					namespace: 'AWS/ApiGateway',
+					statistic: 'Sum',
+					period: Duration.seconds(300),
+					dimensionsMap: {
+						ApiName: nameWithStage,
+					},
+				}),
+			});
+			new GuAlarm(this, 'ProductSwitchFailureAlarm', {
+				app,
+				alarmName: alarmName('An error occurred in the Product Switch lambda'),
+				alarmDescription: alarmDescription(
+					'Product switch lambda failed, please check the logs to diagnose the issue.',
+				),
+				snsTopicName: 'retention-dev',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: 'Sum',
+					period: Duration.seconds(300),
+					dimensionsMap: {
+						FunctionName: lambda.functionName,
+					},
+				}),
+				threshold: 1,
+				evaluationPeriods: 1,
+			});
+		}
 	}
 }
