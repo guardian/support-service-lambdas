@@ -152,18 +152,18 @@ test('preview amounts are correct', () => {
 test('Email message body is correct', () => {
 	const emailAddress = 'test@thegulocal.com';
 	const dateOfFirstPayment = dayjs('2024-04-16');
-	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
-		dateOfFirstPayment,
-		emailAddress,
-		'test',
-		'user',
-		'GBP',
-		10,
-		5.6,
-		'Month',
-		'A-S123456',
-		'123456789',
-	);
+	const emailMessage: EmailMessageWithUserId = buildEmailMessage({
+		dateOfFirstPayment: dateOfFirstPayment,
+		emailAddress: emailAddress,
+		firstName: 'test',
+		lastName: 'user',
+		currency: 'GBP',
+		productPrice: 10,
+		firstPaymentAmount: 5.6,
+		billingPeriod: 'Month',
+		subscriptionNumber: 'A-S123456',
+		identityId: '123456789',
+	});
 
 	const expectedOutput = {
 		To: {

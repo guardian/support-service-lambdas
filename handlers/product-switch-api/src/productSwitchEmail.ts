@@ -3,22 +3,32 @@ import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { ProductCurrency } from '@modules/product-catalog/productCatalog';
 import { getCurrencyGlyph } from '@modules/product-catalog/productCatalog';
-import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
 
-export const buildEmailMessage = (
-	dateOfFirstPayment: Dayjs,
-	emailAddress: string,
-	firstName: string,
-	lastName: string,
-	currency: ProductCurrency<'SupporterPlus'>,
-	productPrice: number,
-	firstPaymentAmount: number,
-	billingPeriod: BillingPeriod,
-	subscriptionNumber: string,
-	identityId: string,
-) => {
+export const buildEmailMessage = ({
+	dateOfFirstPayment,
+	emailAddress,
+	firstName,
+	lastName,
+	currency,
+	productPrice,
+	firstPaymentAmount,
+	billingPeriod,
+	subscriptionNumber,
+	identityId,
+}: {
+	dateOfFirstPayment: dayjs.Dayjs;
+	emailAddress: string;
+	firstName: string;
+	lastName: string;
+	currency: ProductCurrency<'SupporterPlus'>;
+	productPrice: number;
+	firstPaymentAmount: number;
+	billingPeriod: BillingPeriod;
+	subscriptionNumber: string;
+	identityId: string;
+}) => {
 	return {
 		To: {
 			Address: emailAddress,
@@ -50,18 +60,18 @@ export const sendThankYouEmail = async (
 	const { subscriptionNumber, currency, billingPeriod } =
 		switchInformation.subscription;
 
-	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
-		dayjs(),
-		emailAddress,
-		firstName,
-		lastName,
-		currency,
-		switchInformation.input.price,
-		firstPaymentAmount,
-		billingPeriod,
-		subscriptionNumber,
-		identityId,
-	);
+	const emailMessage: EmailMessageWithUserId = buildEmailMessage({
+		dateOfFirstPayment: dayjs(),
+		emailAddress: emailAddress,
+		firstName: firstName,
+		lastName: lastName,
+		currency: currency,
+		productPrice: switchInformation.input.price,
+		firstPaymentAmount: firstPaymentAmount,
+		billingPeriod: billingPeriod,
+		subscriptionNumber: subscriptionNumber,
+		identityId: identityId,
+	});
 
 	return await sendEmail(switchInformation.stage, emailMessage);
 };
