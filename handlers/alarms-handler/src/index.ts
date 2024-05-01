@@ -1,7 +1,7 @@
 import type { SNSEventRecord, SQSEvent } from 'aws-lambda';
 import { z } from 'zod';
-import { buildWebhookMappings, getTeam } from "./alarmMappings";
-import { getAppNameTag } from "./cloudwatch";
+import { buildWebhookMappings, getTeam } from './alarmMappings';
+import { getAppNameTag } from './cloudwatch';
 
 const webhookMappings = buildWebhookMappings();
 
@@ -17,15 +17,19 @@ type AlarmMessage = z.infer<typeof alarmMessageSchema>;
 const getWebhookUrl = async (message: AlarmMessage): Promise<string> => {
 	const appName = await getAppNameTag(message.AlarmArn);
 	if (!appName) {
-		console.log(`Unable to find App tag for alarm ARN: ${message.AlarmArn}, defaulting to SRE`);
+		console.log(
+			`Unable to find App tag for alarm ARN: ${message.AlarmArn}, defaulting to SRE`,
+		);
 		return webhookMappings['SRE'];
 	} else {
 		const teamName = getTeam(appName);
 		return webhookMappings[teamName];
 	}
-}
+};
 
-const processCloudwatchMessage = async (message: AlarmMessage): Promise<void> => {
+const processCloudwatchMessage = async (
+	message: AlarmMessage,
+): Promise<void> => {
 	const webhookUrl = await getWebhookUrl(message);
 
 	const text = `*ALARM:* ${
@@ -39,7 +43,7 @@ const processCloudwatchMessage = async (message: AlarmMessage): Promise<void> =>
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ text }),
 	});
-}
+};
 
 // Not a cloudwatch alarm, just send the whole message to the SRE channel
 const processOtherMessage = async (message: string): Promise<void> => {
@@ -48,7 +52,7 @@ const processOtherMessage = async (message: string): Promise<void> => {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ text: message }),
 	});
-}
+};
 
 const parseMessage = (message: string): AlarmMessage | null => {
 	try {
@@ -56,7 +60,7 @@ const parseMessage = (message: string): AlarmMessage | null => {
 	} catch (error) {
 		return null;
 	}
-}
+};
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
@@ -68,7 +72,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			if (alarmMessage) {
 				await processCloudwatchMessage(alarmMessage);
 			} else {
-				console.log('Message is not a cloudwatch alarm, sending to SRE channel');
+				console.log(
+					'Message is not a cloudwatch alarm, sending to SRE channel',
+				);
 				await processOtherMessage(recordBody.Message);
 			}
 		}
