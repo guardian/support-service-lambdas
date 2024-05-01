@@ -4,6 +4,23 @@ import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { Stage } from '@modules/stage';
 
+type EmailMessage = {
+	To: EmailPayload;
+	DataExtensionName: DataExtensionName;
+};
+
+export type EmailMessageWithSfContactId = EmailMessage & {
+	SfContactId: string;
+};
+
+export type EmailMessageWithIdentityUserId = EmailMessage & {
+	IdentityUserId: string;
+};
+
+export type EmailMessageWithUserId =
+	| EmailMessageWithSfContactId
+	| EmailMessageWithIdentityUserId;
+
 export type EmailPayload = {
 	Address: string; // email address
 	ContactAttributes: {
@@ -18,16 +35,9 @@ export const DataExtensionNames = {
 export type DataExtensionName =
 	(typeof DataExtensionNames)[keyof typeof DataExtensionNames];
 
-export type EmailMessage = {
-	To: EmailPayload;
-	DataExtensionName: DataExtensionName;
-	SfContactId: string;
-	IdentityUserId?: string;
-};
-
 export const sendEmail = async (
 	stage: Stage,
-	emailMessage: EmailMessage,
+	emailMessage: EmailMessageWithUserId,
 ): Promise<SendMessageCommandOutput> => {
 	const queueName = `braze-emails-${stage}`;
 	const client = new SQSClient(awsConfig);

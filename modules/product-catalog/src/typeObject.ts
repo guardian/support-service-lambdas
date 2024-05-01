@@ -82,8 +82,8 @@ export const typeObject = {
         "Contribution": {}
       },
       "Annual": {
-        "Subscription": {},
-        "Contribution": {}
+        "Contribution": {},
+        "Subscription": {}
       }
     }
   },

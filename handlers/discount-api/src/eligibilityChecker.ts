@@ -1,4 +1,5 @@
 import { sum } from '@modules/arrayFunctions';
+import { ValidationError } from '@modules/errors';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
 import { isNotRemoved } from '@modules/zuora/rateplan';
@@ -8,7 +9,6 @@ import type {
 	ZuoraSubscription,
 } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
-import { ValidationError } from './errors';
 import { getEligibleProductRatePlanIdsForDiscount } from './productToDiscountMapping';
 
 export class EligibilityChecker {

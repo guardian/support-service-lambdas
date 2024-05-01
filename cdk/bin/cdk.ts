@@ -7,14 +7,15 @@ import { DiscountApi } from '../lib/discount-api';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
-import type { StripeWebhookEndpointsProps  } from '../lib/stripe-webhook-endpoints';
-import  { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
+import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -147,23 +148,45 @@ new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
 });
 
 export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
-	stack: "membership",
-	stage: "CODE",
+	stack: 'membership',
+	stage: 'CODE',
 	certificateId: membershipCertificateId,
 	domainName: `stripe-webhook-endpoints-code.${membershipApisDomain}`,
 	hostedZoneId: membershipHostedZoneId,
-
-}
+};
 export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
-	stack: "membership",
-	stage: "PROD",
+	stack: 'membership',
+	stage: 'PROD',
 	certificateId: membershipCertificateId,
-	domainName:  `stripe-webhook-endpoints-prod.${membershipApisDomain}`,
+	domainName: `stripe-webhook-endpoints-prod.${membershipApisDomain}`,
 	hostedZoneId: membershipHostedZoneId,
-}
+};
 
-new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-CODE",stripeWebhookEndpointsCodeProps);
-new StripeWebhookEndpoints(app, "stripe-webhook-endpoints-PROD",stripeWebhookEndpointsProdProps);
+new StripeWebhookEndpoints(
+	app,
+	'stripe-webhook-endpoints-CODE',
+	stripeWebhookEndpointsCodeProps,
+);
+new StripeWebhookEndpoints(
+	app,
+	'stripe-webhook-endpoints-PROD',
+	stripeWebhookEndpointsProdProps,
+);
+
+new ProductSwitchApi(app, 'product-switch-api-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `product-switch-api-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new ProductSwitchApi(app, 'product-switch-api-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `product-switch-api.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
 
 new AlarmsHandler(app, 'alarms-handler-CODE', {
 	stack: 'support',
