@@ -5,6 +5,7 @@ type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
 const appToTeamMappings: Record<string, Team> = {
 	'apps-metering': 'GROWTH',
 	'gchat-test-app': 'SRE',
+	'holiday-stop-api': 'VALUE',
 };
 
 export const getTeam = (appName: string): Team => {
