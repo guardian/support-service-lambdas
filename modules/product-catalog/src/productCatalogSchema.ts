@@ -184,6 +184,70 @@ export const productCatalogSchema = z.object({
 				}),
 				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
+			SupporterPlusWithGuardianWeeklyRowMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
+			}),
+			SupporterPlusWithGuardianWeeklyDomesticMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
+			}),
+			SupporterPlusWithGuardianWeeklyRowAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
+			}),
+			SupporterPlusWithGuardianWeeklyDomesticAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
+			}),
 		}),
 	}),
 	GuardianWeeklyRestOfWorld: z.object({
