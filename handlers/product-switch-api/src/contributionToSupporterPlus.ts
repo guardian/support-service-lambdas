@@ -44,11 +44,11 @@ export const switchToSupporterPlus = async (
 		productSwitchInformation.account.defaultPaymentMethodId,
 	);
 
-	await sendThankYouEmail(paidAmount, productSwitchInformation);
-
-	await sendSalesforceTracking(paidAmount, productSwitchInformation);
-
-	await sendToSupporterProductData(productSwitchInformation);
+	await Promise.allSettled([
+		sendThankYouEmail(paidAmount, productSwitchInformation),
+		sendSalesforceTracking(paidAmount, productSwitchInformation),
+		sendToSupporterProductData(productSwitchInformation),
+	]);
 };
 
 export const previewResponseFromZuoraResponse = (
