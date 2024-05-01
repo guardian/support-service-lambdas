@@ -78,9 +78,22 @@ export const zuoraAccountBasicInfoSchema = z
 		identityId: obj.IdentityId__c,
 	}));
 
+export const billToContactSchema = z.object({
+	firstName: z.string(),
+	lastName: z.string(),
+	workEmail: z.string(),
+});
+
+export const billingAndPaymentSchema = z.object({
+	currency: z.string(),
+	defaultPaymentMethodId: z.string(),
+});
+
 export const zuoraAccountSchema = z.object({
 	success: z.boolean(),
 	basicInfo: zuoraAccountBasicInfoSchema,
+	billingAndPayment: billingAndPaymentSchema,
+	billToContact: billToContactSchema,
 });
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 
@@ -102,7 +115,15 @@ export const zuoraSuccessResponseSchema = z.object({
 	success: z.boolean(),
 });
 
+export const zuoraUpperCaseSuccessResponseSchema = z.object({
+	Success: z.boolean(),
+});
+
 export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
+
+export type ZuoraUpperCaseSuccessResponse = z.infer<
+	typeof zuoraUpperCaseSuccessResponseSchema
+>;
 
 // --------------- Billing preview ---------------
 export const billingPreviewSchema = z.object({
@@ -141,3 +162,35 @@ export const addDiscountPreviewSchema = z.object({
 });
 
 export type AddDiscountPreview = z.infer<typeof addDiscountPreviewSchema>;
+
+// --------------- Invoice Items ---------------
+export const getInvoiceSchema = z.object({
+	success: z.boolean(),
+	id: z.string(),
+	amount: z.number(),
+	amountWithoutTax: z.number(),
+});
+
+export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
+
+export const getInvoiceItemsSchema = z.object({
+	success: z.boolean(),
+	invoiceItems: z.array(
+		z.object({
+			id: z.string(),
+			productRatePlanChargeId: z.string(),
+		}),
+	),
+});
+
+export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
+
+// --------------- Invoice Item Adjustment ---------------
+export const invoiceItemAdjustmentResultSchema = z.object({
+	Success: z.boolean(),
+	Id: z.string().optional(),
+});
+
+export type InvoiceItemAdjustmentResult = z.infer<
+	typeof invoiceItemAdjustmentResultSchema
+>;

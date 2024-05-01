@@ -3,7 +3,7 @@
  *
  * @group integration
  */
-import type { EmailMessage } from '@modules/email/email';
+import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 
 test('Email', async () => {
@@ -17,7 +17,7 @@ test('Email', async () => {
 		day: 'numeric',
 	};
 
-	const emailMessage: EmailMessage = {
+	const emailMessage: EmailMessageWithUserId = {
 		To: {
 			Address: emailAddress,
 			ContactAttributes: {

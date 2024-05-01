@@ -1,0 +1,1975 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The Product switch api stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "productswitchapilambdaproductswitchapiCODEEndpointB7C773CB": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "productswitchapilambdaproductswitchapiCODEDeploymentStageCODE68551BAF",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+        },
+        "Stage": {
+          "Ref": "productswitchapilambdaproductswitchapiCODEDeploymentStageCODE68551BAF",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "product-switch-api.code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "product-switch-api.code.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "S3inlinepolicy3B07399A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/product-switch-api/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSpolicy09999EF2": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":braze-emails-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":supporter-product-data-CODE",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSpolicy09999EF2",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SecretsManagerpolicy7194A9CE": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "productswitchapilambdaDA3EBA76": {
+      "DependsOn": [
+        "productswitchapilambdaServiceRoleDefaultPolicy0CFB917A",
+        "productswitchapilambdaServiceRole4826BDA0",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/CODE/product-switch-api/product-switch-api.zip",
+        },
+        "Description": "An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo",
+        "Environment": {
+          "Variables": {
+            "APP": "product-switch-api",
+            "App": "product-switch-api",
+            "STACK": "membership",
+            "STAGE": "CODE",
+            "Stack": "membership",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "product-switch-api-CODE",
+        "Handler": "index.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaServiceRole4826BDA0",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "productswitchapilambdaServiceRole4826BDA0": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "productswitchapilambdaServiceRoleDefaultPolicy0CFB917A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/CODE/product-switch-api/product-switch-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/product-switch-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/product-switch-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "productswitchapilambdaServiceRoleDefaultPolicy0CFB917A",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "productswitchapilambdaproductswitchapiCODE34905765": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway endpoint for the product-switch-api-CODE lambda",
+        "Name": "product-switch-api-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "productswitchapilambdaproductswitchapiCODEANY9F9E62A7": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "productswitchapilambdaDA3EBA76",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaproductswitchapiCODE34905765",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "productswitchapilambdaproductswitchapiCODEANYApiPermissionTestproductswitchapiCODEproductswitchapilambdaproductswitchapiCODE477804E3ANY37AC1BE5": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaDA3EBA76",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productswitchapilambdaproductswitchapiCODEANYApiPermissionproductswitchapiCODEproductswitchapilambdaproductswitchapiCODE477804E3ANY13F7788F": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaDA3EBA76",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+              },
+              "/",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiCODEDeploymentStageCODE68551BAF",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productswitchapilambdaproductswitchapiCODEAccountB2E10ADA": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "productswitchapilambdaproductswitchapiCODE34905765",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaproductswitchapiCODECloudWatchRole34DBE4A2",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "productswitchapilambdaproductswitchapiCODECloudWatchRole34DBE4A2": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "productswitchapilambdaproductswitchapiCODEDeployment4EE627F93aeea53542802ca6e90fed8e74be15e1": {
+      "DependsOn": [
+        "productswitchapilambdaproductswitchapiCODEproxyANYA8660462",
+        "productswitchapilambdaproductswitchapiCODEproxy466471EA",
+        "productswitchapilambdaproductswitchapiCODEANY9F9E62A7",
+      ],
+      "Properties": {
+        "Description": "API Gateway endpoint for the product-switch-api-CODE lambda",
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "productswitchapilambdaproductswitchapiCODEDeploymentStageCODE68551BAF": {
+      "DependsOn": [
+        "productswitchapilambdaproductswitchapiCODEAccountB2E10ADA",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODEDeployment4EE627F93aeea53542802ca6e90fed8e74be15e1",
+        },
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "productswitchapilambdaproductswitchapiCODEUsagePlan9D7B871F": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+            },
+            "Stage": {
+              "Ref": "productswitchapilambdaproductswitchapiCODEDeploymentStageCODE68551BAF",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for product-switch-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "product-switch-api-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "productswitchapilambdaproductswitchapiCODEUsagePlanUsagePlanKeyResourceproductswitchapiCODEproductswitchapilambdaproductswitchapiCODEproductswitchapikeyCODE8A63FAB12A6405BE": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODEproductswitchapikeyCODE941693A7",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODEUsagePlan9D7B871F",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "productswitchapilambdaproductswitchapiCODEproductswitchapikeyCODE941693A7": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "product-switch-api-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+            },
+            "StageName": {
+              "Ref": "productswitchapilambdaproductswitchapiCODEDeploymentStageCODE68551BAF",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "productswitchapilambdaproductswitchapiCODEproxy466471EA": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaproductswitchapiCODE34905765",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "productswitchapilambdaproductswitchapiCODEproxyANYA8660462": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "productswitchapilambdaDA3EBA76",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODEproxy466471EA",
+        },
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "productswitchapilambdaproductswitchapiCODEproxyANYApiPermissionTestproductswitchapiCODEproductswitchapilambdaproductswitchapiCODE477804E3ANYproxy19DF98FD": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaDA3EBA76",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productswitchapilambdaproductswitchapiCODEproxyANYApiPermissionproductswitchapiCODEproductswitchapilambdaproductswitchapiCODE477804E3ANYproxy7FDFB323": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaDA3EBA76",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
+              },
+              "/",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiCODEDeploymentStageCODE68551BAF",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+  },
+}
+`;
+
+exports[`The Product switch api stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuAlarm",
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "productswitchapilambdaproductswitchapiPRODEndpoint5B2FCAD0": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "productswitchapilambdaproductswitchapiPRODDeploymentStagePROD78B3DEEF",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGateway5XXAlarmCDK11905206": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - Product switch api returned a 500 response, please check the logs to diagnose the issue.. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "PRODUCT-SWITCH-API-PROD API gateway 5XX response",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "product-switch-api-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+        },
+        "Stage": {
+          "Ref": "productswitchapilambdaproductswitchapiPRODDeploymentStagePROD78B3DEEF",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "product-switch-api.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "product-switch-api.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "ProductSwitchFailureAlarm3912A544": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - Product switch lambda failed, please check the logs to diagnose the issue.. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "PRODUCT-SWITCH-API-PROD An error occurred in the Product Switch lambda",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "productswitchapilambdaDA3EBA76",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "S3inlinepolicy3B07399A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/product-switch-api/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSpolicy09999EF2": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":braze-emails-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":supporter-product-data-PROD",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSpolicy09999EF2",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SecretsManagerpolicy7194A9CE": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "productswitchapilambdaDA3EBA76": {
+      "DependsOn": [
+        "productswitchapilambdaServiceRoleDefaultPolicy0CFB917A",
+        "productswitchapilambdaServiceRole4826BDA0",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/PROD/product-switch-api/product-switch-api.zip",
+        },
+        "Description": "An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo",
+        "Environment": {
+          "Variables": {
+            "APP": "product-switch-api",
+            "App": "product-switch-api",
+            "STACK": "membership",
+            "STAGE": "PROD",
+            "Stack": "membership",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "product-switch-api-PROD",
+        "Handler": "index.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaServiceRole4826BDA0",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "productswitchapilambdaServiceRole4826BDA0": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "productswitchapilambdaServiceRoleDefaultPolicy0CFB917A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/PROD/product-switch-api/product-switch-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/product-switch-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/product-switch-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "productswitchapilambdaServiceRoleDefaultPolicy0CFB917A",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "productswitchapilambdaproductswitchapiPROD165D4330": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway endpoint for the product-switch-api-PROD lambda",
+        "Name": "product-switch-api-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "productswitchapilambdaproductswitchapiPRODANY623BDD80": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "productswitchapilambdaDA3EBA76",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaproductswitchapiPROD165D4330",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "productswitchapilambdaproductswitchapiPRODANYApiPermissionTestproductswitchapiPRODproductswitchapilambdaproductswitchapiPROD6EB8F51BANY7F24F02B": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaDA3EBA76",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productswitchapilambdaproductswitchapiPRODANYApiPermissionproductswitchapiPRODproductswitchapilambdaproductswitchapiPROD6EB8F51BANY03915820": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaDA3EBA76",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+              },
+              "/",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiPRODDeploymentStagePROD78B3DEEF",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productswitchapilambdaproductswitchapiPRODAccount339EE68B": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "productswitchapilambdaproductswitchapiPROD165D4330",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaproductswitchapiPRODCloudWatchRoleC0B8C810",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "productswitchapilambdaproductswitchapiPRODCloudWatchRoleC0B8C810": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E10b3d9ec051db83c05137457d9ec752a": {
+      "DependsOn": [
+        "productswitchapilambdaproductswitchapiPRODproxyANY4B70B834",
+        "productswitchapilambdaproductswitchapiPRODproxy05CF61E1",
+        "productswitchapilambdaproductswitchapiPRODANY623BDD80",
+      ],
+      "Properties": {
+        "Description": "API Gateway endpoint for the product-switch-api-PROD lambda",
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "productswitchapilambdaproductswitchapiPRODDeploymentStagePROD78B3DEEF": {
+      "DependsOn": [
+        "productswitchapilambdaproductswitchapiPRODAccount339EE68B",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E10b3d9ec051db83c05137457d9ec752a",
+        },
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "productswitchapilambdaproductswitchapiPRODUsagePlan898BB5E2": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+            },
+            "Stage": {
+              "Ref": "productswitchapilambdaproductswitchapiPRODDeploymentStagePROD78B3DEEF",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for product-switch-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "product-switch-api-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "productswitchapilambdaproductswitchapiPRODUsagePlanUsagePlanKeyResourceproductswitchapiPRODproductswitchapilambdaproductswitchapiPRODproductswitchapikeyPROD849378FDA76DA754": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "productswitchapilambdaproductswitchapiPRODproductswitchapikeyPROD0BCED55B",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "productswitchapilambdaproductswitchapiPRODUsagePlan898BB5E2",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "productswitchapilambdaproductswitchapiPRODproductswitchapikeyPROD0BCED55B": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "product-switch-api-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+            },
+            "StageName": {
+              "Ref": "productswitchapilambdaproductswitchapiPRODDeploymentStagePROD78B3DEEF",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "productswitchapilambdaproductswitchapiPRODproxy05CF61E1": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaproductswitchapiPROD165D4330",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "productswitchapilambdaproductswitchapiPRODproxyANY4B70B834": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "productswitchapilambdaDA3EBA76",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "productswitchapilambdaproductswitchapiPRODproxy05CF61E1",
+        },
+        "RestApiId": {
+          "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "productswitchapilambdaproductswitchapiPRODproxyANYApiPermissionTestproductswitchapiPRODproductswitchapilambdaproductswitchapiPROD6EB8F51BANYproxyF5C6ED92": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaDA3EBA76",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "productswitchapilambdaproductswitchapiPRODproxyANYApiPermissionproductswitchapiPRODproductswitchapilambdaproductswitchapiPROD6EB8F51BANYproxy63FCE54C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "productswitchapilambdaDA3EBA76",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
+              },
+              "/",
+              {
+                "Ref": "productswitchapilambdaproductswitchapiPRODDeploymentStagePROD78B3DEEF",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+  },
+}
+`;
