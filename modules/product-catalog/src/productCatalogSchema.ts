@@ -184,7 +184,7 @@ export const productCatalogSchema = z.object({
 				}),
 				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
-			SupporterPlusWithGuardianWeeklyRowMonthly: z.object({
+			GuardianWeeklyRestOfWorldMonthly: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
@@ -200,7 +200,7 @@ export const productCatalogSchema = z.object({
 				}),
 				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
-			SupporterPlusWithGuardianWeeklyDomesticMonthly: z.object({
+			GuardianWeeklyDomesticMonthly: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
@@ -216,7 +216,7 @@ export const productCatalogSchema = z.object({
 				}),
 				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
-			SupporterPlusWithGuardianWeeklyRowAnnual: z.object({
+			GuardianWeeklyRestOfWorldAnnual: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
@@ -232,7 +232,7 @@ export const productCatalogSchema = z.object({
 				}),
 				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
-			SupporterPlusWithGuardianWeeklyDomesticAnnual: z.object({
+			GuardianWeeklyDomesticAnnual: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
