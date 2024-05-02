@@ -4,6 +4,10 @@ type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
 
 const appToTeamMappings: Record<string, Team> = {
 	'apps-metering': 'GROWTH',
+	'dotcom-components': 'GROWTH',
+	'admin-console': 'GROWTH',
+	'promotions-tool': 'GROWTH',
+
 	'gchat-test-app': 'SRE',
 };
 
