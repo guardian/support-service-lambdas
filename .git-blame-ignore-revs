@@ -3,3 +3,6 @@
 
 # Scala Steward: Reformat with scalafmt 3.7.3
 3762f958c7c105f0421d9791cf60516055dad0f3
+
+# Reformat with prettier
+c7065a7fd22fc65c30d5c71f7ce819e84133be1b
