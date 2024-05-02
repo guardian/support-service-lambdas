@@ -13,7 +13,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.Subscripti
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
-import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROW6for6, GuardianWeeklyROWQuarterly}
+import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomesticMonthly, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROWMonthly, GuardianWeeklyROWQuarterly}
 import com.gu.newproduct.api.productcatalog._
 import com.gu.paperround.client.{GetAgents, PaperRoundConfig, PaperRoundRestRequestMaker}
 import com.gu.util.Logging
@@ -166,8 +166,6 @@ object Steps {
         createSubscription,
         awsSQSSend,
         EmailQueueName,
-        GuardianWeeklyDomestic6for6,
-        GuardianWeeklyDomesticQuarterly,
       )
 
       guardianWeeklyROWStep = AddGuardianWeeklySub.wireSteps(
@@ -179,8 +177,6 @@ object Steps {
         createSubscription,
         awsSQSSend,
         EmailQueueName,
-        GuardianWeeklyROW6for6,
-        GuardianWeeklyROWQuarterly,
       )
 
       addSubSteps = new handleRequest(

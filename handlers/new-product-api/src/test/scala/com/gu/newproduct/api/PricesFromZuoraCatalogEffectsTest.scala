@@ -79,8 +79,8 @@ object ProductsData {
   )
   val gw = Set(
     GuardianWeeklyROWQuarterly,
-    GuardianWeeklyDomestic6for6,
-    GuardianWeeklyROW6for6,
+    GuardianWeeklyDomesticMonthly,
+    GuardianWeeklyROWMonthly,
     GuardianWeeklyROWAnnual,
     GuardianWeeklyDomesticQuarterly,
     GuardianWeeklyDomesticAnnual,
