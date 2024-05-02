@@ -108,35 +108,29 @@ object ZuoraIds {
   }
 
   case class GuardianWeeklyDomesticIds(
-      sixForSix: PlanAndCharge,
+      monthly: ProductRatePlanId,
       quarterly: ProductRatePlanId,
       annual: ProductRatePlanId,
   ) {
     val zuoraRatePlanIdByApiPlanId = Map(
-      GuardianWeeklyDomestic6for6 -> sixForSix.productRatePlanId,
+      GuardianWeeklyDomesticMonthly -> monthly,
       GuardianWeeklyDomesticQuarterly -> quarterly,
       GuardianWeeklyDomesticAnnual -> annual,
     )
     val zuoraRatePlanIdToApiPlanId = zuoraRatePlanIdByApiPlanId.map(_.swap)
-    val planAndChargeByApiPlanId = Map(
-      GuardianWeeklyDomestic6for6 -> sixForSix,
-    )
   }
 
   case class GuardianWeeklyROWIds(
-      sixForSix: PlanAndCharge,
+      monthly: ProductRatePlanId,
       quarterly: ProductRatePlanId,
       annual: ProductRatePlanId,
   ) {
     val zuoraRatePlanIdByApiPlanId = Map(
-      GuardianWeeklyROW6for6 -> sixForSix.productRatePlanId,
+      GuardianWeeklyROWMonthly -> monthly,
       GuardianWeeklyROWQuarterly -> quarterly,
       GuardianWeeklyROWAnnual -> annual,
     )
     val apiPlanIdZuoraRatePlanIdBy = zuoraRatePlanIdByApiPlanId.map(_.swap)
-    val planAndChargeByApiPlanId = Map(
-      GuardianWeeklyROW6for6 -> sixForSix,
-    )
   }
 
   case class DigitalVoucherZuoraIds(
@@ -205,9 +199,7 @@ object ZuoraIds {
 
     def apiIdToPlanAndCharge: Map[PlanId, HasPlanAndChargeIds] =
       supporterPlusZuoraIds.planAndChargeByApiPlanId ++
-        contributionsZuoraIds.planAndChargeByApiPlanId ++
-        guardianWeeklyDomestic.planAndChargeByApiPlanId ++
-        guardianWeeklyROW.planAndChargeByApiPlanId
+        contributionsZuoraIds.planAndChargeByApiPlanId
 
   }
 
@@ -276,18 +268,12 @@ object ZuoraIds {
           annual = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4e972204"),
         ),
         GuardianWeeklyDomesticIds(
-          sixForSix = PlanAndCharge(
-            ProductRatePlanId("2c92a0086619bf8901661aaac94257fe"),
-            ProductRatePlanChargeId("2c92a0086619bf8901661aaac95d5800"),
-          ),
+          monthly = ProductRatePlanId("2c92a0fd79ac64b00179ae3f9d474960"),
           quarterly = ProductRatePlanId("2c92a0fe6619b4b301661aa494392ee2"),
           annual = ProductRatePlanId("2c92a0fe6619b4b901661aa8e66c1692"),
         ),
         GuardianWeeklyROWIds(
-          sixForSix = PlanAndCharge(
-            ProductRatePlanId("2c92a0086619bf8901661ab545f51b21"),
-            ProductRatePlanChargeId("2c92a0086619bf8901661ab546091b23"),
-          ),
+          monthly = ProductRatePlanId("2c92a0ff79ac64e30179ae45669b3a83"),
           quarterly = ProductRatePlanId("2c92a0086619bf8901661ab02752722f"),
           annual = ProductRatePlanId("2c92a0fe6619b4b601661ab300222651"),
         ),
@@ -369,18 +355,12 @@ object ZuoraIds {
           annual = ProductRatePlanId("2c92c0f94bbffaaa014bc6a4212e205b"),
         ),
         GuardianWeeklyDomesticIds(
-          sixForSix = PlanAndCharge(
-            ProductRatePlanId("2c92c0f965f212210165f69b94c92d66"),
-            ProductRatePlanChargeId("2c92c0f865f204440165f69f407d66f1"),
-          ),
+          monthly = ProductRatePlanId("2c92c0f878ac40300178acaa04bb401d"),
           quarterly = ProductRatePlanId("2c92c0f965dc30640165f150c0956859"),
           annual = ProductRatePlanId("2c92c0f965d280590165f16b1b9946c2"),
         ),
         GuardianWeeklyROWIds(
-          sixForSix = PlanAndCharge(
-            ProductRatePlanId("2c92c0f965f2122101660fbc75a16c38"),
-            ProductRatePlanChargeId("2c92c0f965f2122101660fbc75ba6c3c"),
-          ),
+          monthly = ProductRatePlanId("2c92c0f878ac402c0178acb3a90a3620"),
           quarterly = ProductRatePlanId("2c92c0f965f2122101660fb81b745a06"),
           annual = ProductRatePlanId("2c92c0f965f2122101660fb33ed24a45"),
         ),
