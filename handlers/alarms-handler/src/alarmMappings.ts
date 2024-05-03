@@ -7,6 +7,8 @@ const appToTeamMappings: Record<string, Team> = {
 	'dotcom-components': 'GROWTH',
 	'admin-console': 'GROWTH',
 	'promotions-tool': 'GROWTH',
+	'price-migration-engine-state-machine': 'GROWTH',
+	'support-reminders': 'GROWTH',
 
 	'gchat-test-app': 'SRE',
 	'holiday-stop-api': 'VALUE',
