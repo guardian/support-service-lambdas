@@ -8,7 +8,7 @@ const webhookMappings = buildWebhookMappings();
 const alarmMessageSchema = z.object({
 	AlarmArn: z.string(),
 	AlarmName: z.string(),
-	AlarmDescription: z.string().optional(),
+	AlarmDescription: z.string().nullish(),
 	NewStateReason: z.string(),
 });
 
@@ -58,6 +58,7 @@ const parseMessage = (message: string): AlarmMessage | null => {
 	try {
 		return alarmMessageSchema.parse(JSON.parse(message));
 	} catch (error) {
+		console.log('Failed to parse cloudwatch alarm:', error);
 		return null;
 	}
 };
