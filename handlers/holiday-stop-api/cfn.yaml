@@ -391,6 +391,7 @@ Resources:
           !Sub
             - 5XX rate from ${ApiName}
             - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        AlarmDescription: Holiday stop API exceeded the allowed 5XX error rate
         ComparisonOperator: GreaterThanThreshold
         Dimensions:
           - Name: ApiName
