@@ -9,6 +9,7 @@ const appToTeamMappings: Record<string, Team> = {
 	'promotions-tool': 'GROWTH',
 
 	'gchat-test-app': 'SRE',
+	'holiday-stop-api': 'VALUE',
 };
 
 export const getTeam = (appName: string): Team => {
