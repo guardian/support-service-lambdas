@@ -238,7 +238,7 @@ Resources:
       - LambdaFunction
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to run
       AlarmDescription: >
         Five or more runs found an error and were unable to complete.
@@ -263,7 +263,7 @@ Resources:
       - LambdaFunctionIAP
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
       AlarmName: !Sub soft-opt-in-consent-setter-IAP-${Stage} threw an exception
       AlarmDescription: >
         Five or more runs found an error and were unable to complete.
@@ -286,7 +286,7 @@ Resources:
     Condition: IsProd
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
       AlarmName: !Sub soft-opt-in-consent-setter-IAP-${Stage} failed to run and sent the message to the dead letter queue.
       AlarmDescription: >
         Five or more runs found an error and were unable to complete.
@@ -311,7 +311,7 @@ Resources:
       - LambdaFunction
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to update Salesforce records
       AlarmDescription: >
         A run failed to update (some) records in Salesforce in the last hour.
@@ -336,7 +336,7 @@ Resources:
       - LambdaFunction
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
       AlarmName: !Sub soft-opt-in-consent-setter-${Stage} failed to update the Dynamo logging table.
       AlarmDescription: >
         A run failed to update (some) records in Salesforce in the last hour.

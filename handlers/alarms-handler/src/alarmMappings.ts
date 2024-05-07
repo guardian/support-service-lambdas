@@ -11,7 +11,9 @@ const appToTeamMappings: Record<string, Team> = {
 	'support-reminders': 'GROWTH',
 
 	'gchat-test-app': 'SRE',
+
 	'holiday-stop-api': 'VALUE',
+	'soft-opt-in-consent-setter': 'VALUE',
 };
 
 export const getTeam = (appName: string): Team => {
