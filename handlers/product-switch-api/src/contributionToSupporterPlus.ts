@@ -30,10 +30,12 @@ export type PreviewResponse = {
 	nextPaymentDate: string;
 };
 
+export type SwitchResponse = { message: string };
+
 export const switchToSupporterPlus = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
-): Promise<void> => {
+): Promise<SwitchResponse> => {
 	const switchResponse = await doSwitch(zuoraClient, productSwitchInformation);
 
 	const paidAmount = await takePaymentOrAdjustInvoice(
@@ -49,6 +51,9 @@ export const switchToSupporterPlus = async (
 		sendSalesforceTracking(paidAmount, productSwitchInformation),
 		sendToSupporterProductData(productSwitchInformation),
 	]);
+	return {
+		message: `Product move completed successfully with subscription number ${productSwitchInformation.subscription.subscriptionNumber} and switch type recurring-contribution-to-supporter-plus`,
+	};
 };
 
 export const previewResponseFromZuoraResponse = (
