@@ -103,23 +103,27 @@ object Handler extends Logging {
           idGenerator,
           FulfilmentDatesFetcher(fetchString, Stage()),
           PreviewPublications.preview,
-        )(
+        ).handleWithSalesforce(
           request,
           sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers)),
         ),
     )
   }
 
+  trait HandlerWithSalesforce {
+    def handleWithSalesforce(request: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse
+  }
+
   private def validateRequestAndCreateSteps(
-      request: ApiGatewayRequest,
-      getAccessToken: () => Either[ApiFailure, AccessToken],
-      getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
-      getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
-      idGenerator: => String,
-      fulfilmentDatesFetcher: FulfilmentDatesFetcher,
-      previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
-  ) = {
-    (for {
+    request: ApiGatewayRequest,
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+    idGenerator: => String,
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher,
+    previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
+  ): HandlerWithSalesforce = {
+    val failureOrSfRequest = for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
     } yield createSteps(
@@ -131,12 +135,12 @@ object Handler extends Logging {
       idGenerator,
       fulfilmentDatesFetcher,
       previewPublications,
-    )).fold(
-      { errorMessage: String =>
-        badrequest(errorMessage) _
-      },
-      identity,
     )
+
+    failureOrSfRequest match {
+      case Left(errorMessage) => badrequest(errorMessage)
+      case Right(steps) => steps
+    }
   }
 
   private def validateMethod(method: Option[String]): Either[String, String] = {
@@ -162,42 +166,42 @@ object Handler extends Logging {
       idGenerator: => String,
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
-  ) = {
+  ): HandlerWithSalesforce = {
     path match {
       case "potential" :: _ :: Nil =>
         httpMethod match {
           case "GET" => stepsForPotentialHolidayStop(getAccessToken, getSubscription, getAccount, previewPublications) _
-          case _ => unsupported _
+          case _ => unsupported
         }
       case "hsr" :: Nil =>
         httpMethod match {
           case "POST" => stepsToCreate(getAccessToken, getSubscription, getAccount) _
-          case _ => unsupported _
+          case _ => unsupported
         }
       case "bulk-hsr" :: Nil =>
         httpMethod match {
           case "POST" => stepsToBulkCreate(getAccessToken, getSubscription, getAccount) _
-          case _ => unsupported _
+          case _ => unsupported
         }
       case "hsr" :: _ :: Nil =>
         httpMethod match {
           case "GET" => stepsToListExisting(getAccessToken, getSubscription, getAccount, fulfilmentDatesFetcher) _
-          case _ => unsupported _
+          case _ => unsupported
         }
       case "hsr" :: _ :: "cancel" :: Nil =>
         httpMethod match {
           case "POST" => stepsToCancel(idGenerator) _
           case "GET" => stepsToGetCancellationDetails(idGenerator) _
-          case _ => unsupported _
+          case _ => unsupported
         }
       case "hsr" :: _ :: _ :: Nil =>
         httpMethod match {
           case "PATCH" => stepsToAmend(getAccessToken, getSubscription, getAccount) _
           case "DELETE" => stepsToWithdraw _
-          case _ => unsupported _
+          case _ => unsupported
         }
       case _ =>
-        notfound _
+        notfound
     }
   }
 
@@ -609,14 +613,12 @@ object Handler extends Logging {
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
-  def unsupported(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
-    ApiGatewayResponse.badRequest("UNSUPPORTED HTTP METHOD")
+  val unsupported: HandlerWithSalesforce =
+    (req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]) => ApiGatewayResponse.badRequest("UNSUPPORTED HTTP METHOD")
 
-  def notfound(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
-    ApiGatewayResponse.notFound("Not Found")
+  val notfound: HandlerWithSalesforce =
+    (req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]) => ApiGatewayResponse.notFound("Not Found")
 
-  def badrequest(
-      message: String,
-  )(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
-    ApiGatewayResponse.badRequest(message)
+  def badrequest(message: String): HandlerWithSalesforce =
+    (request: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]) => ApiGatewayResponse.badRequest(message)
 }
