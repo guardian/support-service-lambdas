@@ -3,12 +3,21 @@
  *
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
+import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
+import {
+	zuoraAccountSchema,
+	zuoraSubscriptionSchema,
+} from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { previewResponseFromZuoraResponse } from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
 import type { ProductSwitchRequestBody } from '../src/schemas';
 import { productSwitchRequestSchema } from '../src/schemas';
+import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
 import { parseUrlPath } from '../src/urlParsing';
+import accountJson from './fixtures/account.json';
+import catalogJson from './fixtures/product-catalog.json';
+import subscriptionJson from './fixtures/subscription.json';
 
 test('request body serialisation', () => {
 	const result: ProductSwitchRequestBody = productSwitchRequestSchema.parse({
@@ -50,6 +59,24 @@ test('url parsing', () => {
 	}).toThrow(
 		"Couldn't parse switch type and subscription number from url /recurring-contribution-to-supporter-plus/A-S00504165",
 	);
+});
+
+test('startNewTerm is only true when the termStartDate is before today', () => {
+	const today = dayjs('2024-05-09');
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
+	const account = zuoraAccountSchema.parse(accountJson);
+	const productCatalog = productCatalogSchema.parse(catalogJson);
+
+	const switchInformation = getSwitchInformationWithOwnerCheck(
+		'CODE',
+		{ price: 95, preview: false },
+		subscription,
+		account,
+		productCatalog,
+		'105368983',
+		today,
+	);
+	expect(switchInformation.startNewTerm).toEqual(false);
 });
 
 test('preview amounts are correct', () => {

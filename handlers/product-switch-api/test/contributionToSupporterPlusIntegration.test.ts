@@ -6,6 +6,8 @@
 import console from 'console';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { zuoraDateFormat } from '@modules/zuora/common';
+import { getAccount } from '@modules/zuora/getAccount';
+import { getSubscription } from '@modules/zuora/getSubscription';
 import { createPayment } from '@modules/zuora/payment';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -29,14 +31,16 @@ describe('product-switching behaviour', () => {
 		const input = { price: 20, preview: true };
 		const zuoraClient = await ZuoraClient.create(stage);
 		const productCatalog = await getProductCatalogFromApi(stage);
+		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+		const account = await getAccount(zuoraClient, subscription.accountNumber);
 
-		const switchInformation = await getSwitchInformationWithOwnerCheck(
+		const switchInformation = getSwitchInformationWithOwnerCheck(
 			stage,
 			input,
-			zuoraClient,
+			subscription,
+			account,
 			productCatalog,
 			identityId,
-			subscriptionNumber,
 		);
 
 		const result = await preview(zuoraClient, switchInformation);
@@ -49,14 +53,16 @@ describe('product-switching behaviour', () => {
 		const input = { price: 120, preview: true };
 		const zuoraClient = await ZuoraClient.create('CODE');
 		const productCatalog = await getProductCatalogFromApi('CODE');
+		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+		const account = await getAccount(zuoraClient, subscription.accountNumber);
 
-		const switchInformation = await getSwitchInformationWithOwnerCheck(
+		const switchInformation = getSwitchInformationWithOwnerCheck(
 			stage,
 			input,
-			zuoraClient,
+			subscription,
+			account,
 			productCatalog,
 			identityId,
-			subscriptionNumber,
 		);
 
 		const result = await preview(zuoraClient, switchInformation);
@@ -77,13 +83,19 @@ describe('product-switching behaviour', () => {
 			const input = { price: 10, preview: false };
 			const zuoraClient = await ZuoraClient.create('CODE');
 			const productCatalog = await getProductCatalogFromApi('CODE');
-			const switchInformation = await getSwitchInformationWithOwnerCheck(
+			const subscription = await getSubscription(
+				zuoraClient,
+				subscriptionNumber,
+			);
+			const account = await getAccount(zuoraClient, subscription.accountNumber);
+
+			const switchInformation = getSwitchInformationWithOwnerCheck(
 				stage,
 				input,
-				zuoraClient,
+				subscription,
+				account,
 				productCatalog,
 				identityId,
-				subscriptionNumber,
 			);
 
 			const response = await doSwitch(zuoraClient, switchInformation);
