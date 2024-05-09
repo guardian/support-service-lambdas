@@ -25,6 +25,7 @@ export class BatchEmailSender extends GuStack {
         // ---- Miscellaneous constants ---- //
         const isProd = this.stage === 'PROD';
         const app = "batch-email-sender";
+        const alarmTopic = 'alarms-handler-topic-PROD';
 
 
         // ---- API-triggered lambda functions ---- //
@@ -95,7 +96,7 @@ export class BatchEmailSender extends GuStack {
             evaluationPeriods: 1,
             threshold: 1,
             actionsEnabled: isProd,
-            snsTopicName: "retention-dev",
+            snsTopicName: alarmTopic,
             comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
             metric: new Metric({
                 metricName: "5XXError",
@@ -115,7 +116,7 @@ export class BatchEmailSender extends GuStack {
             evaluationPeriods: 1,
             threshold: 1,
             actionsEnabled: isProd,
-            snsTopicName: "retention-dev",
+            snsTopicName: alarmTopic,
             comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
             metric: new Metric({
                 metricName: "Errors",
