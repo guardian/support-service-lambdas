@@ -8,10 +8,12 @@ import type {
 } from '@modules/product-catalog/productCatalog';
 import { isValidProductCurrency } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
-import { getAccount } from '@modules/zuora/getAccount';
-import { getSubscription } from '@modules/zuora/getSubscription';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { RatePlan, ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
+import type {
+	RatePlan,
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/zuoraSchemas';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { CatalogInformation } from './catalogInformation';
 import { getCatalogInformation } from './catalogInformation';
@@ -46,11 +48,7 @@ export type SwitchInformation = {
 	catalog: CatalogInformation;
 };
 
-const getAccountInformation = async (
-	zuoraClient: ZuoraClient,
-	accountNumber: string,
-): Promise<AccountInformation> => {
-	const account = await getAccount(zuoraClient, accountNumber);
+const getAccountInformation = (account: ZuoraAccount): AccountInformation => {
 	return {
 		id: account.basicInfo.id,
 		identityId: account.basicInfo.identityId,
@@ -96,29 +94,26 @@ const getCurrency = (
 };
 
 // Gets a subscription from Zuora and checks that it is owned by currently logged-in user
-export const getSwitchInformationWithOwnerCheck = async (
+export const getSwitchInformationWithOwnerCheck = (
 	stage: Stage,
 	input: ProductSwitchRequestBody,
-	zuoraClient: ZuoraClient,
+	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
 	productCatalog: ProductCatalog,
-	identityId: string,
-	subscriptionNumber: string,
-): Promise<SwitchInformation> => {
+	identityIdFromRequest: string,
+	today: Dayjs = dayjs(),
+): SwitchInformation => {
 	console.log(
-		`Checking subscription ${subscriptionNumber} is owned by the currently logged in user`,
+		`Checking subscription ${subscription.subscriptionNumber} is owned by the currently logged in user`,
 	);
-	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-	const userInformation = await getAccountInformation(
-		zuoraClient,
-		subscription.accountNumber,
-	);
-	if (userInformation.identityId !== identityId) {
+	const userInformation = getAccountInformation(account);
+	if (userInformation.identityId !== identityIdFromRequest) {
 		throw new ValidationError(
-			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityId}`,
+			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityIdFromRequest}`,
 		);
 	}
 	console.log(
-		`Subscription ${subscriptionNumber} is owned by identity user ${identityId}`,
+		`Subscription ${subscription.subscriptionNumber} is owned by identity user ${identityIdFromRequest}`,
 	);
 
 	const contributionRatePlan = getFirstContributionRatePlan(
@@ -156,7 +151,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 		billingPeriod,
 	};
 
-	const startNewTerm = !dayjs(subscription.termStartDate).isSame(dayjs());
+	const startNewTerm = dayjs(subscription.termStartDate).isBefore(today);
 
 	return {
 		stage,

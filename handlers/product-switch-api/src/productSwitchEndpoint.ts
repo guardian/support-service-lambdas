@@ -1,6 +1,9 @@
 import { checkDefined } from '@modules/nullAndUndefined';
+import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
+import { getAccount } from '@modules/zuora/getAccount';
+import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
@@ -21,15 +24,18 @@ export const contributionToSupporterPlusEndpoint = async (
 	console.log('Loading the product catalog');
 	const productCatalog = await getProductCatalogFromApi(stage);
 	const input = productSwitchRequestSchema.parse(JSON.parse(body));
-	console.log('Getting the subscription details from Zuora');
+	console.log(`Request body is ${prettyPrint(input)}`);
+	console.log('Getting the subscription and account details from Zuora');
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
 
-	const switchInformation = await getSwitchInformationWithOwnerCheck(
+	const switchInformation = getSwitchInformationWithOwnerCheck(
 		stage,
 		input,
-		zuoraClient,
+		subscription,
+		account,
 		productCatalog,
 		identityId,
-		subscriptionNumber,
 	);
 	const response = input.preview
 		? await preview(zuoraClient, switchInformation)
