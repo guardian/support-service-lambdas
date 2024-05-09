@@ -103,6 +103,8 @@ object Handler extends Logging {
           idGenerator,
           FulfilmentDatesFetcher(fetchString, Stage()),
           PreviewPublications.preview,
+          getBillingPreviewFromZuora(config, backend),
+          LocalDate.now,
         )(
           request,
           sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers)),
@@ -118,6 +120,8 @@ object Handler extends Logging {
       idGenerator: => String,
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
+      getBillingPreview: GetBillingPreview,
+      today: LocalDate,
   ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
@@ -131,6 +135,8 @@ object Handler extends Logging {
       idGenerator,
       fulfilmentDatesFetcher,
       previewPublications,
+      getBillingPreview,
+      today,
     )).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
@@ -162,6 +168,8 @@ object Handler extends Logging {
       idGenerator: => String,
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
+      getBillingPreview: GetBillingPreview,
+      today: LocalDate,
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
@@ -171,12 +179,12 @@ object Handler extends Logging {
         }
       case "hsr" :: Nil =>
         httpMethod match {
-          case "POST" => stepsToCreate(getAccessToken, getSubscription, getAccount) _
+          case "POST" => stepsToCreate(getAccessToken, getSubscription, getAccount, getBillingPreview, today) _
           case _ => unsupported _
         }
       case "bulk-hsr" :: Nil =>
         httpMethod match {
-          case "POST" => stepsToBulkCreate(getAccessToken, getSubscription, getAccount) _
+          case "POST" => stepsToBulkCreate(getAccessToken, getSubscription, getAccount, getBillingPreview, today) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: Nil =>
@@ -371,24 +379,32 @@ object Handler extends Logging {
       getAccessToken: () => Either[ApiFailure, AccessToken],
       getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
       getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+      getBillingPreview: GetBillingPreview,
+      today: LocalDate,
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse =
     stepsToCreate(
       getAccessToken,
       getSubscription,
       getAccount,
       req.bodyAsCaseClass[HolidayStopRequestPartial](),
+      getBillingPreview,
+      today,
     )(req, sfClient)
 
   def stepsToBulkCreate(
       getAccessToken: () => Either[ApiFailure, AccessToken],
       getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
       getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+      getBillingPreview: GetBillingPreview,
+      today: LocalDate,
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse =
     stepsToCreate(
       getAccessToken,
       getSubscription,
       getAccount,
       req.bodyAsCaseClass[BulkHolidayStopRequestPartial](),
+      getBillingPreview,
+      today,
     )(req, sfClient)
 
   private def stepsToCreate(
@@ -396,6 +412,8 @@ object Handler extends Logging {
       getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
       getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
       requestBodyOp: ApiGatewayOp[HolidayStopRequestPartialTrait],
+      getBillingPreview: GetBillingPreview,
+      today: LocalDate,
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val verifyContactOwnsSubOp =
@@ -416,6 +434,10 @@ object Handler extends Logging {
         .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
       account <- getAccount(accessToken, subscription.accountNumber)
         .toApiGatewayOp(s"get account ${subscription.accountNumber}")
+      billingPreview <- getBillingPreview
+        .getBillingPreview(accessToken, subscription.accountNumber, today.plusMonths(13))
+        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
+      _ = logger.info("billingPreview: " + billingPreview)
       issuesData <- SubscriptionData(subscription, account)
         .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
@@ -575,6 +597,12 @@ object Handler extends Logging {
       accessToken: AccessToken,
       accountKey: String,
   ): Either[ApiFailure, ZuoraAccount] = Zuora.accountGetResponse(config.zuoraConfig, accessToken, backend)(accountKey)
+
+  def getBillingPreviewFromZuora(
+      config: Config,
+      backend: SttpBackend[Identity, Any],
+  ): GetBillingPreview =
+    GetBillingPreviewLive.billingPreviewGetResponse(config.zuoraConfig, backend)
 
   def getAccessTokenFromZuora(
       config: Config,
