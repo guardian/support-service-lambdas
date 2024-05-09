@@ -53,6 +53,22 @@ export const typeObject = {
 				Contribution: {},
 				Subscription: {},
 			},
+			GuardianWeeklyRestOfWorldMonthly: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			GuardianWeeklyDomesticMonthly: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			GuardianWeeklyRestOfWorldAnnual: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			GuardianWeeklyDomesticAnnual: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
 		},
 	},
 	GuardianWeeklyRestOfWorld: {
