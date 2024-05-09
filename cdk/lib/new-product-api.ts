@@ -44,6 +44,7 @@ export class NewProductApi extends GuStack {
       timeout,
       environment,
     };
+    const alarmTopic = 'alarms-handler-topic-PROD';
 
 
     // ---- API-triggered lambda functions ---- //
@@ -94,7 +95,7 @@ export class NewProductApi extends GuStack {
       evaluationPeriods: 1,
       threshold: 6,
       actionsEnabled: isProd,
-      snsTopicName: "retention-dev",
+      snsTopicName: alarmTopic,
       comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
       metric: new Metric({
         metricName: "4XXError",
@@ -114,7 +115,7 @@ export class NewProductApi extends GuStack {
       evaluationPeriods: 1,
       threshold: 1,
       actionsEnabled: isProd,
-      snsTopicName: "retention-dev",
+      snsTopicName: alarmTopic,
       comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
       metric: new Metric({
         metricName: "5XXError",
