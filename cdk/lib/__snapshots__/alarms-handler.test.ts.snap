@@ -8,6 +8,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -34,6 +35,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
     },
     "alarmshandlerVALUEwebhook": {
       "Description": "VALUE Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlermobileawsaccount": {
+      "Description": "ARN of the mobile AWS account",
       "Type": "String",
     },
   },
@@ -471,6 +476,34 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SNS::Topic",
     },
+    "alarmshandlertopicPolicy7401CE24": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "alarmshandlermobileawsaccount",
+                },
+              },
+              "Resource": {
+                "Ref": "alarmshandlertopic003C974E",
+              },
+              "Sid": "0",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "alarmshandlertopic003C974E",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
+    },
     "deadlettersalarmshandlerqueueC7A67616": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -510,6 +543,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -536,6 +570,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
     },
     "alarmshandlerVALUEwebhook": {
       "Description": "VALUE Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlermobileawsaccount": {
+      "Description": "ARN of the mobile AWS account",
       "Type": "String",
     },
   },
@@ -972,6 +1010,34 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "TopicName": "alarms-handler-topic-PROD",
       },
       "Type": "AWS::SNS::Topic",
+    },
+    "alarmshandlertopicPolicy7401CE24": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "alarmshandlermobileawsaccount",
+                },
+              },
+              "Resource": {
+                "Ref": "alarmshandlertopic003C974E",
+              },
+              "Sid": "0",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "alarmshandlertopic003C974E",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
     },
     "deadlettersalarmshandlerqueueC7A67616": {
       "DeletionPolicy": "Delete",

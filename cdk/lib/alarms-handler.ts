@@ -1,16 +1,16 @@
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack, GuStringParameter } from '@guardian/cdk/lib/constructs/core';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
-import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
-import {Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import { Topic } from 'aws-cdk-lib/aws-sns';
-import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
-import { Queue } from 'aws-cdk-lib/aws-sqs';
+import {GuAlarm} from '@guardian/cdk/lib/constructs/cloudwatch';
+import type {GuStackProps} from '@guardian/cdk/lib/constructs/core';
+import {GuStack, GuStringParameter} from '@guardian/cdk/lib/constructs/core';
+import {GuLambdaFunction} from '@guardian/cdk/lib/constructs/lambda';
+import type {App} from 'aws-cdk-lib';
+import {Duration} from 'aws-cdk-lib';
+import {ComparisonOperator} from 'aws-cdk-lib/aws-cloudwatch';
+import {ArnPrincipal, Effect, Policy,PolicyStatement} from "aws-cdk-lib/aws-iam";
+import {Runtime} from 'aws-cdk-lib/aws-lambda';
+import {SqsEventSource} from 'aws-cdk-lib/aws-lambda-event-sources';
+import {Topic} from 'aws-cdk-lib/aws-sns';
+import {SqsSubscription} from 'aws-cdk-lib/aws-sns-subscriptions';
+import {Queue} from 'aws-cdk-lib/aws-sqs';
 
 export class AlarmsHandler extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -35,6 +35,10 @@ export class AlarmsHandler extends GuStack {
 			new GuStringParameter(this, `${app}-${team}-webhook`, {
 				description: `${team} Team Google Chat webhook URL`,
 			});
+
+		const mobileAccountArnParameter = new GuStringParameter(this, `${app}-mobile-aws-account`, {
+			description: 'ARN of the mobile AWS account',
+		});
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
@@ -74,6 +78,14 @@ export class AlarmsHandler extends GuStack {
 		});
 
 		snsTopic.addSubscription(new SqsSubscription(queue));
+
+		// Allow cross-account publishing to the topic
+		snsTopic.addToResourcePolicy(new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['sns:Publish'],
+			principals: [new ArnPrincipal(mobileAccountArnParameter.valueAsString)],
+			resources: [snsTopic.topicArn],
+		}));
 
 		new GuAlarm(this, `${app}-alarm`, {
 			app: app,
