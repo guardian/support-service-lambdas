@@ -151,7 +151,9 @@ export const getSwitchInformationWithOwnerCheck = (
 		billingPeriod,
 	};
 
-	const startNewTerm = dayjs(subscription.termStartDate).isBefore(today);
+	const termStartDate = dayjs(subscription.termStartDate).startOf('day');
+	const startOfToday = today.startOf('day');
+	const startNewTerm = termStartDate.isBefore(startOfToday);
 
 	return {
 		stage,
