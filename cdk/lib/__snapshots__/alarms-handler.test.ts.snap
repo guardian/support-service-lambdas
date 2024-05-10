@@ -38,7 +38,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Type": "String",
     },
     "alarmshandlermobileawsaccount": {
-      "Description": "ARN of the mobile AWS account",
+      "Description": "ID of the mobile aws account",
       "Type": "String",
     },
   },
@@ -485,7 +485,20 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Principal": {
                 "AWS": {
-                  "Ref": "alarmshandlermobileawsaccount",
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "alarmshandlermobileawsaccount",
+                      },
+                      ":root",
+                    ],
+                  ],
                 },
               },
               "Resource": {
@@ -573,7 +586,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Type": "String",
     },
     "alarmshandlermobileawsaccount": {
-      "Description": "ARN of the mobile AWS account",
+      "Description": "ID of the mobile aws account",
       "Type": "String",
     },
   },
@@ -1020,7 +1033,20 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
               "Effect": "Allow",
               "Principal": {
                 "AWS": {
-                  "Ref": "alarmshandlermobileawsaccount",
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "alarmshandlermobileawsaccount",
+                      },
+                      ":root",
+                    ],
+                  ],
                 },
               },
               "Resource": {

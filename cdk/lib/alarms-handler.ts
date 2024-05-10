@@ -5,7 +5,7 @@ import {GuLambdaFunction} from '@guardian/cdk/lib/constructs/lambda';
 import type {App} from 'aws-cdk-lib';
 import {Duration} from 'aws-cdk-lib';
 import {ComparisonOperator} from 'aws-cdk-lib/aws-cloudwatch';
-import {ArnPrincipal, Effect, Policy,PolicyStatement} from "aws-cdk-lib/aws-iam";
+import {AccountPrincipal, Effect, Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {Runtime} from 'aws-cdk-lib/aws-lambda';
 import {SqsEventSource} from 'aws-cdk-lib/aws-lambda-event-sources';
 import {Topic} from 'aws-cdk-lib/aws-sns';
@@ -36,8 +36,8 @@ export class AlarmsHandler extends GuStack {
 				description: `${team} Team Google Chat webhook URL`,
 			});
 
-		const mobileAccountArnParameter = new GuStringParameter(this, `${app}-mobile-aws-account`, {
-			description: 'ARN of the mobile AWS account',
+		const mobileAccountId = new GuStringParameter(this, `${app}-mobile-aws-account`, {
+			description: 'ID of the mobile aws account',
 		});
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
@@ -83,7 +83,7 @@ export class AlarmsHandler extends GuStack {
 		snsTopic.addToResourcePolicy(new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['sns:Publish'],
-			principals: [new ArnPrincipal(mobileAccountArnParameter.valueAsString)],
+			principals: [new AccountPrincipal(mobileAccountId.valueAsString)],
 			resources: [snsTopic.topicArn],
 		}));
 
