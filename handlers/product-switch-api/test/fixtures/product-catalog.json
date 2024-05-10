@@ -147,7 +147,7 @@
   },
   "SupporterPlus": {
     "ratePlans": {
-      "SupporterPlusAndGuardianWeeklyRowMonthly": {
+      "GuardianWeeklyRestOfWorldMonthly": {
         "id": "8a1281f38f518d11018f52a599806a65",
         "pricing": {
           "USD": 46,
@@ -167,7 +167,7 @@
         },
         "billingPeriod": "Month"
       },
-      "SupporterPlusAndGuardianWeeklyRowAnnual": {
+      "GuardianWeeklyRestOfWorldAnnual": {
         "id": "8a1292628f51a923018f52a324e45710",
         "pricing": {
           "USD": 516,
@@ -187,7 +187,7 @@
         },
         "billingPeriod": "Annual"
       },
-      "SupporterPlusAndGuardianWeeklyDomesticAnnual": {
+      "GuardianWeeklyDomesticAnnual": {
         "id": "8a1282048f518d08018f529ead0f3d91",
         "pricing": {
           "USD": 480,
@@ -207,7 +207,7 @@
         },
         "billingPeriod": "Annual"
       },
-      "SupporterPlusAndGuardianWeeklyDomesticMonthly": {
+      "GuardianWeeklyDomesticMonthly": {
         "id": "8a1288a38f518d01018f529a04443172",
         "pricing": {
           "USD": 43,

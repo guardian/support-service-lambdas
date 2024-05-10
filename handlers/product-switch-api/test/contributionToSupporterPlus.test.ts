@@ -62,7 +62,7 @@ test('url parsing', () => {
 });
 
 test('startNewTerm is only true when the termStartDate is before today', () => {
-	const today = dayjs('2024-05-09');
+	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = productCatalogSchema.parse(catalogJson);
@@ -73,7 +73,7 @@ test('startNewTerm is only true when the termStartDate is before today', () => {
 		subscription,
 		account,
 		productCatalog,
-		'105368983',
+		'999999999999',
 		today,
 	);
 	expect(switchInformation.startNewTerm).toEqual(false);
