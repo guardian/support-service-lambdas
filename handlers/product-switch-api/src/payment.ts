@@ -54,7 +54,10 @@ export const takePaymentOrAdjustInvoice = async (
 	const amountPayableToday = invoice.amount;
 	const invoiceId = invoice.id;
 
-	if (amountPayableToday < 0.5) {
+	if (amountPayableToday === 0) {
+		// Nothing to do, we don't need to take a payment and the account balance will be correct
+		return 0;
+	} else if (amountPayableToday < 0.5) {
 		await adjustNonCollectedInvoice(
 			zuoraClient,
 			invoiceId,
