@@ -14,7 +14,6 @@ import { buildEmailMessage } from '../src/product-switch/productSwitchEmail';
 import { getSwitchInformationWithOwnerCheck } from '../src/product-switch/switchInformation';
 import type { ProductSwitchRequestBody } from '../src/schemas';
 import { productSwitchRequestSchema } from '../src/schemas';
-import { parseUrlPath } from '../src/urlParsing';
 import accountJson from './fixtures/account.json';
 import catalogJson from './fixtures/product-catalog.json';
 import subscriptionJson from './fixtures/subscription.json';
@@ -25,40 +24,6 @@ test('request body serialisation', () => {
 		preview: false,
 	});
 	expect(result.price).toEqual(10);
-});
-
-test('url parsing', () => {
-	const successfulParsing = parseUrlPath(
-		'/product-move/recurring-contribution-to-supporter-plus/A-S00504165',
-	);
-	expect(successfulParsing.switchType).toEqual(
-		'recurring-contribution-to-supporter-plus',
-	);
-	expect(successfulParsing.subscriptionNumber).toEqual('A-S00504165');
-
-	const incorrectSwitchType =
-		'/product-move/membership-to-digital-subscription/A-S00504165';
-	expect(() => {
-		parseUrlPath(incorrectSwitchType);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /product-move/membership-to-digital-subscription/A-S00504165",
-	);
-
-	const invalidSubscriptionNumber =
-		'/product-move/recurring-contribution-to-supporter-plus/A00000';
-	expect(() => {
-		parseUrlPath(invalidSubscriptionNumber);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /product-move/recurring-contribution-to-supporter-plus/A00000",
-	);
-
-	const missingPathPrefix =
-		'/recurring-contribution-to-supporter-plus/A-S00504165';
-	expect(() => {
-		parseUrlPath(missingPathPrefix);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /recurring-contribution-to-supporter-plus/A-S00504165",
-	);
 });
 
 test('startNewTerm is only true when the termStartDate is before today', () => {

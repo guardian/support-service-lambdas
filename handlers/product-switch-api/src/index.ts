@@ -7,7 +7,7 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import { contributionToSupporterPlusEndpoint } from './product-switch/productSwitchEndpoint';
-import { parseUrlPath } from './urlParsing';
+import { parseProductSwitch } from './urlParsing';
 
 const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (
@@ -20,7 +20,7 @@ export const handler: Handler = async (
 };
 
 const routeRequest = async (event: APIGatewayProxyEvent) => {
-	const parsedUrlPath = parseUrlPath(event.path);
+	const parsedUrlPath = parseProductSwitch(event.path);
 	try {
 		if (
 			parsedUrlPath.switchType === 'recurring-contribution-to-supporter-plus'
