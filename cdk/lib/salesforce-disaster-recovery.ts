@@ -8,9 +8,6 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { Topic } from 'aws-cdk-lib/aws-sns';
-import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import {
 	Choice,
 	Condition,
@@ -47,16 +44,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const queryResultFileName = 'query-result.csv';
 		const failedRowsFileName = 'failed-rows.csv';
 
-		const snsTopic = new Topic(this, 'SnsTopic', {
-			topicName: `${app}-${this.stage}`,
-		});
-
-		const snsTopicSubscriptionEmail = StringParameter.valueForStringParameter(
-			this,
-			`/${this.stage}/membership/salesforce-disaster-recovery/sns-topic-subscription-email`,
-		);
-
-		snsTopic.addSubscription(new EmailSubscription(snsTopicSubscriptionEmail));
+		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`;
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -356,7 +344,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::sns:publish',
 					Parameters: {
-						TopicArn: snsTopic.topicArn,
+						TopicArn: snsTopicArn,
 						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
 						'Message.$': JsonPath.format(
 							`This notification is part of the Salesforce Disaster Recovery procedure explained in the runbook below:\n{}\n\nState machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
@@ -513,7 +501,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						}),
 						new PolicyStatement({
 							actions: ['sns:Publish'],
-							resources: [snsTopic.topicArn],
+							resources: [snsTopicArn],
 						}),
 					],
 				},
