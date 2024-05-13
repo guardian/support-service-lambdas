@@ -20,7 +20,11 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-emails-to-s3-exporter',
 		'sf-gocardless-sync',
 	],
-	VALUE: ['holiday-stop-api', 'soft-opt-in-consent-setter'],
+	VALUE: [
+		'holiday-stop-api',
+		'holiday-stop-processor',
+		'soft-opt-in-consent-setter',
+	],
 	SRE: ['gchat-test-app'],
 	PP: [],
 };
