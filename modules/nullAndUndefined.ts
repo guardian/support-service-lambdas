@@ -3,7 +3,7 @@ export const checkDefined = <T>(
 	value: T | undefined | null,
 	errorMessage: string,
 ): T => {
-	if (!value) {
+	if (value === undefined || value === null) {
 		throw new ReferenceError(errorMessage);
 	}
 	return value;
