@@ -21,6 +21,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-gocardless-sync',
 	],
 	VALUE: [
+		'contact-us-api',
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
