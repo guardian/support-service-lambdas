@@ -6,8 +6,8 @@ import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
+import { productSwitchRequestSchema } from '../schemas';
 import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
-import { productSwitchRequestSchema } from './schemas';
 import { getSwitchInformationWithOwnerCheck } from './switchInformation';
 
 export const contributionToSupporterPlusEndpoint = async (

@@ -11,9 +11,12 @@ import { getSubscription } from '@modules/zuora/getSubscription';
 import { createPayment } from '@modules/zuora/payment';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { doSwitch, preview } from '../src/contributionToSupporterPlus';
-import { adjustNonCollectedInvoice } from '../src/payment';
-import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
+import {
+	doSwitch,
+	preview,
+} from '../src/product-switch/contributionToSupporterPlus';
+import { adjustNonCollectedInvoice } from '../src/product-switch/payment';
+import { getSwitchInformationWithOwnerCheck } from '../src/product-switch/switchInformation';
 
 const jestConsole = console;
 beforeEach(() => {

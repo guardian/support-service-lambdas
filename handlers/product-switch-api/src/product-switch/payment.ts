@@ -7,7 +7,7 @@ import {
 import { createPayment } from '@modules/zuora/payment';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import type { ZuoraSwitchResponse } from './schemas';
+import type { ZuoraSwitchResponse } from '../schemas';
 
 export const adjustNonCollectedInvoice = async (
 	zuoraClient: ZuoraClient,

@@ -6,7 +6,7 @@ import type {
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
+import { contributionToSupporterPlusEndpoint } from './product-switch/productSwitchEndpoint';
 import { parseUrlPath } from './urlParsing';
 
 const stage = process.env.STAGE as Stage;

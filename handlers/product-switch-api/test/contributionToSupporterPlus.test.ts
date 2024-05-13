@@ -9,11 +9,11 @@ import {
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
-import { previewResponseFromZuoraResponse } from '../src/contributionToSupporterPlus';
-import { buildEmailMessage } from '../src/productSwitchEmail';
+import { previewResponseFromZuoraResponse } from '../src/product-switch/contributionToSupporterPlus';
+import { buildEmailMessage } from '../src/product-switch/productSwitchEmail';
+import { getSwitchInformationWithOwnerCheck } from '../src/product-switch/switchInformation';
 import type { ProductSwitchRequestBody } from '../src/schemas';
 import { productSwitchRequestSchema } from '../src/schemas';
-import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
 import { parseUrlPath } from '../src/urlParsing';
 import accountJson from './fixtures/account.json';
 import catalogJson from './fixtures/product-catalog.json';

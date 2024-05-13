@@ -2,8 +2,8 @@
  * @group integration
  */
 
-import { sendToSupporterProductData } from '../src/supporterProductData';
-import type { SwitchInformation } from '../src/switchInformation';
+import { sendToSupporterProductData } from '../src/product-switch/supporterProductData';
+import type { SwitchInformation } from '../src/product-switch/switchInformation';
 
 test('supporter product data', async () => {
 	const switchInformation: SwitchInformation = {

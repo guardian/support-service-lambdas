@@ -15,9 +15,9 @@ import type {
 } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import type { ProductSwitchRequestBody } from '../schemas';
 import type { CatalogInformation } from './catalogInformation';
 import { getCatalogInformation } from './catalogInformation';
-import type { ProductSwitchRequestBody } from './schemas';
 
 export type AccountInformation = {
 	id: string;

@@ -3,11 +3,6 @@ import { zuoraDateFormat } from '@modules/zuora/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import { removePendingUpdateAmendments } from './amendments';
-import type { CatalogInformation } from './catalogInformation';
-import { takePaymentOrAdjustInvoice } from './payment';
-import { sendThankYouEmail } from './productSwitchEmail';
-import { sendSalesforceTracking } from './salesforceTracking';
 import type {
 	ChangePlanOrderAction,
 	CreateOrderRequest,
@@ -15,11 +10,16 @@ import type {
 	PreviewOrderRequest,
 	ZuoraPreviewResponse,
 	ZuoraSwitchResponse,
-} from './schemas';
+} from '../schemas';
 import {
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
-} from './schemas';
+} from '../schemas';
+import { removePendingUpdateAmendments } from './amendments';
+import type { CatalogInformation } from './catalogInformation';
+import { takePaymentOrAdjustInvoice } from './payment';
+import { sendThankYouEmail } from './productSwitchEmail';
+import { sendSalesforceTracking } from './salesforceTracking';
 import { sendToSupporterProductData } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
 

@@ -1,8 +1,8 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
-import type { ZuoraGetAmendmentResponse } from './schemas';
-import { zuoraGetAmendmentResponseSchema } from './schemas';
+import type { ZuoraGetAmendmentResponse } from '../schemas';
+import { zuoraGetAmendmentResponseSchema } from '../schemas';
 
 const getLastAmendment = async (
 	zuoraClient: ZuoraClient,
