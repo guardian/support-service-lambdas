@@ -28,7 +28,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'soft-opt-in-consent-setter',
 	],
 	SRE: ['gchat-test-app'],
-	PP: [],
+	PP: [
+		'salesforce-disaster-recovery',
+		'salesforce-disaster-recovery-health-check',
+	],
 };
 
 const appToTeamMappings: Record<string, Team> = Object.entries(

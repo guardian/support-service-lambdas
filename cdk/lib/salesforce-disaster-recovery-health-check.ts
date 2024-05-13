@@ -14,7 +14,7 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 
 		const app = 'salesforce-disaster-recovery-health-check';
 
-		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:salesforce-disaster-recovery-${this.stage}`;
+		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`;
 
 		const stateMachine = StateMachine.fromStateMachineName(
 			this,
