@@ -436,7 +436,7 @@ object Handler extends Logging {
         .toApiGatewayOp(s"get account ${subscription.accountNumber}")
       billingPreview <- getBillingPreview
         .getBillingPreview(accessToken, subscription.accountNumber, today.plusMonths(13))
-        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
+        .toApiGatewayOp(s"get billing preview for account ${subscription.accountNumber}")
       _ = logger.info("billingPreview: " + billingPreview)
       issuesData <- SubscriptionData(subscription, account)
         .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
