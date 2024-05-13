@@ -5,7 +5,12 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
-import {Policy, PolicyStatement} from "aws-cdk-lib/aws-iam";
+import {
+	AccountPrincipal,
+	Effect,
+	Policy,
+	PolicyStatement,
+} from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -36,6 +41,14 @@ export class AlarmsHandler extends GuStack {
 				description: `${team} Team Google Chat webhook URL`,
 			});
 
+		const mobileAccountId = new GuStringParameter(
+			this,
+			`${app}-mobile-aws-account`,
+			{
+				description: 'ID of the mobile aws account',
+			},
+		);
+
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
@@ -56,24 +69,32 @@ export class AlarmsHandler extends GuStack {
 			},
 		});
 
-		lambda.role?.attachInlinePolicy(new Policy(
-			this,
-			`${app}-cloudwatch-policy`,
-			{
+		lambda.role?.attachInlinePolicy(
+			new Policy(this, `${app}-cloudwatch-policy`, {
 				statements: [
 					new PolicyStatement({
 						actions: ['cloudwatch:ListTagsForResource'],
 						resources: ['*'],
 					}),
 				],
-			},
-		));
+			}),
+		);
 
 		const snsTopic = new Topic(this, `${app}-topic`, {
 			topicName: `${app}-topic-${this.stage}`,
 		});
 
 		snsTopic.addSubscription(new SqsSubscription(queue));
+
+		// Allow cross-account publishing to the topic
+		snsTopic.addToResourcePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				actions: ['sns:Publish'],
+				principals: [new AccountPrincipal(mobileAccountId.valueAsString)],
+				resources: [snsTopic.topicArn],
+			}),
+		);
 
 		new GuAlarm(this, `${app}-alarm`, {
 			app: app,
