@@ -7,10 +7,11 @@
     "test": "jest",
     "test-update": "jest -u",
     "format": "prettier --write \"{lib,bin}/**/*.ts\"",
+    "check-formatting": "prettier --check \"{lib,bin}/**/*.ts\"",
     "lint": "eslint lib/** bin/** --ext .ts --no-error-on-unmatched-pattern",
     "synth": "cdk synth --path-metadata false --version-reporting false",
     "diff": "cdk diff --path-metadata false --version-reporting false",
-    "package": "pnpm build && pnpm lint && pnpm test && pnpm synth"
+    "package": "pnpm build && pnpm lint && pnpm check-formatting && pnpm test && pnpm synth"
   },
   "devDependencies": {
     "@guardian/cdk": "52.3.0",
