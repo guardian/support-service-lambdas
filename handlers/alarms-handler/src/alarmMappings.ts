@@ -44,13 +44,8 @@ const appToTeamMappings: Record<string, Team> = Object.entries(
 	{},
 );
 
-export const getTeam = (appName: string): Team => {
-	const team = appToTeamMappings[appName];
-	if (!team) {
-		console.log(`No team found for app: ${appName}, defaulting to SRE`);
-		return 'SRE';
-	}
-	return team;
+export const getTeam = (appName?: string): Team => {
+	return appName ? appToTeamMappings[appName] ?? 'SRE' : 'SRE';
 };
 
 export const buildWebhookMappings = (): Record<Team, string> => {
