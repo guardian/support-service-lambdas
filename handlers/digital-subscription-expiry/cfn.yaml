@@ -106,8 +106,8 @@ Resources:
         Integration:
           Type: AWS_PROXY
           IntegrationHttpMethod: POST
-          Uri:
-            Fn::ImportValue: !Sub "subscriptions-${Stage}-digital-subscription-expiry-DigitalSubscriptionExpiryLambdaUri"
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubscriptionExpiryLambda.Arn}/invocations
+
       DependsOn:
         - DigitalSubAuthApi
         - SubsApiResource
@@ -118,21 +118,21 @@ Resources:
         Description: Api to handle digital sub authorisation
         Name: !Sub digital-sub-auth-handler-${Stage}
 
-    AuthMethod:
-      Type: AWS::ApiGateway::Method
-      Properties:
-        AuthorizationType: NONE
-        RestApiId: !Ref DigitalSubAuthApi
-        ResourceId: !Ref DigitalSubAuthApiResource
-        HttpMethod: POST
-        Integration:
-          Type: AWS_PROXY
-          IntegrationHttpMethod: POST
-          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubAuthLambda.Arn}/invocations
-      DependsOn:
-        - DigitalSubAuthApi
-        - DigitalSubAuthLambda
-        - DigitalSubAuthApiResource
+#    AuthMethod:
+#      Type: AWS::ApiGateway::Method
+#      Properties:
+#        AuthorizationType: NONE
+#        RestApiId: !Ref DigitalSubAuthApi
+#        ResourceId: !Ref DigitalSubAuthApiResource
+#        HttpMethod: POST
+#        Integration:
+#          Type: AWS_PROXY
+#          IntegrationHttpMethod: POST
+#          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubAuthLambda.Arn}/invocations
+#      DependsOn:
+#        - DigitalSubAuthApi
+#        - DigitalSubAuthLambda
+#        - DigitalSubAuthApiResource
 
     DigitalSubAuthApiStage:
       Type: AWS::ApiGateway::Stage
@@ -141,14 +141,14 @@ Resources:
         RestApiId: !Ref DigitalSubAuthApi
         DeploymentId: !Ref DigitalSubAuthApiDeployment
         StageName: !Sub ${Stage}
-      DependsOn: AuthMethod
+      DependsOn: SubsMethod
 
     DigitalSubAuthApiDeployment:
       Type: AWS::ApiGateway::Deployment
       Properties:
         Description: Deploys the digital sub Auth API into an environment/stage
         RestApiId: !Ref DigitalSubAuthApi
-      DependsOn: AuthMethod
+      DependsOn: SubsMethod
 
     DigitalSubAuthDomainName:
       Type: "AWS::ApiGateway::DomainName"
