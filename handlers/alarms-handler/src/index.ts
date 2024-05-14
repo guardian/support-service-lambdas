@@ -21,6 +21,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 	try {
 		for (const record of event.Records) {
+			console.log(record);
 			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
 
 			try {
@@ -34,6 +35,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				const text = `*ALARM:* ${AlarmName} has triggered!\n\n*Description:* ${
 					AlarmDescription ?? ''
 				}\n\n*Reason:* ${NewStateReason}`;
+
+				console.log(`CloudWatch alarm from ${app} owned by ${team}`);
 
 				await fetch(webhookUrl, {
 					method: 'POST',
@@ -52,6 +55,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					const webhookUrl = webhookMappings[team];
 
 					const text = Message;
+
+					console.log(`SNS publish message from ${app} owned by ${team}`);
 
 					await fetch(webhookUrl, {
 						method: 'POST',
