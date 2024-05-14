@@ -9,7 +9,14 @@ Parameters:
             - PROD
             - CODE
         Default: CODE
-
+Mappings:
+  StageVariables:
+    PROD:
+      DomainName: 'digital-subscription-authorisation-prod.subscriptions.guardianapis.com'
+      ApiGatewayTargetDomainName: 'd-nhg1ruog5k.execute-api.eu-west-1.amazonaws.com'
+    CODE:
+      DomainName: 'digital-subscription-authorisation-code.subscriptions.guardianapis.com'
+      ApiGatewayTargetDomainName: 'd-axk4hzkvf8.execute-api.eu-west-1.amazonaws.com'
 Resources:
     DigitalSubscriptionExpiryRole:
         Type: AWS::IAM::Role
@@ -75,9 +82,96 @@ Resources:
                 FunctionName: !Sub digital-subscription-expiry-${Stage}
                 Principal: apigateway.amazonaws.com
             DependsOn: DigitalSubscriptionExpiryLambda
-Outputs:
-  DigitalSubscriptionExpiryLambdaExport:
-    Description: lambda that returns expiration date for digital pack subscriptions or emergency tokens
-    Value: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubscriptionExpiryLambda.Arn}/invocations
-    Export:
-      Name: !Sub ${AWS::StackName}-DigitalSubscriptionExpiryLambdaUri
+#Outputs:
+#  DigitalSubscriptionExpiryLambdaExport:
+#    Description: lambda that returns expiration date for digital pack subscriptions or emergency tokens
+#    Value: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubscriptionExpiryLambda.Arn}/invocations
+#    Export:
+#      Name: !Sub ${AWS::StackName}-DigitalSubscriptionExpiryLambdaUri
+    SubsApiResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref DigitalSubAuthApi
+        ParentId: !GetAtt [DigitalSubAuthApi, RootResourceId]
+        PathPart: subs
+      DependsOn: DigitalSubAuthApi
+
+    SubsMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        RestApiId: !Ref DigitalSubAuthApi
+        ResourceId: !Ref SubsApiResource
+        HttpMethod: POST
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST
+          Uri:
+            Fn::ImportValue: !Sub "subscriptions-${Stage}-digital-subscription-expiry-DigitalSubscriptionExpiryLambdaUri"
+      DependsOn:
+        - DigitalSubAuthApi
+        - SubsApiResource
+
+    DigitalSubAuthApi:
+      Type: "AWS::ApiGateway::RestApi"
+      Properties:
+        Description: Api to handle digital sub authorisation
+        Name: !Sub digital-sub-auth-handler-${Stage}
+
+    AuthMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        RestApiId: !Ref DigitalSubAuthApi
+        ResourceId: !Ref DigitalSubAuthApiResource
+        HttpMethod: POST
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubAuthLambda.Arn}/invocations
+      DependsOn:
+        - DigitalSubAuthApi
+        - DigitalSubAuthLambda
+        - DigitalSubAuthApiResource
+
+    DigitalSubAuthApiStage:
+      Type: AWS::ApiGateway::Stage
+      Properties:
+        Description: Stage for digital sub auth  API
+        RestApiId: !Ref DigitalSubAuthApi
+        DeploymentId: !Ref DigitalSubAuthApiDeployment
+        StageName: !Sub ${Stage}
+      DependsOn: AuthMethod
+
+    DigitalSubAuthApiDeployment:
+      Type: AWS::ApiGateway::Deployment
+      Properties:
+        Description: Deploys the digital sub Auth API into an environment/stage
+        RestApiId: !Ref DigitalSubAuthApi
+      DependsOn: AuthMethod
+
+    DigitalSubAuthDomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/bece8c44-d92f-4661-a943-8b0b65e2ad6d
+        DomainName: !FindInMap [StageVariables, !Ref 'Stage', DomainName]
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+    DigitalSubBasePathMappings:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref DigitalSubAuthApi
+        DomainName: !Ref DigitalSubAuthDomainName
+        Stage: !Sub ${Stage}
+    DigitalSubAuthDNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: subscriptions.guardianapis.com.
+        Name: !Sub digital-subscription-authorisation-${Stage}.subscriptions.guardianapis.com.
+        Comment: !Sub CNAME for digital subscription auth ${Stage}
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+          - !FindInMap [StageVariables, !Ref 'Stage', ApiGatewayTargetDomainName]
+
