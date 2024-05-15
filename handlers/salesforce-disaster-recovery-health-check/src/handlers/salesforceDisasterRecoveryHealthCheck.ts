@@ -5,6 +5,11 @@ import { describeExecution, startExecution } from '../services/step-functions';
 export const handler = async (): Promise<
 	'HEALTH CHECK PASSED' | 'HEALTH CHECK FAILED'
 > => {
+	const app = checkDefined<string>(
+		process.env.APP,
+		'APP environment variable not set',
+	);
+
 	const stage = checkDefined<string>(
 		process.env.STAGE,
 		'STAGE environment variable not set',
@@ -65,8 +70,17 @@ export const handler = async (): Promise<
 
 				await publishSnsMessage({
 					topicArn,
-					subject: `Health Check Failed For ${stage} Salesforce Disaster Recovery State Machine`,
-					message: `This health check is in place to make sure the Salesforce Disaster Recovery resyncing tool is available at all times.\n\nPlease review the state machine execution details below to figure out the cause of the failure:\n\nhttps://${region}.console.aws.amazon.com/states/home?region=${region}#/executions/details/${executionArn}`,
+					message: `Health Check Failed For ${stage} Salesforce Disaster Recovery State Machine\n\nThis health check is in place to make sure the Salesforce Disaster Recovery resyncing tool is available at all times.\n\nPlease review the state machine execution details below to figure out the cause of the failure:\n\nhttps://${region}.console.aws.amazon.com/states/home?region=${region}#/executions/details/${executionArn}`,
+					messageAttributes: {
+						app: {
+							DataType: 'String',
+							StringValue: app,
+						},
+						stage: {
+							DataType: 'String',
+							StringValue: stage,
+						},
+					},
 				});
 
 				return 'HEALTH CHECK FAILED';
