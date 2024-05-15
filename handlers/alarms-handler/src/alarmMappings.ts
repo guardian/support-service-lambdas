@@ -29,7 +29,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
 	],
-	SRE: ['gchat-test-app', 'mobile-purchases-apple-pubsub'],
+	SRE: ['gchat-test-app', 'mobile-purchases-soft-opt-in-acquisitions'],
 	PP: [
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
