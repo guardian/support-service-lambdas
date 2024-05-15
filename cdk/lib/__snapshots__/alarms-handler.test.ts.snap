@@ -45,7 +45,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
   "Resources": {
     "alarmshandleralarm5F97F469": {
       "Properties": {
-        "ActionsEnabled": false,
+        "ActionsEnabled": true,
         "AlarmActions": [
           {
             "Fn::Join": [
