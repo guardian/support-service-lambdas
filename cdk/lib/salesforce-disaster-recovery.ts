@@ -359,10 +359,10 @@ export class SalesforceDisasterRecovery extends GuStack {
 								DataType: 'String',
 								StringValue: app,
 							},
-							// stage: {
-							// 	Type: 'String',
-							// 	Value: this.stage,
-							// },
+							stage: {
+								DataType: 'String',
+								StringValue: this.stage,
+							},
 						},
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
