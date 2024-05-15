@@ -49,13 +49,12 @@ export const getTeam = (appName?: string): Team => {
 };
 
 export const buildWebhookMappings = (): Record<Team, string> => {
-	const getEnvironmentVariable = (team: Team): string => {
-		const prefix = team.toUpperCase();
-		return checkDefined<string>(
-			process.env[`${prefix}_WEBHOOK`],
-			`${prefix}_WEBHOOK environment variable not set`,
+	const getEnvironmentVariable = (team: Team): string =>
+		checkDefined<string>(
+			process.env[`${team}_WEBHOOK`],
+			`${team}_WEBHOOK environment variable not set`,
 		);
-	};
+
 	return {
 		VALUE: getEnvironmentVariable('VALUE'),
 		GROWTH: getEnvironmentVariable('GROWTH'),
