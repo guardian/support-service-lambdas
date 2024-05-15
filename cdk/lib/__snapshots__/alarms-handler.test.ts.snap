@@ -9,6 +9,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -35,6 +36,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
     },
     "alarmshandlerVALUEwebhook": {
       "Description": "VALUE Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlermobileaccountrolearn": {
+      "Description": "ARN of role in the mobile account which allows cloudwatch:ListTagsForResource",
       "Type": "String",
     },
     "alarmshandlermobileawsaccount": {
@@ -338,6 +343,13 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "alarmshandlermobileaccountrolearn",
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -557,6 +569,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -583,6 +596,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
     },
     "alarmshandlerVALUEwebhook": {
       "Description": "VALUE Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlermobileaccountrolearn": {
+      "Description": "ARN of role in the mobile account which allows cloudwatch:ListTagsForResource",
       "Type": "String",
     },
     "alarmshandlermobileawsaccount": {
@@ -884,6 +901,13 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                     ":parameter/PROD/membership/alarms-handler/*",
                   ],
                 ],
+              },
+            },
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "alarmshandlermobileaccountrolearn",
               },
             },
           ],

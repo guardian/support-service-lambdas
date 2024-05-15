@@ -48,6 +48,13 @@ export class AlarmsHandler extends GuStack {
 				description: 'ID of the mobile aws account',
 			},
 		);
+		const mobileAccountRoleArn = new GuStringParameter(
+			this,
+			`${app}-mobile-account-role-arn`,
+			{
+				description: 'ARN of role in the mobile account which allows cloudwatch:ListTagsForResource',
+			},
+		)
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
@@ -77,6 +84,14 @@ export class AlarmsHandler extends GuStack {
 						resources: ['*'],
 					}),
 				],
+			}),
+		);
+
+		lambda.addToRolePolicy(
+			new PolicyStatement({
+				actions: ['sts:AssumeRole'],
+				effect: Effect.ALLOW,
+				resources: [mobileAccountRoleArn.valueAsString],
 			}),
 		);
 
