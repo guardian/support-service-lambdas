@@ -89,7 +89,7 @@ const handleSnsPublishEventRecord = async ({
 
 	const stage = messageAttributes.stage?.Value;
 
-	if (stage !== 'PROD') return;
+	if (stage && stage !== 'PROD') return;
 
 	const app = messageAttributes.app?.Value;
 	const team = getTeam(app);
