@@ -50,9 +50,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					const messageAttributes =
 						MessageAttributes as SNSPublish['MessageAttributes'];
 
-					// const stage = messageAttributes.stage?.Value;
+					const stage = messageAttributes.stage?.Value;
 
-					// if (stage !== 'PROD') return;
+					if (stage !== 'PROD') return;
 
 					const app = messageAttributes.app?.Value;
 					const team = getTeam(app);
