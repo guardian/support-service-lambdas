@@ -52,9 +52,10 @@ export class AlarmsHandler extends GuStack {
 			this,
 			`${app}-mobile-account-role-arn`,
 			{
-				description: 'ARN of role in the mobile account which allows cloudwatch:ListTagsForResource',
+				description:
+					'ARN of role in the mobile account which allows cloudwatch:ListTagsForResource',
 			},
-		)
+		);
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
