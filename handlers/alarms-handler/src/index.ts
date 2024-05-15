@@ -1,20 +1,33 @@
-import type { SNSEventRecord, SNSMessageAttribute, SQSEvent } from 'aws-lambda';
+import type { SNSEventRecord, SQSEvent } from 'aws-lambda';
+import { z } from 'zod';
 import { buildWebhookMappings, getTeam } from './alarmMappings';
 import { getAppNameTag } from './cloudwatch';
 
-type CloudWatchAlarm = {
-	Message: {
-		AlarmArn: string;
-		AlarmName: string;
-		NewStateReason: string;
-		AlarmDescription?: string;
-	};
-};
+const cloudWatchAlarm = z.object({
+	Message: z.object({
+		AlarmArn: z.string(),
+		AlarmName: z.string(),
+		NewStateReason: z.string(),
+		AlarmDescription: z.string().optional(),
+	}),
+});
 
-type SNSPublish = {
-	Message: string;
-	MessageAttributes: { app?: SNSMessageAttribute; stage?: SNSMessageAttribute };
-};
+type CloudWatchAlarm = z.infer<typeof cloudWatchAlarm>;
+
+const snsMessageAttribute = z.object({
+	Type: z.string(),
+	Value: z.string(),
+});
+
+const snsPublish = z.object({
+	Message: z.string(),
+	MessageAttributes: z.object({
+		app: snsMessageAttribute.optional(),
+		stage: snsMessageAttribute.optional(),
+	}),
+});
+
+type SNSPublish = z.infer<typeof snsPublish>;
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const webhookMappings = buildWebhookMappings();
