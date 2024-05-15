@@ -26,7 +26,7 @@ Mappings:
       ApiGatewayTargetDomainName: 'd-nhg1ruog5k.execute-api.eu-west-1.amazonaws.com'
     CODE:
       DomainName: 'digital-subscription-authorisation-code.subscriptions.guardianapis.com'
-      ApiGatewayTargetDomainName: 'd-erth6z0ptj.execute-api.eu-west-1.amazonaws.com'
+      ApiGatewayTargetDomainName: 'd-9hsw86gre3.execute-api.eu-west-1.amazonaws.com'
 Resources:
     LambdaRole:
         Type: AWS::IAM::Role
