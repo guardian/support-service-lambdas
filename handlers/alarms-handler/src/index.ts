@@ -8,7 +8,7 @@ const cloudWatchAlarmEventRecord = z.object({
 		AlarmArn: z.string(),
 		AlarmName: z.string(),
 		NewStateReason: z.string(),
-		AlarmDescription: z.string().optional(),
+		AlarmDescription: z.string().nullish(),
 	}),
 });
 
