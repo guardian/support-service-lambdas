@@ -34,7 +34,7 @@ describe('Handler', () => {
 					Message: 'mock-message',
 					MessageAttributes: {
 						app: { Type: 'String', Value: 'mock-app' },
-						stage: { Type: 'String', Value: 'CODE' },
+						stage: { Type: 'String', Value: 'PROD' },
 					},
 				}),
 			},
