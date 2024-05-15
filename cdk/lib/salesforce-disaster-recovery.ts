@@ -356,7 +356,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						),
 						MessageAttributes: {
 							app: {
-								Type: 'string',
+								Type: 'String',
 								Value: app,
 							},
 						},
