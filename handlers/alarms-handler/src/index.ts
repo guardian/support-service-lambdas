@@ -13,7 +13,7 @@ type CloudWatchAlarm = {
 
 type SNSPublish = {
 	Message: string;
-	MessageAttributes: { app?: SNSMessageAttribute };
+	MessageAttributes: { app?: SNSMessageAttribute; stage?: SNSMessageAttribute };
 };
 
 export const handler = async (event: SQSEvent): Promise<void> => {
@@ -49,6 +49,10 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 					const messageAttributes =
 						MessageAttributes as SNSPublish['MessageAttributes'];
+
+					// const stage = messageAttributes.stage?.Value;
+
+					// if (stage !== 'PROD') return;
 
 					const app = messageAttributes.app?.Value;
 					const team = getTeam(app);
