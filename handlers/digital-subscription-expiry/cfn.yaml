@@ -23,7 +23,7 @@ Mappings:
   StageVariables:
     PROD:
       DomainName: 'digital-subscription-authorisation-prod.subscriptions.guardianapis.com'
-      ApiGatewayTargetDomainName: 'd-nhg1ruog5k.execute-api.eu-west-1.amazonaws.com'
+      ApiGatewayTargetDomainName: 'd-6c6fh16i42.execute-api.eu-west-1.amazonaws.com'
     CODE:
       DomainName: 'digital-subscription-authorisation-code.subscriptions.guardianapis.com'
       ApiGatewayTargetDomainName: 'd-9hsw86gre3.execute-api.eu-west-1.amazonaws.com'
