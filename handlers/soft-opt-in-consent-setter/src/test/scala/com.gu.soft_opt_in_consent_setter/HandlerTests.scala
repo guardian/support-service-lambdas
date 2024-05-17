@@ -26,7 +26,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processProductSwitchSub should handle product switch event correctly") {
     val mobileSubscriptions = MobileSubscriptions(
       List(
-        MobileSubscription(true),
+        MobileSubscription(true, "InAppPurchase"),
       ),
     )
 
@@ -72,7 +72,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processAcquiredSub should handle acquisition event correctly") {
     val mobileSubscriptions = MobileSubscriptions(
       List(
-        MobileSubscription(true),
+        MobileSubscription(true, "InAppPurchase"),
       ),
     )
 
@@ -103,7 +103,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processCancellation should handle supporter plus cancellation while owning an IAP") {
     val mobileSubscriptions = MobileSubscriptions(
       List(
-        MobileSubscription(true),
+        MobileSubscription(true, "InAppPurchase"),
       ),
     )
 
