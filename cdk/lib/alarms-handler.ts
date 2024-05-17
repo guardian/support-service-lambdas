@@ -107,8 +107,16 @@ export class AlarmsHandler extends GuStack {
 			new PolicyStatement({
 				effect: Effect.ALLOW,
 				actions: ['sns:Publish'],
-				principals: [new AccountPrincipal(mobileAccountId.valueAsString)],
+				// Setting principal to mobileAccountId doesn't work, so we have to restrict the account in the conditions below
+				principals: [new AccountPrincipal('*')],
 				resources: [snsTopic.topicArn],
+				conditions: [
+					{
+						arnLike: {
+							'aws:SourceArn': `arn:aws:cloudwatch:eu-west-1:${mobileAccountId.valueAsString}:alarm:*`,
+						},
+					},
+				],
 			}),
 		);
 

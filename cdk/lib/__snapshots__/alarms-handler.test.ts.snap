@@ -494,6 +494,24 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           "Statement": [
             {
               "Action": "sns:Publish",
+              "Condition": {
+                "0": {
+                  "arnLike": {
+                    "aws:SourceArn": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "alarmshandlermobileawsaccount",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                  },
+                },
+              },
               "Effect": "Allow",
               "Principal": {
                 "AWS": {
@@ -504,11 +522,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":iam::",
-                      {
-                        "Ref": "alarmshandlermobileawsaccount",
-                      },
-                      ":root",
+                      ":iam::*:root",
                     ],
                   ],
                 },
@@ -1054,6 +1068,24 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           "Statement": [
             {
               "Action": "sns:Publish",
+              "Condition": {
+                "0": {
+                  "arnLike": {
+                    "aws:SourceArn": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "alarmshandlermobileawsaccount",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                  },
+                },
+              },
               "Effect": "Allow",
               "Principal": {
                 "AWS": {
@@ -1064,11 +1096,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":iam::",
-                      {
-                        "Ref": "alarmshandlermobileawsaccount",
-                      },
-                      ":root",
+                      ":iam::*:root",
                     ],
                   ],
                 },
