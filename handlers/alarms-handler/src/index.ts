@@ -3,46 +3,35 @@ import { z } from 'zod';
 import { getTeam, getTeamWebhookUrl } from './alarmMappings';
 import { getAppNameTag } from './cloudwatch';
 
-const cloudWatchAlarmEventRecord = z.object({
-	Message: z.object({
-		AlarmArn: z.string(),
-		AlarmName: z.string(),
-		NewStateReason: z.string(),
-		AlarmDescription: z.string().nullish(),
-	}),
+const cloudWatchAlarmMessageSchema = z.object({
+	AlarmArn: z.string(),
+	AlarmName: z.string(),
+	AlarmDescription: z.string().nullish(),
+	NewStateReason: z.string(),
 });
 
-type CloudWatchAlarmEventRecord = z.infer<typeof cloudWatchAlarmEventRecord>;
-
-const snsMessageAttribute = z.object({
-	Type: z.string(),
-	Value: z.string(),
-});
-
-const snsPublishEventRecord = z.object({
-	Message: z.string(),
-	MessageAttributes: z.object({
-		app: snsMessageAttribute.optional(),
-		stage: snsMessageAttribute.optional(),
-	}),
-});
-
-type SNSPublishEventRecord = z.infer<typeof snsPublishEventRecord>;
+type CloudWatchAlarmMessage = z.infer<typeof cloudWatchAlarmMessageSchema>;
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
 		for (const record of event.Records) {
 			console.log(record);
-			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
 
-			try {
-				await handleCloudWatchAlarmEventRecord({ recordBody });
-			} catch (error) {
-				if (error instanceof SyntaxError) {
-					await handleSnsPublishEventRecord({ recordBody });
-				} else {
-					throw error;
-				}
+			const { Message, MessageAttributes } = JSON.parse(
+				record.body,
+			) as SNSEventRecord['Sns'];
+
+			const parsedMessage = attemptToParseMessageString({
+				messageString: Message,
+			});
+
+			if (parsedMessage) {
+				await handleCloudWatchAlarmMessage({ message: parsedMessage });
+			} else {
+				await handleSnsPublishMessage({
+					message: Message,
+					messageAttributes: MessageAttributes,
+				});
 			}
 		}
 	} catch (error) {
@@ -51,14 +40,24 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	}
 };
 
-const handleCloudWatchAlarmEventRecord = async ({
-	recordBody,
+const attemptToParseMessageString = ({
+	messageString,
 }: {
-	recordBody: SNSEventRecord['Sns'];
+	messageString: string;
+}): CloudWatchAlarmMessage | null => {
+	try {
+		return cloudWatchAlarmMessageSchema.parse(JSON.parse(messageString));
+	} catch (error) {
+		return null;
+	}
+};
+
+const handleCloudWatchAlarmMessage = async ({
+	message,
+}: {
+	message: CloudWatchAlarmMessage;
 }) => {
-	const { AlarmArn, AlarmName, NewStateReason, AlarmDescription } = JSON.parse(
-		recordBody.Message,
-	) as CloudWatchAlarmEventRecord['Message'];
+	const { AlarmArn, AlarmName, NewStateReason, AlarmDescription } = message;
 
 	const app = await getAppNameTag(AlarmArn);
 	const team = getTeam(app);
@@ -77,16 +76,13 @@ const handleCloudWatchAlarmEventRecord = async ({
 	});
 };
 
-const handleSnsPublishEventRecord = async ({
-	recordBody,
+const handleSnsPublishMessage = async ({
+	message,
+	messageAttributes,
 }: {
-	recordBody: SNSEventRecord['Sns'];
+	message: string;
+	messageAttributes: SNSEventRecord['Sns']['MessageAttributes'];
 }) => {
-	const { Message, MessageAttributes } = recordBody;
-
-	const messageAttributes =
-		MessageAttributes as SNSPublishEventRecord['MessageAttributes'];
-
 	const stage = messageAttributes.stage?.Value;
 
 	if (stage && stage !== 'PROD') return;
@@ -95,7 +91,7 @@ const handleSnsPublishEventRecord = async ({
 	const team = getTeam(app);
 	const webhookUrl = getTeamWebhookUrl(team);
 
-	const text = Message;
+	const text = message;
 
 	console.log(`SNS publish message from ${app} owned by ${team}`);
 
