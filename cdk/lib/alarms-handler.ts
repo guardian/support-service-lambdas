@@ -6,7 +6,7 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import {
-	AccountPrincipal,
+	AnyPrincipal,
 	Effect,
 	Policy,
 	PolicyStatement,
@@ -108,15 +108,13 @@ export class AlarmsHandler extends GuStack {
 				effect: Effect.ALLOW,
 				actions: ['sns:Publish'],
 				// Setting principal to mobileAccountId doesn't work, so we have to restrict the account in the conditions below
-				principals: [new AccountPrincipal('*')],
+				principals: [new AnyPrincipal()],
 				resources: [snsTopic.topicArn],
-				conditions: [
-					{
-						arnLike: {
-							'aws:SourceArn': `arn:aws:cloudwatch:eu-west-1:${mobileAccountId.valueAsString}:alarm:*`,
-						},
+				conditions: {
+					ArnLike: {
+						'aws:SourceArn': `arn:aws:cloudwatch:eu-west-1:${mobileAccountId.valueAsString}:alarm:*`,
 					},
-				],
+				},
 			}),
 		);
 
