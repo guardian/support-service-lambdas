@@ -47,7 +47,11 @@ const appToTeamMappings: Record<string, Team> = Object.entries(
 );
 
 export const getTeam = (appName?: string): Team => {
-	return appName ? appToTeamMappings[appName] ?? 'SRE' : 'SRE';
+	if (appName && appToTeamMappings[appName]) {
+		return appToTeamMappings[appName] as Team;
+	}
+
+	return 'SRE';
 };
 
 export const getTeamWebhookUrl = (team: Team): string => {
