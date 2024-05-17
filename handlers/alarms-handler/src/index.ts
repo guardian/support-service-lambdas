@@ -8,6 +8,7 @@ const cloudWatchAlarmMessageSchema = z.object({
 	AlarmName: z.string(),
 	AlarmDescription: z.string().nullish(),
 	NewStateReason: z.string(),
+	AWSAccountId: z.string(),
 });
 
 type CloudWatchAlarmMessage = z.infer<typeof cloudWatchAlarmMessageSchema>;
@@ -57,9 +58,9 @@ const handleCloudWatchAlarmMessage = async ({
 }: {
 	message: CloudWatchAlarmMessage;
 }) => {
-	const { AlarmArn, AlarmName, NewStateReason, AlarmDescription } = message;
+	const { AlarmArn, AlarmName, NewStateReason, AlarmDescription, AWSAccountId } = message;
 
-	const app = await getAppNameTag(AlarmArn);
+	const app = await getAppNameTag(AlarmArn, AWSAccountId);
 	const team = getTeam(app);
 	const webhookUrl = getTeamWebhookUrl(team);
 

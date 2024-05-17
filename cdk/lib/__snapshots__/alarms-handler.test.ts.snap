@@ -137,6 +137,12 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             "GROWTH_WEBHOOK": {
               "Ref": "alarmshandlerGROWTHwebhook",
             },
+            "MOBILE_AWS_ACCOUNT_ID": {
+              "Ref": "alarmshandlermobileawsaccount",
+            },
+            "MOBILE_ROLE_ARN": {
+              "Ref": "alarmshandlermobileaccountrolearn",
+            },
             "PP_WEBHOOK": {
               "Ref": "alarmshandlerPPwebhook",
             },
@@ -697,6 +703,12 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             "APP": "alarms-handler",
             "GROWTH_WEBHOOK": {
               "Ref": "alarmshandlerGROWTHwebhook",
+            },
+            "MOBILE_AWS_ACCOUNT_ID": {
+              "Ref": "alarmshandlermobileawsaccount",
+            },
+            "MOBILE_ROLE_ARN": {
+              "Ref": "alarmshandlermobileaccountrolearn",
             },
             "PP_WEBHOOK": {
               "Ref": "alarmshandlerPPwebhook",

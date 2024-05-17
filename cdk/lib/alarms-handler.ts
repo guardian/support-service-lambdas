@@ -74,6 +74,8 @@ export class AlarmsHandler extends GuStack {
 				PP_WEBHOOK: buildWebhookParameter('PP').valueAsString,
 				VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
 				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
+				MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
+				MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
 			},
 		});
 
