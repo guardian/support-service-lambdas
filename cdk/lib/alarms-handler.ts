@@ -90,6 +90,7 @@ export class AlarmsHandler extends GuStack {
 			}),
 		);
 
+		// Allow the lambda to assume the role that allows cross-account fetching of tags
 		lambda.addToRolePolicy(
 			new PolicyStatement({
 				actions: ['sts:AssumeRole'],
