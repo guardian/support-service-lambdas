@@ -2,25 +2,22 @@ import {
 	CloudWatchClient,
 	ListTagsForResourceCommand,
 } from '@aws-sdk/client-cloudwatch';
-import type { ListTagsForResourceCommandOutput } from '@aws-sdk/client-cloudwatch/dist-types/commands/ListTagsForResourceCommand';
 import type { Tag } from '@aws-sdk/client-cloudwatch/dist-types/models/models_0';
 
-const getTags = (alarmArn: string): Promise<Tag[]> => {
+const getTags = async (alarmArn: string): Promise<Tag[]> => {
 	const client = new CloudWatchClient({ region: 'eu-west-1' });
 
 	const request = new ListTagsForResourceCommand({
 		ResourceARN: alarmArn,
 	});
 
-	return client
-		.send(request)
-		.then((response: ListTagsForResourceCommandOutput) => response.Tags ?? []);
+	const response = await client.send(request);
+	return response.Tags ?? [];
 };
 
-export const getAppNameTag = (
+export const getAppNameTag = async (
 	alarmArn: string,
 ): Promise<string | undefined> => {
-	return getTags(alarmArn).then((tags: Tag[]) => {
-		return tags.find((tag: Tag) => tag.Key === 'App')?.Value;
-	});
+	const tags = await getTags(alarmArn);
+	return tags.find((tag: Tag) => tag.Key === 'App')?.Value;
 };

@@ -1,42 +1,73 @@
 import type { SNSEventRecord, SQSEvent } from 'aws-lambda';
 import { z } from 'zod';
-import { buildWebhookMappings, getTeam } from './alarmMappings';
+import { getTeam, getTeamWebhookUrl } from './alarmMappings';
 import { getAppNameTag } from './cloudwatch';
 
-const webhookMappings = buildWebhookMappings();
-
-const alarmMessageSchema = z.object({
+const cloudWatchAlarmMessageSchema = z.object({
 	AlarmArn: z.string(),
 	AlarmName: z.string(),
 	AlarmDescription: z.string().nullish(),
 	NewStateReason: z.string(),
 });
 
-type AlarmMessage = z.infer<typeof alarmMessageSchema>;
+type CloudWatchAlarmMessage = z.infer<typeof cloudWatchAlarmMessageSchema>;
 
-const getWebhookUrl = async (message: AlarmMessage): Promise<string> => {
-	const appName = await getAppNameTag(message.AlarmArn);
-	if (!appName) {
-		console.log(
-			`Unable to find App tag for alarm ARN: ${message.AlarmArn}, defaulting to SRE`,
-		);
-		return webhookMappings['SRE'];
-	} else {
-		const teamName = getTeam(appName);
-		return webhookMappings[teamName];
+export const handler = async (event: SQSEvent): Promise<void> => {
+	try {
+		for (const record of event.Records) {
+			console.log(record);
+
+			const { Message, MessageAttributes } = JSON.parse(
+				record.body,
+			) as SNSEventRecord['Sns'];
+
+			const parsedMessage = attemptToParseMessageString({
+				messageString: Message,
+			});
+
+			if (parsedMessage) {
+				await handleCloudWatchAlarmMessage({ message: parsedMessage });
+			} else {
+				await handleSnsPublishMessage({
+					message: Message,
+					messageAttributes: MessageAttributes,
+				});
+			}
+		}
+	} catch (error) {
+		console.error(error);
+		throw error;
 	}
 };
 
-const processCloudwatchMessage = async (
-	message: AlarmMessage,
-): Promise<void> => {
-	const webhookUrl = await getWebhookUrl(message);
+const attemptToParseMessageString = ({
+	messageString,
+}: {
+	messageString: string;
+}): CloudWatchAlarmMessage | null => {
+	try {
+		return cloudWatchAlarmMessageSchema.parse(JSON.parse(messageString));
+	} catch (error) {
+		return null;
+	}
+};
 
-	const text = `*ALARM:* ${
-		message.AlarmName
-	} has triggered!\n\n*Description:* ${
-		message.AlarmDescription ?? ''
-	}\n\n*Reason:* ${message.NewStateReason}`;
+const handleCloudWatchAlarmMessage = async ({
+	message,
+}: {
+	message: CloudWatchAlarmMessage;
+}) => {
+	const { AlarmArn, AlarmName, NewStateReason, AlarmDescription } = message;
+
+	const app = await getAppNameTag(AlarmArn);
+	const team = getTeam(app);
+	const webhookUrl = getTeamWebhookUrl(team);
+
+	const text = `*ALARM:* ${AlarmName} has triggered!\n\n*Description:* ${
+		AlarmDescription ?? ''
+	}\n\n*Reason:* ${NewStateReason}`;
+
+	console.log(`CloudWatch alarm from ${app} owned by ${team}`);
 
 	await fetch(webhookUrl, {
 		method: 'POST',
@@ -45,42 +76,28 @@ const processCloudwatchMessage = async (
 	});
 };
 
-// Not a cloudwatch alarm, just send the whole message to the SRE channel
-const processOtherMessage = async (message: string): Promise<void> => {
-	await fetch(webhookMappings['SRE'], {
+const handleSnsPublishMessage = async ({
+	message,
+	messageAttributes,
+}: {
+	message: string;
+	messageAttributes: SNSEventRecord['Sns']['MessageAttributes'];
+}) => {
+	const stage = messageAttributes.stage?.Value;
+
+	if (stage && stage !== 'PROD') return;
+
+	const app = messageAttributes.app?.Value;
+	const team = getTeam(app);
+	const webhookUrl = getTeamWebhookUrl(team);
+
+	const text = message;
+
+	console.log(`SNS publish message from ${app} owned by ${team}`);
+
+	await fetch(webhookUrl, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ text: message }),
+		body: JSON.stringify({ text }),
 	});
-};
-
-const parseMessage = (message: string): AlarmMessage | null => {
-	try {
-		return alarmMessageSchema.parse(JSON.parse(message));
-	} catch (error) {
-		console.log('Failed to parse cloudwatch alarm:', error);
-		return null;
-	}
-};
-
-export const handler = async (event: SQSEvent): Promise<void> => {
-	try {
-		for (const record of event.Records) {
-			console.log(record);
-			const recordBody = JSON.parse(record.body) as SNSEventRecord['Sns'];
-			const alarmMessage = parseMessage(recordBody.Message);
-
-			if (alarmMessage) {
-				await processCloudwatchMessage(alarmMessage);
-			} else {
-				console.log(
-					'Message is not a cloudwatch alarm, sending to SRE channel',
-				);
-				await processOtherMessage(recordBody.Message);
-			}
-		}
-	} catch (error) {
-		console.error(error);
-		throw error;
-	}
 };

@@ -46,27 +46,17 @@ const appToTeamMappings: Record<string, Team> = Object.entries(
 	{},
 );
 
-export const getTeam = (appName: string): Team => {
-	const team = appToTeamMappings[appName];
-	if (!team) {
-		console.log(`No team found for app: ${appName}, defaulting to SRE`);
-		return 'SRE';
+export const getTeam = (appName?: string): Team => {
+	if (appName && appToTeamMappings[appName]) {
+		return appToTeamMappings[appName] as Team;
 	}
-	return team;
+
+	return 'SRE';
 };
 
-export const buildWebhookMappings = (): Record<Team, string> => {
-	const getEnvironmentVariable = (team: Team): string => {
-		const prefix = team.toUpperCase();
-		return checkDefined<string>(
-			process.env[`${prefix}_WEBHOOK`],
-			`${prefix}_WEBHOOK environment variable not set`,
-		);
-	};
-	return {
-		VALUE: getEnvironmentVariable('VALUE'),
-		GROWTH: getEnvironmentVariable('GROWTH'),
-		PP: getEnvironmentVariable('PP'),
-		SRE: getEnvironmentVariable('SRE'),
-	};
+export const getTeamWebhookUrl = (team: Team): string => {
+	return checkDefined<string>(
+		process.env[`${team}_WEBHOOK`],
+		`${team}_WEBHOOK environment variable not set`,
+	);
 };
