@@ -12,8 +12,8 @@ importers:
         specifier: 8.0.1
         version: 8.0.1(eslint@8.57.0)(tslib@2.6.2)(typescript@5.3.2)
       '@guardian/prettier':
-        specifier: ^5.0.0
-        version: 5.0.0(prettier@3.2.5)(tslib@2.6.2)
+        specifier: ^8.0.1
+        version: 8.0.1(prettier@3.2.5)(tslib@2.6.2)
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.12
@@ -2714,11 +2714,11 @@ packages:
       - supports-color
     dev: true
 
-  /@guardian/prettier@5.0.0(prettier@3.2.5)(tslib@2.6.2):
-    resolution: {integrity: sha512-gJSQuuP7JVDOWQj4EUrwyJTnMt+frLkw0D2sLg70nHn76L3LmH2xTQtYMPUsqyqn37qocDPzgdvBdmATi50zRQ==}
+  /@guardian/prettier@8.0.1(prettier@3.2.5)(tslib@2.6.2):
+    resolution: {integrity: sha512-mELIji0FezEj5YTyHkylB6VNeCN1+/jsHW/iZ0RItDMn/GjU6gbaPP5D2m+BZwrTYNrxYhCoFqCE/ObkEghtdg==}
     peerDependencies:
-      prettier: ^3.0.0
-      tslib: ^2.5.3
+      prettier: ^3.2.2
+      tslib: ^2.6.2
     dependencies:
       prettier: 3.2.5
       tslib: 2.6.2

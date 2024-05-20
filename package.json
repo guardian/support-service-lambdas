@@ -13,7 +13,7 @@
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "8.0.1",
-		"@guardian/prettier": "^5.0.0",
+		"@guardian/prettier": "^8.0.1",
 		"@types/jest": "^29.5.12",
 		"@types/node": "^20.11.27",
 		"esbuild": "^0.19.5",
