@@ -177,4 +177,45 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     result shouldBe Right(())
   }
+
+  test(testName = "processCancellation should handle supporter plus cancellation while owning a Feast IAP") {
+    val mobileSubscriptionsIncludingFeast = MobileSubscriptions(
+      List(
+        MobileSubscription(true, "FeastInAppPurchase"),
+      ),
+    )
+
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        "[\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
+      )
+      .returning(Right(()))
+    mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptionsIncludingFeast))
+    mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
+      SFAssociatedSubResponse(
+        0,
+        true,
+        records = Seq(),
+      ),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "supporterPlus",
+      previousProductName = None,
+      eventType = Cancellation,
+      subscriptionId = "A-S12345678",
+    )
+
+    val result = processCancelledSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+    )
+
+    result shouldBe Right(())
+  }
 }
