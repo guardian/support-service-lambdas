@@ -9,8 +9,6 @@ object ConsentsCalculatorTestData {
     Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter")
   val guWeeklyMapping = Set("your_support_onboarding", "guardian_weekly_newsletter")
   val testProductMapping = Set("unique_consent")
-  val testMobileSubscriptionMapping =
-    Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter")
 
   val testConsentMappings = Map(
     "membership" -> membershipMapping,
@@ -20,7 +18,6 @@ object ConsentsCalculatorTestData {
     "newspaper" -> newspaperMapping,
     "guardianweekly" -> guWeeklyMapping,
     "testproduct" -> testProductMapping,
-    "mobilesubscription" -> testMobileSubscriptionMapping,
   )
 
 }
