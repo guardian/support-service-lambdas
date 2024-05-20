@@ -74,6 +74,7 @@ export class AlarmsHandler extends GuStack {
 				PP_WEBHOOK: buildWebhookParameter('PP').valueAsString,
 				VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
 				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
+				// The lambda uses the mobile account role if it needs to fetch tags cross-account
 				MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
 				MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
 			},
