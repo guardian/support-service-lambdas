@@ -46,10 +46,8 @@ export class DiscountApi extends GuStack {
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
-			// Create an alarm
 			monitoringConfiguration: {
-				http5xxAlarm: { tolerated5xxPercentage: 5 },
-				snsTopicName: 'retention-dev',
+				noMonitoring: true, // There is a threshold alarm defined below
 			},
 			app: app,
 			api: {
