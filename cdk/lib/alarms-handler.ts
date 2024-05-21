@@ -6,7 +6,7 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import {
-	AccountPrincipal,
+	AnyPrincipal,
 	Effect,
 	Policy,
 	PolicyStatement,
@@ -48,6 +48,14 @@ export class AlarmsHandler extends GuStack {
 				description: 'ID of the mobile aws account',
 			},
 		);
+		const mobileAccountRoleArn = new GuStringParameter(
+			this,
+			`${app}-mobile-account-role-arn`,
+			{
+				description:
+					'ARN of role in the mobile account which allows cloudwatch:ListTagsForResource',
+			},
+		);
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
@@ -66,6 +74,9 @@ export class AlarmsHandler extends GuStack {
 				PP_WEBHOOK: buildWebhookParameter('PP').valueAsString,
 				VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
 				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
+				// The lambda uses the mobile account role if it needs to fetch tags cross-account
+				MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
+				MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
 			},
 		});
 
@@ -80,6 +91,15 @@ export class AlarmsHandler extends GuStack {
 			}),
 		);
 
+		// Allow the lambda to assume the role that allows cross-account fetching of tags
+		lambda.addToRolePolicy(
+			new PolicyStatement({
+				actions: ['sts:AssumeRole'],
+				effect: Effect.ALLOW,
+				resources: [mobileAccountRoleArn.valueAsString],
+			}),
+		);
+
 		const snsTopic = new Topic(this, `${app}-topic`, {
 			topicName: `${app}-topic-${this.stage}`,
 		});
@@ -91,8 +111,14 @@ export class AlarmsHandler extends GuStack {
 			new PolicyStatement({
 				effect: Effect.ALLOW,
 				actions: ['sns:Publish'],
-				principals: [new AccountPrincipal(mobileAccountId.valueAsString)],
+				// Setting principal to mobileAccountId doesn't work, so we have to restrict the account in the conditions below
+				principals: [new AnyPrincipal()],
 				resources: [snsTopic.topicArn],
+				conditions: {
+					ArnLike: {
+						'aws:SourceArn': `arn:aws:cloudwatch:eu-west-1:${mobileAccountId.valueAsString}:alarm:*`,
+					},
+				},
 			}),
 		);
 

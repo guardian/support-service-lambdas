@@ -21,6 +21,7 @@ describe('Handler', () => {
 						AlarmName: 'mock-alarm',
 						NewStateReason: 'mock-reason',
 						AlarmDescription: 'description',
+						AWSAccountId: '111111',
 					}),
 				}),
 			},
@@ -57,7 +58,7 @@ describe('Handler', () => {
 
 		await handler(mockCloudWatchAlarmEvent);
 
-		expect(getAppNameTag).toHaveBeenCalledWith('mock-arn');
+		expect(getAppNameTag).toHaveBeenCalledWith('mock-arn', '111111');
 		expect(fetch).toHaveBeenCalledWith(mockEnv.SRE_WEBHOOK, expect.any(Object));
 	});
 
