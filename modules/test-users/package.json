@@ -10,7 +10,7 @@
     "deleteAccount": "ts-node ./src/deleteAccount.ts"
   },
   "devDependencies": {
-    "dayjs": "^1.11.10",
+    "dayjs": "^1.11.11",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0"
   }

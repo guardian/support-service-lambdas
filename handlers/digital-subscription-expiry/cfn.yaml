@@ -2,16 +2,33 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Gets expiry dates for digital subscriptions or emergency tokens
 
 Parameters:
-    Stage:
-        Description: Stage name
-        Type: String
-        AllowedValues:
-            - PROD
-            - CODE
-        Default: CODE
-
+  Stack:
+    Description: Stack name
+    Type: String
+    Default: subscriptions
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+        - PROD
+        - CODE
+    Default: CODE
+  App:
+    Description: App name
+    Type: String
+    AllowedValues:
+      - digital-subscription-authorisation
+    Default: digital-subscription-authorisation
+Mappings:
+  StageVariables:
+    PROD:
+      DomainName: 'digital-subscription-authorisation-prod.subscriptions.guardianapis.com'
+      ApiGatewayTargetDomainName: 'd-6c6fh16i42.execute-api.eu-west-1.amazonaws.com'
+    CODE:
+      DomainName: 'digital-subscription-authorisation-code.subscriptions.guardianapis.com'
+      ApiGatewayTargetDomainName: 'd-9hsw86gre3.execute-api.eu-west-1.amazonaws.com'
 Resources:
-    DigitalSubscriptionExpiryRole:
+    LambdaRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -43,7 +60,7 @@ Resources:
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/emergencyTokens-${Stage}.*.json
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
-    DigitalSubscriptionExpiryLambda:
+    Lambda:
         Type: AWS::Lambda::Function
         Properties:
             Description: get digital subscription expiration dates
@@ -58,7 +75,7 @@ Resources:
                   Stage: !Ref Stage
             Role:
                 Fn::GetAtt:
-                - "DigitalSubscriptionExpiryRole"
+                - "LambdaRole"
                 - Arn
             MemorySize: 1536
             Runtime: java21
@@ -66,18 +83,87 @@ Resources:
             Architectures:
               - arm64
         DependsOn:
-        - DigitalSubscriptionExpiryRole
+        - LambdaRole
 
-    DigitalSubAuthApiPermission:
+    ApiGatewayLambdaPermission:
             Type: AWS::Lambda::Permission
             Properties:
                 Action: lambda:invokeFunction
                 FunctionName: !Sub digital-subscription-expiry-${Stage}
                 Principal: apigateway.amazonaws.com
-            DependsOn: DigitalSubscriptionExpiryLambda
-Outputs:
-  DigitalSubscriptionExpiryLambdaExport:
-    Description: lambda that returns expiration date for digital pack subscriptions or emergency tokens
-    Value: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubscriptionExpiryLambda.Arn}/invocations
-    Export:
-      Name: !Sub ${AWS::StackName}-DigitalSubscriptionExpiryLambdaUri
+            DependsOn: Lambda
+
+    ApiResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref RestApi
+        ParentId: !GetAtt [RestApi, RootResourceId]
+        PathPart: subs
+      DependsOn: RestApi
+
+    ApiMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        RestApiId: !Ref RestApi
+        ResourceId: !Ref ApiResource
+        HttpMethod: POST
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda.Arn}/invocations
+      DependsOn:
+        - RestApi
+        - Lambda
+        - ApiResource
+
+    RestApi:
+      Type: "AWS::ApiGateway::RestApi"
+      Properties:
+        Description: Api to handle digital sub authorisation
+        Name: !Sub digital-sub-auth-handler-${Stage}
+
+    RestApiStage:
+      Type: AWS::ApiGateway::Stage
+      Properties:
+        Description: Stage for digital sub auth  API
+        RestApiId: !Ref RestApi
+        DeploymentId: !Ref RestApiDeployment
+        StageName: !Sub ${Stage}
+      DependsOn: ApiMethod
+
+    RestApiDeployment:
+      Type: AWS::ApiGateway::Deployment
+      Properties:
+        Description: Deploys the digital sub Auth API into an environment/stage
+        RestApiId: !Ref RestApi
+      DependsOn: ApiMethod
+
+    DomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/bece8c44-d92f-4661-a943-8b0b65e2ad6d
+        DomainName: !FindInMap [StageVariables, !Ref 'Stage', DomainName]
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    BasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref RestApi
+        DomainName: !Ref DomainName
+        Stage: !Sub ${Stage}
+      DependsOn: RestApiStage
+
+    DNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: subscriptions.guardianapis.com.
+        Name: !Sub digital-subscription-authorisation-${Stage}.subscriptions.guardianapis.com.
+        Comment: !Sub CNAME for digital subscription auth ${Stage}
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+          - !FindInMap [StageVariables, !Ref 'Stage', ApiGatewayTargetDomainName]
+

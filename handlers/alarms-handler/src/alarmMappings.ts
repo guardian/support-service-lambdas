@@ -19,13 +19,28 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-contact-merge',
 		'sf-emails-to-s3-exporter',
 		'sf-gocardless-sync',
+		'mobile-purchases-google-oauth',
+		'mobile-purchases-google-subscription-status',
+		'mobile-purchases-apple-subscription-status',
+		'mobile-purchases-apple-pubsub',
+		'mobile-purchases-feast-apple-pubsub',
+		'mobile-purchases-google-pubsub',
+		'mobile-purchases-feast-google-pubsub',
+		'mobile-purchases-apple-pubsub',
+		'mobile-purchases-google-pubsub',
+		'mobile-purchases-feast-apple-pubsub',
+		'mobile-purchases-delete-user-subscription',
 	],
 	VALUE: [
+		'cancellation-sf-cases-api',
 		'contact-us-api',
+		'delivery-records-api',
 		'delivery-problem-credit-processor',
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
+		'mobile-purchases-soft-opt-in-acquisitions',
+		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 	],
 	SRE: ['gchat-test-app'],
 	PP: [
@@ -45,27 +60,17 @@ const appToTeamMappings: Record<string, Team> = Object.entries(
 	{},
 );
 
-export const getTeam = (appName: string): Team => {
-	const team = appToTeamMappings[appName];
-	if (!team) {
-		console.log(`No team found for app: ${appName}, defaulting to SRE`);
-		return 'SRE';
+export const getTeam = (appName?: string): Team => {
+	if (appName && appToTeamMappings[appName]) {
+		return appToTeamMappings[appName] as Team;
 	}
-	return team;
+
+	return 'SRE';
 };
 
-export const buildWebhookMappings = (): Record<Team, string> => {
-	const getEnvironmentVariable = (team: Team): string => {
-		const prefix = team.toUpperCase();
-		return checkDefined<string>(
-			process.env[`${prefix}_WEBHOOK`],
-			`${prefix}_WEBHOOK environment variable not set`,
-		);
-	};
-	return {
-		VALUE: getEnvironmentVariable('VALUE'),
-		GROWTH: getEnvironmentVariable('GROWTH'),
-		PP: getEnvironmentVariable('PP'),
-		SRE: getEnvironmentVariable('SRE'),
-	};
+export const getTeamWebhookUrl = (team: Team): string => {
+	return checkDefined<string>(
+		process.env[`${team}_WEBHOOK`],
+		`${team}_WEBHOOK environment variable not set`,
+	);
 };

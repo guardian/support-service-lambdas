@@ -10,9 +10,9 @@ updates:
       prefix: "chore(deps): "
   
   - package-ecosystem: 'npm'
-    directory: '/cdk'
+    directory: '/'
     schedule:
-      interval: 'monthly'
+      interval: 'weekly'
     commit-message:
       prefix: "chore(deps): "
     # The version of AWS CDK libraries must match those from @guardian/cdk.
