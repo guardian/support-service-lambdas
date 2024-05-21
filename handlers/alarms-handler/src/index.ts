@@ -63,7 +63,7 @@ const handleCloudWatchAlarmMessage = async ({
 	const app = await getAppNameTag(AlarmArn, AWSAccountId);
 	const teams = getTeams(app);
 
-	return Promise.all(teams.map(team => {
+	await Promise.all(teams.map(team => {
 		const webhookUrl = getTeamWebhookUrl(team);
 
 		const text = `*ALARM:* ${AlarmName} has triggered!\n\n*Description:* ${
@@ -94,7 +94,7 @@ const handleSnsPublishMessage = async ({
 	const app = messageAttributes.app?.Value;
 	const teams = getTeams(app);
 
-	return Promise.all(teams.map(team => {
+	await Promise.all(teams.map(team => {
 		const webhookUrl = getTeamWebhookUrl(team);
 
 		const text = message;
