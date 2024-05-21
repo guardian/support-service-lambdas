@@ -75,12 +75,6 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   }
 
   test(testName = "processAcquiredSub should handle acquisition event correctly") {
-    val mobileSubscriptions = MobileSubscriptions(
-      List(
-        MobileSubscription(true, "InAppPurchase"),
-      ),
-    )
-
     mockSendConsentsReq
       .expects(
         "someIdentityId",
