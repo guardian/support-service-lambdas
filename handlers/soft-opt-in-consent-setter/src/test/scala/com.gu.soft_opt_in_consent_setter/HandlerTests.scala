@@ -178,7 +178,9 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     result shouldBe Right(())
   }
 
-  test(testName = "processCancellation should handle supporter plus cancellation while owning a Feast IAP") {
+  test(testName =
+    "when cancelling Supporter Plus, while also holding a Feast IAP, processCancellation should unset the Supporter Plus consents which are not shared with the Feast IAP",
+  ) {
     val mobileSubscriptionsIncludingFeast = MobileSubscriptions(
       List(
         MobileSubscription(true, "FeastInAppPurchase"),
