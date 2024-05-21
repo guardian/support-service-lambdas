@@ -46,6 +46,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 	PP: [
 		'frontend',
 		'it-test-runner',
+		'stripe-intent',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 	],
