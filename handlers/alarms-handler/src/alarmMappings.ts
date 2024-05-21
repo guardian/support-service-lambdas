@@ -44,6 +44,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 	SRE: ['gchat-test-app'],
 	PP: [
+		'canonical-config',
 		'frontend',
 		'it-test-runner',
 		'stripe-intent',
