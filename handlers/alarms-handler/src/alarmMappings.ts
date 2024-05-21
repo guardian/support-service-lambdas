@@ -45,6 +45,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 	SRE: ['gchat-test-app'],
 	PP: [
 		'frontend',
+		'it-test-runner',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 	],
