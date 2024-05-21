@@ -502,18 +502,32 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
               "Action": "sns:Publish",
               "Condition": {
                 "ArnLike": {
-                  "aws:SourceArn": {
-                    "Fn::Join": [
-                      "",
-                      [
-                        "arn:aws:cloudwatch:eu-west-1:",
-                        {
-                          "Ref": "alarmshandlermobileawsaccount",
-                        },
-                        ":alarm:*",
+                  "aws:SourceArn": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "alarmshandlermobileawsaccount",
+                          },
+                          ":alarm:*",
+                        ],
                       ],
-                    ],
-                  },
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "AWS::AccountId",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                  ],
                 },
               },
               "Effect": "Allow",
@@ -1069,18 +1083,32 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
               "Action": "sns:Publish",
               "Condition": {
                 "ArnLike": {
-                  "aws:SourceArn": {
-                    "Fn::Join": [
-                      "",
-                      [
-                        "arn:aws:cloudwatch:eu-west-1:",
-                        {
-                          "Ref": "alarmshandlermobileawsaccount",
-                        },
-                        ":alarm:*",
+                  "aws:SourceArn": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "alarmshandlermobileawsaccount",
+                          },
+                          ":alarm:*",
+                        ],
                       ],
-                    ],
-                  },
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "AWS::AccountId",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                  ],
                 },
               },
               "Effect": "Allow",

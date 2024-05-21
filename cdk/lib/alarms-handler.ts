@@ -116,7 +116,10 @@ export class AlarmsHandler extends GuStack {
 				resources: [snsTopic.topicArn],
 				conditions: {
 					ArnLike: {
-						'aws:SourceArn': `arn:aws:cloudwatch:eu-west-1:${mobileAccountId.valueAsString}:alarm:*`,
+						'aws:SourceArn': [
+							`arn:aws:cloudwatch:eu-west-1:${mobileAccountId.valueAsString}:alarm:*`,
+							`arn:aws:cloudwatch:eu-west-1:${this.account}:alarm:*`,
+						],
 					},
 				},
 			}),
