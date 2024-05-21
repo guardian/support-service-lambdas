@@ -33,7 +33,12 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     mockSendConsentsReq
       .expects(
         identityId,
-        "[\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : true\n  }\n]",
+        """[
+          |  {
+          |    "id" : "digital_subscriber_preview",
+          |    "consented" : true
+          |  }
+          |]""".stripMargin,
       )
       .returning(Right(()))
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
@@ -79,7 +84,24 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     mockSendConsentsReq
       .expects(
         "someIdentityId",
-        "[\n  {\n    \"id\" : \"your_support_onboarding\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"similar_guardian_products\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : true\n  }\n]",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "digital_subscriber_preview",
+          |    "consented" : true
+          |  }
+          |]""".stripMargin,
       )
       .returning(Right(()))
 
@@ -110,7 +132,12 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     mockSendConsentsReq
       .expects(
         "someIdentityId",
-        "[\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
+        """[
+          |  {
+          |    "id" : "digital_subscriber_preview",
+          |    "consented" : false
+          |  }
+          |]""".stripMargin,
       )
       .returning(Right(()))
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
@@ -147,7 +174,20 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     mockSendConsentsReq
       .expects(
         "someIdentityId",
-        "[\n  {\n    \"id\" : \"your_support_onboarding\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : false
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : false
+          |  },
+          |  {
+          |    "id" : "digital_subscriber_preview",
+          |    "consented" : false
+          |  }
+          |]""".stripMargin,
       )
       .returning(Right(()))
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
