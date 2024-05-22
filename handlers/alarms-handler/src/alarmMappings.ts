@@ -60,6 +60,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// members-data-api
 		'membership-attribute-service',
 
+		// national-delivery-fulfilment
+		'national-delivery-fulfilment',
+
 		// national-delivery-failed-delivery-processor
 		'failed-national-delivery-processor',
 		
