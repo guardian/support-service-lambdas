@@ -53,6 +53,12 @@ const teamToAppMappings: Record<Team, string[]> = {
 	PP: [
 		// contributions-platform
 		'fixation',
+
+		// fulfilment-lambdas
+		'fulfilment-lambdas',
+
+		// members-data-api
+		'membership-attribute-service',
 		
 		// support-frontend
 		'frontend',
