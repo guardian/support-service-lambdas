@@ -59,6 +59,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// members-data-api
 		'membership-attribute-service',
+
+		// national-delivery-failed-delivery-processor
+		'failed-national-delivery-processor',
 		
 		// support-frontend
 		'frontend',
