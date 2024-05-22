@@ -1,6 +1,6 @@
 import type { SNSEventRecord, SQSEvent } from 'aws-lambda';
 import { z } from 'zod';
-import { getTeam, getTeamWebhookUrl } from './alarmMappings';
+import { getTeams, getTeamWebhookUrl } from './alarmMappings';
 import { getAppNameTag } from './cloudwatch';
 
 const cloudWatchAlarmMessageSchema = z.object({
@@ -61,20 +61,23 @@ const handleCloudWatchAlarmMessage = async ({
 	const { AlarmArn, AlarmName, NewStateReason, AlarmDescription, AWSAccountId } = message;
 
 	const app = await getAppNameTag(AlarmArn, AWSAccountId);
-	const team = getTeam(app);
-	const webhookUrl = getTeamWebhookUrl(team);
+	const teams = getTeams(app);
 
-	const text = `*ALARM:* ${AlarmName} has triggered!\n\n*Description:* ${
-		AlarmDescription ?? ''
-	}\n\n*Reason:* ${NewStateReason}`;
+	await Promise.all(teams.map(team => {
+		const webhookUrl = getTeamWebhookUrl(team);
 
-	console.log(`CloudWatch alarm from ${app} owned by ${team}`);
+		const text = `*ALARM:* ${AlarmName} has triggered!\n\n*Description:* ${
+			AlarmDescription ?? ''
+		}\n\n*Reason:* ${NewStateReason}`;
 
-	await fetch(webhookUrl, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ text }),
-	});
+		console.log(`CloudWatch alarm from ${app} owned by ${team}`);
+
+		return fetch(webhookUrl, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ text }),
+		});
+	}));
 };
 
 const handleSnsPublishMessage = async ({
@@ -89,16 +92,19 @@ const handleSnsPublishMessage = async ({
 	if (stage && stage !== 'PROD') return;
 
 	const app = messageAttributes.app?.Value;
-	const team = getTeam(app);
-	const webhookUrl = getTeamWebhookUrl(team);
+	const teams = getTeams(app);
 
-	const text = message;
+	await Promise.all(teams.map(team => {
+		const webhookUrl = getTeamWebhookUrl(team);
 
-	console.log(`SNS publish message from ${app} owned by ${team}`);
+		const text = message;
 
-	await fetch(webhookUrl, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ text }),
-	});
+		console.log(`SNS publish message from ${app} owned by ${team}`);
+
+		return fetch(webhookUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({text}),
+		});
+	}));
 };
