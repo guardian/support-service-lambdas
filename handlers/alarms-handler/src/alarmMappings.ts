@@ -51,10 +51,35 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 	SRE: ['gchat-test-app'],
 	PP: [
-		'canonical-config',
+		// contributions-platform
+		'fixation',
+
+		// fulfilment-lambdas
+		'fulfilment-lambdas',
+
+		// members-data-api
+		'membership-attribute-service',
+
+		// national-delivery-fulfilment
+		'national-delivery-fulfilment',
+
+		// national-delivery-failed-delivery-processor
+		'failed-national-delivery-processor',
+
+		// zuora-finance
+		'zuora-creditor',
+		'zuora-oracle-fusion',
+
+		// zuora-retention
+		'zuora-retention',
+		
+		// support-frontend
 		'frontend',
 		'it-test-runner',
 		'stripe-intent',
+		
+		// other
+		'canonical-config',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 	],
