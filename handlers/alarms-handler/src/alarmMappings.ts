@@ -51,10 +51,16 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 	SRE: ['gchat-test-app'],
 	PP: [
-		'canonical-config',
+		// contributions-platform
+		'fixation',
+		
+		// support-frontend
 		'frontend',
 		'it-test-runner',
 		'stripe-intent',
+		
+		// other
+		'canonical-config',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 	],
