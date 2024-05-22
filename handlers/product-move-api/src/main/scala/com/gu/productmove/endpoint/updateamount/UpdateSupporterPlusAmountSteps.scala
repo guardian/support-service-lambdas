@@ -28,7 +28,7 @@ object UpdateSupporterPlusAmountSteps {
       OutputBody | Throwable,
       Success,
     ] = for {
-      _ <- ZIO.log(s"PostData: ${postData.toString}")
+      _ <- ZIO.log(s"Update Supporter Plus Amount - PostData: ${postData.toString}")
 
       subscription <- GetSubscription.get(subscriptionName)
       _ <- ZIO.log("Subscription: " + subscription)
