@@ -69,6 +69,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// zuora-finance
 		'zuora-creditor',
 		'zuora-oracle-fusion',
+
+		// zuora-retention
+		'zuora-retention',
 		
 		// support-frontend
 		'frontend',
