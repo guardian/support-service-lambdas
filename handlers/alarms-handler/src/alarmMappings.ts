@@ -34,6 +34,8 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-emails-to-s3-exporter',
 		'sf-gocardless-sync',
 		...sharedMobilePurchasesApps,
+		'super-mode-calculator',
+		'component-event-stream',
 	],
 	VALUE: [
 		'cancellation-sf-cases-api',
