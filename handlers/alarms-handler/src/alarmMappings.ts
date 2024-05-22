@@ -65,6 +65,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// national-delivery-failed-delivery-processor
 		'failed-national-delivery-processor',
+
+		// zuora-finance
+		'zuora-creditor',
+		'zuora-oracle-fusion',
 		
 		// support-frontend
 		'frontend',
