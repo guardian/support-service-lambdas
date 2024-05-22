@@ -1,21 +1,18 @@
 package com.gu.productmove.framework
 
 import com.amazonaws.services.lambda.runtime.*
-import com.amazonaws.services.lambda.runtime.events.*
-import com.gu.productmove.endpoint
 import io.circe.*
 import io.circe.generic.semiauto.*
-import io.circe.syntax.*
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.serverless.aws.lambda.*
-import sttp.tapir.serverless.aws.ziolambda.{AwsZioServerInterpreter, ZioLambdaHandler}
+import sttp.tapir.serverless.aws.ziolambda.ZioLambdaHandler
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
 import sttp.tapir.ztapir.RIOMonadError
 import zio.{IO, Runtime, Task, ZIO, *}
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream, PrintStream}
+import java.io.*
+import java.lang.System as JavaSystem
 import java.nio.charset.StandardCharsets
-import scala.jdk.CollectionConverters.*
 
 abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, Task]]) extends RequestStreamHandler {
 
@@ -31,24 +28,25 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
   given Decoder[AwsRequestV1] = deriveDecoder
   given Encoder[AwsResponse] = deriveEncoder
 
+  val printStream = new PrintStream(new OutputStream() {
+    override def write(b: Int): Unit =
+      LambdaRuntime.getLogger.log(Array(b.toByte))
+
+    override def write(b: Array[Byte]): Unit =
+      LambdaRuntime.getLogger.log(b)
+
+    override def write(b: Array[Byte], off: Int, len: Int): Unit =
+      LambdaRuntime.getLogger.log(b.slice(off, off + len))
+
+    override def flush(): Unit =
+      JavaSystem.out.flush()
+  })
+
   // this is the main lambda entry point.  It is referenced in the cloudformation.
   override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
-    val printStream = new PrintStream(new OutputStream() {
 
-      override def write(b: Int): Unit =
-        LambdaRuntime.getLogger.log(Array(b.toByte))
-
-      override def write(b: Array[Byte]): Unit =
-        LambdaRuntime.getLogger.log(b)
-
-      override def write(b: Array[Byte], off: Int, len: Int): Unit =
-        LambdaRuntime.getLogger.log(b.slice(off, off + len))
-
-      override def flush(): Unit =
-        java.lang.System.out.flush()
-    })
-    java.lang.System.setOut(printStream)
-    java.lang.System.setErr(printStream)
+    JavaSystem.setOut(printStream)
+    JavaSystem.setErr(printStream)
 
     val runtime = Runtime.default
     Unsafe.unsafe { implicit unsafe =>
