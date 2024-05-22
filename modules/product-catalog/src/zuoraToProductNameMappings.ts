@@ -16,6 +16,8 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Digital Pack Annual': 'Annual',
 	'Digital Subscription One Year Fixed - One Time Charge': 'OneYearGift',
 	'Digital Subscription Three Month Fixed - One Time Charge': 'ThreeMonthGift',
+	'Supporter Plus Monthly': 'V1LegacyMonthly',
+	'Supporter Plus Annual': 'V1LegacyAnnual',
 	'Supporter Plus V2 - Monthly': 'Monthly',
 	'Supporter Plus V2 - Annual': 'Annual',
 	'Supporter Plus V2 & Guardian Weekly ROW - Monthly':
@@ -51,6 +53,8 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Digital Subscription One Year Fixed - One Time Charge': 'Subscription',
 	'Digital Subscription Three Month Fixed - One Time Charge': 'Subscription',
 	'Digital Subscription Three Month Fixed - One Time': 'Subscription',
+	'Supporter Plus Monthly': 'Subscription',
+	'Supporter Plus Annual': 'Subscription',
 	'Supporter Plus Monthly Charge': 'Subscription',
 	'Supporter Plus Annual Charge': 'Subscription',
 	'Annual Contribution': 'Contribution',
