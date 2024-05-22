@@ -228,7 +228,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     Handler.buildProductSwitchConsents(
       "guardianweekly",
       "newspaper",
-      Set("newspaper", "mobilesubscription"),
+      Set("newspaper", "InAppPurchase"),
       calculator,
     ) shouldBe Right("""[
         |  {
@@ -246,7 +246,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     HandlerIAP.buildProductSwitchConsents(
       "guardianweekly",
       "newspaper",
-      Set("newspaper", "mobilesubscription"),
+      Set("newspaper", "InAppPurchase"),
       calculator,
     ) shouldBe Right("""[
         |  {

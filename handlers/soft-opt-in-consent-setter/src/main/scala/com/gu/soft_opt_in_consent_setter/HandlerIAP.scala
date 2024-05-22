@@ -191,11 +191,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
 
-      hasMobileSub = mobileSubscriptionsResponse.subscriptions
+      iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
-        .headOption
-        .map(_ => "InAppPurchase")
-      productNames = activeSubs.records.map(_.Product__c) ++ hasMobileSub
+        .map(_.softOptInProductName)
+        .distinct
+
+      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
 
       consentsBody <- buildProductSwitchConsents(
         previousProductName,
@@ -239,11 +240,11 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
 
-      hasMobileSub = mobileSubscriptionsResponse.subscriptions
+      iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
-        .headOption
-        .map(_ => "InAppPurchase")
-      productNames = activeSubs.records.map(_.Product__c) ++ hasMobileSub
+        .map(_.softOptInProductName)
+        .distinct
+      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
 
       consents <- consentsCalculator.getCancellationConsents(
         messageBody.productName,
