@@ -46,7 +46,7 @@ class SubscriptionCancelEndpointSteps(
         subscriptionName,
         Some(identityId),
       )
-      _ <- ZIO.log(s"PostData: $postData")
+      _ <- ZIO.log(s"Cancel Supporter Plus - PostData: $postData")
       subscription <- getSubscriptionToCancel.get(subscriptionName)
       _ <- ZIO.log(s"Subscription is $subscription")
 

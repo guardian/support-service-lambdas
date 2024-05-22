@@ -13,7 +13,7 @@ import sttp.tapir.swagger.bundle.SwaggerInterpreter
 import sttp.tapir.ztapir.RIOMonadError
 import zio.{IO, Runtime, Task, ZIO, *}
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream, PrintStream}
 import java.nio.charset.StandardCharsets
 import scala.jdk.CollectionConverters.*
 
@@ -33,6 +33,23 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
   override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
+    val printStream = new PrintStream(new OutputStream() {
+
+      override def write(b: Int): Unit =
+        LambdaRuntime.getLogger.log(Array(b.toByte))
+
+      override def write(b: Array[Byte]): Unit =
+        LambdaRuntime.getLogger.log(b)
+
+      override def write(b: Array[Byte], off: Int, len: Int): Unit =
+        LambdaRuntime.getLogger.log(b.slice(off, off + len))
+
+      override def flush(): Unit =
+        java.lang.System.out.flush()
+    })
+    java.lang.System.setOut(printStream)
+    java.lang.System.setErr(printStream)
+
     val runtime = Runtime.default
     Unsafe.unsafe { implicit unsafe =>
       runtime.unsafe
