@@ -1,0 +1,1935 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuApiGateway5xxPercentageAlarm",
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEEndpoint0FD8B6C9": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGateway4XXAlarmCDKC83EACCA": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - Update supporter plus amount received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "UPDATE-SUPPORTER-PLUS-AMOUNT-CODE API gateway 4XX response",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "update-supporter-plus-amount-CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "4XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ApiGatewayHigh5xxPercentageAlarmUpdatesupporterplusamount2469A3C4": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "update-supporter-plus-amount exceeded 5% error rate",
+        "AlarmName": "High 5XX error percentage from update-supporter-plus-amount (ApiGateway) in CODE",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "EvaluationPeriods": 1,
+        "Metrics": [
+          {
+            "Expression": "100*m1/m2",
+            "Id": "expr_1",
+            "Label": "% of 5XX responses served for update-supporter-plus-amount",
+          },
+          {
+            "Id": "m1",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "update-supporter-plus-amount-CODE",
+                  },
+                ],
+                "MetricName": "5XXError",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "m2",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "update-supporter-plus-amount-CODE",
+                  },
+                ],
+                "MetricName": "Count",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "SampleCount",
+            },
+            "ReturnData": false,
+          },
+        ],
+        "Threshold": 5,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+        "Stage": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "update-supporter-plus-amount.code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "update-supporter-plus-amount.code.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "S3inlinepolicy3B07399A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/update-supporter-plus-amount/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "updatesupporterplusamountlambda0DA9A4CB": {
+      "DependsOn": [
+        "updatesupporterplusamountlambdaServiceRoleDefaultPolicy6632021A",
+        "updatesupporterplusamountlambdaServiceRole9F342B79",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/CODE/update-supporter-plus-amount/update-supporter-plus-amount.zip",
+        },
+        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Environment": {
+          "Variables": {
+            "APP": "update-supporter-plus-amount",
+            "App": "update-supporter-plus-amount",
+            "STACK": "membership",
+            "STAGE": "CODE",
+            "Stack": "membership",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "update-supporter-plus-amount-CODE",
+        "Handler": "index.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaServiceRole9F342B79",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "updatesupporterplusamountlambdaServiceRole9F342B79": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "updatesupporterplusamountlambdaServiceRoleDefaultPolicy6632021A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/CODE/update-supporter-plus-amount/update-supporter-plus-amount.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/update-supporter-plus-amount",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/update-supporter-plus-amount/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "updatesupporterplusamountlambdaServiceRoleDefaultPolicy6632021A",
+        "Roles": [
+          {
+            "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "update-supporter-plus-amount-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEANYApiPermissionTestupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDANY6DDD8A0A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEANYApiPermissionupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDANY2028CCCB": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEANYB7D7F661": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAccountCB1D0D01": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountCODECloudWatchRole3FB55309",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODECloudWatchRole3FB55309": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBBc24040d55ee548862eb1f974ece3168d": {
+      "DependsOn": [
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyANY831FAFB9",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyF2B3818D",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEANYB7D7F661",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7": {
+      "DependsOn": [
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAccountCB1D0D01",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBBc24040d55ee548862eb1f974ece3168d",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEUsagePlan48866A91": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+            },
+            "Stage": {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for update-supporter-plus-amount>",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "update-supporter-plus-amount-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEUsagePlanUsagePlanKeyResourceupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODEupdatesupporterplusamountkeyCODE1AFB8F8754FB76F8": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEupdatesupporterplusamountkeyCODE543417C7",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEUsagePlan48866A91",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyANY831FAFB9": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyF2B3818D",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyANYApiPermissionTestupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDANYproxyE8D00B74": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyANYApiPermissionupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDANYproxy6D3A4578": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyF2B3818D": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEupdatesupporterplusamountkeyCODE543417C7": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "update-supporter-plus-amount-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+            },
+            "StageName": {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+  },
+}
+`;
+
+exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuApiGateway5xxPercentageAlarm",
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODEndpoint2410A659": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGateway4XXAlarmCDKC83EACCA": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - Update supporter plus amount received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
+        "AlarmName": "UPDATE-SUPPORTER-PLUS-AMOUNT-PROD API gateway 4XX response",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "update-supporter-plus-amount-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "4XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ApiGatewayHigh5xxPercentageAlarmUpdatesupporterplusamount2469A3C4": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":retention-dev",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "update-supporter-plus-amount exceeded 5% error rate",
+        "AlarmName": "High 5XX error percentage from update-supporter-plus-amount (ApiGateway) in PROD",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "EvaluationPeriods": 1,
+        "Metrics": [
+          {
+            "Expression": "100*m1/m2",
+            "Id": "expr_1",
+            "Label": "% of 5XX responses served for update-supporter-plus-amount",
+          },
+          {
+            "Id": "m1",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "update-supporter-plus-amount-PROD",
+                  },
+                ],
+                "MetricName": "5XXError",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "m2",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "update-supporter-plus-amount-PROD",
+                  },
+                ],
+                "MetricName": "Count",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "SampleCount",
+            },
+            "ReturnData": false,
+          },
+        ],
+        "Threshold": 5,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+        "Stage": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "update-supporter-plus-amount.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "update-supporter-plus-amount.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "S3inlinepolicy3B07399A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/update-supporter-plus-amount/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "updatesupporterplusamountlambda0DA9A4CB": {
+      "DependsOn": [
+        "updatesupporterplusamountlambdaServiceRoleDefaultPolicy6632021A",
+        "updatesupporterplusamountlambdaServiceRole9F342B79",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/PROD/update-supporter-plus-amount/update-supporter-plus-amount.zip",
+        },
+        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Environment": {
+          "Variables": {
+            "APP": "update-supporter-plus-amount",
+            "App": "update-supporter-plus-amount",
+            "STACK": "membership",
+            "STAGE": "PROD",
+            "Stack": "membership",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "update-supporter-plus-amount-PROD",
+        "Handler": "index.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaServiceRole9F342B79",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "updatesupporterplusamountlambdaServiceRole9F342B79": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "updatesupporterplusamountlambdaServiceRoleDefaultPolicy6632021A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/PROD/update-supporter-plus-amount/update-supporter-plus-amount.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/update-supporter-plus-amount",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/update-supporter-plus-amount/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "updatesupporterplusamountlambdaServiceRoleDefaultPolicy6632021A",
+        "Roles": [
+          {
+            "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "update-supporter-plus-amount-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODANY10F5483D": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODANYApiPermissionTestupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8ANY6920CFE2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODANYApiPermissionupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8ANYDC381103": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODAccount9A0DEE2F": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountPRODCloudWatchRole13AB3B32",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODCloudWatchRole13AB3B32": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AE5a9e8c2422844301e81e348dbc3ca226": {
+      "DependsOn": [
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxyANY8129D41C",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxy9DC87935",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODANY10F5483D",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D": {
+      "DependsOn": [
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODAccount9A0DEE2F",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AE5a9e8c2422844301e81e348dbc3ca226",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODUsagePlan4D5C1BEE": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+            },
+            "Stage": {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for update-supporter-plus-amount>",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "update-supporter-plus-amount-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODUsagePlanUsagePlanKeyResourceupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPRODupdatesupporterplusamountkeyPROD09818C76A0A9BFE9": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODupdatesupporterplusamountkeyPRODF8998FA6",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODUsagePlan4D5C1BEE",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxy9DC87935": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxyANY8129D41C": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxy9DC87935",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxyANYApiPermissionTestupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8ANYproxyE01C937F": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxyANYApiPermissionupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8ANYproxy320756B2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODupdatesupporterplusamountkeyPRODF8998FA6": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "update-supporter-plus-amount-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+            },
+            "StageName": {
+              "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+  },
+}
+`;

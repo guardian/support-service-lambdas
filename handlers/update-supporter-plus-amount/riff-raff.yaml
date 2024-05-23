@@ -1,0 +1,25 @@
+stacks:
+- support
+regions:
+- eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  update-supporter-plus-amount-cloudformation:
+    type: cloud-formation
+    app: update-supporter-plus-amount
+    parameters:
+      templateStagePaths:
+        CODE: update-supporter-plus-amount-CODE.template.json
+        PROD: update-supporter-plus-amount-PROD.template.json
+
+  update-supporter-plus-amount:
+    type: aws-lambda
+    parameters:
+      fileName: update-supporter-plus-amount.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+      - update-supporter-plus-amount-
+    dependencies: [update-supporter-plus-amount-cloudformation]

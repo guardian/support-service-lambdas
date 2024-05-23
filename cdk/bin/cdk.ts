@@ -16,6 +16,7 @@ import {
 } from '../lib/single-contribution-salesforce-writes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -212,3 +213,18 @@ new SalesforceDisasterRecoveryHealthCheck(
 		stage: 'PROD',
 	},
 );
+new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-CODE', {
+    stack: 'support',
+    stage: 'CODE',
+    domainName: `update-supporter-plus-amount-code.${supportApisDomain}`,
+    hostedZoneId: supportHostedZoneId,
+    certificateId: supportCertificateId,
+});
+new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-PROD', {
+    stack: 'support',
+    stage: 'PROD',
+    domainName: `update-supporter-plus-amount.${supportApisDomain}`,
+    hostedZoneId: supportHostedZoneId,
+    certificateId: supportCertificateId,
+});
+

@@ -35,7 +35,7 @@ export type ProductRatePlanCharge = {
 	id: string;
 };
 
-type ProductRatePlan<
+export type ProductRatePlan<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
 > = {
