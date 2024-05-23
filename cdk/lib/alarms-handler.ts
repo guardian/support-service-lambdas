@@ -63,6 +63,14 @@ export class AlarmsHandler extends GuStack {
 				description: 'ID of the targeting aws account',
 			},
 		);
+		const targetingAccountRoleArn = new GuStringParameter(
+			this,
+			`${app}-targeting-account-role-arn`,
+			{
+				description:
+					'ARN of role in the targeting account which allows cloudwatch:ListTagsForResource',
+			},
+		);
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
@@ -84,6 +92,8 @@ export class AlarmsHandler extends GuStack {
 				// The lambda uses the mobile account role if it needs to fetch tags cross-account
 				MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
 				MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
+				TARGETING_AWS_ACCOUNT_ID: targetingAccountId.valueAsString,
+				TARGETING_ROLE_ARN: targetingAccountRoleArn.valueAsString,
 			},
 		});
 
@@ -98,12 +108,15 @@ export class AlarmsHandler extends GuStack {
 			}),
 		);
 
-		// Allow the lambda to assume the role that allows cross-account fetching of tags
+		// Allow the lambda to assume the roles that allow cross-account fetching of tags
 		lambda.addToRolePolicy(
 			new PolicyStatement({
 				actions: ['sts:AssumeRole'],
 				effect: Effect.ALLOW,
-				resources: [mobileAccountRoleArn.valueAsString],
+				resources: [
+					mobileAccountRoleArn.valueAsString,
+					targetingAccountRoleArn.valueAsString,
+				],
 			}),
 		);
 

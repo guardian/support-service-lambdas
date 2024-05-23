@@ -11,6 +11,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -45,6 +46,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
     },
     "alarmshandlermobileawsaccount": {
       "Description": "ID of the mobile aws account",
+      "Type": "String",
+    },
+    "alarmshandlertargetingaccountrolearn": {
+      "Description": "ARN of role in the targeting account which allows cloudwatch:ListTagsForResource",
       "Type": "String",
     },
     "alarmshandlertargetingawsaccount": {
@@ -156,6 +161,12 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             },
             "STACK": "membership",
             "STAGE": "CODE",
+            "TARGETING_AWS_ACCOUNT_ID": {
+              "Ref": "alarmshandlertargetingawsaccount",
+            },
+            "TARGETING_ROLE_ARN": {
+              "Ref": "alarmshandlertargetingaccountrolearn",
+            },
             "VALUE_WEBHOOK": {
               "Ref": "alarmshandlerVALUEwebhook",
             },
@@ -357,9 +368,14 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
-              "Resource": {
-                "Ref": "alarmshandlermobileaccountrolearn",
-              },
+              "Resource": [
+                {
+                  "Ref": "alarmshandlermobileaccountrolearn",
+                },
+                {
+                  "Ref": "alarmshandlertargetingaccountrolearn",
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -609,6 +625,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -643,6 +660,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
     },
     "alarmshandlermobileawsaccount": {
       "Description": "ID of the mobile aws account",
+      "Type": "String",
+    },
+    "alarmshandlertargetingaccountrolearn": {
+      "Description": "ARN of role in the targeting account which allows cloudwatch:ListTagsForResource",
       "Type": "String",
     },
     "alarmshandlertargetingawsaccount": {
@@ -754,6 +775,12 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             },
             "STACK": "membership",
             "STAGE": "PROD",
+            "TARGETING_AWS_ACCOUNT_ID": {
+              "Ref": "alarmshandlertargetingawsaccount",
+            },
+            "TARGETING_ROLE_ARN": {
+              "Ref": "alarmshandlertargetingaccountrolearn",
+            },
             "VALUE_WEBHOOK": {
               "Ref": "alarmshandlerVALUEwebhook",
             },
@@ -955,9 +982,14 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
-              "Resource": {
-                "Ref": "alarmshandlermobileaccountrolearn",
-              },
+              "Resource": [
+                {
+                  "Ref": "alarmshandlermobileaccountrolearn",
+                },
+                {
+                  "Ref": "alarmshandlertargetingaccountrolearn",
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
