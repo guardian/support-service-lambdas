@@ -113,7 +113,10 @@ export class AlarmsHandler extends GuStack {
 			new PolicyStatement({
 				actions: ['sts:AssumeRole'],
 				effect: Effect.ALLOW,
-				resources: [mobileAccountRoleArn.valueAsString, targetingAccountRoleArn.valueAsString],
+				resources: [
+					mobileAccountRoleArn.valueAsString,
+					targetingAccountRoleArn.valueAsString,
+				],
 			}),
 		);
 
