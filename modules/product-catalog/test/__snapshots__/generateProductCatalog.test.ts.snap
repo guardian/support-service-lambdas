@@ -724,6 +724,10 @@ exports[`Generated product catalog matches snapshot 1`] = `
 exports[`Generated product catalog types match snapshot 1`] = `
 {
   "Contribution": {
+    "billingPeriods": [
+      "Annual",
+      "Month",
+    ],
     "currencies": [
       "USD",
       "NZD",
@@ -742,6 +746,11 @@ exports[`Generated product catalog types match snapshot 1`] = `
     },
   },
   "DigitalSubscription": {
+    "billingPeriods": [
+      "Quarter",
+      "Month",
+      "Annual",
+    ],
     "currencies": [
       "USD",
       "NZD",
@@ -766,6 +775,11 @@ exports[`Generated product catalog types match snapshot 1`] = `
     },
   },
   "GuardianWeeklyDomestic": {
+    "billingPeriods": [
+      "Annual",
+      "Quarter",
+      "Month",
+    ],
     "currencies": [
       "USD",
       "NZD",
@@ -793,6 +807,11 @@ exports[`Generated product catalog types match snapshot 1`] = `
     },
   },
   "GuardianWeeklyRestOfWorld": {
+    "billingPeriods": [
+      "Month",
+      "Annual",
+      "Quarter",
+    ],
     "currencies": [
       "USD",
       "GBP",
@@ -816,6 +835,9 @@ exports[`Generated product catalog types match snapshot 1`] = `
     },
   },
   "HomeDelivery": {
+    "billingPeriods": [
+      "Month",
+    ],
     "currencies": [
       "GBP",
     ],
@@ -850,6 +872,9 @@ exports[`Generated product catalog types match snapshot 1`] = `
     },
   },
   "NationalDelivery": {
+    "billingPeriods": [
+      "Month",
+    ],
     "currencies": [
       "GBP",
     ],
@@ -878,6 +903,9 @@ exports[`Generated product catalog types match snapshot 1`] = `
     },
   },
   "SubscriptionCard": {
+    "billingPeriods": [
+      "Month",
+    ],
     "currencies": [
       "GBP",
     ],
@@ -912,6 +940,10 @@ exports[`Generated product catalog types match snapshot 1`] = `
     },
   },
   "SupporterPlus": {
+    "billingPeriods": [
+      "Month",
+      "Annual",
+    ],
     "currencies": [
       "USD",
       "NZD",
