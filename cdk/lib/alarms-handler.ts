@@ -56,6 +56,13 @@ export class AlarmsHandler extends GuStack {
 					'ARN of role in the mobile account which allows cloudwatch:ListTagsForResource',
 			},
 		);
+		const targetingAccountId = new GuStringParameter(
+			this,
+			`${app}-targeting-aws-account`,
+			{
+				description: 'ID of the targeting aws account',
+			},
+		);
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
@@ -118,6 +125,7 @@ export class AlarmsHandler extends GuStack {
 					ArnLike: {
 						'aws:SourceArn': [
 							`arn:aws:cloudwatch:eu-west-1:${mobileAccountId.valueAsString}:alarm:*`,
+							`arn:aws:cloudwatch:eu-west-1:${targetingAccountId.valueAsString}:alarm:*`,
 							`arn:aws:cloudwatch:eu-west-1:${this.account}:alarm:*`,
 						],
 					},
