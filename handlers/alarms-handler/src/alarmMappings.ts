@@ -3,17 +3,14 @@ import { checkDefined } from '@modules/nullAndUndefined';
 type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
 
 const sharedMobilePurchasesApps = [
-	'mobile-purchases-google-oauth',
-	'mobile-purchases-google-subscription-status',
+	'mobile-purchases-apple-pubsub',
 	'mobile-purchases-apple-subscription-status',
-	'mobile-purchases-apple-pubsub',
-	'mobile-purchases-feast-apple-pubsub',
-	'mobile-purchases-google-pubsub',
-	'mobile-purchases-feast-google-pubsub',
-	'mobile-purchases-apple-pubsub',
-	'mobile-purchases-google-pubsub',
-	'mobile-purchases-feast-apple-pubsub',
 	'mobile-purchases-delete-user-subscription',
+	'mobile-purchases-feast-apple-pubsub',
+	'mobile-purchases-feast-google-pubsub',
+	'mobile-purchases-google-oauth',
+	'mobile-purchases-google-pubsub',
+	'mobile-purchases-google-subscription-status',
 ];
 
 const teamToAppMappings: Record<Team, string[]> = {
