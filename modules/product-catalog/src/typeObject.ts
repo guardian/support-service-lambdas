@@ -1,6 +1,7 @@
 export const typeObject = {
 	DigitalSubscription: {
 		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
+		billingPeriods: ['Quarter', 'Month', 'Annual'],
 		productRatePlans: {
 			Monthly: {
 				Subscription: {},
@@ -18,6 +19,7 @@ export const typeObject = {
 	},
 	NationalDelivery: {
 		currencies: ['GBP'],
+		billingPeriods: ['Month'],
 		productRatePlans: {
 			Sixday: {
 				Monday: {},
@@ -44,6 +46,7 @@ export const typeObject = {
 	},
 	SupporterPlus: {
 		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
+		billingPeriods: ['Month', 'Annual'],
 		productRatePlans: {
 			GuardianWeeklyRestOfWorldMonthly: {
 				SupporterPlus: {},
@@ -79,6 +82,7 @@ export const typeObject = {
 	},
 	GuardianWeeklyRestOfWorld: {
 		currencies: ['USD', 'GBP'],
+		billingPeriods: ['Month', 'Annual', 'Quarter'],
 		productRatePlans: {
 			Monthly: {
 				Monthly: {},
@@ -99,6 +103,7 @@ export const typeObject = {
 	},
 	GuardianWeeklyDomestic: {
 		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
+		billingPeriods: ['Annual', 'Quarter', 'Month'],
 		productRatePlans: {
 			OneYearGift: {
 				Subscription: {},
@@ -119,6 +124,7 @@ export const typeObject = {
 	},
 	SubscriptionCard: {
 		currencies: ['GBP'],
+		billingPeriods: ['Month'],
 		productRatePlans: {
 			Sixday: {
 				Friday: {},
@@ -151,6 +157,7 @@ export const typeObject = {
 	},
 	Contribution: {
 		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
+		billingPeriods: ['Annual', 'Month'],
 		productRatePlans: {
 			Annual: {
 				Contribution: {},
@@ -162,6 +169,7 @@ export const typeObject = {
 	},
 	HomeDelivery: {
 		currencies: ['GBP'],
+		billingPeriods: ['Month'],
 		productRatePlans: {
 			Everyday: {
 				Sunday: {},
