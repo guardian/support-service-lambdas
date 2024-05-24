@@ -15,6 +15,15 @@ type ProductRatePlanChargeKey<
 export type ProductCurrency<P extends ProductKey> =
 	TypeObject[P]['currencies'][number];
 
+export const isProductCurrency = <P extends ProductKey>(
+	product: P,
+	currency: unknown,
+): currency is ProductCurrency<P> => {
+	return (typeObject[product].currencies as readonly unknown[]).includes(
+		currency,
+	);
+};
+
 export type ProductBillingPeriod<P extends ProductKey> =
 	TypeObject[P]['billingPeriods'][number];
 

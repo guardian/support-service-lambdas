@@ -52,7 +52,7 @@ export const zuoraSubscriptionSchema = z.object({
 					effectiveEndDate: z.coerce.date(),
 					billingPeriod: z.nullable(z.enum(BillingPeriodValues)),
 					processedThroughDate: z.coerce.date(),
-					chargedThroughDate: z.coerce.date(),
+					chargedThroughDate: z.coerce.date().optional(),
 					upToPeriodsType: z.nullable(z.string()),
 					upToPeriods: z.nullable(z.number()),
 					price: z.nullable(z.number()),
@@ -66,6 +66,8 @@ export const zuoraSubscriptionSchema = z.object({
 export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
 
 export type RatePlan = ZuoraSubscription['ratePlans'][number];
+
+export type RatePlanCharge = RatePlan['ratePlanCharges'][number];
 
 // --------------- Account ---------------
 export const zuoraAccountBasicInfoSchema = z
