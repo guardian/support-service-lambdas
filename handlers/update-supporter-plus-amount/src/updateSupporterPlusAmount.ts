@@ -84,11 +84,17 @@ const validateNewAmount = (
 export const updateSupporterPlusAmount = async (
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
+	identityIdFromRequest: string,
 	subscriptionNumber: string,
 	newPaymentAmount: number,
 ): Promise<EmailFields> => {
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
+	if (account.basicInfo.identityId !== identityIdFromRequest) {
+		throw new ValidationError(
+			`Subscription ${subscriptionNumber} does not belong to identity ID ${identityIdFromRequest}`,
+		);
+	}
 	const currency = account.billingAndPayment.currency;
 	if (!isProductCurrency('SupporterPlus', currency)) {
 		throw new Error(`Unsupported currency ${currency}`);

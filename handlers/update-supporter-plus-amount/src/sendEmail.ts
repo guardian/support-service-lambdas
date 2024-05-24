@@ -1,7 +1,9 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
-import type { ProductCurrency } from '@modules/product-catalog/productCatalog';
+import type {
+	ProductBillingPeriod,
+	ProductCurrency,
+} from '@modules/product-catalog/productCatalog';
 import { getCurrencyGlyph } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type dayjs from 'dayjs';
@@ -13,7 +15,7 @@ export type EmailFields = {
 	lastName: string;
 	currency: ProductCurrency<'SupporterPlus'>;
 	newAmount: number;
-	billingPeriod: BillingPeriod;
+	billingPeriod: ProductBillingPeriod<'SupporterPlus'>;
 	identityId: string;
 };
 
