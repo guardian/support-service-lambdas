@@ -313,7 +313,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd560d13880156136b72e50f0c",
         "pricing": {
-          "GBP": 78.99,
+          "GBP": 83.99,
         },
       },
       "Saturday": {
@@ -325,7 +325,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd5e1dcf0d015e3cb39d0a7ddb",
         "pricing": {
-          "GBP": 19.99,
+          "GBP": 20.99,
         },
       },
       "Sixday": {
@@ -352,7 +352,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff560d311b0156136f2afe5315",
         "pricing": {
-          "GBP": 68.99,
+          "GBP": 73.99,
         },
       },
       "Sunday": {
@@ -364,7 +364,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff5af9b657015b0fea5b653f81",
         "pricing": {
-          "GBP": 19.99,
+          "GBP": 20.99,
         },
       },
       "Weekend": {
@@ -379,7 +379,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd5614305c01561dc88f3275be",
         "pricing": {
-          "GBP": 31.99,
+          "GBP": 33.99,
         },
       },
     },
@@ -413,7 +413,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a12999f8a268c57018a27ebe31414a4",
         "pricing": {
-          "GBP": 78.99,
+          "GBP": 83.99,
         },
       },
       "Sixday": {
@@ -440,7 +440,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a12999f8a268c57018a27ebfd721883",
         "pricing": {
-          "GBP": 68.99,
+          "GBP": 73.99,
         },
       },
       "Weekend": {
@@ -455,7 +455,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a12999f8a268c57018a27ebe868150c",
         "pricing": {
-          "GBP": 31.99,
+          "GBP": 33.99,
         },
       },
     },
@@ -489,7 +489,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740c78d2f13",
         "pricing": {
-          "GBP": 64.99,
+          "GBP": 69.99,
         },
       },
       "Saturday": {
@@ -501,7 +501,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740cdd02fbd",
         "pricing": {
-          "GBP": 14.99,
+          "GBP": 15.99,
         },
       },
       "Sixday": {
@@ -528,7 +528,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740ca532f69",
         "pricing": {
-          "GBP": 56.99,
+          "GBP": 61.99,
         },
       },
       "Sunday": {
@@ -540,7 +540,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740d0d83017",
         "pricing": {
-          "GBP": 14.99,
+          "GBP": 15.99,
         },
       },
       "Weekend": {
@@ -555,7 +555,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740d24b3022",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 26.99,
         },
       },
     },
@@ -580,6 +580,86 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "GBP": 95,
           "NZD": 160,
           "USD": 120,
+        },
+      },
+      "GuardianWeeklyDomesticAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a1282048f518d08018f529eadb53d9b",
+          },
+          "SupporterPlus": {
+            "id": "8a1282048f518d08018f529ead683d93",
+          },
+        },
+        "id": "8a1282048f518d08018f529ead0f3d91",
+        "pricing": {
+          "AUD": 640,
+          "CAD": 516,
+          "EUR": 413,
+          "GBP": 275,
+          "NZD": 760,
+          "USD": 480,
+        },
+      },
+      "GuardianWeeklyDomesticMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a129a378f51a91a018f529e4a9f6d88",
+          },
+          "SupporterPlus": {
+            "id": "8a1288a38f518d01018f529a04e7317d",
+          },
+        },
+        "id": "8a1288a38f518d01018f529a04443172",
+        "pricing": {
+          "AUD": 57,
+          "CAD": 46,
+          "EUR": 36.5,
+          "GBP": 25,
+          "NZD": 67,
+          "USD": 43,
+        },
+      },
+      "GuardianWeeklyRestOfWorldAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a1292628f51a923018f52a325a2571a",
+          },
+          "SupporterPlus": {
+            "id": "8a1292628f51a923018f52a3253e5712",
+          },
+        },
+        "id": "8a1292628f51a923018f52a324e45710",
+        "pricing": {
+          "AUD": 584,
+          "CAD": 465,
+          "EUR": 365,
+          "GBP": 392.6,
+          "NZD": 690,
+          "USD": 516,
+        },
+      },
+      "GuardianWeeklyRestOfWorldMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a1281f38f518d11018f52a59a246a6f",
+          },
+          "SupporterPlus": {
+            "id": "8a1281f38f518d11018f52a599dd6a67",
+          },
+        },
+        "id": "8a1281f38f518d11018f52a599806a65",
+        "pricing": {
+          "AUD": 123,
+          "CAD": 99.25,
+          "EUR": 77.5,
+          "GBP": 34.8,
+          "NZD": 149.5,
+          "USD": 46,
         },
       },
       "Monthly": {
@@ -844,6 +924,22 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Annual": {
         "Contribution": {},
         "Subscription": {},
+      },
+      "GuardianWeeklyDomesticAnnual": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyDomesticMonthly": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyRestOfWorldAnnual": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyRestOfWorldMonthly": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
       },
       "Monthly": {
         "Contribution": {},
