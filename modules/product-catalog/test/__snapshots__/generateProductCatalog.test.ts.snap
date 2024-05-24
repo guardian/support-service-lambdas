@@ -602,6 +602,40 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 13,
         },
       },
+      "V1DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "8a12865b8219d9b40182210618c664c1",
+          },
+        },
+        "id": "8a12865b8219d9b40182210618a464ba",
+        "pricing": {
+          "AUD": 160,
+          "CAD": 120,
+          "EUR": 95,
+          "GBP": 95,
+          "NZD": 160,
+          "USD": 120,
+        },
+      },
+      "V1DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "8a12865b8219d9b401822106194e64e3",
+          },
+        },
+        "id": "8a12865b8219d9b401822106192b64dc",
+        "pricing": {
+          "AUD": 17,
+          "CAD": 13,
+          "EUR": 10,
+          "GBP": 10,
+          "NZD": 17,
+          "USD": 13,
+        },
+      },
     },
   },
 }
@@ -813,6 +847,12 @@ exports[`Generated product catalog types match snapshot 1`] = `
       },
       "Monthly": {
         "Contribution": {},
+        "Subscription": {},
+      },
+      "V1DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V1DeprecatedMonthly": {
         "Subscription": {},
       },
     },

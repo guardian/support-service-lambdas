@@ -45,19 +45,7 @@ export const typeObject = {
 	SupporterPlus: {
 		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
 		productRatePlans: {
-			Monthly: {
-				Subscription: {},
-				Contribution: {},
-			},
-			Annual: {
-				Contribution: {},
-				Subscription: {},
-			},
 			GuardianWeeklyRestOfWorldMonthly: {
-				SupporterPlus: {},
-				GuardianWeekly: {},
-			},
-			GuardianWeeklyDomesticMonthly: {
 				SupporterPlus: {},
 				GuardianWeekly: {},
 			},
@@ -68,6 +56,24 @@ export const typeObject = {
 			GuardianWeeklyDomesticAnnual: {
 				SupporterPlus: {},
 				GuardianWeekly: {},
+			},
+			GuardianWeeklyDomesticMonthly: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			V1DeprecatedMonthly: {
+				Subscription: {},
+			},
+			V1DeprecatedAnnual: {
+				Subscription: {},
+			},
+			Monthly: {
+				Subscription: {},
+				Contribution: {},
+			},
+			Annual: {
+				Contribution: {},
+				Subscription: {},
 			},
 		},
 	},

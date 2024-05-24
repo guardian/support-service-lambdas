@@ -152,6 +152,38 @@ export const productCatalogSchema = z.object({
 	}),
 	SupporterPlus: z.object({
 		ratePlans: z.object({
+			V1DeprecatedMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+					Contribution: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
+			}),
+			V1DeprecatedAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+					Contribution: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(BillingPeriodValues).optional(),
+			}),
 			Monthly: z.object({
 				id: z.string(),
 				pricing: z.object({

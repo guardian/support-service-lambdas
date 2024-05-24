@@ -3,12 +3,14 @@
  *
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
-import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import {
 	zuoraAccountSchema,
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
+import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import { previewResponseFromZuoraResponse } from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
 import type { ProductSwitchRequestBody } from '../src/schemas';
@@ -16,8 +18,10 @@ import { productSwitchRequestSchema } from '../src/schemas';
 import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
 import { parseUrlPath } from '../src/urlParsing';
 import accountJson from './fixtures/account.json';
-import catalogJson from './fixtures/product-catalog.json';
 import subscriptionJson from './fixtures/subscription.json';
+
+export const getProductCatalogFromFixture = (): ProductCatalog =>
+	generateProductCatalog(zuoraCatalogFixture);
 
 test('request body serialisation', () => {
 	const result: ProductSwitchRequestBody = productSwitchRequestSchema.parse({
@@ -65,7 +69,7 @@ test('startNewTerm is only true when the termStartDate is before today', () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
-	const productCatalog = productCatalogSchema.parse(catalogJson);
+	const productCatalog = getProductCatalogFromFixture();
 
 	const switchInformation = getSwitchInformationWithOwnerCheck(
 		'CODE',
