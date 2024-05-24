@@ -44,6 +44,7 @@ export const zuoraSubscriptionSchema = z.object({
 				z.object({
 					id: z.string(),
 					productRatePlanChargeId: z.string(),
+					number: z.string(),
 					name: z.string(),
 					type: z.string(),
 					model: z.string(),

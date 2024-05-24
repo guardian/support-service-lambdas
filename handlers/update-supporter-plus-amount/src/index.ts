@@ -1,3 +1,4 @@
+import { ValidationError } from '@modules/errors';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
@@ -8,6 +9,7 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import { requestBodySchema } from './schema';
+import { sendThankYouEmail } from './sendEmail';
 import { updateSupporterPlusAmount } from './updateSupporterPlusAmount';
 import { getSubscriptionNumberFromUrl } from './urlParsing';
 
@@ -16,16 +18,40 @@ const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-	console.log(`Input is ${JSON.stringify(event)}`);
-	const subscriptionNumber = getSubscriptionNumberFromUrl(event.path);
-	const eventBody = checkDefined(event.body, 'No request body provided');
-	const requestBody = requestBodySchema.parse(JSON.parse(eventBody));
-	const zuoraClient = await ZuoraClient.create(stage);
-	const productCatalog = await getProductCatalogFromApi(stage);
-	return await updateSupporterPlusAmount(
-		zuoraClient,
-		productCatalog,
-		subscriptionNumber,
-		requestBody.newPaymentAmount,
-	);
+	try {
+		console.log(`Input is ${JSON.stringify(event)}`);
+		const subscriptionNumber = getSubscriptionNumberFromUrl(event.path);
+		const eventBody = checkDefined(event.body, 'No request body provided');
+		const requestBody = requestBodySchema.parse(JSON.parse(eventBody));
+		const zuoraClient = await ZuoraClient.create(stage);
+		const productCatalog = await getProductCatalogFromApi(stage);
+		const emailFields = await updateSupporterPlusAmount(
+			zuoraClient,
+			productCatalog,
+			subscriptionNumber,
+			requestBody.newPaymentAmount,
+		);
+		await sendThankYouEmail({
+			stage,
+			...emailFields,
+		});
+		return {
+			body: 'Success',
+			statusCode: 200,
+		};
+	} catch (error) {
+		console.log('Caught error in index.ts ', error);
+		if (error instanceof ValidationError) {
+			console.log(`Validation failure: ${error.message}`);
+			return {
+				body: error.message,
+				statusCode: 400,
+			};
+		} else {
+			return {
+				body: JSON.stringify(error),
+				statusCode: 500,
+			};
+		}
+	}
 };

@@ -1,3 +1,4 @@
+import { ValidationError } from '@modules/errors';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type {
@@ -11,7 +12,10 @@ import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { RatePlan, RatePlanCharge } from '@modules/zuora/zuoraSchemas';
+import dayjs from 'dayjs';
+import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
+import { doUpdate } from './zuoraApi';
 
 export type SupporterPlusPlans = {
 	ratePlan: RatePlan;
@@ -66,29 +70,23 @@ const validateNewAmount = (
 ): void => {
 	const amountBand = supporterPlusAmountBands[currency][billingPeriod];
 	if (newAmount < amountBand.min) {
-		throw new Error(
+		throw new ValidationError(
 			`Amount ${newAmount} is below the minimum of ${amountBand.min}`,
 		);
 	}
 	if (newAmount > amountBand.max) {
-		throw new Error(
+		throw new ValidationError(
 			`Amount ${newAmount} is above the maximum of ${amountBand.max}`,
 		);
 	}
 };
 
-const doUpdate = (
-	newContributionAmount: number,
-	applyFromDate: Date,
-	supporterPlusPlans: SupporterPlusPlans,
-	zuoraClient: ZuoraClient,
-) => {};
 export const updateSupporterPlusAmount = async (
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
 	subscriptionNumber: string,
 	newPaymentAmount: number,
-): Promise<void> => {
+): Promise<EmailFields> => {
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
 	const currency = account.billingAndPayment.currency;
@@ -101,30 +99,41 @@ export const updateSupporterPlusAmount = async (
 		subscription.ratePlans,
 	);
 
-	validateNewAmount(
-		newPaymentAmount,
-		currency,
-		checkDefined(
-			supporterPlusPlans.productRatePlan.billingPeriod,
-			`Billing period was undefined in product rate plan ${prettyPrint(supporterPlusPlans.productRatePlan)}`,
-		),
+	const billingPeriod = checkDefined(
+		supporterPlusPlans.productRatePlan.billingPeriod,
+		`Billing period was undefined in product rate plan ${prettyPrint(supporterPlusPlans.productRatePlan)}`,
 	);
+
+	validateNewAmount(newPaymentAmount, currency, billingPeriod);
 	const newContributionAmount =
 		newPaymentAmount - supporterPlusPlans.productRatePlan.pricing[currency];
 
-	const applyFromDate =
+	const applyFromDate = dayjs(
 		supporterPlusPlans.contributionCharge.chargedThroughDate ??
-		supporterPlusPlans.contributionCharge.effectiveStartDate;
-
-	if (subscription.termEndDate < applyFromDate) {
-		// We need to extend the term
-	}
-
-	doUpdate(
-		newContributionAmount,
-		applyFromDate,
-		supporterPlusPlans,
-		zuoraClient,
+			supporterPlusPlans.contributionCharge.effectiveStartDate,
 	);
-	console.log(`${supporterPlusPlans.ratePlan.id} ${currency}`);
+
+	const startNewTerm = dayjs(subscription.termEndDate).isBefore(applyFromDate);
+
+	await doUpdate({
+		zuoraClient,
+		applyFromDate,
+		startNewTerm,
+		subscriptionNumber,
+		accountNumber: subscription.accountNumber,
+		ratePlanId: supporterPlusPlans.ratePlan.id,
+		chargeNumber: supporterPlusPlans.contributionCharge.number,
+		contributionAmount: newContributionAmount,
+	});
+
+	return {
+		nextPaymentDate: dayjs(applyFromDate),
+		emailAddress: account.billToContact.workEmail,
+		firstName: account.billToContact.firstName,
+		lastName: account.billToContact.lastName,
+		currency: currency,
+		newAmount: newContributionAmount,
+		billingPeriod: billingPeriod,
+		identityId: account.basicInfo.identityId,
+	};
 };

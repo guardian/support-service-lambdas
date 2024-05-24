@@ -1,5 +1,11 @@
 import { checkDefined } from '@modules/nullAndUndefined';
 import { zuoraDateFormat } from '@modules/zuora/common';
+import type {
+	ChangePlanOrderAction,
+	CreateOrderRequest,
+	OrderAction,
+	PreviewOrderRequest,
+} from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
@@ -8,14 +14,7 @@ import type { CatalogInformation } from './catalogInformation';
 import { takePaymentOrAdjustInvoice } from './payment';
 import { sendThankYouEmail } from './productSwitchEmail';
 import { sendSalesforceTracking } from './salesforceTracking';
-import type {
-	ChangePlanOrderAction,
-	CreateOrderRequest,
-	OrderAction,
-	PreviewOrderRequest,
-	ZuoraPreviewResponse,
-	ZuoraSwitchResponse,
-} from './schemas';
+import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import {
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
@@ -269,7 +268,7 @@ export const buildSwitchRequestBody = (
 					],
 					renewSubscription: {},
 				},
-		  ]
+			]
 		: [];
 
 	return {

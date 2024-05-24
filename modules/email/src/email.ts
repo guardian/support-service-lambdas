@@ -30,6 +30,7 @@ export type EmailPayload = {
 export const DataExtensionNames = {
 	recurringContributionToSupporterPlusSwitch: 'SV_RCtoSP_Switch',
 	subscriptionCancelledEmail: 'subscription-cancelled-email',
+	updateSupporterPlusAmount: 'payment-amount-changed-email',
 } as const;
 
 export type DataExtensionName =
