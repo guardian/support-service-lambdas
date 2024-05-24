@@ -164,7 +164,6 @@ export const productCatalogSchema = z.object({
 				}),
 				charges: z.object({
 					Subscription: z.object({ id: z.string() }),
-					Contribution: z.object({ id: z.string() }),
 				}),
 				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
@@ -180,7 +179,6 @@ export const productCatalogSchema = z.object({
 				}),
 				charges: z.object({
 					Subscription: z.object({ id: z.string() }),
-					Contribution: z.object({ id: z.string() }),
 				}),
 				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
