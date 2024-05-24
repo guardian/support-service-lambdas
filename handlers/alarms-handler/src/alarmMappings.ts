@@ -45,6 +45,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		...sharedMobilePurchasesApps,
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
+		'salesforce-case-raiser',
 	],
 	SRE: ['gchat-test-app'],
 	PP: [
