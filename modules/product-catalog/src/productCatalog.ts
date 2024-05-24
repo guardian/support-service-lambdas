@@ -1,4 +1,3 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
 import { typeObject } from '@modules/product-catalog/typeObject';
 
 type TypeObject = typeof typeObject;
@@ -45,7 +44,7 @@ type ProductRatePlan<
 	charges: {
 		[PRPC in ProductRatePlanChargeKey<P, PRP>]: ProductRatePlanCharge;
 	};
-	billingPeriod?: BillingPeriod;
+	billingPeriod?: ProductBillingPeriod<P>;
 };
 
 type Product<P extends ProductKey> = {
