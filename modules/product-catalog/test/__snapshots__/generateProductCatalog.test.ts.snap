@@ -602,7 +602,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 13,
         },
       },
-      "V1LegacyAnnual": {
+      "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
         "charges": {
           "Subscription": {
@@ -619,7 +619,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 120,
         },
       },
-      "V1LegacyMonthly": {
+      "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
         "charges": {
           "Subscription": {
@@ -849,10 +849,10 @@ exports[`Generated product catalog types match snapshot 1`] = `
         "Contribution": {},
         "Subscription": {},
       },
-      "V1LegacyAnnual": {
+      "V1DeprecatedAnnual": {
         "Subscription": {},
       },
-      "V1LegacyMonthly": {
+      "V1DeprecatedMonthly": {
         "Subscription": {},
       },
     },

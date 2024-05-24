@@ -61,10 +61,10 @@ export const typeObject = {
 				SupporterPlus: {},
 				GuardianWeekly: {},
 			},
-			V1LegacyMonthly: {
+			V1DeprecatedMonthly: {
 				Subscription: {},
 			},
-			V1LegacyAnnual: {
+			V1DeprecatedAnnual: {
 				Subscription: {},
 			},
 			Monthly: {

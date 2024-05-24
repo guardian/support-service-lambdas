@@ -152,7 +152,7 @@ export const productCatalogSchema = z.object({
 	}),
 	SupporterPlus: z.object({
 		ratePlans: z.object({
-			V1LegacyMonthly: z.object({
+			V1DeprecatedMonthly: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
@@ -168,7 +168,7 @@ export const productCatalogSchema = z.object({
 				}),
 				billingPeriod: z.enum(BillingPeriodValues).optional(),
 			}),
-			V1LegacyAnnual: z.object({
+			V1DeprecatedAnnual: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
