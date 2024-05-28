@@ -91,6 +91,7 @@ Resources:
   RefundDeadLetterQueue:
     Type: AWS::SQS::Queue
     Properties:
+      MessageRetentionPeriod: 1209600 # 14 days this needs to be longer than the message retention period of the main queue because the expiration of a message is always based on its original enqueue timestamp
       QueueName:
         Fn::Sub: product-switch-refund-dead-letter-${Stage}
   ProductMoveApiGatewayUsagePlan:
@@ -393,10 +394,14 @@ Resources:
     Properties:
       AlarmActions:
         - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
-      AlarmName:
-        Fn::Sub: A new message in the refund lambda dead letter queue ${Stage}. Please check the logs to
-          diagnose and redrive the product-switch-refund-dead-letter-${Stage} SQS
-          queue when ready.
+      AlarmName: New message in the product-switch-refund-dead-letter-PROD dead letter queue.
+      AlarmDescription: There is a new message in the product-switch-refund-dead-letter-PROD dead letter queue. This means that a user who has cancelled their supporter plus subscription
+        within 14 days has not received the refund that they are due.
+        Please check the
+        product-switch-refund-PROD logs - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fproduct-switch-refund-PROD
+        and the
+        invoicing-api-refund-PROD logs - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Finvoicing-api-refund-PROD
+        to diagnose the issue.
       Namespace: AWS/SQS
       MetricName: ApproximateNumberOfMessagesVisible
       Dimensions:
