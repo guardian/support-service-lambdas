@@ -53,7 +53,7 @@ export const zuoraSubscriptionSchema = z.object({
 					effectiveEndDate: z.coerce.date(),
 					billingPeriod: z.nullable(z.enum(BillingPeriodValues)),
 					processedThroughDate: z.coerce.date(),
-					chargedThroughDate: z.coerce.date().optional(),
+					chargedThroughDate: z.coerce.date().nullable(),
 					upToPeriodsType: z.nullable(z.string()),
 					upToPeriods: z.nullable(z.number()),
 					price: z.nullable(z.number()),
