@@ -47,7 +47,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'salesforce-case-raiser',
 	],
-	SRE: ['gchat-test-app'],
+	SRE: ['alarms-handler', 'gchat-test-app'],
 	PP: [
 		// contributions-platform
 		'fixation',
@@ -70,12 +70,12 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// zuora-retention
 		'zuora-retention',
-		
+
 		// support-frontend
 		'frontend',
 		'it-test-runner',
 		'stripe-intent',
-		
+
 		// other
 		'canonical-config',
 		'salesforce-disaster-recovery',
@@ -95,7 +95,7 @@ const buildAppToTeamMappings = (): Record<string, Team[]> => {
 		}
 	}
 	return mappings;
-}
+};
 
 const appToTeamMappings: Record<string, Team[]> = buildAppToTeamMappings();
 
