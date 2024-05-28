@@ -23,11 +23,16 @@ export const handler: Handler = async (
 		const subscriptionNumber = getSubscriptionNumberFromUrl(event.path);
 		const eventBody = checkDefined(event.body, 'No request body provided');
 		const requestBody = requestBodySchema.parse(JSON.parse(eventBody));
+		const identityId = checkDefined(
+			event.headers['x-identity-id'],
+			'Identity ID not found in request',
+		);
 		const zuoraClient = await ZuoraClient.create(stage);
 		const productCatalog = await getProductCatalogFromApi(stage);
 		const emailFields = await updateSupporterPlusAmount(
 			zuoraClient,
 			productCatalog,
+			identityId,
 			subscriptionNumber,
 			requestBody.newPaymentAmount,
 		);
