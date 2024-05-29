@@ -1,11 +1,14 @@
-
 import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { ApiKeySourceType , CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ApiKeySourceType,
+	CfnBasePathMapping,
+	CfnDomainName,
+} from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -35,7 +38,7 @@ export class UpdateSupporterPlusAmount extends GuStack {
 		// ---- API-triggered lambda functions ---- //
 		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
-				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
+				'An API Gateway triggered lambda to carry out supporter plus amount updates',
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
@@ -43,10 +46,8 @@ export class UpdateSupporterPlusAmount extends GuStack {
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
-			// Create an alarm
 			monitoringConfiguration: {
-				http5xxAlarm: { tolerated5xxPercentage: 5 },
-				snsTopicName: 'retention-dev',
+				noMonitoring: true,
 			},
 			app: app,
 			api: {
@@ -57,18 +58,17 @@ export class UpdateSupporterPlusAmount extends GuStack {
 				deployOptions: {
 					stageName: this.stage,
 				},
-			
+
 				apiKeySourceType: ApiKeySourceType.HEADER,
 				defaultMethodOptions: {
 					apiKeyRequired: true,
 				},
-			
 			},
 		});
-	
+
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
-			description: 'REST endpoints for update-supporter-plus-amount>',
+			description: 'REST endpoints for update-supporter-plus-amount',
 			apiStages: [
 				{
 					stage: lambda.api.deploymentStage,
@@ -79,41 +79,45 @@ export class UpdateSupporterPlusAmount extends GuStack {
 
 		// create api key
 		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
-		apiKeyName: `${app}-key-${this.stage}`,
+			apiKeyName: `${app}-key-${this.stage}`,
 		});
 
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
-	
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
-			`UPDATE-SUPPORTER-PLUS-AMOUNT-${this.stage} ${shortDescription}`;
+			`update-supporter-plus-amount-${this.stage} ${shortDescription}`;
 
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
-		new GuAlarm(this, 'ApiGateway4XXAlarmCDK', {
-			app,
-			alarmName: alarmName('API gateway 4XX response'),
-			alarmDescription: alarmDescription(
-				'Update supporter plus amount received an invalid request',
-			),
-			evaluationPeriods: 1,
-			threshold: 1,
-			snsTopicName: 'retention-dev',
-			actionsEnabled: this.stage === 'PROD',
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			metric: new Metric({
-				metricName: '4XXError',
-				namespace: 'AWS/ApiGateway',
-				statistic: 'Sum',
-				period: Duration.seconds(300),
-				dimensionsMap: {
-					ApiName: nameWithStage,
-				},
-			}),
-		});
+		if (this.stage === 'PROD') {
+			new GuAlarm(this, 'ApiGateway5XXAlarm', {
+				app,
+				alarmName: alarmName(
+					'Update supporter plus amount - API gateway 5XX response',
+				),
+				alarmDescription: alarmDescription(
+					'Update supporter plus amount api returned a 5XX response. This means that a user who was trying to update the ' +
+						'contribution amount of their supporter plus subscription has received an error. Please check the logs to diagnose the issue',
+				),
+				evaluationPeriods: 1,
+				threshold: 1,
+				snsTopicName: 'retention-dev',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: '5XXError',
+					namespace: 'AWS/ApiGateway',
+					statistic: 'Sum',
+					period: Duration.seconds(300),
+					dimensionsMap: {
+						ApiName: nameWithStage,
+					},
+				}),
+			});
+		}
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
@@ -144,7 +148,9 @@ export class UpdateSupporterPlusAmount extends GuStack {
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
-					resources: [`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`],
+					resources: [
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+					],
 				}),
 			],
 		});
