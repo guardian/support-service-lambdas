@@ -214,17 +214,16 @@ new SalesforceDisasterRecoveryHealthCheck(
 	},
 );
 new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-CODE', {
-    stack: 'support',
-    stage: 'CODE',
-    domainName: `update-supporter-plus-amount-code.${supportApisDomain}`,
-    hostedZoneId: supportHostedZoneId,
-    certificateId: supportCertificateId,
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `update-supporter-plus-amount-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
 });
 new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-PROD', {
-    stack: 'support',
-    stage: 'PROD',
-    domainName: `update-supporter-plus-amount.${supportApisDomain}`,
-    hostedZoneId: supportHostedZoneId,
-    certificateId: supportCertificateId,
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `update-supporter-plus-amount.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
 });
-
