@@ -31,7 +31,13 @@ test('We can carry out an amount change', async () => {
 		productCatalog,
 		identityId,
 		subscriptionNumber,
-		20,
+		21,
 	);
-	expect(result.billingPeriod).toEqual('Month');
+
+	const expected = {
+		currency: 'GBP',
+		newAmount: 21,
+	};
+
+	expect(result).toEqual(expect.objectContaining(expected));
 });

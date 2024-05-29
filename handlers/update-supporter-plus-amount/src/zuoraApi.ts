@@ -14,7 +14,7 @@ export const doUpdate = async ({
 }: {
 	zuoraClient: ZuoraClient;
 	applyFromDate: Dayjs;
-	startNewTerm: boolean;
+	newTermStartDate?: Dayjs;
 	subscriptionNumber: string;
 	accountNumber: string;
 	ratePlanId: string;
@@ -69,7 +69,7 @@ const buildUpdateProductOrderAction = (
 
 export const buildRequestBody = ({
 	applyFromDate,
-	startNewTerm,
+	newTermStartDate,
 	subscriptionNumber,
 	accountNumber,
 	ratePlanId,
@@ -77,58 +77,59 @@ export const buildRequestBody = ({
 	contributionAmount,
 }: {
 	applyFromDate: Dayjs;
-	startNewTerm: boolean;
+	newTermStartDate?: Dayjs;
 	subscriptionNumber: string;
 	accountNumber: string;
 	ratePlanId: string;
 	chargeNumber: string;
 	contributionAmount: number;
 }): OrderRequest => {
-	const newTermOrderActions: OrderAction[] = startNewTerm
-		? [
-				{
-					type: 'TermsAndConditions',
-					triggerDates: [
-						{
-							name: 'ContractEffective',
-							triggerDate: zuoraDateFormat(applyFromDate),
-						},
-						{
-							name: 'ServiceActivation',
-							triggerDate: zuoraDateFormat(applyFromDate),
-						},
-						{
-							name: 'CustomerAcceptance',
-							triggerDate: zuoraDateFormat(applyFromDate),
-						},
-					],
-					termsAndConditions: {
-						lastTerm: {
-							termType: 'TERMED',
-							endDate: zuoraDateFormat(applyFromDate),
+	const newTermOrderActions: OrderAction[] =
+		newTermStartDate !== undefined
+			? [
+					{
+						type: 'TermsAndConditions',
+						triggerDates: [
+							{
+								name: 'ContractEffective',
+								triggerDate: zuoraDateFormat(newTermStartDate),
+							},
+							{
+								name: 'ServiceActivation',
+								triggerDate: zuoraDateFormat(newTermStartDate),
+							},
+							{
+								name: 'CustomerAcceptance',
+								triggerDate: zuoraDateFormat(newTermStartDate),
+							},
+						],
+						termsAndConditions: {
+							lastTerm: {
+								termType: 'TERMED',
+								endDate: zuoraDateFormat(newTermStartDate),
+							},
 						},
 					},
-				},
-				{
-					type: 'RenewSubscription',
-					triggerDates: [
-						{
-							name: 'ContractEffective',
-							triggerDate: zuoraDateFormat(applyFromDate),
-						},
-						{
-							name: 'ServiceActivation',
-							triggerDate: zuoraDateFormat(applyFromDate),
-						},
-						{
-							name: 'CustomerAcceptance',
-							triggerDate: zuoraDateFormat(applyFromDate),
-						},
-					],
-					renewSubscription: {},
-				},
-			]
-		: [];
+					{
+						type: 'RenewSubscription',
+						triggerDates: [
+							{
+								name: 'ContractEffective',
+								triggerDate: zuoraDateFormat(newTermStartDate),
+							},
+							{
+								name: 'ServiceActivation',
+								triggerDate: zuoraDateFormat(newTermStartDate),
+							},
+							{
+								name: 'CustomerAcceptance',
+								triggerDate: zuoraDateFormat(newTermStartDate),
+							},
+						],
+						renewSubscription: {},
+					},
+				]
+			: [];
 
 	return {
 		orderDate: zuoraDateFormat(applyFromDate),

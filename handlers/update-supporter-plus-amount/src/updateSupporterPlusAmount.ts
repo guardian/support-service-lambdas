@@ -11,7 +11,12 @@ import { isProductCurrency } from '@modules/product-catalog/productCatalog';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { RatePlan, RatePlanCharge } from '@modules/zuora/zuoraSchemas';
+import type {
+	RatePlan,
+	RatePlanCharge,
+	ZuoraSubscription,
+} from '@modules/zuora/zuoraSchemas';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
@@ -81,6 +86,31 @@ const validateNewAmount = (
 	}
 };
 
+const getNewTermStartDate = (
+	subscription: ZuoraSubscription,
+	contributionCharge: RatePlanCharge,
+	applyFromDate: Dayjs,
+): Dayjs | undefined => {
+	if (applyFromDate.isAfter(dayjs(subscription.termEndDate))) {
+		// This will cause an error in Zuora "The Contract effective date should not be later than the term end date of the basic subscription."
+		// because you can't add an update after the current term end date.
+		// This has probably happened because the subscription was updated without a new term being started,
+		// so the charge is no longer aligned with the term. To fix this we can start a new term from
+		// the point at which the current term started.
+		const potentialNewTermStartDate = dayjs(
+			contributionCharge.effectiveStartDate,
+		);
+		const today = dayjs().startOf('day');
+		if (potentialNewTermStartDate.isBefore(today)) {
+			// Only start a new term if the charge we are dealing with started in the past, I'm not sure what
+			// will happen otherwise! We can investigate when/if we get a "The Contract effective date..." error from a
+			// subscription in that state
+			return potentialNewTermStartDate;
+		}
+	}
+	return undefined;
+};
+
 export const updateSupporterPlusAmount = async (
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
@@ -115,16 +145,20 @@ export const updateSupporterPlusAmount = async (
 		newPaymentAmount - supporterPlusPlans.productRatePlan.pricing[currency];
 
 	const applyFromDate = dayjs(
-		supporterPlusPlans.contributionCharge.chargedThroughDate ??
-			supporterPlusPlans.contributionCharge.effectiveStartDate,
+		supporterPlusPlans.contributionCharge.chargedThroughDate ?? // If the currently active charge is the one that was invoiced last
+			supporterPlusPlans.contributionCharge.effectiveStartDate, // If there is a pending amendment
 	);
 
-	const startNewTerm = dayjs(subscription.termEndDate).isBefore(applyFromDate);
+	const newTermStartDate = getNewTermStartDate(
+		subscription,
+		supporterPlusPlans.contributionCharge,
+		applyFromDate,
+	);
 
 	await doUpdate({
 		zuoraClient,
 		applyFromDate,
-		startNewTerm,
+		newTermStartDate,
 		subscriptionNumber,
 		accountNumber: subscription.accountNumber,
 		ratePlanId: supporterPlusPlans.ratePlan.id,
@@ -138,7 +172,7 @@ export const updateSupporterPlusAmount = async (
 		firstName: account.billToContact.firstName,
 		lastName: account.billToContact.lastName,
 		currency: currency,
-		newAmount: newContributionAmount,
+		newAmount: newPaymentAmount,
 		billingPeriod: billingPeriod,
 		identityId: account.basicInfo.identityId,
 	};
