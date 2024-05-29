@@ -5,6 +5,7 @@ import type {
 	UpdateProductOrderAction,
 } from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 
@@ -22,11 +23,15 @@ export const doUpdate = async ({
 	contributionAmount: number;
 }) => {
 	const requestBody = buildRequestBody(rest);
-	await zuoraClient.post(
+	const response: ZuoraSuccessResponse = await zuoraClient.post(
 		'/v1/orders',
 		JSON.stringify(requestBody),
 		zuoraSuccessResponseSchema,
 	);
+	if (!response.success) {
+		const errorMessage = response.reasons?.at(0)?.message;
+		throw Error(errorMessage ?? `Unknown error updating subscription`);
+	}
 };
 
 const buildUpdateProductOrderAction = (
@@ -139,13 +144,13 @@ export const buildRequestBody = ({
 			{
 				subscriptionNumber,
 				orderActions: [
+					...newTermOrderActions,
 					buildUpdateProductOrderAction(
 						applyFromDate,
 						ratePlanId,
 						chargeNumber,
 						contributionAmount,
 					),
-					...newTermOrderActions,
 				],
 			},
 		],
