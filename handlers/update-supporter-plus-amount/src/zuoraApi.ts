@@ -1,9 +1,5 @@
 import { zuoraDateFormat } from '@modules/zuora/common';
-import type {
-	OrderAction,
-	OrderRequest,
-	UpdateProductOrderAction,
-} from '@modules/zuora/orders';
+import type { OrderRequest } from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
@@ -11,87 +7,73 @@ import type { Dayjs } from 'dayjs';
 
 export const doUpdate = async ({
 	zuoraClient,
+	newTermStartDate,
+	subscriptionNumber,
+	accountNumber,
 	...rest
 }: {
 	zuoraClient: ZuoraClient;
-	applyFromDate: Dayjs;
 	newTermStartDate?: Dayjs;
 	subscriptionNumber: string;
 	accountNumber: string;
+	applyFromDate: Dayjs;
 	ratePlanId: string;
 	chargeNumber: string;
 	contributionAmount: number;
 }) => {
-	const requestBody = buildRequestBody(rest);
+	if (newTermStartDate !== undefined) {
+		// We have to do the new term and the update amount requests
+		// separately because the order dates are different
+		await doCreateOrderRequest(
+			zuoraClient,
+			buildNewTermRequestBody(
+				newTermStartDate,
+				subscriptionNumber,
+				accountNumber,
+			),
+			'starting new term',
+		);
+	}
+	await doCreateOrderRequest(
+		zuoraClient,
+		buildUpdateAmountRequestBody({
+			subscriptionNumber,
+			accountNumber,
+			...rest,
+		}),
+		'updating subscription',
+	);
+};
+
+const doCreateOrderRequest = async (
+	zuoraClient: ZuoraClient,
+	body: OrderRequest,
+	context: string,
+) => {
 	const response: ZuoraSuccessResponse = await zuoraClient.post(
 		'/v1/orders',
-		JSON.stringify(requestBody),
+		JSON.stringify(body),
 		zuoraSuccessResponseSchema,
 	);
 	if (!response.success) {
 		const errorMessage = response.reasons?.at(0)?.message;
-		throw Error(errorMessage ?? `Unknown error updating subscription`);
+		throw Error(errorMessage ?? `Unknown error ${context}`);
 	}
 };
 
-const buildUpdateProductOrderAction = (
-	applyFromDate: Dayjs,
-	ratePlanId: string,
-	chargeNumber: string,
-	contributionAmount: number,
-): UpdateProductOrderAction => {
+export const buildNewTermRequestBody = (
+	newTermStartDate: Dayjs,
+	subscriptionNumber: string,
+	accountNumber: string,
+): OrderRequest => {
 	return {
-		type: 'UpdateProduct',
-		triggerDates: [
+		orderDate: zuoraDateFormat(newTermStartDate),
+		existingAccountNumber: accountNumber,
+		description: 'Renewed the subscription during supporter plus amount update',
+		subscriptions: [
 			{
-				name: 'ContractEffective',
-				triggerDate: zuoraDateFormat(applyFromDate),
-			},
-			{
-				name: 'ServiceActivation',
-				triggerDate: zuoraDateFormat(applyFromDate),
-			},
-			{
-				name: 'CustomerAcceptance',
-				triggerDate: zuoraDateFormat(applyFromDate),
-			},
-		],
-		updateProduct: {
-			ratePlanId,
-			chargeUpdates: [
-				{
-					chargeNumber,
-					pricing: {
-						recurringFlatFee: {
-							listPrice: contributionAmount,
-						},
-					},
-				},
-			],
-		},
-	};
-};
-
-export const buildRequestBody = ({
-	applyFromDate,
-	newTermStartDate,
-	subscriptionNumber,
-	accountNumber,
-	ratePlanId,
-	chargeNumber,
-	contributionAmount,
-}: {
-	applyFromDate: Dayjs;
-	newTermStartDate?: Dayjs;
-	subscriptionNumber: string;
-	accountNumber: string;
-	ratePlanId: string;
-	chargeNumber: string;
-	contributionAmount: number;
-}): OrderRequest => {
-	const newTermOrderActions: OrderAction[] =
-		newTermStartDate !== undefined
-			? [
+				subscriptionNumber,
+				orderActions: [
 					{
 						type: 'TermsAndConditions',
 						triggerDates: [
@@ -133,24 +115,65 @@ export const buildRequestBody = ({
 						],
 						renewSubscription: {},
 					},
-				]
-			: [];
+				],
+			},
+		],
+	};
+};
 
+export const buildUpdateAmountRequestBody = ({
+	applyFromDate,
+	subscriptionNumber,
+	accountNumber,
+	ratePlanId,
+	chargeNumber,
+	contributionAmount,
+}: {
+	applyFromDate: Dayjs;
+	subscriptionNumber: string;
+	accountNumber: string;
+	ratePlanId: string;
+	chargeNumber: string;
+	contributionAmount: number;
+}): OrderRequest => {
 	return {
 		orderDate: zuoraDateFormat(applyFromDate),
 		existingAccountNumber: accountNumber,
-
+		description: 'Update supporter plus contribution amount',
 		subscriptions: [
 			{
 				subscriptionNumber,
 				orderActions: [
-					...newTermOrderActions,
-					buildUpdateProductOrderAction(
-						applyFromDate,
-						ratePlanId,
-						chargeNumber,
-						contributionAmount,
-					),
+					{
+						type: 'UpdateProduct',
+						triggerDates: [
+							{
+								name: 'ContractEffective',
+								triggerDate: zuoraDateFormat(applyFromDate),
+							},
+							{
+								name: 'ServiceActivation',
+								triggerDate: zuoraDateFormat(applyFromDate),
+							},
+							{
+								name: 'CustomerAcceptance',
+								triggerDate: zuoraDateFormat(applyFromDate),
+							},
+						],
+						updateProduct: {
+							ratePlanId,
+							chargeUpdates: [
+								{
+									chargeNumber,
+									pricing: {
+										recurringFlatFee: {
+											listPrice: contributionAmount,
+										},
+									},
+								},
+							],
+						},
+					},
 				],
 			},
 		],

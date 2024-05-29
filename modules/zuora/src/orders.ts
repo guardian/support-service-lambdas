@@ -88,6 +88,7 @@ export type OrderAction =
 export type OrderRequest = {
 	orderDate: string;
 	existingAccountNumber: string;
+	description?: string;
 	subscriptions: Array<{
 		subscriptionNumber: string;
 		orderActions: OrderAction[];

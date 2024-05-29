@@ -21,8 +21,8 @@ afterEach(() => {
 const stage = 'CODE';
 
 test('We can carry out an amount change', async () => {
-	const subscriptionNumber = 'A-S00603578';
-	const identityId = '200090533';
+	const subscriptionNumber = 'A-S00612865';
+	const identityId = '200110884';
 	const newPaymentAmount = 160;
 	const zuoraClient = await ZuoraClient.create(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
