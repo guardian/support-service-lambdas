@@ -21,8 +21,9 @@ afterEach(() => {
 const stage = 'CODE';
 
 test('We can carry out an amount change', async () => {
-	const subscriptionNumber = 'A-S00602370';
-	const identityId = '200131442';
+	const subscriptionNumber = 'A-S00603578';
+	const identityId = '200090533';
+	const newPaymentAmount = 160;
 	const zuoraClient = await ZuoraClient.create(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
 
@@ -31,13 +32,8 @@ test('We can carry out an amount change', async () => {
 		productCatalog,
 		identityId,
 		subscriptionNumber,
-		21,
+		newPaymentAmount,
 	);
 
-	const expected = {
-		currency: 'GBP',
-		newAmount: 21,
-	};
-
-	expect(result).toEqual(expect.objectContaining(expected));
+	expect(result.newAmount).toEqual(newPaymentAmount);
 });

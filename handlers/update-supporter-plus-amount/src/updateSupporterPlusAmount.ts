@@ -39,8 +39,9 @@ export const getSupporterPlusPlans = (
 			productCatalog.SupporterPlus.ratePlans.Annual,
 	};
 
-	const productRatePlans = ratePlans.reduce(
-		(acc: SupporterPlusPlans[], ratePlan: RatePlan) => {
+	const productRatePlans = ratePlans
+		.filter((ratePlan) => ratePlan.lastChangeType !== 'Remove')
+		.reduce((acc: SupporterPlusPlans[], ratePlan: RatePlan) => {
 			const productRatePlan =
 				supporterPlusProductRatePlans[ratePlan.productRatePlanId];
 
@@ -56,9 +57,7 @@ export const getSupporterPlusPlans = (
 				acc.push({ ratePlan, productRatePlan, contributionCharge });
 			}
 			return acc;
-		},
-		[],
-	);
+		}, []);
 
 	if (productRatePlans.length !== 1 || productRatePlans[0] === undefined) {
 		throw new Error(
