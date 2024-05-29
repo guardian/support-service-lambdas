@@ -4,7 +4,6 @@ import type {
 	ProductBillingPeriod,
 	ProductCurrency,
 } from '@modules/product-catalog/productCatalog';
-import { getCurrencyGlyph } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type dayjs from 'dayjs';
 
@@ -38,8 +37,8 @@ export const sendThankYouEmail = async ({
 					first_name: firstName,
 					last_name: lastName,
 					new_amount: newAmount.toFixed(2),
-					currency: getCurrencyGlyph(currency),
-					frequency: `${billingPeriod}ly`,
+					currency: currency,
+					frequency: billingPeriod,
 					next_payment_date: nextPaymentDate.format('DD MMMM YYYY'),
 				},
 			},

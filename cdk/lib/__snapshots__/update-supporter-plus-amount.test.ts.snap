@@ -150,7 +150,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/update-supporter-plus-amount/update-supporter-plus-amount.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "An API Gateway triggered lambda to carry out supporter plus amount updates",
         "Environment": {
           "Variables": {
             "APP": "update-supporter-plus-amount",
@@ -1043,7 +1043,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/update-supporter-plus-amount/update-supporter-plus-amount.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "An API Gateway triggered lambda to carry out supporter plus amount updates",
         "Environment": {
           "Variables": {
             "APP": "update-supporter-plus-amount",

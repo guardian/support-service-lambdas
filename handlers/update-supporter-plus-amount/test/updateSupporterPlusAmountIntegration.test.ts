@@ -1,6 +1,8 @@
 import console from 'console';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import dayjs from 'dayjs';
+import { sendThankYouEmail } from '../src/sendEmail';
 import { updateSupporterPlusAmount } from '../src/updateSupporterPlusAmount';
 
 /**
@@ -36,4 +38,29 @@ test('We can carry out an amount change', async () => {
 	);
 
 	expect(result.newAmount).toEqual(newPaymentAmount);
+});
+
+test('We can send a thank you email', async () => {
+	const emailAddress = 'rupert.bates@theguardian.com';
+	const nextPaymentDate = dayjs().add(5, 'day');
+	const identityId = '200006098';
+	const newAmount = 160;
+	const firstName = 'R';
+	const lastName = 'B';
+	const currency = 'GBP';
+	const billingPeriod = 'Month';
+
+	const result = await sendThankYouEmail({
+		stage,
+		nextPaymentDate,
+		emailAddress,
+		firstName,
+		lastName,
+		currency,
+		newAmount,
+		billingPeriod,
+		identityId,
+	});
+
+	expect(result.$metadata.httpStatusCode).toEqual(200);
 });
