@@ -22,39 +22,74 @@ import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
 import { doUpdate } from './zuoraApi';
 
-export type SupporterPlusPlans = {
+type UpdatablePlans =
+	| 'Annual'
+	| 'Monthly'
+	| 'V1DeprecatedAnnual'
+	| 'V1DeprecatedMonthly';
+
+export type SupporterPlusData = {
 	ratePlan: RatePlan;
-	productRatePlan: ProductRatePlan<'SupporterPlus', 'Annual' | 'Monthly'>;
+	productRatePlan: ProductRatePlan<'SupporterPlus', UpdatablePlans>;
 	contributionCharge: RatePlanCharge;
+	planHasSeparateContributionCharge: boolean;
 };
 
 export const getSupporterPlusPlans = (
 	productCatalog: ProductCatalog,
 	ratePlans: RatePlan[],
-): SupporterPlusPlans => {
-	const supporterPlusProductRatePlans = {
-		[productCatalog.SupporterPlus.ratePlans.Monthly.id]:
-			productCatalog.SupporterPlus.ratePlans.Monthly,
-		[productCatalog.SupporterPlus.ratePlans.Annual.id]:
-			productCatalog.SupporterPlus.ratePlans.Annual,
+): SupporterPlusData => {
+	const supporterPlusProductData = {
+		[productCatalog.SupporterPlus.ratePlans.Monthly.id]: {
+			productRatePlan: productCatalog.SupporterPlus.ratePlans.Monthly,
+			charge:
+				productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution,
+			planHasSeparateContributionCharge: true,
+		},
+		[productCatalog.SupporterPlus.ratePlans.Annual.id]: {
+			productRatePlan: productCatalog.SupporterPlus.ratePlans.Annual,
+			charge:
+				productCatalog.SupporterPlus.ratePlans.Annual.charges.Contribution,
+			planHasSeparateContributionCharge: true,
+		},
+		[productCatalog.SupporterPlus.ratePlans.V1DeprecatedMonthly.id]: {
+			productRatePlan:
+				productCatalog.SupporterPlus.ratePlans.V1DeprecatedMonthly,
+			charge:
+				productCatalog.SupporterPlus.ratePlans.V1DeprecatedMonthly.charges
+					.Subscription,
+			planHasSeparateContributionCharge: false,
+		},
+		[productCatalog.SupporterPlus.ratePlans.V1DeprecatedAnnual.id]: {
+			productRatePlan:
+				productCatalog.SupporterPlus.ratePlans.V1DeprecatedAnnual,
+			charge:
+				productCatalog.SupporterPlus.ratePlans.V1DeprecatedAnnual.charges
+					.Subscription,
+			planHasSeparateContributionCharge: false,
+		},
 	};
 
 	const productRatePlans = ratePlans
 		.filter((ratePlan) => ratePlan.lastChangeType !== 'Remove')
-		.reduce((acc: SupporterPlusPlans[], ratePlan: RatePlan) => {
-			const productRatePlan =
-				supporterPlusProductRatePlans[ratePlan.productRatePlanId];
-
-			if (productRatePlan !== undefined) {
+		.reduce((acc: SupporterPlusData[], ratePlan: RatePlan) => {
+			const productData = supporterPlusProductData[ratePlan.productRatePlanId];
+			if (productData !== undefined) {
+				const { productRatePlan, planHasSeparateContributionCharge } =
+					productData;
 				const contributionCharge = checkDefined(
 					ratePlan.ratePlanCharges.find(
-						(ratePlan) =>
-							ratePlan.productRatePlanChargeId ===
-							productRatePlan.charges.Contribution.id,
+						(charge) =>
+							charge.productRatePlanChargeId === productData.charge.id,
 					),
 					'Contribution charge not found in rate plan',
 				);
-				acc.push({ ratePlan, productRatePlan, contributionCharge });
+				acc.push({
+					ratePlan,
+					productRatePlan,
+					contributionCharge,
+					planHasSeparateContributionCharge,
+				});
 			}
 			return acc;
 		}, []);
@@ -129,28 +164,31 @@ export const updateSupporterPlusAmount = async (
 		throw new Error(`Unsupported currency ${currency}`);
 	}
 
-	const supporterPlusPlans = getSupporterPlusPlans(
+	const supporterPlusData = getSupporterPlusPlans(
 		productCatalog,
 		subscription.ratePlans,
 	);
 
 	const billingPeriod = checkDefined(
-		supporterPlusPlans.productRatePlan.billingPeriod,
-		`Billing period was undefined in product rate plan ${prettyPrint(supporterPlusPlans.productRatePlan)}`,
+		supporterPlusData.productRatePlan.billingPeriod,
+		`Billing period was undefined in product rate plan ${prettyPrint(supporterPlusData.productRatePlan)}`,
 	);
 
 	validateNewAmount(newPaymentAmount, currency, billingPeriod);
+
 	const newContributionAmount =
-		newPaymentAmount - supporterPlusPlans.productRatePlan.pricing[currency];
+		supporterPlusData.planHasSeparateContributionCharge
+			? newPaymentAmount - supporterPlusData.productRatePlan.pricing[currency]
+			: newPaymentAmount;
 
 	const applyFromDate = dayjs(
-		supporterPlusPlans.contributionCharge.chargedThroughDate ?? // If the currently active charge is the one that was invoiced last
-			supporterPlusPlans.contributionCharge.effectiveStartDate, // If there is a pending amendment
+		supporterPlusData.contributionCharge.chargedThroughDate ?? // If the currently active charge is the one that was invoiced last
+			supporterPlusData.contributionCharge.effectiveStartDate, // If there is a pending amendment
 	);
 
 	const newTermStartDate = getNewTermStartDate(
 		subscription,
-		supporterPlusPlans.contributionCharge,
+		supporterPlusData.contributionCharge,
 		applyFromDate,
 	);
 
@@ -160,8 +198,8 @@ export const updateSupporterPlusAmount = async (
 		newTermStartDate,
 		subscriptionNumber,
 		accountNumber: subscription.accountNumber,
-		ratePlanId: supporterPlusPlans.ratePlan.id,
-		chargeNumber: supporterPlusPlans.contributionCharge.number,
+		ratePlanId: supporterPlusData.ratePlan.id,
+		chargeNumber: supporterPlusData.contributionCharge.number,
 		contributionAmount: newContributionAmount,
 	});
 
