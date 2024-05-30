@@ -74,7 +74,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'zuora-retention',
 
 		// support-frontend
-		'bigquery-acquisitions-publisher',
 		'frontend',
 		'it-test-runner',
 		'stripe-intent',
