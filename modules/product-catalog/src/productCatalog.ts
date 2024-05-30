@@ -1,4 +1,3 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
 import { typeObject } from '@modules/product-catalog/typeObject';
 
 type TypeObject = typeof typeObject;
@@ -15,6 +14,18 @@ type ProductRatePlanChargeKey<
 
 export type ProductCurrency<P extends ProductKey> =
 	TypeObject[P]['currencies'][number];
+
+export type ProductBillingPeriod<P extends ProductKey> =
+	TypeObject[P]['billingPeriods'][number];
+
+export const isProductBillingPeriod = <P extends ProductKey>(
+	product: P,
+	billingPeriod: unknown,
+): billingPeriod is ProductBillingPeriod<P> => {
+	return (typeObject[product].billingPeriods as readonly unknown[]).includes(
+		billingPeriod,
+	);
+};
 
 type ProductPrice<P extends ProductKey> = {
 	[PC in ProductCurrency<P>]: number;
@@ -33,7 +44,7 @@ type ProductRatePlan<
 	charges: {
 		[PRPC in ProductRatePlanChargeKey<P, PRP>]: ProductRatePlanCharge;
 	};
-	billingPeriod?: BillingPeriod;
+	billingPeriod?: ProductBillingPeriod<P>;
 };
 
 type Product<P extends ProductKey> = {

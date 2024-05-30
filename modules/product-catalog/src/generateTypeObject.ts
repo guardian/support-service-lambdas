@@ -33,7 +33,21 @@ const getCurrenciesForProduct = (productRatePlan: ZuoraProductRatePlan) =>
 			charge.pricing.map((price) => price.currency),
 		),
 	);
-
+const getBillingPeriodsForProduct = (
+	productRatePlans: ZuoraProductRatePlan[],
+) =>
+	distinct(
+		productRatePlans
+			.flatMap((productRatePlan) =>
+				productRatePlan.productRatePlanCharges.flatMap(
+					(charge) => charge.billingPeriod,
+				),
+			)
+			.filter(
+				(billingPeriod) =>
+					billingPeriod !== null && billingPeriod != 'Specific_Weeks',
+			) as string[],
+	);
 const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 	const currencies = getCurrenciesForProduct(
 		checkDefined(
@@ -41,8 +55,10 @@ const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 			'Undefined productRatePlan in getZuoraProductObjects',
 		),
 	);
+	const billingPeriods = getBillingPeriodsForProduct(productRatePlans);
 	return {
 		currencies,
+		billingPeriods,
 		productRatePlans: arrayToObject(
 			productRatePlans
 				.filter((productRatePlan) =>
