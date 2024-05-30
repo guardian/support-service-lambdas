@@ -151,8 +151,8 @@ importers:
         specifier: ^8.10.137
         version: 8.10.137
       aws-sdk-client-mock:
-        specifier: 4.0.0
-        version: 4.0.0
+        specifier: ^3.0.1
+        version: 3.1.0
 
   handlers/salesforce-disaster-recovery-health-check:
     dependencies:
@@ -2051,8 +2051,8 @@ packages:
     engines: {node: '>= 14.15.0'}
     hasBin: true
 
-  aws-sdk-client-mock@4.0.0:
-    resolution: {integrity: sha512-/rxo+pzCFaUozK7TyCqo3GYwzdBGn9Ai6EsT8ytXDoUXlD/Q5hw9hj2lOkCAyubECzGJFHMmQg9GZ1GOGlN/qQ==}
+  aws-sdk-client-mock@3.1.0:
+    resolution: {integrity: sha512-3Mx5R8DDka2TB8qtr5jDbSVJsUM6uoX5tZSReBsJS8HunVtL9PHhb+RU7b+I3/53B2fJAyoEp7dJNXndBI+6MA==}
 
   aws-sdk@2.1573.0:
     resolution: {integrity: sha512-Bl+rTEnjKdJrd0NfrLRVQq4AbSgK1+7yoWQTnreZTHCbYhzndP/3HLxA/8x0a8NZSb9oPC+7paFaWW00Xz/Gtw==}
@@ -7855,7 +7855,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.2
 
-  aws-sdk-client-mock@4.0.0:
+  aws-sdk-client-mock@3.1.0:
     dependencies:
       '@types/sinon': 10.0.20
       sinon: 16.1.3
