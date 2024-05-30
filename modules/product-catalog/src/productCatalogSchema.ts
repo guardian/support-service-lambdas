@@ -189,7 +189,9 @@ export const productCatalogSchema = z.object({
 				charges: z.object({
 					Subscription: z.object({ id: z.string() }),
 				}),
-				billingPeriod: z.enum(BillingPeriodValues).optional(),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
 			}),
 			V1DeprecatedAnnual: z.object({
 				id: z.string(),
@@ -204,7 +206,9 @@ export const productCatalogSchema = z.object({
 				charges: z.object({
 					Subscription: z.object({ id: z.string() }),
 				}),
-				billingPeriod: z.enum(BillingPeriodValues).optional(),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
 			}),
 			Monthly: z.object({
 				id: z.string(),
