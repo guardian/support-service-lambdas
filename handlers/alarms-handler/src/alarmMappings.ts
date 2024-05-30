@@ -19,6 +19,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'admin-console',
 		'apps-metering',
 		'batch-email-sender',
+		'bigquery-acquisitions-publisher',
 		'component-event-stream',
 		'contributions-ticker-calculator',
 		'digital-voucher-api',
@@ -73,6 +74,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'zuora-retention',
 
 		// support-frontend
+		'bigquery-acquisitions-publisher',
 		'frontend',
 		'it-test-runner',
 		'stripe-intent',
