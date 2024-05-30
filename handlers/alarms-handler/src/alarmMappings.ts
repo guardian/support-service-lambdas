@@ -24,6 +24,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'digital-voucher-api',
 		'dotcom-components',
 		'fulfilment-date-calculator',
+		'invoicing-api',
 		...sharedMobilePurchasesApps,
 		'new-product-api',
 		'price-migration-engine-state-machine',
