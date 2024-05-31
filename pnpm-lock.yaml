@@ -121,6 +121,9 @@ importers:
 
   handlers/product-switch-api:
     dependencies:
+      '@aws-sdk/client-sqs':
+        specifier: 3.451.0
+        version: 3.451.0
       dayjs:
         specifier: ^1.11.11
         version: 1.11.11
@@ -128,9 +131,6 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
-      '@aws-sdk/client-sqs':
-        specifier: 3.451.0
-        version: 3.451.0
       '@types/aws-lambda':
         specifier: ^8.10.129
         version: 8.10.129
