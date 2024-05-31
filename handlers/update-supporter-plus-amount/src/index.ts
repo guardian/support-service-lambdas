@@ -41,7 +41,7 @@ export const handler: Handler = async (
 			...emailFields,
 		});
 		return {
-			body: 'Success',
+			body: JSON.stringify({ message: 'Success' }),
 			statusCode: 200,
 		};
 	} catch (error) {
