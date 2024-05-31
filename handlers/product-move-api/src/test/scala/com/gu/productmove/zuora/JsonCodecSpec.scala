@@ -4,6 +4,7 @@ import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.GetAccount.BasicInfo
 import com.gu.productmove.*
+import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
 
 import collection.mutable.Stack
 import org.scalatest.*
@@ -121,5 +122,11 @@ class JsonCodecSpec extends AnyFlatSpec {
     val json = Source.fromResource("zuoraResponses/SubscriptionUpdateResponse2.json").mkString
 
     assert(json.fromJson[SubscriptionUpdateResponse].getOrElse("") == subscriptionUpdateResponse5)
+  }
+
+  it should "Handle subscriptions with a discount" in {
+    val json = Source.fromResource("zuoraResponses/GetSubscriptionToCancelResponse.json").mkString
+    val response = json.fromJson[GetSubscriptionToCancelResponse]
+    assert(response.isRight, response.left)
   }
 }
