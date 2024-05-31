@@ -155,6 +155,37 @@ export class UpdateSupporterPlusAmount extends GuStack {
 			],
 		});
 
+		const secretsManagerPolicy: Policy = new Policy(
+			this,
+			'Secrets Manager policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
+		const sqsPolicy: Policy = new Policy(this, 'SQS policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
+					resources: [
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+						`arn:aws:sqs:${this.region}:${this.account}:supporter-product-data-${this.stage}`,
+					],
+				}),
+			],
+		});
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
+		lambda.role?.attachInlinePolicy(sqsPolicy);
 	}
 }
