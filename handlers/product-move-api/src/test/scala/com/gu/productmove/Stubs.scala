@@ -105,7 +105,26 @@ val getSubscriptionForCancelResponse = GetSubscriptionToCancelResponse(
             .productRatePlanChargeId
             .value,
           name = "Contribution",
-          price = 5.000000000,
+          price = Some(5.000000000),
+          number = "number",
+          effectiveStartDate = LocalDate.of(2017, 12, 15),
+          effectiveEndDate = LocalDate.of(2020, 11, 29),
+          chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
+          billingPeriod = Some("Monthly"),
+        ),
+      ),
+    ),
+    GetSubscriptionToCancel.RatePlan(
+      id = "89ad8casd9c0asdcaj89sdc98as",
+      productName = "Discounts",
+      productRatePlanId = "a_discount_rate_plan_id",
+      ratePlanName = "RP2",
+      lastChangeType = None,
+      ratePlanCharges = List(
+        GetSubscriptionToCancel.RatePlanCharge(
+          productRatePlanChargeId = "a_discount_rate_plan_charge_id",
+          name = "Contribution",
+          price = None,
           number = "number",
           effectiveStartDate = LocalDate.of(2017, 12, 15),
           effectiveEndDate = LocalDate.of(2020, 11, 29),
