@@ -57,6 +57,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'stripe-intent',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
+		'workers',
 	],
 };
 
