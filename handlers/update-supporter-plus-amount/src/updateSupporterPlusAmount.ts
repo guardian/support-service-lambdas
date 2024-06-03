@@ -70,7 +70,7 @@ export const getSupporterPlusPlans = (
 		},
 	};
 
-	const productRatePlans = ratePlans
+	const updatableChargeData = ratePlans
 		.filter((ratePlan) => ratePlan.lastChangeType !== 'Remove')
 		.reduce((acc: SupporterPlusData[], ratePlan: RatePlan) => {
 			const productData = supporterPlusProductData[ratePlan.productRatePlanId];
@@ -97,12 +97,15 @@ export const getSupporterPlusPlans = (
 			return acc;
 		}, []);
 
-	if (productRatePlans.length !== 1 || productRatePlans[0] === undefined) {
+	if (
+		updatableChargeData.length !== 1 ||
+		updatableChargeData[0] === undefined
+	) {
 		throw new Error(
 			`Expected 1 rate plan for Supporter Plus, got ${ratePlans.length}`,
 		);
 	}
-	return productRatePlans[0];
+	return updatableChargeData[0];
 };
 
 const validateNewAmount = (
