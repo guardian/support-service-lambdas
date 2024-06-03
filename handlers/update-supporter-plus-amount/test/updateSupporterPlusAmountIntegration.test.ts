@@ -41,7 +41,8 @@ test('We can carry out an amount change', async () => {
 });
 
 test('We can send a thank you email', async () => {
-	const emailAddress = 'rupert.bates@theguardian.com';
+	// Change the value below to send yourself a thank you email
+	const emailAddress = 'no-replay@thegulocal.com';
 	const nextPaymentDate = dayjs().add(5, 'day');
 	const identityId = '200006098';
 	const newAmount = 160;
