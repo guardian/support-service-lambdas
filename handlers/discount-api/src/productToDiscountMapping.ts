@@ -39,6 +39,29 @@ export type Discount = {
 	eligibleProductRatePlanIds: string[];
 };
 
+type Product = 'digiSub'
+
+const productRatePlanIds: {
+	[K in 'CODE'|'PROD']: {
+		[K in Product]: {[K in BillingPeriod]: string};
+	};
+} = {
+    CODE: {
+		digiSub: {
+			Month: '2c92c0f84bbfec8b014bc655f4852d9d',
+			Quarter: '2c92c0f84bbfec58014bc6a2d43a1f5b',
+			Annual: '2c92c0f94bbffaaa014bc6a4212e205b'
+		}
+	},
+	PROD: {
+		digiSub: {
+			Month: '2c92a0fb4edd70c8014edeaa4eae220a',
+			Quarter: '2c92a0fb4edd70c8014edeaa4e8521fe',
+			Annual: '2c92a0fb4edd70c8014edeaa4e972204'
+		}
+	}
+}
+
 const ProductToDiscountMapping: {
 	[K in Stage]: {
 		[K in BillingPeriod]: Discount;
@@ -53,8 +76,8 @@ const ProductToDiscountMapping: {
 			effectiveStartDate: '2018-04-01',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
-				'2c92c0f84bbfec8b014bc655f4852d9d',
-				'2c92c0f84bbfec58014bc6a2d43a1f5b',
+				productRatePlanIds.CODE.digiSub.Month,
+				productRatePlanIds.CODE.digiSub.Quarter,
 			],
 		},
 		Quarter: {
@@ -65,8 +88,8 @@ const ProductToDiscountMapping: {
 			effectiveStartDate: '2018-04-01',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
-				'2c92c0f84bbfec8b014bc655f4852d9d',
-				'2c92c0f84bbfec58014bc6a2d43a1f5b',
+				productRatePlanIds.CODE.digiSub.Month,
+				productRatePlanIds.CODE.digiSub.Quarter,
 			],
 		},
 		Annual: {
@@ -76,7 +99,7 @@ const ProductToDiscountMapping: {
 			upToPeriodsType: 'Months',
 			effectiveStartDate: '2023-10-23',
 			effectiveEndDate: '2099-03-08',
-			eligibleProductRatePlanIds: ['2c92c0f94bbffaaa014bc6a4212e205b'],
+			eligibleProductRatePlanIds: [productRatePlanIds.CODE.digiSub.Annual],
 		},
 	},
 	CSBX: {
@@ -88,8 +111,8 @@ const ProductToDiscountMapping: {
 			effectiveStartDate: '2018-06-22',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
-				'2c92a0fb4edd70c8014edeaa4eae220a',
-				'2c92a0fb4edd70c8014edeaa4e8521fe',
+				productRatePlanIds.PROD.digiSub.Month,
+				productRatePlanIds.PROD.digiSub.Quarter,
 			],
 		},
 		Quarter: {
@@ -100,8 +123,8 @@ const ProductToDiscountMapping: {
 			effectiveStartDate: '2018-06-22',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
-				'2c92a0fb4edd70c8014edeaa4eae220a',
-				'2c92a0fb4edd70c8014edeaa4e8521fe',
+				productRatePlanIds.PROD.digiSub.Month,
+				productRatePlanIds.PROD.digiSub.Quarter,
 			],
 		},
 		Annual: {
@@ -111,7 +134,7 @@ const ProductToDiscountMapping: {
 			upToPeriodsType: 'Months',
 			effectiveStartDate: '2023-10-26',
 			effectiveEndDate: '2099-03-08',
-			eligibleProductRatePlanIds: ['2c92a0fb4edd70c8014edeaa4e972204'],
+			eligibleProductRatePlanIds: [productRatePlanIds.PROD.digiSub.Annual],
 		},
 	},
 	PROD: {
@@ -123,8 +146,8 @@ const ProductToDiscountMapping: {
 			effectiveStartDate: '2018-06-22',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
-				'2c92a0fb4edd70c8014edeaa4eae220a',
-				'2c92a0fb4edd70c8014edeaa4e8521fe',
+				productRatePlanIds.PROD.digiSub.Month,
+				productRatePlanIds.PROD.digiSub.Quarter,
 			],
 		},
 		Quarter: {
@@ -135,8 +158,8 @@ const ProductToDiscountMapping: {
 			effectiveStartDate: '2018-06-22',
 			effectiveEndDate: '2099-03-08',
 			eligibleProductRatePlanIds: [
-				'2c92a0fb4edd70c8014edeaa4eae220a',
-				'2c92a0fb4edd70c8014edeaa4e8521fe',
+				productRatePlanIds.PROD.digiSub.Month,
+				productRatePlanIds.PROD.digiSub.Quarter,
 			],
 		},
 		Annual: {
@@ -146,7 +169,7 @@ const ProductToDiscountMapping: {
 			upToPeriodsType: 'Months',
 			effectiveStartDate: '2023-10-26',
 			effectiveEndDate: '2099-03-08',
-			eligibleProductRatePlanIds: ['2c92a0fb4edd70c8014edeaa4e972204'],
+			eligibleProductRatePlanIds: [productRatePlanIds.PROD.digiSub.Annual],
 		},
 	},
 };
