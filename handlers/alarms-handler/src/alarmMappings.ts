@@ -45,6 +45,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
 		...sharedMobilePurchasesApps,
+		'manage-help-content-publisher',
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
