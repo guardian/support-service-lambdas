@@ -54,7 +54,7 @@ export const handler: Handler = async (
 			};
 		} else {
 			return {
-				body: JSON.stringify(error),
+				body: 'Unexpected error while carrying out the request',
 				statusCode: 500,
 			};
 		}
