@@ -15,8 +15,10 @@ export const cancelSubscription = async (
 	const body = JSON.stringify({
 		cancellationEffectiveDate: zuoraDateFormat(contractEffectiveDate),
 		cancellationPolicy: 'SpecificDate',
-		runBilling,// for some reason zuora chokes on this here but not when pasted into postman?
+		runBilling,
 		collect,
 	});
-	return zuoraClient.put(path, body, zuoraSuccessResponseSchema);
+	return zuoraClient.put(path, body, zuoraSuccessResponseSchema, {
+		'zuora-version': '211.0',
+	});
 };
