@@ -83,6 +83,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'canonical-config',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
+		'workers',
 	],
 };
 
