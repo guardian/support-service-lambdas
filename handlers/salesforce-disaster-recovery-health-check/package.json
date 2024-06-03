@@ -9,7 +9,7 @@
 		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr salesforce-disaster-recovery-health-check.zip ./*.js"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.129"
+		"@types/aws-lambda": "^8.10.138"
 	},
 	"dependencies": {
 		"@aws-sdk/client-sfn": "^3.552.0",

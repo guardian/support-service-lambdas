@@ -10,7 +10,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.137",
+		"@types/aws-lambda": "^8.10.138",
 		"aws-sdk-client-mock": "^3.0.1"
 	},
 	"dependencies": {
