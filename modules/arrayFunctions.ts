@@ -19,17 +19,18 @@ export const groupBy = <T>(
 
 export const getSingleOrThrow = <T>(
 	array: T[],
-	filter: (element: T) => boolean,
+	error: (msg: string) => Error,
+	filter?: (element: T) => boolean,
 ): T => {
-	const matchingElements = array.filter(filter);
+	const matchingElements = filter ? array.filter(filter) : array;
 	if (matchingElements.length > 1) {
-		throw new Error('Array had more than one matching element');
+		throw error('Array had more than one matching element');
 	}
 	if (matchingElements.length < 1) {
-		throw new Error('Array had no matching elements');
+		throw error('Array had no matching elements');
 	}
 	if (!matchingElements[0]) {
-		throw new ReferenceError('Matching element was null or undefined :-s');
+		throw error('Matching element was null or undefined');
 	}
 	return matchingElements[0];
 };
