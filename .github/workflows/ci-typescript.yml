@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - update-supporter-plus-amount
           - product-switch-api
           - generate-product-catalog
           - alarms-handler
@@ -24,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.1
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'

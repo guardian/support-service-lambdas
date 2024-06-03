@@ -44,6 +44,7 @@ export const zuoraSubscriptionSchema = z.object({
 				z.object({
 					id: z.string(),
 					productRatePlanChargeId: z.string(),
+					number: z.string(),
 					name: z.string(),
 					type: z.string(),
 					model: z.string(),
@@ -52,7 +53,7 @@ export const zuoraSubscriptionSchema = z.object({
 					effectiveEndDate: z.coerce.date(),
 					billingPeriod: z.nullable(z.enum(BillingPeriodValues)),
 					processedThroughDate: z.coerce.date(),
-					chargedThroughDate: z.coerce.date(),
+					chargedThroughDate: z.coerce.date().nullable(),
 					upToPeriodsType: z.nullable(z.string()),
 					upToPeriods: z.nullable(z.number()),
 					price: z.nullable(z.number()),
@@ -66,6 +67,8 @@ export const zuoraSubscriptionSchema = z.object({
 export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
 
 export type RatePlan = ZuoraSubscription['ratePlans'][number];
+
+export type RatePlanCharge = RatePlan['ratePlanCharges'][number];
 
 // --------------- Account ---------------
 export const zuoraAccountBasicInfoSchema = z
@@ -113,6 +116,9 @@ export type ZuoraSubscribeResponse = z.infer<
 // --------------- Basic success response ---------------
 export const zuoraSuccessResponseSchema = z.object({
 	success: z.boolean(),
+	reasons: z.optional(
+		z.array(z.object({ code: z.number(), message: z.string() })),
+	),
 });
 
 export const zuoraUpperCaseSuccessResponseSchema = z.object({

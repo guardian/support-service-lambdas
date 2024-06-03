@@ -20,8 +20,8 @@ export const handler: Handler = async (
 };
 
 const routeRequest = async (event: APIGatewayProxyEvent) => {
-	const parsedUrlPath = parseUrlPath(event.path);
 	try {
+		const parsedUrlPath = parseUrlPath(event.path);
 		if (
 			parsedUrlPath.switchType === 'recurring-contribution-to-supporter-plus'
 		) {
