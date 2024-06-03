@@ -60,7 +60,10 @@ export const discountEndpoint = async (
 	]);
 
 	console.log('Working out the appropriate discount for the subscription');
-	const {discount, nonDiscountRatePlan} = getDiscountFromSubscription(stage, subscription);
+	const { discount, nonDiscountRatePlan } = getDiscountFromSubscription(
+		stage,
+		subscription,
+	);
 
 	console.log('Checking this subscription is eligible for the discount');
 	const dateToApply = eligibilityChecker.getNextBillingDateIfEligible(

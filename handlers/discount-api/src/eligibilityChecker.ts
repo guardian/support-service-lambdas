@@ -1,9 +1,9 @@
-import {sum} from '@modules/arrayFunctions';
-import {ValidationError} from '@modules/errors';
-import {checkDefined} from '@modules/nullAndUndefined';
-import {getNextInvoiceItems} from '@modules/zuora/billingPreview';
-import type {BillingPreview, RatePlan,} from '@modules/zuora/zuoraSchemas';
-import type {ZuoraCatalogHelper} from '@modules/zuora-catalog/zuoraCatalog';
+import { sum } from '@modules/arrayFunctions';
+import { ValidationError } from '@modules/errors';
+import { checkDefined } from '@modules/nullAndUndefined';
+import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
+import type { BillingPreview, RatePlan } from '@modules/zuora/zuoraSchemas';
+import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 
 export class EligibilityChecker {
 	constructor(private catalog: ZuoraCatalogHelper) {}
