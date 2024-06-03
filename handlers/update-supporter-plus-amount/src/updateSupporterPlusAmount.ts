@@ -84,12 +84,15 @@ export const getSupporterPlusPlans = (
 					),
 					'Contribution charge not found in rate plan',
 				);
-				acc.push({
-					ratePlan,
-					productRatePlan,
-					contributionCharge,
-					planHasSeparateContributionCharge,
-				});
+				return [
+					...acc,
+					{
+						ratePlan,
+						productRatePlan,
+						contributionCharge,
+						planHasSeparateContributionCharge,
+					},
+				];
 			}
 			return acc;
 		}, []);
