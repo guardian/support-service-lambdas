@@ -31,71 +31,74 @@ type UpdatablePlans =
 export type SupporterPlusData = {
 	ratePlan: RatePlan;
 	productRatePlan: ProductRatePlan<'SupporterPlus', UpdatablePlans>;
-	contributionCharge: RatePlanCharge;
+	chargeToUpdate: RatePlanCharge;
 	planHasSeparateContributionCharge: boolean;
 };
 
-export const getSupporterPlusPlans = (
+type ProductData = {
+	productRatePlan: ProductRatePlan<'SupporterPlus', UpdatablePlans>;
+	chargeToUpdateId: string;
+	planHasSeparateContributionCharge: boolean;
+};
+
+export const getSupporterPlusData = (
 	productCatalog: ProductCatalog,
 	ratePlans: RatePlan[],
 ): SupporterPlusData => {
-	const supporterPlusProductData = {
-		[productCatalog.SupporterPlus.ratePlans.Monthly.id]: {
-			productRatePlan: productCatalog.SupporterPlus.ratePlans.Monthly,
-			charge:
-				productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution,
+	const supporterPlus = productCatalog.SupporterPlus.ratePlans;
+	const supporterPlusProductData: Record<string, ProductData> = {
+		[supporterPlus.Monthly.id]: {
+			productRatePlan: supporterPlus.Monthly,
+			chargeToUpdateId: supporterPlus.Monthly.charges.Contribution.id,
 			planHasSeparateContributionCharge: true,
 		},
-		[productCatalog.SupporterPlus.ratePlans.Annual.id]: {
-			productRatePlan: productCatalog.SupporterPlus.ratePlans.Annual,
-			charge:
-				productCatalog.SupporterPlus.ratePlans.Annual.charges.Contribution,
+		[supporterPlus.Annual.id]: {
+			productRatePlan: supporterPlus.Annual,
+			chargeToUpdateId: supporterPlus.Annual.charges.Contribution.id,
 			planHasSeparateContributionCharge: true,
 		},
-		[productCatalog.SupporterPlus.ratePlans.V1DeprecatedMonthly.id]: {
-			productRatePlan:
-				productCatalog.SupporterPlus.ratePlans.V1DeprecatedMonthly,
-			charge:
-				productCatalog.SupporterPlus.ratePlans.V1DeprecatedMonthly.charges
-					.Subscription,
+		[supporterPlus.V1DeprecatedMonthly.id]: {
+			productRatePlan: supporterPlus.V1DeprecatedMonthly,
+			chargeToUpdateId:
+				supporterPlus.V1DeprecatedMonthly.charges.Subscription.id,
 			planHasSeparateContributionCharge: false,
 		},
-		[productCatalog.SupporterPlus.ratePlans.V1DeprecatedAnnual.id]: {
-			productRatePlan:
-				productCatalog.SupporterPlus.ratePlans.V1DeprecatedAnnual,
-			charge:
-				productCatalog.SupporterPlus.ratePlans.V1DeprecatedAnnual.charges
-					.Subscription,
+		[supporterPlus.V1DeprecatedAnnual.id]: {
+			productRatePlan: supporterPlus.V1DeprecatedAnnual,
+			chargeToUpdateId:
+				supporterPlus.V1DeprecatedAnnual.charges.Subscription.id,
 			planHasSeparateContributionCharge: false,
 		},
 	};
 
 	const updatableChargeData = ratePlans
-		.filter((ratePlan) => ratePlan.lastChangeType !== 'Remove')
-		.reduce((acc: SupporterPlusData[], ratePlan: RatePlan) => {
-			const productData = supporterPlusProductData[ratePlan.productRatePlanId];
-			if (productData !== undefined) {
-				const { productRatePlan, planHasSeparateContributionCharge } =
-					productData;
-				const contributionCharge = checkDefined(
-					ratePlan.ratePlanCharges.find(
-						(charge) =>
-							charge.productRatePlanChargeId === productData.charge.id,
-					),
-					'Contribution charge not found in rate plan',
-				);
-				return [
-					...acc,
-					{
-						ratePlan,
-						productRatePlan,
-						contributionCharge,
-						planHasSeparateContributionCharge,
-					},
-				];
-			}
-			return acc;
-		}, []);
+		.map((ratePlan) => ({
+			ratePlan,
+			productData: supporterPlusProductData[ratePlan.productRatePlanId],
+		}))
+		.filter(
+			(item): item is { ratePlan: RatePlan; productData: ProductData } =>
+				item.ratePlan.lastChangeType !== 'Remove' &&
+				item.productData !== undefined,
+		)
+		.map((item) => {
+			const { ratePlan, productData } = item;
+			const { productRatePlan, planHasSeparateContributionCharge } =
+				productData;
+			const chargeToUpdate = checkDefined(
+				ratePlan.ratePlanCharges.find(
+					(charge) =>
+						charge.productRatePlanChargeId === productData.chargeToUpdateId,
+				),
+				`Couldn\t find a charge with the id ${productData.chargeToUpdateId} in this rate plan`,
+			);
+			return {
+				ratePlan,
+				productRatePlan,
+				chargeToUpdate,
+				planHasSeparateContributionCharge,
+			};
+		});
 
 	if (
 		updatableChargeData.length !== 1 ||
@@ -170,7 +173,7 @@ export const updateSupporterPlusAmount = async (
 		throw new Error(`Unsupported currency ${currency}`);
 	}
 
-	const supporterPlusData = getSupporterPlusPlans(
+	const supporterPlusData = getSupporterPlusData(
 		productCatalog,
 		subscription.ratePlans,
 	);
@@ -188,13 +191,13 @@ export const updateSupporterPlusAmount = async (
 			: newPaymentAmount;
 
 	const applyFromDate = dayjs(
-		supporterPlusData.contributionCharge.chargedThroughDate ?? // If the currently active charge is the one that was invoiced last
-			supporterPlusData.contributionCharge.effectiveStartDate, // If there is a pending amendment
+		supporterPlusData.chargeToUpdate.chargedThroughDate ?? // If the currently active charge is the one that was invoiced last
+			supporterPlusData.chargeToUpdate.effectiveStartDate, // If there is a pending amendment
 	);
 
 	const newTermStartDate = getNewTermStartDate(
 		subscription,
-		supporterPlusData.contributionCharge,
+		supporterPlusData.chargeToUpdate,
 		applyFromDate,
 	);
 
@@ -205,7 +208,7 @@ export const updateSupporterPlusAmount = async (
 		subscriptionNumber,
 		accountNumber: subscription.accountNumber,
 		ratePlanId: supporterPlusData.ratePlan.id,
-		chargeNumber: supporterPlusData.contributionCharge.number,
+		chargeNumber: supporterPlusData.chargeToUpdate.number,
 		contributionAmount: newContributionAmount,
 	});
 
