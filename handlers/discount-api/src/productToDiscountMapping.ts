@@ -44,7 +44,6 @@ export type Discount = {
 
 type Product = 'digiSub';
 
-// TODO in future refactor "catalog" to use catalog service
 const catalog: {
 	[K in 'CODE' | 'PROD']: {
 		[K in Product]: { [K in BillingPeriod]: string };
