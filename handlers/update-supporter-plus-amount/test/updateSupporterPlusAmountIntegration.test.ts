@@ -1,4 +1,4 @@
-import console from 'console';
+'workers',import console from 'console';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';

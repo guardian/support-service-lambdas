@@ -123,7 +123,7 @@ Resources:
         For troubleshooting, see
         https://github.com/guardian/support-service-lambdas/blob/main/handlers/digital-voucher-suspension-processor/README.md.
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
