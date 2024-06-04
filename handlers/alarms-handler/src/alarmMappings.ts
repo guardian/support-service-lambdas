@@ -79,12 +79,15 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'frontend',
 		'it-test-runner',
 		'stripe-intent',
+		'workers',
+
+		// support-service-lambdas
+		'digital-voucher-suspension-processor',
 
 		// other
 		'canonical-config',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
-		'workers',
 	],
 };
 

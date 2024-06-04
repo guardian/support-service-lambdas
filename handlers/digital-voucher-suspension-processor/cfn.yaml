@@ -123,14 +123,19 @@ Resources:
         For troubleshooting, see
         https://github.com/guardian/support-service-lambdas/blob/main/handlers/digital-voucher-suspension-processor/README.md.
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
           Value: !Ref SuspensionLambda
-      EvaluationPeriods: 1
+      
       MetricName: Errors
       Namespace: AWS/Lambda
+      # We have the alarm only trigger after 2 evaluation periods
+      # We do expect intermittent failures from external APIs,
+      # but they should be fixed on the next run and we want to
+      # pick-up on any sustained issues
+      EvaluationPeriods: 2
       Period: 3600
       Statistic: Sum
       Threshold: 3
