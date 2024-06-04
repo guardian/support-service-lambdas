@@ -104,10 +104,10 @@ const getDiscountPreview = async (
 		discount.productRatePlanId,
 	);
 
-	if (!previewResponse.success || previewResponse.invoiceItems.length != 2) {
+	if (!previewResponse.success || previewResponse.invoiceItems.length < 2) {
 		throw new Error(
 			'Unexpected data in preview response from Zuora. ' +
-				'We expected 2 invoice items, one for the discount and one for the main plan',
+				'We expected at least 2 invoice items, one for the discount and at least one for the main plan',
 		);
 	}
 
