@@ -9,7 +9,5 @@ test('getDiscountFromSubscription should return an annual discount for an annual
 		name: 'Cancellation Save Discount - 25% off for 12 months',
 		upToPeriods: 12,
 		upToPeriodsType: 'Months',
-		effectiveStartDate: '2023-10-26',
-		effectiveEndDate: '2099-03-08',
 	});
 });

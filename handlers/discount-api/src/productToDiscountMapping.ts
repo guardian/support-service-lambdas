@@ -38,8 +38,6 @@ export type Discount = {
 	name: string;
 	upToPeriods: number;
 	upToPeriodsType: string;
-	effectiveStartDate: string;
-	effectiveEndDate: string;
 };
 
 type Product = 'digiSub';
@@ -74,16 +72,12 @@ const Discounts: {
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
-			effectiveStartDate: '2018-04-01',
-			effectiveEndDate: '2099-03-08',
 		},
 		cancellation25pc12mo: {
 			productRatePlanId: '8ad08f068b5b9ca2018b5cadf0897ed3',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
-			effectiveStartDate: '2023-10-23',
-			effectiveEndDate: '2099-03-08',
 		},
 	},
 	PROD: {
@@ -92,16 +86,12 @@ const Discounts: {
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
-			effectiveStartDate: '2018-06-22',
-			effectiveEndDate: '2099-03-08',
 		},
 		cancellation25pc12mo: {
 			productRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
-			effectiveStartDate: '2023-10-26',
-			effectiveEndDate: '2099-03-08',
 		},
 	},
 };
