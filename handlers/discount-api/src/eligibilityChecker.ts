@@ -2,69 +2,26 @@ import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { checkDefined } from '@modules/nullAndUndefined';
 import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
-import { isNotRemoved } from '@modules/zuora/rateplan';
-import type {
-	BillingPreview,
-	RatePlan,
-	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
+import type { BillingPreview, RatePlan } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
-import { getEligibleProductRatePlanIdsForDiscount } from './productToDiscountMapping';
 
 export class EligibilityChecker {
 	constructor(private catalog: ZuoraCatalogHelper) {}
 
 	getNextBillingDateIfEligible = (
-		subscription: ZuoraSubscription,
 		billingPreview: BillingPreview,
-		discountProductRatePlanId: string,
+		ratePlan: RatePlan,
 	) => {
-		const eligibleRatePlan = this.getEligibleRatePlanFromSubscription(
-			subscription,
-			discountProductRatePlanId,
-		);
-
 		console.log(
 			'Checking that the next payment is at least at the catalog price',
 		);
 		const nextBillingDate = this.checkNextPaymentIsAtCatalogPrice(
 			billingPreview,
-			eligibleRatePlan,
+			ratePlan,
 		);
 
 		console.log('Subscription is eligible for the discount');
 		return nextBillingDate;
-	};
-
-	private getEligibleRatePlanFromSubscription = (
-		subscription: ZuoraSubscription,
-		discountProductRatePlanId: string,
-	): RatePlan => {
-		const eligibleProductRatePlans = getEligibleProductRatePlanIdsForDiscount(
-			discountProductRatePlanId,
-		);
-
-		const eligibleRatePlans: RatePlan[] = subscription.ratePlans.filter(
-			(ratePlan) =>
-				isNotRemoved(ratePlan) &&
-				eligibleProductRatePlans.includes(ratePlan.productRatePlanId),
-		);
-
-		if (eligibleRatePlans.length > 1) {
-			throw new Error(
-				`Subscription ${subscription.subscriptionNumber} has more than one eligible rate plan
-				 for ${discountProductRatePlanId}. I don't know whether this should be allowed so fail for now`,
-			);
-		}
-
-		if (eligibleRatePlans.length === 0 || !eligibleRatePlans[0]) {
-			throw new ValidationError(
-				`Subscription ${subscription.subscriptionNumber} is not eligible for discount 
-				${discountProductRatePlanId} as it does not contain any eligible rate plans`,
-			);
-		}
-
-		return eligibleRatePlans[0];
 	};
 
 	private checkNextPaymentIsAtCatalogPrice = (
@@ -74,7 +31,7 @@ export class EligibilityChecker {
 		// Work out the catalog price of the rate plan
 		const currency = checkDefined(
 			ratePlan.ratePlanCharges[0]?.currency,
-			'No currency found on rate plan charge',
+			'No charges found on rate plan',
 		);
 		const totalPrice = this.catalog.getCatalogPrice(
 			ratePlan.productRatePlanId,

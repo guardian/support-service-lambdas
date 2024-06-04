@@ -60,13 +60,15 @@ export const discountEndpoint = async (
 	]);
 
 	console.log('Working out the appropriate discount for the subscription');
-	const discount = getDiscountFromSubscription(stage, subscription);
+	const { discount, nonDiscountRatePlan } = getDiscountFromSubscription(
+		stage,
+		subscription,
+	);
 
 	console.log('Checking this subscription is eligible for the discount');
-	const nextBillingDate = eligibilityChecker.getNextBillingDateIfEligible(
-		subscription,
+	const dateToApply = eligibilityChecker.getNextBillingDateIfEligible(
 		billingPreview,
-		discount.productRatePlanId,
+		nonDiscountRatePlan,
 	);
 
 	if (preview) {
@@ -74,7 +76,7 @@ export const discountEndpoint = async (
 		return getDiscountPreview(
 			zuoraClient,
 			requestBody.subscriptionNumber,
-			nextBillingDate,
+			dateToApply,
 			discount,
 		);
 	} else {
@@ -83,7 +85,7 @@ export const discountEndpoint = async (
 			requestBody.subscriptionNumber,
 			subscription.termStartDate,
 			subscription.termEndDate,
-			nextBillingDate,
+			dateToApply,
 			discount.productRatePlanId,
 		);
 	}
