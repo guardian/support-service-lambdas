@@ -6,6 +6,7 @@ import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
+import type { FetchInterface } from '@modules/zuora/requestLogger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
@@ -21,8 +22,9 @@ export const discountEndpoint = async (
 	preview: boolean,
 	headers: APIGatewayProxyEventHeaders,
 	body: string | null,
+	fetchInterface: FetchInterface,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage);
+	const zuoraClient = await ZuoraClient.create(stage, fetchInterface);
 	const catalog = await getZuoraCatalog(stage);
 	const eligibilityChecker = new EligibilityChecker(catalog);
 
