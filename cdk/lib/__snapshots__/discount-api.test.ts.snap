@@ -169,6 +169,11 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                 "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/*",
               ],
             },
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:gu-reader-revenue-logs/CODE/discount-api/*",
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -1100,6 +1105,11 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                 "arn:aws:s3::*:membership-dist/membership/PROD/discount-api/",
                 "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/*",
               ],
+            },
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:gu-reader-revenue-logs/PROD/discount-api/*",
             },
           ],
           "Version": "2012-10-17",

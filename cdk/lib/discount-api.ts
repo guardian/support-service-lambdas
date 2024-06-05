@@ -94,6 +94,13 @@ export class DiscountApi extends GuStack {
 						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/*`,
 					],
 				}),
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['s3:PutObject'],
+					resources: [
+						`arn:aws:s3::*:gu-reader-revenue-logs/${this.stage}/discount-api/*`,
+					],
+				}),
 			],
 		});
 
