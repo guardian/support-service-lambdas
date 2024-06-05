@@ -2,23 +2,7 @@ import { zuoraDateFormat } from '@modules/zuora/common';
 import type { Dayjs } from 'dayjs';
 import { catalog } from '../../../src/productToDiscountMapping';
 
-export const digiSubSubscribeBody = (
-	subscriptionDate: Dayjs,
-	createWithOldPrice: boolean,
-) => {
-	const chargeOverride = createWithOldPrice
-		? {
-				RatePlanChargeData: [
-					{
-						RatePlanCharge: {
-							ProductRatePlanChargeId: '2c92c0f84bbfec58014bc6a2c37e1f15',
-							Price: 11.99,
-							EndDateCondition: 'SubscriptionEnd',
-						},
-					},
-				],
-			}
-		: {};
+export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 	return {
 		subscribes: [
 			{
@@ -44,8 +28,8 @@ export const digiSubSubscribeBody = (
 					Country: 'GB',
 				},
 				PaymentMethod: {
-					FirstName: 'Rupert',
-					LastName: 'Bates',
+					FirstName: 'first',
+					LastName: 'last',
 					BankTransferAccountName: 'blah',
 					BankCode: '200000',
 					BankTransferAccountNumber: '55779911',
@@ -58,9 +42,8 @@ export const digiSubSubscribeBody = (
 					RatePlanData: [
 						{
 							RatePlan: {
-								ProductRatePlanId: catalog.CODE.digiSub.Month,
+								ProductRatePlanId: catalog.CODE.supporterPlus.Month,
 							},
-							...chargeOverride,
 							SubscriptionProductFeatureList: [],
 						},
 					],

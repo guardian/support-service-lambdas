@@ -17,10 +17,72 @@ export const createDigitalSubscription = async (
 	zuoraClient: ZuoraClient,
 	createWithOldPrice: boolean,
 ): Promise<ZuoraSubscribeResponse> => {
-	const path = `/v1/action/subscribe`;
-	const body = JSON.stringify(
+	return await createSubscription(
+		zuoraClient,
 		digiSubSubscribeBody(dayjs(), createWithOldPrice),
 	);
+};
+
+export const createSubscription = async (
+	zuoraClient: ZuoraClient,
+	subscribeBody: {
+		subscribes: {
+			Account: {
+				IdentityId__c: string;
+				InvoiceTemplateId: string;
+				AutoPay: boolean;
+				PaymentTerm: string;
+				CreatedRequestId__c: string;
+				Name: string;
+				sfContactId__c: string;
+				Batch: string;
+				PaymentGateway: string;
+				Currency: string;
+				BcdSettingOption: string;
+				BillCycleDay: number;
+				CrmId: string;
+			};
+			SubscribeOptions: { GenerateInvoice: boolean; ProcessPayments: boolean };
+			SubscriptionData: {
+				RatePlanData: {
+					RatePlan: { ProductRatePlanId: string };
+					SubscriptionProductFeatureList: any[];
+				}[];
+				Subscription: {
+					ContractEffectiveDate: string;
+					ContractAcceptanceDate: string;
+					TermStartDate: string;
+					AutoRenew: boolean;
+					RenewalTerm: number;
+					InitialTerm: number;
+					ReaderType__c: string;
+					TermType: string;
+					CreatedRequestId__c: string;
+					InitialTermPeriodType: string;
+				};
+			};
+			PaymentMethod: {
+				BankTransferAccountName: string;
+				Type: string;
+				BankTransferAccountNumber: string;
+				FirstName: string;
+				PaymentGateway: string;
+				BankTransferType: string;
+				Country: string;
+				BankCode: string;
+				LastName: string;
+			};
+			BillToContact: {
+				FirstName: string;
+				Country: string;
+				LastName: string;
+				WorkEmail: string;
+			};
+		}[];
+	},
+): Promise<ZuoraSubscribeResponse> => {
+	const path = `/v1/action/subscribe`;
+	const body = JSON.stringify(subscribeBody);
 
 	return zuoraClient.post(path, body, zuoraSubscribeResponseSchema);
 };

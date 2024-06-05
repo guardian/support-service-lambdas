@@ -39,7 +39,7 @@ export type Discount = {
 	upToPeriodsType: string;
 };
 
-const catalog = {
+export const catalog = {
 	CODE: {
 		digiSub: {
 			Month: '2c92c0f84bbfec8b014bc655f4852d9d',
