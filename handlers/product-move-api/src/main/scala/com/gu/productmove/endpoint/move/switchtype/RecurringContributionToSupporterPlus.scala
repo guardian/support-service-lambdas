@@ -78,13 +78,20 @@ class RecurringContributionToSupporterPlusImpl(
             s"Missing or unknown currency ${ratePlanCharge.currency} on rate plan charge in rate plan ${currentRatePlan.id} ",
           ),
         )
+      billingPeriod <- ZIO
+        .fromOption(ratePlanCharge.billingPeriod)
+        .orElseFail(
+          new Throwable(
+            s"Missing billing period on rate plan charge in rate plan $currentRatePlan ",
+          ),
+        )
 
       result <-
         if (postData.preview)
           doPreview(
             SubscriptionName(subscription.id),
             postData.price,
-            ratePlanCharge.billingPeriod,
+            billingPeriod,
             ratePlanCharge,
             currency,
             currentRatePlan.id,
@@ -159,6 +166,13 @@ class RecurringContributionToSupporterPlusImpl(
       )
 
       today <- Clock.currentDateTime.map(_.toLocalDate)
+      billingPeriod <- ZIO
+        .fromOption(ratePlanCharge.billingPeriod)
+        .orElseFail(
+          new Throwable(
+            s"Missing billing period on rate plan charge in rate plan $currentRatePlan ",
+          ),
+        )
       supporterPlusRatePlanIds <- getRatePlans.getSupporterPlusRatePlanIds(billingPeriod)
 
       // To avoid problems with charges not aligning correctly with the term and resulting in unpredictable
