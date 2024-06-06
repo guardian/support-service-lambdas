@@ -83,7 +83,7 @@ export const getFirstContributionRatePlan = (
 		);
 	}
 	throw new ReferenceError(
-		`Subscription ${subscription.subscriptionNumber} does not contain and active contribution rate plan: ${prettyPrint(subscription)}`,
+		`Subscription ${subscription.subscriptionNumber} does not contain an active contribution rate plan: ${prettyPrint(subscription)}`,
 	);
 };
 
