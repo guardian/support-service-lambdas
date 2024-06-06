@@ -9,7 +9,9 @@ async function testSingle(requestPlayback: RequestPlayback) {
 		JSON.parse(requestPlayback.request),
 		requestPlayback,
 	);
-	console.log(`Response is ${response.statusCode}\n${response.body}`);
+	console.log(
+		`Response for ${requestPlayback.message} is ${response.statusCode}\n${response.body}`,
+	);
 	expect(response.statusCode).toEqual(requestPlayback.response.statusCode);
 	expect(response.body).toEqual(requestPlayback.response.body);
 }

@@ -135,13 +135,14 @@ export class RequestPlayback implements FetchInterface {
 		const { request, response, outgoingFetch } = groupSchema.parse(
 			JSON.parse(body),
 		);
-		return new RequestPlayback(request, response, outgoingFetch);
+		return new RequestPlayback(request, response, outgoingFetch, key);
 	}
 
 	constructor(
 		public request: string,
 		public response: ResponseData,
 		private recordedData: LogRecord[],
+		public message: string,
 	) {}
 
 	mkString = (input: Record<string, string> | undefined) => {
