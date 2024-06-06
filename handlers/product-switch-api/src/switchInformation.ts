@@ -59,7 +59,7 @@ const getAccountInformation = (account: ZuoraAccount): AccountInformation => {
 	};
 };
 
-const getFirstContributionRatePlan = (
+export const getFirstContributionRatePlan = (
 	productCatalog: ProductCatalog,
 	subscription: ZuoraSubscription,
 ) => {
@@ -67,15 +67,49 @@ const getFirstContributionRatePlan = (
 		productCatalog.Contribution.ratePlans.Annual.id,
 		productCatalog.Contribution.ratePlans.Monthly.id,
 	];
-	return checkDefined(
+	const contributionRatePlan = subscription.ratePlans.find(
+		(ratePlan) =>
+			ratePlan.lastChangeType !== 'Remove' &&
+			contributionProductRatePlanIds.includes(ratePlan.productRatePlanId),
+	);
+	if (contributionRatePlan !== undefined) {
+		return contributionRatePlan;
+	}
+	if (
+		subscriptionHasAlreadySwitchedToSupporterPlus(productCatalog, subscription)
+	) {
+		throw new ValidationError(
+			`The subscription ${subscription.subscriptionNumber} has already been switched to supporter plus: ${prettyPrint(subscription)}`,
+		);
+	}
+	throw new ReferenceError(
+		`Subscription ${subscription.subscriptionNumber} does not contain and active contribution rate plan: ${prettyPrint(subscription)}`,
+	);
+};
+
+export const subscriptionHasAlreadySwitchedToSupporterPlus = (
+	productCatalog: ProductCatalog,
+	subscription: ZuoraSubscription,
+) => {
+	const contributionProductRatePlanIds = [
+		productCatalog.Contribution.ratePlans.Annual.id,
+		productCatalog.Contribution.ratePlans.Monthly.id,
+	];
+	const supporterPlusProductRatePlanIds = [
+		productCatalog.SupporterPlus.ratePlans.Monthly.id,
+		productCatalog.SupporterPlus.ratePlans.Annual.id,
+	];
+	return (
+		subscription.ratePlans.find(
+			(ratePlan) =>
+				ratePlan.lastChangeType === 'Remove' &&
+				contributionProductRatePlanIds.includes(ratePlan.productRatePlanId),
+		) !== undefined &&
 		subscription.ratePlans.find(
 			(ratePlan) =>
 				ratePlan.lastChangeType !== 'Remove' &&
-				contributionProductRatePlanIds.includes(ratePlan.productRatePlanId),
-		),
-		`No contribution rate plan found in the subscription ${prettyPrint(
-			subscription,
-		)}`,
+				supporterPlusProductRatePlanIds.includes(ratePlan.productRatePlanId),
+		) !== undefined
 	);
 };
 

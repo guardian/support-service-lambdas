@@ -1,0 +1,91 @@
+{
+  "success": true,
+  "id": "8a1299898fb956e7018fec7d97d348f6",
+  "accountNumber": "A01637525",
+  "subscriptionNumber": "A-S01691609",
+  "status": "Active",
+  "contractEffectiveDate": "2022-06-19T00:00:00.000Z",
+  "serviceActivationDate": "2022-06-19T00:00:00.000Z",
+  "customerAcceptanceDate": "2022-06-19T00:00:00.000Z",
+  "subscriptionStartDate": "2022-06-19T00:00:00.000Z",
+  "subscriptionEndDate": "2025-06-06T00:00:00.000Z",
+  "lastBookingDate": "2024-06-06T00:00:00.000Z",
+  "termStartDate": "2024-06-06T00:00:00.000Z",
+  "termEndDate": "2025-06-06T00:00:00.000Z",
+  "ratePlans": [
+    {
+      "id": "8a1299898fb956e7018fec7d97fc48f8",
+      "lastChangeType": "Remove",
+      "productId": "2c92a0fe5aacfabe015ad24bf6e15ff6",
+      "productName": "Contributor",
+      "productRatePlanId": "2c92a0fc5aacfadd015ad24db4ff5e97",
+      "ratePlanName": "Monthly Contribution",
+      "ratePlanCharges": [
+        {
+          "id": "8a1299898fb956e7018fec7d97ff48fa",
+          "productRatePlanChargeId": "2c92a0fc5aacfadd015ad250bf2c6d38",
+          "number": "C-03737670",
+          "name": "Monthly Contribution",
+          "type": "Recurring",
+          "model": "FlatFee",
+          "currency": "AUD",
+          "effectiveStartDate": "2022-06-19T00:00:00.000Z",
+          "effectiveEndDate": "2024-06-06T00:00:00.000Z",
+          "billingPeriod": "Month",
+          "processedThroughDate": "2024-06-06T00:00:00.000Z",
+          "chargedThroughDate": "2024-06-06T00:00:00.000Z",
+          "upToPeriodsType": null,
+          "upToPeriods": null,
+          "price": 10,
+          "discountPercentage": null
+        }
+      ]
+    },
+    {
+      "id": "8a1299898fb956e7018fec7d98514901",
+      "lastChangeType": "Add",
+      "productId": "8a12865b8219d9b4018221061563643f",
+      "productName": "Supporter Plus",
+      "productRatePlanId": "8a128ed885fc6ded018602296ace3eb8",
+      "ratePlanName": "Supporter Plus V2 - Monthly",
+      "ratePlanCharges": [
+        {
+          "id": "8a1299898fb956e7018fec7d98654903",
+          "productRatePlanChargeId": "8a128ed885fc6ded018602296af13eba",
+          "number": "C-05659586",
+          "name": "Supporter Plus Monthly Charge",
+          "type": "Recurring",
+          "model": "FlatFee",
+          "currency": "AUD",
+          "effectiveStartDate": "2024-06-06T00:00:00.000Z",
+          "effectiveEndDate": "2025-06-06T00:00:00.000Z",
+          "billingPeriod": "Month",
+          "processedThroughDate": "2024-06-06T00:00:00.000Z",
+          "chargedThroughDate": "2024-07-06T00:00:00.000Z",
+          "upToPeriodsType": null,
+          "upToPeriods": null,
+          "price": 17,
+          "discountPercentage": null
+        },
+        {
+          "id": "8a1299898fb956e7018fec7d98644902",
+          "productRatePlanChargeId": "8a128d7085fc6dec01860234cd075270",
+          "number": "C-05659585",
+          "name": "Contribution",
+          "type": "Recurring",
+          "model": "FlatFee",
+          "currency": "AUD",
+          "effectiveStartDate": "2024-06-06T00:00:00.000Z",
+          "effectiveEndDate": "2025-06-06T00:00:00.000Z",
+          "billingPeriod": "Month",
+          "processedThroughDate": "2024-06-06T00:00:00.000Z",
+          "chargedThroughDate": "2024-07-06T00:00:00.000Z",
+          "upToPeriodsType": null,
+          "upToPeriods": null,
+          "price": 0,
+          "discountPercentage": null
+        }
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@
  *
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
+import { ValidationError } from '@modules/errors';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import {
@@ -15,9 +16,15 @@ import { previewResponseFromZuoraResponse } from '../src/contributionToSupporter
 import { buildEmailMessage } from '../src/productSwitchEmail';
 import type { ProductSwitchRequestBody } from '../src/schemas';
 import { productSwitchRequestSchema } from '../src/schemas';
-import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
+import {
+	getFirstContributionRatePlan,
+	getSwitchInformationWithOwnerCheck,
+	subscriptionHasAlreadySwitchedToSupporterPlus,
+} from '../src/switchInformation';
 import { parseUrlPath } from '../src/urlParsing';
 import accountJson from './fixtures/account.json';
+import alreadySwitchedJson from './fixtures/already-switched-subscription.json';
+import jsonWithNoContribution from './fixtures/subscription-with-no-contribution.json';
 import subscriptionJson from './fixtures/subscription.json';
 
 export const getProductCatalogFromFixture = (): ProductCatalog =>
@@ -216,4 +223,28 @@ test('Email message body is correct', () => {
 		IdentityUserId: '123456789',
 	};
 	expect(emailMessage).toStrictEqual(expectedOutput);
+});
+
+test('We can tell when a subscription has already been switched to Supporter Plus', () => {
+	const productCatalog = getProductCatalogFromFixture();
+	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
+	expect(
+		subscriptionHasAlreadySwitchedToSupporterPlus(productCatalog, subscription),
+	).toEqual(true);
+});
+
+test('We throw a validation error (converts to 400) when trying to switch an already switched subscription', () => {
+	const productCatalog = getProductCatalogFromFixture();
+	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
+	expect(() =>
+		getFirstContributionRatePlan(productCatalog, subscription),
+	).toThrow(ValidationError);
+});
+
+test('We throw a reference error (converts to 500) if a subscription has no contribution charge', () => {
+	const productCatalog = getProductCatalogFromFixture();
+	const subscription = zuoraSubscriptionSchema.parse(jsonWithNoContribution);
+	expect(() =>
+		getFirstContributionRatePlan(productCatalog, subscription),
+	).toThrow(ReferenceError);
 });
