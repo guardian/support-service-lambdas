@@ -248,3 +248,11 @@ test('We throw a reference error (converts to 500) if a subscription has no cont
 		getFirstContributionRatePlan(productCatalog, subscription),
 	).toThrow(ReferenceError);
 });
+
+test('We can successfully find the contribution charge on a valid subscription', () => {
+	const productCatalog = getProductCatalogFromFixture();
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
+	expect(() =>
+		getFirstContributionRatePlan(productCatalog, subscription),
+	).toBeDefined();
+});
