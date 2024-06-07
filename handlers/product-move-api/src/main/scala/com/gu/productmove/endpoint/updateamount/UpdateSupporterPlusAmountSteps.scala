@@ -68,7 +68,12 @@ object UpdateSupporterPlusAmountSteps {
 
       _ <- SubscriptionUpdate.update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
 
-      billingPeriod <- supporterPlusData.contributionCharge.billingPeriod.value
+      billingPeriod <- ZIO
+        .fromOption(supporterPlusData.contributionCharge.billingPeriod)
+        .orElseFail(
+          new Throwable(s"Missing billing period for rate plan charge ${supporterPlusData.contributionCharge}"),
+        )
+      billingPeriodValue <- billingPeriod.value
 
       _ <- SQS
         .sendEmail(
@@ -76,7 +81,7 @@ object UpdateSupporterPlusAmountSteps {
             account,
             postData.newPaymentAmount,
             account.basicInfo.currency,
-            billingPeriod,
+            billingPeriodValue,
             applyFromDate,
           ),
         )
