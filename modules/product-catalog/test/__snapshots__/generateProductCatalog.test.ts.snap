@@ -720,7 +720,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
   },
   "TierThree": {
     "ratePlans": {
-      "GuardianWeeklyDomesticAnnual": {
+      "DomesticAnnual": {
         "billingPeriod": "Annual",
         "charges": {
           "GuardianWeekly": {
@@ -735,7 +735,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "GBP": 275,
         },
       },
-      "GuardianWeeklyDomesticMonthly": {
+      "DomesticMonthly": {
         "billingPeriod": "Month",
         "charges": {
           "GuardianWeekly": {
@@ -750,7 +750,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "GBP": 25,
         },
       },
-      "GuardianWeeklyRestOfWorldAnnual": {
+      "RestOfWorldAnnual": {
         "billingPeriod": "Annual",
         "charges": {
           "GuardianWeekly": {
@@ -765,7 +765,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "GBP": 392.6,
         },
       },
-      "GuardianWeeklyRestOfWorldMonthly": {
+      "RestOfWorldMonthly": {
         "billingPeriod": "Month",
         "charges": {
           "GuardianWeekly": {
@@ -1058,19 +1058,19 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "GBP",
     ],
     "productRatePlans": {
-      "GuardianWeeklyDomesticAnnual": {
+      "DomesticAnnual": {
         "GuardianWeekly": {},
         "SupporterPlus": {},
       },
-      "GuardianWeeklyDomesticMonthly": {
+      "DomesticMonthly": {
         "GuardianWeekly": {},
         "SupporterPlus": {},
       },
-      "GuardianWeeklyRestOfWorldAnnual": {
+      "RestOfWorldAnnual": {
         "GuardianWeekly": {},
         "SupporterPlus": {},
       },
-      "GuardianWeeklyRestOfWorldMonthly": {
+      "RestOfWorldMonthly": {
         "GuardianWeekly": {},
         "SupporterPlus": {},
       },
