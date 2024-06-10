@@ -9,6 +9,7 @@ const zuoraCatalogToProductKey: Record<string, string> = {
 	'Newspaper Digital Voucher': 'SubscriptionCard',
 	Contributor: 'Contribution',
 	'Newspaper Delivery': 'HomeDelivery',
+	'Tier Three': 'TierThree',
 } as const;
 
 const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
@@ -27,6 +28,14 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Supporter Plus V2 & Guardian Weekly ROW - Annual':
 		'GuardianWeeklyRestOfWorldAnnual',
 	'Supporter Plus V2 & Guardian Weekly Domestic - Annual':
+		'GuardianWeeklyDomesticAnnual',
+	'Supporter Plus & Guardian Weekly ROW - Monthly':
+		'GuardianWeeklyRestOfWorldMonthly',
+	'Supporter Plus & Guardian Weekly Domestic - Monthly':
+		'GuardianWeeklyDomesticMonthly',
+	'Supporter Plus & Guardian Weekly ROW - Annual':
+		'GuardianWeeklyRestOfWorldAnnual',
+	'Supporter Plus & Guardian Weekly Domestic - Annual':
 		'GuardianWeeklyDomesticAnnual',
 	'GW Oct 18 - Annual - ROW': 'Annual',
 	'GW Oct 18 - Monthly - ROW': 'Monthly',

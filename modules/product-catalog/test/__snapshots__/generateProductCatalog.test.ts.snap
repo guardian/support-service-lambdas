@@ -729,10 +729,10 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Month",
     ],
     "currencies": [
+      "GBP",
       "USD",
       "NZD",
       "EUR",
-      "GBP",
       "CAD",
       "AUD",
     ],
@@ -752,12 +752,12 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Annual",
     ],
     "currencies": [
-      "USD",
       "NZD",
-      "EUR",
-      "GBP",
       "CAD",
       "AUD",
+      "USD",
+      "GBP",
+      "EUR",
     ],
     "productRatePlans": {
       "Annual": {
@@ -781,10 +781,10 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Month",
     ],
     "currencies": [
+      "GBP",
       "USD",
       "NZD",
       "EUR",
-      "GBP",
       "CAD",
       "AUD",
     ],
@@ -813,8 +813,8 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Quarter",
     ],
     "currencies": [
-      "USD",
       "GBP",
+      "USD",
     ],
     "productRatePlans": {
       "Annual": {
@@ -945,12 +945,12 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Annual",
     ],
     "currencies": [
-      "USD",
-      "NZD",
-      "EUR",
       "GBP",
-      "CAD",
+      "USD",
       "AUD",
+      "EUR",
+      "NZD",
+      "CAD",
     ],
     "productRatePlans": {
       "Annual": {
