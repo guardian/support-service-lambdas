@@ -49,6 +49,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
+		'publishing-alarm-stack-cdk',
 		'salesforce-case-raiser',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
