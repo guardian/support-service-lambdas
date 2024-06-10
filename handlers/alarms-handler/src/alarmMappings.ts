@@ -81,6 +81,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'it-test-runner',
 		'stripe-intent',
 		'workers',
+		'payment-api',
 
 		// support-service-lambdas
 		'digital-voucher-suspension-processor',
