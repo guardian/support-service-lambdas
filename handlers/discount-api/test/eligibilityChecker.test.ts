@@ -18,68 +18,64 @@ import subscriptionJson3 from './fixtures/digital-subscriptions/eligibility-chec
 import subscriptionJson1 from './fixtures/digital-subscriptions/get-discount-test.json';
 import { getDiscountableRatePlan } from '../src/productToDiscountMapping';
 
+const eligibilityCheckerCode = new EligibilityChecker(
+	new ZuoraCatalogHelper(zuoraCatalogSchema.parse(catalogJsonCode)),
+);
+
+const eligibilityCheckerProd = new EligibilityChecker(
+	new ZuoraCatalogHelper(zuoraCatalogSchema.parse(catalogJsonProd)),
+);
+
 test('Eligibility check fails for a subscription which is on a reduced price', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson1);
-	const catalog = new ZuoraCatalogHelper(
-		zuoraCatalogSchema.parse(catalogJsonProd),
-	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson1);
-	const eligibilityChecker = new EligibilityChecker(catalog);
-	expect(() => {
-		eligibilityChecker.getNextBillingDateIfEligible(
+
+	const actual = () => {
+		eligibilityCheckerProd.getNextBillingDateIfEligible(
 			billingPreview,
 			getDiscountableRatePlan(sub),
 		);
-	}).toThrow('Amount payable for next invoice');
+	};
+
+	expect(actual).toThrow('Amount payable for next invoice');
 });
 
 test('Eligibility check works for a price risen subscription', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson2);
-	const catalog = new ZuoraCatalogHelper(
-		zuoraCatalogSchema.parse(catalogJsonProd),
-	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson2);
-	const eligibilityChecker = new EligibilityChecker(catalog);
-	expect(
-		dayjs(
-			eligibilityChecker.getNextBillingDateIfEligible(
-				billingPreview,
-				getDiscountableRatePlan(sub),
-			),
-		),
-	).toEqual(dayjs('2024-02-07'));
+
+	const actual = eligibilityCheckerProd.getNextBillingDateIfEligible(
+		billingPreview,
+		getDiscountableRatePlan(sub),
+	);
+
+	expect(dayjs(actual)).toEqual(dayjs('2024-02-07'));
 });
 
 test('error', () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson3);
-	const catalog = new ZuoraCatalogHelper(
-		zuoraCatalogSchema.parse(catalogJsonCode),
-	);
 	const billingPreview = billingPreviewSchema.parse(billingPreviewJson3);
-	const eligibilityChecker = new EligibilityChecker(catalog);
-	expect(() => {
-		eligibilityChecker.getNextBillingDateIfEligible(
+
+	const actual = () => {
+		eligibilityCheckerCode.getNextBillingDateIfEligible(
 			billingPreview,
 			getDiscountableRatePlan(sub),
 		);
-	}).toThrow('Amount payable for next invoice');
+	};
+
+	expect(actual).toThrow('Amount payable for next invoice');
 });
 
 test('Eligibility check works for supporter plus with 2 rate plans', () => {
 	const sub = zuoraSubscriptionSchema.parse(subSupporterPlusFullPrice);
-	const catalog = new ZuoraCatalogHelper(
-		zuoraCatalogSchema.parse(catalogJsonCode),
-	);
 	const billingPreview = billingPreviewSchema.parse(
 		billingPreviewSupporterPlusFullPrice,
 	);
-	const eligibilityChecker = new EligibilityChecker(catalog);
-	expect(
-		dayjs(
-			eligibilityChecker.getNextBillingDateIfEligible(
-				billingPreview,
-				getDiscountableRatePlan(sub),
-			),
-		).format('YYYY-MM-DD'),
-	).toEqual('2024-07-04');
+
+	const actual = eligibilityCheckerCode.getNextBillingDateIfEligible(
+		billingPreview,
+		getDiscountableRatePlan(sub),
+	);
+
+	expect(dayjs(actual).format('YYYY-MM-DD')).toEqual('2024-07-04');
 });
