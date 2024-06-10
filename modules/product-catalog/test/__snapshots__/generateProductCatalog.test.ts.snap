@@ -718,6 +718,70 @@ exports[`Generated product catalog matches snapshot 1`] = `
       },
     },
   },
+  "TierThree": {
+    "ratePlans": {
+      "GuardianWeeklyDomesticAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a1288a38ff2af980190025b33191cd7",
+          },
+          "SupporterPlus": {
+            "id": "8a1288a38ff2af980190025b32cb1ccf",
+          },
+        },
+        "id": "8a1288a38ff2af980190025b32591ccc",
+        "pricing": {
+          "GBP": 275,
+        },
+      },
+      "GuardianWeeklyDomesticMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a1299788ff2ec100190025fcd8a2bbb",
+          },
+          "SupporterPlus": {
+            "id": "8a1299788ff2ec100190025fcd232bb3",
+          },
+        },
+        "id": "8a1299788ff2ec100190025fccc32bb1",
+        "pricing": {
+          "GBP": 25,
+        },
+      },
+      "GuardianWeeklyRestOfWorldAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a12894e8ff2af99019002511bdd51ca",
+          },
+          "SupporterPlus": {
+            "id": "8a1281f38ff2af9201900255999049db",
+          },
+        },
+        "id": "8a1299788ff2ec100190024d1e3b1a09",
+        "pricing": {
+          "GBP": 392.6,
+        },
+      },
+      "GuardianWeeklyRestOfWorldMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a128ab18ff2af9301900255d86a79b6",
+          },
+          "SupporterPlus": {
+            "id": "8a128ab18ff2af9301900255d80479ae",
+          },
+        },
+        "id": "8a128ab18ff2af9301900255d77979ac",
+        "pricing": {
+          "GBP": 34.8,
+        },
+      },
+    },
+  },
 }
 `;
 
@@ -982,6 +1046,33 @@ exports[`Generated product catalog types match snapshot 1`] = `
       },
       "V1DeprecatedMonthly": {
         "Subscription": {},
+      },
+    },
+  },
+  "TierThree": {
+    "billingPeriods": [
+      "Month",
+      "Annual",
+    ],
+    "currencies": [
+      "GBP",
+    ],
+    "productRatePlans": {
+      "GuardianWeeklyDomesticAnnual": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyDomesticMonthly": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyRestOfWorldAnnual": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyRestOfWorldMonthly": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
       },
     },
   },
