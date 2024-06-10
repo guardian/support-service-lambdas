@@ -4,24 +4,30 @@ import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import { getBillingPreview } from '@modules/zuora/billingPreview';
+import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
+import type { ManipulateType } from 'dayjs';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import type { Discount } from './productToDiscountMapping';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
 import { applyDiscountSchema } from './requestSchema';
+import type {
+	ApplyDiscountResponseBody,
+	EligibilityCheckResponseBody,
+} from './responseSchema';
 
 export const discountEndpoint = async (
 	stage: Stage,
 	preview: boolean,
 	headers: APIGatewayProxyEventHeaders,
 	body: string | null,
-) => {
+): Promise<EligibilityCheckResponseBody | ApplyDiscountResponseBody> => {
 	const zuoraClient = await ZuoraClient.create(stage);
 	const catalog = await getZuoraCatalog(stage);
 	const eligibilityChecker = new EligibilityChecker(catalog);
@@ -87,6 +93,7 @@ export const discountEndpoint = async (
 			subscription.termEndDate,
 			dateToApply,
 			discount.productRatePlanId,
+			subscription.accountNumber,
 		);
 	}
 };
@@ -96,7 +103,7 @@ const getDiscountPreview = async (
 	subscriptionNumber: string,
 	nextBillingDate: Date,
 	discount: Discount,
-) => {
+): Promise<EligibilityCheckResponseBody> => {
 	const previewResponse = await previewDiscount(
 		zuoraClient,
 		subscriptionNumber,
@@ -116,13 +123,23 @@ const getDiscountPreview = async (
 		(item) => item.chargeAmount + item.taxAmount,
 	);
 
+	const firstDiscountedPaymentDate = zuoraDateFormat(dayjs(nextBillingDate));
+	if (discount.upToPeriodsType !== 'Months') {
+		throw new Error(
+			'only month discount is supported, consider using a billing preview',
+		);
+	}
+	const unit: ManipulateType = 'month';
+	const nextNonDiscountedPaymentDate = zuoraDateFormat(
+		dayjs(nextBillingDate).add(discount.upToPeriods, unit),
+	);
+
 	return {
-		body: JSON.stringify({
-			discountedPrice,
-			upToPeriods: discount.upToPeriods,
-			upToPeriodsType: discount.upToPeriodsType,
-		}),
-		statusCode: 200,
+		discountedPrice,
+		upToPeriods: discount.upToPeriods,
+		upToPeriodsType: discount.upToPeriodsType,
+		firstDiscountedPaymentDate,
+		nextNonDiscountedPaymentDate,
 	};
 };
 
@@ -133,7 +150,8 @@ const applyDiscount = async (
 	termEndDate: Date,
 	nextBillingDate: Date,
 	discountProductRatePlanId: string,
-) => {
+	accountNumber: string,
+): Promise<ApplyDiscountResponseBody> => {
 	console.log('Apply a discount to the subscription');
 	const discounted = await addDiscount(
 		zuoraClient,
@@ -146,12 +164,76 @@ const applyDiscount = async (
 
 	if (discounted.success) {
 		console.log('Discount applied successfully');
+	} else {
+		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
 	}
+
+	const billingPreviewAfter = await getBillingPreview(
+		zuoraClient,
+		dayjs().add(13, 'months'),
+		accountNumber,
+	);
+
+	const nextPaymentDate = getNextNonFreePaymentDate(
+		billingPreviewAfter.invoiceItems.map((entry) => {
+			return {
+				date: entry.serviceStartDate,
+				amount: entry.chargeAmount + entry.taxAmount,
+			};
+		}),
+	);
+
 	return {
-		body: 'Success',
-		statusCode: 200,
+		nextPaymentDate,
 	};
 };
+
+export function getNextNonFreePaymentDate(
+	invoiceItems: Array<{ date: Date; amount: number }>,
+) {
+	const grouped = groupBy(invoiceItems, (ii) => {
+		return zuoraDateFormat(dayjs(ii.date));
+	});
+
+	const ordered = Object.entries(grouped).sort();
+
+	const firstNonFree = ordered.find((entry) => {
+		return (
+			entry[1]
+				.map((i) => {
+					return i.amount;
+				})
+				.reduce((a, b) => {
+					return a + b;
+				}) > 0
+		);
+	});
+
+	if (!firstNonFree) {
+		throw new Error('could not find a non free payment in the preview');
+	}
+
+	const nextPaymentDate = firstNonFree[0];
+	return nextPaymentDate;
+}
+
+function groupBy<A>(array: A[], f: (elem: A) => string): Record<string, A[]> {
+	const accu: Record<string, A[]> = {};
+	for (const elem of array) {
+		const keyToUse = f(elem);
+		let group: A[];
+		const maybeGroup: A[] | undefined = accu[keyToUse];
+		if (!maybeGroup) {
+			group = [];
+			accu[keyToUse] = group;
+		} else {
+			group = maybeGroup;
+		}
+		group.push(elem);
+	}
+	return accu;
+}
+
 const checkSubscriptionBelongsToIdentityId = async (
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,

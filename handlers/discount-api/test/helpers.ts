@@ -12,11 +12,12 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
+import { checkDefined } from '@modules/nullAndUndefined';
 
 export const createDigitalSubscription = async (
 	zuoraClient: ZuoraClient,
 	createWithOldPrice: boolean,
-): Promise<ZuoraSubscribeResponse> => {
+): Promise<string> => {
 	return await createSubscription(
 		zuoraClient,
 		digiSubSubscribeBody(dayjs(), createWithOldPrice),
@@ -80,11 +81,20 @@ export const createSubscription = async (
 			};
 		}[];
 	},
-): Promise<ZuoraSubscribeResponse> => {
+): Promise<string> => {
 	const path = `/v1/action/subscribe`;
 	const body = JSON.stringify(subscribeBody);
 
-	return zuoraClient.post(path, body, zuoraSubscribeResponseSchema);
+	const subscribeResponse: ZuoraSubscribeResponse = await zuoraClient.post(
+		path,
+		body,
+		zuoraSubscribeResponseSchema,
+	);
+
+	return checkDefined(
+		subscribeResponse[0]?.SubscriptionNumber,
+		'SubscriptionNumber was undefined in response from Zuora',
+	);
 };
 
 export const doPriceRise = async (

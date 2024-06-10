@@ -22,11 +22,29 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				console.log('Applying a discount');
-				return await discountEndpoint(stage, false, event.headers, event.body);
+				const result = await discountEndpoint(
+					stage,
+					false,
+					event.headers,
+					event.body,
+				);
+				return {
+					body: JSON.stringify(result),
+					statusCode: 200,
+				};
 			}
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
 				console.log('Previewing discount');
-				return await discountEndpoint(stage, true, event.headers, event.body);
+				const result = await discountEndpoint(
+					stage,
+					true,
+					event.headers,
+					event.body,
+				);
+				return {
+					body: JSON.stringify(result),
+					statusCode: 200,
+				};
 			}
 			default:
 				return {
