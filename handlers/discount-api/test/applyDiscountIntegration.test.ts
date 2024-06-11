@@ -5,7 +5,7 @@ import type { Stage } from '@modules/stage';
 import { cancelSubscription } from '@modules/zuora/cancelSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { discountEndpoint } from '../src/discountEndpoint';
+import { applyDiscountEndpoint } from '../src/discountEndpoint';
 import { ApplyDiscountResponseBody } from '../src/responseSchema';
 import { createSubscription } from './helpers';
 import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
@@ -26,16 +26,10 @@ test('Supporter Plus subscriptions can have a discount', async () => {
 		supporterPlusSubscribeBody(today),
 	);
 
-	const requestBody = {
-		subscriptionNumber: subscriptionNumber,
-		preview: true,
-	};
-
-	const result = await discountEndpoint(
+	const result = await applyDiscountEndpoint(
 		stage,
-		false,
 		{ 'x-identity-id': validIdentityId },
-		JSON.stringify(requestBody),
+		subscriptionNumber,
 	);
 	const eligibilityCheckResult = result as ApplyDiscountResponseBody;
 

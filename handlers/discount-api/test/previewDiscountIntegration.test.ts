@@ -5,7 +5,7 @@ import type { Stage } from '@modules/stage';
 import { cancelSubscription } from '@modules/zuora/cancelSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { discountEndpoint } from '../src/discountEndpoint';
+import { previewDiscountEndpoint } from '../src/discountEndpoint';
 import { EligibilityCheckResponseBody } from '../src/responseSchema';
 import { createDigitalSubscription, createSubscription } from './helpers';
 import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
@@ -21,17 +21,11 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 	console.log('Creating a new digital subscription');
 	const subscriptionNumber = await createDigitalSubscription(zuoraClient, true);
 
-	const requestBody = {
-		subscriptionNumber: subscriptionNumber,
-		preview: true,
-	};
-
 	await expect(async () => {
-		await discountEndpoint(
+		await previewDiscountEndpoint(
 			stage,
-			true,
 			{ 'x-identity-id': invalidIdentityId },
-			JSON.stringify(requestBody),
+			subscriptionNumber,
 		);
 	}).rejects.toThrow('does not belong to identity ID');
 
@@ -50,17 +44,11 @@ test('Subscriptions on the old price are not eligible', async () => {
 	console.log('Creating a new digital subscription');
 	const subscriptionNumber = await createDigitalSubscription(zuoraClient, true);
 
-	const requestBody = {
-		subscriptionNumber: subscriptionNumber,
-		preview: true,
-	};
-
 	await expect(async () => {
-		await discountEndpoint(
+		await previewDiscountEndpoint(
 			stage,
-			true,
 			{ 'x-identity-id': validIdentityId },
-			JSON.stringify(requestBody),
+			subscriptionNumber,
 		);
 	}).rejects.toThrow('it is not eligible for a discount');
 
@@ -86,16 +74,10 @@ test('Subscriptions on the new price are eligible', async () => {
 		false,
 	);
 
-	const requestBody = {
-		subscriptionNumber: subscriptionNumber,
-		preview: true,
-	};
-
-	const result = await discountEndpoint(
+	const result = await previewDiscountEndpoint(
 		stage,
-		true,
 		{ 'x-identity-id': validIdentityId },
-		JSON.stringify(requestBody),
+		subscriptionNumber,
 	);
 	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
 
@@ -130,16 +112,10 @@ test('Supporter Plus subscriptions are eligible', async () => {
 		supporterPlusSubscribeBody(today),
 	);
 
-	const requestBody = {
-		subscriptionNumber: subscriptionNumber,
-		preview: true,
-	};
-
-	const result = await discountEndpoint(
+	const result = await previewDiscountEndpoint(
 		stage,
-		true,
 		{ 'x-identity-id': validIdentityId },
-		JSON.stringify(requestBody),
+		subscriptionNumber,
 	);
 	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
 

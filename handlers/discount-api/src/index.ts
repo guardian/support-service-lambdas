@@ -1,11 +1,20 @@
 import { ValidationError } from '@modules/errors';
+import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { discountEndpoint } from './discountEndpoint';
+import {
+	applyDiscountEndpoint,
+	previewDiscountEndpoint,
+} from './discountEndpoint';
+import { applyDiscountSchema } from './requestSchema';
+import type {
+	ApplyDiscountResponseBody,
+	EligibilityCheckResponseBody,
+} from './responseSchema';
 
 const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (
@@ -22,11 +31,13 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				console.log('Applying a discount');
-				const result = await discountEndpoint(
+				const subscriptionNumber = applyDiscountSchema.parse(
+					JSON.parse(checkDefined(event.body, 'No body was provided')),
+				).subscriptionNumber;
+				const result: ApplyDiscountResponseBody = await applyDiscountEndpoint(
 					stage,
-					false,
 					event.headers,
-					event.body,
+					subscriptionNumber,
 				);
 				return {
 					body: JSON.stringify(result),
@@ -35,12 +46,15 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 			}
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
 				console.log('Previewing discount');
-				const result = await discountEndpoint(
-					stage,
-					true,
-					event.headers,
-					event.body,
-				);
+				const subscriptionNumber = applyDiscountSchema.parse(
+					JSON.parse(checkDefined(event.body, 'No body was provided')),
+				).subscriptionNumber;
+				const result: EligibilityCheckResponseBody =
+					await previewDiscountEndpoint(
+						stage,
+						event.headers,
+						subscriptionNumber,
+					);
 				return {
 					body: JSON.stringify(result),
 					statusCode: 200,
