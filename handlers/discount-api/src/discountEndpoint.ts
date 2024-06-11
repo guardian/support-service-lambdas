@@ -15,7 +15,6 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
-import type { ManipulateType } from 'dayjs';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
@@ -64,9 +63,8 @@ export const previewDiscountEndpoint = async (
 			'only discounts measured in months are supported in this version of discount-api',
 		);
 	}
-	const unit: ManipulateType = 'month';
 	const nextNonDiscountedPaymentDate = zuoraDateFormat(
-		dayjs(dateToApply).add(discount.upToPeriods, unit),
+		dayjs(dateToApply).add(discount.upToPeriods, 'month'),
 	);
 
 	return {
