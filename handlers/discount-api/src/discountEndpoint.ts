@@ -130,7 +130,7 @@ const getDiscountPreview = async (
 	const firstDiscountedPaymentDate = zuoraDateFormat(dayjs(nextBillingDate));
 	if (discount.upToPeriodsType !== 'Months') {
 		throw new Error(
-			'only month discount is supported, consider using a billing preview',
+			'only discounts measured in months are supported in this version of discount-api',
 		);
 	}
 	const unit: ManipulateType = 'month';
