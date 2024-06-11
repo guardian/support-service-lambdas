@@ -50,8 +50,8 @@ export function getNextNonFreePaymentDate(
 function getOrderedInvoiceData(
 	invoiceItems: Array<{ date: Date; amount: number }>,
 ) {
-	const grouped = groupBy(invoiceItems, (ii) => {
-		return zuoraDateFormat(dayjs(ii.date));
+	const grouped = groupBy(invoiceItems, (invoiceItem) => {
+		return zuoraDateFormat(dayjs(invoiceItem.date));
 	});
 
 	const ordered = sortBy(Object.entries(grouped), (item) => item[0]).map(
