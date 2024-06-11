@@ -1,9 +1,9 @@
-import { groupBy } from '@modules/arrayFunctions';
+import { groupBy, sortBy, sumNumbers } from '@modules/arrayFunctions';
 import { checkDefined } from '@modules/nullAndUndefined';
-import type { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from './common';
 import type { ZuoraClient } from './zuoraClient';
-import type { BillingPreview, InvoiceItem } from './zuoraSchemas';
+import type { BillingPreview } from './zuoraSchemas';
 import { billingPreviewSchema } from './zuoraSchemas';
 
 export const getBillingPreview = async (
@@ -21,22 +21,55 @@ export const getBillingPreview = async (
 	return zuoraClient.post(path, body, billingPreviewSchema);
 };
 
-export const getNextInvoiceItems = (
-	billingPreview: BillingPreview,
-): InvoiceItem[] => {
-	const sorted = billingPreview.invoiceItems.sort((a, b) => {
-		return a.serviceStartDate < b.serviceStartDate ? -1 : 1;
-	});
-	const nextInvoiceDate = checkDefined(
-		sorted[0]?.serviceStartDate.toISOString(),
-		'No invoice items found in response from Zuora',
+export function getNextInvoiceTotal(
+	invoiceItems: Array<{ date: Date; amount: number }>,
+) {
+	const ordered = getOrderedInvoiceData(invoiceItems);
+
+	return checkDefined(
+		ordered[0],
+		'could not find a payment in the invoice preview',
+	);
+}
+
+export function getNextNonFreePaymentDate(
+	invoiceItems: Array<{ date: Date; amount: number }>,
+) {
+	const ordered = getOrderedInvoiceData(invoiceItems);
+
+	const firstNonFree = checkDefined(
+		ordered.find((item) => item.total > 0),
+		'could not find a non free payment in the invoice preview',
 	);
 
-	const groupedInvoiceItems = groupBy(billingPreview.invoiceItems, (item) =>
-		item.serviceStartDate.toISOString(),
+	const nextPaymentDate = zuoraDateFormat(dayjs(firstNonFree.date));
+
+	return nextPaymentDate;
+}
+
+function getOrderedInvoiceData(
+	invoiceItems: Array<{ date: Date; amount: number }>,
+) {
+	const grouped = groupBy(invoiceItems, (ii) => {
+		return zuoraDateFormat(dayjs(ii.date));
+	});
+
+	const ordered = sortBy(Object.entries(grouped), (item) => item[0]).map(
+		(item) => {
+			return {
+				date: new Date(item[0]),
+				total: sumNumbers(item[1].map((item) => item.amount)),
+			};
+		},
 	);
-	return checkDefined(
-		groupedInvoiceItems[nextInvoiceDate],
-		'No invoice items found for next invoice date',
-	);
-};
+	return ordered;
+}
+
+export function billingPreviewToRecords(billingPreviewAfter: BillingPreview) {
+	return billingPreviewAfter.invoiceItems.map((entry) => {
+		return {
+			date: entry.serviceStartDate,
+			amount: entry.chargeAmount + entry.taxAmount,
+		};
+	});
+}

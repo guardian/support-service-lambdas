@@ -3,7 +3,11 @@ import { ValidationError } from '@modules/errors';
 import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
-import { getBillingPreview } from '@modules/zuora/billingPreview';
+import {
+	billingPreviewToRecords,
+	getBillingPreview,
+	getNextNonFreePaymentDate,
+} from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
@@ -175,64 +179,11 @@ const applyDiscount = async (
 	);
 
 	const nextPaymentDate = getNextNonFreePaymentDate(
-		billingPreviewAfter.invoiceItems.map((entry) => {
-			return {
-				date: entry.serviceStartDate,
-				amount: entry.chargeAmount + entry.taxAmount,
-			};
-		}),
+		billingPreviewToRecords(billingPreviewAfter),
 	);
 
-	return {
-		nextPaymentDate,
-	};
+	return { nextPaymentDate };
 };
-
-export function getNextNonFreePaymentDate(
-	invoiceItems: Array<{ date: Date; amount: number }>,
-) {
-	const grouped = groupBy(invoiceItems, (ii) => {
-		return zuoraDateFormat(dayjs(ii.date));
-	});
-
-	const ordered = Object.entries(grouped).sort();
-
-	const firstNonFree = ordered.find((entry) => {
-		return (
-			entry[1]
-				.map((i) => {
-					return i.amount;
-				})
-				.reduce((a, b) => {
-					return a + b;
-				}) > 0
-		);
-	});
-
-	if (!firstNonFree) {
-		throw new Error('could not find a non free payment in the preview');
-	}
-
-	const nextPaymentDate = firstNonFree[0];
-	return nextPaymentDate;
-}
-
-function groupBy<A>(array: A[], f: (elem: A) => string): Record<string, A[]> {
-	const accu: Record<string, A[]> = {};
-	for (const elem of array) {
-		const keyToUse = f(elem);
-		let group: A[];
-		const maybeGroup: A[] | undefined = accu[keyToUse];
-		if (!maybeGroup) {
-			group = [];
-			accu[keyToUse] = group;
-		} else {
-			group = maybeGroup;
-		}
-		group.push(elem);
-	}
-	return accu;
-}
 
 const checkSubscriptionBelongsToIdentityId = async (
 	zuoraClient: ZuoraClient,

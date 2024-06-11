@@ -1,4 +1,4 @@
-import { getNextNonFreePaymentDate } from '../src/discountEndpoint';
+import { getNextNonFreePaymentDate } from '@modules/zuora/billingPreview';
 
 test('getNextPaymentDate fails if there are no payments in the preview', () => {
 	const items = [
@@ -9,7 +9,9 @@ test('getNextPaymentDate fails if there are no payments in the preview', () => {
 
 	const actual = () => getNextNonFreePaymentDate(items);
 
-	expect(actual).toThrow('could not find a non free payment in the preview');
+	expect(actual).toThrow(
+		'could not find a non free payment in the invoice preview',
+	);
 });
 
 test('getNextPaymentDate finds the relevant payment', () => {
