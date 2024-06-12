@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
 
@@ -118,7 +118,7 @@ export const getTeams = (appName?: string): Team[] => {
 };
 
 export const getTeamWebhookUrl = (team: Team): string => {
-	return checkDefined<string>(
+	return getIfDefined<string>(
 		process.env[`${team}_WEBHOOK`],
 		`${team}_WEBHOOK environment variable not set`,
 	);

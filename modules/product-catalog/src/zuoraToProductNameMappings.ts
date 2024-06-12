@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 const zuoraCatalogToProductKey: Record<string, string> = {
 	'Digital Pack': 'DigitalSubscription',
@@ -89,13 +89,13 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Guardian Weekly': 'GuardianWeekly',
 } as const;
 export const getZuoraProductKey = (product: string): string => {
-	return checkDefined(
+	return getIfDefined(
 		zuoraCatalogToProductKey[product],
 		`Unexpected product type ${product}`,
 	);
 };
 export const getProductRatePlanKey = (productRatePlan: string): string => {
-	return checkDefined(
+	return getIfDefined(
 		zuoraCatalogToProductRatePlanKey[productRatePlan],
 		`Unexpected product rate plan type ${productRatePlan}`,
 	);
@@ -103,7 +103,7 @@ export const getProductRatePlanKey = (productRatePlan: string): string => {
 export const getProductRatePlanChargeKey = (
 	productRatePlanCharge: string,
 ): string => {
-	return checkDefined(
+	return getIfDefined(
 		zuoraCatalogToProductRatePlanChargeKey[productRatePlanCharge],
 		`Unexpected product rate plan charge type ${productRatePlanCharge}`,
 	);

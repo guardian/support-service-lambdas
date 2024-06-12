@@ -1,5 +1,5 @@
 import { groupBy } from '@modules/arrayFunctions';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from './common';
 import type { ZuoraClient } from './zuoraClient';
@@ -27,7 +27,7 @@ export const getNextInvoiceItems = (
 	const sorted = billingPreview.invoiceItems.sort((a, b) => {
 		return a.serviceStartDate < b.serviceStartDate ? -1 : 1;
 	});
-	const nextInvoiceDate = checkDefined(
+	const nextInvoiceDate = getIfDefined(
 		sorted[0]?.serviceStartDate.toISOString(),
 		'No invoice items found in response from Zuora',
 	);
@@ -35,7 +35,7 @@ export const getNextInvoiceItems = (
 	const groupedInvoiceItems = groupBy(billingPreview.invoiceItems, (item) =>
 		item.serviceStartDate.toISOString(),
 	);
-	return checkDefined(
+	return getIfDefined(
 		groupedInvoiceItems[nextInvoiceDate],
 		'No invoice items found for next invoice date',
 	);

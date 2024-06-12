@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
@@ -16,7 +16,7 @@ export const contributionToSupporterPlusEndpoint = async (
 	body: string,
 	subscriptionNumber: string,
 ) => {
-	const identityId = checkDefined(
+	const identityId = getIfDefined(
 		headers['x-identity-id'],
 		'Identity ID not found in request',
 	);

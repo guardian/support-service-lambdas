@@ -1,6 +1,6 @@
 import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import { getBillingPreview } from '@modules/zuora/billingPreview';
@@ -26,13 +26,13 @@ export const discountEndpoint = async (
 	const catalog = await getZuoraCatalog(stage);
 	const eligibilityChecker = new EligibilityChecker(catalog);
 
-	const identityId = checkDefined(
+	const identityId = getIfDefined(
 		headers['x-identity-id'],
 		'Identity ID not found in request',
 	);
 
 	const requestBody = applyDiscountSchema.parse(
-		JSON.parse(checkDefined(body, 'No body was provided')),
+		JSON.parse(getIfDefined(body, 'No body was provided')),
 	);
 
 	console.log('Getting the subscription details from Zuora');

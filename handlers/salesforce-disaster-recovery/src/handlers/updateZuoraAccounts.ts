@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { type Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import {
@@ -13,7 +13,7 @@ export const handler = async (event: {
 }): Promise<AccountRowWithResult[]> => {
 	const { Items } = event;
 
-	const stage = checkDefined<string>(
+	const stage = getIfDefined<string>(
 		process.env.STAGE,
 		'STAGE environment variable not set',
 	);

@@ -1,7 +1,7 @@
 /**
  * @group integration
  */
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { cancelSubscription } from '@modules/zuora/cancelSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -21,7 +21,7 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
 
-	const subscriptionNumber = checkDefined(
+	const subscriptionNumber = getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
 	);
@@ -55,7 +55,7 @@ test('Subscriptions on the old price are not eligible', async () => {
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
 
-	const subscriptionNumber = checkDefined(
+	const subscriptionNumber = getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
 	);
@@ -90,7 +90,7 @@ test('Subscriptions on the new price are eligible', async () => {
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, false);
 
-	const subscriptionNumber = checkDefined(
+	const subscriptionNumber = getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
 	);
@@ -131,7 +131,7 @@ test('Supporter Plus subscriptions are eligible', async () => {
 		supporterPlusSubscribeBody(dayjs()),
 	);
 
-	const subscriptionNumber = checkDefined(
+	const subscriptionNumber = getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
 	);

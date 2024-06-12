@@ -1,31 +1,31 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { publishSnsMessage } from '../services/sns';
 import { describeExecution, startExecution } from '../services/step-functions';
 
 export const handler = async (): Promise<
 	'HEALTH CHECK PASSED' | 'HEALTH CHECK FAILED'
 > => {
-	const app = checkDefined<string>(
+	const app = getIfDefined<string>(
 		process.env.APP,
 		'APP environment variable not set',
 	);
 
-	const stage = checkDefined<string>(
+	const stage = getIfDefined<string>(
 		process.env.STAGE,
 		'STAGE environment variable not set',
 	);
 
-	const region = checkDefined<string>(
+	const region = getIfDefined<string>(
 		process.env.REGION,
 		'REGION environment variable not set',
 	);
 
-	const topicArn = checkDefined<string>(
+	const topicArn = getIfDefined<string>(
 		process.env.SNS_TOPIC_ARN,
 		'SNS_TOPIC_ARN environment variable not set',
 	);
 
-	const stateMachineArn = checkDefined<string>(
+	const stateMachineArn = getIfDefined<string>(
 		process.env.STATE_MACHINE_ARN,
 		'STATE_MACHINE_ARN environment variable not set',
 	);
@@ -45,7 +45,7 @@ export const handler = async (): Promise<
 			name: executionName,
 		});
 
-		const executionArn = checkDefined<string>(
+		const executionArn = getIfDefined<string>(
 			startExecutionResponse.executionArn,
 			'Execution ARN is undefined',
 		);
@@ -58,7 +58,7 @@ export const handler = async (): Promise<
 				executionArn,
 			});
 
-			status = checkDefined<string>(
+			status = getIfDefined<string>(
 				describeExecutionResponse.status,
 				'Execution status is undefined',
 			);

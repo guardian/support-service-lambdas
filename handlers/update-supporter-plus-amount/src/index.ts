@@ -1,5 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -21,9 +21,9 @@ export const handler: Handler = async (
 	try {
 		console.log(`Input is ${JSON.stringify(event)}`);
 		const subscriptionNumber = getSubscriptionNumberFromUrl(event.path);
-		const eventBody = checkDefined(event.body, 'No request body provided');
+		const eventBody = getIfDefined(event.body, 'No request body provided');
 		const requestBody = requestBodySchema.parse(JSON.parse(eventBody));
-		const identityId = checkDefined(
+		const identityId = getIfDefined(
 			event.headers['x-identity-id'],
 			'Identity ID not found in request',
 		);
