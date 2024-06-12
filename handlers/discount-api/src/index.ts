@@ -26,6 +26,9 @@ export const handler: Handler = async (
 	return response;
 };
 
+// this is a type safe version of stringify
+const stringify = <T>(t: T): string => JSON.stringify(t);
+
 const routeRequest = async (event: APIGatewayProxyEvent) => {
 	try {
 		switch (true) {
@@ -34,13 +37,13 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 				const subscriptionNumber = applyDiscountSchema.parse(
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
-				const result: ApplyDiscountResponseBody = await applyDiscountEndpoint(
+				const result = await applyDiscountEndpoint(
 					stage,
 					event.headers,
 					subscriptionNumber,
 				);
 				return {
-					body: JSON.stringify(result),
+					body: stringify<ApplyDiscountResponseBody>(result),
 					statusCode: 200,
 				};
 			}
@@ -49,14 +52,13 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 				const subscriptionNumber = applyDiscountSchema.parse(
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
-				const result: EligibilityCheckResponseBody =
-					await previewDiscountEndpoint(
-						stage,
-						event.headers,
-						subscriptionNumber,
-					);
+				const result = await previewDiscountEndpoint(
+					stage,
+					event.headers,
+					subscriptionNumber,
+				);
 				return {
-					body: JSON.stringify(result),
+					body: stringify<EligibilityCheckResponseBody>(result),
 					statusCode: 200,
 				};
 			}

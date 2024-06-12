@@ -19,16 +19,12 @@ import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import type { Discount } from './productToDiscountMapping';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
-import type {
-	ApplyDiscountResponseBody,
-	EligibilityCheckResponseBody,
-} from './responseSchema';
 
 export const previewDiscountEndpoint = async (
 	stage: Stage,
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
-): Promise<EligibilityCheckResponseBody> => {
+) => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
 	const { discount, dateToApply } = await getDiscountToApply(
@@ -51,7 +47,7 @@ export const applyDiscountEndpoint = async (
 	stage: Stage,
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
-): Promise<ApplyDiscountResponseBody> => {
+) => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
 	const { subscription, discount, dateToApply } = await getDiscountToApply(
