@@ -113,8 +113,21 @@ export class DiscountApi extends GuStack {
 			},
 		);
 
+		const sqsEmailPolicy: Policy = new Policy(this, 'SQS email policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:sendmessage'],
+					resources: [
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+					],
+				}),
+			],
+		});
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
+		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
