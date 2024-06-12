@@ -60,7 +60,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
   "Resources": {
     "alarmshandleralarm5F97F469": {
       "Properties": {
-        "ActionsEnabled": true,
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -102,30 +102,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "EvaluationPeriods": 24,
         "MetricName": "ApproximateNumberOfMessagesVisible",
         "Namespace": "AWS/SQS",
-        "OKActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":",
-                {
-                  "Fn::GetAtt": [
-                    "alarmshandlertopic003C974E",
-                    "TopicName",
-                  ],
-                },
-              ],
-            ],
-          },
-        ],
         "Period": 60,
         "Statistic": "Sum",
         "Threshold": 0,
@@ -740,30 +716,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "EvaluationPeriods": 24,
         "MetricName": "ApproximateNumberOfMessagesVisible",
         "Namespace": "AWS/SQS",
-        "OKActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":",
-                {
-                  "Fn::GetAtt": [
-                    "alarmshandlertopic003C974E",
-                    "TopicName",
-                  ],
-                },
-              ],
-            ],
-          },
-        ],
         "Period": 60,
         "Statistic": "Sum",
         "Threshold": 0,
