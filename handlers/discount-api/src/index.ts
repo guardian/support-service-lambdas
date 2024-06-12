@@ -44,7 +44,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 			};
 		} else {
 			return {
-				body: JSON.stringify(error),
+				body: 'Internal server error, check the logs for more information',
 				statusCode: 500,
 			};
 		}
