@@ -1,5 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type {
 	ProductBillingPeriod,
@@ -85,7 +85,7 @@ export const getSupporterPlusData = (
 			const { ratePlan, productData } = item;
 			const { productRatePlan, planHasSeparateContributionCharge } =
 				productData;
-			const chargeToUpdate = checkDefined(
+			const chargeToUpdate = getIfDefined(
 				ratePlan.ratePlanCharges.find(
 					(charge) =>
 						charge.productRatePlanChargeId === productData.chargeToUpdateId,
@@ -178,7 +178,7 @@ export const updateSupporterPlusAmount = async (
 		subscription.ratePlans,
 	);
 
-	const billingPeriod = checkDefined(
+	const billingPeriod = getIfDefined(
 		supporterPlusData.productRatePlan.billingPeriod,
 		`Billing period was undefined in product rate plan ${prettyPrint(supporterPlusData.productRatePlan)}`,
 	);

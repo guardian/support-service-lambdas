@@ -4,7 +4,7 @@
  * @group integration
  */
 
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount } from '@modules/zuora/addDiscount';
 import { getSubscription } from '@modules/zuora/getSubscription';
@@ -22,7 +22,7 @@ test('createDigitalSubscription', async () => {
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, false);
 
-	const subscriptionNumber = checkDefined(
+	const subscriptionNumber = getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
 	);
@@ -39,7 +39,7 @@ test('createPriceRiseSubscription', async () => {
 	console.log('Creating a new digital subscription');
 	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
 
-	const subscriptionNumber = checkDefined(
+	const subscriptionNumber = getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
 	);

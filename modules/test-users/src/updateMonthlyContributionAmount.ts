@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
@@ -17,7 +17,7 @@ const getFirstContributionRatePlan = (
 		productCatalog.Contribution.ratePlans.Annual.id,
 		productCatalog.Contribution.ratePlans.Monthly.id,
 	];
-	return checkDefined(
+	return getIfDefined(
 		subscription.ratePlans.find(
 			(ratePlan) =>
 				ratePlan.lastChangeType !== 'Remove' &&

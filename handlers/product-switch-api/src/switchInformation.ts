@@ -1,6 +1,6 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type {
 	ProductCatalog,
@@ -116,7 +116,7 @@ export const subscriptionHasAlreadySwitchedToSupporterPlus = (
 const getCurrency = (
 	contributionRatePlan: RatePlan,
 ): ProductCurrency<'SupporterPlus'> => {
-	const currency = checkDefined(
+	const currency = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.currency,
 		'No currency found on the rate plan charge',
 	);
@@ -154,11 +154,11 @@ export const getSwitchInformationWithOwnerCheck = (
 		productCatalog,
 		subscription,
 	);
-	const previousAmount = checkDefined(
+	const previousAmount = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.price,
 		'No price found on the contribution rate plan charge',
 	);
-	const billingPeriod = checkDefined(
+	const billingPeriod = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.billingPeriod,
 		`No rate plan charge found on the rate plan ${prettyPrint(
 			contributionRatePlan,

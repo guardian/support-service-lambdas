@@ -1,5 +1,5 @@
 import { sumNumbers } from '@modules/arrayFunctions';
-import { checkDefined, isNotNull } from '@modules/nullAndUndefined';
+import { getIfDefined, isNotNull } from '@modules/nullAndUndefined';
 import type {
 	Pricing,
 	ZuoraCatalog,
@@ -15,7 +15,7 @@ export class ZuoraCatalogHelper {
 	};
 
 	public getCatalogPlan = (productRatePlanId: string) =>
-		checkDefined(
+		getIfDefined(
 			this.catalog.products
 				.flatMap((product) => product.productRatePlans)
 				.find((productRatePlan) => productRatePlan.id === productRatePlanId),

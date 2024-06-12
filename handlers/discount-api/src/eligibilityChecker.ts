@@ -1,6 +1,6 @@
 import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
 import type { BillingPreview, RatePlan } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
@@ -29,7 +29,7 @@ export class EligibilityChecker {
 		ratePlan: RatePlan,
 	) => {
 		// Work out the catalog price of the rate plan
-		const currency = checkDefined(
+		const currency = getIfDefined(
 			ratePlan.ratePlanCharges[0]?.currency,
 			'No charges found on rate plan',
 		);
@@ -39,7 +39,7 @@ export class EligibilityChecker {
 		);
 
 		// Work out how much the cost of the next invoice will be
-		const nextInvoiceItems = checkDefined(
+		const nextInvoiceItems = getIfDefined(
 			getNextInvoiceItems(billingPreview),
 			`No next invoice found for account ${billingPreview.accountId}`,
 		);
@@ -54,7 +54,7 @@ export class EligibilityChecker {
 				catalog price of the subscription (${totalPrice} ${currency}), so it is not eligible for a discount`,
 			);
 		}
-		return checkDefined(
+		return getIfDefined(
 			nextInvoiceItems[0]?.serviceStartDate,
 			'No next invoice date found in next invoice items',
 		);

@@ -1,5 +1,5 @@
 export const isNotNull = <T>(value: T): value is NonNullable<T> => !!value;
-export const checkDefined = <T>(
+export const getIfDefined = <T>(
 	value: T | undefined | null,
 	errorMessage: string,
 ): T => {
