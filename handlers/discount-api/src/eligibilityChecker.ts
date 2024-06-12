@@ -1,5 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	billingPreviewToRecords,
 	getNextInvoiceTotal,
@@ -31,7 +31,7 @@ export class EligibilityChecker {
 		ratePlan: RatePlan,
 	) => {
 		// Work out the catalog price of the rate plan
-		const currency = checkDefined(
+		const currency = getIfDefined(
 			ratePlan.ratePlanCharges[0]?.currency,
 			'No charges found on rate plan',
 		);
@@ -41,7 +41,7 @@ export class EligibilityChecker {
 		);
 
 		// Work out how much the cost of the next invoice will be
-		const nextInvoiceTotal = checkDefined(
+		const nextInvoiceTotal = getIfDefined(
 			getNextInvoiceTotal(billingPreviewToRecords(billingPreview)),
 			`No next invoice found for account ${billingPreview.accountId}`,
 		);
@@ -52,7 +52,7 @@ export class EligibilityChecker {
 				catalog price of the subscription (${totalPrice} ${currency}), so it is not eligible for a discount`,
 			);
 		}
-		return checkDefined(
+		return getIfDefined(
 			nextInvoiceTotal.date,
 			'No next invoice date found in next invoice items',
 		);

@@ -1,5 +1,5 @@
 import { groupBy, sortBy, sumNumbers } from '@modules/arrayFunctions';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs, { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from './common';
 import type { ZuoraClient } from './zuoraClient';
@@ -26,7 +26,7 @@ export function getNextInvoiceTotal(
 ) {
 	const ordered = getOrderedInvoiceData(invoiceItems);
 
-	return checkDefined(
+	return getIfDefined(
 		ordered[0],
 		'could not find a payment in the invoice preview',
 	);
@@ -37,7 +37,7 @@ export function getNextNonFreePaymentDate(
 ) {
 	const ordered = getOrderedInvoiceData(invoiceItems);
 
-	const firstNonFree = checkDefined(
+	const firstNonFree = getIfDefined(
 		ordered.find((item) => item.total > 0),
 		'could not find a non free payment in the invoice preview',
 	);

@@ -1,5 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
@@ -32,7 +32,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				console.log('Applying a discount');
 				const subscriptionNumber = applyDiscountSchema.parse(
-					JSON.parse(checkDefined(event.body, 'No body was provided')),
+					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
 				const result: ApplyDiscountResponseBody = await applyDiscountEndpoint(
 					stage,
@@ -47,7 +47,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
 				console.log('Previewing discount');
 				const subscriptionNumber = applyDiscountSchema.parse(
-					JSON.parse(checkDefined(event.body, 'No body was provided')),
+					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
 				const result: EligibilityCheckResponseBody =
 					await previewDiscountEndpoint(

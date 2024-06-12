@@ -8,12 +8,12 @@ import {
 	zuoraSubscribeResponseSchema,
 	zuoraSuccessResponseSchema,
 } from '@modules/zuora/zuoraSchemas';
-import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
-import { checkDefined } from '@modules/nullAndUndefined';
 import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 export const createDigitalSubscription = async (
 	zuoraClient: ZuoraClient,
@@ -23,7 +23,7 @@ export const createDigitalSubscription = async (
 		zuoraClient,
 		digiSubSubscribeBody(dayjs(), createWithOldPrice),
 	);
-	return checkDefined(
+	return getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
 	);
@@ -37,7 +37,7 @@ export const createSupporterPlusSubscription = async (
 		supporterPlusSubscribeBody(dayjs()),
 	);
 
-	return checkDefined(
+	return getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
 	);
