@@ -8,6 +8,7 @@ const cloudWatchAlarmMessageSchema = z.object({
 	AlarmName: z.string(),
 	AlarmDescription: z.string().nullish(),
 	NewStateReason: z.string(),
+	NewStateValue: z.string(),
 	AWSAccountId: z.string(),
 });
 
@@ -58,7 +59,14 @@ const handleCloudWatchAlarmMessage = async ({
 }: {
 	message: CloudWatchAlarmMessage;
 }) => {
-	const { AlarmArn, AlarmName, NewStateReason, AlarmDescription, AWSAccountId } = message;
+	const {
+		AlarmArn,
+		AlarmName,
+		NewStateReason,
+		NewStateValue,
+		AlarmDescription,
+		AWSAccountId,
+	} = message;
 
 	const app = await getAppNameTag(AlarmArn, AWSAccountId);
 	const teams = getTeams(app);
@@ -66,7 +74,11 @@ const handleCloudWatchAlarmMessage = async ({
 	await Promise.all(teams.map(team => {
 		const webhookUrl = getTeamWebhookUrl(team);
 
-		const text = `*ALARM:* ${AlarmName} has triggered!\n\n*Description:* ${
+		const title =
+			NewStateValue === 'OK'
+				 ? `*ALARM OK:* ${AlarmName} has recovered!`
+				 : `*ALARM:* ${AlarmName} has triggered!`;
+		const text = `${title}\n\n*Description:* ${
 			AlarmDescription ?? ''
 		}\n\n*Reason:* ${NewStateReason}`;
 
