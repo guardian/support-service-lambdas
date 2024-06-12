@@ -20,6 +20,7 @@ describe('Handler', () => {
 						AlarmArn: 'mock-arn',
 						AlarmName: 'mock-alarm',
 						NewStateReason: 'mock-reason',
+						NewStateValue: 'ALARM',
 						AlarmDescription: 'description',
 						AWSAccountId: '111111',
 					}),
@@ -79,6 +80,38 @@ describe('Handler', () => {
 
 		await expect(handler(mockCloudWatchAlarmEvent)).rejects.toThrow(
 			'Fetch error',
+		);
+	});
+
+	it('calls the webhook with the correct data for an OK action', async () => {
+		(getAppNameTag as jest.Mock).mockResolvedValueOnce('mock-app');
+		jest
+			.spyOn(global, 'fetch')
+			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));
+		const mockCloudWatchOkEvent = {
+			Records: [
+				{
+					body: JSON.stringify({
+						Message: JSON.stringify({
+							AlarmArn: 'mock-arn',
+							AlarmName: 'mock-alarm',
+							NewStateReason: 'mock-reason',
+							NewStateValue: 'OK',
+							AlarmDescription: 'description',
+							AWSAccountId: '111111',
+						}),
+					}),
+				},
+			],
+		} as SQSEvent;
+
+		await handler(mockCloudWatchOkEvent);
+
+		expect(fetch).toHaveBeenCalledWith(
+			mockEnv.SRE_WEBHOOK,
+			expect.objectContaining({
+				body: expect.stringContaining('*ALARM OK:* mock-alarm has recovered!'),
+			}),
 		);
 	});
 });
