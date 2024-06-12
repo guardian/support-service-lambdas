@@ -17,7 +17,10 @@ import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
-import { getDiscountFromSubscription } from './productToDiscountMapping';
+import {
+	Discount,
+	getDiscountFromSubscription,
+} from './productToDiscountMapping';
 import type {
 	ApplyDiscountResponseBody,
 	EligibilityCheckResponseBody,
@@ -38,42 +41,12 @@ export const previewDiscountEndpoint = async (
 	);
 
 	console.log('Preview the new price once the discount has been applied');
-	const previewResponse = await previewDiscount(
+	return await getDiscountPreview(
 		zuoraClient,
 		subscriptionNumber,
-		dayjs(dateToApply),
-		discount.productRatePlanId,
+		dateToApply,
+		discount,
 	);
-
-	if (!previewResponse.success || previewResponse.invoiceItems.length < 2) {
-		throw new Error(
-			'Unexpected data in preview response from Zuora. ' +
-				'We expected at least 2 invoice items, one for the discount and at least one for the main plan',
-		);
-	}
-
-	const discountedPrice = sum(
-		previewResponse.invoiceItems,
-		(item) => item.chargeAmount + item.taxAmount,
-	);
-
-	const firstDiscountedPaymentDate = zuoraDateFormat(dayjs(dateToApply));
-	if (discount.upToPeriodsType !== 'Months') {
-		throw new Error(
-			'only discounts measured in months are supported in this version of discount-api',
-		);
-	}
-	const nextNonDiscountedPaymentDate = zuoraDateFormat(
-		dayjs(dateToApply).add(discount.upToPeriods, 'month'),
-	);
-
-	return {
-		discountedPrice,
-		upToPeriods: discount.upToPeriods,
-		upToPeriodsType: discount.upToPeriodsType,
-		firstDiscountedPaymentDate,
-		nextNonDiscountedPaymentDate,
-	};
 };
 
 export const applyDiscountEndpoint = async (
@@ -89,34 +62,15 @@ export const applyDiscountEndpoint = async (
 		subscriptionNumber,
 		zuoraClient,
 	);
-
-	console.log('Apply a discount to the subscription');
-	const discounted = await addDiscount(
+	return await applyDiscount(
 		zuoraClient,
 		subscriptionNumber,
-		dayjs(subscription.termStartDate),
-		dayjs(subscription.termEndDate),
-		dayjs(dateToApply),
+		subscription.termStartDate,
+		subscription.termEndDate,
+		dateToApply,
 		discount.productRatePlanId,
-	);
-
-	if (discounted.success) {
-		console.log('Discount applied successfully');
-	} else {
-		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
-	}
-
-	const billingPreviewAfter = await getBillingPreview(
-		zuoraClient,
-		dayjs().add(13, 'months'),
 		subscription.accountNumber,
 	);
-
-	const nextPaymentDate = getNextNonFreePaymentDate(
-		billingPreviewToRecords(billingPreviewAfter),
-	);
-
-	return { nextPaymentDate };
 };
 
 async function getDiscountToApply(
@@ -167,6 +121,88 @@ async function getDiscountToApply(
 	);
 	return { subscription, discount, dateToApply };
 }
+
+const getDiscountPreview = async (
+	zuoraClient: ZuoraClient,
+	subscriptionNumber: string,
+	dateToApply: Date,
+	discount: Discount,
+) => {
+	const previewResponse = await previewDiscount(
+		zuoraClient,
+		subscriptionNumber,
+		dayjs(dateToApply),
+		discount.productRatePlanId,
+	);
+
+	if (!previewResponse.success || previewResponse.invoiceItems.length < 2) {
+		throw new Error(
+			'Unexpected data in preview response from Zuora. ' +
+				'We expected at least 2 invoice items, one for the discount and at least one for the main plan',
+		);
+	}
+
+	const discountedPrice = sum(
+		previewResponse.invoiceItems,
+		(item) => item.chargeAmount + item.taxAmount,
+	);
+
+	const firstDiscountedPaymentDate = zuoraDateFormat(dayjs(dateToApply));
+	if (discount.upToPeriodsType !== 'Months') {
+		throw new Error(
+			'only discounts measured in months are supported in this version of discount-api',
+		);
+	}
+	const nextNonDiscountedPaymentDate = zuoraDateFormat(
+		dayjs(dateToApply).add(discount.upToPeriods, 'month'),
+	);
+
+	return {
+		discountedPrice,
+		upToPeriods: discount.upToPeriods,
+		upToPeriodsType: discount.upToPeriodsType,
+		firstDiscountedPaymentDate,
+		nextNonDiscountedPaymentDate,
+	};
+};
+
+const applyDiscount = async (
+	zuoraClient: ZuoraClient,
+	subscriptionNumber: string,
+	termStartDate: Date,
+	termEndDate: Date,
+	dateToApply: Date,
+	discountProductRatePlanId: string,
+	accountNumber: string,
+) => {
+	console.log('Apply a discount to the subscription');
+	const discounted = await addDiscount(
+		zuoraClient,
+		subscriptionNumber,
+		dayjs(termStartDate),
+		dayjs(termEndDate),
+		dayjs(dateToApply),
+		discountProductRatePlanId,
+	);
+
+	if (discounted.success) {
+		console.log('Discount applied successfully');
+	} else {
+		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
+	}
+
+	const billingPreviewAfter = await getBillingPreview(
+		zuoraClient,
+		dayjs().add(13, 'months'),
+		accountNumber,
+	);
+
+	const nextPaymentDate = getNextNonFreePaymentDate(
+		billingPreviewToRecords(billingPreviewAfter),
+	);
+
+	return { nextPaymentDate };
+};
 
 const checkSubscriptionBelongsToIdentityId = async (
 	zuoraClient: ZuoraClient,
