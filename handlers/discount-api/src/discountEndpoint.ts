@@ -17,10 +17,8 @@ import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
-import {
-	Discount,
-	getDiscountFromSubscription,
-} from './productToDiscountMapping';
+import type { Discount } from './productToDiscountMapping';
+import { getDiscountFromSubscription } from './productToDiscountMapping';
 import type {
 	ApplyDiscountResponseBody,
 	EligibilityCheckResponseBody,

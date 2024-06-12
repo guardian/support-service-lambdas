@@ -7,8 +7,10 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
 import { EligibilityCheckResponseBody } from '../src/responseSchema';
-import { createDigitalSubscription, createSubscription } from './helpers';
-import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
+import {
+	createDigitalSubscription,
+	createSupporterPlusSubscription,
+} from './helpers';
 import { zuoraDateFormat } from '@modules/zuora/common';
 
 const stage: Stage = 'CODE';
@@ -107,10 +109,7 @@ test('Supporter Plus subscriptions are eligible', async () => {
 	const paymentDate = today.add(16, 'day');
 
 	console.log('Creating a new S+ subscription');
-	const subscriptionNumber = await createSubscription(
-		zuoraClient,
-		supporterPlusSubscribeBody(today),
-	);
+	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
 	const result = await previewDiscountEndpoint(
 		stage,

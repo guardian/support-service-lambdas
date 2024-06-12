@@ -7,8 +7,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { applyDiscountEndpoint } from '../src/discountEndpoint';
 import { ApplyDiscountResponseBody } from '../src/responseSchema';
-import { createSubscription } from './helpers';
-import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
+import { createSupporterPlusSubscription } from './helpers';
 import { zuoraDateFormat } from '@modules/zuora/common';
 
 const stage: Stage = 'CODE';
@@ -21,10 +20,7 @@ test('Supporter Plus subscriptions can have a discount', async () => {
 	const paymentDate = today.add(16, 'day');
 
 	console.log('Creating a new S+ subscription');
-	const subscriptionNumber = await createSubscription(
-		zuoraClient,
-		supporterPlusSubscribeBody(today),
-	);
+	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
 	const result = await applyDiscountEndpoint(
 		stage,

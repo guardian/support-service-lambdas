@@ -13,18 +13,37 @@ import type { Dayjs } from 'dayjs';
 import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 import { checkDefined } from '@modules/nullAndUndefined';
+import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
 
 export const createDigitalSubscription = async (
 	zuoraClient: ZuoraClient,
 	createWithOldPrice: boolean,
 ): Promise<string> => {
-	return await createSubscription(
+	const subscribeResponse = await subscribe(
 		zuoraClient,
 		digiSubSubscribeBody(dayjs(), createWithOldPrice),
 	);
+	return checkDefined(
+		subscribeResponse[0]?.SubscriptionNumber,
+		'SubscriptionNumber was undefined in response from Zuora',
+	);
 };
 
-export const createSubscription = async (
+export const createSupporterPlusSubscription = async (
+	zuoraClient: ZuoraClient,
+): Promise<string> => {
+	const subscribeResponse = await subscribe(
+		zuoraClient,
+		supporterPlusSubscribeBody(dayjs()),
+	);
+
+	return checkDefined(
+		subscribeResponse[0]?.SubscriptionNumber,
+		'SubscriptionNumber was undefined in response from Zuora',
+	);
+};
+
+async function subscribe(
 	zuoraClient: ZuoraClient,
 	subscribeBody: {
 		subscribes: {
@@ -81,7 +100,7 @@ export const createSubscription = async (
 			};
 		}[];
 	},
-): Promise<string> => {
+) {
 	const path = `/v1/action/subscribe`;
 	const body = JSON.stringify(subscribeBody);
 
@@ -90,12 +109,8 @@ export const createSubscription = async (
 		body,
 		zuoraSubscribeResponseSchema,
 	);
-
-	return checkDefined(
-		subscribeResponse[0]?.SubscriptionNumber,
-		'SubscriptionNumber was undefined in response from Zuora',
-	);
-};
+	return subscribeResponse;
+}
 
 export const doPriceRise = async (
 	zuoraClient: ZuoraClient,
