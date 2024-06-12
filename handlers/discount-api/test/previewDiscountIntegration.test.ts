@@ -10,6 +10,7 @@ import { discountEndpoint } from '../src/discountEndpoint';
 import { previewDiscountSchema } from '../src/responseSchema';
 import { createDigitalSubscription, createSubscription } from './helpers';
 import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
+import { PassThrough } from '@modules/zuora/requestLogger';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';
@@ -37,6 +38,7 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 			true,
 			{ 'x-identity-id': invalidIdentityId },
 			JSON.stringify(requestBody),
+			new PassThrough(),
 		);
 	}).rejects.toThrow('does not belong to identity ID');
 
@@ -71,6 +73,7 @@ test('Subscriptions on the old price are not eligible', async () => {
 			true,
 			{ 'x-identity-id': validIdentityId },
 			JSON.stringify(requestBody),
+			new PassThrough(),
 		);
 	}).rejects.toThrow('it is not eligible for a discount');
 
@@ -105,6 +108,7 @@ test('Subscriptions on the new price are eligible', async () => {
 		true,
 		{ 'x-identity-id': validIdentityId },
 		JSON.stringify(requestBody),
+		new PassThrough(),
 	);
 	const eligibilityCheckResult = previewDiscountSchema.parse(
 		JSON.parse(result.body),
@@ -146,6 +150,7 @@ test('Supporter Plus subscriptions are eligible', async () => {
 		true,
 		{ 'x-identity-id': validIdentityId },
 		JSON.stringify(requestBody),
+		new PassThrough(),
 	);
 	const eligibilityCheckResult = previewDiscountSchema.parse(
 		JSON.parse(result.body),

@@ -1,6 +1,7 @@
 import { zuoraServerUrl } from './common';
 import type { OAuthClientCredentials, ZuoraBearerToken } from './zuoraSchemas';
 import { zuoraBearerTokenSchema } from './zuoraSchemas';
+import { FetchInterface } from '@modules/zuora/requestLogger';
 
 export class BearerTokenProvider {
 	private bearerToken: ZuoraBearerToken | null = null;
@@ -9,6 +10,7 @@ export class BearerTokenProvider {
 	constructor(
 		private stage: string,
 		private credentials: OAuthClientCredentials,
+		private fetchInterface: FetchInterface,
 	) {}
 
 	private tokenIsExpired = () => {
@@ -40,14 +42,17 @@ export class BearerTokenProvider {
 			['client_id', this.credentials.clientId],
 			['client_secret', this.credentials.clientSecret],
 			['grant_type', 'client_credentials'],
-		]);
+		]).toString();
 
-		const response = await fetch(url, {
+		const response = await this.fetchInterface.execute(url, {
 			method: 'POST',
+			headers: {
+				'Content-type': 'application/x-www-form-urlencoded',
+			},
 			body: formData,
 		});
 
-		const json = await response.json();
+		const json = JSON.parse(response.text);
 		console.log('Response from Zuora was: ', json);
 
 		return zuoraBearerTokenSchema.parse(json);

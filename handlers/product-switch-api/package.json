@@ -11,7 +11,7 @@
   "dependencies": {
     "dayjs": "^1.11.11",
     "zod": "^3.22.4",
-    "@aws-sdk/client-sqs": "3.451.0"
+    "@aws-sdk/client-sqs": "3.590.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.129"
