@@ -66,10 +66,8 @@ function getOrderedInvoiceData(
 }
 
 export function billingPreviewToRecords(billingPreviewAfter: BillingPreview) {
-	return billingPreviewAfter.invoiceItems.map((entry) => {
-		return {
-			date: entry.serviceStartDate,
-			amount: entry.chargeAmount + entry.taxAmount,
-		};
-	});
+	return billingPreviewAfter.invoiceItems.map((entry) => ({
+		date: entry.serviceStartDate,
+		amount: entry.chargeAmount + entry.taxAmount,
+	}));
 }
