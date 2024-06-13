@@ -100,7 +100,7 @@ export const applyDiscountEndpoint = async (
 
 	const billingPreviewAfter = await getBillingPreview(
 		zuoraClient,
-		dayjs().add(13, 'months'),
+		dayjs().add(13, 'months'), // 13 months gives us minimum 2 payments even on an Annual sub
 		subscription.accountNumber,
 	);
 
