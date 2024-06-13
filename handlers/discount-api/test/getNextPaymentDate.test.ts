@@ -2,7 +2,7 @@ import { getNextNonFreePaymentDate } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import dayjs from 'dayjs';
 
-test('getNextPaymentDate fails if there are no payments in the preview', () => {
+test('getNextNonFreePaymentDate fails if all payments are free', () => {
 	const items = [
 		{ date: new Date('2020-02-01'), amount: 0 },
 		{ date: new Date('2020-01-01'), amount: 0 },
@@ -16,7 +16,7 @@ test('getNextPaymentDate fails if there are no payments in the preview', () => {
 	);
 });
 
-test('getNextPaymentDate finds the relevant payment', () => {
+test('getNextNonFreePaymentDate finds the relevant payment', () => {
 	const items = [
 		{ date: new Date('2020-01-01'), amount: 0 },
 		{ date: new Date('2020-02-01'), amount: 10 },
@@ -28,7 +28,7 @@ test('getNextPaymentDate finds the relevant payment', () => {
 	expect(zuoraDateFormat(dayjs(actual))).toEqual('2020-02-01');
 });
 
-test('getNextPaymentDate finds the relevant payment in reverse order', () => {
+test('getNextNonFreePaymentDate finds the relevant payment in reverse order', () => {
 	const items = [
 		{ date: new Date('2020-03-01'), amount: 10 },
 		{ date: new Date('2020-02-01'), amount: 10 },
@@ -40,7 +40,7 @@ test('getNextPaymentDate finds the relevant payment in reverse order', () => {
 	expect(zuoraDateFormat(dayjs(actual))).toEqual('2020-02-01');
 });
 
-test('getNextPaymentDate finds the relevant payment even if theres duplicates', () => {
+test('getNextNonFreePaymentDate finds the relevant payment even if theres duplicates', () => {
 	const items = [
 		{ date: new Date('2020-01-01'), amount: 0 },
 		{ date: new Date('2020-02-01'), amount: 0 },
@@ -53,7 +53,7 @@ test('getNextPaymentDate finds the relevant payment even if theres duplicates', 
 	expect(zuoraDateFormat(dayjs(actual))).toEqual('2020-02-01');
 });
 
-test('getNextPaymentDate finds the relevant payment in reverse order even if theres duplicates', () => {
+test('getNextNonFreePaymentDate finds the relevant payment in reverse order even if theres duplicates', () => {
 	const items = [
 		{ date: new Date('2020-03-01'), amount: 10 },
 		{ date: new Date('2020-02-01'), amount: 10 },
