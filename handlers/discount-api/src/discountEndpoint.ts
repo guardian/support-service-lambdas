@@ -17,8 +17,8 @@ import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
+import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
-import { sendCancellationDiscountEmail } from './sendCancellationDiscountConfirmationEmail';
 
 export const previewDiscountEndpoint = async (
 	stage: Stage,
@@ -93,9 +93,9 @@ export const applyDiscountEndpoint = async (
 	);
 
 	if (!discounted.success) {
-	        throw new Error('discount was not applied: ' + JSON.stringify(discounted));
+		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
 	}
-	
+
 	console.log('Discount applied successfully');
 
 	const billingPreviewAfter = await getBillingPreview(
@@ -109,7 +109,7 @@ export const applyDiscountEndpoint = async (
 	);
 
 	const emailPayload = discount.sendEmail
-		? sendCancellationDiscountEmail({
+		? generateCancellationDiscountConfirmationEmail({
 				firstDiscountedPaymentDate: dayjs(dateToApply),
 				nextNonDiscountedPaymentDate: dayjs(nextPaymentDate),
 				emailAddress: account.billToContact.workEmail,
