@@ -92,11 +92,11 @@ export const applyDiscountEndpoint = async (
 		discount.productRatePlanId,
 	);
 
-	if (discounted.success) {
-		console.log('Discount applied successfully');
-	} else {
-		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
+	if (!discounted.success) {
+	        throw new Error('discount was not applied: ' + JSON.stringify(discounted));
 	}
+	
+	console.log('Discount applied successfully');
 
 	const billingPreviewAfter = await getBillingPreview(
 		zuoraClient,
