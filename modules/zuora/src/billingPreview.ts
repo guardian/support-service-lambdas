@@ -21,9 +21,9 @@ export const getBillingPreview = async (
 	return zuoraClient.post(path, body, billingPreviewSchema);
 };
 
-export function getNextInvoiceTotal(
-	invoiceItems: Array<{ date: Date; amount: number }>,
-) {
+type SimpleInvoiceItem = { date: Date; amount: number };
+
+export function getNextInvoiceTotal(invoiceItems: Array<SimpleInvoiceItem>) {
 	const ordered = getOrderedInvoiceData(invoiceItems);
 
 	return getIfDefined(
@@ -33,7 +33,7 @@ export function getNextInvoiceTotal(
 }
 
 export function getNextNonFreePaymentDate(
-	invoiceItems: Array<{ date: Date; amount: number }>,
+	invoiceItems: Array<SimpleInvoiceItem>,
 ) {
 	const ordered = getOrderedInvoiceData(invoiceItems);
 
@@ -47,27 +47,22 @@ export function getNextNonFreePaymentDate(
 	return nextPaymentDate;
 }
 
-function getOrderedInvoiceData(
-	invoiceItems: Array<{ date: Date; amount: number }>,
-) {
-	const grouped = groupBy(invoiceItems, (invoiceItem) => {
-		return zuoraDateFormat(dayjs(invoiceItem.date));
-	});
+function getOrderedInvoiceData(invoiceItems: Array<SimpleInvoiceItem>) {
+	const grouped = groupBy(invoiceItems, (invoiceItem) =>
+		zuoraDateFormat(dayjs(invoiceItem.date)),
+	);
 
 	const ordered = sortBy(Object.entries(grouped), (item) => item[0]).map(
-		(item) => {
-			return {
-				date: new Date(item[0]),
-				total: sumNumbers(item[1].map((item) => item.amount)),
-			};
-		},
+		(item) => ({
+			date: new Date(item[0]),
+			total: sumNumbers(item[1].map((item) => item.amount)),
+		}),
 	);
 	return ordered;
 }
 
-export function billingPreviewToRecords(billingPreviewAfter: BillingPreview) {
-	return billingPreviewAfter.invoiceItems.map((entry) => ({
+export const billingPreviewToRecords = (billingPreviewAfter: BillingPreview) =>
+	billingPreviewAfter.invoiceItems.map((entry) => ({
 		date: entry.serviceStartDate,
 		amount: entry.chargeAmount + entry.taxAmount,
 	}));
-}
