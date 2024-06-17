@@ -157,8 +157,7 @@ export class AlarmsHandler extends GuStack {
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			threshold: 0,
 			evaluationPeriods: 24,
-			actionsEnabled: true,
-			okAction: true,
+			actionsEnabled: this.stage === 'PROD',
 		});
 	}
 }
