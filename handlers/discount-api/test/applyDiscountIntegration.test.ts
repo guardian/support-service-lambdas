@@ -33,7 +33,7 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 	);
 
 	const expected: ApplyDiscountResponseBody = {
-		nextPaymentDate: zuoraDateFormat(paymentDate.add(2, 'months')),
+		nextNonDiscountedPaymentDate: zuoraDateFormat(paymentDate.add(2, 'months')),
 	};
 	const expectedEmail: EmailMessageWithUserId = {
 		To: {
@@ -83,7 +83,7 @@ test('digi subs can have a discount but dont get an email', async () => {
 	);
 
 	const expected: ApplyDiscountResponseBody = {
-		nextPaymentDate: zuoraDateFormat(today.add(16, 'day')),
+		nextNonDiscountedPaymentDate: zuoraDateFormat(today.add(16, 'day')),
 	};
 
 	expect(response as ApplyDiscountResponseBody).toEqual(expected);

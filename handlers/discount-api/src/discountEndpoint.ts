@@ -4,7 +4,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
-	billingPreviewToRecords,
+	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
 	getNextNonFreePaymentDate,
 } from '@modules/zuora/billingPreview';
@@ -105,7 +105,7 @@ export const applyDiscountEndpoint = async (
 	);
 
 	const nextPaymentDate = getNextNonFreePaymentDate(
-		billingPreviewToRecords(billingPreviewAfter),
+		billingPreviewToSimpleInvoiceItems(billingPreviewAfter),
 	);
 
 	const emailPayload = discount.sendEmail
@@ -121,7 +121,9 @@ export const applyDiscountEndpoint = async (
 
 	return {
 		emailPayload,
-		response: { nextPaymentDate: zuoraDateFormat(dayjs(nextPaymentDate)) },
+		response: {
+			nextNonDiscountedPaymentDate: zuoraDateFormat(dayjs(nextPaymentDate)),
+		},
 	};
 };
 
