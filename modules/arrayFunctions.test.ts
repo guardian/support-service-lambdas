@@ -8,7 +8,7 @@ test('sortBy should sort by the relevant field', () => {
 	];
 	const actual = sortBy(data, (item) => `${item.d}`);
 	expect(actual).toEqual([
-		{ l: 2, d: 1011 },
+		{ l: 2, d: 101 },
 		{ l: 1, d: 102 },
 		{ l: 3, d: 103 },
 	]);
