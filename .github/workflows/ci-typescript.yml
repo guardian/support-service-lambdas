@@ -39,7 +39,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter modules test
+      - run: pushd modules && pnpm test; popd
       - run: pnpm package
 
       - name: Configure AWS credentials
