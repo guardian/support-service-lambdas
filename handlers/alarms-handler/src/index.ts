@@ -76,8 +76,8 @@ const handleCloudWatchAlarmMessage = async ({
 
 		const title =
 			NewStateValue === 'OK'
-				 ? `*ALARM OK:* ${AlarmName} has recovered!`
-				 : `*ALARM:* ${AlarmName} has triggered!`;
+				 ? `✅ *ALARM OK:* ${AlarmName} has recovered!`
+				 : `🚨 *ALARM:* ${AlarmName} has triggered!`;
 		const text = `${title}\n\n*Description:* ${
 			AlarmDescription ?? ''
 		}\n\n*Reason:* ${NewStateReason}`;
