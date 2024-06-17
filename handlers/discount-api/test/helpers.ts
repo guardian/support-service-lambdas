@@ -8,22 +8,42 @@ import {
 	zuoraSubscribeResponseSchema,
 	zuoraSuccessResponseSchema,
 } from '@modules/zuora/zuoraSchemas';
-import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
+import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 export const createDigitalSubscription = async (
 	zuoraClient: ZuoraClient,
 	createWithOldPrice: boolean,
-): Promise<ZuoraSubscribeResponse> => {
-	return await createSubscription(
+): Promise<string> => {
+	const subscribeResponse = await subscribe(
 		zuoraClient,
 		digiSubSubscribeBody(dayjs(), createWithOldPrice),
 	);
+	return getIfDefined(
+		subscribeResponse[0]?.SubscriptionNumber,
+		'SubscriptionNumber was undefined in response from Zuora',
+	);
 };
 
-export const createSubscription = async (
+export const createSupporterPlusSubscription = async (
+	zuoraClient: ZuoraClient,
+): Promise<string> => {
+	const subscribeResponse = await subscribe(
+		zuoraClient,
+		supporterPlusSubscribeBody(dayjs()),
+	);
+
+	return getIfDefined(
+		subscribeResponse[0]?.SubscriptionNumber,
+		'SubscriptionNumber was undefined in response from Zuora',
+	);
+};
+
+async function subscribe(
 	zuoraClient: ZuoraClient,
 	subscribeBody: {
 		subscribes: {
@@ -80,12 +100,17 @@ export const createSubscription = async (
 			};
 		}[];
 	},
-): Promise<ZuoraSubscribeResponse> => {
+) {
 	const path = `/v1/action/subscribe`;
 	const body = JSON.stringify(subscribeBody);
 
-	return zuoraClient.post(path, body, zuoraSubscribeResponseSchema);
-};
+	const subscribeResponse: ZuoraSubscribeResponse = await zuoraClient.post(
+		path,
+		body,
+		zuoraSubscribeResponseSchema,
+	);
+	return subscribeResponse;
+}
 
 export const doPriceRise = async (
 	zuoraClient: ZuoraClient,

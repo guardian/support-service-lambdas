@@ -1,7 +1,9 @@
-import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
+import {
+	billingPreviewToRecords,
+	getNextInvoiceTotal,
+} from '@modules/zuora/billingPreview';
 import type { BillingPreview, RatePlan } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 
@@ -39,23 +41,19 @@ export class EligibilityChecker {
 		);
 
 		// Work out how much the cost of the next invoice will be
-		const nextInvoiceItems = getIfDefined(
-			getNextInvoiceItems(billingPreview),
+		const nextInvoiceTotal = getIfDefined(
+			getNextInvoiceTotal(billingPreviewToRecords(billingPreview)),
 			`No next invoice found for account ${billingPreview.accountId}`,
 		);
-		const nextInvoiceTotal = sum(
-			nextInvoiceItems,
-			(item) => item.chargeAmount + item.taxAmount,
-		);
 
-		if (nextInvoiceTotal < totalPrice) {
+		if (nextInvoiceTotal.total < totalPrice) {
 			throw new ValidationError(
-				`Amount payable for next invoice (${nextInvoiceTotal} ${currency}) is less than the current 
+				`Amount payable for next invoice (${nextInvoiceTotal.total} ${currency}) is less than the current 
 				catalog price of the subscription (${totalPrice} ${currency}), so it is not eligible for a discount`,
 			);
 		}
 		return getIfDefined(
-			nextInvoiceItems[0]?.serviceStartDate,
+			nextInvoiceTotal.date,
 			'No next invoice date found in next invoice items',
 		);
 	};

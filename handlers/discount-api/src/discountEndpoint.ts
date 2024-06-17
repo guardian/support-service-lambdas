@@ -3,7 +3,12 @@ import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
-import { getBillingPreview } from '@modules/zuora/billingPreview';
+import {
+	billingPreviewToRecords,
+	getBillingPreview,
+	getNextNonFreePaymentDate,
+} from '@modules/zuora/billingPreview';
+import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -14,15 +19,60 @@ import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import type { Discount } from './productToDiscountMapping';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
-import { applyDiscountSchema } from './requestSchema';
 
-export const discountEndpoint = async (
+export const previewDiscountEndpoint = async (
 	stage: Stage,
-	preview: boolean,
 	headers: APIGatewayProxyEventHeaders,
-	body: string | null,
+	subscriptionNumber: string,
 ) => {
 	const zuoraClient = await ZuoraClient.create(stage);
+
+	const { discount, dateToApply } = await getDiscountToApply(
+		stage,
+		headers,
+		subscriptionNumber,
+		zuoraClient,
+	);
+
+	console.log('Preview the new price once the discount has been applied');
+	return await getDiscountPreview(
+		zuoraClient,
+		subscriptionNumber,
+		dateToApply,
+		discount,
+	);
+};
+
+export const applyDiscountEndpoint = async (
+	stage: Stage,
+	headers: APIGatewayProxyEventHeaders,
+	subscriptionNumber: string,
+) => {
+	const zuoraClient = await ZuoraClient.create(stage);
+
+	const { subscription, discount, dateToApply } = await getDiscountToApply(
+		stage,
+		headers,
+		subscriptionNumber,
+		zuoraClient,
+	);
+	return await applyDiscount(
+		zuoraClient,
+		subscriptionNumber,
+		subscription.termStartDate,
+		subscription.termEndDate,
+		dateToApply,
+		discount.productRatePlanId,
+		subscription.accountNumber,
+	);
+};
+
+async function getDiscountToApply(
+	stage: Stage,
+	headers: APIGatewayProxyEventHeaders,
+	subscriptionNumber: string,
+	zuoraClient: ZuoraClient,
+) {
 	const catalog = await getZuoraCatalog(stage);
 	const eligibilityChecker = new EligibilityChecker(catalog);
 
@@ -31,15 +81,8 @@ export const discountEndpoint = async (
 		'Identity ID not found in request',
 	);
 
-	const requestBody = applyDiscountSchema.parse(
-		JSON.parse(getIfDefined(body, 'No body was provided')),
-	);
-
 	console.log('Getting the subscription details from Zuora');
-	const subscription = await getSubscription(
-		zuoraClient,
-		requestBody.subscriptionNumber,
-	);
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 
 	if (subscription.status !== 'Active') {
 		throw new ValidationError(
@@ -70,37 +113,19 @@ export const discountEndpoint = async (
 		billingPreview,
 		nonDiscountRatePlan,
 	);
-
-	if (preview) {
-		console.log('Preview the new price once the discount has been applied');
-		return getDiscountPreview(
-			zuoraClient,
-			requestBody.subscriptionNumber,
-			dateToApply,
-			discount,
-		);
-	} else {
-		return applyDiscount(
-			zuoraClient,
-			requestBody.subscriptionNumber,
-			subscription.termStartDate,
-			subscription.termEndDate,
-			dateToApply,
-			discount.productRatePlanId,
-		);
-	}
-};
+	return { subscription, discount, dateToApply };
+}
 
 const getDiscountPreview = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
-	nextBillingDate: Date,
+	dateToApply: Date,
 	discount: Discount,
 ) => {
 	const previewResponse = await previewDiscount(
 		zuoraClient,
 		subscriptionNumber,
-		dayjs(nextBillingDate),
+		dayjs(dateToApply),
 		discount.productRatePlanId,
 	);
 
@@ -116,13 +141,22 @@ const getDiscountPreview = async (
 		(item) => item.chargeAmount + item.taxAmount,
 	);
 
+	const firstDiscountedPaymentDate = zuoraDateFormat(dayjs(dateToApply));
+	if (discount.upToPeriodsType !== 'Months') {
+		throw new Error(
+			'only discounts measured in months are supported in this version of discount-api',
+		);
+	}
+	const nextNonDiscountedPaymentDate = zuoraDateFormat(
+		dayjs(dateToApply).add(discount.upToPeriods, 'month'),
+	);
+
 	return {
-		body: JSON.stringify({
-			discountedPrice,
-			upToPeriods: discount.upToPeriods,
-			upToPeriodsType: discount.upToPeriodsType,
-		}),
-		statusCode: 200,
+		discountedPrice,
+		upToPeriods: discount.upToPeriods,
+		upToPeriodsType: discount.upToPeriodsType,
+		firstDiscountedPaymentDate,
+		nextNonDiscountedPaymentDate,
 	};
 };
 
@@ -131,8 +165,9 @@ const applyDiscount = async (
 	subscriptionNumber: string,
 	termStartDate: Date,
 	termEndDate: Date,
-	nextBillingDate: Date,
+	dateToApply: Date,
 	discountProductRatePlanId: string,
+	accountNumber: string,
 ) => {
 	console.log('Apply a discount to the subscription');
 	const discounted = await addDiscount(
@@ -140,18 +175,29 @@ const applyDiscount = async (
 		subscriptionNumber,
 		dayjs(termStartDate),
 		dayjs(termEndDate),
-		dayjs(nextBillingDate),
+		dayjs(dateToApply),
 		discountProductRatePlanId,
 	);
 
 	if (discounted.success) {
 		console.log('Discount applied successfully');
+	} else {
+		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
 	}
-	return {
-		body: 'Success',
-		statusCode: 200,
-	};
+
+	const billingPreviewAfter = await getBillingPreview(
+		zuoraClient,
+		dayjs().add(13, 'months'),
+		accountNumber,
+	);
+
+	const nextPaymentDate = getNextNonFreePaymentDate(
+		billingPreviewToRecords(billingPreviewAfter),
+	);
+
+	return { nextPaymentDate };
 };
+
 const checkSubscriptionBelongsToIdentityId = async (
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
