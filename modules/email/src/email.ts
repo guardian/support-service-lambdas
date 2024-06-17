@@ -31,6 +31,7 @@ export const DataExtensionNames = {
 	recurringContributionToSupporterPlusSwitch: 'SV_RCtoSP_Switch',
 	subscriptionCancelledEmail: 'subscription-cancelled-email',
 	updateSupporterPlusAmount: 'payment-amount-changed-email',
+	cancellationDiscountConfirmation: 'cancellation-discount-confirmation-email',
 } as const;
 
 export type DataExtensionName =

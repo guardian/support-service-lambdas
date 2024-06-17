@@ -1,4 +1,6 @@
 import { getNextNonFreePaymentDate } from '@modules/zuora/billingPreview';
+import { zuoraDateFormat } from '@modules/zuora/common';
+import dayjs from 'dayjs';
 
 test('getNextNonFreePaymentDate fails if all payments are free', () => {
 	const items = [
@@ -23,7 +25,7 @@ test('getNextNonFreePaymentDate finds the relevant payment', () => {
 
 	const actual = getNextNonFreePaymentDate(items);
 
-	expect(actual).toEqual('2020-02-01');
+	expect(zuoraDateFormat(dayjs(actual))).toEqual('2020-02-01');
 });
 
 test('getNextNonFreePaymentDate finds the relevant payment in reverse order', () => {
@@ -35,7 +37,7 @@ test('getNextNonFreePaymentDate finds the relevant payment in reverse order', ()
 
 	const actual = getNextNonFreePaymentDate(items);
 
-	expect(actual).toEqual('2020-02-01');
+	expect(zuoraDateFormat(dayjs(actual))).toEqual('2020-02-01');
 });
 
 test('getNextNonFreePaymentDate finds the relevant payment even if theres duplicates', () => {
@@ -48,7 +50,7 @@ test('getNextNonFreePaymentDate finds the relevant payment even if theres duplic
 
 	const actual = getNextNonFreePaymentDate(items);
 
-	expect(actual).toEqual('2020-02-01');
+	expect(zuoraDateFormat(dayjs(actual))).toEqual('2020-02-01');
 });
 
 test('getNextNonFreePaymentDate finds the relevant payment in reverse order even if theres duplicates', () => {
@@ -61,5 +63,5 @@ test('getNextNonFreePaymentDate finds the relevant payment in reverse order even
 
 	const actual = getNextNonFreePaymentDate(items);
 
-	expect(actual).toEqual('2020-02-01');
+	expect(zuoraDateFormat(dayjs(actual))).toEqual('2020-02-01');
 });

@@ -1,3 +1,4 @@
+import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
@@ -37,13 +38,16 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 				const subscriptionNumber = applyDiscountSchema.parse(
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
-				const result = await applyDiscountEndpoint(
+				const { response, emailPayload } = await applyDiscountEndpoint(
 					stage,
 					event.headers,
 					subscriptionNumber,
 				);
+				if (emailPayload) {
+					await sendEmail(stage, emailPayload);
+				}
 				return {
-					body: stringify<ApplyDiscountResponseBody>(result),
+					body: stringify<ApplyDiscountResponseBody>(response),
 					statusCode: 200,
 				};
 			}

@@ -42,7 +42,7 @@ export function getNextNonFreePaymentDate(
 		'could not find a non free payment in the invoice preview',
 	);
 
-	const nextPaymentDate = zuoraDateFormat(dayjs(firstNonFree.date));
+	const nextPaymentDate = firstNonFree.date;
 
 	return nextPaymentDate;
 }

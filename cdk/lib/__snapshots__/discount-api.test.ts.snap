@@ -181,6 +181,42 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SQSemailpolicy7D2D5531": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:sendmessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSemailpolicy7D2D5531",
+        "Roles": [
+          {
+            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "SecretsManagerpolicy7194A9CE": {
       "Properties": {
         "PolicyDocument": {
@@ -1105,6 +1141,42 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSemailpolicy7D2D5531": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:sendmessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSemailpolicy7D2D5531",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
