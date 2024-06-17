@@ -13,7 +13,7 @@ export type EligibilityCheckResponseBody = z.infer<
 >;
 
 export const applyDiscountSchema = z.object({
-	nextPaymentDate: z.string(),
+	nextNonDiscountedPaymentDate: z.string(),
 });
 
 export type ApplyDiscountResponseBody = z.infer<typeof applyDiscountSchema>;

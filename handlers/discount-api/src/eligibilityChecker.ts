@@ -1,7 +1,7 @@
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import {
-	billingPreviewToRecords,
+	billingPreviewToSimpleInvoiceItems,
 	getNextInvoiceTotal,
 } from '@modules/zuora/billingPreview';
 import type { BillingPreview, RatePlan } from '@modules/zuora/zuoraSchemas';
@@ -42,7 +42,7 @@ export class EligibilityChecker {
 
 		// Work out how much the cost of the next invoice will be
 		const nextInvoiceTotal = getIfDefined(
-			getNextInvoiceTotal(billingPreviewToRecords(billingPreview)),
+			getNextInvoiceTotal(billingPreviewToSimpleInvoiceItems(billingPreview)),
 			`No next invoice found for account ${billingPreview.accountId}`,
 		);
 

@@ -52,16 +52,18 @@ function getOrderedInvoiceData(invoiceItems: Array<SimpleInvoiceItem>) {
 		zuoraDateFormat(dayjs(invoiceItem.date)),
 	);
 
-	const ordered = sortBy(Object.entries(grouped), (item) => item[0]).map(
-		(item) => ({
-			date: new Date(item[0]),
-			total: sumNumbers(item[1].map((item) => item.amount)),
-		}),
-	);
-	return ordered;
+	const sortedItemGroups = sortBy(Object.entries(grouped), ([date]) => date);
+
+	const sortedTotals = sortedItemGroups.map(([date, items]) => ({
+		date: new Date(date),
+		total: sumNumbers(items.map((item) => item.amount)),
+	}));
+	return sortedTotals;
 }
 
-export const billingPreviewToRecords = (billingPreviewAfter: BillingPreview) =>
+export const billingPreviewToSimpleInvoiceItems = (
+	billingPreviewAfter: BillingPreview,
+) =>
 	billingPreviewAfter.invoiceItems.map((entry) => ({
 		date: entry.serviceStartDate,
 		amount: entry.chargeAmount + entry.taxAmount,
