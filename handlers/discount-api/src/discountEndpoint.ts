@@ -27,10 +27,15 @@ export const previewDiscountEndpoint = async (
 ) => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
+	const { subscription } = await getSubscriptionIfBelongsToIdentityId(
+		headers,
+		zuoraClient,
+		subscriptionNumber,
+	);
+
 	const { discount, dateToApply } = await getDiscountToApply(
 		stage,
-		headers,
-		subscriptionNumber,
+		subscription,
 		zuoraClient,
 	);
 
@@ -80,8 +85,17 @@ export const applyDiscountEndpoint = async (
 ) => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
-	const { subscription, discount, dateToApply, account } =
-		await getDiscountToApply(stage, headers, subscriptionNumber, zuoraClient);
+	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
+		headers,
+		zuoraClient,
+		subscriptionNumber,
+	);
+
+	const { discount, dateToApply } = await getDiscountToApply(
+		stage,
+		subscription,
+		zuoraClient,
+	);
 	console.log('Apply a discount to the subscription');
 	const discounted = await addDiscount(
 		zuoraClient,
@@ -127,15 +141,11 @@ export const applyDiscountEndpoint = async (
 	};
 };
 
-async function getDiscountToApply(
-	stage: Stage,
+async function getSubscriptionIfBelongsToIdentityId(
 	headers: APIGatewayProxyEventHeaders,
-	subscriptionNumber: string,
 	zuoraClient: ZuoraClient,
+	subscriptionNumber: string,
 ) {
-	const catalog = await getZuoraCatalog(stage);
-	const eligibilityChecker = new EligibilityChecker(catalog);
-
 	const identityId = getIfDefined(
 		headers['x-identity-id'],
 		'Identity ID not found in request',
@@ -144,23 +154,37 @@ async function getDiscountToApply(
 	console.log('Getting the subscription details from Zuora');
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 
+	console.log('get account for the subscription');
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+	console.log('assert that sub is owned by logged in user');
+	if (account.basicInfo.identityId !== identityId) {
+		throw new ValidationError(
+			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityId}`,
+		);
+	}
+
+	return { subscription, account };
+}
+
+async function getDiscountToApply(
+	stage: Stage,
+	subscription: ZuoraSubscription,
+	zuoraClient: ZuoraClient,
+) {
+	const catalog = await getZuoraCatalog(stage);
+	const eligibilityChecker = new EligibilityChecker(catalog);
+
 	if (subscription.status !== 'Active') {
 		throw new ValidationError(
 			`Subscription ${subscription.subscriptionNumber} has status ${subscription.status}`,
 		);
 	}
-
-	console.log(
-		'Check sub is owned by user & get billing preview for the subscription',
+	console.log('get billing preview for the subscription');
+	const billingPreview = await getBillingPreview(
+		zuoraClient,
+		dayjs().add(13, 'months'),
+		subscription.accountNumber,
 	);
-	const [account, billingPreview] = await Promise.all([
-		checkSubscriptionBelongsToIdentityId(zuoraClient, subscription, identityId),
-		getBillingPreview(
-			zuoraClient,
-			dayjs().add(13, 'months'),
-			subscription.accountNumber,
-		),
-	]);
 
 	console.log('Working out the appropriate discount for the subscription');
 	const { discount, nonDiscountRatePlan } = getDiscountFromSubscription(
@@ -173,19 +197,5 @@ async function getDiscountToApply(
 		billingPreview,
 		nonDiscountRatePlan,
 	);
-	return { subscription, discount, dateToApply, account };
+	return { discount, dateToApply };
 }
-
-const checkSubscriptionBelongsToIdentityId = async (
-	zuoraClient: ZuoraClient,
-	subscription: ZuoraSubscription,
-	identityId: string,
-) => {
-	const account = await getAccount(zuoraClient, subscription.accountNumber);
-	if (account.basicInfo.identityId !== identityId) {
-		throw new ValidationError(
-			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityId}`,
-		);
-	}
-	return account;
-};
