@@ -9,4 +9,5 @@ object ZuoraProductTypes {
   object NewspaperDigitalVoucher extends ZuoraProductType("Newspaper - Digital Voucher")
   object NewspaperNationalDelivery extends ZuoraProductType("Newspaper - National Delivery")
   object GuardianWeekly extends ZuoraProductType("Guardian Weekly")
+  object TierThree extends ZuoraProductType("Tier Three")
 }

@@ -18,6 +18,29 @@ case class SupportedProduct(
 object SupportedProduct {
   lazy val supportedProducts = List(
     SupportedProduct(
+      name = "Tier Three",
+      productType = TierThree,
+      annualIssueLimitPerEdition = 6,
+      ratePlans = List(
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly Domestic - Monthly",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly Domestic - Annual",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly ROW - Monthly",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly ROW - Annual",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+      ),
+    ),
+    SupportedProduct(
       name = "Guardian Weekly - Domestic",
       productType = GuardianWeekly,
       annualIssueLimitPerEdition = 6,
