@@ -5,7 +5,8 @@
     "generateTypes": "ts-node src/generateTypeObjectCommand.ts",
     "updateSnapshots": "jest -u --group=-integration",
     "test": "jest --group=-integration",
-    "it-test": "jest --group=integration"
+    "it-test": "jest --group=integration",
+    "check-formatting": "prettier --check **/*.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "test": "jest --group=-integration",
-    "it-test": "jest --group=integration"
+    "it-test": "jest --group=integration",
+    "check-formatting": "prettier --check **/*.ts"
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "3.451.0"

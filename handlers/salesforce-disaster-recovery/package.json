@@ -7,7 +7,8 @@
 		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target src/handlers/*.ts",
 		"lint": "eslint src/**/*.ts",
 		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr salesforce-disaster-recovery.zip ./*.js",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"check-formatting": "prettier --check **/*.ts"
 	},
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.137",
