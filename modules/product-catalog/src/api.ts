@@ -14,6 +14,7 @@ export const getProductCatalogFromApi = async (
 	});
 
 	const json = await response.json();
+	return 1;
 	if (response.ok) {
 		console.log(`Response from catalog api was: ${JSON.stringify(json)}`);
 		return productCatalogSchema.parse(json);
