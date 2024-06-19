@@ -27,7 +27,7 @@ export const supporterRatePlanItemFromSwitchInformation = (
 						amount: switchInformation.contributionAmount,
 						currency: 'GBP',
 					},
-			  }
+				}
 			: {};
 
 	const productRatePlanName =

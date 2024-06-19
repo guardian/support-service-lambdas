@@ -41,7 +41,7 @@ export const createSubscribeBody = ({
 							},
 						},
 					],
-			  }
+				}
 			: {};
 
 		return {

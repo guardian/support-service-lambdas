@@ -5,5 +5,5 @@ export const awsConfig = isRunningLocally
 	? {
 			region: 'eu-west-1',
 			credentials: defaultProvider({ profile: 'membership' }),
-	  }
+		}
 	: {};
