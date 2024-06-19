@@ -2,7 +2,8 @@
   "name": "aws",
   "version": "1.0.0",
   "scripts": {
-    "check-formatting": "prettier --check **/*.ts"
+    "check-formatting": "prettier --check **/*.ts",
+    "fix-formatting": "prettier --write **/*.ts"
   },
   "dependencies": {
     "@aws-sdk/credential-provider-node": "3.451.0"
