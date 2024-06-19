@@ -19,7 +19,8 @@ object SupportedProduct {
   lazy val supportedProducts = List(
     SupportedProduct(
       name = "Tier Three",
-      productType = TierThree,
+      productType =
+        GuardianWeekly, // Guardian Weekly is included in Tier Three and is the product we are concerned with here
       annualIssueLimitPerEdition = 6,
       ratePlans = List(
         SupportedRatePlan(

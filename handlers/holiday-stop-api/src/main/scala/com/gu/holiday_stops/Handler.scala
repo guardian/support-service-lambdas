@@ -31,8 +31,9 @@ import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads, Writes}
 import zio.console.Console
 import zio.ZIO
-import java.lang.{System => JavaSystem}
+import zio.ZIO.debug
 
+import java.lang.{System => JavaSystem}
 import scala.util.Try
 
 object Handler extends Logging {
@@ -134,9 +135,10 @@ object Handler extends Logging {
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
   ) = {
+    logger.info(s"Input body is ${request.body}")
     (for {
       httpMethod <- validateMethod(request.httpMethod)
-      path <- validatePath(request.path)
+          path <- validatePath(request.path)
     } yield createSteps(
       httpMethod,
       splitPath(path),
