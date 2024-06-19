@@ -97,13 +97,13 @@ object HolidayCreditProduct {
 
     def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
       case (Stage.Prod, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
-      case (Stage.Prod, "Tier Three") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
+//      case (Stage.Prod, "Tier Three") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
       case (Stage.Prod, "Newspaper Delivery") => Some(HolidayCreditProduct.Prod.HomeDelivery)
       case (Stage.Prod, "Newspaper Voucher") => Some(HolidayCreditProduct.Prod.Voucher)
       case (Stage.Prod, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Prod.DigitalVoucher)
       case (Stage.Prod, "Newspaper - National Delivery") => Some(HolidayCreditProduct.Prod.NationalDelivery)
       case (Stage.Code, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Code.GuardianWeekly)
-      case (Stage.Code, "Tier Three") => Some(HolidayCreditProduct.Code.GuardianWeekly)
+//      case (Stage.Code, "Tier Three") => Some(HolidayCreditProduct.Code.GuardianWeekly)
       case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
       case (Stage.Code, "Newspaper Voucher") => Some(HolidayCreditProduct.Code.Voucher)
       case (Stage.Code, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.DigitalVoucher)

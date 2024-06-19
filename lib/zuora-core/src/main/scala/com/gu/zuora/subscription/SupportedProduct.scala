@@ -17,30 +17,30 @@ case class SupportedProduct(
 
 object SupportedProduct {
   lazy val supportedProducts = List(
-    SupportedProduct(
-      name = "Tier Three",
-      productType =
-        GuardianWeekly, // Guardian Weekly is included in Tier Three and is the product we are concerned with here
-      annualIssueLimitPerEdition = 6,
-      ratePlans = List(
-        SupportedRatePlan(
-          "Supporter Plus & Guardian Weekly Domestic - Monthly",
-          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
-        ),
-        SupportedRatePlan(
-          "Supporter Plus & Guardian Weekly Domestic - Annual",
-          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
-        ),
-        SupportedRatePlan(
-          "Supporter Plus & Guardian Weekly ROW - Monthly",
-          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
-        ),
-        SupportedRatePlan(
-          "Supporter Plus & Guardian Weekly ROW - Annual",
-          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
-        ),
-      ),
-    ),
+//    SupportedProduct(
+//      name = "Tier Three",
+//      productType =
+//        GuardianWeekly, // Guardian Weekly is included in Tier Three and is the product we are concerned with here
+//      annualIssueLimitPerEdition = 6,
+//      ratePlans = List(
+//        SupportedRatePlan(
+//          "Supporter Plus & Guardian Weekly Domestic - Monthly",
+//          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+//        ),
+//        SupportedRatePlan(
+//          "Supporter Plus & Guardian Weekly Domestic - Annual",
+//          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+//        ),
+//        SupportedRatePlan(
+//          "Supporter Plus & Guardian Weekly ROW - Monthly",
+//          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+//        ),
+//        SupportedRatePlan(
+//          "Supporter Plus & Guardian Weekly ROW - Annual",
+//          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+//        ),
+//      ),
+//    ),
     SupportedProduct(
       name = "Guardian Weekly - Domestic",
       productType = GuardianWeekly,
@@ -79,6 +79,23 @@ object SupportedProduct {
         SupportedRatePlan(
           "GW Oct 18 - Monthly - Domestic",
           List(SupportedRatePlanCharge("GW Oct 18 - Monthly - Domestic", DayOfWeek.FRIDAY)),
+        ),
+        // Tier Three rate plans
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly Domestic - Monthly",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly Domestic - Annual",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly ROW - Monthly",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly ROW - Annual",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
         ),
       ),
     ),
