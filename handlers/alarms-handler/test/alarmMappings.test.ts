@@ -6,7 +6,7 @@ describe('getTeam', () => {
 
 		const team = getTeams(app);
 
-		expect(team).toEqual(['GROWTH']);
+		expect(team).toEqual(['FOO']);
 	});
 
 	it('returns SRE if the app does not have a team owner', () => {
