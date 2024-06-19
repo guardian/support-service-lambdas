@@ -41,6 +41,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pushd modules && pnpm test; popd
+      - run: pnpm --filter cdk package
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Configure AWS credentials
