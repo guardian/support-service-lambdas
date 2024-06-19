@@ -52,13 +52,12 @@ object Handler extends Logging {
       LambdaRuntime.getLogger.log(b.slice(off, off + len))
   })
 
-  JavaSystem.setOut(printStream)
-  JavaSystem.setErr(printStream)
-
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
     val configOp = runtime.unsafeRun {
+      JavaSystem.setOut(printStream)
+      JavaSystem.setErr(printStream)
       operationForEffects(
         RawEffects.response,
         RawEffects.stage,

@@ -39,11 +39,11 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
       LambdaRuntime.getLogger.log(b.slice(off, off + len))
   })
 
-  JavaSystem.setOut(printStream)
-  JavaSystem.setErr(printStream)
-
   // this is the main lambda entry point.  It is referenced in the cloudformation.
   override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
+
+    JavaSystem.setOut(printStream)
+    JavaSystem.setErr(printStream)
 
     val runtime = Runtime.default
     Unsafe.unsafe { implicit unsafe =>
