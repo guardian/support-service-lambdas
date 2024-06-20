@@ -30,6 +30,7 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
+		paymentDate.add(2, 'months').add(1, 'day'),
 	);
 
 	const expected: ApplyDiscountResponseBody = {
@@ -80,6 +81,7 @@ test('digi subs can have a discount but dont get an email', async () => {
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
+		today,
 	);
 
 	const expected: ApplyDiscountResponseBody = {

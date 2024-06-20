@@ -81,6 +81,10 @@ export const zuoraAccountBasicInfoSchema = z
 		identityId: obj.IdentityId__c,
 	}));
 
+export const metricsSchema = z.object({
+	totalInvoiceBalance: z.number(),
+	currency: z.string(),
+});
 export const billToContactSchema = z.object({
 	firstName: z.string(),
 	lastName: z.string(),
@@ -97,6 +101,7 @@ export const zuoraAccountSchema = z.object({
 	basicInfo: zuoraAccountBasicInfoSchema,
 	billingAndPayment: billingAndPaymentSchema,
 	billToContact: billToContactSchema,
+	metrics: metricsSchema,
 });
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 

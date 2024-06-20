@@ -2,80 +2,143 @@ import {
 	billingPreviewSchema,
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/zuoraSchemas';
-import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
-import catalogJsonCode from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
+import {
+	EligibilityChecker,
+	validationRequirements,
+} from '../src/eligibilityChecker';
 import catalogJsonProd from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import { EligibilityChecker } from '../src/eligibilityChecker';
 import billingPreviewJson1 from './fixtures/billing-previews/eligibility-checker-test.json';
 import billingPreviewJson2 from './fixtures/billing-previews/eligibility-checker-test2.json';
-import billingPreviewJson3 from './fixtures/billing-previews/eligibility-checker-test3.json';
 import billingPreviewSupporterPlusFullPrice from './fixtures/billing-previews/supporter-plus-fullprice.json';
 import subscriptionJson2 from './fixtures/digital-subscriptions/eligibility-checker-test2.json';
 import subSupporterPlusFullPrice from './fixtures/supporter-plus/full-price.json';
 import subscriptionJson3 from './fixtures/digital-subscriptions/eligibility-checker-test3.json';
-import subscriptionJson1 from './fixtures/digital-subscriptions/get-discount-test.json';
-import { getDiscountableRatePlan } from '../src/productToDiscountMapping';
+import subscriptionJson1 from './fixtures/supporter-plus/free-2-months.json';
+import {
+	billingPreviewToSimpleInvoiceItems,
+	getNextInvoiceItems,
+} from '@modules/zuora/billingPreview';
+import { getDiscountFromSubscription } from '../src/productToDiscountMapping';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 
-const eligibilityCheckerCode = new EligibilityChecker(
-	new ZuoraCatalogHelper(zuoraCatalogSchema.parse(catalogJsonCode)),
+const eligibilityChecker = new EligibilityChecker('A-S001');
+const catalogProd = new ZuoraCatalogHelper(
+	zuoraCatalogSchema.parse(catalogJsonProd),
 );
 
-const eligibilityCheckerProd = new EligibilityChecker(
-	new ZuoraCatalogHelper(zuoraCatalogSchema.parse(catalogJsonProd)),
-);
+function loadBillingPreview(data: any) {
+	return billingPreviewToSimpleInvoiceItems(billingPreviewSchema.parse(data));
+}
 
-test('Eligibility check fails for a subscription which is on a reduced price', () => {
+test('Eligibility check fails for a Supporter plus which has already had the offer', async () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson1);
-	const billingPreview = billingPreviewSchema.parse(billingPreviewJson1);
+	const billingPreview = loadBillingPreview(billingPreviewJson1);
+	const discount = getDiscountFromSubscription('CODE', sub);
+	const after2Months = dayjs(sub.contractEffectiveDate)
+		.add(2, 'months')
+		.add(1, 'days');
 
-	const actual = () => {
-		eligibilityCheckerProd.getNextBillingDateIfEligible(
-			billingPreview,
-			getDiscountableRatePlan(sub),
+	const actual = () =>
+		eligibilityChecker.assertGenerallyEligible(
+			sub,
+			0,
+			getNextInvoiceItems(billingPreview).items,
 		);
-	};
 
-	expect(actual).toThrow('Amount payable for next invoice');
+	expect(actual).toThrow(validationRequirements.noNegativePreviewItems);
+
+	const ac2 = () =>
+		eligibilityChecker.assertEligibleForFreePeriod(
+			discount.discount.productRatePlanId,
+			sub,
+			after2Months,
+		);
+
+	expect(ac2).toThrow(validationRequirements.notAlreadyUsed);
 });
 
-test('Eligibility check works for a price risen subscription', () => {
-	const sub = zuoraSubscriptionSchema.parse(subscriptionJson2);
-	const billingPreview = billingPreviewSchema.parse(billingPreviewJson2);
+test('Eligibility check fails for a S+ subscription which is on a reduced price', async () => {
+	const sub = zuoraSubscriptionSchema.parse(subscriptionJson3);
+	const billingPreview = loadBillingPreview(billingPreviewJson1);
+	const discount = getDiscountFromSubscription('CODE', sub);
+	const after2Months = dayjs(sub.contractEffectiveDate)
+		.add(2, 'months')
+		.add(1, 'days');
 
-	const actual = eligibilityCheckerProd.getNextBillingDateIfEligible(
-		billingPreview,
-		getDiscountableRatePlan(sub),
+	const actual = () =>
+		eligibilityChecker.assertGenerallyEligible(
+			sub,
+			0,
+			getNextInvoiceItems(billingPreview).items,
+		);
+
+	expect(actual).toThrow(validationRequirements.noNegativePreviewItems);
+
+	//expect to not throw
+	eligibilityChecker.assertEligibleForFreePeriod(
+		discount.discount.productRatePlanId,
+		sub,
+		after2Months,
+	);
+});
+
+test('Eligibility check fails for a subscription which hasnt been running long', async () => {
+	const sub = zuoraSubscriptionSchema.parse(subSupporterPlusFullPrice);
+	const discount = getDiscountFromSubscription('CODE', sub);
+	const nearlyLongEnough = dayjs(sub.contractEffectiveDate).add(2, 'months');
+
+	const ac2 = () =>
+		eligibilityChecker.assertEligibleForFreePeriod(
+			discount.discount.productRatePlanId,
+			sub,
+			nearlyLongEnough,
+		);
+
+	expect(ac2).toThrow(validationRequirements.twoMonthsMin);
+});
+
+test('Eligibility check works for a price risen subscription', async () => {
+	const sub = zuoraSubscriptionSchema.parse(subscriptionJson2);
+	const billingPreview = loadBillingPreview(billingPreviewJson2);
+	const discount = getDiscountFromSubscription('PROD', sub);
+
+	eligibilityChecker.assertGenerallyEligible(
+		sub,
+		0,
+		getNextInvoiceItems(billingPreview).items,
 	);
 
-	expect(dayjs(actual)).toEqual(dayjs('2024-02-07'));
+	// shouldn't throw
+	eligibilityChecker.assertNextPaymentIsAtCatalogPrice(
+		catalogProd,
+		billingPreview,
+		discount.discountableProductRatePlanId,
+		'GBP',
+	);
 });
 
-test('error', () => {
-	const sub = zuoraSubscriptionSchema.parse(subscriptionJson3);
-	const billingPreview = billingPreviewSchema.parse(billingPreviewJson3);
-
-	const actual = () => {
-		eligibilityCheckerCode.getNextBillingDateIfEligible(
-			billingPreview,
-			getDiscountableRatePlan(sub),
-		);
-	};
-
-	expect(actual).toThrow('Amount payable for next invoice');
-});
-
-test('Eligibility check works for supporter plus with 2 rate plans', () => {
+test('Eligibility check works for supporter plus with 2 rate plans', async () => {
 	const sub = zuoraSubscriptionSchema.parse(subSupporterPlusFullPrice);
-	const billingPreview = billingPreviewSchema.parse(
+	const billingPreview = loadBillingPreview(
 		billingPreviewSupporterPlusFullPrice,
 	);
+	const discount = getDiscountFromSubscription('CODE', sub);
+	const after2Months = dayjs(sub.contractEffectiveDate)
+		.add(2, 'months')
+		.add(1, 'days');
 
-	const actual = eligibilityCheckerCode.getNextBillingDateIfEligible(
-		billingPreview,
-		getDiscountableRatePlan(sub),
+	eligibilityChecker.assertGenerallyEligible(
+		sub,
+		0,
+		getNextInvoiceItems(billingPreview).items,
 	);
 
-	expect(dayjs(actual).format('YYYY-MM-DD')).toEqual('2024-07-04');
+	//shouldn't throw
+	eligibilityChecker.assertEligibleForFreePeriod(
+		discount.discount.productRatePlanId,
+		sub,
+		after2Months,
+	);
 });
