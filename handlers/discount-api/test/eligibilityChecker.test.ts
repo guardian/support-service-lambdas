@@ -36,6 +36,9 @@ test('Eligibility check fails for a Supporter plus which has already had the off
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson1);
 	const billingPreview = loadBillingPreview(billingPreviewJson1);
 	const discount = getDiscountFromSubscription('CODE', sub);
+	const after2Months = dayjs(sub.contractEffectiveDate)
+		.add(2, 'months')
+		.add(1, 'days');
 
 	const actual = () =>
 		eligibilityChecker.assertGenerallyEligible(
@@ -50,7 +53,7 @@ test('Eligibility check fails for a Supporter plus which has already had the off
 		eligibilityChecker.assertEligibleForFreePeriod(
 			discount.discount.productRatePlanId,
 			sub,
-			dayjs('2024-09-01'),
+			after2Months,
 		);
 
 	expect(ac2).toThrow(validationRequirements.notAlreadyUsed);
@@ -60,6 +63,9 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson3);
 	const billingPreview = loadBillingPreview(billingPreviewJson1);
 	const discount = getDiscountFromSubscription('CODE', sub);
+	const after2Months = dayjs(sub.contractEffectiveDate)
+		.add(2, 'months')
+		.add(1, 'days');
 
 	const actual = () =>
 		eligibilityChecker.assertGenerallyEligible(
@@ -74,19 +80,20 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 	eligibilityChecker.assertEligibleForFreePeriod(
 		discount.discount.productRatePlanId,
 		sub,
-		dayjs('2024-08-20'),
+		after2Months,
 	);
 });
 
 test('Eligibility check fails for a subscription which hasnt been running long', async () => {
 	const sub = zuoraSubscriptionSchema.parse(subSupporterPlusFullPrice);
 	const discount = getDiscountFromSubscription('CODE', sub);
+	const nearlyLongEnough = dayjs(sub.contractEffectiveDate).add(2, 'months');
 
 	const ac2 = () =>
 		eligibilityChecker.assertEligibleForFreePeriod(
 			discount.discount.productRatePlanId,
 			sub,
-			dayjs('2024-08-04'),
+			nearlyLongEnough,
 		);
 
 	expect(ac2).toThrow(validationRequirements.twoMonthsMin);
@@ -118,6 +125,9 @@ test('Eligibility check works for supporter plus with 2 rate plans', async () =>
 		billingPreviewSupporterPlusFullPrice,
 	);
 	const discount = getDiscountFromSubscription('CODE', sub);
+	const after2Months = dayjs(sub.contractEffectiveDate)
+		.add(2, 'months')
+		.add(1, 'days');
 
 	eligibilityChecker.assertGenerallyEligible(
 		sub,
@@ -129,6 +139,6 @@ test('Eligibility check works for supporter plus with 2 rate plans', async () =>
 	eligibilityChecker.assertEligibleForFreePeriod(
 		discount.discount.productRatePlanId,
 		sub,
-		dayjs('2024-08-05'),
+		after2Months,
 	);
 });
