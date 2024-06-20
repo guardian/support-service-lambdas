@@ -10,17 +10,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
-		new GuLambdaFunction(
-			this,
-			'get-billing-accounts-lambda',
-			{
-				app: appName,
-				functionName: `${appName}-get-billing-accounts-lambda-${this.stage}`,
-				runtime: Runtime.NODEJS_20_X,
-				handler: 'getBillingAccounts.handler',
-				fileName: `${appName}.zip`,
-			}
-		)
+		new GuLambdaFunction(this, 'get-billing-accounts-lambda', {
+			app: appName,
+			functionName: `${appName}-get-billing-accounts-lambda-${this.stage}`,
+			runtime: Runtime.NODEJS_20_X,
+			handler: 'getBillingAccounts.handler',
+			fileName: `${appName}.zip`,
+		});
 	}
-	
 }
+
+// make a test file
+// make a snapshot file jest --u
+// run pnpm
