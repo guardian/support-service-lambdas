@@ -24,7 +24,7 @@ export const getDiscountFromSubscription = (
 	const discount =
 		ProductToDiscountMapping[stage][discountableProductRatePlanId];
 
-	if (discount == undefined) {
+	if (discount === undefined) {
 		throw new ValidationError(
 			`Subscription ${subscription.subscriptionNumber} is not eligible for any discount`,
 		);
