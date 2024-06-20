@@ -82,23 +82,6 @@ object SupportedProduct {
           "GW Oct 18 - Monthly - Domestic",
           List(SupportedRatePlanCharge("GW Oct 18 - Monthly - Domestic", DayOfWeek.FRIDAY)),
         ),
-        // Tier Three rate plans
-        SupportedRatePlan(
-          "Supporter Plus & Guardian Weekly Domestic - Monthly",
-          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
-        ),
-        SupportedRatePlan(
-          "Supporter Plus & Guardian Weekly Domestic - Annual",
-          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
-        ),
-        SupportedRatePlan(
-          "Supporter Plus & Guardian Weekly ROW - Monthly",
-          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
-        ),
-        SupportedRatePlan(
-          "Supporter Plus & Guardian Weekly ROW - Annual",
-          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
-        ),
       ),
     ),
     SupportedProduct(

@@ -49,6 +49,7 @@ object HolidayStopCreditProcessor {
           NewspaperDigitalVoucher,
           GuardianWeekly,
           NewspaperNationalDelivery,
+          TierThree,
         )
     }
 
