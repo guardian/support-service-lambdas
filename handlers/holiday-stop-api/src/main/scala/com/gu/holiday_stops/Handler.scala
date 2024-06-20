@@ -135,7 +135,7 @@ object Handler extends Logging {
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
   ) = {
-    logger.info(s"Input body is ${request.body}")
+    logger.info(s"Input request is $request")
     (for {
       httpMethod <- validateMethod(request.httpMethod)
           path <- validatePath(request.path)
