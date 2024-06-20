@@ -1,7 +1,13 @@
 package com.gu.holiday_stops
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
-import com.gu.holiday_stops.TestFixtures.{asIsoDateString, gwDomesticAccount, gwDomesticSubscription, t3Account, t3Subscription}
+import com.gu.holiday_stops.TestFixtures.{
+  asIsoDateString,
+  gwDomesticAccount,
+  gwDomesticSubscription,
+  t3Account,
+  t3Subscription,
+}
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
@@ -129,8 +135,8 @@ class HandlerTest extends AnyFlatSpec with Matchers {
             .steps(
               legacyPotentialIssueDateRequest(
                 productPrefix = "Tier Three",
-                startDate = today.minusMonths(1).format(DateTimeFormatter.ISO_LOCAL_DATE),
-                endDate = today.plusWeeks(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+                startDate = asIsoDateString(today.minusMonths(1)),
+                endDate = asIsoDateString(today.plusWeeks(2)),
                 subscriptionName = t3Subscription.subscriptionNumber,
               ),
             )
@@ -139,11 +145,19 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         response.statusCode should equal("200")
         val parsedResponseBody = Json.fromJson[PotentialHolidayStopsResponse](Json.parse(response.body))
         inside(parsedResponseBody) { case JsSuccess(response, _) =>
+
+          val expectedCreditAmount = 3.75 // worked out by RatePlanChargeData.calculateIssueCreditAmount method
+          val expectedNextIssueDate = LocalDate.parse("2024-06-28")
+          val expectedInvoiceDate = LocalDate.parse("2024-07-28")
+
           response should equal(
             PotentialHolidayStopsResponse(
-              nextInvoiceDateAfterToday = LocalDate.parse("2024-07-28"),
+              nextInvoiceDateAfterToday = expectedInvoiceDate,
               potentials = List(
-                PotentialHolidayStop(LocalDate.parse("2024-06-28"), Credit(-3.75, LocalDate.parse("2024-07-28"))),
+                PotentialHolidayStop(
+                  publicationDate = expectedNextIssueDate,
+                  expectedCredit = Credit(amount = expectedCreditAmount, invoiceDate = expectedInvoiceDate),
+                ),
               ),
             ),
           )
