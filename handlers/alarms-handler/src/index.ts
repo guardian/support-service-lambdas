@@ -71,25 +71,27 @@ const handleCloudWatchAlarmMessage = async ({
 	const app = await getAppNameTag(AlarmArn, AWSAccountId);
 	const teams = getTeams(app);
 
-	await Promise.all(teams.map(team => {
-		const webhookUrl = getTeamWebhookUrl(team);
+	await Promise.all(
+		teams.map((team) => {
+			const webhookUrl = getTeamWebhookUrl(team);
 
-		const title =
-			NewStateValue === 'OK'
-				 ? `✅ *ALARM OK:* ${AlarmName} has recovered!`
-				 : `🚨 *ALARM:* ${AlarmName} has triggered!`;
-		const text = `${title}\n\n*Description:* ${
-			AlarmDescription ?? ''
-		}\n\n*Reason:* ${NewStateReason}`;
+			const title =
+				NewStateValue === 'OK'
+					? `✅ *ALARM OK:* ${AlarmName} has recovered!`
+					: `🚨 *ALARM:* ${AlarmName} has triggered!`;
+			const text = `${title}\n\n*Description:* ${
+				AlarmDescription ?? ''
+			}\n\n*Reason:* ${NewStateReason}`;
 
-		console.log(`CloudWatch alarm from ${app} owned by ${team}`);
+			console.log(`CloudWatch alarm from ${app} owned by ${team}`);
 
-		return fetch(webhookUrl, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ text }),
-		});
-	}));
+			return fetch(webhookUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ text }),
+			});
+		}),
+	);
 };
 
 const handleSnsPublishMessage = async ({
@@ -106,17 +108,19 @@ const handleSnsPublishMessage = async ({
 	const app = messageAttributes.app?.Value;
 	const teams = getTeams(app);
 
-	await Promise.all(teams.map(team => {
-		const webhookUrl = getTeamWebhookUrl(team);
+	await Promise.all(
+		teams.map((team) => {
+			const webhookUrl = getTeamWebhookUrl(team);
 
-		const text = message;
+			const text = message;
 
-		console.log(`SNS publish message from ${app} owned by ${team}`);
+			console.log(`SNS publish message from ${app} owned by ${team}`);
 
-		return fetch(webhookUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({text}),
-		});
-	}));
+			return fetch(webhookUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ text }),
+			});
+		}),
+	);
 };
