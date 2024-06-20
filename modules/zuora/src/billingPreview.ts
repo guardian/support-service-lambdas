@@ -21,10 +21,14 @@ export const getBillingPreview = async (
 	return zuoraClient.post(path, body, billingPreviewSchema);
 };
 
-type SimpleInvoiceItem = { date: Date; amount: number };
+export type SimpleInvoiceItem = { date: Date; amount: number };
 
 export function getNextInvoiceTotal(invoiceItems: Array<SimpleInvoiceItem>) {
-	const ordered = getOrderedInvoiceData(invoiceItems);
+	return convertItemsToTotal(getNextInvoiceItems(invoiceItems)).total;
+}
+
+export function getNextInvoiceItems(invoiceItems: Array<SimpleInvoiceItem>) {
+	const ordered = getOrderedInvoiceItemGroups(invoiceItems);
 
 	return getIfDefined(
 		ordered[0],
@@ -35,35 +39,49 @@ export function getNextInvoiceTotal(invoiceItems: Array<SimpleInvoiceItem>) {
 export function getNextNonFreePaymentDate(
 	invoiceItems: Array<SimpleInvoiceItem>,
 ) {
-	const ordered = getOrderedInvoiceData(invoiceItems);
+	const ordered = getOrderedInvoiceItemGroups(invoiceItems);
 
 	const firstNonFree = getIfDefined(
-		ordered.find((item) => item.total > 0),
+		ordered.find((items) => convertItemsToTotal(items).total > 0),
 		'could not find a non free payment in the invoice preview',
 	);
 
-	const nextPaymentDate = firstNonFree.date;
-
-	return nextPaymentDate;
+	return firstNonFree.date;
 }
 
-function getOrderedInvoiceData(invoiceItems: Array<SimpleInvoiceItem>) {
+function getOrderedInvoiceItemGroups(invoiceItems: Array<SimpleInvoiceItem>) {
+	if (invoiceItems[0] === undefined) {
+		throw new Error('no invoice items in preview');
+	}
 	const grouped = groupBy(invoiceItems, (invoiceItem) =>
 		zuoraDateFormat(dayjs(invoiceItem.date)),
 	);
 
-	const sortedItemGroups = sortBy(Object.entries(grouped), ([date]) => date);
+	const sortedItemGroups: [string, SimpleInvoiceItem[]][] = sortBy(
+		Object.entries(grouped),
+		([date]) => date,
+	);
 
-	const sortedTotals = sortedItemGroups.map(([date, items]) => ({
+	return sortedItemGroups.map(([date, items]) => ({
 		date: new Date(date),
-		total: sumNumbers(items.map((item) => item.amount)),
+		items,
 	}));
-	return sortedTotals;
 }
+
+const convertItemsToTotal = ({
+	date,
+	items,
+}: {
+	date: Date;
+	items: SimpleInvoiceItem[];
+}) => ({
+	date: new Date(date),
+	total: sumNumbers(items.map((item) => item.amount)),
+});
 
 export const billingPreviewToSimpleInvoiceItems = (
 	billingPreviewAfter: BillingPreview,
-) =>
+): SimpleInvoiceItem[] =>
 	billingPreviewAfter.invoiceItems.map((entry) => ({
 		date: entry.serviceStartDate,
 		amount: entry.chargeAmount + entry.taxAmount,

@@ -12,6 +12,7 @@ import {
 	createSupporterPlusSubscription,
 } from './helpers';
 import { zuoraDateFormat } from '@modules/zuora/common';
+import { validationRequirements } from '../src/eligibilityChecker';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';
@@ -28,6 +29,7 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 			stage,
 			{ 'x-identity-id': invalidIdentityId },
 			subscriptionNumber,
+			dayjs(),
 		);
 	}).rejects.toThrow('does not belong to identity ID');
 
@@ -51,8 +53,9 @@ test('Subscriptions on the old price are not eligible', async () => {
 			stage,
 			{ 'x-identity-id': validIdentityId },
 			subscriptionNumber,
+			dayjs(),
 		);
-	}).rejects.toThrow('it is not eligible for a discount');
+	}).rejects.toThrow(validationRequirements.atLeastCatalogPrice);
 
 	console.log('Cancelling the subscription');
 	const cancellationResult = await cancelSubscription(
@@ -80,6 +83,7 @@ test('Subscriptions on the new price are eligible', async () => {
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
+		dayjs(),
 	);
 	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
 
@@ -115,6 +119,7 @@ test('Supporter Plus subscriptions are eligible', async () => {
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
+		today.add(2, 'months').add(1, 'day'),
 	);
 	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
 

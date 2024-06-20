@@ -70,7 +70,7 @@ async function subscribe(
 				}[];
 				Subscription: {
 					ContractEffectiveDate: string;
-					ContractAcceptanceDate: string;
+					ContractAcceptanceDate: string; // actually CustomerAcceptanceDate but zuora API has a typo
 					TermStartDate: string;
 					AutoRenew: boolean;
 					RenewalTerm: number;

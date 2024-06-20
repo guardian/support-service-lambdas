@@ -6,13 +6,17 @@ import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
 	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
+	getNextInvoiceItems,
 	getNextNonFreePaymentDate,
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
+import type {
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/zuoraSchemas';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
@@ -24,10 +28,11 @@ export const previewDiscountEndpoint = async (
 	stage: Stage,
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
+	today: dayjs.Dayjs,
 ) => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
-	const { subscription } = await getSubscriptionIfBelongsToIdentityId(
+	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
 		headers,
 		zuoraClient,
 		subscriptionNumber,
@@ -36,7 +41,9 @@ export const previewDiscountEndpoint = async (
 	const { discount, dateToApply } = await getDiscountToApply(
 		stage,
 		subscription,
+		account,
 		zuoraClient,
+		today,
 	);
 
 	console.log('Preview the new price once the discount has been applied');
@@ -82,6 +89,7 @@ export const applyDiscountEndpoint = async (
 	stage: Stage,
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
+	today: dayjs.Dayjs,
 ) => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
@@ -94,7 +102,9 @@ export const applyDiscountEndpoint = async (
 	const { discount, dateToApply } = await getDiscountToApply(
 		stage,
 		subscription,
+		account,
 		zuoraClient,
+		today,
 	);
 	console.log('Apply a discount to the subscription');
 	const discounted = await addDiscount(
@@ -169,33 +179,54 @@ async function getSubscriptionIfBelongsToIdentityId(
 async function getDiscountToApply(
 	stage: Stage,
 	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
 	zuoraClient: ZuoraClient,
+	today: dayjs.Dayjs,
 ) {
-	const catalog = await getZuoraCatalog(stage);
-	const eligibilityChecker = new EligibilityChecker(catalog);
+	const catalog = () => getZuoraCatalog(stage);
+	const eligibilityChecker = new EligibilityChecker(
+		subscription.subscriptionNumber,
+	);
 
-	if (subscription.status !== 'Active') {
-		throw new ValidationError(
-			`Subscription ${subscription.subscriptionNumber} has status ${subscription.status}`,
-		);
-	}
 	console.log('get billing preview for the subscription');
-	const billingPreview = await getBillingPreview(
-		zuoraClient,
-		dayjs().add(13, 'months'),
-		subscription.accountNumber,
+	const billingPreview = billingPreviewToSimpleInvoiceItems(
+		await getBillingPreview(
+			zuoraClient,
+			today.add(13, 'months'),
+			subscription.accountNumber,
+		),
 	);
 
 	console.log('Working out the appropriate discount for the subscription');
-	const { discount, nonDiscountRatePlan } = getDiscountFromSubscription(
-		stage,
-		subscription,
-	);
+	const { discount, discountableProductRatePlanId } =
+		getDiscountFromSubscription(stage, subscription);
 
 	console.log('Checking this subscription is eligible for the discount');
-	const dateToApply = eligibilityChecker.getNextBillingDateIfEligible(
-		billingPreview,
-		nonDiscountRatePlan,
+	switch (discount.eligibilityCheckForRatePlan) {
+		case 'EligibleForFreePeriod':
+			eligibilityChecker.assertEligibleForFreePeriod(
+				discount.productRatePlanId,
+				subscription,
+				today,
+			);
+			break;
+		case 'AtCatalogPrice':
+			eligibilityChecker.assertNextPaymentIsAtCatalogPrice(
+				await catalog(),
+				billingPreview,
+				discountableProductRatePlanId,
+				account.metrics.currency,
+			);
+			break;
+	}
+
+	const { date: dateToApply, items: nextInvoiceItems } =
+		getNextInvoiceItems(billingPreview);
+
+	eligibilityChecker.assertGenerallyEligible(
+		subscription,
+		account.metrics.totalInvoiceBalance,
+		nextInvoiceItems,
 	);
 	return { discount, dateToApply };
 }

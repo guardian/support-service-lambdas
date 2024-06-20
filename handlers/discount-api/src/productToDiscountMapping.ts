@@ -19,9 +19,10 @@ export const getDiscountFromSubscription = (
 	stage: Stage,
 	subscription: ZuoraSubscription,
 ) => {
-	const nonDiscountRatePlan = getDiscountableRatePlan(subscription);
+	const discountableProductRatePlanId =
+		getDiscountableRatePlan(subscription).productRatePlanId;
 	const discount =
-		ProductToDiscountMapping[stage][nonDiscountRatePlan.productRatePlanId];
+		ProductToDiscountMapping[stage][discountableProductRatePlanId];
 
 	if (discount == undefined) {
 		throw new ValidationError(
@@ -29,15 +30,17 @@ export const getDiscountFromSubscription = (
 		);
 	}
 
-	return { discount, nonDiscountRatePlan };
+	return { discount, discountableProductRatePlanId };
 };
 
+export type EligibilityCheck = 'EligibleForFreePeriod' | 'AtCatalogPrice';
 export type Discount = {
 	productRatePlanId: string;
 	name: string;
 	upToPeriods: number;
 	upToPeriodsType: string;
 	sendEmail: boolean;
+	eligibilityCheckForRatePlan?: EligibilityCheck;
 };
 
 export const catalog = {
@@ -73,6 +76,7 @@ const Discounts: {
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
 			sendEmail: false,
+			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellation25pc12mo: {
 			productRatePlanId: '8ad08f068b5b9ca2018b5cadf0897ed3',
@@ -80,6 +84,7 @@ const Discounts: {
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
 			sendEmail: false,
+			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellationFree2Mo: {
 			productRatePlanId: '8ad081dd8fd3d9df018fe2b6a7bc379d',
@@ -87,6 +92,7 @@ const Discounts: {
 			upToPeriods: 2,
 			upToPeriodsType: 'Months',
 			sendEmail: true,
+			eligibilityCheckForRatePlan: 'EligibleForFreePeriod',
 		},
 	},
 	PROD: {
@@ -96,6 +102,7 @@ const Discounts: {
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
 			sendEmail: false,
+			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellation25pc12mo: {
 			productRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
@@ -103,6 +110,7 @@ const Discounts: {
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
 			sendEmail: false,
+			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellationFree2Mo: {
 			productRatePlanId: '8a1299c28fb956e8018fe2c0e12c3ae4',
@@ -110,6 +118,7 @@ const Discounts: {
 			upToPeriods: 2,
 			upToPeriodsType: 'Months',
 			sendEmail: true,
+			eligibilityCheckForRatePlan: 'EligibleForFreePeriod',
 		},
 	},
 };

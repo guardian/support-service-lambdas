@@ -7,6 +7,7 @@ import type {
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
+import dayjs from 'dayjs';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
@@ -42,6 +43,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 					stage,
 					event.headers,
 					subscriptionNumber,
+					dayjs(),
 				);
 				if (emailPayload) {
 					await sendEmail(stage, emailPayload);
@@ -60,6 +62,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 					stage,
 					event.headers,
 					subscriptionNumber,
+					dayjs(),
 				);
 				return {
 					body: stringify<EligibilityCheckResponseBody>(result),

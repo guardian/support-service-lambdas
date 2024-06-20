@@ -1,5 +1,6 @@
 import { zuoraSubscriptionSchema } from '@modules/zuora/zuoraSchemas';
 import {
+	catalog,
 	Discount,
 	getDiscountFromSubscription,
 } from '../src/productToDiscountMapping';
@@ -13,6 +14,10 @@ test('getDiscountFromSubscription should return an annual discount for an annual
 		upToPeriods: 12,
 		upToPeriodsType: 'Months',
 		sendEmail: false,
+		eligibilityCheckForRatePlan: 'AtCatalogPrice',
 	};
-	expect(getDiscountFromSubscription('PROD', sub).discount).toEqual(expected);
+	const { discount, discountableProductRatePlanId } =
+		getDiscountFromSubscription('PROD', sub);
+	expect(discount).toEqual(expected);
+	expect(discountableProductRatePlanId).toEqual(catalog.PROD.digiSub.Annual);
 });
