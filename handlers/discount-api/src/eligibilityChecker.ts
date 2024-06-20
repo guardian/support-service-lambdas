@@ -70,7 +70,7 @@ export class EligibilityChecker {
 			subscription.subscriptionNumber,
 		);
 		eligibilityChecker.assertValidState(
-			dayjs(subscription.contractEffectiveDate).add(2, 'months').isBefore(now),
+			dayjs(subscription.contractEffectiveDate).subtract(2, 'months').isBefore(now),
 			validationRequirements.twoMonthsMin,
 			subscription.contractEffectiveDate.toDateString(),
 		);
