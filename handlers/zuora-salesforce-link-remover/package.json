@@ -1,0 +1,13 @@
+{
+	"name": "zuora-salesforce-link-remover",
+	"description": "A state machine that queries Salesforce for Zuora records that should be deleted for GDPR purposes, and updates the respective Billing Accounts in Zuora by removing the crmId.",
+	"scripts": {
+		"test": "jest --group=-integration",
+		"it-test": "jest --group=integration",
+		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target src/**/*.ts",
+		"lint": "eslint src/**/*.ts",
+		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr zuora-salesforce-link-remover.zip ./*.js",
+		"type-check": "tsc --noEmit",
+		"check-formatting": "prettier --check **/*.ts"
+	}
+}
