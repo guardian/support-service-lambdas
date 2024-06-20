@@ -6,7 +6,7 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 const appName = 'zuora-salesforce-link-remover';
 
-export class SalesforceDisasterRecovery extends GuStack {
+export class ZuoraSalesforceLinkRemover extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
