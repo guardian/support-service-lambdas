@@ -13,7 +13,7 @@ describe('The ZuoraSalesforceLinkRemover stack', () => {
 				stage: 'CODE',
 			},
 		);
-		
+
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
 	});
 });
