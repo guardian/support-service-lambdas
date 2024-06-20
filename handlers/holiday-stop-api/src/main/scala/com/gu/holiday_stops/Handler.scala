@@ -53,7 +53,6 @@ object Handler extends Logging {
       LambdaRuntime.getLogger.log(b.slice(off, off + len))
   })
 
-
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
     val configOp = runtime.unsafeRun {
@@ -135,10 +134,9 @@ object Handler extends Logging {
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
   ) = {
-    logger.info(s"Input request is $request")
     (for {
       httpMethod <- validateMethod(request.httpMethod)
-          path <- validatePath(request.path)
+      path <- validatePath(request.path)
     } yield createSteps(
       httpMethod,
       splitPath(path),
