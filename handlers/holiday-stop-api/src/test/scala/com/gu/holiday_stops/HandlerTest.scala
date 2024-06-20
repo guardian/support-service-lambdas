@@ -1,6 +1,7 @@
 package com.gu.holiday_stops
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
+import com.gu.holiday_stops.TestFixtures.{asIsoDateString, gwDomesticAccount, gwDomesticSubscription, t3Account, t3Subscription}
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
@@ -9,15 +10,7 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.config.Stage
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.zuora.subscription.{
-  Credit,
-  MutableCalendar,
-  RatePlan,
-  RatePlanCharge,
-  Subscription,
-  SubscriptionName,
-  Fixtures => SubscriptionFixtures,
-}
+import com.gu.zuora.subscription.{Credit, MutableCalendar, SubscriptionName, Fixtures => SubscriptionFixtures}
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -26,7 +19,6 @@ import sttp.client3.testing.SttpBackendStub
 import zio.ZIO
 import zio.console.Console
 
-import java.io.Serializable
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters.next
 import java.time.{DayOfWeek, LocalDate}
@@ -69,64 +61,13 @@ class HandlerTest extends AnyFlatSpec with Matchers {
   }
   "GET /potential/<<sub name>>?startDate=...&endDate=... endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
-      MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-02-01")))
-      val subscriptionName = "Sub12344"
-
-      val startDate = LocalDate.of(2019, 1, 1)
-      val endDate = startDate.plusMonths(3)
-      val customerAcceptanceDate = startDate.plusMonths(1)
-
-      val accountNumber = "123456"
-      val account = Fixtures.mkAccount()
-      val subscription = Subscription(
-        subscriptionNumber = subscriptionName,
-        termStartDate = startDate,
-        termEndDate = endDate,
-        customerAcceptanceDate = customerAcceptanceDate,
-        contractEffectiveDate = customerAcceptanceDate,
-        currentTerm = 12,
-        currentTermPeriodType = "Month",
-        autoRenew = true,
-        ratePlans = List(
-          RatePlan(
-            productName = "Guardian Weekly - Domestic",
-            ratePlanName = "GW Oct 18 - Quarterly - Domestic",
-            ratePlanCharges = List(
-              RatePlanCharge(
-                name = "GW Oct 18 - Quarterly - Domestic",
-                number = "C1",
-                37.50,
-                Some("Quarter"),
-                effectiveStartDate = startDate,
-                chargedThroughDate = Some(endDate),
-                HolidayStart__c = None,
-                HolidayEnd__c = None,
-                processedThroughDate = Some(endDate.minusMonths(3)),
-                "",
-                specificBillingPeriod = None,
-                endDateCondition = Some("Subscription_End"),
-                upToPeriodsType = None,
-                upToPeriods = None,
-                billingDay = None,
-                triggerEvent = Some("SpecificDate"),
-                triggerDate = Some(startDate),
-                discountPercentage = None,
-                effectiveEndDate = LocalDate.now,
-              ),
-            ),
-            productRatePlanId = "",
-            id = "",
-            lastChangeType = None,
-          ),
-        ),
-        "Active",
-        accountNumber = accountNumber,
-      )
+      val today = LocalDate.parse("2019-02-01")
+      MutableCalendar.setFakeToday(Some(today))
 
       val testBackend = SttpBackendStub.synchronous
         .stubZuoraAuthCall()
-        .stubZuoraAccount(accountNumber, account)
-        .stubZuoraSubscription(subscriptionName, subscription)
+        .stubZuoraAccount(gwDomesticSubscription.accountNumber, gwDomesticAccount)
+        .stubZuoraSubscription(gwDomesticSubscription.subscriptionNumber, gwDomesticSubscription)
 
       inside(
         unwrappedOp(
@@ -142,9 +83,9 @@ class HandlerTest extends AnyFlatSpec with Matchers {
             .steps(
               legacyPotentialIssueDateRequest(
                 productPrefix = "Guardian Weekly xxx",
-                startDate = "2019-01-01",
+                startDate = asIsoDateString(today.minusMonths(1)),
                 endDate = "2019-01-15",
-                subscriptionName = subscriptionName,
+                subscriptionName = gwDomesticSubscription.subscriptionNumber,
               ),
             )
         },
@@ -156,8 +97,53 @@ class HandlerTest extends AnyFlatSpec with Matchers {
             PotentialHolidayStopsResponse(
               nextInvoiceDateAfterToday = LocalDate.parse("2019-04-01"),
               potentials = List(
-                PotentialHolidayStop(LocalDate.of(2019, 1, 4), Credit(-2.89, LocalDate.parse("2019-04-01"))),
-                PotentialHolidayStop(LocalDate.of(2019, 1, 11), Credit(-2.89, LocalDate.parse("2019-04-01"))),
+                PotentialHolidayStop(LocalDate.parse("2019-01-04"), Credit(-2.89, LocalDate.parse("2019-04-01"))),
+                PotentialHolidayStop(LocalDate.parse("2019-01-11"), Credit(-2.89, LocalDate.parse("2019-04-01"))),
+              ),
+            ),
+          )
+        }
+      }
+    }
+  "GET /potential/<<sub name>>?startDate=...&endDate=... endpoint" should
+    "calculate the correct amount for T3 subscriptions" in {
+      val today = LocalDate.parse("2024-06-20")
+      MutableCalendar.setFakeToday(Some(today))
+
+      val testBackend = SttpBackendStub.synchronous
+        .stubZuoraAuthCall()
+        .stubZuoraAccount(t3Subscription.accountNumber, t3Account)
+        .stubZuoraSubscription(t3Subscription.subscriptionNumber, t3Subscription)
+
+      inside(
+        unwrappedOp(
+          Handler.operationForEffects(
+            defaultTestEffects.response,
+            Stage("CODE"),
+            FakeFetchString.fetchString,
+            testBackend,
+            "test-generated-id",
+          ),
+        ).map { operation =>
+          operation
+            .steps(
+              legacyPotentialIssueDateRequest(
+                productPrefix = "Tier Three",
+                startDate = today.minusMonths(1).format(DateTimeFormatter.ISO_LOCAL_DATE),
+                endDate = today.plusWeeks(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+                subscriptionName = t3Subscription.subscriptionNumber,
+              ),
+            )
+        },
+      ) { case ContinueProcessing(response) =>
+        response.statusCode should equal("200")
+        val parsedResponseBody = Json.fromJson[PotentialHolidayStopsResponse](Json.parse(response.body))
+        inside(parsedResponseBody) { case JsSuccess(response, _) =>
+          response should equal(
+            PotentialHolidayStopsResponse(
+              nextInvoiceDateAfterToday = LocalDate.parse("2024-07-28"),
+              potentials = List(
+                PotentialHolidayStop(LocalDate.parse("2024-06-28"), Credit(-3.75, LocalDate.parse("2024-07-28"))),
               ),
             ),
           )
