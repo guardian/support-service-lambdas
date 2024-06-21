@@ -10,7 +10,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		super(scope, id, props);
 
 		const appName = 'zuora-salesforce-link-remover';
-ß
+
 		new GuLambdaFunction(this, 'get-billing-accounts-lambda', {
 			app: appName,
 			functionName: `${appName}-get-billing-accounts-lambda-${this.stage}`,
