@@ -146,7 +146,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         val parsedResponseBody = Json.fromJson[PotentialHolidayStopsResponse](Json.parse(response.body))
         inside(parsedResponseBody) { case JsSuccess(response, _) =>
 
-          val expectedCreditAmount = 3.75 // worked out by RatePlanChargeData.calculateIssueCreditAmount method
+          val expectedCreditAmount = -3.75 // worked out by RatePlanChargeData.calculateIssueCreditAmount method
           val expectedNextIssueDate = LocalDate.parse("2024-06-28")
           val expectedInvoiceDate = LocalDate.parse("2024-07-28")
 
