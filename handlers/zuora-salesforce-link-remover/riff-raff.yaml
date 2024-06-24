@@ -6,7 +6,7 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  salesforce-disaster-recovery-cloudformation:
+  zuora-salesforce-link-remover-cloudformation:
     type: cloud-formation
     app: zuora-salesforce-link-remover
     parameters:
