@@ -36,7 +36,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "zuora-salesforce-link-remover-get-billing-accounts-lambda-CODE",
+        "FunctionName": "zuora-salesforce-link-remover-get-billing-accounts-CODE",
         "Handler": "getBillingAccounts.handler",
         "MemorySize": 512,
         "Role": {
@@ -265,7 +265,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "zuora-salesforce-link-remover-get-billing-accounts-lambda-PROD",
+        "FunctionName": "zuora-salesforce-link-remover-get-billing-accounts-PROD",
         "Handler": "getBillingAccounts.handler",
         "MemorySize": 512,
         "Role": {
