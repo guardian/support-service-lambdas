@@ -227,3 +227,17 @@ new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-PROD', {
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 });
+new UpdateSupporterPlusAmount(app, 'zuora-salesforce-link-remover-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+	domainName: `zuora-salesforce-link-remover-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new UpdateSupporterPlusAmount(app, 'zuora-salesforce-link-remover-PROD', {
+	stack: 'membership',
+	stage: 'PROD',
+	domainName: `zuora-salesforce-link-remover.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
