@@ -67,8 +67,8 @@ class HandlerTest extends AnyFlatSpec with Matchers {
   }
   "GET /potential/<<sub name>>?startDate=...&endDate=... endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
-      val today = LocalDate.parse("2019-02-01")
-      MutableCalendar.setFakeToday(Some(today))
+      val fakeToday = LocalDate.parse("2019-02-01")
+      MutableCalendar.setFakeToday(Some(fakeToday))
 
       val testBackend = SttpBackendStub.synchronous
         .stubZuoraAuthCall()
@@ -89,7 +89,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
             .steps(
               legacyPotentialIssueDateRequest(
                 productPrefix = "Guardian Weekly xxx",
-                startDate = asIsoDateString(today.minusMonths(1)),
+                startDate = asIsoDateString(fakeToday.minusMonths(1)),
                 endDate = "2019-01-15",
                 subscriptionName = gwDomesticSubscription.subscriptionNumber,
               ),
@@ -113,8 +113,8 @@ class HandlerTest extends AnyFlatSpec with Matchers {
     }
   "GET /potential/<<sub name>>?startDate=...&endDate=... endpoint" should
     "calculate the correct amount for T3 subscriptions" in {
-      val today = LocalDate.parse("2024-06-20")
-      MutableCalendar.setFakeToday(Some(today))
+      val fakeToday = LocalDate.parse("2024-06-20")
+      MutableCalendar.setFakeToday(Some(fakeToday))
 
       val testBackend = SttpBackendStub.synchronous
         .stubZuoraAuthCall()
@@ -135,8 +135,8 @@ class HandlerTest extends AnyFlatSpec with Matchers {
             .steps(
               legacyPotentialIssueDateRequest(
                 productPrefix = "Tier Three",
-                startDate = asIsoDateString(today.minusMonths(1)),
-                endDate = asIsoDateString(today.plusWeeks(2)),
+                startDate = asIsoDateString(fakeToday.minusMonths(1)),
+                endDate = asIsoDateString(fakeToday.plusWeeks(2)),
                 subscriptionName = t3Subscription.subscriptionNumber,
               ),
             )
