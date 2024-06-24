@@ -19,7 +19,3 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		});
 	}
 }
-
-// make a test file
-// make a snapshot file jest --u
-// run pnpm
