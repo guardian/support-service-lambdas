@@ -12,7 +12,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		new GuLambdaFunction(this, 'get-billing-accounts-lambda', {
 			app: appName,
-			functionName: `${appName}-get-billing-accounts-lambda-${this.stage}`,
+			functionName: `${appName}-get-billing-accounts-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
 			handler: 'getBillingAccounts.handler',
 			fileName: `${appName}.zip`,
