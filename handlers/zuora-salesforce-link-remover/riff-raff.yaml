@@ -20,5 +20,5 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - get-billing-accounts-
+        - get-billing-accounts-lambda-
     dependencies: [zuora-salesforce-link-remover-cloudformation]
