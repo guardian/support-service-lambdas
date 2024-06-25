@@ -14,8 +14,8 @@ export async function handler() {
 		await getSecretValue<ApiUserSecret>(apiUserSecretName);
 
 	const { authUrl, clientId, clientSecret } = connectedAppSecretValue;
-	const { username, password, token } = apiUserSecretValue;
-
+	const { username, token } = apiUserSecretValue;
+	const password = '123';
 	const sfConnectedAppAuth : SfConnectedAppAuth = {clientId, clientSecret};
 	const sfApiUserAuth : SfApiUserAuth = {url: authUrl, grant_type:'password', username, password, token};
 
@@ -35,7 +35,7 @@ export async function doSfAuth(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth:
 		};
 
 		const result = await fetch(sfApiUserAuth.url, options);
-		console.log('when credentials are good');
+		console.log('when credentials are bad');
 		console.log('result:',result);
 		if(!result.ok){
 			throw new Error();
