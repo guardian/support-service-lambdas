@@ -5,7 +5,7 @@ export function handler() {
 	const secretName = "DEV/Salesforce/ConnectedApp/AwsConnectorSandbox"
 
 	const secret = getSecretValue({secretName});
-
+	console.log('secret = ', secret);
 	return 'abcdef';
 }
 
