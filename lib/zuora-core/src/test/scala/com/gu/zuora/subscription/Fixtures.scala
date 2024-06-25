@@ -104,6 +104,11 @@ object Fixtures extends Assertions {
     decode[Subscription](subscriptionRaw).getOrElse(fail(s"Could not decode $subscriptionRaw"))
   }
 
+  def accountFromJson(resource: String): ZuoraAccount = {
+    val accountRaw = Source.fromResource(resource).mkString
+    decode[ZuoraAccount](accountRaw).getOrElse(fail(s"Could not decode $accountRaw"))
+  }
+
   def mkAccount(billCycleDay: Int = 1) = {
     ZuoraAccount(
       ZuoraAccountBillingAndPayment(billCycleDay = billCycleDay),
