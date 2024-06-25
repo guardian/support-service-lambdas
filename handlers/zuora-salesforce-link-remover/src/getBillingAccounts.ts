@@ -16,97 +16,65 @@ export async function handler() {
 	const { authUrl, clientId, clientSecret } = connectedAppSecretValue;
 	const { username, password, token } = apiUserSecretValue;
 
-	await doSfAuth(authUrl, clientId, clientSecret, username, password, token);
+	const sfConnectedAppAuth : SfConnectedAppAuth = {clientId, clientSecret};
+	const sfApiUserAuth : SfApiUserAuth = {url: authUrl, grant_type:password, username, password, token};
+
+	await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 	return;
 }
 
-// export async function doSfAuth(
-// 	authUrl: string,
-// 	clientId: string,
-// 	clientSecret: string,
-// 	username: string,
-// 	password: string,
-// 	token: string,
-// ): Promise<unknown> { //Promise<SfAuthResponse> {
-// 	console.log('1. authenticating with Salesforce...');
+export async function doSfAuth(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth: SfConnectedAppAuth): Promise<SfAuthResponse> {
+	console.log('1. authenticating with Salesforce...');
 
-// 	try {
-// 		const options = {
-// 			method: 'POST',
-// 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-// 			body: buildBody(clientId, clientSecret, username, password, token),
-// 		};
-	
-// 		const result = await fetch(authUrl, options);
-// 		console.log('2. result:',result);
-// 		const authResponse = await result.json();
-// 		console.log('3. authResponse:',authResponse);
+	try{
+		const options = {
+			method: "POST",
+			headers: {"Content-Type":"application/x-www-form-urlencoded"},
+			body: buildBody(sfApiUserAuth, sfConnectedAppAuth)
+		};
 
-// 		// if (!result.ok) {
-// 		// 	throw new Error(`Something went wrong authenticating with Salesforce. authResponse: ${JSON.stringify(authResponse)}`); // error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
-// 		// }
+		const result = await fetch(sfApiUserAuth.url, options);
+		console.log('2. result:',result);
 
-// 		// console.log(
-// 		// 	'successfully authenticated with Salesforce. instance_url:',
-// 		// 	authResponse.instance_url,
-// 		// );
-// 		return authResponse;
-// 	} catch (error) {
-// 		throw new Error(`Error authenticating with sf. error: ${JSON.stringify(error)}`);
-// 	}
-// }
+		const authResponse = await result.json();
+		console.log('3. authResponse:',authResponse);
 
-async function doSfAuth(
-	authUrl: string,
-	clientId: string,
-	clientSecret: string,
-	username: string,
-	password: string,
-	token: string
-  ): Promise<SfAuthResponse> {
-	const url = `${authUrl}/services/oauth2/token`;
-	const params = new URLSearchParams();
-  
-	params.append('grant_type', 'password');
-	params.append('client_id', clientId);
-	params.append('client_secret', clientSecret);
-	params.append('username', username);
-	params.append('password', password + token);
-  
-	const response = await fetch(url, {
-	  method: 'POST',
-	  headers: {
-		'Content-Type': 'application/x-www-form-urlencoded'
-	  },
-	  body: params
-	});
-  
-	if (!response.ok) {
-	  throw new Error(`Error authenticating with Salesforce: ${response.statusText}`);
-	}
-  
-	const data = await response.json();
-	console.log('data: ', data);
-	return data as SfAuthResponse;
-  }
+		if(!result.ok){
+			throw new Error(`Something went wrong authenticating with Salesforce. error:${JSON.stringify(authResponse)} | Status: ${result.status} | Status Text: ${result.statusText}.`);
 
-// function buildBody(
-// 	clientId: string,
-// 	clientSecret: string,
-// 	username: string,
-// 	password: string,
-// 	token: string,
-// ) {
-// 	return (
-// 		`grant_type=password` +
-// 		`&client_id=${clientId}` +
-// 		`&client_secret=${clientSecret}` +
-// 		`&username=${username}` +
-// 		`&password=${password}${token}`
-// 	);
-// }
+			// throw new Error(`Something went wrong authenticating with Salesforce. error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
+		}
+
+		console.log('successfully authenticated with Salesforce.');
+		return authResponse as SfAuthResponse;
+	}catch(error){
+		throw new Error(`Error to authenticate with sf: ${JSON.stringify(error)}`);
+ 	}
+}
+
+function buildBody(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth: SfConnectedAppAuth){
+	return `grant_type=password` + 
+	`&client_id=${sfConnectedAppAuth.clientId}` + 
+	`&client_secret=${sfConnectedAppAuth.clientSecret}` + 
+	`&username=${sfApiUserAuth.username}` + 
+	`&password=${sfApiUserAuth.password}`;
+}
 
 export type SfAuthResponse = {
 	access_token: string;
 	instance_url: string;
 };
+
+export type SfConnectedAppAuth = {
+	clientId: string;
+	clientSecret: string;
+};
+
+export type SfApiUserAuth = {
+	url: string;
+	grant_type: string;
+	username: string;
+	password: string;
+	token: string;
+};
+
