@@ -28,42 +28,28 @@ export async function doSfAuth(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth:
 
 	try{
 
-		const body = buildBody(sfApiUserAuth, sfConnectedAppAuth);
 		const options = {
 			method: "POST",
 			headers: {"Content-Type":"application/x-www-form-urlencoded"},
-			body
+			body: buildBody(sfApiUserAuth, sfConnectedAppAuth)
 		};
-		console.log('1a. body:',body);
-		const url = `${sfApiUserAuth.url}${'/services/oauth2/token'}`;
-		console.log('1aa. url:',url);
 
-		const result = await fetch(url, options);
-		console.log('2. result:',result);
-		console.log('2a. result.ok:',result.ok);
-
-
-
+		const result = await fetch(sfApiUserAuth.url, options);
+		console.log('when credentials are good');
+		console.log('result:',result);
 		if(!result.ok){
 			throw new Error();
 			// throw new Error(`Something went wrong authenticating with Salesforce. error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
 		}		
-		const contentType = result.headers.get('content-type');
-		console.log('3. contentType:', contentType);
 
-		let authResponse;
-		if (contentType && contentType.includes('application/json')) {
-			authResponse = await result.json();
-		} else {
-			const text = await result.text();
-			throw new Error(`Unexpected response content type: ${contentType}. Response text: ${text}`);
-		}
+		const authResponse = await result.json();
+		console.log('authResponse:',authResponse);
 
-		console.log('3. authResponse:', JSON.stringify(authResponse));
 		console.log('successfully authenticated with Salesforce.');
+
 		return authResponse as SfAuthResponse;
 	}catch(error){
-		throw new Error(`Error to authenticate with sf: ${JSON.stringify(error)}`);
+		throw new Error(`Error authenticating with sf: ${JSON.stringify(error)}`);
  	}
 }
 
@@ -92,4 +78,3 @@ export type SfApiUserAuth = {
 	password: string;
 	token: string;
 };
-
