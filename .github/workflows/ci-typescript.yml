@@ -25,6 +25,7 @@ jobs:
           - discount-api
           - salesforce-disaster-recovery
           - salesforce-disaster-recovery-health-check
+          - zuora-salesforce-link-remover
     runs-on: ubuntu-latest
     permissions:
       id-token: write

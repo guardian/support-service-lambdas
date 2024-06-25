@@ -1,0 +1,24 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  zuora-salesforce-link-remover-cloudformation:
+    type: cloud-formation
+    app: zuora-salesforce-link-remover
+    parameters:
+      templateStagePaths:
+        CODE: zuora-salesforce-link-remover-CODE.template.json
+        PROD: zuora-salesforce-link-remover-PROD.template.json
+  zuora-salesforce-link-remover:
+    type: aws-lambda
+    parameters:
+      fileName: zuora-salesforce-link-remover.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - zuora-salesforce-link-remover-get-billing-accounts-
+    dependencies: [zuora-salesforce-link-remover-cloudformation]

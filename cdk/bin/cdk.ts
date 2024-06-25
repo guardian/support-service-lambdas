@@ -17,6 +17,7 @@ import {
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
+import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -226,4 +227,12 @@ new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-PROD', {
 	domainName: `update-supporter-plus-amount.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
+});
+new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+});
+new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-PROD', {
+	stack: 'membership',
+	stage: 'PROD',
 });

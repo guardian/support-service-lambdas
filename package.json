@@ -9,7 +9,7 @@
 		"it-test": "pnpm --stream -r run it-test",
 		"new-lambda": "pnpm hygen new-lambda api-gateway && pnpm install && cd ./cdk && yarn lint --fix && yarn test -u && git add ./lib/__snapshots__/*.test.ts.snap",
 		"prepare": "husky",
-		"format": "prettier --write handlers/**/*.ts modules/**/*.ts",
+		"format": "prettier --write handlers/**/*.ts cdk/**/*.ts modules/**/*.ts",
 		"check-formatting": "pnpm -r run check-formatting"
 	},
 	"devDependencies": {
