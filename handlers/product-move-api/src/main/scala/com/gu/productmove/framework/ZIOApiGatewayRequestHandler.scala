@@ -37,9 +37,6 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
 
     override def write(b: Array[Byte], off: Int, len: Int): Unit =
       LambdaRuntime.getLogger.log(b.slice(off, off + len))
-
-    override def flush(): Unit =
-      JavaSystem.out.flush()
   })
 
   // this is the main lambda entry point.  It is referenced in the cloudformation.
