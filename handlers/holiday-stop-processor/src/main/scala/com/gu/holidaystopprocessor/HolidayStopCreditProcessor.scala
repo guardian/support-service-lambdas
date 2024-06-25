@@ -37,20 +37,19 @@ object HolidayStopCreditProcessor {
       fetchFromS3: S3Location => Try[String],
   ): List[ProcessResult[ZuoraHolidayCreditAddResult]] = {
 
-    val allProcessableProductTypes = List(
-      NewspaperHomeDelivery,
-      NewspaperVoucherBook,
-      NewspaperDigitalVoucher,
-      GuardianWeekly,
-      NewspaperNationalDelivery,
-      TierThree,
-    )
-
     val productTypesToProcess = productTypeAndStopDateOverride match {
+
       case Some(ProductTypeAndStopDate(productType, _)) =>
         List(productType)
+
       case None =>
-        allProcessableProductTypes
+        List(
+          NewspaperHomeDelivery,
+          NewspaperVoucherBook,
+          NewspaperDigitalVoucher,
+          GuardianWeekly,
+          NewspaperNationalDelivery,
+        )
     }
 
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
