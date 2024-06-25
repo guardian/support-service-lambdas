@@ -10,5 +10,5 @@ export async function handler() {
 	await getSecretValue<ConnectedAppSecret>(connectedAppSecretName);
 	await getSecretValue<ApiUserSecret>(apiUserSecretName);
 
-	return 'abcdef';
+	return;
 }
