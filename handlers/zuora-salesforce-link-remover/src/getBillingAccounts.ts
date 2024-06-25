@@ -34,10 +34,11 @@ export async function doSfAuth(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth:
 			headers: {"Content-Type":"application/x-www-form-urlencoded"},
 			body
 		};
-		console.log('1a. body:',body);
-		console.log('1aa. sfApiUserAuth.url:',sfApiUserAuth.url);
+		// console.log('1a. body:',body);
+		const url = `${sfApiUserAuth.url}${'/services/oauth2/token'}`;
+		console.log('1aa. url:',url);
 
-		const result = await fetch(sfApiUserAuth.url, options);
+		const result = await fetch(url, options);
 		console.log('2. result:',result);
 		console.log('2a. result.ok:',result.ok);
 
