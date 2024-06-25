@@ -17,7 +17,7 @@ export async function handler() {
 	const { username, password, token } = apiUserSecretValue;
 
 	const sfConnectedAppAuth : SfConnectedAppAuth = {clientId, clientSecret};
-	const sfApiUserAuth : SfApiUserAuth = {url: authUrl, grant_type:password, username, password, token};
+	const sfApiUserAuth : SfApiUserAuth = {url: authUrl, grant_type:'password', username, password, token};
 
 	await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 	return;
