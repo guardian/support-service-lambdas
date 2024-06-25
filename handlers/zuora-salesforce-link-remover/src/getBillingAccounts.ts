@@ -1,14 +1,16 @@
-import { GetSecretValueCommand, SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
+import {
+	GetSecretValueCommand,
+	SecretsManagerClient,
+} from '@aws-sdk/client-secrets-manager';
 
 export function handler() {
 	console.log('getting secret...');
-	const secretName = "DEV/Salesforce/ConnectedApp/AwsConnectorSandbox"
+	const secretName = 'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox';
 
-	const secret = getSecretValue({secretName});
+	const secret = getSecretValue({ secretName });
 	console.log('secret = ', secret);
 	return 'abcdef';
 }
-
 
 export const getSecretValue = async <T>({
 	secretName,
@@ -38,7 +40,7 @@ export const getSecretValue = async <T>({
 
 		return secretValue;
 	} catch (error) {
-		console.error('error:',error);
+		console.error('error:', error);
 		throw error;
 	}
 };

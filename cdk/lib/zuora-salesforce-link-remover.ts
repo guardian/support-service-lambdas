@@ -20,9 +20,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			architecture: Architecture.ARM_64,
 			initialPolicy: [
 				new PolicyStatement({
-					actions: [
-						'secretsmanager:GetSecretValue',
-					],
+					actions: ['secretsmanager:GetSecretValue'],
 					resources: [
 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
 					],
