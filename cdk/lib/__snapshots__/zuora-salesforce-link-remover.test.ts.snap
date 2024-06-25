@@ -23,6 +23,9 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "getbillingaccountslambdaServiceRoleD8FEBB2C",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
@@ -252,6 +255,9 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "getbillingaccountslambdaServiceRoleD8FEBB2C",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
