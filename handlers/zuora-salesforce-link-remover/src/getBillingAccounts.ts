@@ -50,7 +50,7 @@ export async function doSfAuth(
 		);
 		return authResponse;
 	} catch (error) {
-		throw new Error(`Error authenticating with sf`); //: ${error}`);
+		throw new Error(`Error authenticating with sf. error: ${JSON.stringify(error)}`);
 	}
 }
 
