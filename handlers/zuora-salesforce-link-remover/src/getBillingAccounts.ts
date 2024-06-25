@@ -1,5 +1,5 @@
-import type { ApiUserSecret, ConnectedAppSecret } from './AWS/secrets';
-import { getSecretValue } from './AWS/secrets';
+import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
+import { getSecretValue } from './secrets';
 
 export async function handler() {
 	//TODO in future pr: add a module that returns obtains secrets depending on env
