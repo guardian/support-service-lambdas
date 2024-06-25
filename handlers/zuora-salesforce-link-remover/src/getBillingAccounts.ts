@@ -28,7 +28,7 @@ export async function doSfAuth(
 	password: string,
 	token: string,
 ): Promise<SfAuthResponse> {
-	console.log('authenticating with Salesforce...');
+	console.log('1. authenticating with Salesforce...');
 
 	try {
 		const options = {
@@ -36,9 +36,11 @@ export async function doSfAuth(
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body: buildBody(clientId, clientSecret, username, password, token),
 		};
-
+	
 		const result = await fetch(authUrl, options);
+		console.log('2. result:',result);
 		const authResponse = (await result.json()) as SfAuthResponse;
+		console.log('3. authResponse:',authResponse);
 
 		if (!result.ok) {
 			throw new Error(`Something went wrong authenticating with Salesforce. authResponse: ${JSON.stringify(authResponse)}`); // error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
