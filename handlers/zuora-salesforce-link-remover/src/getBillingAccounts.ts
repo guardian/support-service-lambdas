@@ -27,11 +27,15 @@ export async function doSfAuth(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth:
 	console.log('1. authenticating with Salesforce...');
 
 	try{
+
+		const body = buildBody(sfApiUserAuth, sfConnectedAppAuth);
 		const options = {
 			method: "POST",
 			headers: {"Content-Type":"application/x-www-form-urlencoded"},
-			body: buildBody(sfApiUserAuth, sfConnectedAppAuth)
+			body
 		};
+		console.log('1a. body:',body);
+		console.log('1aa. sfApiUserAuth.url:',sfApiUserAuth.url);
 
 		const result = await fetch(sfApiUserAuth.url, options);
 		console.log('2. result:',result);
