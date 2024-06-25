@@ -27,7 +27,7 @@ export async function doSfAuth(
 	username: string,
 	password: string,
 	token: string,
-): Promise<SfAuthResponse> {
+): Promise<unknown> { //Promise<SfAuthResponse> {
 	console.log('1. authenticating with Salesforce...');
 
 	try {
@@ -39,17 +39,17 @@ export async function doSfAuth(
 	
 		const result = await fetch(authUrl, options);
 		console.log('2. result:',result);
-		const authResponse = (await result.json()) as SfAuthResponse;
+		const authResponse = await result.json();
 		console.log('3. authResponse:',authResponse);
 
-		if (!result.ok) {
-			throw new Error(`Something went wrong authenticating with Salesforce. authResponse: ${JSON.stringify(authResponse)}`); // error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
-		}
+		// if (!result.ok) {
+		// 	throw new Error(`Something went wrong authenticating with Salesforce. authResponse: ${JSON.stringify(authResponse)}`); // error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
+		// }
 
-		console.log(
-			'successfully authenticated with Salesforce. instance_url:',
-			authResponse.instance_url,
-		);
+		// console.log(
+		// 	'successfully authenticated with Salesforce. instance_url:',
+		// 	authResponse.instance_url,
+		// );
 		return authResponse;
 	} catch (error) {
 		throw new Error(`Error authenticating with sf. error: ${JSON.stringify(error)}`);
