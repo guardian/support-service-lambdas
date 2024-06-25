@@ -133,6 +133,44 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:DEV/Salesforce/User/MembersDataAPI-yaO9GU",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
               "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
@@ -364,6 +402,44 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:DEV/Salesforce/User/MembersDataAPI-yaO9GU",
+                    ],
+                  ],
+                },
+              ],
+            },
             {
               "Action": [
                 "s3:GetObject*",

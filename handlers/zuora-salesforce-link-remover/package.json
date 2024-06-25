@@ -9,5 +9,8 @@
 		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr zuora-salesforce-link-remover.zip ./*.js",
 		"type-check": "tsc --noEmit",
 		"check-formatting": "prettier --check **/*.ts"
+	},
+	"dependencies": {
+		"@aws-sdk/client-secrets-manager": "^3.600.0"
 	}
 }
