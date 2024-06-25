@@ -72,7 +72,7 @@ function buildBody(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth: SfConnected
 	`&client_id=${sfConnectedAppAuth.clientId}` + 
 	`&client_secret=${sfConnectedAppAuth.clientSecret}` + 
 	`&username=${sfApiUserAuth.username}` + 
-	`&password=${sfApiUserAuth.password}`;
+	`&password=${sfApiUserAuth.password}${sfApiUserAuth.token}`;
 }
 
 export type SfAuthResponse = {
