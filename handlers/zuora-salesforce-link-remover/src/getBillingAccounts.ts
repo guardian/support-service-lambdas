@@ -3,21 +3,20 @@ import {
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 
-export function handler() {
+export async function handler() {
 	console.log('getting secret...');
 	const secretName = 'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox';
 
-	const secret = getSecretValue({ secretName });
+	const secret = await getSecretValue({ secretName });
 	console.log('secret = ', secret);
 	return 'abcdef';
 }
 
-export const getSecretValue = async <T>({
+export const getSecretValue = async ({
 	secretName,
 }: {
 	secretName: string;
-}): Promise<T> => {
-	console.log('1. secretName:', secretName);
+}): Promise<ConnectedAppSecret> => {
 
 	const secretsManagerClient = new SecretsManagerClient({
 		region: process.env.region,
@@ -29,18 +28,23 @@ export const getSecretValue = async <T>({
 		});
 
 		const response = await secretsManagerClient.send(command);
-		console.log('2. secret response:', response);
 		if (!response.SecretString) {
 			throw new Error('No secret found');
 		}
-		console.log('3. response.SecretString:', response.SecretString);
 
-		const secretValue = JSON.parse(response.SecretString) as T;
-		console.log('4. secretValue:', secretValue);
+		const secretValue = JSON.parse(response.SecretString) as ConnectedAppSecret;
+		
+		console.log('secretValue.name:', secretValue.name);
+		console.log('secretValue.authUrl:', secretValue.authUrl);
 
 		return secretValue;
 	} catch (error) {
 		console.error('error:', error);
 		throw error;
 	}
+};
+
+type ConnectedAppSecret = {
+	name: string;
+	authUrl: string;
 };
