@@ -40,12 +40,11 @@ export async function doSfAuth(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth:
 
 
 		if(!result.ok){
-			throw new Error(`Something went wrong authenticating with Salesforce. error:${JSON.stringify(authResponse)} | Status: ${result.status} | Status Text: ${result.statusText}.`);
-
+			throw new Error();
 			// throw new Error(`Something went wrong authenticating with Salesforce. error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
 		}else{
 			const authResponse = await result.json();
-			console.log('3. authResponse:',authResponse);
+			console.log('3. authResponse:',JSON.stringify(authResponse));
 		}
 		const authResponse1 = await result.json();
 		console.log('successfully authenticated with Salesforce.');
