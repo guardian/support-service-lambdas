@@ -41,7 +41,7 @@ export async function doSfAuth(
 		const authResponse = (await result.json()) as SfAuthResponse;
 
 		if (!result.ok) {
-			throw new Error(`Something went wrong authenticating with Salesforce.`); // error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
+			throw new Error(`Something went wrong authenticating with Salesforce. authResponse: ${JSON.stringify(authResponse)}`); // error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
 		}
 
 		console.log(
