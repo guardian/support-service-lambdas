@@ -14,13 +14,10 @@ export async function doSfAuth(
 		const result = await fetch(sfApiUserAuth.url, options);
 
 		if (!result.ok) {
-			const authResponseText = await result.text();
-			throw new Error(authResponseText);
+			throw new Error(await result.text());
 		} else {
 			console.log('successfully authenticated with Salesforce');
-
-			const authResponseJson = await result.json();
-			return authResponseJson as SfAuthResponse;
+			return await result.json() as SfAuthResponse;
 		}
 	} catch (error) {
 		throw new Error(
@@ -60,21 +57,21 @@ export type SfApiUserAuth = {
 	token: string;
 };
 
-export async function executeSalesforceQuery(sfAuthResponse: SfAuthResponse) {
-	const soql = 'select Id, name from Zuora__CustomerAccount__c LIMIT 10';
-
-	const queryUrl = `${sfAuthResponse.instance_url}/services/data/v54.0/query?q=${encodeURIComponent(soql)}`;
-
-	console.log('queryUrl:', queryUrl);
-	console.log('sfAuthResponse:', JSON.stringify(sfAuthResponse));
-
-	const response = await fetch(queryUrl, {
-		method: 'GET',
-		headers: {
-			Authorization: `Bearer ${sfAuthResponse.access_token}`,
-			'Content-Type': 'application/json',
+export async function executeSalesforceQuery(
+	sfAuthResponse: SfAuthResponse,
+	query: string,
+) {
+	//todo api version to env vars
+	const response = await fetch(
+		`${sfAuthResponse.instance_url}/services/data/v54.0/query?q=${encodeURIComponent(query)}`,
+		{
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${sfAuthResponse.access_token}`,
+				'Content-Type': 'application/json',
+			},
 		},
-	});
+	);
 
 	if (!response.ok) {
 		throw new Error(`Failed to execute query: ${response.statusText}`);

@@ -29,7 +29,10 @@ export async function handler() {
 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
-	const response = await executeSalesforceQuery(sfAuthResponse);
+	//todo use test query for now, but update to prod query before release
+	//todo generate test data when we get to dev for updating zuora billing accounts
+	const query = 'select Id, name from Zuora__CustomerAccount__c LIMIT 10';
+	const response = await executeSalesforceQuery(sfAuthResponse, query);
 	console.log('query response: ', response);
 	return;
 }
