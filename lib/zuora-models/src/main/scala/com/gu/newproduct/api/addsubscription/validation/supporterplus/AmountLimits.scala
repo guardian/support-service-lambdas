@@ -26,7 +26,7 @@ object AmountLimits {
 
   val usd = SupporterPlusLimits(
     monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 15, max = 800),
-    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 130, max = 10000),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 150, max = 10000),
   )
 
   val nzd = SupporterPlusLimits(
@@ -36,7 +36,7 @@ object AmountLimits {
 
   val cad = SupporterPlusLimits(
     monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 15, max = 166),
-    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 130, max = 2000),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 150, max = 2000),
   )
 
   val eur = SupporterPlusLimits(
