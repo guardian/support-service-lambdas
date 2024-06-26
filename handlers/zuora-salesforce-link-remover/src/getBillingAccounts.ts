@@ -1,3 +1,4 @@
+import { executeSalesforceQuery } from './http';
 import { getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 import { doSfAuth } from './sfAuth';
@@ -27,6 +28,13 @@ export async function handler() {
 		token,
 	};
 
-	await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
+	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
+
+	const response = executeSalesforceQuery(sfAuthResponse);
+	console.log('query response: ', response);
 	return;
 }
+
+// function getBillingAccountsFromSalesforce(){
+
+// }

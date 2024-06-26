@@ -57,3 +57,26 @@ export type SfApiUserAuth = {
 	password: string;
 	token: string;
 };
+
+export async function executeSalesforceQuery(
+	sfAuthResponse: SfAuthResponse
+){
+	const soql = 'select Id, name from Zuora__CustomerAccount__c LIMIT 10';
+
+	const queryUrl = `${sfAuthResponse.instance_url}/services/data/v54.0/query?q=${encodeURIComponent(soql)}`;
+  
+	const response = await fetch(queryUrl, {
+	  method: 'GET',
+	  headers: {
+		'Authorization': `Bearer ${sfAuthResponse.access_token}`,
+		'Content-Type': 'application/json',
+	  },
+	});
+
+	if (!response.ok) {
+	  throw new Error(`Failed to execute query: ${response.statusText}`);
+	}
+  
+	return await response.json();
+}
+  
