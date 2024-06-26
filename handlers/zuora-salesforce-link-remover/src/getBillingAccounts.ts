@@ -46,7 +46,9 @@ export async function doSfAuth(
 		console.log('when credentials are bad');
 		console.log('result:', result);
 		if (!result.ok) {
-			console.log('result.text():', result.text());
+
+			const authResponseText = await result.text();
+			console.log('result.text():', authResponseText);
 
 			throw new Error();
 			// throw new Error(`Something went wrong authenticating with Salesforce. error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
