@@ -43,10 +43,10 @@ function buildBody(
 
 const SalesforceAuthResponseSchema = z.object({
 	access_token: z.string(),
-	instance_url: z.string().url(), // Ensures it's a valid URL
-	id: z.string().url(), // Assuming it's a URL
+	instance_url: z.string().url(),
+	id: z.string().url(),
 	token_type: z.string(),
-	issued_at: z.string(), // Assuming it's a string representation of a timestamp
+	issued_at: z.string(),
 	signature: z.string(),
 });
 type SfAuthResponse = z.infer<typeof SalesforceAuthResponseSchema>;
