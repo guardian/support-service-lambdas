@@ -14,8 +14,8 @@ export async function handler() {
 		await getSecretValue<ApiUserSecret>(apiUserSecretName);
 
 	const { authUrl, clientId, clientSecret } = connectedAppSecretValue;
-	const { username, token } = apiUserSecretValue;
-	const password = '123';
+	const { username, password, token } = apiUserSecretValue;
+
 	const sfConnectedAppAuth: SfConnectedAppAuth = { clientId, clientSecret };
 	const sfApiUserAuth: SfApiUserAuth = {
 		url: authUrl,
@@ -54,7 +54,7 @@ export async function doSfAuth(
 			return authResponseJson as SfAuthResponse;
 		}
 	} catch (error) {
-		throw new Error(`Error authenticating with sf: ${JSON.stringify(error)}`);
+		throw new Error(`error authenticating with Salesforce: ${JSON.stringify(error)}`);
 	}
 }
 
