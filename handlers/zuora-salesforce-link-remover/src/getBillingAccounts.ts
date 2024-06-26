@@ -5,7 +5,7 @@ export async function handler() {
 	//TODO in future pr: add a module that returns obtains secrets depending on env
 	const connectedAppSecretName =
 		'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox';
-	const apiUserSecretName = 'DEV/Salesforce/User/MembersDataAPI';
+	const apiUserSecretName = 'DEV/Salesforce/User/integrationuser';
 
 	const connectedAppSecretValue = await getSecretValue<ConnectedAppSecret>(
 		connectedAppSecretName,
