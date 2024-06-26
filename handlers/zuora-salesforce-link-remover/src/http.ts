@@ -19,7 +19,7 @@ export async function doSfAuth(
 			throw new Error(await result.text());
 		} else {
 			console.log('successfully authenticated with Salesforce');
-			return await result.json() as SfAuthResponse;
+			return (await result.json()) as SfAuthResponse;
 		}
 	} catch (error) {
 		throw new Error(
@@ -41,10 +41,15 @@ function buildBody(
 	);
 }
 
-export type SfAuthResponse = {
-	access_token: string;
-	instance_url: string;
-};
+const SalesforceAuthResponseSchema = z.object({
+	access_token: z.string(),
+	instance_url: z.string().url(), // Ensures it's a valid URL
+	id: z.string().url(), // Assuming it's a URL
+	token_type: z.string(),
+	issued_at: z.string(), // Assuming it's a string representation of a timestamp
+	signature: z.string(),
+});
+type SfAuthResponse = z.infer<typeof SalesforceAuthResponseSchema>;
 
 export type SfConnectedAppAuth = {
 	clientId: string;
@@ -79,25 +84,26 @@ export async function executeSalesforceQuery(
 		throw new Error(`Failed to execute query: ${response.statusText}`);
 	}
 
-	return await response.json() as SalesforceQueryResponse;
+	return (await response.json()) as SalesforceQueryResponse;
 }
 
 const SalesforceAttributesSchema = z.object({
 	type: z.string(),
 	url: z.string(),
-  });
-  
-  const BillingAccountRecordSchema = z.object({
+});
+
+const BillingAccountRecordSchema = z.object({
 	attributes: SalesforceAttributesSchema,
 	Id: z.string(),
 	Name: z.string(),
-  });
-  
-  const SalesforceQueryResponseSchema = z.object({
+});
+export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
+
+const SalesforceQueryResponseSchema = z.object({
 	totalSize: z.number(),
 	done: z.boolean(),
 	records: z.array(BillingAccountRecordSchema),
-  });
-  
-  export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
-  export type SalesforceQueryResponse = z.infer<typeof SalesforceQueryResponseSchema>;
+});
+export type SalesforceQueryResponse = z.infer<
+	typeof SalesforceQueryResponseSchema
+>;
