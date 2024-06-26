@@ -1,8 +1,7 @@
-import { executeSalesforceQuery } from './http';
+import { doSfAuth, executeSalesforceQuery } from './http';
+import type { SfApiUserAuth, SfConnectedAppAuth } from './http';
 import { getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
-import { doSfAuth } from './sfAuth';
-import type { SfApiUserAuth, SfConnectedAppAuth } from './sfAuth';
 
 export async function handler() {
 	//TODO in future pr: add a module that returns obtains secrets depending on env
