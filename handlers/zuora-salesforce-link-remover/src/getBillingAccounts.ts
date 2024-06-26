@@ -9,7 +9,7 @@ export async function handler() {
 
 	const connectedAppSecretValue = await getSecretValue<ConnectedAppSecret>(
 		connectedAppSecretName,
-	);
+	); 
 	const apiUserSecretValue =
 		await getSecretValue<ApiUserSecret>(apiUserSecretName);
 
@@ -38,16 +38,18 @@ export async function doSfAuth(sfApiUserAuth: SfApiUserAuth, sfConnectedAppAuth:
 		console.log('when credentials are bad');
 		console.log('result:',result);
 		if(!result.ok){
+			console.log('result.text():',result.text());
+
 			throw new Error();
 			// throw new Error(`Something went wrong authenticating with Salesforce. error:${authResponse.error} | error_description:${authResponse.error_description}. Status: ${result.status} | Status Text: ${result.statusText}.`);
-		}		
-
-		const authResponse = await result.json();
-		console.log('authResponse:',authResponse);
-
-		console.log('successfully authenticated with Salesforce.');
-
-		return authResponse as SfAuthResponse;
+		}else{
+			const authResponse = await result.json();
+			console.log('authResponse:',authResponse);
+	
+			console.log('successfully authenticated with Salesforce.');
+	
+			return authResponse as SfAuthResponse;
+		}
 	}catch(error){
 		throw new Error(`Error authenticating with sf: ${JSON.stringify(error)}`);
  	}
