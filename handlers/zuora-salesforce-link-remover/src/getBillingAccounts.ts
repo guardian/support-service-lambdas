@@ -29,7 +29,7 @@ export async function handler() {
 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
-	const response = executeSalesforceQuery(sfAuthResponse);
+	const response = await executeSalesforceQuery(sfAuthResponse);
 	console.log('query response: ', response);
 	return;
 }
