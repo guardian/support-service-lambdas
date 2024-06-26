@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export async function doSfAuth(
 	sfApiUserAuth: SfApiUserAuth,
 	sfConnectedAppAuth: SfConnectedAppAuth,
@@ -80,17 +82,22 @@ export async function executeSalesforceQuery(
 	return await response.json() as SalesforceQueryResponse;
 }
 
-type BillingAccountRecord = {
-	attributes: {
-		type: string;
-		url: string;
-	};
-	Id: string;
-	Name: string;
-  };
+const SalesforceAttributesSchema = z.object({
+	type: z.string(),
+	url: z.string(),
+  });
   
-  type SalesforceQueryResponse = {
-	totalSize: number;
-	done: boolean;
-	records: BillingAccountRecord[];
-  };
+  const BillingAccountRecordSchema = z.object({
+	attributes: SalesforceAttributesSchema,
+	Id: z.string(),
+	Name: z.string(),
+  });
+  
+  const SalesforceQueryResponseSchema = z.object({
+	totalSize: z.number(),
+	done: z.boolean(),
+	records: z.array(BillingAccountRecordSchema),
+  });
+  
+  export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
+  export type SalesforceQueryResponse = z.infer<typeof SalesforceQueryResponseSchema>;
