@@ -70,3 +70,14 @@ that's a thin wrapper around the processor to enable it to be tested functionall
 1. Use the `Salesforce Inspector | Show all data` extension to set value `Guardian Weekly` to `Product__c` and `Product_Type__c` fields
 1. Create holiday request
 1. Run processor lambda with `Stopped Publication Date` value as input, for example "2019-08-14" if `Stopped Publication Date = 14/08/2020` 
+
+## Tier Three (Digital + Print) product - June 2024
+The new 'Tier Three' (T3) product is a bundled product which contains Guardian Weekly as well as as digital benefits. That means
+that we need to allow subscribers to create holiday stops on it.
+
+To do this we need to add T3 to the list of supported products (`SupportedProduct.supporterProducts`)
+so that we can recognise it when working with a subscription of this type (we do this by looking at the `ratePlan.productName`).
+As soon as we recognise a T3 sub however we then treat the holiday stop as a Guardian Weekly.
+
+We also need to add T3 to the list of all processable product types which the HolidayStopProcessor uses to query
+Salesforce for holiday stop records as this query filters on the name of the Zuora product.

@@ -17,6 +17,32 @@ case class SupportedProduct(
 
 object SupportedProduct {
   lazy val supportedProducts = List(
+    // We need to add Tier Three into this list because it is the name of the product in Zuora (ratePlan.productName)
+    // However for the purposes of the credit processing we are only concerned with the Guardian Weekly plan within it
+    SupportedProduct(
+      name = "Tier Three",
+      productType =
+        GuardianWeekly, // Guardian Weekly is included in Tier Three and is the product we are concerned with here
+      annualIssueLimitPerEdition = 6,
+      ratePlans = List(
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly Domestic - Monthly",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly Domestic - Annual",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly ROW - Monthly",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "Supporter Plus & Guardian Weekly ROW - Annual",
+          List(SupportedRatePlanCharge("Guardian Weekly", DayOfWeek.FRIDAY)),
+        ),
+      ),
+    ),
     SupportedProduct(
       name = "Guardian Weekly - Domestic",
       productType = GuardianWeekly,
