@@ -67,7 +67,7 @@ export async function executeSalesforceQuery(sfAuthResponse: SfAuthResponse) {
 
 	console.log('queryUrl:', queryUrl);
 	console.log('sfAuthResponse:', JSON.stringify(sfAuthResponse));
-	
+
 	const response = await fetch(queryUrl, {
 		method: 'GET',
 		headers: {
