@@ -60,7 +60,7 @@ export type SfApiUserAuth = {
 export async function executeSalesforceQuery(
 	sfAuthResponse: SfAuthResponse,
 	query: string,
-) {
+): Promise<SalesforceQueryResponse> {
 	//todo api version to env vars
 	const response = await fetch(
 		`${sfAuthResponse.instance_url}/services/data/v54.0/query?q=${encodeURIComponent(query)}`,
@@ -77,5 +77,16 @@ export async function executeSalesforceQuery(
 		throw new Error(`Failed to execute query: ${response.statusText}`);
 	}
 
-	return await response.json();
+	return await response.json() as SalesforceQueryResponse;
 }
+
+type SalesforceRecord = {
+	Id: string;
+	Name: string;
+  };
+  
+  type SalesforceQueryResponse = {
+	totalSize: number;
+	done: boolean;
+	records: SalesforceRecord[];
+  };
