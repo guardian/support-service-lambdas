@@ -80,7 +80,11 @@ export async function executeSalesforceQuery(
 	return await response.json() as SalesforceQueryResponse;
 }
 
-type SalesforceRecord = {
+type BillingAccountRecord = {
+	attributes: {
+		type: string;
+		url: string;
+	};
 	Id: string;
 	Name: string;
   };
@@ -88,5 +92,5 @@ type SalesforceRecord = {
   type SalesforceQueryResponse = {
 	totalSize: number;
 	done: boolean;
-	records: SalesforceRecord[];
+	records: BillingAccountRecord[];
   };
