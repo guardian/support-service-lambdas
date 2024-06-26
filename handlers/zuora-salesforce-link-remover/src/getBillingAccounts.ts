@@ -34,7 +34,7 @@ export async function handler() {
 	// const limit = 200;
 	// const prodQuery = `SELECT Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c FROM Zuora__CustomerAccount__c WHERE Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts ORDER BY Zuora__Account__r.GDPR_Date_Successfully_Removed_Related__c desc LIMIT $limit`
 
-	const testQuery = 'select Id, Name from Zuora__CustomerAccount__c LIMIT 10';
+	const testQuery = 'select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c  from Zuora__CustomerAccount__c LIMIT 10';
 	const response = await executeSalesforceQuery(sfAuthResponse, testQuery);
 	console.log('query response: ', response);
 	return response.records;
