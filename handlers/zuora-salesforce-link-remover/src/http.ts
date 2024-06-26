@@ -65,6 +65,8 @@ export async function executeSalesforceQuery(sfAuthResponse: SfAuthResponse) {
 
 	const queryUrl = `${sfAuthResponse.instance_url}/services/data/v54.0/query?q=${encodeURIComponent(soql)}`;
 
+	console.log('queryUrl:', queryUrl);
+	
 	const response = await fetch(queryUrl, {
 		method: 'GET',
 		headers: {
