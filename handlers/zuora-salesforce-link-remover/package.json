@@ -11,6 +11,7 @@
 		"check-formatting": "prettier --check **/*.ts"
 	},
 	"dependencies": {
-		"@aws-sdk/client-secrets-manager": "^3.600.0"
+		"@aws-sdk/client-secrets-manager": "^3.600.0",
+		"zod": "^3.23.8"
 	}
 }
