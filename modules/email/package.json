@@ -7,6 +7,6 @@
     "check-formatting": "prettier --check **/*.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "3.451.0"
+    "@aws-sdk/client-sqs": "3.600.0"
   }
 }
