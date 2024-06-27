@@ -10,7 +10,7 @@
 		"check-formatting": "prettier --check **/*.ts"
 	},
 	"dependencies": {
-		"@aws-sdk/client-cloudwatch": "^3.556.0",
+		"@aws-sdk/client-cloudwatch": "^3.600.0",
 		"@aws-sdk/credential-providers": "^3.556.0",
 		"zod": "^3.23.4"
 	},
