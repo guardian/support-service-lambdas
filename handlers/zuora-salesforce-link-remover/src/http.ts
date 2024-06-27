@@ -17,8 +17,9 @@ export async function doSfAuth(
 
 		if (!result.ok) {
 			const errorText = await result.text();
-			console.error(`Error response from Salesforce: ${errorText}`);
-			throw new Error(errorText);
+			const errorMessage = `Error response from Salesforce: ${errorText}`;
+			console.error(errorMessage);
+			throw new Error(errorMessage);
 		}
 
 		console.log('successfully authenticated with Salesforce');
@@ -28,9 +29,9 @@ export async function doSfAuth(
 		const parseResult = SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
 		if (!parseResult.success) {
-			const parseError = JSON.stringify(parseResult.error.format());
-			console.error(`Error parsing response from Salesforce: ${parseError}`);
-			throw new Error(`Error parsing response from Salesforce: ${parseError}`);
+			const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResult.error.format())}`;
+			console.error(parseError);
+			throw new Error(parseError);
 		}
 
 		return parseResult.data;
@@ -98,7 +99,17 @@ export async function executeSalesforceQuery(
 		throw new Error(`Failed to execute query: ${response.statusText}`);
 	}
 
-	return (await response.json()) as SalesforceQueryResponse;
+	const sfQueryResponse = (await response.json()) as SalesforceQueryResponse;
+
+	const parseResult = SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
+
+	if (!parseResult.success) {
+		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResult.error.format())}`;
+		console.error(parseError);
+		throw new Error(parseError);
+	}
+
+	return parseResult.data;
 }
 
 const SalesforceAttributesSchema = z.object({
