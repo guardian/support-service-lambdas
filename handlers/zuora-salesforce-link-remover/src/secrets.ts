@@ -3,6 +3,30 @@ import {
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 
+export function getSecretNameDependingOnEnvironment(
+	stage: string,
+): SecretNames {
+	switch (stage) {
+		case 'CODE':
+			return {
+				apiUserSecretName: 'DEV/Salesforce/User/integrationuserapi',
+				connectedAppSecretName:
+					'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
+			};
+		case 'PROD':
+			return {
+				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
+				connectedAppSecretName:
+					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+			};
+		default:
+			return {
+				apiUserSecretName: '',
+				connectedAppSecretName: '',
+			};
+	}
+}
+
 export async function getSecretValue<T>(secretName: string): Promise<T> {
 	try {
 		const secretsManagerClient = new SecretsManagerClient({
@@ -25,6 +49,11 @@ export async function getSecretValue<T>(secretName: string): Promise<T> {
 		throw error;
 	}
 }
+
+export type SecretNames = {
+	apiUserSecretName: string;
+	connectedAppSecretName: string;
+};
 
 export type ConnectedAppSecret = {
 	name: string;
