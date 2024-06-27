@@ -14,6 +14,10 @@ export async function handler() {
 		throw Error('Stage not defined');
 	}
 
+	if (!isValidStage(stage)) {
+		throw Error('Invalid stage value');
+	}
+
 	const secretNames = getSecretNameDependingOnEnvironment(stage);
 
 	const { authUrl, clientId, clientSecret } =
@@ -48,4 +52,8 @@ export async function handler() {
 		testQuery,
 	);
 	return response.records;
+}
+
+function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
+	return value === 'CODE' || value === 'PROD';
 }
