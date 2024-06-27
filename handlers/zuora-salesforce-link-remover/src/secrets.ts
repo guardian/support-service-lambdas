@@ -40,8 +40,10 @@ export async function getSecretValue<T>(secretName: string): Promise<T> {
 
 		return JSON.parse(response.SecretString) as T;
 	} catch (error) {
-		console.error('error:', error);
-		throw error;
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		const errorText = `error getting secret: ${errorMessage}`;
+		console.error(errorText);
+		throw new Error(errorText);
 	}
 }
 
