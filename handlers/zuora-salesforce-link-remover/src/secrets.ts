@@ -3,6 +3,25 @@ import {
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 
+export function getSecretNameDependingOnEnvironment(
+	stage: 'CODE' | 'PROD',
+): SecretNames {
+	switch (stage) {
+		case 'CODE':
+			return {
+				apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
+				connectedAppSecretName:
+					'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
+			};
+		case 'PROD':
+			return {
+				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
+				connectedAppSecretName:
+					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+			};
+	}
+}
+
 export async function getSecretValue<T>(secretName: string): Promise<T> {
 	try {
 		const secretsManagerClient = new SecretsManagerClient({
@@ -16,19 +35,28 @@ export async function getSecretValue<T>(secretName: string): Promise<T> {
 		const response = await secretsManagerClient.send(command);
 
 		if (!response.SecretString) {
-			throw new Error(`No secret found with name:$secretName`);
+			throw new Error(`No secret found with name: ${secretName}`);
 		}
 
 		return JSON.parse(response.SecretString) as T;
 	} catch (error) {
-		console.error('error:', error);
-		throw error;
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		const errorText = `error getting secret: ${errorMessage}`;
+		console.error(errorText);
+		throw new Error(errorText);
 	}
 }
+
+export type SecretNames = {
+	apiUserSecretName: string;
+	connectedAppSecretName: string;
+};
 
 export type ConnectedAppSecret = {
 	name: string;
 	authUrl: string;
+	clientId: string;
+	clientSecret: string;
 };
 
 export type ApiUserSecret = {
