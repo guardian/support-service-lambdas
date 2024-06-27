@@ -1,6 +1,6 @@
 import {
 	GetSecretValueCommand,
-	SecretsManagerClient
+	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 import { mockClient } from 'aws-sdk-client-mock';
 import type { ConnectedAppSecret } from '../src/secrets';
@@ -9,13 +9,12 @@ import { getSecretValue } from '../src/secrets';
 const secretsManagerClientMock = mockClient(SecretsManagerClient);
 
 describe('getSecretValue', () => {
-
 	const secretName = 'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox';
-	const secretValue = { 
-		name:'AwsConnectorSandbox', 
-		authUrl: 'https://test.salesforce.com/services/oauth2/token', 
-		clientId: 'abc', 
-		clientSecret: 'def' 
+	const secretValue = {
+		name: 'AwsConnectorSandbox',
+		authUrl: 'https://test.salesforce.com/services/oauth2/token',
+		clientId: 'abc',
+		clientSecret: 'def',
 	};
 	const secretString = JSON.stringify(secretValue);
 
@@ -26,13 +25,14 @@ describe('getSecretValue', () => {
 	});
 
 	test('should get secret value from Secrets Manager', async () => {
-
 		secretsManagerClientMock.on(GetSecretValueCommand).resolves({
 			SecretString: secretString,
 		});
 
-		const result = await getSecretValue<{ connectedAppSecret: ConnectedAppSecret }>(secretName);
-		
+		const result = await getSecretValue<{
+			connectedAppSecret: ConnectedAppSecret;
+		}>(secretName);
+
 		expect(secretsManagerClientMock.calls().length).toEqual(1);
 		const getSecretArgs = secretsManagerClientMock.call(0)
 			.firstArg as GetSecretValueCommand;
@@ -60,4 +60,3 @@ describe('getSecretValue', () => {
 		).rejects.toThrow('Failed to get secret value');
 	});
 });
-

@@ -16,9 +16,10 @@ export async function handler() {
 
 	const secretNames = getSecretNameDependingOnEnvironment(stage);
 
-	const { authUrl, clientId, clientSecret } = await getSecretValue<ConnectedAppSecret>(
-		secretNames.connectedAppSecretName,
-	);
+	const { authUrl, clientId, clientSecret } =
+		await getSecretValue<ConnectedAppSecret>(
+			secretNames.connectedAppSecretName,
+		);
 
 	const { username, password, token } = await getSecretValue<ApiUserSecret>(
 		secretNames.apiUserSecretName,
