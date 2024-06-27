@@ -66,7 +66,7 @@ describe('getSecretNameDependingOnEnvironment', () => {
 	test('should return correct CODE secret names', () => {
 		const actual = getSecretNameDependingOnEnvironment('CODE');
 		const expected = {
-			apiUserSecretName: 'DEV/Salesforce/User/integrationuserapi',
+			apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
 			connectedAppSecretName:
 				'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
 		};

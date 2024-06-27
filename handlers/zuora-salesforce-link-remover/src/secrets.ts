@@ -9,7 +9,7 @@ export function getSecretNameDependingOnEnvironment(
 	switch (stage) {
 		case 'CODE':
 			return {
-				apiUserSecretName: 'DEV/Salesforce/User/integrationuserapi',
+				apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
 				connectedAppSecretName:
 					'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
 			};
