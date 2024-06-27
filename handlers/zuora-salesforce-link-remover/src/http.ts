@@ -29,7 +29,7 @@ export async function doSfAuth(
 		const parseResult = SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
 		if (!parseResult.success) {
-			const parseError = `Error parsing response from Salesforce: ${String(parseResult.error.format())}`;
+			const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResult.error.format())}`;
 			console.error(parseError);
 			throw new Error(parseError);
 		}
@@ -129,7 +129,9 @@ const SalesforceAttributesSchema = z.object({
 const BillingAccountRecordSchema = z.object({
 	attributes: SalesforceAttributesSchema,
 	Id: z.string(),
-	Name: z.string(),
+	Zuora__Account__c: z.string(),
+	GDPR_Removal_Attempts__c: z.string(),
+	Zuora__External_Id__c: z.string(),
 });
 export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
 
