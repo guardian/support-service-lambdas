@@ -83,7 +83,6 @@ export async function executeSalesforceQuery(
 	sfAuthResponse: SfAuthResponse,
 	query: string,
 ): Promise<SalesforceQueryResponse> {
-
 	const response = await fetch(
 		`${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/query?q=${encodeURIComponent(query)}`,
 		{
