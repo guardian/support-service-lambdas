@@ -4,7 +4,7 @@ import type {
 	SfApiUserAuth,
 	SfConnectedAppAuth,
 } from './http';
-import { getSecretNameDependingOnEnvironment, getSecretValue } from './secrets';
+import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export async function handler() {
@@ -18,7 +18,7 @@ export async function handler() {
 		throw Error('Invalid stage value');
 	}
 
-	const secretNames = getSecretNameDependingOnEnvironment(stage);
+	const secretNames = getSalesforceSecretNames(stage);
 
 	const { authUrl, clientId, clientSecret } =
 		await getSecretValue<ConnectedAppSecret>(

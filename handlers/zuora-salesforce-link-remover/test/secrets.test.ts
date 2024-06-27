@@ -5,7 +5,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import type { ConnectedAppSecret } from '../src/secrets';
 import {
-	getSecretNameDependingOnEnvironment,
+	getSalesforceSecretNames,
 	getSecretValue,
 } from '../src/secrets';
 
@@ -66,7 +66,7 @@ describe('getSecretValue', () => {
 
 describe('getSecretNameDependingOnEnvironment', () => {
 	test('should return correct CODE secret names', () => {
-		const actual = getSecretNameDependingOnEnvironment('CODE');
+		const actual = getSalesforceSecretNames('CODE');
 		const expected = {
 			apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
 			connectedAppSecretName: 'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
@@ -75,7 +75,7 @@ describe('getSecretNameDependingOnEnvironment', () => {
 	});
 
 	test('should return correct PROD secret names', () => {
-		const actual = getSecretNameDependingOnEnvironment('PROD');
+		const actual = getSalesforceSecretNames('PROD');
 		const expected = {
 			apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
 			connectedAppSecretName:
