@@ -19,7 +19,18 @@ export async function doSfAuth(
 			throw new Error(await result.text());
 		} else {
 			console.log('successfully authenticated with Salesforce');
-			return (await result.json()) as SfAuthResponse;
+
+			const sfAuthResponse = await result.json() as SfAuthResponse;
+
+			const safeParseAttempt = SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
+
+			if(safeParseAttempt.success){
+				return sfAuthResponse;
+			}else{
+				throw new Error(
+					`error parsing response from Salesforce: ${JSON.stringify(sfAuthResponse)}`,
+				);
+			}
 		}
 	} catch (error) {
 		throw new Error(
