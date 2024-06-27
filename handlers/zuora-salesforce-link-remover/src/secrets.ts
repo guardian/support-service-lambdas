@@ -35,7 +35,7 @@ export async function getSecretValue<T>(secretName: string): Promise<T> {
 		const response = await secretsManagerClient.send(command);
 
 		if (!response.SecretString) {
-			throw new Error(`No secret found with name:$secretName`);
+			throw new Error(`No secret found with name: ${secretName}`);
 		}
 
 		return JSON.parse(response.SecretString) as T;
