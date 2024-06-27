@@ -130,7 +130,7 @@ const BillingAccountRecordSchema = z.object({
 	attributes: SalesforceAttributesSchema,
 	Id: z.string(),
 	Zuora__Account__c: z.string(),
-	GDPR_Removal_Attempts__c: z.string(),
+	GDPR_Removal_Attempts__c: z.number(),
 	Zuora__External_Id__c: z.string(),
 });
 export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
