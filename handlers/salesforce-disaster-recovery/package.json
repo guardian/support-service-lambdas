@@ -11,7 +11,7 @@
 		"check-formatting": "prettier --check **/*.ts"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.137",
+		"@types/aws-lambda": "^8.10.140",
 		"aws-sdk-client-mock": "^3.0.1"
 	},
 	"dependencies": {

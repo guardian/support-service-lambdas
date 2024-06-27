@@ -10,7 +10,7 @@
 		"check-formatting": "prettier --check **/*.ts"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.129"
+		"@types/aws-lambda": "^8.10.140"
 	},
 	"dependencies": {
 		"@aws-sdk/client-sfn": "^3.552.0",
