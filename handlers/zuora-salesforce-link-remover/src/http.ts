@@ -83,9 +83,9 @@ export async function executeSalesforceQuery(
 	sfAuthResponse: SfAuthResponse,
 	query: string,
 ): Promise<SalesforceQueryResponse> {
-	//todo api version to env vars
+
 	const response = await fetch(
-		`${sfAuthResponse.instance_url}/services/data/v54.0/query?q=${encodeURIComponent(query)}`,
+		`${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/query?q=${encodeURIComponent(query)}`,
 		{
 			method: 'GET',
 			headers: {
@@ -111,6 +111,15 @@ export async function executeSalesforceQuery(
 
 	return parseResult.data;
 }
+
+const sfApiVersion = (): string => {
+	const sfApiVersion = process.env.SF_API_VERSION;
+
+	if (!sfApiVersion) {
+		return 'v54.0';
+	}
+	return sfApiVersion;
+};
 
 const SalesforceAttributesSchema = z.object({
 	type: z.string(),
