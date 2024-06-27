@@ -27,7 +27,7 @@ export async function doSfAuth(
 			const parseResult = SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
 			if(parseResult.success){
-				return sfAuthResponse;
+				return parseResult.data;
 			}else{
 				const parseError = JSON.stringify(parseResult.error.format());
 				console.error(`Error parsing response from Salesforce: ${parseError}`);
