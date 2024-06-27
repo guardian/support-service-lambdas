@@ -16,16 +16,13 @@ export async function handler() {
 
 	const secretNames = getSecretNameDependingOnEnvironment(stage);
 
-	const connectedAppSecretValue = await getSecretValue<ConnectedAppSecret>(
+	const { authUrl, clientId, clientSecret } = await getSecretValue<ConnectedAppSecret>(
 		secretNames.connectedAppSecretName,
 	);
 
-	const apiUserSecretValue = await getSecretValue<ApiUserSecret>(
+	const { username, password, token } = await getSecretValue<ApiUserSecret>(
 		secretNames.apiUserSecretName,
 	);
-
-	const { authUrl, clientId, clientSecret } = connectedAppSecretValue;
-	const { username, password, token } = apiUserSecretValue;
 
 	const sfConnectedAppAuth: SfConnectedAppAuth = { clientId, clientSecret };
 	const sfApiUserAuth: SfApiUserAuth = {
