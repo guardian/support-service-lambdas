@@ -4,7 +4,7 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 
 export function getSecretNameDependingOnEnvironment(
-	stage: string,
+	stage: 'CODE' | 'PROD',
 ): SecretNames {
 	switch (stage) {
 		case 'CODE':
@@ -18,11 +18,6 @@ export function getSecretNameDependingOnEnvironment(
 				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
 				connectedAppSecretName:
 					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
-			};
-		default:
-			return {
-				apiUserSecretName: '',
-				connectedAppSecretName: '',
 			};
 	}
 }
