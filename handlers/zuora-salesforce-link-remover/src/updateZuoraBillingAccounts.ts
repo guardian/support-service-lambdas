@@ -4,7 +4,11 @@ import { doZuoraAuth, updateBillingAccountInZuora } from './zuoraHttp';
 
 export async function handler() {
 	const stage = process.env.STAGE;
+	let zuoraBillingAccountId = process.env.ZUORABILLINGACCOUNTID;
 
+	if (!zuoraBillingAccountId) {
+		zuoraBillingAccountId = '2c92c0f875e014d30175e5a18c51068b';
+	}
 	if (!stage) {
 		throw Error('Stage not defined');
 	}
@@ -38,7 +42,8 @@ export async function handler() {
 
 	await updateBillingAccountInZuora(
 		zuoraAccessToken,
-		input.Zuora__External_Id__c
+		//input.Zuora__External_Id__c
+		zuoraBillingAccountId
 	);
 	return;
 }
