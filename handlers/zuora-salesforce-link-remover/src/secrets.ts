@@ -73,7 +73,6 @@ export type ApiUserSecret = {
 };
 
 export type ZuoraSecret = {
-	authUrl: string;
 	clientId: string;
 	clientSecret: string;
 };

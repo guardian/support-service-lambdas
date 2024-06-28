@@ -1,5 +1,6 @@
 import { getSecretValue, getZuoraSecretName } from './secrets';
 import type { ZuoraSecret } from './secrets';
+import { doZuoraAuth } from './zuoraHttp';
 
 export async function handler() {
 	const stage = process.env.STAGE;
@@ -26,12 +27,18 @@ export async function handler() {
 
 	const secretName = getZuoraSecretName(stage);
 
-	const { authUrl, clientId, clientSecret } = await getSecretValue<ZuoraSecret>(secretName);
+	const { clientId, clientSecret } =
+		await getSecretValue<ZuoraSecret>(secretName);
 	console.log('clientId:', clientId);
 	console.log('clientSecret:', clientSecret);
 
-	const zuoraAuthResponse = await doZuoraAuth({ authUrl, clientId, clientSecret });
 
+	// const zuoraAuthResponse = 
+	await doZuoraAuth({
+		client_id: clientId,
+		client_secret: clientSecret,
+		grant_type: 'client_credentials'
+	});
 
 	return;
 }
