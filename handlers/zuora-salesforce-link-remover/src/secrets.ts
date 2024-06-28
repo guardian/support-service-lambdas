@@ -3,9 +3,7 @@ import {
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 
-export function getSalesforceSecretNames(
-	stage: 'CODE' | 'PROD',
-): SecretNames {
+export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
 	switch (stage) {
 		case 'CODE':
 			return {
@@ -22,9 +20,7 @@ export function getSalesforceSecretNames(
 	}
 }
 
-export function getZuoraSecretName(
-	stage: 'CODE' | 'PROD',
-): string {
+export function getZuoraSecretName(stage: 'CODE' | 'PROD'): string {
 	switch (stage) {
 		case 'CODE':
 			return 'DEV/Zuora/User/ZuoraApiUser';

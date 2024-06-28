@@ -4,10 +4,7 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import { mockClient } from 'aws-sdk-client-mock';
 import type { ConnectedAppSecret } from '../src/secrets';
-import {
-	getSalesforceSecretNames,
-	getSecretValue,
-} from '../src/secrets';
+import { getSalesforceSecretNames, getSecretValue } from '../src/secrets';
 
 const secretsManagerClientMock = mockClient(SecretsManagerClient);
 
