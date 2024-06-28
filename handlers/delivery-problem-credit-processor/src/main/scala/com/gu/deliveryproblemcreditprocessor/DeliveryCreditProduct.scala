@@ -54,9 +54,11 @@ object DeliveryCreditProduct {
 
     def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
       case (Stage.Prod, s"Guardian Weekly$_") => Some(DeliveryCreditProduct.Prod.GuardianWeekly)
+      case (Stage.Prod, s"Tier Three") => Some(DeliveryCreditProduct.Prod.GuardianWeekly)
       case (Stage.Prod, "Newspaper Delivery") => Some(DeliveryCreditProduct.Prod.HomeDelivery)
       case (Stage.Prod, "Newspaper - National Delivery") => Some(DeliveryCreditProduct.Prod.NationalDelivery)
       case (Stage.Code, s"Guardian Weekly$_") => Some(DeliveryCreditProduct.Code.GuardianWeekly)
+      case (Stage.Code, s"Tier Three") => Some(DeliveryCreditProduct.Code.GuardianWeekly)
       case (Stage.Code, "Newspaper Delivery") => Some(DeliveryCreditProduct.Code.HomeDelivery)
       case (Stage.Code, "Newspaper - National Delivery") => Some(DeliveryCreditProduct.Code.NationalDelivery)
       case _ => None
