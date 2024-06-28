@@ -23,7 +23,7 @@ export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
 export function getZuoraSecretName(stage: 'CODE' | 'PROD'): string {
 	switch (stage) {
 		case 'CODE':
-			return 'DEV/Zuora/User/ZuoraApiUser';
+			return 'CODE/Zuora-OAuth/SupportServiceLambdas';
 		case 'PROD':
 			return 'PROD/Zuora/SupportServiceLambdas';
 	}

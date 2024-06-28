@@ -398,7 +398,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:CODE/Zuora/SubscriptionsZuoraApi-XW49AL",
+                      ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l",
                     ],
                   ],
                 },
@@ -918,7 +918,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:CODE/Zuora/SubscriptionsZuoraApi-XW49AL",
+                      ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l",
                     ],
                   ],
                 },
