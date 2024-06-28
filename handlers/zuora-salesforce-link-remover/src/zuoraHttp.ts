@@ -13,7 +13,7 @@ export async function doZuoraAuth(
 	};
 
 	try {
-		const response = await fetch('https://rest.apisandbox.zuora.com', req);
+		const response = await fetch('https://rest.apisandbox.zuora.com/oauth/token', req);
 		console.log('response:', JSON.stringify(response));
 
 		if (!response.ok) {
@@ -27,9 +27,7 @@ export async function doZuoraAuth(
 
 		return responseData.access_token;
 	} catch (error) {
-		throw new Error(
-			`Error retrieving access token from Zuora: ${String(error)}`,
-		);
+		throw new Error(String(error));
 	}
 }
 
