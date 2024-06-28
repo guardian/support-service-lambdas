@@ -40,7 +40,10 @@ export async function handler() {
 		grant_type: 'client_credentials'
 	});
 
-	console.log('zuoraAccessToken:',zuoraAccessToken);
+	updateBillingAccountInZuora(
+		zuoraAccessToken,
+		input.Zuora__External_Id__c
+	);
 	return;
 }
 
