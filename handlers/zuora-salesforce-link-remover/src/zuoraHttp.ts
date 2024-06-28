@@ -81,7 +81,7 @@ export async function updateRecordInZuora(
 		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${bearerToken}`,
+			Authorization: `bearer ${bearerToken}`,
 		},
 		body: JSON.stringify(data),
 	};
