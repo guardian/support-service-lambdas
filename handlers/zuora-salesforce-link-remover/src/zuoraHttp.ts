@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-export async function doZuoraAuth(
-	zuoraAuth: ZuoraAuth
-): Promise<string> {
+export async function doZuoraAuth(zuoraAuth: ZuoraAuth): Promise<string> {
 	console.log('authenticating with Zuora...');
 	const req = {
 		method: 'POST',
@@ -13,7 +11,10 @@ export async function doZuoraAuth(
 	};
 
 	try {
-		const result = await fetch('https://rest.apisandbox.zuora.com/oauth/token', req);
+		const result = await fetch(
+			'https://rest.apisandbox.zuora.com/oauth/token',
+			req,
+		);
 
 		if (!result.ok) {
 			//can we get the error text out of the response rather than outputting full response?
@@ -50,31 +51,39 @@ const ZuoraAuthResponseSchema = z.object({
 });
 type ZuoraAuthResponse = z.infer<typeof ZuoraAuthResponseSchema>;
 
-
-export async function updateBillingAccountInZuora(bearerToken: string, zuoraBillingAccountId: string) : Promise<unknown>{
-	console.log(`removing crmId from Billing Account ${zuoraBillingAccountId}...`);
-  
-	const formData = new FormData();  
-	formData.set('crmId','');
-  
-	const accountUpdateAttempt = await updateRecordInZuora(
-	  `https://rest.apisandbox.zuora.com/v1/accounts/${zuoraBillingAccountId}`,
-	  formData,
-	  bearerToken
+export async function updateBillingAccountInZuora(
+	bearerToken: string,
+	zuoraBillingAccountId: string,
+): Promise<unknown> {
+	console.log(
+		`removing crmId from Billing Account ${zuoraBillingAccountId}...`,
 	);
-	
-	return accountUpdateAttempt;
-  }
 
-export async function updateRecordInZuora(url: string, data: object, bearerToken: string): Promise<unknown> {
+	const formData = new FormData();
+	formData.set('crmId', '');
+
+	const accountUpdateAttempt = await updateRecordInZuora(
+		`https://rest.apisandbox.zuora.com/v1/accounts/${zuoraBillingAccountId}`,
+		formData,
+		bearerToken,
+	);
+
+	return accountUpdateAttempt;
+}
+
+export async function updateRecordInZuora(
+	url: string,
+	data: object,
+	bearerToken: string,
+): Promise<unknown> {
 	console.log('updating record in Zuora: url:', url);
 	const fetchReq = {
 		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${bearerToken}`
+			Authorization: `Bearer ${bearerToken}`,
 		},
-		body: JSON.stringify(data)
+		body: JSON.stringify(data),
 	};
 
 	try {
@@ -86,9 +95,9 @@ export async function updateRecordInZuora(url: string, data: object, bearerToken
 
 		if (!response.ok) {
 			// Handle non-200 responses
-			return responseData;  // Return the error response
+			return responseData; // Return the error response
 		}
-		return responseData;  // Return the successful response
+		return responseData; // Return the successful response
 	} catch (error) {
 		// Handle network errors or JSON parsing errors
 		// return { error: error.message };

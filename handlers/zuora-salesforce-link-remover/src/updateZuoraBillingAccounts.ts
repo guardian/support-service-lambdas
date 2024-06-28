@@ -37,13 +37,13 @@ export async function handler() {
 	const zuoraAccessToken = await doZuoraAuth({
 		client_id: clientId,
 		client_secret: clientSecret,
-		grant_type: 'client_credentials'
+		grant_type: 'client_credentials',
 	});
 
 	await updateBillingAccountInZuora(
 		zuoraAccessToken,
 		//input.Zuora__External_Id__c
-		zuoraBillingAccountId
+		zuoraBillingAccountId,
 	);
 	return;
 }
