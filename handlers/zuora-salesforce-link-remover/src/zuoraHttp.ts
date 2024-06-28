@@ -78,13 +78,15 @@ export async function updateRecordInZuora(
 	bearerToken: string,
 ): Promise<unknown> {
 	console.log('updating record in Zuora: url:', url);
+	console.log('data:', data);
+	console.log('JSON.stringify(data):', JSON.stringify(data));
 	const fetchReq = {
 		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `bearer ${bearerToken}`,
 		},
-		body: JSON.stringify(data),
+		body: data,
 	};
 	console.log('fetchReq:',fetchReq);
 
