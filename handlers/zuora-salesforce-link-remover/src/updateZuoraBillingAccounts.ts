@@ -1,6 +1,6 @@
 import { getSecretValue, getZuoraSecretName } from './secrets';
 import type { ZuoraSecret } from './secrets';
-import { doZuoraAuth } from './zuoraHttp';
+import { doZuoraAuth, updateBillingAccountInZuora } from './zuoraHttp';
 
 export async function handler() {
 	const stage = process.env.STAGE;
@@ -40,7 +40,7 @@ export async function handler() {
 		grant_type: 'client_credentials'
 	});
 
-	updateBillingAccountInZuora(
+	await updateBillingAccountInZuora(
 		zuoraAccessToken,
 		input.Zuora__External_Id__c
 	);
