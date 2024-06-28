@@ -59,15 +59,13 @@ export async function updateBillingAccountInZuora(
 		`removing crmId from Billing Account ${zuoraBillingAccountId}...`,
 	);
 
-	const formData = new FormData();
-	formData.set('crmId', '');
-
-	console.log('formData:',formData);
-	console.log('JSON.stringify(formData):', JSON.stringify(formData));
+	const fields = {
+		crmId: '',
+	};
 
 	const accountUpdateAttempt = await updateRecordInZuora(
 		`https://rest.apisandbox.zuora.com/v1/accounts/${zuoraBillingAccountId}`,
-		formData,
+		fields,
 		bearerToken,
 	);
 
@@ -90,7 +88,6 @@ export async function updateRecordInZuora(
 		},
 		body: JSON.stringify(data),
 	};
-	// console.log('fetchReq:',fetchReq);
 
 	try {
 		const response = await fetch(url, fetchReq);
