@@ -27,7 +27,7 @@ export function getZuoraSecretName(
 ): string {
 	switch (stage) {
 		case 'CODE':
-			return 'CODE/Zuora/SubscriptionsZuoraApi';
+			return 'DEV/Zuora/User/ZuoraApiUser';
 		case 'PROD':
 			return 'PROD/Zuora/SupportServiceLambdas';
 	}
