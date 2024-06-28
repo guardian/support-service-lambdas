@@ -29,11 +29,7 @@ export async function handler() {
 
 	const { clientId, clientSecret } =
 		await getSecretValue<ZuoraSecret>(secretName);
-	console.log('clientId:', clientId);
-	console.log('clientSecret:', clientSecret);
 
-
-	// const zuoraAuthResponse = 
 	const zuoraAccessToken = await doZuoraAuth({
 		client_id: clientId,
 		client_secret: clientSecret,
