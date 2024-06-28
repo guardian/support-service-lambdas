@@ -9,23 +9,31 @@ export async function doZuoraAuth(
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		},
-		body: new URLSearchParams(zuoraAuth).toString(), // Convert data to URL-encoded string
+		body: new URLSearchParams(zuoraAuth).toString(),
 	};
 
 	try {
-		const response = await fetch('https://rest.apisandbox.zuora.com/oauth/token', req);
-		console.log('response:', JSON.stringify(response));
+		const result = await fetch('https://rest.apisandbox.zuora.com/oauth/token', req);
 
-		if (!response.ok) {
-			throw new Error(
-				`Error retrieving access token from Zuora: ${JSON.stringify(response)}`,
-			);
+		if (!result.ok) {
+			//can we get the error text out of the response rather than outputting full response?
+			const errorMessage = `Error retrieving access token from Zuora: ${JSON.stringify(result)}`;
+			console.error(errorMessage);
+			throw new Error(errorMessage);
+		}
+		console.log('successfully authenticated with Zuora');
+
+		const zuoraAuthResponse = (await result.json()) as ZuoraAuthResponse;
+
+		const parseResult = ZuoraAuthResponseSchema.safeParse(zuoraAuthResponse);
+
+		if (!parseResult.success) {
+			const parseError = `Error parsing response from Zuora: ${JSON.stringify(parseResult.error.format())}`;
+			console.error(parseError);
+			throw new Error(parseError);
 		}
 
-		const responseData = (await response.json()) as ZuoraAuthResponse;
-		console.log('responseData:', JSON.stringify(responseData));
-
-		return responseData.access_token;
+		return parseResult.data.access_token;
 	} catch (error) {
 		throw new Error(String(error));
 	}

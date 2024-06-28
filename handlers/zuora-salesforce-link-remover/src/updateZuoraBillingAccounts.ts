@@ -34,12 +34,13 @@ export async function handler() {
 
 
 	// const zuoraAuthResponse = 
-	await doZuoraAuth({
+	const zuoraAccessToken = await doZuoraAuth({
 		client_id: clientId,
 		client_secret: clientSecret,
 		grant_type: 'client_credentials'
 	});
 
+	console.log('zuoraAccessToken:',zuoraAccessToken);
 	return;
 }
 
