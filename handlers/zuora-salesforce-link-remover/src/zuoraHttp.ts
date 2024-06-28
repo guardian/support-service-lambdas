@@ -63,6 +63,8 @@ export async function updateBillingAccountInZuora(
 	formData.set('crmId', '');
 
 	console.log('formData:',formData);
+	console.log('JSON.stringify(formData):', JSON.stringify(formData));
+
 	const accountUpdateAttempt = await updateRecordInZuora(
 		`https://rest.apisandbox.zuora.com/v1/accounts/${zuoraBillingAccountId}`,
 		formData,
@@ -86,9 +88,9 @@ export async function updateRecordInZuora(
 			'Content-Type': 'application/json',
 			Authorization: `bearer ${bearerToken}`,
 		},
-		body: data,
+		body: JSON.stringify(data),
 	};
-	console.log('fetchReq:',fetchReq);
+	// console.log('fetchReq:',fetchReq);
 
 	try {
 		const response = await fetch(url, fetchReq);
