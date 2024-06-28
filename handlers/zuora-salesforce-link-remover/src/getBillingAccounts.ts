@@ -1,9 +1,9 @@
-import { doSfAuth, executeSalesforceQuery } from './http';
+import { doSfAuth, executeSalesforceQuery } from './salesforceHttp';
 import type {
 	SalesforceQueryResponse,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
-} from './http';
+} from './salesforceHttp';
 import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
