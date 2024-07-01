@@ -197,6 +197,10 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.23.8
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.140
+        version: 8.10.140
 
   modules/aws:
     dependencies:
@@ -2038,6 +2042,9 @@ packages:
 
   '@types/aws-lambda@8.10.137':
     resolution: {integrity: sha512-YNFwzVarXAOXkjuFxONyDw1vgRNzyH8AuyN19s0bM+ChSu/bzxb5XPxYFLXoqoM+tvgzwR3k7fXcEOW125yJxg==}
+
+  '@types/aws-lambda@8.10.140':
+    resolution: {integrity: sha512-4Dh3dk2TUcbdfHrX0Al90mNGJDvA9NBiTQPzbrjGi/dLxzKCGOYgT8YQ47jUKNFALkAJAadifq0pzyjIUlhVhg==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -8510,6 +8517,8 @@ snapshots:
   '@types/aws-lambda@8.10.134': {}
 
   '@types/aws-lambda@8.10.137': {}
+
+  '@types/aws-lambda@8.10.140': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
