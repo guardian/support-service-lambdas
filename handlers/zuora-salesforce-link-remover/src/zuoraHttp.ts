@@ -54,7 +54,7 @@ type ZuoraAuthResponse = z.infer<typeof ZuoraAuthResponseSchema>;
 export async function updateBillingAccountInZuora(
 	bearerToken: string,
 	zuoraBillingAccountId: string,
-): Promise<unknown> {
+): Promise<ZuoraBillingAccountUpdateResponse> {
 	console.log(
 		`removing crmId from Billing Account ${zuoraBillingAccountId}...`,
 	);
@@ -76,7 +76,7 @@ export async function updateRecordInZuora(
 	url: string,
 	data: object,
 	bearerToken: string,
-): Promise<unknown> {
+): Promise<ZuoraBillingAccountUpdateResponse> {
 
 	const fetchReq = {
 		method: 'PUT',
