@@ -5,6 +5,17 @@ import type { ZuoraSecret } from './secrets';
 import { doZuoraAuth, updateBillingAccountInZuora } from './zuoraHttp';
 
 export const handler: Handler = async (event: Event) => {
+
+	const parseResponse = EventSchema.safeParse(event);
+
+	if (!parseResponse.success) {
+		const parseError = `Error parsing billing account id from input: ${JSON.stringify(parseResponse.error.format())}`;
+		console.error(parseError);
+		throw new Error(parseError);
+	}
+
+	const billingAccountId = parseResponse.data.Zuora__External_Id__c;
+	
 	const stage = process.env.STAGE;
 	if (!stage) {
 		throw Error('Stage not defined');
@@ -13,22 +24,6 @@ export const handler: Handler = async (event: Event) => {
 	if (!isValidStage(stage)) {
 		throw Error('Invalid stage value');
 	}
-
-	const parseResponse = EventSchema.safeParse(event);
-	console.error('parseResponse:',parseResponse);
-
-	if (!parseResponse.success) {
-		const parseError = `Error parsing event from input: ${JSON.stringify(parseResponse.error.format())}`;
-		console.error(parseError);
-		throw new Error(parseError);
-	}
-
-	// return parseResponse.data;
-
-	// if (!event.Zuora__External_Id__c) {
-	// 	throw Error('No Billing Account Id has been provided');
-	// }
-	const billingAccountId = parseResponse.data.Zuora__External_Id__c;
 	const secretName = getZuoraSecretName(stage);
 
 	const { clientId, clientSecret } =
@@ -44,6 +39,7 @@ export const handler: Handler = async (event: Event) => {
 		zuoraAccessToken,
 		billingAccountId,
 	);
+	
 	return {
 		billingAccountId,
 		...zuoraBillingAccountUpdateResponse,
