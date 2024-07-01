@@ -1,10 +1,10 @@
+import type { Handler } from "aws-lambda";
+import { z } from 'zod';
 import { getSecretValue, getZuoraSecretName } from './secrets';
 import type { ZuoraSecret } from './secrets';
 import { doZuoraAuth, updateBillingAccountInZuora } from './zuoraHttp';
-import type { ZuoraBillingAccountUpdateResponse } from './zuoraHttp';
-import { Handler } from "aws-lambda";
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event: Event) => {
 	const stage = process.env.STAGE;
 	if (!stage) {
 		throw Error('Stage not defined');
@@ -14,7 +14,7 @@ export const handler: Handler = async (event) => {
 		throw Error('Invalid stage value');
 	}
 
-	const billingAccountId: string = event.Zuora__External_Id__c;
+	const billingAccountId = event.Zuora__External_Id__c;
 
 	const secretName = getZuoraSecretName(stage);
 
@@ -40,3 +40,10 @@ export const handler: Handler = async (event) => {
 function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
 	return value === 'CODE' || value === 'PROD';
 }
+
+const EventSchema = z.object({
+	Zuora__External_Id__c: z.string()
+});
+export type Event = z.infer<
+	typeof EventSchema
+>;
