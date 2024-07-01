@@ -29,17 +29,16 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			],
 		});
 
-		new GuLambdaFunction(this, 'update-zuora-billing-accounts-lambda', {
+		new GuLambdaFunction(this, 'update-zuora-billing-account-lambda', {
 			app: appName,
-			functionName: `${appName}-update-zuora-billing-accounts-${this.stage}`,
+			functionName: `${appName}-update-zuora-billing-account-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
 			environment: {
 				APP: appName,
 				STACK: this.stack,
-				STAGE: this.stage,
-				ZUORABILLINGACCOUNTID: 'abc',
+				STAGE: this.stage
 			},
-			handler: 'updateZuoraBillingAccounts.handler',
+			handler: 'updateZuoraBillingAccount.handler',
 			fileName: `${appName}.zip`,
 			architecture: Architecture.ARM_64,
 			initialPolicy: [

@@ -267,10 +267,10 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "updatezuorabillingaccountslambdaB9900DE8": {
+    "updatezuorabillingaccountlambda6EF8BCFE": {
       "DependsOn": [
-        "updatezuorabillingaccountslambdaServiceRoleDefaultPolicyD7F4C98E",
-        "updatezuorabillingaccountslambdaServiceRole87D6ACA6",
+        "updatezuorabillingaccountlambdaServiceRoleDefaultPolicy56C07513",
+        "updatezuorabillingaccountlambdaServiceRole91046AA4",
       ],
       "Properties": {
         "Architectures": [
@@ -287,15 +287,14 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
             "APP": "zuora-salesforce-link-remover",
             "STACK": "membership",
             "STAGE": "CODE",
-            "ZUORABILLINGACCOUNTID": "abc",
           },
         },
-        "FunctionName": "zuora-salesforce-link-remover-update-zuora-billing-accounts-CODE",
-        "Handler": "updateZuoraBillingAccounts.handler",
+        "FunctionName": "zuora-salesforce-link-remover-update-zuora-billing-account-CODE",
+        "Handler": "updateZuoraBillingAccount.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "updatezuorabillingaccountslambdaServiceRole87D6ACA6",
+            "updatezuorabillingaccountlambdaServiceRole91046AA4",
             "Arn",
           ],
         },
@@ -326,7 +325,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "updatezuorabillingaccountslambdaServiceRole87D6ACA6": {
+    "updatezuorabillingaccountlambdaServiceRole91046AA4": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -379,7 +378,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "updatezuorabillingaccountslambdaServiceRoleDefaultPolicyD7F4C98E": {
+    "updatezuorabillingaccountlambdaServiceRoleDefaultPolicy56C07513": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -508,10 +507,10 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "updatezuorabillingaccountslambdaServiceRoleDefaultPolicyD7F4C98E",
+        "PolicyName": "updatezuorabillingaccountlambdaServiceRoleDefaultPolicy56C07513",
         "Roles": [
           {
-            "Ref": "updatezuorabillingaccountslambdaServiceRole87D6ACA6",
+            "Ref": "updatezuorabillingaccountlambdaServiceRole91046AA4",
           },
         ],
       },
@@ -788,10 +787,10 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "updatezuorabillingaccountslambdaB9900DE8": {
+    "updatezuorabillingaccountlambda6EF8BCFE": {
       "DependsOn": [
-        "updatezuorabillingaccountslambdaServiceRoleDefaultPolicyD7F4C98E",
-        "updatezuorabillingaccountslambdaServiceRole87D6ACA6",
+        "updatezuorabillingaccountlambdaServiceRoleDefaultPolicy56C07513",
+        "updatezuorabillingaccountlambdaServiceRole91046AA4",
       ],
       "Properties": {
         "Architectures": [
@@ -808,15 +807,14 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
             "APP": "zuora-salesforce-link-remover",
             "STACK": "membership",
             "STAGE": "PROD",
-            "ZUORABILLINGACCOUNTID": "abc",
           },
         },
-        "FunctionName": "zuora-salesforce-link-remover-update-zuora-billing-accounts-PROD",
-        "Handler": "updateZuoraBillingAccounts.handler",
+        "FunctionName": "zuora-salesforce-link-remover-update-zuora-billing-account-PROD",
+        "Handler": "updateZuoraBillingAccount.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "updatezuorabillingaccountslambdaServiceRole87D6ACA6",
+            "updatezuorabillingaccountlambdaServiceRole91046AA4",
             "Arn",
           ],
         },
@@ -847,7 +845,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "updatezuorabillingaccountslambdaServiceRole87D6ACA6": {
+    "updatezuorabillingaccountlambdaServiceRole91046AA4": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -900,7 +898,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "updatezuorabillingaccountslambdaServiceRoleDefaultPolicyD7F4C98E": {
+    "updatezuorabillingaccountlambdaServiceRoleDefaultPolicy56C07513": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1029,10 +1027,10 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "updatezuorabillingaccountslambdaServiceRoleDefaultPolicyD7F4C98E",
+        "PolicyName": "updatezuorabillingaccountlambdaServiceRoleDefaultPolicy56C07513",
         "Roles": [
           {
-            "Ref": "updatezuorabillingaccountslambdaServiceRole87D6ACA6",
+            "Ref": "updatezuorabillingaccountlambdaServiceRole91046AA4",
           },
         ],
       },
