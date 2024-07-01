@@ -52,7 +52,7 @@ const ZuoraAuthResponseSchema = z.object({
 type ZuoraAuthResponse = z.infer<typeof ZuoraAuthResponseSchema>;
 
 export async function updateBillingAccountInZuora(
-	bearerToken: string,
+	accessToken: string,
 	zuoraBillingAccountId: string,
 ): Promise<ZuoraBillingAccountUpdateResponse> {
 	console.log(
@@ -66,7 +66,7 @@ export async function updateBillingAccountInZuora(
 	const accountUpdateAttempt = await updateRecordInZuora(
 		`https://rest.apisandbox.zuora.com/v1/accounts/${zuoraBillingAccountId}`,
 		fields,
-		bearerToken,
+		accessToken,
 	);
 
 	return accountUpdateAttempt;
@@ -75,31 +75,27 @@ export async function updateBillingAccountInZuora(
 export async function updateRecordInZuora(
 	url: string,
 	data: object,
-	bearerToken: string,
+	accessToken: string,
 ): Promise<ZuoraBillingAccountUpdateResponse> {
 
 	const fetchReq = {
 		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `bearer ${bearerToken}`,
+			Authorization: `bearer ${accessToken}`,
 		},
 		body: JSON.stringify(data),
 	};
 
 	try {
 		const response = await fetch(url, fetchReq);
-		console.log('response:', response);
 
 		if (!response.ok) {
 			throw new Error(`Failed to update Zuora Billing Account: ${response.statusText}`);
 		}
 
-		const zuoraBillingAccountUpdateResponse = (await response.json()) as ZuoraBillingAccountUpdateResponse;
-		console.log('zuoraBillingAccountUpdateResponse:', zuoraBillingAccountUpdateResponse);
-		
+		const zuoraBillingAccountUpdateResponse = (await response.json()) as ZuoraBillingAccountUpdateResponse;		
 		const parseResponse = ZuoraBillingAccountUpdateResponseSchema.safeParse(zuoraBillingAccountUpdateResponse);
-		console.log('parseResponse:', parseResponse);
 
 		if (!parseResponse.success) {
 			const parseError = `Error parsing response from Zuora: ${JSON.stringify(parseResponse.error.format())}`;
