@@ -119,7 +119,7 @@ const ReasonSchema = z.object({
 });
 const ZuoraBillingAccountUpdateResponseSchema = z.object({
 	success: z.boolean(),
-    reasons: z.array(ReasonSchema),
+    reasons: z.array(ReasonSchema).optional(),
 });
 export type ZuoraBillingAccountUpdateResponse = z.infer<
 	typeof ZuoraBillingAccountUpdateResponseSchema
