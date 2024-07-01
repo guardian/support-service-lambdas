@@ -89,16 +89,34 @@ export async function updateRecordInZuora(
 
 	try {
 		const response = await fetch(url, fetchReq);
-		const responseData = await response.json();
+		console.log('response:', response);
 
 		if (!response.ok) {
-			// Handle non-200 responses
-			return responseData; // Return the error response
+			throw new Error(`Failed to update Zuora Billing Account: ${response.statusText}`);
 		}
-		return responseData; // Return the successful response
+
+		const zuoraBillingAccountUpdateResponse = (await response.json()) as ZuoraBillingAccountUpdateResponse;
+		console.log('zuoraBillingAccountUpdateResponse:', zuoraBillingAccountUpdateResponse);
+		
+		const parseResponse = ZuoraBillingAccountUpdateResponseSchema.safeParse(zuoraBillingAccountUpdateResponse);
+
+		if (!parseResponse.success) {
+			const parseError = `Error parsing response from Zuora: ${JSON.stringify(parseResponse.error.format())}`;
+			console.error(parseError);
+			throw new Error(parseError);
+		}
+	
+		return parseResponse.data;
 	} catch (error) {
 		// Handle network errors or JSON parsing errors
 		// return { error: error.message };
 		throw new Error(String(error));
 	}
 }
+
+const ZuoraBillingAccountUpdateResponseSchema = z.object({
+	success: z.boolean(),
+});
+export type ZuoraBillingAccountUpdateResponse = z.infer<
+	typeof ZuoraBillingAccountUpdateResponseSchema
+>;
