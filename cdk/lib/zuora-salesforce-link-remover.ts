@@ -51,5 +51,28 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				}),
 			],
 		});
+
+		new GuLambdaFunction(this, 'update-sf-billing-accounts-lambda', {
+			app: appName,
+			functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
+			runtime: Runtime.NODEJS_20_X,
+			environment: {
+				APP: appName,
+				STACK: this.stack,
+				STAGE: this.stage,
+			},
+			handler: 'updateSfBillingAccounts.handler',
+			fileName: `${appName}.zip`,
+			architecture: Architecture.ARM_64,
+			initialPolicy: [
+				new PolicyStatement({
+					actions: ['secretsmanager:GetSecretValue'],
+					resources: [
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
+					],
+				}),
+			],
+		});
 	}
 }
