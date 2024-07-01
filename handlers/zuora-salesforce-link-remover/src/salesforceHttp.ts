@@ -13,10 +13,10 @@ export async function doSfAuth(
 			body: buildBody(sfApiUserAuth, sfConnectedAppAuth),
 		};
 
-		const result = await fetch(sfApiUserAuth.url, options);
+		const response = await fetch(sfApiUserAuth.url, options);
 
-		if (!result.ok) {
-			const errorText = await result.text();
+		if (!response.ok) {
+			const errorText = await response.text();
 			const errorMessage = `Error response from Salesforce: ${errorText}`;
 			console.error(errorMessage);
 			throw new Error(errorMessage);
@@ -24,17 +24,17 @@ export async function doSfAuth(
 
 		console.log('successfully authenticated with Salesforce');
 
-		const sfAuthResponse = (await result.json()) as SfAuthResponse;
+		const sfAuthResponse = (await response.json()) as SfAuthResponse;
 
-		const parseResult = SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
+		const parseResponse = SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
-		if (!parseResult.success) {
-			const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResult.error.format())}`;
+		if (!parseResponse.success) {
+			const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
 			console.error(parseError);
 			throw new Error(parseError);
 		}
 
-		return parseResult.data;
+		return parseResponse.data;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const errorText = `Error authenticating with Salesforce: ${errorMessage}`;
@@ -100,15 +100,15 @@ export async function executeSalesforceQuery(
 
 	const sfQueryResponse = (await response.json()) as SalesforceQueryResponse;
 
-	const parseResult = SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
+	const parseResponse = SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
 
-	if (!parseResult.success) {
-		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResult.error.format())}`;
+	if (!parseResponse.success) {
+		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
 		console.error(parseError);
 		throw new Error(parseError);
 	}
 
-	return parseResult.data;
+	return parseResponse.data;
 }
 
 const sfApiVersion = (): string => {
