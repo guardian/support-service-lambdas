@@ -1,6 +1,7 @@
 import { getSecretValue, getZuoraSecretName } from './secrets';
 import type { ZuoraSecret } from './secrets';
 import { doZuoraAuth, updateBillingAccountInZuora } from './zuoraHttp';
+import type { ZuoraBillingAccountUpdateResponse } from './zuoraHttp';
 
 export async function handler() {
 	const stage = process.env.STAGE;
@@ -40,12 +41,15 @@ export async function handler() {
 		grant_type: 'client_credentials',
 	});
 
-	await updateBillingAccountInZuora(
+	const zuoraBillingAccountUpdateResponse: ZuoraBillingAccountUpdateResponse = await updateBillingAccountInZuora(
 		zuoraAccessToken,
 		//input.Zuora__External_Id__c
 		zuoraBillingAccountId,
 	);
-	return;
+	return {
+		zuoraBillingAccountId,
+		...zuoraBillingAccountUpdateResponse
+	};
 }
 
 function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
