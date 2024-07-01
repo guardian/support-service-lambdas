@@ -77,9 +77,7 @@ export async function updateRecordInZuora(
 	data: object,
 	bearerToken: string,
 ): Promise<unknown> {
-	console.log('updating record in Zuora: url:', url);
-	console.log('data:', data);
-	console.log('JSON.stringify(data):', JSON.stringify(data));
+
 	const fetchReq = {
 		method: 'PUT',
 		headers: {
@@ -91,10 +89,7 @@ export async function updateRecordInZuora(
 
 	try {
 		const response = await fetch(url, fetchReq);
-		console.log('response:', response);
-
 		const responseData = await response.json();
-		console.log('responseData:', responseData);
 
 		if (!response.ok) {
 			// Handle non-200 responses
