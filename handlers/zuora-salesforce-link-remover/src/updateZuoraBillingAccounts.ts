@@ -1,4 +1,4 @@
-import type { Handler } from "aws-lambda";
+import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { getSecretValue, getZuoraSecretName } from './secrets';
 import type { ZuoraSecret } from './secrets';
@@ -29,21 +29,19 @@ export const handler: Handler = async (event: Event) => {
 
 	const zuoraBillingAccountUpdateResponse = await updateBillingAccountInZuora(
 		zuoraAccessToken,
-		billingAccountId
+		billingAccountId,
 	);
 	return {
 		billingAccountId,
-		...zuoraBillingAccountUpdateResponse
+		...zuoraBillingAccountUpdateResponse,
 	};
-}
+};
 
 function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
 	return value === 'CODE' || value === 'PROD';
 }
 
 const EventSchema = z.object({
-	Zuora__External_Id__c: z.string()
+	Zuora__External_Id__c: z.string(),
 });
-export type Event = z.infer<
-	typeof EventSchema
->;
+export type Event = z.infer<typeof EventSchema>;

@@ -26,7 +26,8 @@ export async function doSfAuth(
 
 		const sfAuthResponse = (await response.json()) as SfAuthResponse;
 
-		const parseResponse = SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
+		const parseResponse =
+			SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
 		if (!parseResponse.success) {
 			const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
@@ -100,7 +101,8 @@ export async function executeSalesforceQuery(
 
 	const sfQueryResponse = (await response.json()) as SalesforceQueryResponse;
 
-	const parseResponse = SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
+	const parseResponse =
+		SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
 
 	if (!parseResponse.success) {
 		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;

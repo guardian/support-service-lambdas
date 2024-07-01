@@ -77,7 +77,6 @@ export async function updateRecordInZuora(
 	data: object,
 	accessToken: string,
 ): Promise<ZuoraBillingAccountUpdateResponse> {
-
 	const fetchReq = {
 		method: 'PUT',
 		headers: {
@@ -91,18 +90,23 @@ export async function updateRecordInZuora(
 		const response = await fetch(url, fetchReq);
 
 		if (!response.ok) {
-			throw new Error(`Failed to update Zuora Billing Account: ${response.statusText}`);
+			throw new Error(
+				`Failed to update Zuora Billing Account: ${response.statusText}`,
+			);
 		}
 
-		const zuoraBillingAccountUpdateResponse = (await response.json()) as ZuoraBillingAccountUpdateResponse;		
-		const parseResponse = ZuoraBillingAccountUpdateResponseSchema.safeParse(zuoraBillingAccountUpdateResponse);
+		const zuoraBillingAccountUpdateResponse =
+			(await response.json()) as ZuoraBillingAccountUpdateResponse;
+		const parseResponse = ZuoraBillingAccountUpdateResponseSchema.safeParse(
+			zuoraBillingAccountUpdateResponse,
+		);
 
 		if (!parseResponse.success) {
 			const parseError = `Error parsing response from Zuora: ${JSON.stringify(parseResponse.error.format())}`;
 			console.error(parseError);
 			throw new Error(parseError);
 		}
-	
+
 		return parseResponse.data;
 	} catch (error) {
 		throw new Error(String(error));
@@ -110,12 +114,12 @@ export async function updateRecordInZuora(
 }
 
 const ReasonSchema = z.object({
-    code: z.number(),
-    message: z.string(),
+	code: z.number(),
+	message: z.string(),
 });
 const ZuoraBillingAccountUpdateResponseSchema = z.object({
 	success: z.boolean(),
-    reasons: z.array(ReasonSchema).optional(),
+	reasons: z.array(ReasonSchema).optional(),
 });
 export type ZuoraBillingAccountUpdateResponse = z.infer<
 	typeof ZuoraBillingAccountUpdateResponseSchema

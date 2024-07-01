@@ -36,7 +36,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			environment: {
 				APP: appName,
 				STACK: this.stack,
-				STAGE: this.stage
+				STAGE: this.stage,
 			},
 			handler: 'updateZuoraBillingAccount.handler',
 			fileName: `${appName}.zip`,
