@@ -1,4 +1,8 @@
-import { doCompositeCallout, doSfAuth, executeSalesforceQuery } from './salesforceHttp';
+import {
+	doCompositeCallout,
+	doSfAuth,
+	executeSalesforceQuery,
+} from './salesforceHttp';
 import type {
 	SalesforceCompositeRequestBody,
 	SalesforceQueryResponse,
@@ -42,12 +46,12 @@ export async function handler() {
 	};
 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
-	
+
 	const sfUpdateResponse: SalesforceUpdateResponse = await doCompositeCallout(
-		sfAuthResponse.access_token
+		sfAuthResponse.access_token,
 	);
 
-	console.log('sfUpdateResponse:',sfUpdateResponse);
+	console.log('sfUpdateResponse:', sfUpdateResponse);
 	return {};
 }
 

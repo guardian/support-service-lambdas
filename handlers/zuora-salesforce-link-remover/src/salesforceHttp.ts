@@ -145,41 +145,48 @@ export type SalesforceQueryResponse = z.infer<
 	typeof SalesforceQueryResponseSchema
 >;
 
-export async function doCompositeCallout(token: string): Promise<SalesforceUpdateResponse> {
+export async function doCompositeCallout(
+	token: string,
+): Promise<SalesforceUpdateResponse> {
 	console.log('doing composite callout...');
 
 	const options = {
-		method: "POST",
-		headers: {			
+		method: 'POST',
+		headers: {
 			Authorization: `Bearer ${token}`,
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json',
 		},
 		body: {
-			"allOrNone" : false,
-			"records" : [
-			  {
-				"id" : "abc",
-				"GDPR_Removal_Attempts__c" : "1",
-				"attributes" : {
-				  "type" : "Zuora__CustomerAccount__c"
-				}
-			  },
-			  {
-				"id" : "def",
-				"GDPR_Removal_Attempts__c" : "2",
-				"attributes" : {
-				  "type" : "Zuora__CustomerAccount__c"
-				}
-			  }
-			]
-		}
+			allOrNone: false,
+			records: [
+				{
+					id: 'abc',
+					GDPR_Removal_Attempts__c: '1',
+					attributes: {
+						type: 'Zuora__CustomerAccount__c',
+					},
+				},
+				{
+					id: 'def',
+					GDPR_Removal_Attempts__c: '2',
+					attributes: {
+						type: 'Zuora__CustomerAccount__c',
+					},
+				},
+			],
+		},
 	};
 
-	const response = await fetch('https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/composite/sobjects', options);
-	console.log('response:',response);
-	
+	const response = await fetch(
+		'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/composite/sobjects',
+		options,
+	);
+	console.log('response:', response);
+
 	if (!response.ok) {
-		throw new Error(`Error updating Billing Account(s) in Salesforce: ${response.statusText}`);
+		throw new Error(
+			`Error updating Billing Account(s) in Salesforce: ${response.statusText}`,
+		);
 	}
 
 	const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
@@ -192,53 +199,50 @@ export async function doCompositeCallout(token: string): Promise<SalesforceUpdat
 		console.error(parseError);
 		throw new Error(parseError);
 	}
-	
-	console.log('parseResponse.data:',parseResponse.data);
+
+	console.log('parseResponse.data:', parseResponse.data);
 	// return parseResponse.data;
 
 	return [
 		{
-			"success": false,
-			"errors": [
+			success: false,
+			errors: [
 				{
-					"statusCode": "MALFORMED_ID",
-					"message": "Record ID: id value of incorrect type: abc",
-					"fields": [
-						"Id"
-					]
-				}
-			]
+					statusCode: 'MALFORMED_ID',
+					message: 'Record ID: id value of incorrect type: abc',
+					fields: ['Id'],
+				},
+			],
 		},
 		{
-			"success": false,
-			"errors": [
+			success: false,
+			errors: [
 				{
-					"statusCode": "MALFORMED_ID",
-					"message": "Record ID: id value of incorrect type: def",
-					"fields": [
-						"Id"
-					]
-				}
-			]
-		}
-	]
+					statusCode: 'MALFORMED_ID',
+					message: 'Record ID: id value of incorrect type: def',
+					fields: ['Id'],
+				},
+			],
+		},
+	];
 }
 
 const SalesforceUpdateRecordsSchema = z.object({
-    id: z.string(),
-    GDPR_Removal_Attempts__c: z.string(),
-    attributes: z.object({
-        type: z.string(),
-    }),
+	id: z.string(),
+	GDPR_Removal_Attempts__c: z.string(),
+	attributes: z.object({
+		type: z.string(),
+	}),
 });
 
 const SalesforceCompositeRequestSchema = z.object({
-    allOrNone: z.boolean(),
-    records: z.array(SalesforceUpdateRecordsSchema),
+	allOrNone: z.boolean(),
+	records: z.array(SalesforceUpdateRecordsSchema),
 });
 
-export type SalesforceCompositeRequestBody = z.infer<typeof SalesforceCompositeRequestSchema>;
-
+export type SalesforceCompositeRequestBody = z.infer<
+	typeof SalesforceCompositeRequestSchema
+>;
 
 const SalesforceUpdateRequestSchema = z.object({
 	url: z.string(),
@@ -250,15 +254,17 @@ export type SalesforceUpdateRequest = z.infer<
 >;
 
 const SalesforceUpdateErrorSchema = z.object({
-    statusCode: z.string(),
-    message: z.string(),
-    fields: z.array(z.string()),
+	statusCode: z.string(),
+	message: z.string(),
+	fields: z.array(z.string()),
 });
 
 const SalesforceUpdateResponseSchema = z.array(
-    z.object({
-        success: z.boolean(),
-        errors: z.array(SalesforceUpdateErrorSchema),
-    })
+	z.object({
+		success: z.boolean(),
+		errors: z.array(SalesforceUpdateErrorSchema),
+	}),
 );
-export type SalesforceUpdateResponse = z.infer<typeof SalesforceUpdateResponseSchema>;
+export type SalesforceUpdateResponse = z.infer<
+	typeof SalesforceUpdateResponseSchema
+>;
