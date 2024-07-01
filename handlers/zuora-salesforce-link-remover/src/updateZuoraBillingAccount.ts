@@ -14,8 +14,10 @@ export const handler: Handler = async (event: Event) => {
 		throw Error('Invalid stage value');
 	}
 
+	if (!event.Zuora__External_Id__c) {
+		throw Error('No Billing Account Id has been provided');
+	}
 	const billingAccountId = event.Zuora__External_Id__c;
-
 	const secretName = getZuoraSecretName(stage);
 
 	const { clientId, clientSecret } =
