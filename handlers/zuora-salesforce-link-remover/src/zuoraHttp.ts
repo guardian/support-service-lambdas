@@ -99,6 +99,7 @@ export async function updateRecordInZuora(
 		console.log('zuoraBillingAccountUpdateResponse:', zuoraBillingAccountUpdateResponse);
 		
 		const parseResponse = ZuoraBillingAccountUpdateResponseSchema.safeParse(zuoraBillingAccountUpdateResponse);
+		console.log('parseResponse:', parseResponse);
 
 		if (!parseResponse.success) {
 			const parseError = `Error parsing response from Zuora: ${JSON.stringify(parseResponse.error.format())}`;
@@ -108,14 +109,17 @@ export async function updateRecordInZuora(
 	
 		return parseResponse.data;
 	} catch (error) {
-		// Handle network errors or JSON parsing errors
-		// return { error: error.message };
 		throw new Error(String(error));
 	}
 }
 
+const ReasonSchema = z.object({
+    code: z.number(),
+    message: z.string(),
+});
 const ZuoraBillingAccountUpdateResponseSchema = z.object({
 	success: z.boolean(),
+    reasons: z.array(ReasonSchema),
 });
 export type ZuoraBillingAccountUpdateResponse = z.infer<
 	typeof ZuoraBillingAccountUpdateResponseSchema
