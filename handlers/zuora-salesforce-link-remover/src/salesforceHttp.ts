@@ -191,7 +191,7 @@ export async function doCompositeCallout(
 
 	const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
 	console.log('sfUpdateResponse:', sfUpdateResponse);
-	console.log('JSON.stringify(sfUpdateResponse[0].errors):', JSON.stringify(sfUpdateResponse[0].errors));
+	console.log('JSON.stringify(sfUpdateResponse[0].errors):', JSON.stringify(sfUpdateResponse));
 
 	const parseResponse =
 		SalesforceQueryResponseSchema.safeParse(sfUpdateResponse);
@@ -206,28 +206,7 @@ export async function doCompositeCallout(
 	console.log('parseResponse.data:', parseResponse.data);
 	// return parseResponse.data;
 
-	return [
-		{
-			success: false,
-			errors: [
-				{
-					statusCode: 'MALFORMED_ID',
-					message: 'Record ID: id value of incorrect type: abc',
-					fields: ['Id'],
-				},
-			],
-		},
-		{
-			success: false,
-			errors: [
-				{
-					statusCode: 'MALFORMED_ID',
-					message: 'Record ID: id value of incorrect type: def',
-					fields: ['Id'],
-				},
-			],
-		},
-	];
+	return [];
 }
 
 const SalesforceUpdateRecordsSchema = z.object({
@@ -258,7 +237,7 @@ export type SalesforceUpdateRequest = z.infer<
 
 const SalesforceUpdateErrorSchema = z.array(
 	z.object({
-		statusCode: z.string(),
+		statusCode: z.string().optional(),
 		message: z.string(),
 		fields: z.array(z.string()),
 	})
