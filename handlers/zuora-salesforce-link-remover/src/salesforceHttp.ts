@@ -147,7 +147,7 @@ export type SalesforceQueryResponse = z.infer<
 
 export async function doCompositeCallout(
 	token: string,
-): Promise<void> {
+): Promise<SalesforceUpdateResponse[]> {
 	console.log('doing composite callout...');
 
 	const options = {
@@ -181,7 +181,6 @@ export async function doCompositeCallout(
 		'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/composite/sobjects',
 		options,
 	);
-	console.log('response:', response);
 
 	if (!response.ok) {
 		throw new Error(
@@ -190,22 +189,15 @@ export async function doCompositeCallout(
 	}
 
 	const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
-	console.log('sfUpdateResponse:', sfUpdateResponse);
-	console.log('JSON.stringify(sfUpdateResponse[0].errors):', JSON.stringify(sfUpdateResponse));
-
 	const parseResponse = SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
-		console.log('parseResponse:', parseResponse);
 
 	if (!parseResponse.success) {
 		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
 		console.error(parseError);
 		throw new Error(parseError);
 	}
-
-	console.log('parseResponse.data:', parseResponse.data);
-	// return parseResponse.data;
-
-	// return parseResponse.data;
+	
+	return parseResponse.data;
 }
 
 const SalesforceUpdateRecordsSchema = z.object({
