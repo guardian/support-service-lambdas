@@ -18,7 +18,8 @@ export const handler: Handler = async (event: Event) => {
 	}
 
 	const billingAccountId = parseResponse.data.Zuora__External_Id__c;
-	
+	console.log('billingAccountId:',billingAccountId);
+
 	// const stage = process.env.STAGE;
 	// if (!stage) {
 	// 	throw Error('Stage not defined');
@@ -39,7 +40,7 @@ export const handler: Handler = async (event: Event) => {
 			crmId: '',
 		});
 
-		const abc = zuoraClient.post(path, body, zuoraSuccessResponseSchema);
+		const abc = await zuoraClient.post(path, body, zuoraSuccessResponseSchema);
 		console.log('abc:',abc);
 	// const zuoraAccessToken = await doZuoraAuth({
 	// 	client_id: clientId,
