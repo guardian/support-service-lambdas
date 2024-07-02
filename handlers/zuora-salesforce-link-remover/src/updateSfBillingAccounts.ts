@@ -43,11 +43,11 @@ export async function handler() {
 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
-	const sfUpdateResponse: SalesforceUpdateResponse = await doCompositeCallout(
+	await doCompositeCallout(
 		sfAuthResponse.access_token,
 	);
 
-	console.log('sfUpdateResponse:', sfUpdateResponse);
+	// console.log('sfUpdateResponse:', sfUpdateResponse);
 	return {};
 }
 

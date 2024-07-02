@@ -147,7 +147,7 @@ export type SalesforceQueryResponse = z.infer<
 
 export async function doCompositeCallout(
 	token: string,
-): Promise<SalesforceUpdateResponse> {
+): Promise<void> {
 	console.log('doing composite callout...');
 
 	const options = {
@@ -206,7 +206,7 @@ export async function doCompositeCallout(
 	console.log('parseResponse.data:', parseResponse.data);
 	// return parseResponse.data;
 
-	return [];
+	// return parseResponse.data;
 }
 
 const SalesforceUpdateRecordsSchema = z.object({
