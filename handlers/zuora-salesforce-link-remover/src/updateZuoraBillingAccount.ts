@@ -14,10 +14,7 @@ export const handler: Handler = async (event: Event) => {
 	}
 
 	const zuoraBillingAccountId = parseResponse.data.Zuora__External_Id__c;
-	console.log('billingAccountId:',zuoraBillingAccountId);
-
 	const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse = await updateBillingAccountInZuora(zuoraBillingAccountId);
-	console.log('zuoraBillingAccountUpdateResponse:',zuoraBillingAccountUpdateResponse);
 	
 	return {
 		zuoraBillingAccountId,
