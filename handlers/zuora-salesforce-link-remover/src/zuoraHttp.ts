@@ -1,4 +1,4 @@
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+// import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 
 // export async function doZuoraAuth(): Promise<string> {
@@ -62,10 +62,10 @@ export type ZuoraAuth = {
 	grant_type: 'client_credentials';
 };
 
-const ZuoraAuthResponseSchema = z.object({
-	access_token: z.string(),
-});
-type ZuoraAuthResponse = z.infer<typeof ZuoraAuthResponseSchema>;
+// const ZuoraAuthResponseSchema = z.object({
+// 	access_token: z.string(),
+// });
+// type ZuoraAuthResponse = z.infer<typeof ZuoraAuthResponseSchema>;
 
 export async function updateBillingAccountInZuora(
 	accessToken: string,

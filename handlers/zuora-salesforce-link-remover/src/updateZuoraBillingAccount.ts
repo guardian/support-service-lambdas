@@ -60,9 +60,9 @@ export const handler: Handler = async (event: Event) => {
 	return {};
 };
 
-function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
-	return value === 'CODE' || value === 'PROD';
-}
+// function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
+// 	return value === 'CODE' || value === 'PROD';
+// }
 
 const EventSchema = z.object({
 	Zuora__External_Id__c: z.string(),
