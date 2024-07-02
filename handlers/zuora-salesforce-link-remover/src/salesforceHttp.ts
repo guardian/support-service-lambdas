@@ -151,7 +151,7 @@ export async function doCompositeCallout(
 	console.log('doing composite callout...');
 
 	const options = {
-		method: 'POST',
+		method: 'PATCH',
 		headers: {
 			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
