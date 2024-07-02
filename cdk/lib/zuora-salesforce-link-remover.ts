@@ -15,6 +15,11 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			app: appName,
 			functionName: `${appName}-get-billing-accounts-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
+			environment: {
+				APP: appName,
+				STACK: this.stack,
+				Stage: this.stage,
+			},
 			handler: 'getBillingAccounts.handler',
 			fileName: `${appName}.zip`,
 			architecture: Architecture.ARM_64,
@@ -36,7 +41,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			environment: {
 				APP: appName,
 				STACK: this.stack,
-				STAGE: this.stage,
+				Stage: this.stage,
 			},
 			handler: 'updateZuoraBillingAccount.handler',
 			fileName: `${appName}.zip`,
