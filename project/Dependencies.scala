@@ -8,7 +8,7 @@ object Dependencies {
   val circeVersion = "0.14.9"
   val sttpVersion = "3.8.16"
   val http4sVersion = "0.23.27"
-  val catsVersion = "2.9.0"
+  val catsVersion = "2.12.0"
   val catsEffectVersion = "2.5.5"
 
   val logging: Seq[ModuleID] = Seq(
