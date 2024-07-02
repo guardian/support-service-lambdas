@@ -16,7 +16,8 @@ export async function updateBillingAccountInZuora(
 		crmId: '',
 	});
 
-	const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse = await zuoraClient.put(path, body, zuoraSuccessResponseSchema);
+	const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse =
+		await zuoraClient.put(path, body, zuoraSuccessResponseSchema);
 
 	return zuoraBillingAccountUpdateResponse;
 }
