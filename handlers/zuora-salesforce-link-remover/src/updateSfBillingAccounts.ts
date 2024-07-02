@@ -1,11 +1,5 @@
-import {
-	doSfAuth,
-	updateSfBillingAccounts,
-} from './salesforceHttp';
-import type {
-	SfApiUserAuth,
-	SfConnectedAppAuth,
-} from './salesforceHttp';
+import { doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
+import type { SfApiUserAuth, SfConnectedAppAuth } from './salesforceHttp';
 import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
@@ -42,9 +36,7 @@ export async function handler() {
 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
-	const sfUpdateResponse = await updateSfBillingAccounts(
-		sfAuthResponse
-	);
+	const sfUpdateResponse = await updateSfBillingAccounts(sfAuthResponse);
 
 	return sfUpdateResponse;
 }

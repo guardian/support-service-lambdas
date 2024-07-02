@@ -146,9 +146,8 @@ export type SalesforceQueryResponse = z.infer<
 >;
 
 export async function updateSfBillingAccounts(
-	sfAuthResponse: SfAuthResponse
+	sfAuthResponse: SfAuthResponse,
 ): Promise<SalesforceUpdateResponse[]> {
-
 	const url = `${sfAuthResponse.instance_url}/services/data/v59.0/composite/sobjects`;
 	const body = JSON.stringify({
 		allOrNone: false,
@@ -168,11 +167,11 @@ export async function updateSfBillingAccounts(
 				},
 			},
 		],
-	})
+	});
 	const sfUpdateResponse = await doCompositeCallout(
 		url,
 		sfAuthResponse.access_token,
-		body
+		body,
 	);
 	return sfUpdateResponse;
 }
@@ -180,7 +179,7 @@ export async function updateSfBillingAccounts(
 export async function doCompositeCallout(
 	url: string,
 	token: string,
-	body: string
+	body: string,
 ): Promise<SalesforceUpdateResponse[]> {
 	console.log('doing composite callout...');
 
@@ -193,10 +192,7 @@ export async function doCompositeCallout(
 		body,
 	};
 
-	const response = await fetch(
-		url,
-		options,
-	);
+	const response = await fetch(url, options);
 
 	if (!response.ok) {
 		throw new Error(
@@ -205,15 +201,16 @@ export async function doCompositeCallout(
 	}
 
 	const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
-	const parseResponse = SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
-	console.log('parseResponse:',JSON.stringify(parseResponse));
-	
+	const parseResponse =
+		SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
+	console.log('parseResponse:', JSON.stringify(parseResponse));
+
 	if (!parseResponse.success) {
 		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
 		console.error(parseError);
 		throw new Error(parseError);
 	}
-	
+
 	return parseResponse.data;
 }
 
@@ -252,8 +249,10 @@ const SalesforceUpdateErrorSchema = z.object({
 const SalesforceUpdateResponseSchema = z.object({
 	success: z.boolean(),
 	errors: z.array(SalesforceUpdateErrorSchema),
-  });
+});
 export type SalesforceUpdateResponse = z.infer<
 	typeof SalesforceUpdateResponseSchema
 >;
-const SalesforceUpdateResponseArraySchema = z.array(SalesforceUpdateResponseSchema);
+const SalesforceUpdateResponseArraySchema = z.array(
+	SalesforceUpdateResponseSchema,
+);
