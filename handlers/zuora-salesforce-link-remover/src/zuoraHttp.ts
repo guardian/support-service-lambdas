@@ -1,3 +1,4 @@
+import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
@@ -8,10 +9,9 @@ export async function updateBillingAccountInZuora(
 	console.log(
 		`removing crmId from Billing Account ${zuoraBillingAccountId}...`,
 	);
-
-	const zuoraClient = await ZuoraClient.create('CODE');
+	
+	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 	const path = `v1/accounts/${zuoraBillingAccountId}`;
-
 	const body = JSON.stringify({
 		crmId: '',
 	});
