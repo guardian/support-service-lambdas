@@ -235,20 +235,16 @@ export type SalesforceUpdateRequest = z.infer<
 	typeof SalesforceUpdateRequestSchema
 >;
 
-const SalesforceUpdateErrorSchema = z.array(
-	z.object({
-		statusCode: z.string().optional(),
-		message: z.string(),
-		fields: z.array(z.string()),
-	})
-);
+const SalesforceUpdateErrorSchema = z.object({
+	statusCode: z.string().optional(),
+	message: z.string(),
+	fields: z.array(z.string()),
+});
 
-const SalesforceUpdateResponseSchema = z.array(
-	z.object({
-		success: z.boolean(),
-		errors: z.array(SalesforceUpdateErrorSchema),
-	}),
-);
+const SalesforceUpdateResponseSchema = z.object({
+	success: z.boolean(),
+	errors: z.array(SalesforceUpdateErrorSchema),
+  });
 export type SalesforceUpdateResponse = z.infer<
 	typeof SalesforceUpdateResponseSchema
 >;
