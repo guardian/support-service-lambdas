@@ -1,6 +1,6 @@
 import {
-	doCompositeCallout,
 	doSfAuth,
+	updateSfBillingAccounts,
 } from './salesforceHttp';
 import type {
 	SfApiUserAuth,
@@ -42,12 +42,11 @@ export async function handler() {
 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
-	await doCompositeCallout(
-		sfAuthResponse.access_token,
+	const sfUpdateResponse = await updateSfBillingAccounts(
+		sfAuthResponse
 	);
 
-	// console.log('sfUpdateResponse:', sfUpdateResponse);
-	return {};
+	return sfUpdateResponse;
 }
 
 function isValidStage(value: unknown): value is 'CODE' | 'PROD' {

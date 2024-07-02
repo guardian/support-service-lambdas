@@ -145,40 +145,56 @@ export type SalesforceQueryResponse = z.infer<
 	typeof SalesforceQueryResponseSchema
 >;
 
+export async function updateSfBillingAccounts(
+	sfAuthResponse: SfAuthResponse
+): Promise<SalesforceUpdateResponse[]> {
+
+	const url = `${sfAuthResponse.instance_url}/services/data/v59.0/composite/sobjects`;
+	const body = JSON.stringify({
+		allOrNone: false,
+		records: [
+			{
+				id: 'a029E00000OEdL9QAL',
+				GDPR_Removal_Attempts__c: '1',
+				attributes: {
+					type: 'Zuora__CustomerAccount__c',
+				},
+			},
+			{
+				id: 'a029E00000OEdMWQA1',
+				GDPR_Removal_Attempts__c: '2',
+				attributes: {
+					type: 'Zuora__CustomerAccount__c',
+				},
+			},
+		],
+	})
+	const sfUpdateResponse = await doCompositeCallout(
+		url,
+		sfAuthResponse.access_token,
+		body
+	);
+	return sfUpdateResponse;
+}
+
 export async function doCompositeCallout(
+	url: string,
 	token: string,
+	body: string
 ): Promise<SalesforceUpdateResponse[]> {
 	console.log('doing composite callout...');
 
 	const options = {
-		method: 'POST',
+		method: 'PUT',
 		headers: {
 			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({
-			allOrNone: false,
-			records: [
-				{
-					id: 'a029E00000OEdL9QAL',
-					GDPR_Removal_Attempts__c: '1',
-					attributes: {
-						type: 'Zuora__CustomerAccount__c',
-					},
-				},
-				{
-					id: 'a029E00000OEdMWQA1',
-					GDPR_Removal_Attempts__c: '2',
-					attributes: {
-						type: 'Zuora__CustomerAccount__c',
-					},
-				},
-			],
-		}),
+		body,
 	};
 
 	const response = await fetch(
-		'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com/services/data/v59.0/composite/sobjects',
+		url,
 		options,
 	);
 
