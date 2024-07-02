@@ -191,6 +191,7 @@ export async function doCompositeCallout(
 
 	const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
 	console.log('sfUpdateResponse:', sfUpdateResponse);
+	console.log('JSON.stringify(sfUpdateResponse[0].errors):', JSON.stringify(sfUpdateResponse[0].errors));
 
 	const parseResponse =
 		SalesforceQueryResponseSchema.safeParse(sfUpdateResponse);
@@ -203,7 +204,6 @@ export async function doCompositeCallout(
 	}
 
 	console.log('parseResponse.data:', parseResponse.data);
-	
 	// return parseResponse.data;
 
 	return [
@@ -256,11 +256,13 @@ export type SalesforceUpdateRequest = z.infer<
 	typeof SalesforceUpdateRequestSchema
 >;
 
-const SalesforceUpdateErrorSchema = z.object({
-	statusCode: z.string(),
-	message: z.string(),
-	fields: z.array(z.string()),
-});
+const SalesforceUpdateErrorSchema = z.array(
+	z.object({
+		statusCode: z.string(),
+		message: z.string(),
+		fields: z.array(z.string()),
+	})
+);
 
 const SalesforceUpdateResponseSchema = z.array(
 	z.object({
