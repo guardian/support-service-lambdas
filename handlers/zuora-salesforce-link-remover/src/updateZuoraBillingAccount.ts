@@ -40,7 +40,7 @@ export const handler: Handler = async (event: Event) => {
 			crmId: '',
 		});
 
-		const abc = await zuoraClient.post(path, body, zuoraSuccessResponseSchema);
+		const abc = await zuoraClient.put(path, body, zuoraSuccessResponseSchema);
 		console.log('abc:',abc);
 	// const zuoraAccessToken = await doZuoraAuth({
 	// 	client_id: clientId,
