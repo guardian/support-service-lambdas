@@ -161,9 +161,9 @@ object ZuoraIds {
   }
 
   case class NationalDeliveryZuoraIds(
-    everyday: ProductRatePlanId,
-    weekend: ProductRatePlanId,
-    sixDay: ProductRatePlanId,
+      everyday: ProductRatePlanId,
+      weekend: ProductRatePlanId,
+      sixDay: ProductRatePlanId,
   ) {
     val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
       NationalDeliveryEveryday -> everyday,
@@ -173,15 +173,15 @@ object ZuoraIds {
   }
 
   case class ZuoraIds(
-    supporterPlusZuoraIds: SupporterPlusZuoraIds,
-    contributionsZuoraIds: ContributionsZuoraIds,
-    voucherZuoraIds: VoucherZuoraIds,
-    homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
-    digitalPackIds: DigipackZuoraIds,
-    guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
-    guardianWeeklyROW: GuardianWeeklyROWIds,
-    digitalVoucher: DigitalVoucherZuoraIds,
-    nationalDeliveryZuoraIds: NationalDeliveryZuoraIds,
+      supporterPlusZuoraIds: SupporterPlusZuoraIds,
+      contributionsZuoraIds: ContributionsZuoraIds,
+      voucherZuoraIds: VoucherZuoraIds,
+      homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
+      digitalPackIds: DigipackZuoraIds,
+      guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
+      guardianWeeklyROW: GuardianWeeklyROWIds,
+      digitalVoucher: DigitalVoucherZuoraIds,
+      nationalDeliveryZuoraIds: NationalDeliveryZuoraIds,
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
       (supporterPlusZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
@@ -191,9 +191,8 @@ object ZuoraIds {
         digitalPackIds.byApiPlanId ++
         guardianWeeklyDomestic.zuoraRatePlanIdByApiPlanId ++
         guardianWeeklyROW.zuoraRatePlanIdByApiPlanId ++
-        digitalVoucher.byApiPlanId ++ 
-        nationalDeliveryZuoraIds.byApiPlanId
-      ).toMap
+        digitalVoucher.byApiPlanId ++
+        nationalDeliveryZuoraIds.byApiPlanId).toMap
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 
@@ -378,7 +377,7 @@ object ZuoraIds {
         ),
         NationalDeliveryZuoraIds(
           everyday = ProductRatePlanId("8ad096ca8992481d018992a363bd17ad"),
-          weekend = ProductRatePlanId("8ad096ca8992481d018992a36256175e"), 
+          weekend = ProductRatePlanId("8ad096ca8992481d018992a36256175e"),
           sixDay = ProductRatePlanId("8ad096ca8992481d018992a35f60171b"),
         ),
       ),

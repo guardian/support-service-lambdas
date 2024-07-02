@@ -94,7 +94,6 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
       Price(Some(9.79), "GBP"),
       Price(Some(9.79), "GBP"),
       Price(Some(13.05), "GBP"),
-
     )
     ZuoraCatalogWireModel.sumPrices(prices) shouldBe Some(AmountMinorUnits(6199))
   }
