@@ -3,7 +3,6 @@ import {
 	doSfAuth,
 } from './salesforceHttp';
 import type {
-	SalesforceUpdateResponse,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
 } from './salesforceHttp';
