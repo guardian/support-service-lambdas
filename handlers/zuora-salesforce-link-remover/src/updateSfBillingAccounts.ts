@@ -1,12 +1,8 @@
 import {
 	doCompositeCallout,
 	doSfAuth,
-	executeSalesforceQuery,
 } from './salesforceHttp';
 import type {
-	SalesforceCompositeRequestBody,
-	SalesforceQueryResponse,
-	SalesforceUpdateRequest,
 	SalesforceUpdateResponse,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
