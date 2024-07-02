@@ -193,8 +193,7 @@ export async function doCompositeCallout(
 	console.log('sfUpdateResponse:', sfUpdateResponse);
 	console.log('JSON.stringify(sfUpdateResponse[0].errors):', JSON.stringify(sfUpdateResponse));
 
-	const parseResponse =
-		SalesforceQueryResponseSchema.safeParse(sfUpdateResponse);
+	const parseResponse = SalesforceUpdateResponseSchema.safeParse(sfUpdateResponse);
 		console.log('parseResponse:', parseResponse);
 
 	if (!parseResponse.success) {
