@@ -160,14 +160,14 @@ export async function doCompositeCallout(
 			allOrNone: false,
 			records: [
 				{
-					id: 'abc',
+					id: 'a029E00000OEdL9QAL',
 					GDPR_Removal_Attempts__c: '1',
 					attributes: {
 						type: 'Zuora__CustomerAccount__c',
 					},
 				},
 				{
-					id: 'def',
+					id: 'a029E00000OEdMWQA1',
 					GDPR_Removal_Attempts__c: '2',
 					attributes: {
 						type: 'Zuora__CustomerAccount__c',
