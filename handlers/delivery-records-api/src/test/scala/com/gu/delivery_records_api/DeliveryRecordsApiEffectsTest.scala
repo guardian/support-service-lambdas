@@ -2,7 +2,12 @@ package com.gu.delivery_records_api
 
 import cats.effect.{ContextShift, IO}
 import com.gu.delivery_records_api.service.createproblem._
-import com.gu.delivery_records_api.service.getrecords.{DeliveryProblemCase, DeliveryProblemCredit, DeliveryRecord, DeliveryRecordsApiResponse}
+import com.gu.delivery_records_api.service.getrecords.{
+  DeliveryProblemCase,
+  DeliveryProblemCredit,
+  DeliveryRecord,
+  DeliveryRecordsApiResponse,
+}
 import com.gu.test.EffectsTest
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher
@@ -45,30 +50,33 @@ class DeliveryRecordsApiEffectsTest extends AnyFlatSpec with DiffShouldMatcher w
           problemCaseId = Some(caseId),
           isChangedAddress = Some(false),
           isChangedDeliveryInstruction = Some(false),
-          credit = Some(DeliveryProblemCredit(
-            1.23,
-            Some(LocalDate.of(2000, 1, 1)),
-            isActioned = false
-          ))
-        )
+          credit = Some(
+            DeliveryProblemCredit(
+              1.23,
+              Some(LocalDate.of(2000, 1, 1)),
+              isActioned = false,
+            ),
+          ),
+        ),
       ),
       deliveryProblemMap = Map(
         caseId ->
           DeliveryProblemCase(
             id = caseId,
             ref = caseNo,
-            subject = Some("[Self Service] Delivery Problem : No Delivery (Newspaper - National Delivery - A-S00689849)"),
+            subject =
+              Some("[Self Service] Delivery Problem : No Delivery (Newspaper - National Delivery - A-S00689849)"),
             description = Some("descdesc"),
-            problemType = Some("No Delivery")
-          )
+            problemType = Some("No Delivery"),
+          ),
       ),
       contactPhoneNumbers = SFApiContactPhoneNumbers(
         Id = Some("0039E00001q22KdQAI"),
         Phone = None,
         HomePhone = None,
         MobilePhone = None,
-        OtherPhone = None
-      )
+        OtherPhone = None,
+      ),
     )
   }
 
@@ -85,7 +93,7 @@ class DeliveryRecordsApiEffectsTest extends AnyFlatSpec with DiffShouldMatcher w
 
     val result = runRequestOnSandbox(request).unsafeRunSync()
 
-    result shouldMatchTo((200, expectedFor(result._2)))
+    result shouldMatchTo ((200, expectedFor(result._2)))
   }
 
   it should "create a delivery problem record in salesforce" taggedAs EffectsTest in {

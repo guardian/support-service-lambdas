@@ -8,7 +8,10 @@ import java.time.{DayOfWeek, LocalDate}
 
 object NewProductApi {
 
-  private def paymentPlansFor(billingPeriod: BillingPeriod, pricesByCurrency: Map[Currency, AmountMinorUnits]): Map[Currency, PaymentPlan] = {
+  private def paymentPlansFor(
+      billingPeriod: BillingPeriod,
+      pricesByCurrency: Map[Currency, AmountMinorUnits],
+  ): Map[Currency, PaymentPlan] = {
 
     val billingPeriodDescription = billingPeriod match {
       case Monthly => "every month"
@@ -28,12 +31,12 @@ object NewProductApi {
   }
 
   def catalog(
-    pricingFor: PlanId => Map[Currency, AmountMinorUnits],
-    getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate,
-    today: LocalDate,
+      pricingFor: PlanId => Map[Currency, AmountMinorUnits],
+      getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate,
+      today: LocalDate,
   ): Map[PlanId, Plan] = {
 
-    val allProducts = 
+    val allProducts =
       new VoucherPlans(getStartDateFromFulfilmentFiles).planInfo ++
         new SupporterPlusPlans(today).planInfo ++
         new ContributionsPlans(today).planInfo ++
@@ -43,10 +46,11 @@ object NewProductApi {
         new DigitalVoucherPlans(getStartDateFromFulfilmentFiles).planInfo ++
         new NationalDeliveryPlans(getStartDateFromFulfilmentFiles).planInfo
 
-    allProducts.map({
-      case (planId, planDescription, startDateRules, billingPeriod) =>
+    allProducts
+      .map({ case (planId, planDescription, startDateRules, billingPeriod) =>
         planId -> Plan(planId, planDescription, startDateRules, paymentPlansFor(billingPeriod, pricingFor(planId)))
-    }).toMap
+      })
+      .toMap
 
   }
 }
