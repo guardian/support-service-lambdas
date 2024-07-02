@@ -156,7 +156,7 @@ export async function doCompositeCallout(
 			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
 		},
-		body: {
+		body: JSON.stringify({
 			allOrNone: false,
 			records: [
 				{
@@ -174,7 +174,7 @@ export async function doCompositeCallout(
 					},
 				},
 			],
-		},
+		}),
 	};
 
 	const response = await fetch(
