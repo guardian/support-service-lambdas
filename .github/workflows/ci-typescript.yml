@@ -14,7 +14,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  common:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm --filter "./modules/**" check-formatting
+      - run: pnpm --filter "./modules/**" test
+
   gu-cdk-build:
+    needs: common
     strategy:
       matrix:
         subproject:
@@ -40,7 +59,6 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pushd modules && pnpm test; popd
       - run: pnpm --filter cdk package
       - run: pnpm --filter ${{ matrix.subproject }} package
 
