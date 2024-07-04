@@ -12,17 +12,17 @@ export function getSalesforceSecretNames(stage: Stage): SecretNames {
 				connectedAppSecretName:
 					'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
 			};
-			case 'PROD':
-				return {
-					apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
-					connectedAppSecretName:
-						'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
-				};
-			default :
-				return {
-					apiUserSecretName: '',
-					connectedAppSecretName: '',
-				};
+		case 'PROD':
+			return {
+				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
+				connectedAppSecretName:
+					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+			};
+		default:
+			return {
+				apiUserSecretName: '',
+				connectedAppSecretName: '',
+			};
 	}
 }
 

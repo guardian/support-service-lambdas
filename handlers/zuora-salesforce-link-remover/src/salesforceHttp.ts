@@ -150,7 +150,7 @@ export async function updateSfBillingAccounts(
 ): Promise<SalesforceUpdateResponse[]> {
 	const url = `${sfAuthResponse.instance_url}/services/data/v59.0/composite/sobjects`;
 
-	//body will be provided as a property of the input Event to the lambda. 
+	//body will be provided as a property of the input Event to the lambda.
 	//Need to build the state machine and see what the exact body format will be. For now we use the estimated array of objects below.
 	const body = JSON.stringify({
 		allOrNone: false,

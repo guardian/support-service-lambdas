@@ -5,7 +5,6 @@ import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export async function handler() {
-
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 	const { authUrl, clientId, clientSecret } =
@@ -31,8 +30,4 @@ export async function handler() {
 	const sfUpdateResponse = await updateSfBillingAccounts(sfAuthResponse);
 
 	return sfUpdateResponse;
-}
-
-function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
-	return value === 'CODE' || value === 'PROD';
 }
