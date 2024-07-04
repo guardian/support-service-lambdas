@@ -7,9 +7,9 @@ export const handler: Handler = async (event: Event) => {
 	const parseResponse = EventSchema.safeParse(event);
 
 	if (!parseResponse.success) {
-		const parseError = `Error parsing billing account id from input: ${JSON.stringify(parseResponse.error.format())}`;
-		console.error(parseError);
-		throw new Error(parseError);
+		throw new Error(
+			`Error parsing billing account id from input: ${JSON.stringify(parseResponse.error.format())}`,
+		);
 	}
 
 	const zuoraBillingAccountId = parseResponse.data.Zuora__External_Id__c;

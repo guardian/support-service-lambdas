@@ -9,7 +9,7 @@ export async function updateBillingAccountInZuora(
 	console.log(
 		`removing crmId from Billing Account ${zuoraBillingAccountId}...`,
 	);
-	
+
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 	const path = `v1/accounts/${zuoraBillingAccountId}`;
 	const body = JSON.stringify({

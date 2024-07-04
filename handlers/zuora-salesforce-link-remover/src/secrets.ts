@@ -2,8 +2,9 @@ import {
 	GetSecretValueCommand,
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
+import type { Stage } from '@modules/stage';
 
-export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
+export function getSalesforceSecretNames(stage: Stage): SecretNames {
 	switch (stage) {
 		case 'CODE':
 			return {
@@ -16,6 +17,11 @@ export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
 				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
 				connectedAppSecretName:
 					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+			};
+		default:
+			return {
+				apiUserSecretName: '',
+				connectedAppSecretName: '',
 			};
 	}
 }
@@ -49,7 +55,6 @@ export async function getSecretValue<T>(secretName: string): Promise<T> {
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const errorText = `error getting secret: ${errorMessage}`;
-		console.error(errorText);
 		throw new Error(errorText);
 	}
 }
