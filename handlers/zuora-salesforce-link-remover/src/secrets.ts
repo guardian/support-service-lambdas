@@ -1,4 +1,6 @@
-export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
+import type { Stage } from '@modules/stage';
+
+export function getSalesforceSecretNames(stage: Stage): SecretNames {
 	switch (stage) {
 		case 'CODE':
 			return {
@@ -11,6 +13,11 @@ export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
 				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
 				connectedAppSecretName:
 					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+			};
+		default:
+			return {
+				apiUserSecretName: '',
+				connectedAppSecretName: '',
 			};
 	}
 }

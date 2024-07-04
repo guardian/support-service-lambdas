@@ -22,4 +22,5 @@ deployments:
       functionNames:
         - zuora-salesforce-link-remover-get-billing-accounts-
         - zuora-salesforce-link-remover-update-zuora-billing-account-
+        - zuora-salesforce-link-remover-update-sf-billing-accounts-
     dependencies: [zuora-salesforce-link-remover-cloudformation]

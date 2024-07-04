@@ -18,7 +18,6 @@ export async function doSfAuth(
 		if (!response.ok) {
 			const errorText = await response.text();
 			const errorMessage = `Error response from Salesforce: ${errorText}`;
-			console.error(errorMessage);
 			throw new Error(errorMessage);
 		}
 
@@ -30,16 +29,15 @@ export async function doSfAuth(
 			SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
 		if (!parseResponse.success) {
-			const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
-			console.error(parseError);
-			throw new Error(parseError);
+			throw new Error(
+				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+			);
 		}
 
 		return parseResponse.data;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const errorText = `Error authenticating with Salesforce: ${errorMessage}`;
-		console.error(errorText);
 		throw new Error(errorText);
 	}
 }
@@ -105,9 +103,9 @@ export async function executeSalesforceQuery(
 		SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
 
 	if (!parseResponse.success) {
-		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
-		console.error(parseError);
-		throw new Error(parseError);
+		throw new Error(
+			`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+		);
 	}
 
 	return parseResponse.data;
@@ -144,3 +142,102 @@ const SalesforceQueryResponseSchema = z.object({
 export type SalesforceQueryResponse = z.infer<
 	typeof SalesforceQueryResponseSchema
 >;
+
+export async function updateSfBillingAccounts(
+	sfAuthResponse: SfAuthResponse,
+	records: SalesforceUpdateRecord[],
+): Promise<SalesforceUpdateResponse[]> {
+	const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
+
+	const body = JSON.stringify({
+		allOrNone: false,
+		records,
+	});
+	const sfUpdateResponse = await doCompositeCallout(
+		url,
+		sfAuthResponse.access_token,
+		body,
+	);
+	return sfUpdateResponse;
+}
+
+export async function doCompositeCallout(
+	url: string,
+	token: string,
+	body: string,
+): Promise<SalesforceUpdateResponse[]> {
+	console.log('doing composite callout...');
+
+	const options = {
+		method: 'PATCH',
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+		},
+		body,
+	};
+
+	const response = await fetch(url, options);
+	if (!response.ok) {
+		throw new Error(
+			`Error updating record(s) in Salesforce: ${response.statusText}`,
+		);
+	}
+
+	const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
+	const parseResponse =
+		SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
+
+	if (!parseResponse.success) {
+		throw new Error(
+			`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+		);
+	}
+
+	return parseResponse.data;
+}
+
+const SalesforceUpdateRecordsSchema = z.object({
+	id: z.string(),
+	GDPR_Removal_Attempts__c: z.number(),
+	attributes: z.object({
+		type: z.string(),
+	}),
+});
+export type SalesforceUpdateRecord = z.infer<
+	typeof SalesforceUpdateRecordsSchema
+>;
+const SalesforceCompositeRequestSchema = z.object({
+	allOrNone: z.boolean(),
+	records: z.array(SalesforceUpdateRecordsSchema),
+});
+
+export type SalesforceCompositeRequestBody = z.infer<
+	typeof SalesforceCompositeRequestSchema
+>;
+
+const SalesforceUpdateRequestSchema = z.object({
+	url: z.string(),
+	token: z.string(),
+	body: SalesforceCompositeRequestSchema,
+});
+export type SalesforceUpdateRequest = z.infer<
+	typeof SalesforceUpdateRequestSchema
+>;
+
+const SalesforceUpdateErrorSchema = z.object({
+	statusCode: z.string().optional(),
+	message: z.string(),
+	fields: z.array(z.string()),
+});
+
+const SalesforceUpdateResponseSchema = z.object({
+	success: z.boolean(),
+	errors: z.array(SalesforceUpdateErrorSchema),
+});
+export type SalesforceUpdateResponse = z.infer<
+	typeof SalesforceUpdateResponseSchema
+>;
+const SalesforceUpdateResponseArraySchema = z.array(
+	SalesforceUpdateResponseSchema,
+);
