@@ -4,6 +4,7 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
 export class ZuoraSalesforceLinkRemover extends GuStack {
@@ -101,16 +102,16 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const stateMachineDefinition =
+		const definition =
 			getSalesforceBillingAccountsFromLambdaTask.next(
 				updateZuoraBillingAccountsLambdaTask,
 			);
 
-		const stateMachine = new StateMachine(
+		new StateMachine(
 			this,
 			`zuora-salesforce-link-remover-state-machine-${this.stage}`,
 			{
-				stateMachineDefinition,
+				definition,
 			},
 		);
 	}
