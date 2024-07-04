@@ -85,7 +85,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		});
 
 		const getSalesforceBillingAccountsFromLambdaTask = new LambdaInvoke(
-			this, 
+			this,
 			'Get Salesforce Billing Accounts',
 			{
 				lambdaFunction: getSalesforceBillingAccountsLambda,
