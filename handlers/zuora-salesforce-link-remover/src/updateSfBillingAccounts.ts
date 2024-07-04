@@ -1,20 +1,12 @@
+import { stageFromEnvironment } from '@modules/stage';
 import { doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type { SfApiUserAuth, SfConnectedAppAuth } from './salesforceHttp';
 import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export async function handler() {
-	const stage = process.env.STAGE;
 
-	if (!stage) {
-		throw Error('Stage not defined');
-	}
-
-	if (!isValidStage(stage)) {
-		throw Error('Invalid stage value');
-	}
-
-	const secretNames = getSalesforceSecretNames(stage);
+	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 	const { authUrl, clientId, clientSecret } =
 		await getSecretValue<ConnectedAppSecret>(

@@ -2,8 +2,9 @@ import {
 	GetSecretValueCommand,
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
+import type { Stage } from '@modules/stage';
 
-export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
+export function getSalesforceSecretNames(stage: Stage): SecretNames {
 	switch (stage) {
 		case 'CODE':
 			return {
@@ -11,12 +12,17 @@ export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
 				connectedAppSecretName:
 					'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
 			};
-		case 'PROD':
-			return {
-				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
-				connectedAppSecretName:
-					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
-			};
+			case 'PROD':
+				return {
+					apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
+					connectedAppSecretName:
+						'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+				};
+			default :
+				return {
+					apiUserSecretName: '',
+					connectedAppSecretName: '',
+				};
 	}
 }
 

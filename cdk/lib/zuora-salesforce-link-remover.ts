@@ -58,9 +58,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
 			environment: {
-				APP: appName,
-				STACK: this.stack,
-				STAGE: this.stage,
+				Stage: this.stage,
 			},
 			handler: 'updateSfBillingAccounts.handler',
 			fileName: `${appName}.zip`,
