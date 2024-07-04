@@ -53,7 +53,7 @@ export async function handler() {
 	);
 
 	return {
-		billingAccountsToProcess: response.records
+		billingAccountsToProcess: response.records,
 	};
 }
 

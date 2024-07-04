@@ -102,18 +102,25 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const billingAccountsProcessingMap = new Map(this, 'Billing Accounts Processor Map', {
-			maxConcurrency: 1,
-			itemsPath: JsonPath.stringAt('$.billingAccountsToProcess'),
-			parameters: {
-			  item: JsonPath.stringAt('$$.Map.Item.Value'),
+		const billingAccountsProcessingMap = new Map(
+			this,
+			'Billing Accounts Processor Map',
+			{
+				maxConcurrency: 1,
+				itemsPath: JsonPath.stringAt('$.billingAccountsToProcess'),
+				parameters: {
+					item: JsonPath.stringAt('$$.Map.Item.Value'),
+				},
+				resultPath: '$.billingAccountProcessingAttempts',
 			},
-			resultPath: '$.billingAccountProcessingAttempts',
-		  });
-	  
-		  const billingAccountsProcessingMapDefinition = updateZuoraBillingAccountsLambdaTask;
-		  
-		  billingAccountsProcessingMap.iterator(billingAccountsProcessingMapDefinition);
+		);
+
+		const billingAccountsProcessingMapDefinition =
+			updateZuoraBillingAccountsLambdaTask;
+
+		billingAccountsProcessingMap.iterator(
+			billingAccountsProcessingMapDefinition,
+		);
 
 		const definition = getSalesforceBillingAccountsFromLambdaTask.next(
 			billingAccountsProcessingMap,
