@@ -1,4 +1,4 @@
-import { getSalesforceSecretNames } from '../secrets';
+import { getSalesforceSecretNames, getZuoraSecretName } from '../secrets';
 
 describe('getSalesforceSecretNames', () => {
 	beforeEach(() => {
@@ -35,14 +35,14 @@ describe('getZuoraSecretName', () => {
 	});
 
 	test('should get CODE Zuora secret name', () => {
-		const actual = getSalesforceSecretNames('CODE');
+		const actual = getZuoraSecretName('CODE');
 		const expected = 'CODE/Zuora-OAuth/SupportServiceLambdas';
 
 		expect(actual).toEqual(expected);
 	});
 
 	test('should get PROD Zuora secret name', () => {
-		const actual = getSalesforceSecretNames('PROD');
+		const actual = getZuoraSecretName('PROD');
 		const expected = 'PROD/Zuora/SupportServiceLambdas';
 
 		expect(actual).toEqual(expected);
