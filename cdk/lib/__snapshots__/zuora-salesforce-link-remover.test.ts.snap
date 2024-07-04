@@ -36,8 +36,10 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
+            "App": "zuora-salesforce-link-remover",
             "STACK": "membership",
             "STAGE": "CODE",
+            "Stack": "membership",
             "Stage": "CODE",
           },
         },
@@ -286,8 +288,10 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
+            "App": "zuora-salesforce-link-remover",
             "STACK": "membership",
             "STAGE": "CODE",
+            "Stack": "membership",
             "Stage": "CODE",
           },
         },
@@ -558,8 +562,10 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
+            "App": "zuora-salesforce-link-remover",
             "STACK": "membership",
             "STAGE": "PROD",
+            "Stack": "membership",
             "Stage": "PROD",
           },
         },
@@ -808,8 +814,10 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
+            "App": "zuora-salesforce-link-remover",
             "STACK": "membership",
             "STAGE": "PROD",
+            "Stack": "membership",
             "Stage": "PROD",
           },
         },
