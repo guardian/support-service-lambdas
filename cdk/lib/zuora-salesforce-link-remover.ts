@@ -102,10 +102,9 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const definition =
-			getSalesforceBillingAccountsFromLambdaTask.next(
-				updateZuoraBillingAccountsLambdaTask,
-			);
+		const definition = getSalesforceBillingAccountsFromLambdaTask.next(
+			updateZuoraBillingAccountsLambdaTask,
+		);
 
 		new StateMachine(
 			this,
