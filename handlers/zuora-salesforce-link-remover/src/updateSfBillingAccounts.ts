@@ -1,6 +1,10 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
-import type { SalesforceUpdateRecord, SfApiUserAuth, SfConnectedAppAuth } from './salesforceHttp';
+import type {
+	SalesforceUpdateRecord,
+	SfApiUserAuth,
+	SfConnectedAppAuth,
+} from './salesforceHttp';
 import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
@@ -48,15 +52,17 @@ export async function handler() {
 	const incrementedRecords = incrementRemovalAttempts(mockedRecordsToUpdate);
 	const sfUpdateResponse = await updateSfBillingAccounts(
 		sfAuthResponse,
-		incrementedRecords
+		incrementedRecords,
 	);
 
 	return sfUpdateResponse;
 }
 
-function incrementRemovalAttempts(recordsToIncrement: SalesforceUpdateRecord[]): SalesforceUpdateRecord[]{
-	return recordsToIncrement.map(record => ({
-        ...record,
-        GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
-    }));
+function incrementRemovalAttempts(
+	recordsToIncrement: SalesforceUpdateRecord[],
+): SalesforceUpdateRecord[] {
+	return recordsToIncrement.map((record) => ({
+		...record,
+		GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
+	}));
 }
