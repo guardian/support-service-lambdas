@@ -51,7 +51,10 @@ export async function handler() {
 		sfAuthResponse,
 		testQuery,
 	);
-	return response.records;
+
+	return {
+		billingAccountsToProcess: response.records
+	};
 }
 
 function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
