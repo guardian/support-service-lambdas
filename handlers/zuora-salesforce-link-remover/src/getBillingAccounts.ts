@@ -1,13 +1,19 @@
+import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
+import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import { doSfAuth, executeSalesforceQuery } from './salesforceHttp';
 import type {
 	SalesforceQueryResponse,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
 } from './salesforceHttp';
-import { getSalesforceSecretNames, getSecretValue } from './secrets';
+import { getSalesforceSecretNames } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
+import { updateBillingAccountInZuora } from './zuoraHttp';
 
 export async function handler() {
+	const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse =
+		await updateBillingAccountInZuora('');
+	console.log(zuoraBillingAccountUpdateResponse);
 	const stage = process.env.STAGE;
 
 	if (!stage) {
