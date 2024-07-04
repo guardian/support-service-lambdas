@@ -55,7 +55,6 @@ export async function getSecretValue<T>(secretName: string): Promise<T> {
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const errorText = `error getting secret: ${errorMessage}`;
-		console.error(errorText);
 		throw new Error(errorText);
 	}
 }

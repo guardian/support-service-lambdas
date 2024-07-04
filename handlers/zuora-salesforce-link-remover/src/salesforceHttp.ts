@@ -18,7 +18,6 @@ export async function doSfAuth(
 		if (!response.ok) {
 			const errorText = await response.text();
 			const errorMessage = `Error response from Salesforce: ${errorText}`;
-			console.error(errorMessage);
 			throw new Error(errorMessage);
 		}
 
@@ -30,16 +29,13 @@ export async function doSfAuth(
 			SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
 		if (!parseResponse.success) {
-			const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
-			console.error(parseError);
-			throw new Error(parseError);
+			throw new Error(`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`);
 		}
 
 		return parseResponse.data;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const errorText = `Error authenticating with Salesforce: ${errorMessage}`;
-		console.error(errorText);
 		throw new Error(errorText);
 	}
 }
@@ -105,9 +101,7 @@ export async function executeSalesforceQuery(
 		SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
 
 	if (!parseResponse.success) {
-		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
-		console.error(parseError);
-		throw new Error(parseError);
+		throw new Error(`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`);
 	}
 
 	return parseResponse.data;
@@ -191,9 +185,7 @@ export async function doCompositeCallout(
 		SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
 
 	if (!parseResponse.success) {
-		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
-		console.error(parseError);
-		throw new Error(parseError);
+		throw new Error(`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`);
 	}
 
 	return parseResponse.data;
