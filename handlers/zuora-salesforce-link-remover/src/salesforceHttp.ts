@@ -29,7 +29,9 @@ export async function doSfAuth(
 			SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
 		if (!parseResponse.success) {
-			throw new Error(`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`);
+			throw new Error(
+				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+			);
 		}
 
 		return parseResponse.data;
@@ -101,7 +103,9 @@ export async function executeSalesforceQuery(
 		SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
 
 	if (!parseResponse.success) {
-		throw new Error(`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`);
+		throw new Error(
+			`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+		);
 	}
 
 	return parseResponse.data;
@@ -141,13 +145,13 @@ export type SalesforceQueryResponse = z.infer<
 
 export async function updateSfBillingAccounts(
 	sfAuthResponse: SfAuthResponse,
-	records: SalesforceUpdateRecord[]
+	records: SalesforceUpdateRecord[],
 ): Promise<SalesforceUpdateResponse[]> {
 	const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
 
 	const body = JSON.stringify({
 		allOrNone: false,
-		records
+		records,
 	});
 	const sfUpdateResponse = await doCompositeCallout(
 		url,
@@ -185,7 +189,9 @@ export async function doCompositeCallout(
 		SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
 
 	if (!parseResponse.success) {
-		throw new Error(`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`);
+		throw new Error(
+			`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+		);
 	}
 
 	return parseResponse.data;
