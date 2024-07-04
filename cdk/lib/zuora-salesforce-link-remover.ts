@@ -4,6 +4,7 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
 export class ZuoraSalesforceLinkRemover extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -11,7 +12,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		const appName = 'zuora-salesforce-link-remover';
 
-		new GuLambdaFunction(this, 'get-billing-accounts-lambda', {
+		const getSalesforceBillingAccountsLambda = new GuLambdaFunction(this, 'get-billing-accounts-lambda', {
 			app: appName,
 			functionName: `${appName}-get-billing-accounts-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
@@ -32,7 +33,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			],
 		});
 
-		new GuLambdaFunction(this, 'update-zuora-billing-account-lambda', {
+		const updateZuoraBillingAccountsLambda = new GuLambdaFunction(this, 'update-zuora-billing-account-lambda', {
 			app: appName,
 			functionName: `${appName}-update-zuora-billing-account-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
@@ -72,6 +73,23 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 					],
 				}),
 			],
+		});
+		
+		const getSalesforceBillingAccountsFromLambdaTask = new LambdaInvoke(this, 'Get Salesforce Billing Accounts', {
+			lambdaFunction: getSalesforceBillingAccountsLambda,
+			outputPath: '$.Payload',
+		});
+		
+		const updateZuoraBillingAccountsLambdaTask = new LambdaInvoke(this, 'Update Zuora Billing Accounts', {
+			lambdaFunction: updateZuoraBillingAccountsLambda,
+			outputPath: '$.Payload',
+		});
+
+		const stateMachineDefinition = getSalesforceBillingAccountsFromLambdaTask
+		.next(updateZuoraBillingAccountsLambdaTask);
+		
+		const stateMachine = new StateMachine(this, `zuora-salesforce-link-remover-state-machine-${this.stage}`, {
+			stateMachineDefinition,
 		});
 	}
 }
