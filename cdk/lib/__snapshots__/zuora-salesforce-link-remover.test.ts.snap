@@ -889,7 +889,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"Next":"Update Zuora Billing Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"Next":"Billing Accounts Processor Map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -900,7 +900,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","End":true,"Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Accounts","States":{"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -911,7 +911,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1}}}",
             ],
           ],
         },
@@ -1947,7 +1947,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"Next":"Update Zuora Billing Accounts","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"Next":"Billing Accounts Processor Map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1958,7 +1958,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","End":true,"Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Accounts","States":{"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1969,7 +1969,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1}}}",
             ],
           ],
         },
