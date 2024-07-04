@@ -147,29 +147,13 @@ export type SalesforceQueryResponse = z.infer<
 
 export async function updateSfBillingAccounts(
 	sfAuthResponse: SfAuthResponse,
+	records: SalesforceUpdateRecord[]
 ): Promise<SalesforceUpdateResponse[]> {
-	const url = `${sfAuthResponse.instance_url}/services/data/v59.0/composite/sobjects`;
+	const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
 
-	//body will be provided as a property of the input Event to the lambda.
-	//Need to build the state machine and see what the exact body format will be. For now we use the estimated array of objects below.
 	const body = JSON.stringify({
 		allOrNone: false,
-		records: [
-			{
-				id: 'a029E00000OEdL9QAL',
-				GDPR_Removal_Attempts__c: '1',
-				attributes: {
-					type: 'Zuora__CustomerAccount__c',
-				},
-			},
-			{
-				id: 'a029E00000OEdMWQA1',
-				GDPR_Removal_Attempts__c: '2',
-				attributes: {
-					type: 'Zuora__CustomerAccount__c',
-				},
-			},
-		],
+		records
 	});
 	const sfUpdateResponse = await doCompositeCallout(
 		url,
@@ -196,18 +180,15 @@ export async function doCompositeCallout(
 	};
 
 	const response = await fetch(url, options);
-	console.log('response:', JSON.stringify(response));
-
 	if (!response.ok) {
 		throw new Error(
-			`Error updating Billing Account(s) in Salesforce: ${response.statusText}`,
+			`Error updating record(s) in Salesforce: ${response.statusText}`,
 		);
 	}
 
 	const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
 	const parseResponse =
 		SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
-	console.log('parseResponse:', JSON.stringify(parseResponse));
 
 	if (!parseResponse.success) {
 		const parseError = `Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`;
@@ -220,12 +201,14 @@ export async function doCompositeCallout(
 
 const SalesforceUpdateRecordsSchema = z.object({
 	id: z.string(),
-	GDPR_Removal_Attempts__c: z.string(),
+	GDPR_Removal_Attempts__c: z.number(),
 	attributes: z.object({
 		type: z.string(),
 	}),
 });
-
+export type SalesforceUpdateRecord = z.infer<
+	typeof SalesforceUpdateRecordsSchema
+>;
 const SalesforceCompositeRequestSchema = z.object({
 	allOrNone: z.boolean(),
 	records: z.array(SalesforceUpdateRecordsSchema),
