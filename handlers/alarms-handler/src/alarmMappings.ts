@@ -25,6 +25,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'batch-email-sender',
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
+		'contributions-store-queue',
 		'contributions-ticker-calculator',
 		'digital-voucher-api',
 		'dotcom-components',
