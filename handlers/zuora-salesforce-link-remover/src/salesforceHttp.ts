@@ -187,7 +187,7 @@ export async function doCompositeCallout(
 	console.log('doing composite callout...');
 
 	const options = {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: {
 			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
@@ -196,6 +196,7 @@ export async function doCompositeCallout(
 	};
 
 	const response = await fetch(url, options);
+	console.log('response:', JSON.stringify(response));
 
 	if (!response.ok) {
 		throw new Error(
