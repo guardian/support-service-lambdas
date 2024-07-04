@@ -1,4 +1,4 @@
-import { getSalesforceSecretNames } from "../secrets";
+import { getSalesforceSecretNames } from '../secrets';
 
 describe('getSalesforceSecretNames', () => {
 	beforeEach(() => {
@@ -9,10 +9,9 @@ describe('getSalesforceSecretNames', () => {
 	test('should get CODE Salesforce secret names', () => {
 		const actual = getSalesforceSecretNames('CODE');
 		const expected = {
-            apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
-            connectedAppSecretName:
-                'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
-        };
+			apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
+			connectedAppSecretName: 'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
+		};
 
 		expect(actual).toEqual(expected);
 	});
@@ -20,10 +19,10 @@ describe('getSalesforceSecretNames', () => {
 	test('should get PROD Salesforce secret names', () => {
 		const actual = getSalesforceSecretNames('PROD');
 		const expected = {
-            apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
-            connectedAppSecretName:
-                'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
-        };
+			apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
+			connectedAppSecretName:
+				'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+		};
 
 		expect(actual).toEqual(expected);
 	});
