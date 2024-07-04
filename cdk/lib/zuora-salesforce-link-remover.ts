@@ -15,6 +15,9 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			app: appName,
 			functionName: `${appName}-get-billing-accounts-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
+			environment: {
+				Stage: this.stage,
+			},
 			handler: 'getBillingAccounts.handler',
 			fileName: `${appName}.zip`,
 			architecture: Architecture.ARM_64,
@@ -24,6 +27,27 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 					resources: [
 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
+					],
+				}),
+			],
+		});
+
+		new GuLambdaFunction(this, 'update-zuora-billing-account-lambda', {
+			app: appName,
+			functionName: `${appName}-update-zuora-billing-account-${this.stage}`,
+			runtime: Runtime.NODEJS_20_X,
+			environment: {
+				Stage: this.stage,
+			},
+			handler: 'updateZuoraBillingAccount.handler',
+			fileName: `${appName}.zip`,
+			architecture: Architecture.ARM_64,
+			initialPolicy: [
+				new PolicyStatement({
+					actions: ['secretsmanager:GetSecretValue'],
+					resources: [
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l`,
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Zuora/SupportServiceLambdas-WeibUa`,
 					],
 				}),
 			],

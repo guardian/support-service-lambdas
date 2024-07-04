@@ -3,9 +3,7 @@ import {
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 
-export function getSecretNameDependingOnEnvironment(
-	stage: 'CODE' | 'PROD',
-): SecretNames {
+export function getSalesforceSecretNames(stage: 'CODE' | 'PROD'): SecretNames {
 	switch (stage) {
 		case 'CODE':
 			return {
@@ -19,6 +17,15 @@ export function getSecretNameDependingOnEnvironment(
 				connectedAppSecretName:
 					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
 			};
+	}
+}
+
+export function getZuoraSecretName(stage: 'CODE' | 'PROD'): string {
+	switch (stage) {
+		case 'CODE':
+			return 'CODE/Zuora-OAuth/SupportServiceLambdas';
+		case 'PROD':
+			return 'PROD/Zuora/SupportServiceLambdas';
 	}
 }
 
@@ -63,4 +70,9 @@ export type ApiUserSecret = {
 	username: string;
 	password: string;
 	token: string;
+};
+
+export type ZuoraSecret = {
+	clientId: string;
+	clientSecret: string;
 };
