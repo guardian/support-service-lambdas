@@ -1,8 +1,9 @@
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
-import { doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
+import { BillingAccountRecordSchema, doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type {
+	BillingAccountRecord,
 	SalesforceUpdateRecord,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
@@ -10,9 +11,9 @@ import type {
 import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
-export const handler: Handler = async (event: Event) => {
-	console.log('event:',event);
-	const parseResponse = EventSchema.safeParse(event);
+export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) => {
+	console.log('billingAccounts:',billingAccounts);
+	const parseResponse = BillingAccountRecordSchema.safeParse(billingAccounts);
 	console.log('parseResponse:',parseResponse);
 
 	if (!parseResponse.success) {
@@ -21,8 +22,9 @@ export const handler: Handler = async (event: Event) => {
 		);
 	}
 
-	const sfBillingAccountIds = parseResponse.data.map(record => record.sfBillingAccountId);
-	console.log('sfBillingAccountIds:',sfBillingAccountIds)
+	const billingAccountsList = parseResponse.data;
+	// const sfBillingAccountIds = parseResponse.data.map(record => record.sfBillingAccountId);
+	console.log('billingAccountsList:',billingAccountsList)
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 	const { authUrl, clientId, clientSecret } =
@@ -46,22 +48,24 @@ export const handler: Handler = async (event: Event) => {
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
 	//mocked records to update will come from input event. Need to create state machine before we will know the exact format of the object.
-	const mockedRecordsToUpdate: SalesforceUpdateRecord[] = [
-		{
-			id: 'a029E00000OEdL9QAL',
-			GDPR_Removal_Attempts__c: 1,
-			attributes: {
-				type: 'Zuora__CustomerAccount__c',
-			},
-		},
-		{
-			id: 'a029E00000OEdMWQA1',
-			GDPR_Removal_Attempts__c: 2,
-			attributes: {
-				type: 'Zuora__CustomerAccount__c',
-			},
-		},
-	];
+	const mockedRecordsToUpdate: BillingAccountRecord[] = billingAccountsList;
+	
+	// [
+	// 	{
+	// 		id: 'a029E00000OEdL9QAL',
+	// 		GDPR_Removal_Attempts__c: 1,
+	// 		attributes: {
+	// 			type: 'Zuora__CustomerAccount__c',
+	// 		},
+	// 	},
+	// 	{
+	// 		id: 'a029E00000OEdMWQA1',
+	// 		GDPR_Removal_Attempts__c: 2,
+	// 		attributes: {
+	// 			type: 'Zuora__CustomerAccount__c',
+	// 		},
+	// 	},
+	// ];
 
 	const incrementedRecords = incrementRemovalAttempts(mockedRecordsToUpdate);
 	const sfUpdateResponse = await updateSfBillingAccounts(
@@ -73,19 +77,19 @@ export const handler: Handler = async (event: Event) => {
 }
 
 function incrementRemovalAttempts(
-	recordsToIncrement: SalesforceUpdateRecord[],
-): SalesforceUpdateRecord[] {
+	recordsToIncrement: BillingAccountRecord[],
+): BillingAccountRecord[] {
 	return recordsToIncrement.map((record) => ({
 		...record,
 		GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
 	}));
 }
 
-const DataSchema = z.object({
-  zuoraBillingAccountId: z.string(),
-  sfBillingAccountId: z.string(),
-  success: z.boolean()
-});
+// const DataSchema = z.object({
+//   zuoraBillingAccountId: z.string(),
+//   sfBillingAccountId: z.string(),
+//   success: z.boolean()
+// });
 
-const EventSchema = z.array(DataSchema);
-export type Event = z.infer<typeof EventSchema>;
+// const EventSchema = z.array(DataSchema);
+// export type Event = z.infer<typeof EventSchema>;

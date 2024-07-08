@@ -122,10 +122,10 @@ const sfApiVersion = (): string => {
 
 const SalesforceAttributesSchema = z.object({
 	type: z.string(),
-	url: z.string(),
+	url: z.string().optional(),
 });
 
-const BillingAccountRecordSchema = z.object({
+export const BillingAccountRecordSchema = z.object({
 	attributes: SalesforceAttributesSchema,
 	Id: z.string(),
 	Zuora__Account__c: z.string(),
@@ -145,7 +145,7 @@ export type SalesforceQueryResponse = z.infer<
 
 export async function updateSfBillingAccounts(
 	sfAuthResponse: SfAuthResponse,
-	records: SalesforceUpdateRecord[],
+	records: BillingAccountRecord[],
 ): Promise<SalesforceUpdateResponse[]> {
 	const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
 

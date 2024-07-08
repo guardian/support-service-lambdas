@@ -1,10 +1,11 @@
 import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
+import type { BillingAccountRecord } from './salesforceHttp';
 import { updateBillingAccountInZuora } from './zuoraHttp';
 
-export const handler: Handler = async (event: Event) => {
-	const parseResponse = EventSchema.safeParse(event);
+export const handler: Handler = async (billingAccount: BillingAccountRecord) => {
+	const parseResponse = EventSchema.safeParse(billingAccount);
 	console.log('parseResponse:',parseResponse);
 	if (!parseResponse.success) {
 		throw new Error(
@@ -12,15 +13,15 @@ export const handler: Handler = async (event: Event) => {
 		);
 	}
 
-	const billingAccount = parseResponse.data.item;
-	console.log('billingAccount:',billingAccount);
+	const billingAccountItem = parseResponse.data.item;
+	console.log('billingAccountItem:',billingAccountItem);
 
 	const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse =
-		await updateBillingAccountInZuora(billingAccount.Zuora__External_Id__c);
+		await updateBillingAccountInZuora(billingAccountItem.Zuora__External_Id__c);
 	console.log('zuoraBillingAccountUpdateResponse:',zuoraBillingAccountUpdateResponse);
 
 	const returnObj = {
-		billingAccount,
+		billingAccountItem,
 		...zuoraBillingAccountUpdateResponse,
 	};
 
