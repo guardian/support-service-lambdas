@@ -82,12 +82,10 @@ function incrementRemovalAttempts(
 }
 
 const DataSchema = z.object({
-	zuoraBillingAccountId: z.string(),
-	sfBillingAccountId: z.string(),
-	success: z.boolean()
+  zuoraBillingAccountId: z.string(),
+  sfBillingAccountId: z.string(),
+  success: z.boolean()
 });
 
-const EventSchema = z.object({
-	billingAccountProcessingAttempts: z.array(DataSchema)
-});
+const EventSchema = z.array(DataSchema);
 export type Event = z.infer<typeof EventSchema>;
