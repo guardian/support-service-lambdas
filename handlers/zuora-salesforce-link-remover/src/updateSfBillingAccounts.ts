@@ -1,6 +1,6 @@
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
-import { BillingAccountRecordSchema, doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
+import { BillingAccountRecordsSchema, doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type {
 	BillingAccountRecord,
 	SfApiUserAuth,
@@ -11,7 +11,7 @@ import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) => {
 	console.log('billingAccounts:',billingAccounts);
-	const parseResponse = BillingAccountRecordSchema.safeParse(billingAccounts);
+	const parseResponse = BillingAccountRecordsSchema.safeParse(billingAccounts);
 	console.log('parseResponse:',parseResponse);
 
 	if (!parseResponse.success) {
@@ -20,7 +20,7 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 		);
 	}
 
-	const billingAccountsList: BillingAccountRecord = parseResponse.data;
+	const billingAccountsList: BillingAccountRecord[] = parseResponse.data;
 	// const sfBillingAccountIds = parseResponse.data.map(record => record.sfBillingAccountId);
 	console.log('billingAccountsList:',billingAccountsList)
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());

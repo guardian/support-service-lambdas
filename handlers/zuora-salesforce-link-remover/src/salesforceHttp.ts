@@ -131,6 +131,8 @@ export const BillingAccountRecordSchema = z.object({
 	GDPR_Removal_Attempts__c: z.number(),
 	Zuora__External_Id__c: z.string(),
 });
+
+export const BillingAccountRecordsSchema = z.array(BillingAccountRecordSchema);
 export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
 
 const SalesforceQueryResponseSchema = z.object({
