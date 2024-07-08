@@ -63,7 +63,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		new GuLambdaFunction(this, 'update-sf-billing-accounts-lambda', {
+		const updateSfBillingAccountsLambda = new GuLambdaFunction(this, 'update-sf-billing-accounts-lambda', {
 			app: appName,
 			functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
@@ -102,6 +102,15 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
+		const updateSfBillingAccountsLambdaTask = new LambdaInvoke(
+			this,
+			'Update Salesforce Billing Accounts',
+			{
+				lambdaFunction: updateSfBillingAccountsLambda,
+				outputPath: '$.Payload',
+			},
+		);
+
 		const billingAccountsProcessingMap = new Map(
 			this,
 			'Billing Accounts Processor Map',
@@ -124,6 +133,8 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		const definition = getSalesforceBillingAccountsFromLambdaTask.next(
 			billingAccountsProcessingMap,
+		).next(
+			updateSfBillingAccountsLambdaTask,
 		);
 
 		new StateMachine(

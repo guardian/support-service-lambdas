@@ -900,7 +900,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","End":true,"Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Accounts","States":{"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","Next":"Update Salesforce Billing Accounts","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Accounts","States":{"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -911,7 +911,18 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "updatesfbillingaccountslambda98285844",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}}}}",
             ],
           ],
         },
@@ -1007,6 +1018,32 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                       {
                         "Fn::GetAtt": [
                           "getbillingaccountslambdaEDDA46BF",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "updatesfbillingaccountslambda98285844",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "updatesfbillingaccountslambda98285844",
                           "Arn",
                         ],
                       },
@@ -1958,7 +1995,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","End":true,"Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Accounts","States":{"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","Next":"Update Salesforce Billing Accounts","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Accounts","States":{"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1969,7 +2006,18 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "updatesfbillingaccountslambda98285844",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}}}}",
             ],
           ],
         },
@@ -2065,6 +2113,32 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                       {
                         "Fn::GetAtt": [
                           "getbillingaccountslambdaEDDA46BF",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "updatesfbillingaccountslambda98285844",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "updatesfbillingaccountslambda98285844",
                           "Arn",
                         ],
                       },
