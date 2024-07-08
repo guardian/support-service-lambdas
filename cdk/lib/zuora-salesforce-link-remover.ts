@@ -111,6 +111,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			'Update Salesforce Billing Accounts',
 			{
 				lambdaFunction: updateSfBillingAccountsLambda,
+				inputPath: '$.billingAccountProcessingAttempts',
 				outputPath: '$.Payload',
 			},
 		);
