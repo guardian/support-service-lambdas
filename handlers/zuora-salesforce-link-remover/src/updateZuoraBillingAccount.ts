@@ -21,11 +21,14 @@ export const handler: Handler = async (event: Event) => {
 		await updateBillingAccountInZuora(zuoraBillingAccountId);
 	console.log('zuoraBillingAccountUpdateResponse:',zuoraBillingAccountUpdateResponse);
 
-	return {
+	const returnObj = {
 		zuoraBillingAccountId,
 		sfBillingAccountId,
 		...zuoraBillingAccountUpdateResponse,
 	};
+
+	console.log('returnObj: ', returnObj);
+	return returnObj;
 };
 
 const DataSchema = z.object({
