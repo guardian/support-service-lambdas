@@ -27,7 +27,7 @@ export const handler: Handler = async (event: Event) => {
 		...zuoraBillingAccountUpdateResponse,
 	};
 
-	console.log('returnObj: ', returnObj);
+	console.log('returnObj : ', returnObj);
 	return returnObj;
 };
 
