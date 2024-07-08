@@ -1,10 +1,8 @@
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
-import { z } from 'zod';
 import { BillingAccountRecordSchema, doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type {
 	BillingAccountRecord,
-	SalesforceUpdateRecord,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
 } from './salesforceHttp';
@@ -22,7 +20,7 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 		);
 	}
 
-	const billingAccountsList = parseResponse.data;
+	const billingAccountsList: BillingAccountRecord = parseResponse.data;
 	// const sfBillingAccountIds = parseResponse.data.map(record => record.sfBillingAccountId);
 	console.log('billingAccountsList:',billingAccountsList)
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
@@ -48,7 +46,7 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
 	//mocked records to update will come from input event. Need to create state machine before we will know the exact format of the object.
-	const mockedRecordsToUpdate: BillingAccountRecord[] = billingAccountsList;
+	// const mockedRecordsToUpdate: BillingAccountRecord[] = billingAccountsList;
 	
 	// [
 	// 	{
@@ -67,23 +65,28 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 	// 	},
 	// ];
 
-	const incrementedRecords = incrementRemovalAttempts(mockedRecordsToUpdate);
+	// const incrementedRecords = incrementRemovalAttempts(billingAccountsList);
+	// const sfUpdateResponse = await updateSfBillingAccounts(
+	// 	sfAuthResponse,
+	// 	incrementedRecords,
+	// );
+
 	const sfUpdateResponse = await updateSfBillingAccounts(
 		sfAuthResponse,
-		incrementedRecords,
+		billingAccounts,
 	);
 
 	return sfUpdateResponse;
 }
 
-function incrementRemovalAttempts(
-	recordsToIncrement: BillingAccountRecord[],
-): BillingAccountRecord[] {
-	return recordsToIncrement.map((record) => ({
-		...record,
-		GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
-	}));
-}
+// function incrementRemovalAttempts(
+// 	recordsToIncrement: BillingAccountRecord[],
+// ): BillingAccountRecord[] {
+// 	return recordsToIncrement.map((record) => ({
+// 		...record,
+// 		GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
+// 	}));
+// }
 
 // const DataSchema = z.object({
 //   zuoraBillingAccountId: z.string(),
