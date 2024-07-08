@@ -1,4 +1,6 @@
 import { stageFromEnvironment } from '@modules/stage';
+import type { Handler } from 'aws-lambda';
+import { z } from 'zod';
 import { doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type {
 	SalesforceUpdateRecord,
@@ -8,7 +10,19 @@ import type {
 import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
-export async function handler() {
+export const handler: Handler = async (event: Event) => {
+	console.log('event:',event);
+	const parseResponse = EventSchema.safeParse(event);
+	console.log('parseResponse:',parseResponse);
+
+	if (!parseResponse.success) {
+		throw new Error(
+			`Error parsing data from input: ${JSON.stringify(parseResponse.error.format())}`,
+		);
+	}
+
+	const sfBillingAccountIds = parseResponse.data.billingAccountProcessingAttempts.map(record => record.sfBillingAccountId);
+	console.log('sfBillingAccountIds:',sfBillingAccountIds)
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 	const { authUrl, clientId, clientSecret } =
@@ -66,3 +80,14 @@ function incrementRemovalAttempts(
 		GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
 	}));
 }
+
+const DataSchema = z.object({
+	zuoraBillingAccountId: z.string(),
+	sfBillingAccountId: z.string(),
+	success: z.boolean()
+});
+
+const EventSchema = z.object({
+	billingAccountProcessingAttempts: z.array(DataSchema)
+});
+export type Event = z.infer<typeof EventSchema>;
