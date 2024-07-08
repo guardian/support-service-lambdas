@@ -11,7 +11,6 @@ export const handler: Handler = async (event: Event) => {
 			`Error parsing billing account id from input: ${JSON.stringify(parseResponse.error.format())}`,
 		);
 	}
-	console.log('parseResponse:',parseResponse);
 	const zuoraBillingAccountId = parseResponse.data.item.Zuora__External_Id__c;
 	const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse =
 		await updateBillingAccountInZuora(zuoraBillingAccountId);
