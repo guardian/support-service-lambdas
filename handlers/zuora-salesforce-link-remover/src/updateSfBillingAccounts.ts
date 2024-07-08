@@ -1,6 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
-import { z } from 'zod';
 import { BillingAccountRecordsSchema, doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type {
 	BillingAccountRecord,
