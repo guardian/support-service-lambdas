@@ -20,9 +20,16 @@ export const handler: Handler = async (billingAccount: BillingAccountRecord) => 
 		await updateBillingAccountInZuora(billingAccountItem.Zuora__External_Id__c);
 	console.log('zuoraBillingAccountUpdateResponse:',zuoraBillingAccountUpdateResponse);
 
+	// const returnObj = {
+	// 	billingAccountItem,
+	// 	...zuoraBillingAccountUpdateResponse,
+	// };
+
 	const returnObj = {
-		billingAccountItem,
-		...zuoraBillingAccountUpdateResponse,
+		Id: billingAccountItem.Id,
+		GDPR_Removal_Attempts__c: billingAccountItem.GDPR_Removal_Attempts__c,
+		Zuora__External_Id__c: billingAccountItem.Zuora__External_Id__c,
+		attributes: billingAccountItem.attributes,
 	};
 
 	console.log('returnObj : ', returnObj);
@@ -33,6 +40,10 @@ const DataSchema = z.object({
 	GDPR_Removal_Attempts__c: z.number(),
 	Zuora__External_Id__c: z.string(),
 	Id: z.string(),
+	attributes: z.object({
+		type: z.string(),
+		url: z.string().optional(),
+	}),
 });
 
 const EventSchema = z.object({

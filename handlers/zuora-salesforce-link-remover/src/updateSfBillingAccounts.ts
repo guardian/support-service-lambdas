@@ -1,5 +1,6 @@
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
+import { z } from 'zod';
 import { BillingAccountRecordsSchema, doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type {
 	BillingAccountRecord,
@@ -11,6 +12,13 @@ import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) => {
 	console.log('billingAccounts:',billingAccounts);
+	// const abc: OriginalRecords = billingAccounts.map(record => ({
+	// 	...record.billingAccountItem,
+	// 	success: record.success,
+	//   }));
+
+	//   console.log('abc:',abc);
+
 	const parseResponse = BillingAccountRecordsSchema.safeParse(billingAccounts);
 	console.log('parseResponse:',parseResponse);
 
@@ -21,7 +29,6 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 	}
 
 	const billingAccountsList: BillingAccountRecord[] = parseResponse.data;
-	// const sfBillingAccountIds = parseResponse.data.map(record => record.sfBillingAccountId);
 	console.log('billingAccountsList:',billingAccountsList)
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
@@ -96,3 +103,16 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 
 // const EventSchema = z.array(DataSchema);
 // export type Event = z.infer<typeof EventSchema>;
+
+// const BillingAccountItemSchema = z.object({
+// 	GDPR_Removal_Attempts__c: z.number(),
+// 	Zuora__External_Id__c: z.string(),
+// 	Id: z.string(),
+//   });
+  
+//   const OriginalRecordSchema = z.object({
+// 	billingAccountItem: BillingAccountItemSchema,
+// 	success: z.boolean(),
+//   });
+//   export const OriginalRecordsSchema = z.array(OriginalRecordSchema);
+//   export type OriginalRecords = z.infer<typeof OriginalRecordsSchema>;
