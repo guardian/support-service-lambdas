@@ -27,8 +27,6 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 		);
 	}
 
-	const billingAccountsList: BillingAccountRecord[] = parseResponse.data;
-	console.log('billingAccountsList:',billingAccountsList)
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 	const { authUrl, clientId, clientSecret } =
@@ -77,22 +75,26 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 	// 	incrementedRecords,
 	// );
 
+
+	const billingAccountsToUpdate: BillingAccountRecord[] = incrementRemovalAttempts(parseResponse.data);
+	console.log('billingAccountsList:',billingAccountsToUpdate)
+
 	const sfUpdateResponse = await updateSfBillingAccounts(
 		sfAuthResponse,
-		billingAccounts,
+		billingAccountsToUpdate,
 	);
 
 	return sfUpdateResponse;
 }
 
-// function incrementRemovalAttempts(
-// 	recordsToIncrement: BillingAccountRecord[],
-// ): BillingAccountRecord[] {
-// 	return recordsToIncrement.map((record) => ({
-// 		...record,
-// 		GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
-// 	}));
-// }
+function incrementRemovalAttempts(
+	recordsToIncrement: BillingAccountRecord[],
+): BillingAccountRecord[] {
+	return recordsToIncrement.map((record) => ({
+		...record,
+		GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
+	}));
+}
 
 // const DataSchema = z.object({
 //   zuoraBillingAccountId: z.string(),
