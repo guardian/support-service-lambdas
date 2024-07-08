@@ -10,16 +10,8 @@ import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) => {
-	console.log('billingAccounts:',billingAccounts);
-	// const abc: OriginalRecords = billingAccounts.map(record => ({
-	// 	...record.billingAccountItem,
-	// 	success: record.success,
-	//   }));
-
-	//   console.log('abc:',abc);
 
 	const parseResponse = BillingAccountRecordsSchema.safeParse(billingAccounts);
-	console.log('parseResponse:',parseResponse);
 
 	if (!parseResponse.success) {
 		throw new Error(
@@ -48,36 +40,7 @@ export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) 
 	};
 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
-
-	//mocked records to update will come from input event. Need to create state machine before we will know the exact format of the object.
-	// const mockedRecordsToUpdate: BillingAccountRecord[] = billingAccountsList;
-	
-	// [
-	// 	{
-	// 		id: 'a029E00000OEdL9QAL',
-	// 		GDPR_Removal_Attempts__c: 1,
-	// 		attributes: {
-	// 			type: 'Zuora__CustomerAccount__c',
-	// 		},
-	// 	},
-	// 	{
-	// 		id: 'a029E00000OEdMWQA1',
-	// 		GDPR_Removal_Attempts__c: 2,
-	// 		attributes: {
-	// 			type: 'Zuora__CustomerAccount__c',
-	// 		},
-	// 	},
-	// ];
-
-	// const incrementedRecords = incrementRemovalAttempts(billingAccountsList);
-	// const sfUpdateResponse = await updateSfBillingAccounts(
-	// 	sfAuthResponse,
-	// 	incrementedRecords,
-	// );
-
-
 	const billingAccountsToUpdate: BillingAccountRecord[] = incrementRemovalAttempts(parseResponse.data);
-	console.log('billingAccountsList:',billingAccountsToUpdate)
 
 	const sfUpdateResponse = await updateSfBillingAccounts(
 		sfAuthResponse,

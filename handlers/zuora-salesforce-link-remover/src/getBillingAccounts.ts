@@ -1,6 +1,5 @@
 import { doSfAuth, executeSalesforceQuery } from './salesforceHttp';
 import type {
-	BillingAccountRecord,
 	SalesforceQueryResponse,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
@@ -53,10 +52,8 @@ export async function handler() {
 		testQuery,
 	);
 
-	const billingAccountsToProcess: BillingAccountRecord[] = response.records;
-	console.log('billingAccountsToProcess:',billingAccountsToProcess)
 	return {
-		billingAccountsToProcess,
+		billingAccountsToProcess: response.records,
 	};
 }
 
