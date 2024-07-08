@@ -11,8 +11,8 @@ export const handler: Handler = async (event: Event) => {
 			`Error parsing billing account id from input: ${JSON.stringify(parseResponse.error.format())}`,
 		);
 	}
-
-	const zuoraBillingAccountId = parseResponse.data.Zuora__External_Id__c;
+	console.log('parseResponse:',parseResponse);
+	const zuoraBillingAccountId = parseResponse.data.item.Zuora__External_Id__c;
 	const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse =
 		await updateBillingAccountInZuora(zuoraBillingAccountId);
 
@@ -22,7 +22,11 @@ export const handler: Handler = async (event: Event) => {
 	};
 };
 
-const EventSchema = z.object({
+const DataSchema = z.object({
 	Zuora__External_Id__c: z.string(),
+});
+
+const EventSchema = z.object({
+	item: DataSchema,
 });
 export type Event = z.infer<typeof EventSchema>;
