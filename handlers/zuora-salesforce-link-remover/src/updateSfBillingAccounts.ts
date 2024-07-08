@@ -21,7 +21,7 @@ export const handler: Handler = async (event: Event) => {
 		);
 	}
 
-	const sfBillingAccountIds = parseResponse.data.billingAccountProcessingAttempts.map(record => record.sfBillingAccountId);
+	const sfBillingAccountIds = parseResponse.data.map(record => record.sfBillingAccountId);
 	console.log('sfBillingAccountIds:',sfBillingAccountIds)
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
