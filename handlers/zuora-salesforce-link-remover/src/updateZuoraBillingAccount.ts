@@ -11,19 +11,16 @@ export const handler: Handler = async (event: Event) => {
 			`Error parsing billing account id from input: ${JSON.stringify(parseResponse.error.format())}`,
 		);
 	}
-	const zuoraBillingAccountId = parseResponse.data.item.Zuora__External_Id__c;
-	console.log('zuoraBillingAccountId:',zuoraBillingAccountId);
 
-	const sfBillingAccountId = parseResponse.data.item.Id;
-	console.log('sfBillingAccountId:',sfBillingAccountId);
+	const billingAccount = parseResponse.data.item;
+	console.log('billingAccount:',billingAccount);
 
 	const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse =
-		await updateBillingAccountInZuora(zuoraBillingAccountId);
+		await updateBillingAccountInZuora(billingAccount.Zuora__External_Id__c);
 	console.log('zuoraBillingAccountUpdateResponse:',zuoraBillingAccountUpdateResponse);
 
 	const returnObj = {
-		zuoraBillingAccountId,
-		sfBillingAccountId,
+		billingAccount,
 		...zuoraBillingAccountUpdateResponse,
 	};
 
@@ -32,6 +29,7 @@ export const handler: Handler = async (event: Event) => {
 };
 
 const DataSchema = z.object({
+	GDPR_Removal_Attempts__c: z.number(),
 	Zuora__External_Id__c: z.string(),
 	Id: z.string(),
 });
