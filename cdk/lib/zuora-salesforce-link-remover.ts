@@ -63,26 +63,30 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const updateSfBillingAccountsLambda = new GuLambdaFunction(this, 'update-sf-billing-accounts-lambda', {
-			app: appName,
-			functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
-			runtime: Runtime.NODEJS_20_X,
-			environment: {
-				Stage: this.stage,
+		const updateSfBillingAccountsLambda = new GuLambdaFunction(
+			this,
+			'update-sf-billing-accounts-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
+				runtime: Runtime.NODEJS_20_X,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'updateSfBillingAccounts.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
+						],
+					}),
+				],
 			},
-			handler: 'updateSfBillingAccounts.handler',
-			fileName: `${appName}.zip`,
-			architecture: Architecture.ARM_64,
-			initialPolicy: [
-				new PolicyStatement({
-					actions: ['secretsmanager:GetSecretValue'],
-					resources: [
-						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
-						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
-					],
-				}),
-			],
-		});
+		);
 
 		const getSalesforceBillingAccountsFromLambdaTask = new LambdaInvoke(
 			this,
@@ -131,11 +135,9 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			billingAccountsProcessingMapDefinition,
 		);
 
-		const definition = getSalesforceBillingAccountsFromLambdaTask.next(
-			billingAccountsProcessingMap,
-		).next(
-			updateSfBillingAccountsLambdaTask,
-		);
+		const definition = getSalesforceBillingAccountsFromLambdaTask
+			.next(billingAccountsProcessingMap)
+			.next(updateSfBillingAccountsLambdaTask);
 
 		new StateMachine(
 			this,
