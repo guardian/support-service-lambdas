@@ -20,7 +20,7 @@ export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseAr
 		);
 	}
 	const billingAccountsToUpdate: BillingAccountRecord[] = parseResponse.data;
-
+	console.log('billingAccountsToUpdate:',billingAccountsToUpdate);
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 	const { authUrl, clientId, clientSecret } =
