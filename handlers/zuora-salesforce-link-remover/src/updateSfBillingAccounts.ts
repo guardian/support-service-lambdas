@@ -19,7 +19,18 @@ export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseAr
 			`Error parsing data from input: ${JSON.stringify(parseResponse.error.format())}`,
 		);
 	}
-	const billingAccountsToUpdate: BillingAccountRecord[] = parseResponse.data;
+	//const billingAccountsToUpdate: BillingAccountRecord[] = parseResponse.data;
+
+	const billingAccountsToUpdate: BillingAccountRecord[] = [{
+			"Id" : "a02UD000003DBdnYAG",
+			"Zuora__External_Id__c":"",
+			"GDPR_Removal_Attempts__c" : 1,
+			"attributes" : {
+			  "url": "/services/data/v54.0/sobjects/Zuora__CustomerAccount__c/a02UD000003DBdnYAG",
+			  "type" : "Zuora__CustomerAccount__c"
+			}
+	}];
+	
 	console.log('billingAccountsToUpdate:',billingAccountsToUpdate);
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
