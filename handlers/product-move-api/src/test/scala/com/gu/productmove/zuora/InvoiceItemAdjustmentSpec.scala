@@ -48,18 +48,20 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
         val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
           List(
             InvoiceItemWithTaxDetails(
-              "8ad08dc989d472290189db0888460962",
-              "2023-08-09T17:01:56.000+01:00",
-              -120,
-              None,
-              "8ad08dc989d472290189db08883a0961",
+              Id = "8ad08dc989d472290189db0888460962",
+              ChargeDate = "2023-08-09T17:01:56.000+01:00",
+              ChargeAmount = -120,
+              ProcessingType = ChargeProcessingType,
+              TaxDetails = None,
+              InvoiceId = "8ad08dc989d472290189db08883a0961",
             ),
             InvoiceItemWithTaxDetails(
-              "8ad08dc989d472290189db0888460963",
-              "2023-08-09T17:01:56.000+01:00",
-              0,
-              None,
-              "8ad08dc989d472290189db08883a0961",
+              Id = "8ad08dc989d472290189db0888460963",
+              ChargeDate = "2023-08-09T17:01:56.000+01:00",
+              ChargeAmount = 0,
+              ProcessingType = ChargeProcessingType,
+              TaxDetails = None,
+              InvoiceId = "8ad08dc989d472290189db08883a0961",
             ),
           ),
         )
@@ -70,23 +72,52 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
         val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
           List(
             InvoiceItemWithTaxDetails(
-              "8a12843289e577d00189f660966d56bd",
-              "2023-08-15T00:27:52.000+01:00",
-              33,
-              None,
-              "8a12843289e577d00189f660965f56bc",
+              Id = "8a12843289e577d00189f660966d56bd",
+              ChargeDate = "2023-08-15T00:27:52.000+01:00",
+              ChargeAmount = 33,
+              ProcessingType = ChargeProcessingType,
+              TaxDetails = None,
+              InvoiceId = "8a12843289e577d00189f660965f56bc",
             ),
             InvoiceItemWithTaxDetails(
-              "8a12843289e577d00189f660966d56be",
-              "2023-08-15T00:27:52.000+01:00",
-              15.45,
-              None,
-              "8a12843289e577d00189f660965f56bc",
+              Id = "8a12843289e577d00189f660966d56be",
+              ChargeDate = "2023-08-15T00:27:52.000+01:00",
+              ChargeAmount = 15.45,
+              ProcessingType = ChargeProcessingType,
+              TaxDetails = None,
+              InvoiceId = "8a12843289e577d00189f660965f56bc",
             ),
           ),
         )
         assert(adjustments.length)(equalTo(2)) &&
         assert(adjustments.head.AdjustmentDate.getDayOfMonth)(equalTo(15))
+      },
+      test("buildInvoiceAdjustments function does not include discount items in the adjustments list") {
+        val invoiceItems = List(
+          InvoiceItemWithTaxDetails(
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            TaxDetails = Some(TaxDetails(-0.91, "8a12867e90766628019084f204fa5338")),
+            Id = "8a12867e90766628019084f204fa5335",
+            InvoiceId = "8a12867e90766628019084f204f15333",
+            ChargeAmount = -9.09,
+            ProcessingType = ChargeProcessingType,
+          ),
+          InvoiceItemWithTaxDetails(
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            TaxDetails = Some(TaxDetails(0.45, "8a12867e90766628019084f204fa5339")),
+            Id = "8a12867e90766628019084f204fa5336",
+            InvoiceId = "8a12867e90766628019084f204f15333",
+            ChargeAmount = 4.55,
+            ProcessingType = DiscountProcessingType,
+          ),
+        )
+
+        val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
+          invoiceItems,
+        )
+        val adjustmentAmount = adjustments.map(item => item.Amount).sum
+        assert(adjustments.length)(equalTo(2)) &&
+        assert(adjustmentAmount)(equalTo(10))
       },
       test("Deserialisation of the invoice adjustment response works") {
         val responseJson =
