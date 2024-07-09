@@ -10,7 +10,6 @@ import type {
 import { getSalesforceSecretNames, getSecretValue } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
-// export const handler: Handler = async (billingAccounts: BillingAccountRecord[]) => {
 export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseArray> = async (billingAccounts) => {
 
 	const parseResponse = BillingAccountRecordsSchema.safeParse(billingAccounts);
