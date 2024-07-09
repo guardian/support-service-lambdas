@@ -1,33 +1,16 @@
 package com.gu.productmove.refund
 
-import com.amazonaws.services.lambda.runtime.RequestHandler
-import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
+import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
-import zio.{Clock, RIO, Task, ZIO}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.TransactionError
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
-import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
+import com.gu.productmove.zuora.*
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import com.gu.productmove.zuora.{
-  CreditBalanceAdjustment,
-  GetAccountLive,
-  GetInvoice,
-  GetRefundInvoiceDetails,
-  GetSubscriptionLive,
-  InvoiceItemAdjustment,
-  RefundInvoiceDetails,
-  SubscribeLive,
-  ZuoraCancel,
-  ZuoraCancelLive,
-  ZuoraSetCancellationReason,
-}
-import sttp.capabilities.zio.ZioStreams
 import sttp.client3.SttpBackend
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
+import zio.{Task, ZIO}
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 
 case class RefundInput(subscriptionName: SubscriptionName)
 
@@ -117,12 +100,14 @@ object RefundSupporterPlus {
     // - one for the charge where the SourceType is "InvoiceDetail" and SourceId is the invoice item id
     // - one for the tax where the SourceType is "Tax" and SourceId is the taxation item id
     // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
-    invoiceItems.filter(_.amountWithTax != 0).flatMap { invoiceItem =>
+    invoiceItems.filter(item => item.amountWithTax != 0).flatMap { invoiceItem =>
       val chargeAdjustment =
         List(
           InvoiceItemAdjustment.PostBody(
             AdjustmentDate = invoiceItem.chargeDateAsDate,
-            Amount = invoiceItem.ChargeAmount.abs,
+            // ChargeAmount will be negative for charges and positive for discounts,
+            // we need to invert this for the adjustments
+            Amount = invoiceItem.ChargeAmount * -1,
             InvoiceId = invoiceItem.InvoiceId,
             SourceId = invoiceItem.Id,
             SourceType = "InvoiceDetail",
@@ -133,7 +118,9 @@ object RefundSupporterPlus {
           List(
             InvoiceItemAdjustment.PostBody(
               AdjustmentDate = invoiceItem.chargeDateAsDate,
-              Amount = taxDetails.amount.abs,
+              // Tax amount will be negative for charges and positive for discounts,
+              // we need to invert this for the adjustments
+              Amount = taxDetails.amount * -1,
               InvoiceId = invoiceItem.InvoiceId,
               SourceId = taxDetails.taxationId,
               SourceType = "Tax",

@@ -46,6 +46,28 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
           )
         }
       },
+      test("finds discount details for a subscription") {
+        for {
+          result <- GetRefundInvoiceDetails
+            .get(SubscriptionName("A-S00631534"))
+            .provide(
+              GetRefundInvoiceDetailsLive.layer,
+              ZLayer.succeed(
+                new MockStackedGetInvoicesZuoraClient(
+                  mutable.Stack(
+                    MockGetInvoicesZuoraClient.responseWithDiscount,
+                    MockGetInvoicesZuoraClient.taxationItemsForDiscount,
+                  ),
+                ),
+              ),
+              ZuoraGetLive.layer,
+            )
+        } yield {
+          assertTrue(
+            result.negativeInvoiceItems.count(_.ProcessingType == ChargeProcessingType) == 2
+          )
+        }
+      },
       test("checkInvoicesEqualBalance function works correctly") {
 
         for {
