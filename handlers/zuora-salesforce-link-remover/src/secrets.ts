@@ -16,7 +16,7 @@ export function getSalesforceSecretNames(stage: Stage): SecretNames {
 			};
 		default:
 			return {
-				apiUserSecretName:'',
+				apiUserSecretName: '',
 				connectedAppSecretName: '',
 			};
 	}
