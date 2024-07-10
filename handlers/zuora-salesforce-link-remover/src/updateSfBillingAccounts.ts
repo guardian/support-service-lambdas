@@ -1,15 +1,27 @@
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
-import { doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
+import type { Handler } from 'aws-lambda';
+import { BillingAccountRecordsSchema, doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type {
-	SalesforceUpdateRecord,
+	BillingAccountRecord,
+	SalesforceUpdateResponseArray,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
 } from './salesforceHttp';
 import { getSalesforceSecretNames } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
-export async function handler() {
+export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseArray> = async (billingAccounts) => {
+
+	const parseResponse = BillingAccountRecordsSchema.safeParse(billingAccounts);
+
+	if (!parseResponse.success) {
+		throw new Error(
+			`Error parsing data from input: ${JSON.stringify(parseResponse.error.format())}`,
+		);
+	}
+	const billingAccountsToUpdate: BillingAccountRecord[] = parseResponse.data;
+
 	const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 	const { authUrl, clientId, clientSecret } =
@@ -32,38 +44,10 @@ export async function handler() {
 
 	const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
-	//mocked records to update will come from input event. Need to create state machine before we will know the exact format of the object.
-	const mockedRecordsToUpdate: SalesforceUpdateRecord[] = [
-		{
-			id: 'a029E00000OEdL9QAL',
-			GDPR_Removal_Attempts__c: 1,
-			attributes: {
-				type: 'Zuora__CustomerAccount__c',
-			},
-		},
-		{
-			id: 'a029E00000OEdMWQA1',
-			GDPR_Removal_Attempts__c: 2,
-			attributes: {
-				type: 'Zuora__CustomerAccount__c',
-			},
-		},
-	];
-
-	const incrementedRecords = incrementRemovalAttempts(mockedRecordsToUpdate);
 	const sfUpdateResponse = await updateSfBillingAccounts(
 		sfAuthResponse,
-		incrementedRecords,
+		billingAccountsToUpdate,
 	);
 
 	return sfUpdateResponse;
-}
-
-function incrementRemovalAttempts(
-	recordsToIncrement: SalesforceUpdateRecord[],
-): SalesforceUpdateRecord[] {
-	return recordsToIncrement.map((record) => ({
-		...record,
-		GDPR_Removal_Attempts__c: record.GDPR_Removal_Attempts__c + 1,
-	}));
 }

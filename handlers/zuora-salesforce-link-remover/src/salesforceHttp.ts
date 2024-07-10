@@ -122,17 +122,23 @@ const sfApiVersion = (): string => {
 
 const SalesforceAttributesSchema = z.object({
 	type: z.string(),
-	url: z.string(),
+	url: z.string().optional(),
 });
 
-const BillingAccountRecordSchema = z.object({
+export const BillingAccountRecordSchema = z.object({
 	attributes: SalesforceAttributesSchema,
 	Id: z.string(),
-	Zuora__Account__c: z.string(),
 	GDPR_Removal_Attempts__c: z.number(),
 	Zuora__External_Id__c: z.string(),
 });
+
+export const BillingAccountRecordsSchema = z.array(BillingAccountRecordSchema);
 export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
+
+export const BillingAccountRecordWithSuccessSchema = BillingAccountRecordSchema.extend({
+	crmIdRemovedSuccessfully: z.boolean(),
+});
+export type BillingAccountRecordWithSuccess = z.infer<typeof BillingAccountRecordWithSuccessSchema>;
 
 const SalesforceQueryResponseSchema = z.object({
 	totalSize: z.number(),
@@ -145,7 +151,7 @@ export type SalesforceQueryResponse = z.infer<
 
 export async function updateSfBillingAccounts(
 	sfAuthResponse: SfAuthResponse,
-	records: SalesforceUpdateRecord[],
+	records: BillingAccountRecord[],
 ): Promise<SalesforceUpdateResponse[]> {
 	const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
 
@@ -241,3 +247,6 @@ export type SalesforceUpdateResponse = z.infer<
 const SalesforceUpdateResponseArraySchema = z.array(
 	SalesforceUpdateResponseSchema,
 );
+export type SalesforceUpdateResponseArray = z.infer<
+typeof SalesforceUpdateResponseArraySchema
+>;
