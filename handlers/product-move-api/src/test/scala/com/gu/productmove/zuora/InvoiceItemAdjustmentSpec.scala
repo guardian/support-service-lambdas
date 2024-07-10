@@ -116,8 +116,8 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
           invoiceItems,
         )
         val adjustmentAmount = adjustments.map(item => item.Amount).sum
-        assert(adjustments.length)(equalTo(2)) &&
-        assert(adjustmentAmount)(equalTo(10))
+        assert(adjustments.length)(equalTo(4)) &&
+        assert(adjustmentAmount)(equalTo(5))
       },
       test("Deserialisation of the invoice adjustment response works") {
         val responseJson =

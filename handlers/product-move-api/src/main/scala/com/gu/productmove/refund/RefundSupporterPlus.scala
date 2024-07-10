@@ -100,13 +100,14 @@ object RefundSupporterPlus {
     // - one for the charge where the SourceType is "InvoiceDetail" and SourceId is the invoice item id
     // - one for the tax where the SourceType is "Tax" and SourceId is the taxation item id
     // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
-    // We should ignore any discount charges as these are for information purposes only
-    invoiceItems.filter(item => item.amountWithTax != 0 && item.ProcessingType != DiscountProcessingType).flatMap { invoiceItem =>
+    invoiceItems.filter(item => item.amountWithTax != 0).flatMap { invoiceItem =>
       val chargeAdjustment =
         List(
           InvoiceItemAdjustment.PostBody(
             AdjustmentDate = invoiceItem.chargeDateAsDate,
-            Amount = invoiceItem.ChargeAmount.abs,
+            // ChargeAmount will be negative for charges and positive for discounts,
+            // we need to invert this for the adjustments
+            Amount = invoiceItem.ChargeAmount * -1,
             InvoiceId = invoiceItem.InvoiceId,
             SourceId = invoiceItem.Id,
             SourceType = "InvoiceDetail",
@@ -117,7 +118,9 @@ object RefundSupporterPlus {
           List(
             InvoiceItemAdjustment.PostBody(
               AdjustmentDate = invoiceItem.chargeDateAsDate,
-              Amount = taxDetails.amount.abs,
+              // Tax amount will be negative for charges and positive for discounts,
+              // we need to invert this for the adjustments
+              Amount = taxDetails.amount * -1,
               InvoiceId = invoiceItem.InvoiceId,
               SourceId = taxDetails.taxationId,
               SourceType = "Tax",
