@@ -1,3 +1,4 @@
+import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import { doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
 import type {
@@ -5,7 +6,7 @@ import type {
 	SfApiUserAuth,
 	SfConnectedAppAuth,
 } from './salesforceHttp';
-import { getSalesforceSecretNames, getSecretValue } from './secrets';
+import { getSalesforceSecretNames } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export async function handler() {
