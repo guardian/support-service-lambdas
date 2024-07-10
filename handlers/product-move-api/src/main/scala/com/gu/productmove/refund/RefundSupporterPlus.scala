@@ -100,7 +100,7 @@ object RefundSupporterPlus {
     // - one for the charge where the SourceType is "InvoiceDetail" and SourceId is the invoice item id
     // - one for the tax where the SourceType is "Tax" and SourceId is the taxation item id
     // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
-    invoiceItems.filter(item => item.amountWithTax != 0).flatMap { invoiceItem =>
+    invoiceItems.filter(_.amountWithTax != 0).flatMap { invoiceItem =>
       val chargeAdjustment =
         List(
           InvoiceItemAdjustment.PostBody(

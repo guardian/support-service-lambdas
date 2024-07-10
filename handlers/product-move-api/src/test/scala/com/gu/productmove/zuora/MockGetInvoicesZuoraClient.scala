@@ -215,7 +215,6 @@ object MockGetInvoicesZuoraClient {
       |    {
       |      "ChargeDate": "2023-08-11T10:03:41.000+01:00",
       |      "TaxAmount": 0,
-      |      "ProcessingType": 0,
       |      "Id": "8ad081c689e27bbb0189e3d654fc04bb",
       |      "InvoiceId": "8ad081c689e27bbb0189e3d654f104ba",
       |      "ChargeAmount": 0
@@ -223,7 +222,6 @@ object MockGetInvoicesZuoraClient {
       |    {
       |      "ChargeDate": "2023-08-11T10:03:41.000+01:00",
       |      "TaxAmount": 0.91,
-      |      "ProcessingType": 0,
       |      "Id": "8ad081c689e27bbb0189e3d654fc04bc",
       |      "InvoiceId": "8ad081c689e27bbb0189e3d654f104ba",
       |      "ChargeAmount": 9.09
@@ -231,7 +229,6 @@ object MockGetInvoicesZuoraClient {
       |    {
       |      "ChargeDate": "2023-08-11T11:04:54.000+01:00",
       |      "TaxAmount": -0.91,
-      |      "ProcessingType": 0,
       |      "Id": "8ad08dc989e27bbe0189e40e611d0abb",
       |      "InvoiceId": "8ad08dc989e27bbe0189e40e61110aba",
       |      "ChargeAmount": -9.09
@@ -239,7 +236,6 @@ object MockGetInvoicesZuoraClient {
       |    {
       |      "ChargeDate": "2023-08-11T11:04:54.000+01:00",
       |      "TaxAmount": 0,
-      |      "ProcessingType": 0,
       |      "Id": "8ad08dc989e27bbe0189e40e611d0abc",
       |      "InvoiceId": "8ad08dc989e27bbe0189e40e61110aba",
       |      "ChargeAmount": 0
@@ -398,7 +394,6 @@ object MockGetInvoicesZuoraClient {
       |        {
       |            "ChargeDate": "2024-07-05T23:09:31.000+01:00",
       |            "TaxAmount": 0,
-      |            "ProcessingType": 0,
       |            "Id": "8a12867e90766628019084f204fa5334",
       |            "InvoiceId": "8a12867e90766628019084f204f15333",
       |            "ChargeAmount": 0
@@ -406,7 +401,6 @@ object MockGetInvoicesZuoraClient {
       |        {
       |            "ChargeDate": "2024-07-05T23:09:31.000+01:00",
       |            "TaxAmount": -0.91,
-      |            "ProcessingType": 0,
       |            "Id": "8a12867e90766628019084f204fa5335",
       |            "InvoiceId": "8a12867e90766628019084f204f15333",
       |            "ChargeAmount": -9.09
@@ -414,7 +408,6 @@ object MockGetInvoicesZuoraClient {
       |        {
       |            "ChargeDate": "2024-07-05T23:09:31.000+01:00",
       |            "TaxAmount": 0.45,
-      |            "ProcessingType": 1,
       |            "Id": "8a12867e90766628019084f204fa5336",
       |            "InvoiceId": "8a12867e90766628019084f204f15333",
       |            "ChargeAmount": 4.55
@@ -422,7 +415,6 @@ object MockGetInvoicesZuoraClient {
       |        {
       |            "ChargeDate": "2024-06-25T16:04:41.000+01:00",
       |            "TaxAmount": 0.91,
-      |            "ProcessingType": 0,
       |            "Id": "8a12997890498d8901904fed779d1763",
       |            "InvoiceId": "8a12997890498d8901904fed778f1762",
       |            "ChargeAmount": 9.09
@@ -430,7 +422,6 @@ object MockGetInvoicesZuoraClient {
       |        {
       |            "ChargeDate": "2024-06-25T16:04:41.000+01:00",
       |            "TaxAmount": -0.45,
-      |            "ProcessingType": 1,
       |            "Id": "8a12997890498d8901904fed779e1764",
       |            "InvoiceId": "8a12997890498d8901904fed778f1762",
       |            "ChargeAmount": -4.55
@@ -438,7 +429,6 @@ object MockGetInvoicesZuoraClient {
       |        {
       |            "ChargeDate": "2024-06-25T16:04:41.000+01:00",
       |            "TaxAmount": 0,
-      |            "ProcessingType": 0,
       |            "Id": "8a12997890498d8901904fed779e1765",
       |            "InvoiceId": "8a12997890498d8901904fed778f1762",
       |            "ChargeAmount": 0

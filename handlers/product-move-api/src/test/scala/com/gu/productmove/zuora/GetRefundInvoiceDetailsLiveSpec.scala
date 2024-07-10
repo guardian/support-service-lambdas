@@ -21,7 +21,6 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("GetInvoiceItemsForSubscriptionLive")(
       test("finds taxation details for a subscription") {
-
         for {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00631534"))
@@ -64,7 +63,7 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
             )
         } yield {
           assertTrue(
-            result.negativeInvoiceItems.count(_.ProcessingType == ChargeProcessingType) == 2
+            result.negativeInvoiceItems.size == 2,
           )
         }
       },
