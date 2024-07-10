@@ -13,7 +13,7 @@
 		"check-formatting": "pnpm -r run check-formatting"
 	},
 	"devDependencies": {
-		"@guardian/eslint-config-typescript": "8.0.1",
+		"@guardian/eslint-config-typescript": "11.0.0",
 		"@guardian/prettier": "^8.0.1",
 		"@types/jest": "^29.5.12",
 		"@types/node": "^20.11.27",
