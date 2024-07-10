@@ -55,11 +55,11 @@ export async function handler() {
 			testQuery,
 		);
 		console.log('response:', response);
-		throw new Error(`Testing error throwing`);
+		// throw new Error(`Testing error throwing`);
 
-		// return {
-		// 	billingAccountsToProcess: response.records,
-		// };
+		return {
+			billingAccountsToProcess: response.records,
+		};
 	}catch(error){
 		throw new Error(`Error fetching billing accounts from Salesforce: ${JSON.stringify(error)}`);
 	}
