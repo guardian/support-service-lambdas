@@ -1,10 +1,11 @@
+import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { doSfAuth, executeSalesforceQuery } from './salesforceHttp';
 import type {
 	SalesforceQueryResponse,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
 } from './salesforceHttp';
-import { getSalesforceSecretNames, getSecretValue } from './secrets';
+import { getSalesforceSecretNames } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export async function handler() {
@@ -15,7 +16,7 @@ export async function handler() {
 	}
 
 	if (!isValidStage(stage)) {
-		throw Error('Invalid stage value');
+		throw Error('Invalid Stage value');
 	}
 
 	const secretNames = getSalesforceSecretNames(stage);

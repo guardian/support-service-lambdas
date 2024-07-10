@@ -1,3 +1,4 @@
+import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import { BillingAccountRecordsSchema, doSfAuth, updateSfBillingAccounts } from './salesforceHttp';
@@ -7,7 +8,7 @@ import type {
 	SfApiUserAuth,
 	SfConnectedAppAuth,
 } from './salesforceHttp';
-import { getSalesforceSecretNames, getSecretValue } from './secrets';
+import { getSalesforceSecretNames } from './secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
 
 export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseArray> = async (billingAccounts) => {

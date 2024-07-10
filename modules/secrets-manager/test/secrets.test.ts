@@ -3,8 +3,9 @@ import {
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 import { mockClient } from 'aws-sdk-client-mock';
-import type { ConnectedAppSecret } from '../src/secrets';
-import { getSalesforceSecretNames, getSecretValue } from '../src/secrets';
+import type { ConnectedAppSecret } from '../../../handlers/zuora-salesforce-link-remover/src/secrets';
+import { getSalesforceSecretNames } from '../../../handlers/zuora-salesforce-link-remover/src/secrets';
+import { getSecretValue } from '../src/getSecret';
 
 const secretsManagerClientMock = mockClient(SecretsManagerClient);
 
