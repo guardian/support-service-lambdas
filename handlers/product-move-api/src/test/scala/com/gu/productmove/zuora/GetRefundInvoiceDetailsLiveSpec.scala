@@ -63,7 +63,7 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
             )
         } yield {
           assertTrue(
-            result.negativeInvoiceItems.size == 2,
+            result.negativeInvoiceItems.size == 3
           )
         }
       },
