@@ -16,7 +16,7 @@ export async function handler() {
 	}
 
 	if (!isValidStage(stage)) {
-		throw Error('Invalid stage value');
+		throw Error('Invalid Stage value');
 	}
 
 	const secretNames = getSalesforceSecretNames(stage);
