@@ -39,7 +39,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-gocardless-sync',
 		'super-mode-calculator',
 		'support-reminders',
-		'zuora-salesforce-link-remover',
 	],
 	VALUE: [
 		'cancellation-sf-cases-api',
