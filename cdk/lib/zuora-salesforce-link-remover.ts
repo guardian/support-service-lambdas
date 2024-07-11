@@ -176,14 +176,13 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			actionsEnabled: true,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			metric: new Metric({
-				dimensionsMap: {
-					Stage: this.stage,
-				},
-				metricName: 'failure_in_zuora_salesforce_link-remover',
-				namespace: 'zuora-salesforce-link-remover',
+				metricName: 'Errors',
+				namespace: 'AWS/Lambda',
 				statistic: Stats.SUM,
 				period: Duration.seconds(60),
-				unit: Unit.COUNT,
+				dimensionsMap: {
+					FunctionName: getSalesforceBillingAccountsLambda.functionName,
+				},
 			}),
 			threshold: 0,
 			treatMissingData: TreatMissingData.MISSING,
