@@ -171,8 +171,12 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			'Topic',
 			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
 		);
-		
-		const lambdaFunctions = [getSalesforceBillingAccountsLambda, updateZuoraBillingAccountsLambda, updateSfBillingAccountsLambda];
+
+		const lambdaFunctions = [
+			getSalesforceBillingAccountsLambda,
+			updateZuoraBillingAccountsLambda,
+			updateSfBillingAccountsLambda,
+		];
 
 		lambdaFunctions.forEach((lambdaFunction, index) => {
 			const alarm = new Alarm(this, `alarm-${index}`, {
@@ -182,7 +186,8 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				datapointsToAlarm: 1,
 				evaluationPeriods: 1,
 				actionsEnabled: true,
-				comparisonOperator: aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				comparisonOperator:
+					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
 				metric: new Metric({
 					metricName: 'Errors',
 					namespace: 'AWS/Lambda',
