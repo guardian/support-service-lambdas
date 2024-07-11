@@ -54,8 +54,6 @@ export async function handler() {
 			sfAuthResponse,
 			testQuery,
 		);
-		console.log('response:', response);
-		// throw new Error(`Testing error throwing`);
 
 		return {
 			billingAccountsToProcess: response.records,
