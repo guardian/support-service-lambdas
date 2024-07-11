@@ -4,7 +4,7 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
 import {
-	ComparisonOperator,
+	Alarm,
 	Metric,
 	Stats,
 	TreatMissingData,
@@ -166,33 +166,36 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const alarm = new aws_cloudwatch.Alarm(this, 'alarm', {
-			alarmName: `Zuora <-> Salesforce link remover - something went wrong - ${this.stage}`,
-			alarmDescription:
-				'Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.',
-			datapointsToAlarm: 1,
-			evaluationPeriods: 1,
-			actionsEnabled: true,
-			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
-			metric: new Metric({
-				metricName: 'Errors',
-				namespace: 'AWS/Lambda',
-				statistic: Stats.SUM,
-				period: Duration.seconds(60),
-				dimensionsMap: {
-					FunctionName: updateSfBillingAccountsLambda.functionName,
-				},
-			}),
-			threshold: 0,
-			treatMissingData: TreatMissingData.MISSING,
-		});
-
 		const topic = Topic.fromTopicArn(
 			this,
 			'Topic',
 			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
 		);
+		
+		const lambdaFunctions = [getSalesforceBillingAccountsLambda, updateZuoraBillingAccountsLambda, updateSfBillingAccountsLambda];
 
-		alarm.addAlarmAction(new SnsAction(topic));
+		lambdaFunctions.forEach((lambdaFunction, index) => {
+			const alarm = new Alarm(this, `alarm-${index}`, {
+				alarmName: `Zuora <-> Salesforce link remover - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
+				alarmDescription:
+					'Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.',
+				datapointsToAlarm: 1,
+				evaluationPeriods: 1,
+				actionsEnabled: true,
+				comparisonOperator: aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: Stats.SUM,
+					period: Duration.seconds(60),
+					dimensionsMap: {
+						FunctionName: lambdaFunction.functionName,
+					},
+				}),
+				threshold: 0,
+				treatMissingData: TreatMissingData.MISSING,
+			});
+			alarm.addAlarmAction(new SnsAction(topic));
+		});
 	}
 }
