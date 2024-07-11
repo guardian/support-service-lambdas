@@ -1,12 +1,12 @@
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import { doSfAuth, executeSalesforceQuery } from './salesforceHttp';
+import { doSfAuth, executeSalesforceQuery } from '../salesforceHttp';
 import type {
 	SalesforceQueryResponse,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
-} from './salesforceHttp';
-import { getSalesforceSecretNames } from './secrets';
-import type { ApiUserSecret, ConnectedAppSecret } from './secrets';
+} from '../salesforceHttp';
+import { getSalesforceSecretNames } from '../secrets';
+import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 
 export async function handler() {
 	try{
