@@ -52,6 +52,6 @@ export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseAr
 
 		return sfUpdateResponse;
 	}catch(error){
-		throw new Error(`Error updating billing account in Zuora: ${JSON.stringify(error)}`);
+		throw new Error(`Error updating billing account in Salesforce: ${JSON.stringify(error)}`);
 	}
 }
