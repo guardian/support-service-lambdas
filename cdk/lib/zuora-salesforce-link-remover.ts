@@ -8,7 +8,6 @@ import {
 	Metric,
 	Stats,
 	TreatMissingData,
-	Unit,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
