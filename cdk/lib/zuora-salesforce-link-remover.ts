@@ -181,7 +181,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				statistic: Stats.SUM,
 				period: Duration.seconds(60),
 				dimensionsMap: {
-					FunctionName: getSalesforceBillingAccountsLambda.functionName,
+					FunctionName: updateZuoraBillingAccountsLambda.functionName,
 				},
 			}),
 			threshold: 0,

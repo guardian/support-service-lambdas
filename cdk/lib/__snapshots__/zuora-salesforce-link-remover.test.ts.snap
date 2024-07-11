@@ -157,7 +157,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
           {
             "Name": "FunctionName",
             "Value": {
-              "Ref": "getbillingaccountslambdaEDDA46BF",
+              "Ref": "updatezuorabillingaccountlambda6EF8BCFE",
             },
           },
         ],
@@ -1310,7 +1310,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
           {
             "Name": "FunctionName",
             "Value": {
-              "Ref": "getbillingaccountslambdaEDDA46BF",
+              "Ref": "updatezuorabillingaccountlambda6EF8BCFE",
             },
           },
         ],
