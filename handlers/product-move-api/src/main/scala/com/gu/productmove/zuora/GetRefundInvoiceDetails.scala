@@ -163,7 +163,8 @@ case class InvoiceItemWithTaxDetails(
     TaxDetails: Option[TaxDetails],
     InvoiceId: String,
 ) {
-  def amountWithTax = ChargeAmount + TaxDetails.map(_.amount).getOrElse(0)
+  def taxAmount = TaxDetails.map(_.amount).getOrElse(BigDecimal(0))
+  def amountWithTax = ChargeAmount + taxAmount
   def chargeDateAsDate = LocalDate.parse(ChargeDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 }
 

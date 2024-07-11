@@ -14,6 +14,8 @@ import java.time.LocalDate
 
 case class RefundInput(subscriptionName: SubscriptionName)
 
+case class ChargeWithDiscount(charge: InvoiceItemWithTaxDetails, discount: Option[InvoiceItemWithTaxDetails])
+
 object RefundInput {
   import SubscriptionName.*
 
@@ -92,6 +94,10 @@ object RefundSupporterPlus {
       )
     } yield ()
 
+  def identifyCharges(invoiceItems: List[InvoiceItemWithTaxDetails]) = {
+    val (charges, discounts) = invoiceItems.partition(_.amountWithTax < 0)
+  }
+
   def buildInvoiceItemAdjustments(
       invoiceItems: List[InvoiceItemWithTaxDetails],
   ): List[InvoiceItemAdjustment.PostBody] = {
@@ -100,28 +106,49 @@ object RefundSupporterPlus {
     // - one for the charge where the SourceType is "InvoiceDetail" and SourceId is the invoice item id
     // - one for the tax where the SourceType is "Tax" and SourceId is the taxation item id
     // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
-    invoiceItems.filter(_.amountWithTax != 0).flatMap { invoiceItem =>
+
+    // Charges will have a negative value because we are dealing with the negative invoice created by cancellation,
+    // discounts will have a positive value. Unfortunately we can't just create an adjustment for each of the charges
+    // and discounts as this takes the invoice to values which are not allowed by Zuora. Instead we need to subtract
+    // the discount from the charge and create an adjustment for the difference.
+    val (charges, discounts) = invoiceItems
+      .filter(_.amountWithTax != 0) // Ignore any items with a zero amount, they will be the contribution charge where the user is just paying the base price 
+      .partition(_.amountWithTax < 0)
+    val maybeDiscount = discounts.headOption
+    val discountedCharge = maybeDiscount.flatMap(discount =>
+      charges.find(charge =>
+        charge.ChargeAmount.abs >= discount.ChargeAmount &&
+          charge.taxAmount.abs >= discount.taxAmount,
+      ),
+    )
+
+    val chargesWithDiscounts = charges
+      .map(charge => ChargeWithDiscount(charge, if discountedCharge.contains(charge) then maybeDiscount else None))
+
+    val chargeAdjustments = chargesWithDiscounts.flatMap { chargeWithDiscount =>
+      val discountChargeAmount = chargeWithDiscount.discount.map(_.ChargeAmount).getOrElse(BigDecimal(0))
+      val discountTaxAmount = chargeWithDiscount.discount.map(_.taxAmount).getOrElse(BigDecimal(0))
       val chargeAdjustment =
         List(
           InvoiceItemAdjustment.PostBody(
-            AdjustmentDate = invoiceItem.chargeDateAsDate,
+            AdjustmentDate = chargeWithDiscount.charge.chargeDateAsDate,
             // ChargeAmount will be negative for charges and positive for discounts,
             // we need to invert this for the adjustments
-            Amount = invoiceItem.ChargeAmount * -1,
-            InvoiceId = invoiceItem.InvoiceId,
-            SourceId = invoiceItem.Id,
+            Amount = chargeWithDiscount.charge.ChargeAmount.abs - discountChargeAmount,
+            InvoiceId = chargeWithDiscount.charge.InvoiceId,
+            SourceId = chargeWithDiscount.charge.Id,
             SourceType = "InvoiceDetail",
           ),
         )
-      val taxAdjustment = invoiceItem.TaxDetails match {
+      val taxAdjustment = chargeWithDiscount.charge.TaxDetails match {
         case Some(taxDetails) =>
           List(
             InvoiceItemAdjustment.PostBody(
-              AdjustmentDate = invoiceItem.chargeDateAsDate,
+              AdjustmentDate = chargeWithDiscount.charge.chargeDateAsDate,
               // Tax amount will be negative for charges and positive for discounts,
               // we need to invert this for the adjustments
-              Amount = taxDetails.amount * -1,
-              InvoiceId = invoiceItem.InvoiceId,
+              Amount = taxDetails.amount.abs - discountTaxAmount,
+              InvoiceId = chargeWithDiscount.charge.InvoiceId,
               SourceId = taxDetails.taxationId,
               SourceType = "Tax",
             ),
@@ -131,5 +158,6 @@ object RefundSupporterPlus {
 
       chargeAdjustment ++ taxAdjustment
     }
+    chargeAdjustments
   }
 }

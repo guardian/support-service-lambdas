@@ -72,14 +72,14 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
             InvoiceItemWithTaxDetails(
               Id = "8a12843289e577d00189f660966d56bd",
               ChargeDate = "2023-08-15T00:27:52.000+01:00",
-              ChargeAmount = 33,
+              ChargeAmount = -33,
               TaxDetails = None,
               InvoiceId = "8a12843289e577d00189f660965f56bc",
             ),
             InvoiceItemWithTaxDetails(
               Id = "8a12843289e577d00189f660966d56be",
               ChargeDate = "2023-08-15T00:27:52.000+01:00",
-              ChargeAmount = 15.45,
+              ChargeAmount = -15.45,
               TaxDetails = None,
               InvoiceId = "8a12843289e577d00189f660965f56bc",
             ),
@@ -88,8 +88,15 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
         assert(adjustments.length)(equalTo(2)) &&
         assert(adjustments.head.AdjustmentDate.getDayOfMonth)(equalTo(15))
       },
-      test("buildInvoiceAdjustments function handles discounts correctly") {
+      test("buildInvoiceAdjustments function handles discounts correctly for sub with tax and no contribution") {
         val invoiceItems = List(
+          InvoiceItemWithTaxDetails(
+            "8a12867e90766628019084f204fa5334",
+            "2024-07-05T23:09:31.000+01:00",
+            0,
+            None,
+            "8a12867e90766628019084f204f15333",
+          ),
           InvoiceItemWithTaxDetails(
             ChargeDate = "2024-07-05T23:09:31.000+01:00",
             TaxDetails = Some(TaxDetails(-0.91, "8a12867e90766628019084f204fa5338")),
@@ -110,8 +117,72 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
           invoiceItems,
         )
         val adjustmentAmount = adjustments.map(item => item.Amount).sum
-        assert(adjustments.length)(equalTo(4)) &&
+        assert(adjustments.length)(equalTo(2)) &&
         assert(adjustmentAmount)(equalTo(5))
+      },
+      test("buildInvoiceAdjustments function handles discounts correctly for sub with tax and contribution") {
+        val invoiceItems = List(
+          InvoiceItemWithTaxDetails(
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            TaxDetails = Some(TaxDetails(0.45, "8a12867e90766628019084f204fa5339")),
+            Id = "8a12867e90766628019084f204fa5336",
+            InvoiceId = "8a12867e90766628019084f204f15333",
+            ChargeAmount = 4.55,
+          ),
+          InvoiceItemWithTaxDetails(
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            TaxDetails = Some(TaxDetails(-0.91, "8a12867e90766628019084f204fa5338")),
+            Id = "8a12867e90766628019084f204fa5335",
+            InvoiceId = "8a12867e90766628019084f204f15333",
+            ChargeAmount = -9.09,
+          ),
+          InvoiceItemWithTaxDetails(
+            "8a12867e90766628019084f204fa5334",
+            "2024-07-05T23:09:31.000+01:00",
+            -10,
+            None,
+            "8a12867e90766628019084f204f15333",
+          ),
+        )
+
+        val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
+          invoiceItems,
+        )
+        val adjustmentAmount = adjustments.map(item => item.Amount).sum
+        assert(adjustments.length)(equalTo(3)) &&
+        assert(adjustmentAmount)(equalTo(15))
+      },
+      test("buildInvoiceAdjustments function handles discounts correctly for sub with no tax and contribution") {
+        val invoiceItems = List(
+          InvoiceItemWithTaxDetails(
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            TaxDetails = None,
+            Id = "8a12867e90766628019084f204fa5336",
+            InvoiceId = "8a12867e90766628019084f204f15333",
+            ChargeAmount = 5,
+          ),
+          InvoiceItemWithTaxDetails(
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            TaxDetails = None,
+            Id = "8a12867e90766628019084f204fa5335",
+            InvoiceId = "8a12867e90766628019084f204f15333",
+            ChargeAmount = -15,
+          ),
+          InvoiceItemWithTaxDetails(
+            "8a12867e90766628019084f204fa5334",
+            "2024-07-05T23:09:31.000+01:00",
+            -10,
+            None,
+            "8a12867e90766628019084f204f15333",
+          ),
+        )
+
+        val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
+          invoiceItems,
+        )
+        val adjustmentAmount = adjustments.map(item => item.Amount).sum
+        assert(adjustments.length)(equalTo(2)) &&
+        assert(adjustmentAmount)(equalTo(20))
       },
       test("Deserialisation of the invoice adjustment response works") {
         val responseJson =

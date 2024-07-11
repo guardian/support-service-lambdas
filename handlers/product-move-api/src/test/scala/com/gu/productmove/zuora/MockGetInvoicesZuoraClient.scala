@@ -396,7 +396,7 @@ object MockGetInvoicesZuoraClient {
       |            "TaxAmount": 0,
       |            "Id": "8a12867e90766628019084f204fa5334",
       |            "InvoiceId": "8a12867e90766628019084f204f15333",
-      |            "ChargeAmount": 0
+      |            "ChargeAmount": -10
       |        },
       |        {
       |            "ChargeDate": "2024-07-05T23:09:31.000+01:00",
