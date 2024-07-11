@@ -135,10 +135,13 @@ export const BillingAccountRecordSchema = z.object({
 export const BillingAccountRecordsSchema = z.array(BillingAccountRecordSchema);
 export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
 
-export const BillingAccountRecordWithSuccessSchema = BillingAccountRecordSchema.extend({
-	crmIdRemovedSuccessfully: z.boolean(),
-});
-export type BillingAccountRecordWithSuccess = z.infer<typeof BillingAccountRecordWithSuccessSchema>;
+export const BillingAccountRecordWithSuccessSchema =
+	BillingAccountRecordSchema.extend({
+		crmIdRemovedSuccessfully: z.boolean(),
+	});
+export type BillingAccountRecordWithSuccess = z.infer<
+	typeof BillingAccountRecordWithSuccessSchema
+>;
 
 const SalesforceQueryResponseSchema = z.object({
 	totalSize: z.number(),
@@ -248,5 +251,5 @@ const SalesforceUpdateResponseArraySchema = z.array(
 	SalesforceUpdateResponseSchema,
 );
 export type SalesforceUpdateResponseArray = z.infer<
-typeof SalesforceUpdateResponseArraySchema
+	typeof SalesforceUpdateResponseArraySchema
 >;

@@ -1,9 +1,18 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { type App } from 'aws-cdk-lib';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
+import type { App } from 'aws-cdk-lib';
+import {
+	Alarm,
+	Metric,
+	Stats,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
+import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import { JsonPath, Map, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
@@ -12,6 +21,12 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		super(scope, id, props);
 
 		const appName = 'zuora-salesforce-link-remover';
+
+		const allowPutMetric = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['cloudwatch:PutMetricData'],
+			resources: ['*'],
+		});
 
 		const getSalesforceBillingAccountsLambda = new GuLambdaFunction(
 			this,
@@ -34,6 +49,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
 						],
 					}),
+					allowPutMetric,
 				],
 			},
 		);
@@ -59,6 +75,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Zuora/SupportServiceLambdas-WeibUa`,
 						],
 					}),
+					allowPutMetric,
 				],
 			},
 		);
@@ -84,6 +101,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
 						],
 					}),
+					allowPutMetric,
 				],
 			},
 		);
@@ -147,5 +165,42 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				definition,
 			},
 		);
+
+		const topic = Topic.fromTopicArn(
+			this,
+			'Topic',
+			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
+		);
+
+		const lambdaFunctions = [
+			getSalesforceBillingAccountsLambda,
+			updateZuoraBillingAccountsLambda,
+			updateSfBillingAccountsLambda,
+		];
+
+		lambdaFunctions.forEach((lambdaFunction, index) => {
+			const alarm = new Alarm(this, `alarm-${index}`, {
+				alarmName: `Zuora <-> Salesforce link remover - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
+				alarmDescription:
+					'Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.',
+				datapointsToAlarm: 1,
+				evaluationPeriods: 1,
+				actionsEnabled: true,
+				comparisonOperator:
+					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: Stats.SUM,
+					period: Duration.seconds(60),
+					dimensionsMap: {
+						FunctionName: lambdaFunction.functionName,
+					},
+				}),
+				threshold: 0,
+				treatMissingData: TreatMissingData.MISSING,
+			});
+			alarm.addAlarmAction(new SnsAction(topic));
+		});
 	}
 }

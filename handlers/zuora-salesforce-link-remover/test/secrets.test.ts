@@ -1,4 +1,4 @@
-import { getSalesforceSecretNames, getZuoraSecretName } from "../src/secrets";
+import { getSalesforceSecretNames, getZuoraSecretName } from '../src/secrets';
 
 describe('getSalesforceSecretNames', () => {
 	beforeEach(() => {
