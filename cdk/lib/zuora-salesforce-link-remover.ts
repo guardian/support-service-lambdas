@@ -3,7 +3,13 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
-import { ComparisonOperator, Metric, Stats, TreatMissingData, Unit } from 'aws-cdk-lib/aws-cloudwatch';
+import {
+	ComparisonOperator,
+	Metric,
+	Stats,
+	TreatMissingData,
+	Unit,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -22,7 +28,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			actions: ['cloudwatch:PutMetricData'],
 			resources: ['*'],
 		});
-		  
+
 		const getSalesforceBillingAccountsLambda = new GuLambdaFunction(
 			this,
 			'get-billing-accounts-lambda',
@@ -163,31 +169,32 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		const alarm = new aws_cloudwatch.Alarm(this, 'alarm', {
 			alarmName: `Zuora <-> Salesforce link remover - something went wrong - ${this.stage}`,
-			alarmDescription: 'Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.',
+			alarmDescription:
+				'Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.',
 			datapointsToAlarm: 1,
 			evaluationPeriods: 1,
 			actionsEnabled: true,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			metric: new Metric({
 				dimensionsMap: {
-					"Stage": this.stage,
+					Stage: this.stage,
 				},
 				metricName: 'failure_in_zuora_salesforce_link-remover',
-				namespace: "zuora-salesforce-link-remover",
+				namespace: 'zuora-salesforce-link-remover',
 				statistic: Stats.SUM,
 				period: Duration.seconds(60),
-				unit: Unit.COUNT
+				unit: Unit.COUNT,
 			}),
 			threshold: 0,
-			treatMissingData: TreatMissingData.MISSING
+			treatMissingData: TreatMissingData.MISSING,
 		});
 
 		const topic = Topic.fromTopicArn(
-			this, 
-			'Topic', 
-			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`
+			this,
+			'Topic',
+			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
 		);
 
 		alarm.addAlarmAction(new SnsAction(topic));
-  }
+	}
 }
