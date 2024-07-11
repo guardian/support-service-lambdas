@@ -94,10 +94,6 @@ object RefundSupporterPlus {
       )
     } yield ()
 
-  def identifyCharges(invoiceItems: List[InvoiceItemWithTaxDetails]) = {
-    val (charges, discounts) = invoiceItems.partition(_.amountWithTax < 0)
-  }
-
   def buildInvoiceItemAdjustments(
       invoiceItems: List[InvoiceItemWithTaxDetails],
   ): List[InvoiceItemAdjustment.PostBody] = {
@@ -112,7 +108,7 @@ object RefundSupporterPlus {
     // and discounts as this takes the invoice to values which are not allowed by Zuora. Instead we need to subtract
     // the discount from the charge and create an adjustment for the difference.
     val (charges, discounts) = invoiceItems
-      .filter(_.amountWithTax != 0) // Ignore any items with a zero amount, they will be the contribution charge where the user is just paying the base price 
+      .filter(_.amountWithTax != 0) // Ignore any items with a zero amount, they will be the contribution charge where the user is just paying the base price
       .partition(_.amountWithTax < 0)
     val maybeDiscount = discounts.headOption
     val discountedCharge = maybeDiscount.flatMap(discount =>
@@ -125,7 +121,7 @@ object RefundSupporterPlus {
     val chargesWithDiscounts = charges
       .map(charge => ChargeWithDiscount(charge, if discountedCharge.contains(charge) then maybeDiscount else None))
 
-    val chargeAdjustments = chargesWithDiscounts.flatMap { chargeWithDiscount =>
+    chargesWithDiscounts.flatMap { chargeWithDiscount =>
       val discountChargeAmount = chargeWithDiscount.discount.map(_.ChargeAmount).getOrElse(BigDecimal(0))
       val discountTaxAmount = chargeWithDiscount.discount.map(_.taxAmount).getOrElse(BigDecimal(0))
       val chargeAdjustment =
@@ -158,6 +154,5 @@ object RefundSupporterPlus {
 
       chargeAdjustment ++ taxAdjustment
     }
-    chargeAdjustments
   }
 }
