@@ -1,35 +1,20 @@
 package com.gu.productmove.refund
 
-import com.amazonaws.services.lambda.runtime.RequestHandler
-import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
+import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, OutputBody, Success, TransactionError}
-import zio.{Clock, RIO, Task, ZIO}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.TransactionError
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
-import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
+import com.gu.productmove.zuora.*
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import com.gu.productmove.zuora.{
-  CreditBalanceAdjustment,
-  GetAccountLive,
-  GetInvoice,
-  GetRefundInvoiceDetails,
-  GetSubscriptionLive,
-  InvoiceItemAdjustment,
-  RefundInvoiceDetails,
-  SubscribeLive,
-  ZuoraCancel,
-  ZuoraCancelLive,
-  ZuoraSetCancellationReason,
-}
-import sttp.capabilities.zio.ZioStreams
 import sttp.client3.SttpBackend
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
+import zio.{Task, ZIO}
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 
 case class RefundInput(subscriptionName: SubscriptionName)
+
+case class ChargeWithDiscount(charge: InvoiceItemWithTaxDetails, discount: Option[InvoiceItemWithTaxDetails])
 
 object RefundInput {
   import SubscriptionName.*
@@ -117,24 +102,49 @@ object RefundSupporterPlus {
     // - one for the charge where the SourceType is "InvoiceDetail" and SourceId is the invoice item id
     // - one for the tax where the SourceType is "Tax" and SourceId is the taxation item id
     // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
-    invoiceItems.filter(_.amountWithTax != 0).flatMap { invoiceItem =>
+
+    // We are dealing with a refund invoice created by the back dated cancellation, so all of the charges are the opposite way around to the original invoice.
+    // i.e. Charges will have a negative value and discounts will have a positive value.
+    // Unfortunately we can't just create an adjustment for each of the charges and discounts because
+    // because adjustments are applied in sequence and Zuora doesn't allow the invoice amount go from negative to positive.
+    // This means we have to calculate the overall adjustment and then adjust the invoice in one go.
+    val (charges, discounts) = invoiceItems
+      .filter(
+        _.amountWithTax != 0,
+      ) // Ignore any items with a zero amount, they will be the contribution charge where the user is just paying the base price
+      .partition(_.AppliedToInvoiceItemId.isEmpty) // Discounts have an AppliedToInvoiceItemId
+
+    val maybeDiscount = discounts.headOption
+    val maybeDiscountedCharge =
+      maybeDiscount.flatMap(discount => charges.find(charge => discount.AppliedToInvoiceItemId.contains(charge.Id)))
+
+    val chargesWithDiscounts = charges
+      .map(charge => ChargeWithDiscount(charge, if maybeDiscountedCharge.contains(charge) then maybeDiscount else None))
+
+    chargesWithDiscounts.flatMap { chargeWithDiscount =>
+      val discountChargeAmount = chargeWithDiscount.discount.map(_.ChargeAmount).getOrElse(BigDecimal(0))
+      val discountTaxAmount = chargeWithDiscount.discount.map(_.taxAmount).getOrElse(BigDecimal(0))
       val chargeAdjustment =
         List(
           InvoiceItemAdjustment.PostBody(
-            AdjustmentDate = invoiceItem.chargeDateAsDate,
-            Amount = invoiceItem.ChargeAmount.abs,
-            InvoiceId = invoiceItem.InvoiceId,
-            SourceId = invoiceItem.Id,
+            AdjustmentDate = chargeWithDiscount.charge.chargeDateAsDate,
+            // ChargeAmount will be negative for charges and positive for discounts,
+            // we need to invert this for the adjustments
+            Amount = chargeWithDiscount.charge.ChargeAmount.abs - discountChargeAmount,
+            InvoiceId = chargeWithDiscount.charge.InvoiceId,
+            SourceId = chargeWithDiscount.charge.Id,
             SourceType = "InvoiceDetail",
           ),
         )
-      val taxAdjustment = invoiceItem.TaxDetails match {
+      val taxAdjustment = chargeWithDiscount.charge.TaxDetails match {
         case Some(taxDetails) =>
           List(
             InvoiceItemAdjustment.PostBody(
-              AdjustmentDate = invoiceItem.chargeDateAsDate,
-              Amount = taxDetails.amount.abs,
-              InvoiceId = invoiceItem.InvoiceId,
+              AdjustmentDate = chargeWithDiscount.charge.chargeDateAsDate,
+              // Tax amount will be negative for charges and positive for discounts,
+              // we need to invert this for the adjustments
+              Amount = taxDetails.amount.abs - discountTaxAmount,
+              InvoiceId = chargeWithDiscount.charge.InvoiceId,
               SourceId = taxDetails.taxationId,
               SourceType = "Tax",
             ),
