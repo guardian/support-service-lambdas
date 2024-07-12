@@ -90,13 +90,15 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
       },
       test("buildInvoiceAdjustments function handles discounts correctly for sub with tax and no contribution") {
         val invoiceItems = List(
+          // Contribution charge
           InvoiceItemWithTaxDetails(
-            "8a12867e90766628019084f204fa5334",
-            "2024-07-05T23:09:31.000+01:00",
-            0,
-            None,
-            "8a12867e90766628019084f204f15333",
+            Id = "8a12867e90766628019084f204fa5334",
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            ChargeAmount = 0,
+            TaxDetails = None,
+            InvoiceId = "8a12867e90766628019084f204f15333",
           ),
+          // Subscription charge
           InvoiceItemWithTaxDetails(
             ChargeDate = "2024-07-05T23:09:31.000+01:00",
             TaxDetails = Some(TaxDetails(-0.91, "8a12867e90766628019084f204fa5338")),
@@ -104,8 +106,10 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
             InvoiceId = "8a12867e90766628019084f204f15333",
             ChargeAmount = -9.09,
           ),
+          // The discount
           InvoiceItemWithTaxDetails(
             ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            AppliedToInvoiceItemId = Some("8a12867e90766628019084f204fa5335"),
             TaxDetails = Some(TaxDetails(0.45, "8a12867e90766628019084f204fa5339")),
             Id = "8a12867e90766628019084f204fa5336",
             InvoiceId = "8a12867e90766628019084f204f15333",
@@ -122,13 +126,15 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
       },
       test("buildInvoiceAdjustments function handles discounts correctly for sub with tax and contribution") {
         val invoiceItems = List(
+          // Contribution charge
           InvoiceItemWithTaxDetails(
+            Id = "8a12867e90766628019084f204fa5334",
             ChargeDate = "2024-07-05T23:09:31.000+01:00",
-            TaxDetails = Some(TaxDetails(0.45, "8a12867e90766628019084f204fa5339")),
-            Id = "8a12867e90766628019084f204fa5336",
+            ChargeAmount = -10,
+            TaxDetails = None,
             InvoiceId = "8a12867e90766628019084f204f15333",
-            ChargeAmount = 4.55,
           ),
+          // Subscription charge
           InvoiceItemWithTaxDetails(
             ChargeDate = "2024-07-05T23:09:31.000+01:00",
             TaxDetails = Some(TaxDetails(-0.91, "8a12867e90766628019084f204fa5338")),
@@ -136,12 +142,14 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
             InvoiceId = "8a12867e90766628019084f204f15333",
             ChargeAmount = -9.09,
           ),
+          // The discount
           InvoiceItemWithTaxDetails(
-            "8a12867e90766628019084f204fa5334",
-            "2024-07-05T23:09:31.000+01:00",
-            -10,
-            None,
-            "8a12867e90766628019084f204f15333",
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            AppliedToInvoiceItemId = Some("8a12867e90766628019084f204fa5335"),
+            TaxDetails = Some(TaxDetails(0.45, "8a12867e90766628019084f204fa5339")),
+            Id = "8a12867e90766628019084f204fa5336",
+            InvoiceId = "8a12867e90766628019084f204f15333",
+            ChargeAmount = 4.55,
           ),
         )
 
@@ -154,13 +162,15 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
       },
       test("buildInvoiceAdjustments function handles discounts correctly for sub with no tax and contribution") {
         val invoiceItems = List(
+          // Contribution charge
           InvoiceItemWithTaxDetails(
+            Id = "8a12867e90766628019084f204fa5334",
             ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            ChargeAmount = -10,
             TaxDetails = None,
-            Id = "8a12867e90766628019084f204fa5336",
             InvoiceId = "8a12867e90766628019084f204f15333",
-            ChargeAmount = 5,
           ),
+          // Subscription charge
           InvoiceItemWithTaxDetails(
             ChargeDate = "2024-07-05T23:09:31.000+01:00",
             TaxDetails = None,
@@ -168,12 +178,14 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
             InvoiceId = "8a12867e90766628019084f204f15333",
             ChargeAmount = -15,
           ),
+          // The discount
           InvoiceItemWithTaxDetails(
-            "8a12867e90766628019084f204fa5334",
-            "2024-07-05T23:09:31.000+01:00",
-            -10,
-            None,
-            "8a12867e90766628019084f204f15333",
+            ChargeDate = "2024-07-05T23:09:31.000+01:00",
+            AppliedToInvoiceItemId = Some("8a12867e90766628019084f204fa5335"),
+            TaxDetails = None,
+            Id = "8a12867e90766628019084f204fa5336",
+            InvoiceId = "8a12867e90766628019084f204f15333",
+            ChargeAmount = 5,
           ),
         )
 
@@ -182,6 +194,7 @@ object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
         )
         val adjustmentAmount = adjustments.map(item => item.Amount).sum
         assert(adjustments.length)(equalTo(2)) &&
+        assert(adjustments.find(_.SourceId == "8a12867e90766628019084f204fa5335").get.Amount)(equalTo(10)) &&
         assert(adjustmentAmount)(equalTo(20))
       },
       test("Deserialisation of the invoice adjustment response works") {

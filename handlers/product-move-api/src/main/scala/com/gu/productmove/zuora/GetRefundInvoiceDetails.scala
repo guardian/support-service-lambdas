@@ -27,7 +27,7 @@ object GetRefundInvoiceDetailsLive {
 
 private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundInvoiceDetails {
   private def getInvoiceItemsQuery(subscriptionName: SubscriptionName) =
-    s"select Id, ChargeAmount, TaxAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
+    s"select Id, AppliedToInvoiceItemId, ChargeAmount, TaxAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
   private def getTaxationItemsQuery(invoiceId: String) =
     s"select Id, InvoiceItemId, InvoiceId from TaxationItem where InvoiceId = '$invoiceId'"
   override def get(subscriptionName: SubscriptionName): Task[RefundInvoiceDetails] = {
@@ -61,10 +61,11 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
       negativeInvoiceId,
       negativeInvoiceItems.map(i =>
         InvoiceItemWithTaxDetails(
-          i.Id,
-          i.ChargeDate,
-          i.ChargeAmount,
-          if (i.TaxAmount != 0) {
+          Id = i.Id,
+          AppliedToInvoiceItemId = i.AppliedToInvoiceItemId,
+          ChargeDate = i.ChargeDate,
+          ChargeAmount = i.ChargeAmount,
+          TaxDetails = if (i.TaxAmount != 0) {
             println(s"Tax amount for invoice item $i is ${i.TaxAmount} searching for matching taxation item")
             val item = taxationItems.find(_.InvoiceItemId == i.Id)
             if (item.isDefined)
@@ -75,7 +76,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
           } else {
             None
           },
-          i.InvoiceId,
+          InvoiceId = i.InvoiceId,
         ),
       ),
     )
@@ -132,6 +133,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
   case class TaxationItems(records: List[TaxationItem])
   case class InvoiceItem(
       Id: String,
+      AppliedToInvoiceItemId: Option[String] = None,
       ChargeDate: String,
       ChargeAmount: BigDecimal,
       TaxAmount: BigDecimal,
@@ -158,6 +160,7 @@ case class RefundInvoiceDetails(
 case class TaxDetails(amount: BigDecimal, taxationId: String)
 case class InvoiceItemWithTaxDetails(
     Id: String,
+    AppliedToInvoiceItemId: Option[String] = None,
     ChargeDate: String,
     ChargeAmount: BigDecimal,
     TaxDetails: Option[TaxDetails],

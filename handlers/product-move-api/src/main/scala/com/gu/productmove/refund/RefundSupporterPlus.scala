@@ -108,18 +108,17 @@ object RefundSupporterPlus {
     // and discounts as this takes the invoice to values which are not allowed by Zuora. Instead we need to subtract
     // the discount from the charge and create an adjustment for the difference.
     val (charges, discounts) = invoiceItems
-      .filter(_.amountWithTax != 0) // Ignore any items with a zero amount, they will be the contribution charge where the user is just paying the base price
+      .filter(
+        _.amountWithTax != 0,
+      ) // Ignore any items with a zero amount, they will be the contribution charge where the user is just paying the base price
       .partition(_.amountWithTax < 0)
+
     val maybeDiscount = discounts.headOption
-    val discountedCharge = maybeDiscount.flatMap(discount =>
-      charges.find(charge =>
-        charge.ChargeAmount.abs >= discount.ChargeAmount &&
-          charge.taxAmount.abs >= discount.taxAmount,
-      ),
-    )
+    val maybeDiscountedCharge =
+      maybeDiscount.flatMap(discount => charges.find(charge => discount.AppliedToInvoiceItemId.contains(charge.Id)))
 
     val chargesWithDiscounts = charges
-      .map(charge => ChargeWithDiscount(charge, if discountedCharge.contains(charge) then maybeDiscount else None))
+      .map(charge => ChargeWithDiscount(charge, if maybeDiscountedCharge.contains(charge) then maybeDiscount else None))
 
     chargesWithDiscounts.flatMap { chargeWithDiscount =>
       val discountChargeAmount = chargeWithDiscount.discount.map(_.ChargeAmount).getOrElse(BigDecimal(0))
