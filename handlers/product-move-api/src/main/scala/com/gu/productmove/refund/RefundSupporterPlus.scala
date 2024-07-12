@@ -103,15 +103,16 @@ object RefundSupporterPlus {
     // - one for the tax where the SourceType is "Tax" and SourceId is the taxation item id
     // https://www.zuora.com/developer/api-references/older-api/operation/Object_POSTInvoiceItemAdjustment/#!path=SourceType&t=request
 
-    // Charges will have a negative value because we are dealing with the negative invoice created by cancellation,
-    // discounts will have a positive value. Unfortunately we can't just create an adjustment for each of the charges
-    // and discounts as this takes the invoice to values which are not allowed by Zuora. Instead we need to subtract
-    // the discount from the charge and create an adjustment for the difference.
+    // We are dealing with a refund invoice created by the back dated cancellation, so all of the charges are the opposite way around to the original invoice.
+    // i.e. Charges will have a negative value and discounts will have a positive value.
+    // Unfortunately we can't just create an adjustment for each of the charges and discounts because
+    // because adjustments are applied in sequence and Zuora doesn't allow the invoice amount go from negative to positive.
+    // This means we have to calculate the overall adjustment and then adjust the invoice in one go.
     val (charges, discounts) = invoiceItems
       .filter(
         _.amountWithTax != 0,
       ) // Ignore any items with a zero amount, they will be the contribution charge where the user is just paying the base price
-      .partition(_.amountWithTax < 0)
+      .partition(_.AppliedToInvoiceItemId.isEmpty) // Discounts have an AppliedToInvoiceItemId
 
     val maybeDiscount = discounts.headOption
     val maybeDiscountedCharge =
