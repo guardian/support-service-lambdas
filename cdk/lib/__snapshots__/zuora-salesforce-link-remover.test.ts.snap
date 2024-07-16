@@ -443,6 +443,38 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                     ],
                   ],
                 },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ",
+                    ],
+                  ],
+                },
               ],
             },
             {
@@ -695,6 +727,38 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                         "Ref": "AWS::AccountId",
                       },
                       ":secret:DEV/Salesforce/User/integrationapiuser-rvxxrG",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ",
                     ],
                   ],
                 },
@@ -1716,6 +1780,38 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                     ],
                   ],
                 },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ",
+                    ],
+                  ],
+                },
               ],
             },
             {
@@ -1968,6 +2064,38 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                         "Ref": "AWS::AccountId",
                       },
                       ":secret:DEV/Salesforce/User/integrationapiuser-rvxxrG",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ",
                     ],
                   ],
                 },

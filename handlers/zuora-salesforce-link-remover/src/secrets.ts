@@ -12,7 +12,7 @@ export function getSalesforceSecretNames(stage: Stage): SecretNames {
 			return {
 				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
 				connectedAppSecretName:
-					'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+					'PROD/Salesforce/ConnectedApp/BillingAccountRemover',
 			};
 		default:
 			return {
