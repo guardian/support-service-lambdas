@@ -77,7 +77,7 @@ describe('getSecretNameDependingOnEnvironment', () => {
 		const expected = {
 			apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
 			connectedAppSecretName:
-				'PROD/Salesforce/ConnectedApp/AwsConnectorSandbox',
+				'PROD/Salesforce/ConnectedApp/BillingAccountRemover',
 		};
 		expect(actual).toEqual(expected);
 	});

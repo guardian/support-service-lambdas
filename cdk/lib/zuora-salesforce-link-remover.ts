@@ -48,6 +48,8 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ`,
 						],
 					}),
 					allowPutMetric,
@@ -100,6 +102,8 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ`,
 						],
 					}),
 					allowPutMetric,
