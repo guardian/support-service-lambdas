@@ -308,6 +308,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
+            "BillingAccountIds": "",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stage": "CODE",
@@ -1580,6 +1581,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
+            "BillingAccountIds": "",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stage": "PROD",
