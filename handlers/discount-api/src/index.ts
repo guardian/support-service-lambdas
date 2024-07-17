@@ -1,9 +1,20 @@
+import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type { FetchInterface } from '@modules/zuora/requestLogger';
 import { RequestLogger } from '@modules/zuora/requestLogger';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { discountEndpoint } from './discountEndpoint';
+import dayjs from 'dayjs';
+import {
+	applyDiscountEndpoint,
+	previewDiscountEndpoint,
+} from './discountEndpoint';
+import { applyDiscountSchema } from './requestSchema';
+import type {
+	ApplyDiscountResponseBody,
+	EligibilityCheckResponseBody,
+} from './responseSchema';
 
 const stage = process.env.STAGE as Stage | undefined;
 export const handler: (
@@ -20,6 +31,9 @@ export const handler: (
 	return response;
 };
 
+// this is a type safe version of stringify
+const stringify = <T>(t: T): string => JSON.stringify(t);
+
 export const routeRequest = async (
 	event: APIGatewayProxyEvent,
 	fetchInterface: FetchInterface,
@@ -28,23 +42,40 @@ export const routeRequest = async (
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				console.log('Applying a discount');
-				return await discountEndpoint(
+				const subscriptionNumber = applyDiscountSchema.parse(
+					JSON.parse(getIfDefined(event.body, 'No body was provided')),
+				).subscriptionNumber;
+				const { response, emailPayload } = await applyDiscountEndpoint(
 					stage ?? 'CODE',
-					false,
 					event.headers,
-					event.body,
+					subscriptionNumber,
+					dayjs(),
 					fetchInterface,
 				);
+				if (emailPayload) {
+					await sendEmail(stage ?? 'CODE', emailPayload);
+				}
+				return {
+					body: stringify<ApplyDiscountResponseBody>(response),
+					statusCode: 200,
+				};
 			}
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
 				console.log('Previewing discount');
-				return await discountEndpoint(
+				const subscriptionNumber = applyDiscountSchema.parse(
+					JSON.parse(getIfDefined(event.body, 'No body was provided')),
+				).subscriptionNumber;
+				const result = await previewDiscountEndpoint(
 					stage ?? 'CODE',
-					true,
 					event.headers,
-					event.body,
+					subscriptionNumber,
+					dayjs(),
 					fetchInterface,
 				);
+				return {
+					body: stringify<EligibilityCheckResponseBody>(result),
+					statusCode: 200,
+				};
 			}
 			default:
 				return {
@@ -62,7 +93,7 @@ export const routeRequest = async (
 			};
 		} else {
 			return {
-				body: JSON.stringify(error),
+				body: 'Internal server error, check the logs for more information',
 				statusCode: 500,
 			};
 		}

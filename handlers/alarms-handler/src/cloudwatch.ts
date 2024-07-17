@@ -3,8 +3,8 @@ import {
 	ListTagsForResourceCommand,
 } from '@aws-sdk/client-cloudwatch';
 import type { Tag } from '@aws-sdk/client-cloudwatch';
-import {fromTemporaryCredentials} from "@aws-sdk/credential-providers";
-import { checkDefined } from '@modules/nullAndUndefined';
+import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 const buildCrossAccountCloudwatchClient = (roleArn: string) => {
 	const credentials = fromTemporaryCredentials({
@@ -12,18 +12,18 @@ const buildCrossAccountCloudwatchClient = (roleArn: string) => {
 	});
 
 	return new CloudWatchClient({ region: 'eu-west-1', credentials });
-}
+};
 
 // Use the awsAccountId of the alarm to decide which credentials are needed to fetch the alarm's tags
 const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
-	const mobileAccountId = checkDefined<string>(
+	const mobileAccountId = getIfDefined<string>(
 		process.env['MOBILE_AWS_ACCOUNT_ID'],
 		'MOBILE_AWS_ACCOUNT_ID environment variable not set',
 	);
 	if (awsAccountId === mobileAccountId) {
 		console.log('Using mobile account credentials to fetch tags');
 
-		const roleArn = checkDefined<string>(
+		const roleArn = getIfDefined<string>(
 			process.env['MOBILE_ROLE_ARN'],
 			'MOBILE_ROLE_ARN environment variable not set',
 		);
@@ -31,14 +31,14 @@ const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
 		return buildCrossAccountCloudwatchClient(roleArn);
 	}
 
-	const targetingAccountId = checkDefined<string>(
+	const targetingAccountId = getIfDefined<string>(
 		process.env['TARGETING_AWS_ACCOUNT_ID'],
 		'TARGETING_AWS_ACCOUNT_ID environment variable not set',
 	);
 	if (awsAccountId === targetingAccountId) {
 		console.log('Using targeting account credentials to fetch tags');
 
-		const roleArn = checkDefined<string>(
+		const roleArn = getIfDefined<string>(
 			process.env['TARGETING_ROLE_ARN'],
 			'TARGETING_ROLE_ARN environment variable not set',
 		);
@@ -47,7 +47,7 @@ const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
 	}
 
 	return new CloudWatchClient({ region: 'eu-west-1' });
-}
+};
 
 const getTags = async (
 	alarmArn: string,

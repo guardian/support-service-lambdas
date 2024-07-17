@@ -17,6 +17,16 @@ export const groupBy = <T>(
 	}, {});
 };
 
+export const sortBy = <T>(array: T[], fn: (item: T) => string): T[] => {
+	return array.sort((posGT, negGT) => {
+		const posGTKey = fn(posGT);
+		const negGTKey = fn(negGT);
+		if (posGTKey > negGTKey) return 1;
+		else if (posGTKey < negGTKey) return -1;
+		else return 0;
+	});
+};
+
 export const getSingleOrThrow = <T>(
 	array: T[],
 	error: (msg: string) => Error,

@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import type {
 	ChangePlanOrderAction,
@@ -59,11 +59,11 @@ export const previewResponseFromZuoraResponse = (
 	zuoraResponse: ZuoraPreviewResponse,
 	catalogInformation: CatalogInformation,
 ): PreviewResponse => {
-	const invoice = checkDefined(
+	const invoice = getIfDefined(
 		zuoraResponse.previewResult?.invoices[0],
 		'No invoice found in the preview response',
 	);
-	const contributionRefundAmount = checkDefined(
+	const contributionRefundAmount = getIfDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
@@ -72,7 +72,7 @@ export const previewResponseFromZuoraResponse = (
 		'No contribution refund amount found in the preview response',
 	);
 
-	const supporterPlusSubscriptionInvoiceItem = checkDefined(
+	const supporterPlusSubscriptionInvoiceItem = getIfDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
@@ -81,7 +81,7 @@ export const previewResponseFromZuoraResponse = (
 		'No supporter plus invoice item found in the preview response',
 	);
 
-	const supporterPlusContributionItem = checkDefined(
+	const supporterPlusContributionItem = getIfDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===

@@ -9,14 +9,15 @@
 		"it-test": "pnpm --stream -r run it-test",
 		"new-lambda": "pnpm hygen new-lambda api-gateway && pnpm install && cd ./cdk && yarn lint --fix && yarn test -u && git add ./lib/__snapshots__/*.test.ts.snap",
 		"prepare": "husky",
-		"format": "prettier --write handlers/**/*.ts modules/**/*.ts"
+		"fix-formatting": "pnpm -r run fix-formatting",
+		"check-formatting": "pnpm -r run check-formatting"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "8.0.1",
 		"@guardian/prettier": "^8.0.1",
 		"@types/jest": "^29.5.12",
 		"@types/node": "^20.11.27",
-		"esbuild": "^0.19.5",
+		"esbuild": "^0.23.0",
 		"eslint": "^8.57.0",
 		"eslint-import-resolver-typescript": "^3.6.1",
 		"eslint-plugin-import": "^2.29.1",

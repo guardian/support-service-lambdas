@@ -1,0 +1,10 @@
+{
+  "name": "modules",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "check-formatting": "prettier --check **/*.ts",
+    "fix-formatting": "prettier --write **/*.ts"
+  }
+}

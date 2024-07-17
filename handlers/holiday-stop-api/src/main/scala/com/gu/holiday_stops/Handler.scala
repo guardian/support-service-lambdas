@@ -1,9 +1,9 @@
 package com.gu.holiday_stops
 
-import java.io.{InputStream, OutputStream, Serializable}
+import java.io.{InputStream, OutputStream, PrintStream, Serializable}
 import java.time.LocalDate
 import java.util.UUID
-import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.lambda.runtime.{Context, LambdaRuntime}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
@@ -31,7 +31,9 @@ import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads, Writes}
 import zio.console.Console
 import zio.ZIO
+import zio.ZIO.debug
 
+import java.lang.{System => JavaSystem}
 import scala.util.Try
 
 object Handler extends Logging {
@@ -40,9 +42,22 @@ object Handler extends Logging {
 
   private val runtime = zio.Runtime.default
 
+  val printStream = new PrintStream(new OutputStream() {
+    override def write(b: Int): Unit =
+      LambdaRuntime.getLogger.log(Array(b.toByte))
+
+    override def write(b: Array[Byte]): Unit =
+      LambdaRuntime.getLogger.log(b)
+
+    override def write(b: Array[Byte], off: Int, len: Int): Unit =
+      LambdaRuntime.getLogger.log(b.slice(off, off + len))
+  })
+
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
     val configOp = runtime.unsafeRun {
+      JavaSystem.setOut(printStream)
+      JavaSystem.setErr(printStream)
       operationForEffects(
         RawEffects.response,
         RawEffects.stage,

@@ -1,62 +1,108 @@
-import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
-import { getNextInvoiceItems } from '@modules/zuora/billingPreview';
-import type { BillingPreview, RatePlan } from '@modules/zuora/zuoraSchemas';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
+import { getNextInvoiceTotal } from '@modules/zuora/billingPreview';
+import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 export class EligibilityChecker {
-	constructor(private catalog: ZuoraCatalogHelper) {}
+	constructor(private subscriptionNumber: string) {}
 
-	getNextBillingDateIfEligible = (
-		billingPreview: BillingPreview,
-		ratePlan: RatePlan,
+	assertGenerallyEligible = (
+		subscription: ZuoraSubscription,
+		accountBalance: number,
+		nextInvoiceItems: SimpleInvoiceItem[],
 	) => {
-		console.log(
-			'Checking that the next payment is at least at the catalog price',
+		console.log('Checking basic eligibility for the subscription');
+		this.assertValidState(
+			subscription.status === 'Active',
+			validationRequirements.isActive,
+			subscription.status,
 		);
-		const nextBillingDate = this.checkNextPaymentIsAtCatalogPrice(
-			billingPreview,
-			ratePlan,
+		this.assertValidState(
+			accountBalance === 0,
+			validationRequirements.zeroAccountBalance,
+			`${accountBalance}`,
 		);
 
-		console.log('Subscription is eligible for the discount');
-		return nextBillingDate;
+		console.log('Working out the date to apply the discount');
+		this.assertValidState(
+			nextInvoiceItems.every((item) => item.amount >= 0),
+			validationRequirements.noNegativePreviewItems,
+			JSON.stringify(nextInvoiceItems),
+		);
+
+		console.log('Subscription is generally eligible for the discount');
 	};
 
-	private checkNextPaymentIsAtCatalogPrice = (
-		billingPreview: BillingPreview,
-		ratePlan: RatePlan,
+	assertNextPaymentIsAtCatalogPrice = (
+		catalog: ZuoraCatalogHelper,
+		invoiceItems: SimpleInvoiceItem[],
+		discountableProductRatePlanId: string,
+		currency: string,
 	) => {
-		// Work out the catalog price of the rate plan
-		const currency = checkDefined(
-			ratePlan.ratePlanCharges[0]?.currency,
-			'No charges found on rate plan',
-		);
-		const totalPrice = this.catalog.getCatalogPrice(
-			ratePlan.productRatePlanId,
+		const catalogPrice = catalog.getCatalogPrice(
+			discountableProductRatePlanId,
 			currency,
 		);
 
 		// Work out how much the cost of the next invoice will be
-		const nextInvoiceItems = checkDefined(
-			getNextInvoiceItems(billingPreview),
-			`No next invoice found for account ${billingPreview.accountId}`,
-		);
-		const nextInvoiceTotal = sum(
-			nextInvoiceItems,
-			(item) => item.chargeAmount + item.taxAmount,
+		const nextInvoiceTotal = getIfDefined(
+			getNextInvoiceTotal(invoiceItems),
+			`No next invoice found for account containing ${this.subscriptionNumber}`,
 		);
 
-		if (nextInvoiceTotal < totalPrice) {
-			throw new ValidationError(
-				`Amount payable for next invoice (${nextInvoiceTotal} ${currency}) is less than the current 
-				catalog price of the subscription (${totalPrice} ${currency}), so it is not eligible for a discount`,
-			);
-		}
-		return checkDefined(
-			nextInvoiceItems[0]?.serviceStartDate,
-			'No next invoice date found in next invoice items',
+		this.assertValidState(
+			nextInvoiceTotal >= catalogPrice,
+			validationRequirements.atLeastCatalogPrice + ' of ' + catalogPrice,
+			nextInvoiceTotal + ' ' + currency,
 		);
 	};
+
+	assertEligibleForFreePeriod = (
+		discountProductRatePlanId: string,
+		subscription: ZuoraSubscription,
+		now: Dayjs,
+	) => {
+		const eligibilityChecker = new EligibilityChecker(
+			subscription.subscriptionNumber,
+		);
+		eligibilityChecker.assertValidState(
+			dayjs(subscription.contractEffectiveDate).add(2, 'months').isBefore(now),
+			validationRequirements.twoMonthsMin,
+			subscription.contractEffectiveDate.toDateString(),
+		);
+		eligibilityChecker.assertValidState(
+			subscription.ratePlans.every(
+				(rp) => rp.productRatePlanId !== discountProductRatePlanId,
+			),
+			validationRequirements.notAlreadyUsed,
+			discountProductRatePlanId,
+		);
+	};
+
+	assertValidState = (isValid: boolean, message: string, actual: string) => {
+		console.log(
+			`Asserting that ${this.subscriptionNumber} - <` + message + '>',
+		);
+		if (!isValid) {
+			throw new ValidationError(
+				`Subscription ${this.subscriptionNumber} did not meet precondition <` +
+					message +
+					'>' +
+					` (was ${actual})`,
+			);
+		}
+	};
 }
+
+export const validationRequirements = {
+	twoMonthsMin: 'subscription was taken out more than 2 months ago',
+	notAlreadyUsed: 'this discount has not already been used',
+	noNegativePreviewItems: `next invoice has no negative items`,
+	isActive: 'subscription status is active',
+	zeroAccountBalance: 'account balance is zero',
+	atLeastCatalogPrice: 'next invoice must be at least the catalog price',
+};

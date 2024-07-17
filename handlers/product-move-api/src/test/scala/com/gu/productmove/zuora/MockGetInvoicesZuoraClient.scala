@@ -385,6 +385,83 @@ object MockGetInvoicesZuoraClient {
     """
       |{"size":1,"records":[{"InvoiceItemId":"8ad0880589b2ecb50189b49e46f155c8","Id":"8ad0880589b2ecb50189b49e46df55c6","InvoiceId":"8ad0880589b2ecb50189b49e46e755c7"}],"done":true}
       |""".stripMargin
+
+  val responseWithDiscount =
+    """
+      |{
+      |    "size": 6,
+      |    "records": [
+      |        {
+      |            "ChargeDate": "2024-07-05T23:09:31.000+01:00",
+      |            "TaxAmount": 0,
+      |            "Id": "8a12867e90766628019084f204fa5334",
+      |            "InvoiceId": "8a12867e90766628019084f204f15333",
+      |            "ChargeAmount": -10
+      |        },
+      |        {
+      |            "ChargeDate": "2024-07-05T23:09:31.000+01:00",
+      |            "TaxAmount": -0.91,
+      |            "Id": "8a12867e90766628019084f204fa5335",
+      |            "InvoiceId": "8a12867e90766628019084f204f15333",
+      |            "ChargeAmount": -9.09
+      |        },
+      |        {
+      |            "ChargeDate": "2024-07-05T23:09:31.000+01:00",
+      |            "TaxAmount": 0.45,
+      |            "Id": "8a12867e90766628019084f204fa5336",
+      |            "InvoiceId": "8a12867e90766628019084f204f15333",
+      |            "ChargeAmount": 4.55
+      |        },
+      |        {
+      |            "ChargeDate": "2024-06-25T16:04:41.000+01:00",
+      |            "TaxAmount": 0.91,
+      |            "Id": "8a12997890498d8901904fed779d1763",
+      |            "InvoiceId": "8a12997890498d8901904fed778f1762",
+      |            "ChargeAmount": 9.09
+      |        },
+      |        {
+      |            "ChargeDate": "2024-06-25T16:04:41.000+01:00",
+      |            "TaxAmount": -0.45,
+      |            "Id": "8a12997890498d8901904fed779e1764",
+      |            "InvoiceId": "8a12997890498d8901904fed778f1762",
+      |            "ChargeAmount": -4.55
+      |        },
+      |        {
+      |            "ChargeDate": "2024-06-25T16:04:41.000+01:00",
+      |            "TaxAmount": 0,
+      |            "Id": "8a12997890498d8901904fed779e1765",
+      |            "InvoiceId": "8a12997890498d8901904fed778f1762",
+      |            "ChargeAmount": 0
+      |        }
+      |    ],
+      |    "done": true
+      |}
+      |""".stripMargin
+
+  val taxationItemsForDiscount =
+    """
+      |{
+      |    "size": 3,
+      |    "records": [
+      |        {
+      |            "InvoiceItemId": "8a12867e90766628019084f204fa5334",
+      |            "Id": "8a12867e90766628019084f204fa5337",
+      |            "InvoiceId": "8a12867e90766628019084f204f15333"
+      |        },
+      |        {
+      |            "InvoiceItemId": "8a12867e90766628019084f204fa5335",
+      |            "Id": "8a12867e90766628019084f204fa5338",
+      |            "InvoiceId": "8a12867e90766628019084f204f15333"
+      |        },
+      |        {
+      |            "InvoiceItemId": "8a12867e90766628019084f204fa5336",
+      |            "Id": "8a12867e90766628019084f204fa5339",
+      |            "InvoiceId": "8a12867e90766628019084f204f15333"
+      |        }
+      |    ],
+      |    "done": true
+      |}
+      |""".stripMargin
 }
 
 class MockGetInvoicesZuoraClient(response: MockGetInvoicesZuoraClient.ClientResponse) extends ZuoraClient {

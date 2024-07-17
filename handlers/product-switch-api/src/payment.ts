@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	creditInvoice,
 	getInvoice,
@@ -17,7 +17,7 @@ export const adjustNonCollectedInvoice = async (
 ) => {
 	console.log(`Writing off amount ${paymentAmount} from invoice ${invoiceId}`);
 	const invoiceItems = await getInvoiceItems(zuoraClient, invoiceId);
-	const supporterPlusInvoiceItem = checkDefined(
+	const supporterPlusInvoiceItem = getIfDefined(
 		invoiceItems.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId === supporterPlusChargeId,
@@ -45,7 +45,7 @@ export const takePaymentOrAdjustInvoice = async (
 	accountId: string,
 	paymentMethodId: string,
 ): Promise<number> => {
-	const invoiceNumber = checkDefined(
+	const invoiceNumber = getIfDefined(
 		switchResponse.invoiceNumbers?.at(0),
 		'No invoice number found in the switch response',
 	);

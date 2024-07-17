@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	generateSalesforceAccessToken,
 	getSalesforceQueryResult,
@@ -13,17 +13,17 @@ export const handler = async (event: {
 }): Promise<void> => {
 	const { queryJobId, filePath } = event;
 
-	const bucketName = checkDefined<string>(
+	const bucketName = getIfDefined<string>(
 		process.env.S3_BUCKET,
 		'S3_BUCKET environment variable not set',
 	);
 
-	const salesforceApiDomain = checkDefined<string>(
+	const salesforceApiDomain = getIfDefined<string>(
 		process.env.SALESFORCE_API_DOMAIN,
 		'SALESFORCE_API_DOMAIN environment variable not set',
 	);
 
-	const salesforceOauthSecretName = checkDefined<string>(
+	const salesforceOauthSecretName = getIfDefined<string>(
 		process.env.SALESFORCE_OAUTH_SECRET_NAME,
 		'SALESFORCE_OAUTH_SECRET_NAME environment variable not set',
 	);

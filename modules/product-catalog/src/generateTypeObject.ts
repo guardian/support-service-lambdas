@@ -1,5 +1,5 @@
 import { arrayToObject, distinct } from '@modules/arrayFunctions';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
@@ -50,7 +50,7 @@ const getBillingPeriodsForProduct = (
 	);
 const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 	const currencies = getCurrenciesForProduct(
-		checkDefined(
+		getIfDefined(
 			productRatePlans[0],
 			'Undefined productRatePlan in getZuoraProductObjects',
 		),

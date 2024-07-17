@@ -58,3 +58,13 @@ handles processing of holiday stops when a subscription is cancelled, unprocesse
 ### `GET` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd`
 returns details of existing holiday stops that should be manually refunded if a subscription is canceled. This includes unprocessed holiday stops for dates before the cancellation date defined by the effectiveCancellationDate query string parameter.
 
+## Tier Three (Digital + Print) product - June 2024
+The new 'Tier Three' (T3) product is a bundled product which contains Guardian Weekly as well as as digital benefits. That means
+that we need to allow subscribers to create holiday stops on it.
+
+To do this we need to add T3 to the list of supported products (`SupportedProduct.supporterProducts`) 
+so that we can recognise it when working with a subscription of this type (we do this by looking at the `ratePlan.productName`). 
+As soon as we recognise a T3 sub however we then treat the holiday stop as a Guardian Weekly.
+
+We also need to add T3 to the list of all processable product types which the HolidayStopProcessor uses to query 
+Salesforce for holiday stop records as this query filters on the name of the Zuora product.

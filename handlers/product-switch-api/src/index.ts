@@ -1,5 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
@@ -25,7 +25,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 		if (
 			parsedUrlPath.switchType === 'recurring-contribution-to-supporter-plus'
 		) {
-			const requestBody = checkDefined(
+			const requestBody = getIfDefined(
 				event.body,
 				'No request body was provided in call to recurring-contribution-to-supporter-plus',
 			);

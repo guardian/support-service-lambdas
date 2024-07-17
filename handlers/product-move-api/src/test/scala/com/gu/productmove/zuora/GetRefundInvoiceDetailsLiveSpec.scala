@@ -21,7 +21,6 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("GetInvoiceItemsForSubscriptionLive")(
       test("finds taxation details for a subscription") {
-
         for {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00631534"))
@@ -43,6 +42,28 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
               .find(_.TaxDetails.isDefined)
               .flatMap(_.TaxDetails)
               .contains(TaxDetails(-0.91, "8ad08dc989e27bbe0189e40e60f80ab8")),
+          )
+        }
+      },
+      test("finds discount details for a subscription") {
+        for {
+          result <- GetRefundInvoiceDetails
+            .get(SubscriptionName("A-S00631534"))
+            .provide(
+              GetRefundInvoiceDetailsLive.layer,
+              ZLayer.succeed(
+                new MockStackedGetInvoicesZuoraClient(
+                  mutable.Stack(
+                    MockGetInvoicesZuoraClient.responseWithDiscount,
+                    MockGetInvoicesZuoraClient.taxationItemsForDiscount,
+                  ),
+                ),
+              ),
+              ZuoraGetLive.layer,
+            )
+        } yield {
+          assertTrue(
+            result.negativeInvoiceItems.size == 3
           )
         }
       },

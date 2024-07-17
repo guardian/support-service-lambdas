@@ -47,7 +47,7 @@ val ratePlanCharge1 = RatePlanCharge(
   effectiveStartDate = LocalDate.of(2017, 12, 15),
   effectiveEndDate = LocalDate.of(2020, 11, 29),
   chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
-  billingPeriod = Monthly,
+  billingPeriod = Some(Monthly),
 )
 
 val ratePlanCharge2 = RatePlanCharge(
@@ -60,7 +60,7 @@ val ratePlanCharge2 = RatePlanCharge(
   effectiveStartDate = LocalDate.of(2021, 1, 15),
   effectiveEndDate = LocalDate.of(2022, 1, 15),
   chargedThroughDate = Some(LocalDate.of(2021, 2, 15)),
-  billingPeriod = Monthly,
+  billingPeriod = Some(Monthly),
 )
 
 val getSubscriptionResponse = GetSubscriptionResponse(
@@ -153,7 +153,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
           number = "C-00732721",
           price = Some(5.000000000),
           currency = "GBP",
-          billingPeriod = Monthly,
+          billingPeriod = Some(Monthly),
           effectiveStartDate = LocalDate.of(2022, 10, 28),
           effectiveEndDate = LocalDate.of(2022, 10, 28),
           chargedThroughDate = Some(LocalDate.of(2022, 10, 28)),
@@ -174,7 +174,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
           number = "C-00732747",
           price = Some(30.000000000),
           currency = "GBP",
-          billingPeriod = Monthly,
+          billingPeriod = Some(Monthly),
           chargedThroughDate = Some(LocalDate.of(2022, 11, 28)),
           effectiveStartDate = LocalDate.of(2022, 10, 28),
           effectiveEndDate = LocalDate.of(2023, 10, 28),
@@ -227,7 +227,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
           effectiveStartDate = LocalDate.of(2017, 12, 15),
           effectiveEndDate = LocalDate.of(2020, 11, 29),
           chargedThroughDate = None,
-          billingPeriod = Monthly,
+          billingPeriod = Some(Monthly),
         ),
       ),
     ),

@@ -53,7 +53,6 @@ export class BearerTokenProvider {
 		});
 
 		const json = JSON.parse(response.text);
-		console.log('Response from Zuora was: ', json);
 
 		return zuoraBearerTokenSchema.parse(json);
 	};

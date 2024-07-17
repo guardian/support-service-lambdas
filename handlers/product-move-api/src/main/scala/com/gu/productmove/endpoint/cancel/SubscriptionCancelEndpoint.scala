@@ -68,7 +68,7 @@ object SubscriptionCancelEndpoint {
     run(
       "A-S00878246",
       ExpectedInput(
-        "mma_value_for_money",// valid pick list value
+        "mma_value_for_money", // valid pick list value
       ),
       IdentityId("200235444"),
     ),
@@ -115,6 +115,11 @@ object SubscriptionCancelEndpoint {
               sttp.model.StatusCode.InternalServerError,
               jsonBody[InternalServerError]
                 .copy(info = EndpointIO.Info.empty.copy(description = Some("InternalServerError."))),
+            ),
+            oneOfVariant(
+              sttp.model.StatusCode.BadRequest,
+              jsonBody[BadRequest]
+                .copy(info = EndpointIO.Info.empty.copy(description = Some("Bad request."))),
             ),
           ),
         )

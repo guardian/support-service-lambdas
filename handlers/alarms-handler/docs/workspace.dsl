@@ -3,7 +3,6 @@ workspace {
         dev = person "Guardian Developer" "A software developer within the Guardian"
 
         googleChat = softwareSystem "Google Chat" "Group messaging for professional collaboration" "SaaS"
-        trello = softwareSystem "Trello" "Project management tool" "SaaS"
 
         existingApplication = softwareSystem "Existing application" "Any existing application within the AWS membership account"
 
@@ -14,12 +13,10 @@ workspace {
         }
 
         existingApplication -> snsTopic "Triggers" "Cloud Watch"
-        snsTopic -> queue "Sends message" "AWS Events"
-        queue -> lambda "Sends message" "AWS Events"
-        lambda -> googleChat "Starts thread if alarm is urgent" "Webhook"
-        lambda -> trello "Creates card always" "HTTP"
+        snsTopic -> queue "Sends message to" "AWS Events"
+        queue -> lambda "Sends message to" "AWS Events"
+        lambda -> googleChat "Starts thread in" "Webhook"
         dev -> googleChat "Is notified by" "Chat message"
-        dev -> trello "Views" "Dasbhoard"
     }
 
     views {

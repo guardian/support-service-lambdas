@@ -19,24 +19,28 @@ export const getDiscountFromSubscription = (
 	stage: Stage,
 	subscription: ZuoraSubscription,
 ) => {
-	const nonDiscountRatePlan = getDiscountableRatePlan(subscription);
+	const discountableProductRatePlanId =
+		getDiscountableRatePlan(subscription).productRatePlanId;
 	const discount =
-		ProductToDiscountMapping[stage][nonDiscountRatePlan.productRatePlanId];
+		ProductToDiscountMapping[stage][discountableProductRatePlanId];
 
-	if (discount == undefined) {
+	if (discount === undefined) {
 		throw new ValidationError(
 			`Subscription ${subscription.subscriptionNumber} is not eligible for any discount`,
 		);
 	}
 
-	return { discount, nonDiscountRatePlan };
+	return { discount, discountableProductRatePlanId };
 };
 
+export type EligibilityCheck = 'EligibleForFreePeriod' | 'AtCatalogPrice';
 export type Discount = {
 	productRatePlanId: string;
 	name: string;
 	upToPeriods: number;
 	upToPeriodsType: string;
+	sendEmail: boolean;
+	eligibilityCheckForRatePlan?: EligibilityCheck;
 };
 
 export const catalog = {
@@ -71,18 +75,24 @@ const Discounts: {
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
+			sendEmail: false,
+			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellation25pc12mo: {
 			productRatePlanId: '8ad08f068b5b9ca2018b5cadf0897ed3',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
+			sendEmail: false,
+			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellationFree2Mo: {
 			productRatePlanId: '8ad081dd8fd3d9df018fe2b6a7bc379d',
 			name: 'Cancellation Save Discount - Free for 2 months',
 			upToPeriods: 2,
 			upToPeriodsType: 'Months',
+			sendEmail: true,
+			eligibilityCheckForRatePlan: 'EligibleForFreePeriod',
 		},
 	},
 	PROD: {
@@ -91,18 +101,24 @@ const Discounts: {
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
+			sendEmail: false,
+			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellation25pc12mo: {
 			productRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
+			sendEmail: false,
+			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellationFree2Mo: {
 			productRatePlanId: '8a1299c28fb956e8018fe2c0e12c3ae4',
 			name: 'Cancellation Save Discount - Free for 2 months',
 			upToPeriods: 2,
 			upToPeriodsType: 'Months',
+			sendEmail: true,
+			eligibilityCheckForRatePlan: 'EligibleForFreePeriod',
 		},
 	},
 };

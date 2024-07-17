@@ -1,16 +1,20 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
 
 const sharedMobilePurchasesApps = [
 	'mobile-purchases-apple-pubsub',
 	'mobile-purchases-apple-subscription-status',
+	'mobile-purchases-apple-update-subscriptions',
 	'mobile-purchases-delete-user-subscription',
 	'mobile-purchases-feast-apple-pubsub',
+	'mobile-purchases-feast-apple-update-subscriptions',
 	'mobile-purchases-feast-google-pubsub',
+	'mobile-purchases-feast-google-update-subscriptions',
 	'mobile-purchases-google-oauth',
 	'mobile-purchases-google-pubsub',
 	'mobile-purchases-google-subscription-status',
+	'mobile-purchases-google-update-subscriptions',
 ];
 
 const teamToAppMappings: Record<Team, string[]> = {
@@ -35,6 +39,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-gocardless-sync',
 		'super-mode-calculator',
 		'support-reminders',
+		'zuora-salesforce-link-remover',
 	],
 	VALUE: [
 		'cancellation-sf-cases-api',
@@ -49,6 +54,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
+		'publishing-alarm-stack-cdk',
 		'salesforce-case-raiser',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
@@ -79,12 +85,16 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'frontend',
 		'it-test-runner',
 		'stripe-intent',
+		'workers',
+		'payment-api',
+
+		// support-service-lambdas
+		'digital-voucher-suspension-processor',
 
 		// other
 		'canonical-config',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
-		'workers',
 	],
 };
 
@@ -113,7 +123,7 @@ export const getTeams = (appName?: string): Team[] => {
 };
 
 export const getTeamWebhookUrl = (team: Team): string => {
-	return checkDefined<string>(
+	return getIfDefined<string>(
 		process.env[`${team}_WEBHOOK`],
 		`${team}_WEBHOOK environment variable not set`,
 	);

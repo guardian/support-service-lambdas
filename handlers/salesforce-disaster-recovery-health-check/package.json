@@ -6,7 +6,9 @@
 		"type-check": "tsc --noEmit",
 		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target src/handlers/*.ts",
 		"lint": "eslint src/**/*.ts",
-		"package": "pnpm type-check && pnpm lint && pnpm test && pnpm build && cd target; zip -qr salesforce-disaster-recovery-health-check.zip ./*.js"
+		"package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr salesforce-disaster-recovery-health-check.zip ./*.js",
+		"check-formatting": "prettier --check **/*.ts",
+		"fix-formatting": "prettier --write **/*.ts"
 	},
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.129"
