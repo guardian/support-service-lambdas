@@ -71,7 +71,7 @@ Resources:
           Properties:
             Schedule: !FindInMap [ StageMap, !Ref Stage, Schedule ]
             Description: Runs BillingAccountRemover
-            Enabled: True
+            Enabled: False
       FunctionName:
         !Sub sf-billing-account-remover-${Stage}
       Description: Remove Billing Accounts and related records from Salesforce (via Zuora)
