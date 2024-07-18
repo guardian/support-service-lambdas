@@ -22,24 +22,21 @@ export async function doSfAuth(
 		}
 
 		console.log('successfully authenticated with Salesforce');
-		console.log('parsing response...', response);
 
 		const sfAuthResponse = (await response.json()) as SfAuthResponse;
-		console.log('instance_url', sfAuthResponse.instance_url);
-		// const parseResponse =
-		// 	SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
-		// if (!parseResponse.success) {
-		// 	throw new Error(
-		// 		`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
-		// 	);
-		// }
+		const parseResponse =
+			SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
 
-		return sfAuthResponse;
+		if (!parseResponse.success) {
+			throw new Error(
+				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+			);
+		}
+
+		return parseResponse.data;
 	} catch (error) {
-		console.log('abc error:',error);
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		const errorText = `Error authenticating with Salesforce: ${errorMessage}`;
+		const errorText = `Error authenticating with Salesforce: ${JSON.stringify(error)}`;
 		throw new Error(errorText);
 	}
 }
@@ -94,17 +91,15 @@ export async function executeSalesforceQuery(
 			},
 		},
 	);
-	console.log('response:',response);
+
 	if (!response.ok) {
 		throw new Error(`Failed to execute query: ${response.statusText}`);
 	}
-	
+
 	const sfQueryResponse = (await response.json()) as SalesforceQueryResponse;
-	console.log('sfQueryResponse:',sfQueryResponse);
 
 	const parseResponse =
 		SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
-		console.log('parseResponse:',parseResponse);
 
 	if (!parseResponse.success) {
 		throw new Error(

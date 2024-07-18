@@ -21,7 +21,7 @@ export async function handler() {
 		if (!isValidStage(stage)) {
 			throw Error('Invalid Stage value');
 		}
-		console.log('stage:', stage);
+
 		const secretNames = getSalesforceSecretNames(stage);
 
 		const { authUrl, clientId, clientSecret } =
@@ -41,14 +41,9 @@ export async function handler() {
 			password,
 			token,
 		};
-		console.log('url', sfApiUserAuth.url);
-		console.log('clientId', clientId.substring(0, 3));
-		console.log('clientSecret', clientSecret.substring(0, 3));
-
 
 		const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
-		console.log('sfAuthResponse', sfAuthResponse.access_token.substring(0, 3));
-		console.log('instance_url', sfAuthResponse.instance_url);
+
 		//todo use test query for now, but update to prod query before release
 		//todo generate test data when we get to dev for updating zuora billing accounts
 		// const limit = 200;
@@ -56,7 +51,6 @@ export async function handler() {
 
 		const testQuery =
 			`select Id, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Id in ${BillingAccountIds}`;
-		console.log('testQuery:',testQuery);
 		const response: SalesforceQueryResponse = await executeSalesforceQuery(
 			sfAuthResponse,
 			testQuery,
