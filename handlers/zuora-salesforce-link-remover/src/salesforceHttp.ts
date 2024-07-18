@@ -36,8 +36,7 @@ export async function doSfAuth(
 
 		return parseResponse.data;
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		const errorText = `Error authenticating with Salesforce: ${errorMessage}`;
+		const errorText = `Error authenticating with Salesforce: ${JSON.stringify(error)}`;
 		throw new Error(errorText);
 	}
 }
