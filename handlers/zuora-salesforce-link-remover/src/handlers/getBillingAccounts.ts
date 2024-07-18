@@ -41,9 +41,8 @@ export async function handler() {
 			password,
 			token,
 		};
-		console.log('username', username);
-		console.log('password', password.substring(0, 3));
-		console.log('token', token.substring(0, 3));
+		console.log('clientId', clientId.substring(0, 3));
+		console.log('clientSecret', clientSecret.substring(0, 3));
 
 
 		const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
