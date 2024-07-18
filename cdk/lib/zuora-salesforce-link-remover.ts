@@ -75,7 +75,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Zuora/SupportServiceLambdas-WeibUa`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Zuora-OAuth/SupportServiceLambdas-Iu3KIT`,
 						],
 					}),
 					allowPutMetric,

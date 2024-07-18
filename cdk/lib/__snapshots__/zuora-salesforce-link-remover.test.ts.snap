@@ -1013,7 +1013,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:PROD/Zuora/SupportServiceLambdas-WeibUa",
+                      ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-Iu3KIT",
                     ],
                   ],
                 },
@@ -2350,7 +2350,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:PROD/Zuora/SupportServiceLambdas-WeibUa",
+                      ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-Iu3KIT",
                     ],
                   ],
                 },

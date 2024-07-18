@@ -27,7 +27,7 @@ export const handler: Handler<BillingAccountRecord, BillingAccountRecordWithSucc
 			crmIdRemovedSuccessfully: zuoraBillingAccountUpdateResponse.success
 		};
 	}catch(error){
-		throw new Error(`Error updating billing accounts in Salesforce: ${JSON.stringify(error)}`);
+		throw new Error(`Error updating billing accounts in Zuora: ${JSON.stringify(error)}`);
 	}
 };
 
