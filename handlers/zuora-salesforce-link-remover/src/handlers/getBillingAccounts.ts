@@ -1,4 +1,5 @@
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
+import { stageFromEnvironment } from '@modules/stage';
 import { doSfAuth, executeSalesforceQuery } from '../salesforceHttp';
 import type {
 	SalesforceQueryResponse,
@@ -10,18 +11,8 @@ import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 
 export async function handler() {
 	try{
-		
-		const stage = process.env.STAGE;
 
-		if (!stage) {
-			throw Error('Stage not defined');
-		}
-
-		if (!isValidStage(stage)) {
-			throw Error('Invalid Stage value');
-		}
-
-		const secretNames = getSalesforceSecretNames(stage);
+		const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 		const { authUrl, clientId, clientSecret } =
 			await getSecretValue<ConnectedAppSecret>(
@@ -57,8 +48,4 @@ export async function handler() {
 	}catch(error){
 		throw new Error(`Error fetching billing accounts from Salesforce: ${JSON.stringify(error)}`);
 	}
-}
-
-function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
-	return value === 'CODE' || value === 'PROD';
 }
