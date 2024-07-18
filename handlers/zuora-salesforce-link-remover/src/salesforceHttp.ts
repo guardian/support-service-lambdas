@@ -92,15 +92,17 @@ export async function executeSalesforceQuery(
 			},
 		},
 	);
-
+	console.log('response:',response);
 	if (!response.ok) {
 		throw new Error(`Failed to execute query: ${response.statusText}`);
 	}
-
+	
 	const sfQueryResponse = (await response.json()) as SalesforceQueryResponse;
+	console.log('sfQueryResponse:',sfQueryResponse);
 
 	const parseResponse =
 		SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
+		console.log('parseResponse:',parseResponse);
 
 	if (!parseResponse.success) {
 		throw new Error(

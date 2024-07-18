@@ -51,6 +51,7 @@ export async function handler() {
 
 		const testQuery =
 			`select Id, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Id in ${BillingAccountIds}`;
+		console.log('testQuery:',testQuery);
 		const response: SalesforceQueryResponse = await executeSalesforceQuery(
 			sfAuthResponse,
 			testQuery,
