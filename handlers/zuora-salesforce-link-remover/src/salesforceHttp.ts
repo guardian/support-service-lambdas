@@ -23,7 +23,9 @@ export async function doSfAuth(
 
 		console.log('successfully authenticated with Salesforce');
 		console.log('parsing response...', response);
-		
+		const responseText = await response.text();
+		console.log('responseText', responseText);
+
 		const sfAuthResponse = (await response.json()) as SfAuthResponse;
 		console.log('instance_url', sfAuthResponse.instance_url);
 		// const parseResponse =
