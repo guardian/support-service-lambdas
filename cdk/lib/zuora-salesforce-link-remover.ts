@@ -10,6 +10,8 @@ import {
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -162,13 +164,22 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			.next(billingAccountsProcessingMap)
 			.next(updateSfBillingAccountsLambdaTask);
 
-		new StateMachine(
+		const stateMachine = new StateMachine(
 			this,
 			`zuora-salesforce-link-remover-state-machine-${this.stage}`,
 			{
 				definition,
 			},
 		);
+
+		const cronEveryHour = { minute: '0', hour: '*' };
+		const cronOncePerYear = { minute: '0', hour: '0', day: '1', month: '1' };
+		const executionFrequency = this.stage==='PROD' ? cronEveryHour : cronOncePerYear;
+		
+		new Rule(this, 'ScheduleStateMachineRule', {
+			schedule: Schedule.cron(executionFrequency),
+			targets: [new SfnStateMachine(stateMachine)]
+		});
 
 		const topic = Topic.fromTopicArn(
 			this,
