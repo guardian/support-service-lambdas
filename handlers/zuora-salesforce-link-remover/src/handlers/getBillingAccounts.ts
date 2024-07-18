@@ -41,6 +41,7 @@ export async function handler() {
 			password,
 			token,
 		};
+		console.log('url', sfApiUserAuth.url);
 		console.log('clientId', clientId.substring(0, 3));
 		console.log('clientSecret', clientSecret.substring(0, 3));
 
