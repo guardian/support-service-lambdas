@@ -81,7 +81,7 @@ export async function executeSalesforceQuery(
 	sfAuthResponse: SfAuthResponse,
 	query: string,
 ): Promise<SalesforceQueryResponse> {
-	try{
+	try {
 		const response = await fetch(
 			`${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/query?q=${encodeURIComponent(query)}`,
 			{
@@ -160,7 +160,7 @@ export async function updateSfBillingAccounts(
 	sfAuthResponse: SfAuthResponse,
 	records: BillingAccountRecord[],
 ): Promise<SalesforceUpdateResponse[]> {
-	try{
+	try {
 		const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
 
 		const body = JSON.stringify({
@@ -186,7 +186,7 @@ export async function doCompositeCallout(
 ): Promise<SalesforceUpdateResponse[]> {
 	console.log('doing composite callout...');
 
-	try{
+	try {
 		const options = {
 			method: 'PATCH',
 			headers: {
@@ -203,7 +203,8 @@ export async function doCompositeCallout(
 			);
 		}
 
-		const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
+		const sfUpdateResponse =
+			(await response.json()) as SalesforceUpdateResponse;
 		const parseResponse =
 			SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
 

@@ -174,11 +174,12 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		const cronEveryHour = { minute: '0', hour: '*' };
 		const cronOncePerYear = { minute: '0', hour: '0', day: '1', month: '1' };
-		const executionFrequency = this.stage==='PROD' ? cronEveryHour : cronOncePerYear;
-		
+		const executionFrequency =
+			this.stage === 'PROD' ? cronEveryHour : cronOncePerYear;
+
 		new Rule(this, 'ScheduleStateMachineRule', {
 			schedule: Schedule.cron(executionFrequency),
-			targets: [new SfnStateMachine(stateMachine)]
+			targets: [new SfnStateMachine(stateMachine)],
 		});
 
 		const topic = Topic.fromTopicArn(
