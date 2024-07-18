@@ -21,7 +21,7 @@ export async function handler() {
 		if (!isValidStage(stage)) {
 			throw Error('Invalid Stage value');
 		}
-
+		console.log('stage:', stage);
 		const secretNames = getSalesforceSecretNames(stage);
 
 		const { authUrl, clientId, clientSecret } =
@@ -41,6 +41,10 @@ export async function handler() {
 			password,
 			token,
 		};
+		console.log('username', username);
+		console.log('password', password.substring(0, 3));
+		console.log('token', token.substring(0, 3));
+
 
 		const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 		console.log('sfAuthResponse', sfAuthResponse.access_token.substring(0, 3));
