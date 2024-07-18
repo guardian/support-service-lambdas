@@ -39,6 +39,7 @@ export async function doSfAuth(
 
 		return sfAuthResponse;
 	} catch (error) {
+		console.log('abc error:',error);
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const errorText = `Error authenticating with Salesforce: ${errorMessage}`;
 		throw new Error(errorText);
