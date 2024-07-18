@@ -37,7 +37,6 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				runtime: Runtime.NODEJS_20_X,
 				environment: {
 					Stage: this.stage,
-					BillingAccountIds: '',
 				},
 				handler: 'getBillingAccounts.handler',
 				fileName: `${appName}.zip`,
@@ -143,7 +142,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			this,
 			'Billing Accounts Processor Map',
 			{
-				maxConcurrency: 1,
+				maxConcurrency: 10,
 				itemsPath: JsonPath.stringAt('$.billingAccountsToProcess'),
 				parameters: {
 					item: JsonPath.stringAt('$$.Map.Item.Value'),

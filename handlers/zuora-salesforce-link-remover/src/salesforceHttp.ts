@@ -81,33 +81,38 @@ export async function executeSalesforceQuery(
 	sfAuthResponse: SfAuthResponse,
 	query: string,
 ): Promise<SalesforceQueryResponse> {
-	const response = await fetch(
-		`${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/query?q=${encodeURIComponent(query)}`,
-		{
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${sfAuthResponse.access_token}`,
-				'Content-Type': 'application/json',
+	try{
+		const response = await fetch(
+			`${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/query?q=${encodeURIComponent(query)}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${sfAuthResponse.access_token}`,
+					'Content-Type': 'application/json',
+				},
 			},
-		},
-	);
-
-	if (!response.ok) {
-		throw new Error(`Failed to execute query: ${response.statusText}`);
-	}
-
-	const sfQueryResponse = (await response.json()) as SalesforceQueryResponse;
-
-	const parseResponse =
-		SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
-
-	if (!parseResponse.success) {
-		throw new Error(
-			`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
 		);
-	}
 
-	return parseResponse.data;
+		if (!response.ok) {
+			throw new Error(`Failed to execute query: ${response.statusText}`);
+		}
+
+		const sfQueryResponse = (await response.json()) as SalesforceQueryResponse;
+
+		const parseResponse =
+			SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
+
+		if (!parseResponse.success) {
+			throw new Error(
+				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+			);
+		}
+
+		return parseResponse.data;
+	} catch (error) {
+		const errorText = `Error querying Salesforce: ${JSON.stringify(error)}`;
+		throw new Error(errorText);
+	}
 }
 
 const sfApiVersion = (): string => {
@@ -155,18 +160,23 @@ export async function updateSfBillingAccounts(
 	sfAuthResponse: SfAuthResponse,
 	records: BillingAccountRecord[],
 ): Promise<SalesforceUpdateResponse[]> {
-	const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
+	try{
+		const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
 
-	const body = JSON.stringify({
-		allOrNone: false,
-		records,
-	});
-	const sfUpdateResponse = await doCompositeCallout(
-		url,
-		sfAuthResponse.access_token,
-		body,
-	);
-	return sfUpdateResponse;
+		const body = JSON.stringify({
+			allOrNone: false,
+			records,
+		});
+		const sfUpdateResponse = await doCompositeCallout(
+			url,
+			sfAuthResponse.access_token,
+			body,
+		);
+		return sfUpdateResponse;
+	} catch (error) {
+		const errorText = `Error updating billing accounts in Salesforce: ${JSON.stringify(error)}`;
+		throw new Error(errorText);
+	}
 }
 
 export async function doCompositeCallout(
@@ -176,33 +186,38 @@ export async function doCompositeCallout(
 ): Promise<SalesforceUpdateResponse[]> {
 	console.log('doing composite callout...');
 
-	const options = {
-		method: 'PATCH',
-		headers: {
-			Authorization: `Bearer ${token}`,
-			'Content-Type': 'application/json',
-		},
-		body,
-	};
+	try{
+		const options = {
+			method: 'PATCH',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+			body,
+		};
 
-	const response = await fetch(url, options);
-	if (!response.ok) {
-		throw new Error(
-			`Error updating record(s) in Salesforce: ${response.statusText}`,
-		);
+		const response = await fetch(url, options);
+		if (!response.ok) {
+			throw new Error(
+				`Error updating record(s) in Salesforce: ${response.statusText}`,
+			);
+		}
+
+		const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
+		const parseResponse =
+			SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
+
+		if (!parseResponse.success) {
+			throw new Error(
+				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+			);
+		}
+
+		return parseResponse.data;
+	} catch (error) {
+		const errorText = `Error executing composite callout to Salesforce: ${JSON.stringify(error)}`;
+		throw new Error(errorText);
 	}
-
-	const sfUpdateResponse = (await response.json()) as SalesforceUpdateResponse;
-	const parseResponse =
-		SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
-
-	if (!parseResponse.success) {
-		throw new Error(
-			`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
-		);
-	}
-
-	return parseResponse.data;
 }
 
 const SalesforceUpdateRecordsSchema = z.object({

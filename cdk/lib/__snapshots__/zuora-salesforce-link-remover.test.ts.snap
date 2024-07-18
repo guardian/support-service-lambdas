@@ -308,7 +308,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
-            "BillingAccountIds": "",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stage": "CODE",
@@ -1153,7 +1152,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.billingAccountProcessingAttempts","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":10},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.billingAccountProcessingAttempts","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1645,7 +1644,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
-            "BillingAccountIds": "",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stage": "PROD",
@@ -2490,7 +2488,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.billingAccountProcessingAttempts","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":10},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.billingAccountProcessingAttempts","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
