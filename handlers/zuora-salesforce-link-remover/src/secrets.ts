@@ -27,7 +27,7 @@ export function getZuoraSecretName(stage: 'CODE' | 'PROD'): string {
 		case 'CODE':
 			return 'CODE/Zuora-OAuth/SupportServiceLambdas';
 		case 'PROD':
-			return 'PROD/Zuora/SupportServiceLambdas';
+			return 'PROD/Zuora-OAuth/SupportServiceLambdas';
 	}
 }
 
