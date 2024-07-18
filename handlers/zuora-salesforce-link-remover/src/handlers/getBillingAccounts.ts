@@ -43,7 +43,8 @@ export async function handler() {
 		};
 
 		const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
-
+		console.log('sfAuthResponse', sfAuthResponse.access_token.substring(0, 3));
+		console.log('instance_url', sfAuthResponse.instance_url);
 		//todo use test query for now, but update to prod query before release
 		//todo generate test data when we get to dev for updating zuora billing accounts
 		// const limit = 200;
