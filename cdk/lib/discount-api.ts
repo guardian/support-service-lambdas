@@ -4,6 +4,7 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
+import { aws_logs as logs } from 'aws-cdk-lib';
 import {
 	ApiKeySourceType,
 	CfnBasePathMapping,
@@ -64,6 +65,13 @@ export class DiscountApi extends GuStack {
 				},
 			},
 		});
+
+		const logGroup = new logs.LogRetention(this, `${app}-lambda-log-group`, {
+			logGroupName: '/aws/lambda/discount-api-${this.stage}',
+			retention: logs.RetentionDays.TWO_WEEKS,
+			logGroupRegion: 'eu-west-1',
+
+		})
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
