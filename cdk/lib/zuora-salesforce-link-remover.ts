@@ -180,6 +180,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		new Rule(this, 'ScheduleStateMachineRule', {
 			schedule: Schedule.cron(executionFrequency),
 			targets: [new SfnStateMachine(stateMachine)],
+			enabled: false,
 		});
 
 		const topic = Topic.fromTopicArn(
