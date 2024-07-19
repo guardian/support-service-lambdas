@@ -88,6 +88,11 @@ Resources:
           Value: SAM
       Architectures:
         - arm64
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: '/aws/lambda/move-product-${Stage}'
+      RetentionInDays: 14
   RefundDeadLetterQueue:
     Type: AWS::SQS::Queue
     Properties:
