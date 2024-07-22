@@ -58,3 +58,6 @@ export type SalesforceUpdateResponse = z.infer<
 const SalesforceUpdateResponseArraySchema = z.array(
 	SalesforceUpdateResponseSchema,
 );
+export type SalesforceUpdateResponseArray = z.infer<
+	typeof SalesforceUpdateResponseArraySchema
+>;

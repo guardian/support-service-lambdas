@@ -1,12 +1,12 @@
 import type { SfApiUserAuth, SfConnectedAppAuth } from '@modules/salesforce/src/auth';
 import { doSfAuth } from '@modules/salesforce/src/auth';
+import type { SalesforceUpdateResponseArray } from '@modules/salesforce/src/updateRecords';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import { BillingAccountRecordsSchema, updateSfBillingAccounts } from '../salesforceHttp';
 import type {
-	BillingAccountRecord,
-	SalesforceUpdateResponseArray
+	BillingAccountRecord
 } from '../salesforceHttp';
 import { getSalesforceSecretNames } from '../secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
