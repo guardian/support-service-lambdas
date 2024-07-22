@@ -15,7 +15,14 @@ import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Topic } from 'aws-cdk-lib/aws-sns';
-import { JsonPath, Map, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
+import {
+	Choice,
+	Condition,
+	JsonPath,
+	Map,
+	Pass,
+	StateMachine,
+} from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
 export class ZuoraSalesforceLinkRemover extends GuStack {
@@ -58,7 +65,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const updateZuoraBillingAccountsLambda = new GuLambdaFunction(
+		const updateZuoraBillingAccountLambda = new GuLambdaFunction(
 			this,
 			'update-zuora-billing-account-lambda',
 			{
@@ -121,11 +128,11 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const updateZuoraBillingAccountsLambdaTask = new LambdaInvoke(
+		const updateZuoraBillingAccountLambdaTask = new LambdaInvoke(
 			this,
-			'Update Zuora Billing Accounts',
+			'Update Zuora Billing Account',
 			{
-				lambdaFunction: updateZuoraBillingAccountsLambda,
+				lambdaFunction: updateZuoraBillingAccountLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -154,15 +161,25 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		);
 
 		const billingAccountsProcessingMapDefinition =
-			updateZuoraBillingAccountsLambdaTask;
+			updateZuoraBillingAccountLambdaTask;
 
 		billingAccountsProcessingMap.iterator(
 			billingAccountsProcessingMapDefinition,
 		);
 
-		const definition = getSalesforceBillingAccountsFromLambdaTask
-			.next(billingAccountsProcessingMap)
-			.next(updateSfBillingAccountsLambdaTask);
+		const billingAccountsExistChoice = new Choice(
+			this,
+			'Billing Accounts exist for processing?',
+		)
+			.when(
+				Condition.isPresent('$.billingAccountsToProcess[0]'),
+				billingAccountsProcessingMap.next(updateSfBillingAccountsLambdaTask),
+			)
+			.otherwise(new Pass(this, 'No Billing Accounts to process'));
+
+		const definition = getSalesforceBillingAccountsFromLambdaTask.next(
+			billingAccountsExistChoice,
+		);
 
 		const stateMachine = new StateMachine(
 			this,
@@ -180,7 +197,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		new Rule(this, 'ScheduleStateMachineRule', {
 			schedule: Schedule.cron(executionFrequency),
 			targets: [new SfnStateMachine(stateMachine)],
-			enabled: false,
+			enabled: true,
 		});
 
 		const topic = Topic.fromTopicArn(
@@ -191,7 +208,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		const lambdaFunctions = [
 			getSalesforceBillingAccountsLambda,
-			updateZuoraBillingAccountsLambda,
+			updateZuoraBillingAccountLambda,
 			updateSfBillingAccountsLambda,
 		];
 
