@@ -967,7 +967,9 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "discountapilambdaloggroup1B091C98": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "LogGroupName": "/aws/lambda/discount-api-CODE",
+        "LogGroupName": {
+          "Ref": "discountapilambda972ABED6",
+        },
         "RetentionInDays": 14,
         "Tags": [
           {
@@ -1962,7 +1964,9 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "discountapilambdaloggroup1B091C98": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "LogGroupName": "/aws/lambda/discount-api-PROD",
+        "LogGroupName": {
+          "Ref": "discountapilambda972ABED6",
+        },
         "RetentionInDays": 14,
         "Tags": [
           {

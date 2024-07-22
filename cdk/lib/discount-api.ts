@@ -3,9 +3,7 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
-import {aws_logs, Duration} from 'aws-cdk-lib';
-import { aws_logs as logs } from 'aws-cdk-lib';
-import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { Duration, aws_logs as logs} from 'aws-cdk-lib';
 import {
 	ApiKeySourceType,
 	CfnBasePathMapping,
@@ -14,6 +12,7 @@ import {
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 
 export interface DiscountApiProps extends GuStackProps {
@@ -67,10 +66,10 @@ export class DiscountApi extends GuStack {
 			},
 		});
 
-		const logGroup = new LogGroup(this, `${app}-lambda-log-group`, {
-		 	logGroupName: `/aws/lambda/discount-api-${this.stage}`,
-		 	retention: logs.RetentionDays.TWO_WEEKS,
-		 });
+		new LogGroup(this, `${app}-lambda-log-group`, {
+			logGroupName: `${lambda.functionName}`,
+			retention: logs.RetentionDays.TWO_WEEKS,
+		});
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
