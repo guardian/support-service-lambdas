@@ -51,6 +51,7 @@ export class DiscountApi extends GuStack {
 				noMonitoring: true, // There is a threshold alarm defined below
 			},
 			app: app,
+			logRetention: logs.RetentionDays.TWO_WEEKS,
 			api: {
 				id: nameWithStage,
 				restApiName: nameWithStage,
@@ -65,13 +66,6 @@ export class DiscountApi extends GuStack {
 				},
 			},
 		});
-
-		const logGroup = new logs.LogRetention(this, `${app}-lambda-log-group`, {
-			logGroupName: '/aws/lambda/discount-api-${this.stage}',
-			retention: logs.RetentionDays.TWO_WEEKS,
-			logGroupRegion: 'eu-west-1',
-
-		})
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
