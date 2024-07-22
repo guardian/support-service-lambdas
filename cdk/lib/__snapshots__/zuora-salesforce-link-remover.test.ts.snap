@@ -131,7 +131,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
     "ScheduleStateMachineRule91756851": {
       "Properties": {
         "ScheduleExpression": "cron(0 0 1 1 ? *)",
-        "State": "DISABLED",
+        "State": "ENABLED",
         "Targets": [
           {
             "Arn": {
@@ -1546,7 +1546,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
     "ScheduleStateMachineRule91756851": {
       "Properties": {
         "ScheduleExpression": "cron(0 * * * ? *)",
-        "State": "DISABLED",
+        "State": "ENABLED",
         "Targets": [
           {
             "Arn": {
