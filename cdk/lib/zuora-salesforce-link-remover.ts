@@ -65,7 +65,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const updateZuoraBillingAccountsLambda = new GuLambdaFunction(
+		const updateZuoraBillingAccountLambda = new GuLambdaFunction(
 			this,
 			'update-zuora-billing-account-lambda',
 			{
@@ -128,11 +128,11 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const updateZuoraBillingAccountsLambdaTask = new LambdaInvoke(
+		const updateZuoraBillingAccountLambdaTask = new LambdaInvoke(
 			this,
-			'Update Zuora Billing Accounts',
+			'Update Zuora Billing Account',
 			{
-				lambdaFunction: updateZuoraBillingAccountsLambda,
+				lambdaFunction: updateZuoraBillingAccountLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -161,7 +161,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		);
 
 		const billingAccountsProcessingMapDefinition =
-			updateZuoraBillingAccountsLambdaTask;
+			updateZuoraBillingAccountLambdaTask;
 
 		billingAccountsProcessingMap.iterator(
 			billingAccountsProcessingMapDefinition,
@@ -208,7 +208,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		const lambdaFunctions = [
 			getSalesforceBillingAccountsLambda,
-			updateZuoraBillingAccountsLambda,
+			updateZuoraBillingAccountLambda,
 			updateSfBillingAccountsLambda,
 		];
 
