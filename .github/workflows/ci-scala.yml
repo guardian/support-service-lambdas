@@ -91,7 +91,6 @@ jobs:
           - product-move-api
           - revenue-recogniser-job
           - sf-api-user-credentials-setter
-          - sf-billing-account-remover
           - sf-contact-merge
           - sf-datalake-export
           - sf-emails-to-s3-exporter
