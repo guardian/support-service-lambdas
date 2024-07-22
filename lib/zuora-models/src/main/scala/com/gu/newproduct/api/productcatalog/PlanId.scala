@@ -191,6 +191,13 @@ object PlanId {
     NationalDeliveryEveryday,
     NationalDeliveryWeekend,
   )
+  
+  val enabledTierThreePlans = List(
+    TierThreeDomesticMonthly,
+    TierThreeDomesticAnnual,
+    TierThreeROWMonthly,
+    TierThreeROWAnnual,
+  )
 
   val supportedPlans: List[PlanId] =
     enabledVoucherPlans ++ enabledSupporterPlusPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
