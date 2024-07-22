@@ -1,0 +1,11 @@
+{
+  "name": "salesforce",
+  "version": "1.0.0",
+  "scripts": {
+    "check-formatting": "prettier --check **/*.ts",
+    "test": "jest --group=-integration"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}
