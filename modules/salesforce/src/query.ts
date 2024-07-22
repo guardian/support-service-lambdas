@@ -40,7 +40,8 @@ export async function executeSalesforceQuery(
 	}
 }
 
-const SalesforceAttributesSchema = z.object({
+//todo hoist this up to a higher level
+export const SalesforceAttributesSchema = z.object({
 	type: z.string(),
 	url: z.string().optional(),
 });
