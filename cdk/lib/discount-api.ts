@@ -3,8 +3,9 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import {aws_logs, Duration} from 'aws-cdk-lib';
 import { aws_logs as logs } from 'aws-cdk-lib';
+import { LogGroup } from "aws-cdk-lib/aws-logs";
 import {
 	ApiKeySourceType,
 	CfnBasePathMapping,
@@ -51,7 +52,6 @@ export class DiscountApi extends GuStack {
 				noMonitoring: true, // There is a threshold alarm defined below
 			},
 			app: app,
-			logRetention: logs.RetentionDays.TWO_WEEKS,
 			api: {
 				id: nameWithStage,
 				restApiName: nameWithStage,
@@ -66,6 +66,11 @@ export class DiscountApi extends GuStack {
 				},
 			},
 		});
+
+		const logGroup = new LogGroup(this, `${app}-lambda-log-group`, {
+		 	logGroupName: `/aws/lambda/discount-api-${this.stage}`,
+		 	retention: logs.RetentionDays.TWO_WEEKS,
+		 });
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
