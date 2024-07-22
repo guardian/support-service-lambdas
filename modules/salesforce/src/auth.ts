@@ -21,7 +21,7 @@ const SalesforceAuthResponseSchema = z.object({
 	issued_at: z.string(),
 	signature: z.string(),
 });
-type SfAuthResponse = z.infer<typeof SalesforceAuthResponseSchema>;
+export type SfAuthResponse = z.infer<typeof SalesforceAuthResponseSchema>;
 
 export async function doSfAuth(
 	sfApiUserAuth: SfApiUserAuth,
