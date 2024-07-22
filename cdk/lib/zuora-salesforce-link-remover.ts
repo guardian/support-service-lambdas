@@ -169,13 +169,13 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		const billingAccountsExistChoice = new Choice(
 			this,
-			'Billing Accounts exist for processing',
+			'Billing Accounts exist for processing?',
 		)
 			.when(
 				Condition.numberGreaterThan('$.billingAccountsToProcess.length', 0),
 				billingAccountsProcessingMap.next(updateSfBillingAccountsLambdaTask),
 			)
-			.otherwise(new Pass(this, 'End'));
+			.otherwise(new Pass(this, 'No Billing Accounts to process'));
 
 		const definition = getSalesforceBillingAccountsFromLambdaTask.next(
 			billingAccountsExistChoice,
