@@ -20,8 +20,8 @@ import {
 	Condition,
 	JsonPath,
 	Map,
+	Pass,
 	StateMachine,
-	Succeed,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
@@ -175,7 +175,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				Condition.numberGreaterThan('$.billingAccountsToProcess.length', 0),
 				billingAccountsProcessingMap.next(updateSfBillingAccountsLambdaTask),
 			)
-			.otherwise(new Succeed(this, 'No Accounts To Process'));
+			.otherwise(new Pass(this, 'End'));
 
 		const definition = getSalesforceBillingAccountsFromLambdaTask.next(
 			billingAccountsExistChoice,
