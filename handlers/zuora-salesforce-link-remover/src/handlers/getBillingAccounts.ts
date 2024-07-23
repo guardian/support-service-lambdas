@@ -1,9 +1,10 @@
 import type { SfApiUserAuth, SfConnectedAppAuth } from '@modules/salesforce/src/auth';
 import { doSfAuth } from '@modules/salesforce/src/auth';
-import type { SalesforceQueryResponse } from '@modules/salesforce/src/query';
 import { executeSalesforceQuery } from '@modules/salesforce/src/query';
+import { RecordSchema } from '@modules/salesforce/src/recordSchema';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
+import { z } from 'zod';
 import { getSalesforceSecretNames } from '../secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 
@@ -35,10 +36,11 @@ export async function handler() {
 		const limit = 200;
 		const query = `SELECT Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c FROM Zuora__CustomerAccount__c WHERE Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < 5 ORDER BY Zuora__Account__r.GDPR_Date_Successfully_Removed_Related__c desc LIMIT ${limit}`
 
-		const response: SalesforceQueryResponse = await executeSalesforceQuery(
+		const response = await executeSalesforceQuery(
 			sfAuthResponse,
 			query,
-		);
+			BillingAccountRecordSchema
+		  );
 
 		return {
 			billingAccountsToProcess: response.records,
@@ -47,3 +49,20 @@ export async function handler() {
 		throw new Error(`Error fetching billing accounts from Salesforce: ${JSON.stringify(error)}`);
 	}
 }
+
+export const BillingAccountRecordSchema = RecordSchema.extend({
+	GDPR_Removal_Attempts__c: z.number(),
+	Zuora__External_Id__c: z.string(),
+});
+export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
+
+export const BillingAccountRecordsSchema = z.array(BillingAccountRecordSchema);
+export type BillingAccountRecords = z.infer<typeof BillingAccountRecordsSchema>;
+
+export const BillingAccountRecordWithSuccessSchema =
+	BillingAccountRecordSchema.extend({
+		crmIdRemovedSuccessfully: z.boolean(),
+	});
+export type BillingAccountRecordWithSuccess = z.infer<
+	typeof BillingAccountRecordWithSuccessSchema
+>;

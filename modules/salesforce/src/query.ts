@@ -1,11 +1,14 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 import type { SfAuthResponse } from './auth';
 import { sfApiVersion } from './config';
+import type { SalesforceQueryResponse } from './recordSchema';
+import { SalesforceQueryResponseSchema } from './recordSchema';
 
-export async function executeSalesforceQuery(
+export async function executeSalesforceQuery<T extends z.ZodTypeAny>(
 	sfAuthResponse: SfAuthResponse,
 	query: string,
-): Promise<SalesforceQueryResponse> {
+	schema: T
+  ): Promise<SalesforceQueryResponse<z.infer<T>>> {
 	try {
 		const response = await fetch(
 			`${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/query?q=${encodeURIComponent(query)}`,
@@ -22,10 +25,10 @@ export async function executeSalesforceQuery(
 			throw new Error(`Failed to execute query: ${response.statusText}`);
 		}
 
-		const sfQueryResponse = (await response.json()) as SalesforceQueryResponse;
+		const sfQueryResponse = (await response.json()) as SalesforceQueryResponse<T>;
 
-		const parseResponse =
-			SalesforceQueryResponseSchema.safeParse(sfQueryResponse);
+		const parseResponse = SalesforceQueryResponseSchema(schema).safeParse(sfQueryResponse);
+
 
 		if (!parseResponse.success) {
 			throw new Error(
@@ -39,36 +42,3 @@ export async function executeSalesforceQuery(
 		throw new Error(errorText);
 	}
 }
-
-//todo hoist this up to a higher level
-export const SalesforceAttributesSchema = z.object({
-	type: z.string(),
-	url: z.string().optional(),
-});
-
-export const BillingAccountRecordSchema = z.object({
-	attributes: SalesforceAttributesSchema,
-	Id: z.string(),
-	GDPR_Removal_Attempts__c: z.number(),
-	Zuora__External_Id__c: z.string(),
-});
-
-export const BillingAccountRecordsSchema = z.array(BillingAccountRecordSchema);
-export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
-
-export const BillingAccountRecordWithSuccessSchema =
-	BillingAccountRecordSchema.extend({
-		crmIdRemovedSuccessfully: z.boolean(),
-	});
-export type BillingAccountRecordWithSuccess = z.infer<
-	typeof BillingAccountRecordWithSuccessSchema
->;
-
-const SalesforceQueryResponseSchema = z.object({
-	totalSize: z.number(),
-	done: z.boolean(),
-	records: z.array(BillingAccountRecordSchema),
-});
-export type SalesforceQueryResponse = z.infer<
-	typeof SalesforceQueryResponseSchema
->;
