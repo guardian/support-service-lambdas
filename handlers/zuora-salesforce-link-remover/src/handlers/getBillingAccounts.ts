@@ -56,6 +56,7 @@ export const BillingAccountRecordSchema = RecordSchema.extend({
 });
 export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
 
+//might need hoisting
 export const BillingAccountRecordsSchema = z.array(BillingAccountRecordSchema);
 export type BillingAccountRecords = z.infer<typeof BillingAccountRecordsSchema>;
 
