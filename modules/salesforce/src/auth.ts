@@ -41,9 +41,9 @@ export async function doSfAuth(
 		if (!response.ok) {
 			const errorText = await response.text();
 			const errorMessage = `Error response from Salesforce: ${errorText}`;
+
 			throw new Error(errorMessage);
 		}
-
 		console.log('successfully authenticated with Salesforce');
 
 		const sfAuthResponse = (await response.json()) as SfAuthResponse;
@@ -59,7 +59,11 @@ export async function doSfAuth(
 
 		return parseResponse.data;
 	} catch (error) {
-		const errorText = `Error authenticating with Salesforce: ${JSON.stringify(error)}`;
+		const errorTextBase = 'Error authenticating with Salesforce';
+		const errorText =
+			error instanceof Error
+				? `${errorTextBase}: ${error.message}`
+				: errorTextBase;
 		throw new Error(errorText);
 	}
 }
