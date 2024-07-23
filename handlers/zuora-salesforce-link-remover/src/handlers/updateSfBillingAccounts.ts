@@ -1,19 +1,18 @@
-import type { SfApiUserAuth, SfConnectedAppAuth } from '@modules/salesforce/src/auth';
+import type { SfApiUserAuth, SfAuthResponse, SfConnectedAppAuth } from '@modules/salesforce/src/auth';
 import { doSfAuth } from '@modules/salesforce/src/auth';
-import type { SalesforceUpdateResponseArray } from '@modules/salesforce/src/updateRecords';
+import { doCompositeCallout, type SalesforceUpdateResponse, type SalesforceUpdateResponseArray } from '@modules/salesforce/src/updateRecords';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
-import { BillingAccountRecordsSchema, updateSfBillingAccounts } from '../salesforceHttp';
-import type {
-	BillingAccountRecord
-} from '../salesforceHttp';
 import { getSalesforceSecretNames } from '../secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
+import type { BillingAccountRecord } from './getBillingAccounts';
+import { BillingAccountRecordsSchema } from './getBillingAccounts';
 
 export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseArray> = async (billingAccounts) => {
 
 	try{
+
 		const parseResponse = BillingAccountRecordsSchema.safeParse(billingAccounts);
 
 		if (!parseResponse.success) {
@@ -53,5 +52,28 @@ export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseAr
 		return sfUpdateResponse;
 	}catch(error){
 		throw new Error(`Error updating billing account in Salesforce: ${JSON.stringify(error)}`);
+	}
+}
+
+export async function updateSfBillingAccounts(
+	sfAuthResponse: SfAuthResponse,
+	records: BillingAccountRecord[],
+): Promise<SalesforceUpdateResponse[]> {
+	try {
+		const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
+
+		const body = JSON.stringify({
+			allOrNone: false,
+			records,
+		});
+		const sfUpdateResponse = await doCompositeCallout(
+			url,
+			sfAuthResponse.access_token,
+			body,
+		);
+		return sfUpdateResponse;
+	} catch (error) {
+		const errorText = `Error updating billing accounts in Salesforce: ${JSON.stringify(error)}`;
+		throw new Error(errorText);
 	}
 }
