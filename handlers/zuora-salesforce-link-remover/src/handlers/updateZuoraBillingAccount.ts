@@ -1,8 +1,8 @@
 import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
-import type { BillingAccountRecord, BillingAccountRecordWithSuccess } from '../salesforceHttp';
 import { updateBillingAccountInZuora } from '../zuoraHttp';
+import type { BillingAccountRecord, BillingAccountRecordWithSuccess } from './getBillingAccounts';
 
 export const handler: Handler<BillingAccountRecord, BillingAccountRecordWithSuccess> = async (billingAccount) => {
 
