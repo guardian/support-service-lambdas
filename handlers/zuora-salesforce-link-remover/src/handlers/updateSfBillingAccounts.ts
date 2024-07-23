@@ -1,6 +1,8 @@
 import type { SfApiUserAuth, SfAuthResponse, SfConnectedAppAuth } from '@modules/salesforce/src/auth';
 import { doSfAuth } from '@modules/salesforce/src/auth';
-import { doCompositeCallout, type SalesforceUpdateResponse, type SalesforceUpdateResponseArray } from '@modules/salesforce/src/updateRecords';
+import { sfApiVersion } from '@modules/salesforce/src/config';
+import type { SalesforceUpdateResponse, SalesforceUpdateResponseArray } from '@modules/salesforce/src/updateRecords';
+import { doCompositeCallout } from '@modules/salesforce/src/updateRecords';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
@@ -12,7 +14,6 @@ import { BillingAccountRecordsSchema } from './getBillingAccounts';
 export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseArray> = async (billingAccounts) => {
 
 	try{
-
 		const parseResponse = BillingAccountRecordsSchema.safeParse(billingAccounts);
 
 		if (!parseResponse.success) {
