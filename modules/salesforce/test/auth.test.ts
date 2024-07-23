@@ -55,7 +55,7 @@ describe('doSfAuth', () => {
 	});
 
 	it('should handle invalid response format', async () => {
-		// Mock an invalid response format from the Salesforce authentication endpoint
+		// Mock invalid response format from the Salesforce authentication endpoint
 		(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
 			ok: true,
 			json: () =>
