@@ -3,7 +3,7 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
-import { Duration, aws_logs as logs} from 'aws-cdk-lib';
+import { Duration, aws_logs as logs } from 'aws-cdk-lib';
 import {
 	ApiKeySourceType,
 	CfnBasePathMapping,
@@ -12,7 +12,7 @@ import {
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 
 export interface DiscountApiProps extends GuStackProps {
