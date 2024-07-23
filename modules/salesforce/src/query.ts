@@ -7,8 +7,8 @@ import { SalesforceQueryResponseSchema } from './recordSchema';
 export async function executeSalesforceQuery<T extends z.ZodTypeAny>(
 	sfAuthResponse: SfAuthResponse,
 	query: string,
-	schema: T
-  ): Promise<SalesforceQueryResponse<z.infer<T>>> {
+	schema: T,
+): Promise<SalesforceQueryResponse<z.infer<T>>> {
 	try {
 		const response = await fetch(
 			`${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/query?q=${encodeURIComponent(query)}`,
@@ -25,9 +25,11 @@ export async function executeSalesforceQuery<T extends z.ZodTypeAny>(
 			throw new Error(`Failed to execute query: ${response.statusText}`);
 		}
 
-		const sfQueryResponse = (await response.json()) as SalesforceQueryResponse<T>;
+		const sfQueryResponse =
+			(await response.json()) as SalesforceQueryResponse<T>;
 
-		const parseResponse = SalesforceQueryResponseSchema(schema).safeParse(sfQueryResponse);
+		const parseResponse =
+			SalesforceQueryResponseSchema(schema).safeParse(sfQueryResponse);
 
 		if (!parseResponse.success) {
 			throw new Error(
