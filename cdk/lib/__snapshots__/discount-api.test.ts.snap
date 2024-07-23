@@ -968,7 +968,15 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       "DeletionPolicy": "Retain",
       "Properties": {
         "LogGroupName": {
-          "Ref": "discountapilambda972ABED6",
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "discountapilambda972ABED6",
+              },
+            ],
+          ],
         },
         "RetentionInDays": 14,
         "Tags": [
@@ -1965,7 +1973,15 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       "DeletionPolicy": "Retain",
       "Properties": {
         "LogGroupName": {
-          "Ref": "discountapilambda972ABED6",
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "discountapilambda972ABED6",
+              },
+            ],
+          ],
         },
         "RetentionInDays": 14,
         "Tags": [

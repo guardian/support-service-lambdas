@@ -67,7 +67,7 @@ export class DiscountApi extends GuStack {
 		});
 
 		new LogGroup(this, `${app}-lambda-log-group`, {
-			logGroupName: `${lambda.functionName}`,
+			logGroupName: `/aws/lambda/${lambda.functionName}`,
 			retention: logs.RetentionDays.TWO_WEEKS,
 		});
 
