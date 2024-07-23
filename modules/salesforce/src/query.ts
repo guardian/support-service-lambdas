@@ -29,7 +29,6 @@ export async function executeSalesforceQuery<T extends z.ZodTypeAny>(
 
 		const parseResponse = SalesforceQueryResponseSchema(schema).safeParse(sfQueryResponse);
 
-
 		if (!parseResponse.success) {
 			throw new Error(
 				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
