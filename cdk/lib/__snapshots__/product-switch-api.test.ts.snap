@@ -1009,7 +1009,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":retention-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
@@ -1120,7 +1120,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":retention-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
