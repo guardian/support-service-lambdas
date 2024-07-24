@@ -2,7 +2,6 @@ import type { SalesforceUpdateResponse } from '../src/updateRecords';
 import {
 	doCompositeCallout } from '../src/updateRecords';
 
-// Mock fetch
 global.fetch = jest.fn();
 
 describe('doCompositeCallout', () => {
