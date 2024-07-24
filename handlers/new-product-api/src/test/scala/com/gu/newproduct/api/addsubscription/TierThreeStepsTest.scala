@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import com.gu.newproduct.TestData
-import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
+import com.gu.newproduct.api.addsubscription.email.{GuardianWeeklyEmailData, TierThreeEmailData}
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
@@ -72,7 +72,7 @@ class TierThreeStepsTest extends AnyFlatSpec with Matchers {
     Passed(())
   }
 
-  def stubSendEmail(expectedPlan: Plan)(sfContactId: Option[SfContactId], paperData: GuardianWeeklyEmailData) = {
+  def stubSendEmail(expectedPlan: Plan)(sfContactId: Option[SfContactId], paperData: TierThreeEmailData) = {
     sfContactId should equal(TestData.tierThreeCustomerData.account.sfContactId)
     paperData.subscriptionName should equal(SubscriptionName(newSubscriptionName))
     paperData.contacts should equal(TestData.tierThreeCustomerData.contacts)

@@ -9,8 +9,8 @@ object AddSubscriptionManualTest extends App {
   val requestBody =
     """{
       |	"zuoraAccountId":"8ad09b7d83634b880183698ea4ff27cc",
-      |	"startDate":"2023-10-26",
-      |	"planId":"national_delivery_sixday",
+      |	"startDate":"2024-08-02",
+      |	"planId":"tier_three_domestic_monthly",
       |	"createdByCSR":"John Duffell",
       |	"amountMinorUnits":2000,
       |	"acquisitionSource":"CSR",

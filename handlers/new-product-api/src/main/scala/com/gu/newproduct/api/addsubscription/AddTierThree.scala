@@ -4,10 +4,10 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.addsubscription.AddTierThree.createCreateSubRequest
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.serialisers.GuardianWeeklyEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, GuardianWeeklyEmailData, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.serialisers.TierThreeEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, SendConfirmationEmail, TierThreeEmailData}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GetGuardianWeeklyCustomerData, GuardianWeeklyAccountValidation, GuardianWeeklyCustomerData}
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAccountValidation
 import com.gu.newproduct.api.addsubscription.validation.tierthree.{GetTierThreeCustomerData, TierThreeCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidatedAccount, ValidationResult}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
@@ -17,7 +17,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetCont
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetContacts, GetPaymentMethod}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{HasPlanAndChargeIds, ProductRatePlanId, ZuoraIds}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.AsyncTypes._
@@ -35,7 +35,7 @@ class AddTierThree(
     validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
     validateAddress: (BillToAddress, SoldToAddress) => ValidationResult[Unit],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    sendConfirmationEmail: (Option[SfContactId], GuardianWeeklyEmailData) => AsyncApiGatewayOp[Unit],
+    sendConfirmationEmail: (Option[SfContactId], TierThreeEmailData) => AsyncApiGatewayOp[Unit],
 ) extends AddSpecificProduct {
   override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
@@ -51,8 +51,7 @@ class AddTierThree(
     ).toAsync
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create tier three subscription")
     plan = getPlan(request.planId)
-    // TODO
-    guardianWeeklyEmailData = GuardianWeeklyEmailData(
+    tierThreeEmailData = TierThreeEmailData(
       plan = plan,
       firstPaymentDate = request.startDate,
       contacts = customerData.contacts,
@@ -61,7 +60,7 @@ class AddTierThree(
       subscriptionName = subscriptionName,
       discountMessage = request.discountMessage,
     )
-    _ <- sendConfirmationEmail(customerData.account.sfContactId, guardianWeeklyEmailData)
+    _ <- sendConfirmationEmail(customerData.account.sfContactId, tierThreeEmailData)
       .recoverAndLog("send tier three confirmation email")
   } yield subscriptionName
 }
@@ -78,9 +77,9 @@ object AddTierThree {
       awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
       emailQueueName: QueueName,
   ): AddSpecificProduct = {
-    val guardianWeeklySqsQueueSend = awsSQSSend(emailQueueName)
-    val guardianWeeklyBrazeConfirmationSqsSend = EtSqsSend[GuardianWeeklyEmailData](guardianWeeklySqsQueueSend) _
-    val sendConfirmationEmail = SendConfirmationEmail(guardianWeeklyBrazeConfirmationSqsSend) _
+    val sqsQueueSend = awsSQSSend(emailQueueName)
+    val brazeConfirmationSqsSend = EtSqsSend[TierThreeEmailData](sqsQueueSend) _
+    val sendConfirmationEmail = SendConfirmationEmail(brazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)
     new AddTierThree(
       catalog,
