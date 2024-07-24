@@ -2,6 +2,7 @@ import { sfApiVersion } from '../src/config';
 
 describe('sfApiVersion', () => {
 	const ORIGINAL_ENV = process.env;
+	const mockApiVersion = 'v59.0';
 
 	beforeEach(() => {
 		jest.resetModules();
@@ -14,12 +15,11 @@ describe('sfApiVersion', () => {
 
 	it('should return the default version if SF_API_VERSION is not set', () => {
 		delete process.env.SF_API_VERSION;
-		expect(sfApiVersion()).toBe('v54.0');
+		expect(sfApiVersion()).toBe(mockApiVersion);
 	});
 
 	it('should return the version set in SF_API_VERSION environment variable', () => {
-		const mockVersion = 'v55.0';
-		process.env.SF_API_VERSION = mockVersion;
-		expect(sfApiVersion()).toBe(mockVersion);
+		process.env.SF_API_VERSION = mockApiVersion;
+		expect(sfApiVersion()).toBe(mockApiVersion);
 	});
 });
