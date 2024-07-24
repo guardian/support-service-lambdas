@@ -28,9 +28,7 @@ export async function doCompositeCallout(
 			SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
 
 		if (!parseResponse.success) {
-			throw new Error(
-				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
-			);
+			throw new Error(`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`);
 		}
 
 		return parseResponse.data;

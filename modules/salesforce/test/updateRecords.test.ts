@@ -1,5 +1,5 @@
 // import type { SalesforceUpdateResponse } from '../src/updateRecords';
-import { doCompositeCallout } from '../src/updateRecords';
+import { doCompositeCallout, SalesforceUpdateResponse } from '../src/updateRecords';
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -13,25 +13,25 @@ describe('doCompositeCallout', () => {
 		jest.resetAllMocks();
 	});
 
-	// it('should make a PATCH request with the correct headers and body', async () => {
-	// 	const mockResponse: SalesforceUpdateResponse[] = [{ success: true, errors: [] }];
-	// 	(global.fetch as jest.Mock).mockResolvedValue({
-	// 		ok: true,
-	// 		json: async () => await Promise.resolve(mockResponse),
-	// 	});
+	it('should make a PATCH request with the correct headers and body', async () => {
+		const mockResponse: SalesforceUpdateResponse[] = [{ success: true, errors: [] }];
+		(global.fetch as jest.Mock).mockResolvedValue({
+			ok: true,
+			json: async () => await Promise.resolve(mockResponse),
+		});
 
-	// 	const result = await doCompositeCallout(url, token, body);
+		const result = await doCompositeCallout(url, token, body);
 
-	// 	expect(fetch).toHaveBeenCalledWith(url, {
-	// 		method: 'PATCH',
-	// 		headers: {
-	// 			Authorization: `Bearer ${token}`,
-	// 			'Content-Type': 'application/json',
-	// 		},
-	// 		body,
-	// 	});
-	// 	expect(result).toEqual(mockResponse);
-	// });
+		expect(fetch).toHaveBeenCalledWith(url, {
+			method: 'PATCH',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+			body,
+		});
+		expect(result).toEqual(mockResponse);
+	});
 
 	it('should throw an error if the response is not ok', async () => {
 		(global.fetch as jest.Mock).mockResolvedValue({
@@ -44,23 +44,23 @@ describe('doCompositeCallout', () => {
 		);
 	});
 
-	// it('should throw an error if the response parsing fails', async () => {
-	// 	const invalidResponse = { invalid: 'response' };
-	// 	(global.fetch as jest.Mock).mockResolvedValue({
-	// 		ok: true,
-	// 		json: async () => await Promise.resolve(invalidResponse),
-	// 	});
+	it('should throw an error if the response parsing fails', async () => {
+		const invalidResponse = { invalid: 'response' };
+		(global.fetch as jest.Mock).mockResolvedValue({
+			ok: true,
+			json: async () => await Promise.resolve(invalidResponse),
+		});
 
-	// 	await expect(doCompositeCallout(url, token, body)).rejects.toThrow(
-	// 		'Error parsing response from Salesforce'
-	// 	);
-	// });
+		await expect(doCompositeCallout(url, token, body)).rejects.toThrow(
+			'Error parsing response from Salesforce'
+		);
+	});
 
-	// it('should throw an error if the fetch call fails', async () => {
-	// 	(global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+	it('should throw an error if the fetch call fails', async () => {
+		(global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-	// 	await expect(doCompositeCallout(url, token, body)).rejects.toThrow(
-	// 		'Error executing composite callout to Salesforce:'
-	// 	);
-	// });
+		await expect(doCompositeCallout(url, token, body)).rejects.toThrow(
+			'Error executing composite callout to Salesforce:'
+		);
+	});
 });
