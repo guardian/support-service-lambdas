@@ -39,7 +39,11 @@ export async function executeSalesforceQuery<T extends z.ZodTypeAny>(
 
 		return parseResponse.data;
 	} catch (error) {
-		const errorText = `Error querying Salesforce: ${JSON.stringify(error)}`;
+		const errorTextBase = 'Error querying Salesforce';
+		const errorText =
+			error instanceof Error
+				? `${errorTextBase}: ${error.message}`
+				: errorTextBase;
 		throw new Error(errorText);
 	}
 }
