@@ -2,7 +2,6 @@ import { z } from 'zod';
 import type { SfAuthResponse } from '../src/auth';
 import { executeSalesforceQuery } from '../src/query';
 
-//errors here are similar to the ones with empty objects
 global.fetch = jest.fn();
 
 describe('executeSalesforceQuery', () => {
