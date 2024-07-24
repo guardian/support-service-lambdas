@@ -1,6 +1,5 @@
 import type { SalesforceUpdateResponse } from '../src/updateRecords';
-import {
-	doCompositeCallout } from '../src/updateRecords';
+import { doCompositeCallout } from '../src/updateRecords';
 
 global.fetch = jest.fn();
 
