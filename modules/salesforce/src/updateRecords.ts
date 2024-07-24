@@ -19,9 +19,7 @@ export async function doCompositeCallout(
 
 		const response = await fetch(url, options);
 		if (!response.ok) {
-			throw new Error(
-				`Error updating record(s) in Salesforce: ${response.statusText}`,
-			);
+			throw new Error(`Error updating record(s) in Salesforce: ${response.statusText}`);
 		}
 
 		const sfUpdateResponse =
@@ -37,7 +35,12 @@ export async function doCompositeCallout(
 
 		return parseResponse.data;
 	} catch (error) {
-		const errorText = `Error executing composite callout to Salesforce: ${JSON.stringify(error)}`;
+		const errorTextBase = 'Error executing composite callout to Salesforce';
+		const errorText =
+			error instanceof Error
+				? `${errorTextBase}: ${error.message}`
+				: errorTextBase;
+
 		throw new Error(errorText);
 	}
 }
