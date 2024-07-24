@@ -8,7 +8,7 @@ export async function executeSalesforceQuery<T extends z.ZodTypeAny>(
 	sfAuthResponse: SfAuthResponse,
 	query: string,
 	schema: T,
-): Promise<SalesforceQueryResponse<z.infer<T>>> {
+): Promise<SalesforceQueryResponse<T>> {
 	try {
 		const response = await fetch(
 			`${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/query?q=${encodeURIComponent(query)}`,
