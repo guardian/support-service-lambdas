@@ -57,6 +57,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'payment-failure-comms',
 		'publishing-alarm-stack-cdk',
 		'salesforce-case-raiser',
+		'product-switch-api',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PP: [
