@@ -44,6 +44,7 @@ export async function executeSalesforceQuery<T extends z.ZodTypeAny>(
 			error instanceof Error
 				? `${errorTextBase}: ${error.message}`
 				: errorTextBase;
+
 		throw new Error(errorText);
 	}
 }
