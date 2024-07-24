@@ -6,15 +6,16 @@ import { doCompositeCallout } from '@modules/salesforce/src/updateRecords';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
+import { z } from 'zod';
 import { getSalesforceSecretNames } from '../secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 import type { BillingAccountRecord } from './getBillingAccounts';
-import { BillingAccountRecordsSchema } from './getBillingAccounts';
+import { BillingAccountRecordSchema } from './getBillingAccounts';
 
 export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseArray> = async (billingAccounts) => {
 
 	try{
-		const parseResponse = BillingAccountRecordsSchema.safeParse(billingAccounts);
+		const parseResponse = z.array(BillingAccountRecordSchema).safeParse(billingAccounts);
 
 		if (!parseResponse.success) {
 			throw new Error(
