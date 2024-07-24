@@ -1,5 +1,8 @@
 // import type { SalesforceUpdateResponse } from '../src/updateRecords';
-import { doCompositeCallout, SalesforceUpdateResponse } from '../src/updateRecords';
+import {
+	doCompositeCallout,
+	SalesforceUpdateResponse,
+} from '../src/updateRecords';
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -14,7 +17,9 @@ describe('doCompositeCallout', () => {
 	});
 
 	it('should make a PATCH request with the correct headers and body', async () => {
-		const mockResponse: SalesforceUpdateResponse[] = [{ success: true, errors: [] }];
+		const mockResponse: SalesforceUpdateResponse[] = [
+			{ success: true, errors: [] },
+		];
 		(global.fetch as jest.Mock).mockResolvedValue({
 			ok: true,
 			json: async () => await Promise.resolve(mockResponse),
@@ -40,7 +45,7 @@ describe('doCompositeCallout', () => {
 		});
 
 		await expect(doCompositeCallout(url, token, body)).rejects.toThrow(
-			'Error executing composite callout to Salesforce: Error updating record(s) in Salesforce: Not Found'
+			'Error executing composite callout to Salesforce: Error updating record(s) in Salesforce: Not Found',
 		);
 	});
 
@@ -52,7 +57,7 @@ describe('doCompositeCallout', () => {
 		});
 
 		await expect(doCompositeCallout(url, token, body)).rejects.toThrow(
-			'Error parsing response from Salesforce'
+			'Error parsing response from Salesforce',
 		);
 	});
 
@@ -60,7 +65,7 @@ describe('doCompositeCallout', () => {
 		(global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
 		await expect(doCompositeCallout(url, token, body)).rejects.toThrow(
-			'Error executing composite callout to Salesforce:'
+			'Error executing composite callout to Salesforce:',
 		);
 	});
 });

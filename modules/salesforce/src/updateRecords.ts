@@ -19,7 +19,9 @@ export async function doCompositeCallout(
 
 		const response = await fetch(url, options);
 		if (!response.ok) {
-			throw new Error(`Error updating record(s) in Salesforce: ${response.statusText}`);
+			throw new Error(
+				`Error updating record(s) in Salesforce: ${response.statusText}`,
+			);
 		}
 
 		const sfUpdateResponse =
@@ -28,7 +30,9 @@ export async function doCompositeCallout(
 			SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
 
 		if (!parseResponse.success) {
-			throw new Error(`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`);
+			throw new Error(
+				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+			);
 		}
 
 		return parseResponse.data;
