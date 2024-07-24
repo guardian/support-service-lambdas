@@ -25,8 +25,7 @@ export async function executeSalesforceQuery<T extends z.ZodTypeAny>(
 			throw new Error(`Failed to execute query: ${response.statusText}`);
 		}
 
-		const sfQueryResponse =
-			(await response.json()) as SalesforceQueryResponse<T>;
+		const sfQueryResponse = await response.json();
 
 		const parseResponse =
 			SalesforceQueryResponseSchema(schema).safeParse(sfQueryResponse);
