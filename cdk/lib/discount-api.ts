@@ -1,19 +1,18 @@
-import { GuApiLambda } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import type { App } from 'aws-cdk-lib';
-import { Duration, aws_logs as logs } from 'aws-cdk-lib';
-import {
-	ApiKeySourceType,
-	CfnBasePathMapping,
-	CfnDomainName,
-} from 'aws-cdk-lib/aws-apigateway';
-import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { LogGroup } from 'aws-cdk-lib/aws-logs';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import {GuApiLambda} from '@guardian/cdk';
+import {GuAlarm} from '@guardian/cdk/lib/constructs/cloudwatch';
+import type {GuStackProps} from '@guardian/cdk/lib/constructs/core';
+import {GuStack} from '@guardian/cdk/lib/constructs/core';
+import type {App} from 'aws-cdk-lib';
+//import { aws_logs as logs, Duration, RemovalPolicy} from 'aws-cdk-lib';
+import { Duration} from 'aws-cdk-lib';
+import {ApiKeySourceType, CfnBasePathMapping, CfnDomainName,} from 'aws-cdk-lib/aws-apigateway';
+import {ComparisonOperator, Metric} from 'aws-cdk-lib/aws-cloudwatch';
+//import {Effect, Grant, IPrincipal, Policy, PolicyStatement, Role, ServicePrincipal} from 'aws-cdk-lib/aws-iam';
+import {Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import {Runtime} from 'aws-cdk-lib/aws-lambda';
+//import {LogGroup, RetentionDays} from 'aws-cdk-lib/aws-logs';
+import { RetentionDays} from 'aws-cdk-lib/aws-logs';
+import {CfnRecordSet} from 'aws-cdk-lib/aws-route53';
 
 export interface DiscountApiProps extends GuStackProps {
 	stack: string;
@@ -50,6 +49,7 @@ export class DiscountApi extends GuStack {
 			monitoringConfiguration: {
 				noMonitoring: true, // There is a threshold alarm defined below
 			},
+			logRetention: RetentionDays.TWO_WEEKS,
 			app: app,
 			api: {
 				id: nameWithStage,
@@ -64,11 +64,6 @@ export class DiscountApi extends GuStack {
 					apiKeyRequired: true,
 				},
 			},
-		});
-
-		new LogGroup(this, `${app}-lambda-log-group`, {
-			logGroupName: `/aws/lambda/${lambda.functionName}`,
-			retention: logs.RetentionDays.TWO_WEEKS,
 		});
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
