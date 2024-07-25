@@ -15,7 +15,8 @@ object AddSubscriptionManualTest extends App {
       |	"amountMinorUnits":2000,
       |	"acquisitionSource":"CSR",
       |	"acquisitionCase":"5009E00000Lyy3T",
-      | "deliveryAgent":"1821"
+      | "deliveryAgent":"1821",
+      | "discountRatePlanId": "8ad081dd90c4bafe0190e52d3ae30f88"
       |}
     """.stripMargin
 
