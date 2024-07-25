@@ -58,6 +58,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'publishing-alarm-stack-cdk',
 		'salesforce-case-raiser',
 		'product-switch-api',
+		'update-supporter-plus-amounts',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PP: [
