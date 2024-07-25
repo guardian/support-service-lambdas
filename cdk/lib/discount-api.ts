@@ -3,19 +3,22 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
-//import { aws_logs as logs, Duration, RemovalPolicy} from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import {
 	ApiKeySourceType,
 	CfnBasePathMapping,
 	CfnDomainName,
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-//import {Effect, Grant, IPrincipal, Policy, PolicyStatement, Role, ServicePrincipal} from 'aws-cdk-lib/aws-iam';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import {
+	Effect,
+	Policy,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-//import {LogGroup, RetentionDays} from 'aws-cdk-lib/aws-logs';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { LogRetention, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 
 export interface DiscountApiProps extends GuStackProps {
@@ -53,7 +56,6 @@ export class DiscountApi extends GuStack {
 			monitoringConfiguration: {
 				noMonitoring: true, // There is a threshold alarm defined below
 			},
-			logRetention: RetentionDays.TWO_WEEKS,
 			app: app,
 			api: {
 				id: nameWithStage,
@@ -133,6 +135,52 @@ export class DiscountApi extends GuStack {
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
+
+		const lambdaRetentionPolicy = new Policy(this, 'LambdaRetentionPolicy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['logs:DescribeLogGroups', 'logs:PutRetentionPolicy'],
+					resources: [
+						`arn:aws:logs:${this.region}:${this.account}:log-group:*`,
+					],
+				}),
+			],
+		});
+
+		const retentionS3Policy: Policy = new Policy(
+			this,
+			'Retention S3 inline policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['s3:GetObject'],
+						resources: [
+							`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+						],
+					}),
+				],
+			},
+		);
+
+		const logRetentionRole = new Role(this, 'retention-role', {
+			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+		});
+		logRetentionRole.attachInlinePolicy(lambdaRetentionPolicy);
+		logRetentionRole.attachInlinePolicy(retentionS3Policy);
+
+		new LogRetention(this, `${app}-lambda-log-group-retention-manager`, {
+			logGroupName: lambda.logGroup.logGroupName,
+			retention: RetentionDays.TWO_WEEKS,
+			logGroupRegion: this.region,
+			role: logRetentionRole,
+			logRetentionRetryOptions: {
+				base: Duration.minutes(30),
+				maxRetries: 3,
+			},
+			removalPolicy: RemovalPolicy.RETAIN,
+		});
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
