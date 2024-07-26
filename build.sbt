@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.3.1",
+  scalaVersion := "3.3.3",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
