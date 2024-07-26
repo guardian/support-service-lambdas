@@ -163,6 +163,8 @@ export class ProductSwitchApi extends GuStack {
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
 		if (this.stage === 'PROD') {
+			const snsTopicName = 'alarms-handler-topic-PROD';
+
 			new GuAlarm(this, 'ApiGateway5XXAlarmCDK', {
 				app,
 				alarmName: alarmName('API gateway 5XX response'),
@@ -171,7 +173,7 @@ export class ProductSwitchApi extends GuStack {
 				),
 				evaluationPeriods: 1,
 				threshold: 1,
-				snsTopicName: 'retention-dev',
+				snsTopicName,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
@@ -190,7 +192,7 @@ export class ProductSwitchApi extends GuStack {
 				alarmDescription: alarmDescription(
 					'Product switch lambda failed, please check the logs to diagnose the issue.',
 				),
-				snsTopicName: 'retention-dev',
+				snsTopicName,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
