@@ -44,10 +44,12 @@ object Handler {
 
   def handleSar(input: InputStream, output: OutputStream): Either[ConfigFailure, Unit] = {
     val loadConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
-    loadConfig.load[ZuoraSarConfig].map(config => {
-      val sarLambda = ZuoraSarHandler(S3Helper, config)
-      sarLambda.handleRequest(input, output)
-    })
+    loadConfig
+      .load[ZuoraSarConfig]
+      .map(config => {
+        val sarLambda = ZuoraSarHandler(S3Helper, config)
+        sarLambda.handleRequest(input, output)
+      })
   }
 
   def handlePerformSar(

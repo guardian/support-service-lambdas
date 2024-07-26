@@ -3,7 +3,12 @@ package com.gu.delivery_records_api
 import cats.effect.{ContextShift, IO}
 import com.gu.delivery_records_api.service.createproblem._
 import com.gu.delivery_records_api.service.getrecords.GetDeliveryRecordsServiceImpl.deliveryRecordsQuery
-import com.gu.delivery_records_api.service.getrecords.{DeliveryProblemCase, DeliveryProblemCredit, DeliveryRecord, DeliveryRecordsApiResponse}
+import com.gu.delivery_records_api.service.getrecords.{
+  DeliveryProblemCase,
+  DeliveryProblemCredit,
+  DeliveryRecord,
+  DeliveryRecordsApiResponse,
+}
 import sttp.client3.impl.cats.CatsMonadAsyncError
 import sttp.client3.testing.SttpBackendStub
 import com.gu.salesforce._
@@ -464,7 +469,9 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO]).stubFailingAuth
 
-    DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(true)
+    DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(
+      true,
+    )
   }
 
   private def getBody[A: Decoder](response: Response[IO]) = {
@@ -478,13 +485,14 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
   }
 
   private def createApp(salesforceBackendStub: SttpBackendStub[IO, Nothing]) = {
-    Inside.inside(DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync()) { case Right(value) =>
-      value
+    Inside.inside(DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync()) {
+      case Right(value) =>
+        value
     }
   }
 }
 
 case class SFApiSubscription(
-  Buyer__r: SFApiContactPhoneNumbers,
-  Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]],
+    Buyer__r: SFApiContactPhoneNumbers,
+    Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]],
 )
