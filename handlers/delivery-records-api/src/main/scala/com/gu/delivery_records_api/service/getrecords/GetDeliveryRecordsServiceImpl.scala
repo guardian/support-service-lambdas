@@ -4,7 +4,12 @@ import cats.Monad
 import cats.data.EitherT
 import cats.syntax.all._
 import com.gu.delivery_records_api.service.createproblem.{SFApiContactPhoneNumbers, SFApiDeliveryRecord}
-import com.gu.delivery_records_api.service.{DeliveryRecordServiceError, DeliveryRecordServiceGenericError, DeliveryRecordServiceSubscriptionNotFound, getrecords}
+import com.gu.delivery_records_api.service.{
+  DeliveryRecordServiceError,
+  DeliveryRecordServiceGenericError,
+  DeliveryRecordServiceSubscriptionNotFound,
+  getrecords,
+}
 import com.gu.salesforce.SalesforceQueryConstants.{contactToWhereClausePart, escapeString}
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
@@ -13,19 +18,21 @@ import io.circe.generic.auto._
 import java.time.LocalDate
 import scala.annotation.tailrec
 
-class GetDeliveryRecordsServiceImpl[F[_]: Monad](salesforceClient: SalesforceClient[F]) extends GetDeliveryRecordsService[F] {
+class GetDeliveryRecordsServiceImpl[F[_]: Monad](salesforceClient: SalesforceClient[F])
+    extends GetDeliveryRecordsService[F] {
 
   import GetDeliveryRecordsServiceImpl._
 
   override def getDeliveryRecordsForSubscription(
-    subscriptionId: String,
-    contact: Contact,
-    optionalStartDate: Option[LocalDate],
-    optionalEndDate: Option[LocalDate],
-    optionalCancellationEffectiveDate: Option[LocalDate],
+      subscriptionId: String,
+      contact: Contact,
+      optionalStartDate: Option[LocalDate],
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate],
   ): EitherT[F, DeliveryRecordServiceError, DeliveryRecordsApiResponse] =
     for {
-      queryResult <- salesforceClient.query[SubscriptionRecordQueryResult](
+      queryResult <- salesforceClient
+        .query[SubscriptionRecordQueryResult](
           deliveryRecordsQuery(
             contact,
             subscriptionId,
@@ -55,21 +62,19 @@ class GetDeliveryRecordsServiceImpl[F[_]: Monad](salesforceClient: SalesforceCli
 
 }
 
-
-
 object GetDeliveryRecordsServiceImpl {
 
   private case class SubscriptionRecordQueryResult(
-    Buyer__r: SFApiContactPhoneNumbers,
-    Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]],
+      Buyer__r: SFApiContactPhoneNumbers,
+      Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]],
   )
 
   @tailrec
   private def detectChangeSkippingNoneAtHead[T](
-    allPrevious: List[DeliveryRecord],
-    fieldExtractor: DeliveryRecord => Option[T],
+      allPrevious: List[DeliveryRecord],
+      fieldExtractor: DeliveryRecord => Option[T],
   )(
-    value: T,
+      value: T,
   ): Boolean = allPrevious match {
     case head :: tail =>
       fieldExtractor(head) match {
@@ -81,8 +86,8 @@ object GetDeliveryRecordsServiceImpl {
   }
 
   private def transformSfApiDeliveryRecords(
-    accumulator: List[DeliveryRecord],
-    sfRecord: SFApiDeliveryRecord,
+      accumulator: List[DeliveryRecord],
+      sfRecord: SFApiDeliveryRecord,
   ): List[DeliveryRecord] =
     DeliveryRecord(
       id = sfRecord.Id,
@@ -115,11 +120,11 @@ object GetDeliveryRecordsServiceImpl {
   // this is done with a nested query so one can distinguish between the contact not owning subscription and there
   // simply being no delivery records, due to the hierarchical nature of the Salesforce response
   def deliveryRecordsQuery(
-    contact: Contact,
-    subscriptionNumber: String,
-    optionalStartDate: Option[LocalDate],
-    optionalEndDate: Option[LocalDate],
-    optionalCancellationEffectiveDate: Option[LocalDate],
+      contact: Contact,
+      subscriptionNumber: String,
+      optionalStartDate: Option[LocalDate],
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate],
   ): String =
     s"""SELECT Buyer__r.Id, Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
@@ -135,9 +140,9 @@ object GetDeliveryRecordsServiceImpl {
        |                         AND ${contactToWhereClausePart(contact)}""".stripMargin
 
   private def deliveryDateFilter(
-    optionalStartDate: Option[LocalDate],
-    optionalEndDate: Option[LocalDate],
-    optionalCancellationEffectiveDate: Option[LocalDate],
+      optionalStartDate: Option[LocalDate],
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate],
   ) = {
     List(
       optionalStartDate.map(startDate => s"Delivery_Date__c >= $startDate "),
@@ -150,9 +155,9 @@ object GetDeliveryRecordsServiceImpl {
   }
 
   private def getDeliveryRecordsFromQueryResults(
-    subscriptionId: String,
-    contact: Contact,
-    queryResult: RecordsWrapperCaseClass[SubscriptionRecordQueryResult],
+      subscriptionId: String,
+      contact: Contact,
+      queryResult: RecordsWrapperCaseClass[SubscriptionRecordQueryResult],
   ): Either[DeliveryRecordServiceError, List[SFApiDeliveryRecord]] = {
     queryResult.records.headOption
       .toRight(

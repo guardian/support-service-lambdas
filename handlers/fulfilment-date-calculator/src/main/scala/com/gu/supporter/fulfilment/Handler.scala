@@ -34,7 +34,6 @@ class Handler extends Lambda[Option[String], String] with LazyLogging {
     val datesForYesterdayThroughToAFortnight = (-1 to 14).map(_.toLong).map(today.plusDays)
 
     datesForYesterdayThroughToAFortnight.foreach { date =>
-
       val writeToBucket = new BucketWrite(date, stage).writeToBucket _
 
       writeToBucket(GuardianWeekly, GuardianWeeklyFulfilmentDates(date))

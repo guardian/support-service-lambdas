@@ -58,4 +58,3 @@ object SupporterPlusFields {
   ) ++ paymentMethodFields(data.paymentMethod, data.firstPaymentDate)
 
 }
-
