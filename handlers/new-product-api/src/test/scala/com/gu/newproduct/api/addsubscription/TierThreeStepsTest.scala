@@ -1,20 +1,13 @@
 package com.gu.newproduct.api.addsubscription
 
-import java.time.LocalDate
-
 import com.gu.newproduct.TestData
-import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
+import com.gu.newproduct.api.addsubscription.email.{GuardianWeeklyEmailData, TierThreeEmailData}
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
-  ChargeOverride,
-  SubscriptionName,
-  ZuoraCreateSubRequest,
-  ZuoraCreateSubRequestRatePlan,
-}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
-import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomesticMonthly, GuardianWeeklyDomesticQuarterly}
+import com.gu.newproduct.api.productcatalog.PlanId.TierThreeDomesticMonthly
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
@@ -24,52 +17,50 @@ import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json._
 
+import java.time.LocalDate
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 
-class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
-  val quarterlyTestRatePlanZuoraId = ProductRatePlanId("quarterly-zuora-rate-plan-id")
+class TierThreeStepsTest extends AnyFlatSpec with Matchers {
   val monthlyTestRatePlanZuoraId = ProductRatePlanId("monthly-zuora-rate-plan-id")
   val monthlyTestRatePlanChargeZuoraId = ProductRatePlanChargeId("monthly-zuora-rate-plan-charge-id")
 
   val newSubscriptionName = "A-Sxxxxxxxx"
   val testFirstPaymentDate = LocalDate.of(2018, 7, 18)
   val testZuoraAccountId = ZuoraAccountId("acccc")
-  val quarterlyRatePlan =
-    Plan(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), testStartDateRules)
   val monthlyRatePlan =
-    Plan(GuardianWeeklyDomesticMonthly, PlanDescription("GW Oct 18 - Monthly - Domestic"), testStartDateRules)
+    Plan(TierThreeDomesticMonthly, PlanDescription("Tier Three - Monthly - Domestic"), testStartDateRules)
+  val discountRatePlanId = "tier_three_discount_rate_plan_id"
   val testCaseId = CaseId("case")
   val testAcquistionSource = AcquisitionSource("CSR")
   val testCSR = CreatedByCSR("bob")
 
   def stubGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = {
     zuoraAccountId should equal(testZuoraAccountId)
-    ContinueProcessing(TestData.guardianWeeklyCustomerData)
+    ContinueProcessing(TestData.tierThreeCustomerData)
   }
 
   def stubValidateAddress(billingAddress: BillToAddress, deliveryAddress: SoldToAddress) = {
-    billingAddress should equal(TestData.guardianWeeklyCustomerData.contacts.billTo.address)
-    deliveryAddress should equal(TestData.guardianWeeklyCustomerData.contacts.soldTo.address)
+    billingAddress should equal(TestData.tierThreeCustomerData.contacts.billTo.address)
+    deliveryAddress should equal(TestData.tierThreeCustomerData.contacts.soldTo.address)
     Passed(())
   }
 
   def stubGetZuoraId(planId: PlanId) = {
     planId match {
-      case GuardianWeeklyDomesticQuarterly => Some(quarterlyTestRatePlanZuoraId)
-      case GuardianWeeklyDomesticMonthly => Some(monthlyTestRatePlanZuoraId)
+      case TierThreeDomesticMonthly => Some(monthlyTestRatePlanZuoraId)
       case _ => fail()
     }
   }
 
   def stubGetPlanAndCharge(planId: PlanId): Option[PlanAndCharge] = {
     planId match {
-      case GuardianWeeklyDomesticMonthly =>
+      case TierThreeDomesticMonthly =>
         Some(PlanAndCharge(monthlyTestRatePlanZuoraId, monthlyTestRatePlanChargeZuoraId))
       case _ => fail()
     }
@@ -81,21 +72,20 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
     Passed(())
   }
 
-  def stubSendEmail(expectedPlan: Plan)(sfContactId: Option[SfContactId], paperData: GuardianWeeklyEmailData) = {
-    sfContactId should equal(TestData.guardianWeeklyCustomerData.account.sfContactId)
+  def stubSendEmail(expectedPlan: Plan)(sfContactId: Option[SfContactId], paperData: TierThreeEmailData) = {
+    sfContactId should equal(TestData.tierThreeCustomerData.account.sfContactId)
     paperData.subscriptionName should equal(SubscriptionName(newSubscriptionName))
-    paperData.contacts should equal(TestData.guardianWeeklyCustomerData.contacts)
-    paperData.currency should equal(TestData.guardianWeeklyCustomerData.account.currency)
+    paperData.contacts should equal(TestData.tierThreeCustomerData.contacts)
+    paperData.currency should equal(TestData.tierThreeCustomerData.account.currency)
     paperData.firstPaymentDate should equal(testFirstPaymentDate)
-    paperData.paymentMethod should equal(TestData.guardianWeeklyCustomerData.paymentMethod)
+    paperData.paymentMethod should equal(TestData.tierThreeCustomerData.paymentMethod)
     paperData.plan should equal(expectedPlan)
     ContinueProcessing(()).toAsync
   }
 
   def stubGetPlan(planId: PlanId) = {
     planId match {
-      case GuardianWeeklyDomesticQuarterly => quarterlyRatePlan
-      case GuardianWeeklyDomesticMonthly => monthlyRatePlan
+      case TierThreeDomesticMonthly => monthlyRatePlan
       case _ => fail()
     }
   }
@@ -105,10 +95,10 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       fail("unexpected execution of voucher steps while processing contribution request!")
   }
 
-  it should "create subscription for non 6-for-6 rate plan" in {
+  it should "create a Tier Three subscription" in {
     def stubCreate(
-                    request: CreateSubscription.ZuoraCreateSubRequest,
-                  ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+        request: CreateSubscription.ZuoraCreateSubRequest,
+    ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       request shouldBe ZuoraCreateSubRequest(
         accountId = testZuoraAccountId,
         acceptanceDate = testFirstPaymentDate,
@@ -118,7 +108,11 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
         deliveryAgent = None,
         ratePlans = List(
           ZuoraCreateSubRequestRatePlan(
-            productRatePlanId = quarterlyTestRatePlanZuoraId,
+            productRatePlanId = ProductRatePlanId(discountRatePlanId),
+            maybeChargeOverride = None,
+          ),
+          ZuoraCreateSubRequestRatePlan(
+            productRatePlanId = monthlyTestRatePlanZuoraId,
             maybeChargeOverride = None,
           ),
         ),
@@ -126,15 +120,14 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       ClientSuccess(SubscriptionName(newSubscriptionName))
     }
 
-    val stubAddVoucherSteps = new AddGuardianWeeklySub(
+    val stubAddTierThreeSteps = new AddTierThree(
       stubGetPlan,
       stubGetZuoraId,
-      stubGetPlanAndCharge,
       stubGetVoucherCustomerData,
-      stubValidateStartDate(GuardianWeeklyDomesticQuarterly),
+      stubValidateStartDate(TierThreeDomesticMonthly),
       stubValidateAddress,
       stubCreate,
-      stubSendEmail(quarterlyRatePlan),
+      stubSendEmail(monthlyRatePlan),
     )
 
     val futureActual = new handleRequest(
@@ -142,9 +135,9 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       addContribution = dummySteps,
       addPaperSub = dummySteps,
       addDigipackSub = dummySteps,
-      addGuardianWeeklyDomesticSub = stubAddVoucherSteps,
-      addGuardianWeeklyROWSub = stubAddVoucherSteps,
-      addTierThree = dummySteps,
+      addGuardianWeeklyDomesticSub = dummySteps,
+      addGuardianWeeklyROWSub = dummySteps,
+      addTierThree = stubAddTierThreeSteps,
     )(
       ApiGatewayRequest(
         None,
@@ -158,7 +151,8 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
                 "zuoraAccountId" -> JsString(testZuoraAccountId.value),
                 "acquisitionSource" -> JsString(testAcquistionSource.value),
                 "createdByCSR" -> JsString(testCSR.value),
-                "planId" -> JsString(GuardianWeeklyDomesticQuarterly.name),
+                "planId" -> JsString(TierThreeDomesticMonthly.name),
+                "discountRatePlanId" -> JsString(discountRatePlanId),
               ),
             ),
           ),

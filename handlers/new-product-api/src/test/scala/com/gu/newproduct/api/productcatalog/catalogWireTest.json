@@ -811,5 +811,77 @@
       "paymentPlan" : "GBP 71.02 every month"
     } ],
     "enabledForDeliveryCountries" : [ "United Kingdom" ]
-  } ]
+  }, {
+    "label" : "Tier Three",
+    "plans" : [ {
+      "id" : "tier_three_domestic_monthly",
+      "label" : "Tier Three - Monthly - Domestic",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Friday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-01-01",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 27,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 27.00 every month"
+      } ],
+      "paymentPlan" : "GBP 27.00 every month"
+    }, {
+      "id" : "tier_three_domestic_annual",
+      "label" : "Tier Three - Annual - Domestic",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Friday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-01-01",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 300,
+        "billingPeriod" : "Annual",
+        "description" : "GBP 300.00 every 12 months"
+      } ],
+      "paymentPlan" : "GBP 300.00 every 12 months"
+    }, {
+      "id" : "tier_three_row_monthly",
+      "label" : "Tier Three - Monthly - ROW",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Friday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-01-01",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 48,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 48.00 every month"
+      } ],
+      "paymentPlan" : "GBP 48.00 every month"
+    }, {
+      "id" : "tier_three_row_annual",
+      "label" : "Tier Three - Annual - ROW",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Friday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-01-01",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 546,
+        "billingPeriod" : "Annual",
+        "description" : "GBP 546.00 every 12 months"
+      } ],
+      "paymentPlan" : "GBP 546.00 every 12 months"
+    } ],
+    "enabledForDeliveryCountries" : [ "United Kingdom" ]
+  }]
 }

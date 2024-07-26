@@ -128,6 +128,7 @@ class SupporterPlusStepsTest extends AnyFlatSpec with Matchers {
       addDigipackSub = dummySteps,
       addGuardianWeeklyDomesticSub = dummySteps,
       addGuardianWeeklyROWSub = dummySteps,
+      addTierThree = dummySteps,
     )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None, None))
 
     val actual = Await.result(futureActual, 30 seconds)
