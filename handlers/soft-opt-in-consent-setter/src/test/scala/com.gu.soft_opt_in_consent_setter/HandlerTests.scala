@@ -263,4 +263,51 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     result shouldBe Right(())
   }
+  test(testName = "processAcquiredSub should handle a Tier Three acquisition event correctly") {
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        """[
+          |  {
+          |    "id" : "digital_subscriber_preview",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "guardian_weekly_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Tier Three",
+      previousProductName = None,
+      eventType = Acquisition,
+      subscriptionId = "A-S12345678",
+    )
+
+    val result = processAcquiredSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      calculator,
+    )
+
+    result shouldBe Right(())
+  }
 }
+
+
