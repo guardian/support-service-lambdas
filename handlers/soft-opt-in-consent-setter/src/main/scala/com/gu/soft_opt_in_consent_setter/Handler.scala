@@ -89,6 +89,9 @@ object Handler extends LazyLogging {
           for {
             consents <- consentsCalculator.getSoftOptInsByProduct(sub.Product__c)
             consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
+            _ = logger.info(
+              s"Sending consents request for sub with name ${sub.Name} and Identity id for ${sub.Buyer__r.IdentityID__c} with body $consentsBody",
+            )
             _ <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
           } yield ()
 

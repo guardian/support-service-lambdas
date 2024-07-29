@@ -9,7 +9,6 @@ import scala.util.Try
 class IdentityConnector(config: IdentityConfig) extends LazyLogging {
 
   def sendConsentsReq(identityId: String, body: String): Either[SoftOptInError, Unit] = {
-    logger.info(s"Sending consents request to Identity for $identityId with body $body")
     handleConsentsResp(
       sendReq(url = s"${config.identityUrl}/users/$identityId/consents", body),
       errorDesc = s"Identity request failed while processing $identityId with body $body",
