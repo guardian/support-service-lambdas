@@ -1,9 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{IdentityConfig, SoftOptInError}
-import com.typesafe.scalalogging.LazyLogging
 import scalaj.http.{Http, HttpResponse}
-
 import scala.util.Try
 
 class IdentityConnector(config: IdentityConfig) {
