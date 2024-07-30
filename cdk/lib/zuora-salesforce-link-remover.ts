@@ -18,6 +18,7 @@ import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	Choice,
 	Condition,
+	DefinitionBody,
 	JsonPath,
 	Map,
 	Pass,
@@ -177,15 +178,17 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			)
 			.otherwise(new Pass(this, 'No Billing Accounts to process'));
 
-		const definition = getSalesforceBillingAccountsFromLambdaTask.next(
-			billingAccountsExistChoice,
+		const definitionBody = DefinitionBody.fromChainable(
+			getSalesforceBillingAccountsFromLambdaTask.next(
+				billingAccountsExistChoice,
+			),
 		);
 
 		const stateMachine = new StateMachine(
 			this,
 			`zuora-salesforce-link-remover-state-machine-${this.stage}`,
 			{
-				definition,
+				definitionBody: definitionBody,
 			},
 		);
 
