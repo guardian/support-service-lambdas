@@ -6,7 +6,7 @@ import scalaj.http.{Http, HttpResponse}
 
 import scala.util.Try
 
-class IdentityConnector(config: IdentityConfig) extends LazyLogging {
+class IdentityConnector(config: IdentityConfig) {
 
   def sendConsentsReq(identityId: String, body: String): Either[SoftOptInError, Unit] = {
     handleConsentsResp(
