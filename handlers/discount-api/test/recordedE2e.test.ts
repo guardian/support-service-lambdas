@@ -25,7 +25,7 @@ test('call the lambda with all recorded data', async () => {
 
 test('call the lambda with recorded data', async () => {
 	// load data from s3
-	const requestPlayback = await RequestPlayback.load('DEV', '1717622177150');
+	const requestPlayback = await RequestPlayback.load('DEV', '1721227406524');
 	await testSingle(requestPlayback);
 });
 
@@ -42,11 +42,13 @@ test('call the lambda to record data - apply', async () => {
 	// const expected = '';
 	const response = await handler(testDataObject);
 	expect(response.statusCode).toEqual(200);
-	expect(response.body).toEqual('Success');
+	expect(response.body).toEqual(
+		'{"nextNonDiscountedPaymentDate":"2024-10-16"}',
+	);
 }, 30000);
 
-const subscriptionNumber = 'A-S00894688';
-const identityId = '200259370';
+const subscriptionNumber = 'A-S00904942';
+const identityId = '200275381';
 const previewTestData = `{
     "path": "/preview-discount",
     "httpMethod": "POST",
@@ -67,4 +69,4 @@ const applyTestData = `{
     "body": "{\\n    \\"subscriptionNumber\\": \\"${subscriptionNumber}\\"\\n}"
 }`;
 
-const expectedBody = `{"discountedPrice":0,"upToPeriods":2,"upToPeriodsType":"Months"}`;
+const expectedBody = `{"discountedPrice":0,"upToPeriods":2,"upToPeriodsType":"Months","firstDiscountedPaymentDate":"2024-08-16","nextNonDiscountedPaymentDate":"2024-10-16"}`;

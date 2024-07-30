@@ -155,19 +155,37 @@ export class RequestPlayback implements FetchInterface {
 		return accu;
 	};
 
+	findAndDelete = <T>(
+		array: T[],
+		predicate: (value: T, index: number, obj: T[]) => unknown,
+		thisArg?: any,
+	): T | undefined => {
+		const maybeIndex = array.findIndex(predicate);
+		if (maybeIndex < 0) return undefined;
+		else {
+			// because deleteCount is 1 and maybeIndex is non negative, we know that value is not undefined
+			const value: T = array.splice(maybeIndex, 1)[0]!;
+			return value;
+		}
+	};
+
 	// this is a dummy fetch from the records
 	execute = async (
 		input: string,
 		init: RequestData,
 	): Promise<RecordedResponse> => {
-		const maybeResponse = this.recordedData.find(({ request }) => {
-			return (
-				request.input === input &&
-				this.mkString(init.headers) === this.mkString(request.init.headers) &&
-				init.method === request.init.method &&
-				init.body === request.init.body
-			);
-		})?.response;
+		// we need to delete in case a call is made multiple times
+		const maybeResponse = this.findAndDelete(
+			this.recordedData,
+			({ request }) => {
+				return (
+					request.input === input &&
+					this.mkString(init.headers) === this.mkString(request.init.headers) &&
+					init.method === request.init.method &&
+					init.body === request.init.body
+				);
+			},
+		)?.response;
 		return maybeResponse
 			? Promise.resolve(maybeResponse)
 			: Promise.reject(
