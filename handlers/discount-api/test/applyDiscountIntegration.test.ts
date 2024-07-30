@@ -13,6 +13,7 @@ import {
 } from './helpers';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { EmailMessageWithUserId } from '@modules/email/email';
+import { PassThrough } from '@modules/zuora/requestLogger';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';
@@ -31,6 +32,7 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
 		paymentDate.add(2, 'months').add(1, 'day'),
+		new PassThrough(),
 	);
 
 	const expected: ApplyDiscountResponseBody = {
@@ -82,6 +84,7 @@ test('digi subs can have a discount but dont get an email', async () => {
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
 		today,
+		new PassThrough(),
 	);
 
 	const expected: ApplyDiscountResponseBody = {

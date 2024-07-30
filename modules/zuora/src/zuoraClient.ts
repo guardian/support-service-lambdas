@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
+import { FetchInterface, PassThrough } from '@modules/zuora/requestLogger';
 
 export class ZuoraError extends Error {
 	constructor(
@@ -14,15 +15,24 @@ export class ZuoraError extends Error {
 }
 
 export class ZuoraClient {
-	static async create(stage: Stage) {
+	static async create(
+		stage: Stage,
+		fetchInterface: FetchInterface = new PassThrough(),
+	) {
+		console.log(`creating zuora client for stage ${stage}`);
 		const credentials = await getOAuthClientCredentials(stage);
-		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-		return new ZuoraClient(stage, bearerTokenProvider);
+		const bearerTokenProvider = new BearerTokenProvider(
+			stage,
+			credentials,
+			fetchInterface,
+		);
+		return new ZuoraClient(stage, bearerTokenProvider, fetchInterface);
 	}
 	private zuoraServerUrl: string;
 	constructor(
 		stage: Stage,
 		private tokenProvider: BearerTokenProvider,
+		private fetchInterface: FetchInterface,
 	) {
 		this.zuoraServerUrl = zuoraServerUrl(stage).replace(/\/$/, ''); // remove trailing slash
 	}
@@ -69,7 +79,7 @@ export class ZuoraClient {
 		const bearerToken = await this.tokenProvider.getBearerToken();
 		const url = `${this.zuoraServerUrl}/${path.replace(/^\//, '')}`;
 		console.log(`${method} ${url} ${body ? `with body ${body}` : ''}`);
-		const response = await fetch(url, {
+		const response = await this.fetchInterface.execute(url, {
 			method,
 			headers: {
 				Authorization: `Bearer ${bearerToken.access_token}`,
@@ -78,14 +88,12 @@ export class ZuoraClient {
 			},
 			body,
 		});
-		const json = await response.json();
+		const json = JSON.parse(response.text);
 		console.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
 		if (response.ok) {
 			return schema.parse(json);
 		} else {
-			console.error(response.text);
-
 			if (response.status === 429) {
 				console.log(response.headers);
 			}
