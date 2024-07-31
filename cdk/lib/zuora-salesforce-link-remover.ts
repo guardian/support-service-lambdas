@@ -154,7 +154,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				maxConcurrency: 10,
 				itemsPath: JsonPath.stringAt('$.billingAccountsToProcess'),
-				parameters: {
+				itemSelector: {
 					item: JsonPath.stringAt('$$.Map.Item.Value'),
 				},
 				resultPath: '$.billingAccountProcessingAttempts',
@@ -164,7 +164,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		const billingAccountsProcessingMapDefinition =
 			updateZuoraBillingAccountLambdaTask;
 
-		billingAccountsProcessingMap.iterator(
+		billingAccountsProcessingMap.itemProcessor(
 			billingAccountsProcessingMapDefinition,
 		);
 
