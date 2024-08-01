@@ -38,12 +38,12 @@ object HolidayStopCreditProcessor {
   ): List[ProcessResult[ZuoraHolidayCreditAddResult]] = {
 
     val allProcessableProductTypes = List(
+      NewspaperNationalDelivery,
       NewspaperHomeDelivery,
+      GuardianWeekly,
+      TierThree,
       NewspaperVoucherBook,
       NewspaperDigitalVoucher,
-      GuardianWeekly,
-      NewspaperNationalDelivery,
-      TierThree,
     )
 
     val productTypesToProcess = productTypeAndStopDateOverride match {
