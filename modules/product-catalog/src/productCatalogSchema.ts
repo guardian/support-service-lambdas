@@ -329,7 +329,8 @@ export const productCatalogSchema = z.object({
 					GBP: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
 				}),
 				billingPeriod: z
 					.enum(typeObject.SupporterPlus.billingPeriods)
