@@ -33,7 +33,9 @@ object Salesforce extends LazyLogging {
     }.toDisjunction match {
       case Left(failure) => Left(SalesforceApiFailure(failure.toString))
       case Right(details) =>
-        logger.info(s"There are ${details.length} credit requests from Salesforce to process")
+        logger.info(
+          s"There are ${details.length} credit requests from Salesforce to process for '${productVariant.name}'",
+        )
         if (details.length > batchSize) logger.warn(s"Only processing $batchSize of ${details.length} requests")
         Right(details.take(batchSize))
     }
