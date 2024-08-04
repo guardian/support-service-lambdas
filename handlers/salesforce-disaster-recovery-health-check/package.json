@@ -11,7 +11,7 @@
 		"fix-formatting": "prettier --write **/*.ts"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.129"
+		"@types/aws-lambda": "^8.10.142"
 	},
 	"dependencies": {
 		"@aws-sdk/client-sfn": "^3.552.0",
