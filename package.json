@@ -1,4 +1,6 @@
 {
+	"name": "@guardian/support-service-lambdas",
+	"version": "1.0.0",
 	"scripts": {
 		"build": "pnpm --stream -r run build",
 		"package": "pnpm --stream -r run package",

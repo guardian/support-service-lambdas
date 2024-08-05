@@ -320,6 +320,74 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
+	TierThree: z.object({
+		ratePlans: z.object({
+			RestOfWorldMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					GBP: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+			RestOfWorldAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					GBP: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+			DomesticAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+			DomesticMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+		}),
+	}),
 	GuardianWeeklyRestOfWorld: z.object({
 		ratePlans: z.object({
 			ThreeMonthGift: z.object({

@@ -1,6 +1,28 @@
 export const typeObject = {
+	TierThree: {
+		currencies: ['USD', 'GBP'],
+		billingPeriods: ['Month', 'Annual'],
+		productRatePlans: {
+			RestOfWorldMonthly: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			RestOfWorldAnnual: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			DomesticAnnual: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			DomesticMonthly: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+		},
+	},
 	DigitalSubscription: {
-		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
+		currencies: ['NZD', 'CAD', 'AUD', 'USD', 'GBP', 'EUR'],
 		billingPeriods: ['Quarter', 'Month', 'Annual'],
 		productRatePlans: {
 			Monthly: {
@@ -45,7 +67,7 @@ export const typeObject = {
 		},
 	},
 	SupporterPlus: {
-		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
+		currencies: ['GBP', 'USD', 'AUD', 'EUR', 'NZD', 'CAD'],
 		billingPeriods: ['Month', 'Annual'],
 		productRatePlans: {
 			GuardianWeeklyRestOfWorldMonthly: {
@@ -81,7 +103,7 @@ export const typeObject = {
 		},
 	},
 	GuardianWeeklyRestOfWorld: {
-		currencies: ['USD', 'GBP'],
+		currencies: ['GBP', 'USD'],
 		billingPeriods: ['Month', 'Annual', 'Quarter'],
 		productRatePlans: {
 			Monthly: {
@@ -102,7 +124,7 @@ export const typeObject = {
 		},
 	},
 	GuardianWeeklyDomestic: {
-		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
+		currencies: ['GBP', 'USD', 'NZD', 'EUR', 'CAD', 'AUD'],
 		billingPeriods: ['Annual', 'Quarter', 'Month'],
 		productRatePlans: {
 			OneYearGift: {
@@ -156,7 +178,7 @@ export const typeObject = {
 		},
 	},
 	Contribution: {
-		currencies: ['USD', 'NZD', 'EUR', 'GBP', 'CAD', 'AUD'],
+		currencies: ['GBP', 'USD', 'NZD', 'EUR', 'CAD', 'AUD'],
 		billingPeriods: ['Annual', 'Month'],
 		productRatePlans: {
 			Annual: {
