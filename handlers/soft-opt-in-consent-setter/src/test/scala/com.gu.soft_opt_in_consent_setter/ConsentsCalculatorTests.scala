@@ -1,14 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, SoftOptInError}
-import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{
-  contributionMapping,
-  guWeeklyMapping,
-  membershipMapping,
-  newspaperMapping,
-  supporterPlusMapping,
-  testConsentMappings,
-}
+import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData._
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
