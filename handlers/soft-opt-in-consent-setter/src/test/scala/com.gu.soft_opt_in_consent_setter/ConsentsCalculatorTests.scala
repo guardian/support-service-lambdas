@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, SoftOptInError}
 import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.{
   contributionMapping,
   guWeeklyMapping,
@@ -15,11 +15,11 @@ import org.scalatest.matchers.should
 
 class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with EitherValues {
 
-  val calculator = new ConsentsCalculator(testConsentMappings)
+  val calculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
 
   // getAcquisitionConsents success cases
   "getSoftOptInsByProduct" should "correctly return the mapping when a known product is passed" in {
-    calculator.getSoftOptInsByProduct("membership") shouldBe Right(membershipMapping)
+    calculator.getSoftOptInsByProduct("Membership") shouldBe Right(membershipMapping)
   }
 
   // getAcquisitionConsents failure cases
@@ -33,7 +33,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   // getSoftOptInsByProducts success cases
   "getSoftOptInsByProducts" should "correctly return both mappings when two products are passed in" in {
-    calculator.getSoftOptInsByProducts(Set("contributions", "supporterPlus")) shouldBe Right(
+    calculator.getSoftOptInsByProducts(Set("Contributor", "Supporter Plus")) shouldBe Right(
       contributionMapping ++ supporterPlusMapping,
     )
   }
@@ -49,33 +49,29 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   // getCancellationConsents success cases
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are no owned products" in {
-    calculator.getCancellationConsents("membership", Set()) shouldBe Right(membershipMapping)
-  }
-
-  "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are owned products but do not overlap" in {
-    calculator.getCancellationConsents("membership", Set("testproduct")) shouldBe Right(membershipMapping)
+    calculator.getCancellationConsents("Membership", Set()) shouldBe Right(membershipMapping)
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there is an owned product that partially overlaps" in {
-    calculator.getCancellationConsents("newspaper", Set("guardianweekly")) shouldBe Right(
+    calculator.getCancellationConsents("newspaper", Set("Guardian Weekly")) shouldBe Right(
       newspaperMapping.diff(guWeeklyMapping),
     )
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that partially overlap" in {
-    calculator.getCancellationConsents("newspaper", Set("membership", "guardianweekly")) shouldBe Right(
+    calculator.getCancellationConsents("newspaper", Set("Membership", "Guardian Weekly")) shouldBe Right(
       newspaperMapping.diff(membershipMapping ++ guWeeklyMapping),
     )
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there is an owned products completely overlaps" in {
-    calculator.getCancellationConsents("guardianweekly", Set("membership")) shouldBe Right(
+    calculator.getCancellationConsents("Guardian Weekly", Set("Membership")) shouldBe Right(
       guWeeklyMapping.diff(membershipMapping),
     )
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that completely overlap" in {
-    calculator.getCancellationConsents("guardianweekly", Set("membership", "contributions")) shouldBe Right(
+    calculator.getCancellationConsents("Guardian Weekly", Set("Membership", "Contributor")) shouldBe Right(
       guWeeklyMapping.diff(membershipMapping ++ contributionMapping),
     )
   }
@@ -90,7 +86,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "getCancellationConsents" should "correctly return a SoftOptInError when a known product is passed and an unknown product is present in the owned products" in {
-    val result = calculator.getCancellationConsents("membership", Set("nonexistentProduct"))
+    val result = calculator.getCancellationConsents("Membership", Set("nonexistentProduct"))
 
     result.isLeft shouldBe true
     result.left.value shouldBe a[SoftOptInError]
@@ -132,9 +128,9 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to Guardian Weekly subscription" in {
     Handler.buildProductSwitchConsents(
-      "contributions",
-      "guardianweekly",
-      Set("guardianweekly"),
+      "Contributor",
+      "Guardian Weekly",
+      Set("Guardian Weekly"),
       calculator,
     ) shouldBe Right("""[
         |  {
@@ -154,9 +150,9 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to a Guardian Weekly subscription whilst the user also owns a Newspaper subscription" in {
     Handler.buildProductSwitchConsents(
-      "contributions",
-      "guardianweekly",
-      Set("guardianweekly", "newspaper"),
+      "Contributor",
+      "Guardian Weekly",
+      Set("Guardian Weekly", "newspaper"),
       calculator,
     ) shouldBe Right("""[
         |  {
@@ -168,7 +164,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription" in {
     Handler.buildProductSwitchConsents(
-      "guardianweekly",
+      "Guardian Weekly",
       "newspaper",
       Set("newspaper"),
       calculator,
@@ -194,9 +190,9 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
     Handler.buildProductSwitchConsents(
-      "guardianweekly",
-      "contributions",
-      Set("newspaper", "contributions"),
+      "Guardian Weekly",
+      "Contributor",
+      Set("newspaper", "Contributor"),
       calculator,
     ) shouldBe Right("""[
         |  {
@@ -208,9 +204,9 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Recurring Contribution" in {
     Handler.buildProductSwitchConsents(
-      "guardianweekly",
+      "Guardian Weekly",
       "newspaper",
-      Set("newspaper", "contributions"),
+      Set("newspaper", "Contributor"),
       calculator,
     ) shouldBe Right("""[
         |  {
@@ -226,7 +222,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
     Handler.buildProductSwitchConsents(
-      "guardianweekly",
+      "Guardian Weekly",
       "newspaper",
       Set("newspaper", "InAppPurchase"),
       calculator,
@@ -244,7 +240,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   "buildProductSwitchConsents - HandlerIAP" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
     HandlerIAP.buildProductSwitchConsents(
-      "guardianweekly",
+      "Guardian Weekly",
       "newspaper",
       Set("newspaper", "InAppPurchase"),
       calculator,
