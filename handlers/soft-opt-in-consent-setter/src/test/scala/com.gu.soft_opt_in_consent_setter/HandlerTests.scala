@@ -1,6 +1,10 @@
 import com.gu.soft_opt_in_consent_setter.HandlerIAP._
-import com.gu.soft_opt_in_consent_setter.models.{SFAssociatedSubRecord, SFAssociatedSubResponse, SoftOptInError}
-import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.testConsentMappings
+import com.gu.soft_opt_in_consent_setter.models.{
+  ConsentsMapping,
+  SFAssociatedSubRecord,
+  SFAssociatedSubResponse,
+  SoftOptInError,
+}
 import com.gu.soft_opt_in_consent_setter.{
   ConsentsCalculator,
   MobileSubscription,
@@ -15,7 +19,7 @@ import org.scalatest.matchers.should.Matchers
 
 class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
-  val calculator = new ConsentsCalculator(testConsentMappings)
+  val calculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
   val mockSendConsentsReq = mockFunction[String, String, Either[SoftOptInError, Unit]]
   val mockGetMobileSubscriptions = mockFunction[String, Either[SoftOptInError, MobileSubscriptions]]
   val mockSfConnector = mock[SalesforceConnector]
@@ -48,7 +52,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         true,
         records = Seq(
           SFAssociatedSubRecord(
-            "contributions",
+            "Contributor",
             identityId,
           ),
         ),
@@ -57,8 +61,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
-      previousProductName = Some("contributions"),
+      productName = "Supporter Plus",
+      previousProductName = Some("Contributor"),
       eventType = Switch,
       subscriptionId = "A-S12345678",
     )
@@ -101,7 +105,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
+      productName = "Supporter Plus",
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
@@ -145,7 +149,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
+      productName = "Supporter Plus",
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
@@ -195,7 +199,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
+      productName = "Supporter Plus",
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
@@ -247,7 +251,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
+      productName = "Supporter Plus",
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
@@ -309,5 +313,3 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     result shouldBe Right(())
   }
 }
-
-

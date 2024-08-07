@@ -73,7 +73,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       dynamoConnector <- DynamoConnector()
 
       identityConnector = new IdentityConnector(config.identityConfig)
-      consentsCalculator = new ConsentsCalculator(config.consentsMapping)
+      consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
       mpapiConnector = new MpapiConnector(config.mpapiConfig)
     } yield (sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
 
