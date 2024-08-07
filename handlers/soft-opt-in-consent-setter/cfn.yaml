@@ -61,11 +61,6 @@ Resources:
       Policies:
         - Statement:
             - Effect: Allow
-              Action: s3:GetObject
-              Resource:
-                - !Sub arn:aws:s3:::soft-opt-in-consent-setter/${Stage}/ConsentsByProductMapping.json
-        - Statement:
-            - Effect: Allow
               Action: cloudwatch:PutMetricData
               Resource: "*"
         - Statement:
@@ -113,11 +108,6 @@ Resources:
                 - "dynamodb:PutItem"
               Resource:
                 - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/soft-opt-in-consent-setter-${Stage}-logging
-        - Statement:
-            - Effect: Allow
-              Action: s3:GetObject
-              Resource:
-                - !Sub arn:aws:s3:::soft-opt-in-consent-setter/${Stage}/ConsentsByProductMapping.json
         - Statement:
             - Effect: Allow
               Action: cloudwatch:PutMetricData
