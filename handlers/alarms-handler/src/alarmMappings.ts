@@ -96,9 +96,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 	],
-	PLATFORM: [
-		'fulfilment-lambdas',
-	]
+	PLATFORM: ['fulfilment-lambdas'],
 };
 
 const buildAppToTeamMappings = (): Record<string, Team[]> => {
