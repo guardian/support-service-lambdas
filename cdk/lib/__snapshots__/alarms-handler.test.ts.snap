@@ -12,6 +12,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -28,8 +29,12 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Description": "GROWTH Team Google Chat webhook URL",
       "Type": "String",
     },
-    "alarmshandlerPPwebhook": {
-      "Description": "PP Team Google Chat webhook URL",
+    "alarmshandlerPLATFORMwebhook": {
+      "Description": "PLATFORM Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlerPORTFOLIOwebhook": {
+      "Description": "PORTFOLIO Team Google Chat webhook URL",
       "Type": "String",
     },
     "alarmshandlerSREwebhook": {
@@ -153,8 +158,11 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             "MOBILE_ROLE_ARN": {
               "Ref": "alarmshandlermobileaccountrolearn",
             },
-            "PP_WEBHOOK": {
-              "Ref": "alarmshandlerPPwebhook",
+            "PLATFORM_WEBHOOK": {
+              "Ref": "alarmshandlerPLATFORMwebhook",
+            },
+            "PORTFOLIO_WEBHOOK": {
+              "Ref": "alarmshandlerPORTFOLIOwebhook",
             },
             "SRE_WEBHOOK": {
               "Ref": "alarmshandlerSREwebhook",
@@ -626,6 +634,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -642,8 +651,12 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Description": "GROWTH Team Google Chat webhook URL",
       "Type": "String",
     },
-    "alarmshandlerPPwebhook": {
-      "Description": "PP Team Google Chat webhook URL",
+    "alarmshandlerPLATFORMwebhook": {
+      "Description": "PLATFORM Team Google Chat webhook URL",
+      "Type": "String",
+    },
+    "alarmshandlerPORTFOLIOwebhook": {
+      "Description": "PORTFOLIO Team Google Chat webhook URL",
       "Type": "String",
     },
     "alarmshandlerSREwebhook": {
@@ -767,8 +780,11 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             "MOBILE_ROLE_ARN": {
               "Ref": "alarmshandlermobileaccountrolearn",
             },
-            "PP_WEBHOOK": {
-              "Ref": "alarmshandlerPPwebhook",
+            "PLATFORM_WEBHOOK": {
+              "Ref": "alarmshandlerPLATFORMwebhook",
+            },
+            "PORTFOLIO_WEBHOOK": {
+              "Ref": "alarmshandlerPORTFOLIOwebhook",
             },
             "SRE_WEBHOOK": {
               "Ref": "alarmshandlerSREwebhook",
