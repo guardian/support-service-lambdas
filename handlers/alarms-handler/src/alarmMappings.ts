@@ -1,6 +1,6 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 
-type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
+type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
 
 const sharedMobilePurchasesApps = [
 	'mobile-purchases-apple-pubsub',
@@ -61,12 +61,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'update-supporter-plus-amount',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
-	PP: [
+	PORTFOLIO: [
 		// contributions-platform
 		'fixation',
-
-		// fulfilment-lambdas
-		'fulfilment-lambdas',
 
 		// members-data-api
 		'membership-attribute-service',
@@ -99,6 +96,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 	],
+	PLATFORM: ['fulfilment-lambdas'],
 };
 
 const buildAppToTeamMappings = (): Record<string, Team[]> => {
