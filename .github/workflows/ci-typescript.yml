@@ -37,6 +37,7 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - ticket-tailor-webhook
           - update-supporter-plus-amount
           - product-switch-api
           - generate-product-catalog
@@ -59,6 +60,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
+      - run: pnpm prettier -v
       - run: pnpm --filter cdk package
       - run: pnpm --filter ${{ matrix.subproject }} package
 

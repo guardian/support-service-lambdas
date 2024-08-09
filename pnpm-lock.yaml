@@ -167,6 +167,12 @@ importers:
         specifier: ^8.10.142
         version: 8.10.142
 
+  handlers/ticket-tailor-webhook:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.129
+        version: 8.10.142
+
   handlers/update-supporter-plus-amount:
     dependencies:
       '@aws-sdk/client-sqs':
