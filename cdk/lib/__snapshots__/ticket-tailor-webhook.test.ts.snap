@@ -5,21 +5,20 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
+      "GuLambdaFunction",
+      "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "tickettailorwebhooklambdatickettailorwebhookCODEEndpoint157D6C1F": {
+    "RestApiEndpoint0551178A": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
+              "Ref": "RestApi0C43BF4B",
             },
             ".execute-api.",
             {
@@ -31,7 +30,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
             },
             "/",
             {
-              "Ref": "tickettailorwebhooklambdatickettailorwebhookCODEDeploymentStageCODE4D82F771",
+              "Ref": "RestApiDeploymentStageprod3855DE66",
             },
             "/",
           ],
@@ -47,117 +46,277 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
+    "ApiGatewayToSqsRole590217A3": {
       "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
           {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
           },
         ],
-        "AlarmDescription": "Impact - Ticket tailor webhook received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "TICKET-TAILOR-WEBHOOK-CODE API gateway 4XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "ticket-tailor-webhook-CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Threshold": 1,
       },
-      "Type": "AWS::CloudWatch::Alarm",
+      "Type": "AWS::IAM::Role",
     },
-    "ApiGatewayHigh5xxPercentageAlarmTickettailorwebhook77367DFB": {
+    "ApiGatewayToSqsRoleDefaultPolicy4DC2F8A9": {
       "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "tickettailorwebhookqueueCODEBF7A5727",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiGatewayToSqsRoleDefaultPolicy4DC2F8A9",
+        "Roles": [
+          {
+            "Ref": "ApiGatewayToSqsRole590217A3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RestApi0C43BF4B": {
+      "Properties": {
+        "Name": "membership-CODE-ticket-tailor-webhook",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "RestApiAccount7C83CF5A": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "RestApi0C43BF4B",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "RestApiCloudWatchRoleE3ED6605",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiCloudWatchRoleE3ED6605": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
           {
             "Fn::Join": [
               "",
               [
-                "arn:aws:sns:",
+                "arn:",
                 {
-                  "Ref": "AWS::Region",
+                  "Ref": "AWS::Partition",
                 },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
               ],
             ],
           },
         ],
-        "AlarmDescription": "ticket-tailor-webhook exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from ticket-tailor-webhook (ApiGateway) in CODE",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
+        "Tags": [
           {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for ticket-tailor-webhook",
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
           },
           {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "ticket-tailor-webhook-CODE",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
           },
           {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "ticket-tailor-webhook-CODE",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
           },
         ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
       },
-      "Type": "AWS::CloudWatch::Alarm",
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiDeployment180EC50390aa00a70885ac6e926b065481d74047": {
+      "DependsOn": [
+        "RestApiPOSTEF2EB351",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "RestApiDeploymentStageprod3855DE66": {
+      "DependsOn": [
+        "RestApiAccount7C83CF5A",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "RestApiDeployment180EC50390aa00a70885ac6e926b065481d74047",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "StageName": "prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "RestApiPOSTEF2EB351": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "ApiGatewayToSqsRole590217A3",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "{ "success": true }",
+              },
+              "StatusCode": "200",
+            },
+          ],
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'application/json'",
+          },
+          "RequestTemplates": {
+            "application/json": "Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=X-GU-GeoIP-Country-Code&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$input.params('X-GU-GeoIP-Country-Code')&MessageAttribute.2.Name=EventPath&MessageAttribute.2.Value.DataType=String&MessageAttribute.2.Value.StringValue=$context.path",
+          },
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":sqs:path/",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                "/",
+                {
+                  "Fn::GetAtt": [
+                    "tickettailorwebhookqueueCODEBF7A5727",
+                    "QueueName",
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+          },
+        ],
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "S3inlinepolicy3B07399A": {
       "Properties": {
@@ -179,6 +338,33 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "tickettailorwebhookdlqCODE9240ACEF": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "ticket-tailor-webhook-dlq-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
     },
     "tickettailorwebhooklambdaEF743C00": {
       "DependsOn": [
@@ -298,6 +484,22 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           "Statement": [
             {
               "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "tickettailorwebhookqueueCODEBF7A5727",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -392,136 +594,280 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "tickettailorwebhooklambdatickettailorwebhookCODEANY80D99D22": {
+    "tickettailorwebhooklambdaSqsEventSourcetickettailorwebhookCODEtickettailorwebhookqueueCODE887B0D2D9C295CD4": {
       "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "tickettailorwebhookqueueCODEBF7A5727",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "tickettailorwebhooklambdaEF743C00",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "tickettailorwebhookqueueCODEBF7A5727": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "ticket-tailor-webhook-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "tickettailorwebhookdlqCODE9240ACEF",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 1,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+}
+`;
+
+exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuLambdaFunction",
+      "GuApiGatewayWithLambdaByPath",
+      "GuApiGateway5xxPercentageAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "RestApiEndpoint0551178A": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "RestApi0C43BF4B",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGatewayHigh5xxPercentageAlarmTickettailorwebhook77367DFB": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
             "Fn::Join": [
               "",
               [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
+                "arn:aws:sns:",
                 {
                   "Ref": "AWS::Region",
                 },
-                ":lambda:path/2015-03-31/functions/",
+                ":",
                 {
-                  "Fn::GetAtt": [
-                    "tickettailorwebhooklambdaEF743C00",
-                    "Arn",
-                  ],
+                  "Ref": "AWS::AccountId",
                 },
-                "/invocations",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
-        },
+        ],
+        "AlarmDescription": "ticket-tailor-webhook exceeded 0% error rate",
+        "AlarmName": "High 5XX error percentage from ticket-tailor-webhook (ApiGateway) in PROD",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "EvaluationPeriods": 1,
+        "Metrics": [
+          {
+            "Expression": "100*m1/m2",
+            "Id": "expr_1",
+            "Label": "% of 5XX responses served for ticket-tailor-webhook",
+          },
+          {
+            "Id": "m1",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "membership-PROD-ticket-tailor-webhook",
+                  },
+                ],
+                "MetricName": "5XXError",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "m2",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "ApiName",
+                    "Value": "membership-PROD-ticket-tailor-webhook",
+                  },
+                ],
+                "MetricName": "Count",
+                "Namespace": "AWS/ApiGateway",
+              },
+              "Period": 60,
+              "Stat": "SampleCount",
+            },
+            "ReturnData": false,
+          },
+        ],
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
       },
-      "Type": "AWS::ApiGateway::Method",
+      "Type": "AWS::CloudWatch::Alarm",
     },
-    "tickettailorwebhooklambdatickettailorwebhookCODEANYApiPermissionTesttickettailorwebhookCODEtickettailorwebhooklambdatickettailorwebhookCODEEC287915ANY862408EC": {
+    "ApiGatewayToSqsRole590217A3": {
       "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdaEF743C00",
-            "Arn",
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
           ],
+          "Version": "2012-10-17",
         },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
       },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::IAM::Role",
     },
-    "tickettailorwebhooklambdatickettailorwebhookCODEANYApiPermissiontickettailorwebhookCODEtickettailorwebhooklambdatickettailorwebhookCODEEC287915ANY3F70E072": {
+    "ApiGatewayToSqsRoleDefaultPolicy4DC2F8A9": {
       "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdaEF743C00",
-            "Arn",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "tickettailorwebhookqueuePRODDAE73271",
+                  "Arn",
+                ],
+              },
+            },
           ],
+          "Version": "2012-10-17",
         },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
-              },
-              "/",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookCODEDeploymentStageCODE4D82F771",
-              },
-              "/*/",
-            ],
-          ],
-        },
+        "PolicyName": "ApiGatewayToSqsRoleDefaultPolicy4DC2F8A9",
+        "Roles": [
+          {
+            "Ref": "ApiGatewayToSqsRole590217A3",
+          },
+        ],
       },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::IAM::Policy",
     },
-    "tickettailorwebhooklambdatickettailorwebhookCODEAccount436C74C5": {
+    "RestApi0C43BF4B": {
+      "Properties": {
+        "Name": "membership-PROD-ticket-tailor-webhook",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "RestApiAccount7C83CF5A": {
       "DeletionPolicy": "Retain",
       "DependsOn": [
-        "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
+        "RestApi0C43BF4B",
       ],
       "Properties": {
         "CloudWatchRoleArn": {
           "Fn::GetAtt": [
-            "tickettailorwebhooklambdatickettailorwebhookCODECloudWatchRole49C92E42",
+            "RestApiCloudWatchRoleE3ED6605",
             "Arn",
           ],
         },
@@ -529,7 +875,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::Account",
       "UpdateReplacePolicy": "Retain",
     },
-    "tickettailorwebhooklambdatickettailorwebhookCODECloudWatchRole49C92E42": {
+    "RestApiCloudWatchRoleE3ED6605": {
       "DeletionPolicy": "Retain",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -560,10 +906,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
-            "Key": "App",
-            "Value": "ticket-tailor-webhook",
-          },
-          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -577,73 +919,38 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stage",
-            "Value": "CODE",
+            "Value": "PROD",
           },
         ],
       },
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "tickettailorwebhooklambdatickettailorwebhookCODED417109B": {
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "ticket-tailor-webhook-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "ticket-tailor-webhook",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookCODEDeployment6B505C02d890a10b52f333588fe5a87da73928af": {
+    "RestApiDeployment180EC5030721e46eaca0da1e36bae49bf8cc5886": {
       "DependsOn": [
-        "tickettailorwebhooklambdatickettailorwebhookCODEproxyANY1BAF006E",
-        "tickettailorwebhooklambdatickettailorwebhookCODEproxy66C8920B",
-        "tickettailorwebhooklambdatickettailorwebhookCODEANY80D99D22",
+        "RestApiPOSTEF2EB351",
       ],
       "Properties": {
-        "Description": "API Gateway created by CDK",
+        "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
+          "Ref": "RestApi0C43BF4B",
         },
       },
       "Type": "AWS::ApiGateway::Deployment",
     },
-    "tickettailorwebhooklambdatickettailorwebhookCODEDeploymentStageCODE4D82F771": {
+    "RestApiDeploymentStageprod3855DE66": {
       "DependsOn": [
-        "tickettailorwebhooklambdatickettailorwebhookCODEAccount436C74C5",
+        "RestApiAccount7C83CF5A",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookCODEDeployment6B505C02d890a10b52f333588fe5a87da73928af",
+          "Ref": "RestApiDeployment180EC5030721e46eaca0da1e36bae49bf8cc5886",
         },
         "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
+          "Ref": "RestApi0C43BF4B",
         },
-        "StageName": "CODE",
+        "StageName": "prod",
         "Tags": [
-          {
-            "Key": "App",
-            "Value": "ticket-tailor-webhook",
-          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -658,34 +965,39 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stage",
-            "Value": "CODE",
+            "Value": "PROD",
           },
         ],
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "tickettailorwebhooklambdatickettailorwebhookCODEproxy66C8920B": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookCODEproxyANY1BAF006E": {
+    "RestApiPOSTEF2EB351": {
       "Properties": {
         "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
+        "HttpMethod": "POST",
         "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "ApiGatewayToSqsRole590217A3",
+              "Arn",
+            ],
+          },
           "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "{ "success": true }",
+              },
+              "StatusCode": "200",
+            },
+          ],
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'application/json'",
+          },
+          "RequestTemplates": {
+            "application/json": "Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=X-GU-GeoIP-Country-Code&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$input.params('X-GU-GeoIP-Country-Code')&MessageAttribute.2.Name=EventPath&MessageAttribute.2.Value.DataType=String&MessageAttribute.2.Value.StringValue=$context.path",
+          },
+          "Type": "AWS",
           "Uri": {
             "Fn::Join": [
               "",
@@ -698,267 +1010,37 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::Region",
                 },
-                ":lambda:path/2015-03-31/functions/",
+                ":sqs:path/",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                "/",
                 {
                   "Fn::GetAtt": [
-                    "tickettailorwebhooklambdaEF743C00",
-                    "Arn",
+                    "tickettailorwebhookqueuePRODDAE73271",
+                    "QueueName",
                   ],
                 },
-                "/invocations",
               ],
             ],
           },
         },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+          },
+        ],
         "ResourceId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookCODEproxy66C8920B",
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
         },
         "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
+          "Ref": "RestApi0C43BF4B",
         },
       },
       "Type": "AWS::ApiGateway::Method",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookCODEproxyANYApiPermissionTesttickettailorwebhookCODEtickettailorwebhooklambdatickettailorwebhookCODEEC287915ANYproxyF938D880": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdaEF743C00",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookCODEproxyANYApiPermissiontickettailorwebhookCODEtickettailorwebhooklambdatickettailorwebhookCODEEC287915ANYproxy11973929": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdaEF743C00",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookCODED417109B",
-              },
-              "/",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookCODEDeploymentStageCODE4D82F771",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-  },
-}
-`;
-
-exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
-{
-  "Metadata": {
-    "gu:cdk:constructs": [
-      "GuDistributionBucketParameter",
-      "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
-    ],
-    "gu:cdk:version": "TEST",
-  },
-  "Outputs": {
-    "tickettailorwebhooklambdatickettailorwebhookPRODEndpoint1214E482": {
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region",
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix",
-            },
-            "/",
-            {
-              "Ref": "tickettailorwebhooklambdatickettailorwebhookPRODDeploymentStagePROD4AA66CAD",
-            },
-            "/",
-          ],
-        ],
-      },
-    },
-  },
-  "Parameters": {
-    "DistributionBucketName": {
-      "Default": "/account/services/artifact.bucket",
-      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-  },
-  "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Ticket tailor webhook received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "TICKET-TAILOR-WEBHOOK-PROD API gateway 4XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "ticket-tailor-webhook-PROD",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmTickettailorwebhook77367DFB": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "ticket-tailor-webhook exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from ticket-tailor-webhook (ApiGateway) in PROD",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for ticket-tailor-webhook",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "ticket-tailor-webhook-PROD",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "ticket-tailor-webhook-PROD",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
     },
     "S3inlinepolicy3B07399A": {
       "Properties": {
@@ -980,6 +1062,33 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "tickettailorwebhookdlqPRODC8AAF6D6": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "ticket-tailor-webhook-dlq-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
     },
     "tickettailorwebhooklambdaEF743C00": {
       "DependsOn": [
@@ -1099,6 +1208,22 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           "Statement": [
             {
               "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "tickettailorwebhookqueuePRODDAE73271",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -1193,15 +1318,37 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264": {
+    "tickettailorwebhooklambdaSqsEventSourcetickettailorwebhookPRODtickettailorwebhookqueuePRODFBF666F3E22E29AD": {
       "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "ticket-tailor-webhook-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "ticket-tailor-webhook",
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "tickettailorwebhookqueuePRODDAE73271",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "tickettailorwebhooklambdaEF743C00",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "tickettailorwebhookqueuePRODDAE73271": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "ticket-tailor-webhook-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "tickettailorwebhookdlqPRODC8AAF6D6",
+              "Arn",
+            ],
           },
+          "maxReceiveCount": 1,
+        },
+        "Tags": [
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1220,383 +1367,8 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
         ],
       },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODANY8E359EE4": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "tickettailorwebhooklambdaEF743C00",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODANYApiPermissionTesttickettailorwebhookPRODtickettailorwebhooklambdatickettailorwebhookPROD473619E1ANYA64EA26D": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdaEF743C00",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODANYApiPermissiontickettailorwebhookPRODtickettailorwebhooklambdatickettailorwebhookPROD473619E1ANYADF8EFD7": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdaEF743C00",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-              },
-              "/",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookPRODDeploymentStagePROD4AA66CAD",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODAccountC37A65C1": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdatickettailorwebhookPRODCloudWatchRole57044912",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODCloudWatchRole57044912": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "ticket-tailor-webhook",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODDeploymentF02C84D366ef14a7fc6ff211070079b239a279c0": {
-      "DependsOn": [
-        "tickettailorwebhooklambdatickettailorwebhookPRODproxyANY164D253A",
-        "tickettailorwebhooklambdatickettailorwebhookPRODproxy2FACC77C",
-        "tickettailorwebhooklambdatickettailorwebhookPRODANY8E359EE4",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODDeploymentStagePROD4AA66CAD": {
-      "DependsOn": [
-        "tickettailorwebhooklambdatickettailorwebhookPRODAccountC37A65C1",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookPRODDeploymentF02C84D366ef14a7fc6ff211070079b239a279c0",
-        },
-        "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "ticket-tailor-webhook",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODproxy2FACC77C": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODproxyANY164D253A": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "tickettailorwebhooklambdaEF743C00",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookPRODproxy2FACC77C",
-        },
-        "RestApiId": {
-          "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODproxyANYApiPermissionTesttickettailorwebhookPRODtickettailorwebhooklambdatickettailorwebhookPROD473619E1ANYproxy9DC760BB": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdaEF743C00",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "tickettailorwebhooklambdatickettailorwebhookPRODproxyANYApiPermissiontickettailorwebhookPRODtickettailorwebhooklambdatickettailorwebhookPROD473619E1ANYproxyC991263B": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "tickettailorwebhooklambdaEF743C00",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookPROD2CFFB264",
-              },
-              "/",
-              {
-                "Ref": "tickettailorwebhooklambdatickettailorwebhookPRODDeploymentStagePROD4AA66CAD",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
     },
   },
 }

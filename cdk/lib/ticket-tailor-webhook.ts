@@ -1,12 +1,20 @@
-import { GuApiLambda } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
+import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { AwsIntegration } from 'aws-cdk-lib/aws-apigateway';
+import {
+	Effect,
+	Policy,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 
 export interface TicketTailorWebhookProps extends GuStackProps {
 	stack: string;
@@ -23,14 +31,71 @@ export class TicketTailorWebhook extends GuStack {
 		const app = 'ticket-tailor-webhook';
 		const nameWithStage = `${app}-${this.stage}`;
 
+		const alarmsTopic = `alarms-handler-topic-${this.stage}`;
+
 		const commonEnvironmentVariables = {
 			App: app,
 			Stack: this.stack,
 			Stage: this.stage,
 		};
 
+		// SQS
+		const queueName = `${app}-queue-${props.stage}`;
+		const deadLetterQueueName = `${app}-dlq-${props.stage}`;
+
+		const deadLetterQueue = new Queue(this, deadLetterQueueName, {
+			queueName: deadLetterQueueName,
+			retentionPeriod: Duration.days(14),
+		});
+
+		const queue = new Queue(this, queueName, {
+			queueName,
+			deadLetterQueue: {
+				// The number of times a message can be unsuccessfully dequeued before being moved to the dlq
+				maxReceiveCount: 1,
+				queue: deadLetterQueue,
+			},
+		});
+
+		// SQS to Lambda event source mapping
+		const eventSource = new SqsEventSource(queue, {
+			reportBatchItemFailures: true,
+		});
+		const events = [eventSource];
+
+		// grant sqs:SendMessage* to Api Gateway Role
+		const apiRole = new Role(this, 'ApiGatewayToSqsRole', {
+			assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
+		});
+		queue.grantSendMessages(apiRole);
+
+		// API Gateway Direct Integration
+		const sendMessageIntegration = new AwsIntegration({
+			service: 'sqs',
+			path: `${this.account}/${queue.queueName}`,
+			integrationHttpMethod: 'POST',
+			options: {
+				credentialsRole: apiRole,
+				requestParameters: {
+					'integration.request.header.Content-Type': `'application/json'`,
+				},
+				requestTemplates: {
+					'application/json':
+						"Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=X-GU-GeoIP-Country-Code&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$input.params('X-GU-GeoIP-Country-Code')&MessageAttribute.2.Name=EventPath&MessageAttribute.2.Value.DataType=String&MessageAttribute.2.Value.StringValue=$context.path",
+				},
+				integrationResponses: [
+					{
+						statusCode: '200',
+						responseTemplates: {
+							'application/json': '{ "success": true }',
+						},
+					},
+				],
+			},
+		});
+
 		// ---- API-triggered lambda functions ---- //
-		const lambda = new GuApiLambda(this, `${app}-lambda`, {
+		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			description:
 				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 			functionName: nameWithStage,
@@ -40,51 +105,32 @@ export class TicketTailorWebhook extends GuStack {
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
-			// Create an alarm
-			monitoringConfiguration: {
-				http5xxAlarm: { tolerated5xxPercentage: 5 },
-				snsTopicName: `alarms-handler-topic-${this.stage}`,
-			},
 			app: app,
-			api: {
-				id: nameWithStage,
-				restApiName: nameWithStage,
-				description: 'API Gateway created by CDK',
-				proxy: true,
-				deployOptions: {
-					stageName: this.stage,
-				},
-			},
+			events,
 		});
 
-		// ---- Alarms ---- //
-		const alarmName = (shortDescription: string) =>
-			`TICKET-TAILOR-WEBHOOK-${this.stage} ${shortDescription}`;
-
-		const alarmDescription = (description: string) =>
-			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
-
-		new GuAlarm(this, 'ApiGateway4XXAlarmCDK', {
+		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,
-			alarmName: alarmName('API gateway 4XX response'),
-			alarmDescription: alarmDescription(
-				'Ticket tailor webhook received an invalid request',
-			),
-			evaluationPeriods: 1,
-			threshold: 1,
-			snsTopicName: `alarms-handler-topic-${this.stage}`,
-			actionsEnabled: this.stage === 'PROD',
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			metric: new Metric({
-				metricName: '4XXError',
-				namespace: 'AWS/ApiGateway',
-				statistic: 'Sum',
-				period: Duration.seconds(300),
-				dimensionsMap: {
-					ApiName: nameWithStage,
-				},
-			}),
+			monitoringConfiguration:
+				this.stage === 'CODE'
+					? { noMonitoring: true }
+					: {
+							snsTopicName: alarmsTopic,
+							http5xxAlarm: {
+								tolerated5xxPercentage: 0,
+							},
+					  },
+			targets: [],
 		});
+		apiGateway.api.root
+			.resourceForPath('/')
+			.addMethod('POST', sendMessageIntegration, {
+				methodResponses: [
+					{
+						statusCode: '200',
+					},
+				],
+			});
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
 			statements: [
