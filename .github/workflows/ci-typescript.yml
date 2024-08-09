@@ -37,6 +37,7 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - ticket-tailor-webhook
           - update-supporter-plus-amount
           - product-switch-api
           - generate-product-catalog

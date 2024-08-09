@@ -1,0 +1,25 @@
+stacks:
+- support
+regions:
+- eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  ticket-tailor-webhook-cloudformation:
+    type: cloud-formation
+    app: ticket-tailor-webhook
+    parameters:
+      templateStagePaths:
+        CODE: ticket-tailor-webhook-CODE.template.json
+        PROD: ticket-tailor-webhook-PROD.template.json
+
+  ticket-tailor-webhook:
+    type: aws-lambda
+    parameters:
+      fileName: ticket-tailor-webhook.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+      - ticket-tailor-webhook-
+    dependencies: [ticket-tailor-webhook-cloudformation]
