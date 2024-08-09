@@ -20,7 +20,6 @@ import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
-
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
 const membershipCertificateId = 'c1efc564-9ff8-4a03-be48-d1990a3d79d2';
@@ -239,17 +238,16 @@ new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-PROD', {
 	stage: 'PROD',
 });
 new TicketTailorWebhook(app, 'ticket-tailor-webhook-CODE', {
-    stack: 'support',
-    stage: 'CODE',
-    domainName: `ticket-tailor-webhook-code.${supportApisDomain}`,
-    hostedZoneId: supportHostedZoneId,
-    certificateId: supportCertificateId,
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `ticket-tailor-webhook-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
 });
 new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
-    stack: 'support',
-    stage: 'PROD',
-    domainName: `ticket-tailor-webhook.${supportApisDomain}`,
-    hostedZoneId: supportHostedZoneId,
-    certificateId: supportCertificateId,
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `ticket-tailor-webhook.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
 });
-

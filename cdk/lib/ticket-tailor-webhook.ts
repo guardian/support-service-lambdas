@@ -1,4 +1,3 @@
-
 import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
@@ -57,10 +56,8 @@ export class TicketTailorWebhook extends GuStack {
 				deployOptions: {
 					stageName: this.stage,
 				},
-			
 			},
 		});
-	
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
@@ -120,7 +117,9 @@ export class TicketTailorWebhook extends GuStack {
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
-					resources: [`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`],
+					resources: [
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+					],
 				}),
 			],
 		});
