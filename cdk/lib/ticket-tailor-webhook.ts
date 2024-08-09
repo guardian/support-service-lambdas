@@ -55,6 +55,8 @@ export class TicketTailorWebhook extends GuStack {
 				maxReceiveCount: 1,
 				queue: deadLetterQueue,
 			},
+			// This must be >= the lambda timeout
+			visibilityTimeout: Duration.minutes(5),
 		});
 
 		// SQS to Lambda event source mapping
