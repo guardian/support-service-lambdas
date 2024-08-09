@@ -48,7 +48,7 @@ export class <%= PascalCase %> extends GuStack {
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
-			runtime: Runtime.NODEJS_18_X,
+			runtime: Runtime.NODEJS_20_X,
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
