@@ -109,17 +109,18 @@ export class TicketTailorWebhook extends GuStack {
 			events,
 		});
 
+		const prodMonitoringConfiguration = {
+			snsTopicName: alarmsTopic,
+			http5xxAlarm: {
+				tolerated5xxPercentage: 0,
+			},
+		};
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,
 			monitoringConfiguration:
 				this.stage === 'CODE'
 					? { noMonitoring: true }
-					: {
-							snsTopicName: alarmsTopic,
-							http5xxAlarm: {
-								tolerated5xxPercentage: 0,
-							},
-						},
+					: prodMonitoringConfiguration,
 			targets: [],
 		});
 		apiGateway.api.root
