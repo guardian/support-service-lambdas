@@ -119,7 +119,7 @@ export class TicketTailorWebhook extends GuStack {
 							http5xxAlarm: {
 								tolerated5xxPercentage: 0,
 							},
-					  },
+						},
 			targets: [],
 		});
 		apiGateway.api.root
