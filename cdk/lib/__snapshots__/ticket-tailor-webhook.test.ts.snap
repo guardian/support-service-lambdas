@@ -202,7 +202,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50390aa00a70885ac6e926b065481d74047": {
+    "RestApiDeployment180EC503292b20212d93b3c7cea7280040f79107": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -220,7 +220,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50390aa00a70885ac6e926b065481d74047",
+          "Ref": "RestApiDeployment180EC503292b20212d93b3c7cea7280040f79107",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -271,7 +271,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
             "integration.request.header.Content-Type": "'application/json'",
           },
           "RequestTemplates": {
-            "application/json": "Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=X-GU-GeoIP-Country-Code&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$input.params('X-GU-GeoIP-Country-Code')&MessageAttribute.2.Name=EventPath&MessageAttribute.2.Value.DataType=String&MessageAttribute.2.Value.StringValue=$context.path",
+            "application/json": "Action=SendMessage&MessageBody=$input.body",
           },
           "Type": "AWS",
           "Uri": {
@@ -927,7 +927,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5030721e46eaca0da1e36bae49bf8cc5886": {
+    "RestApiDeployment180EC5035a7726d4ef62ccf374fa7bd525261eca": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -945,7 +945,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5030721e46eaca0da1e36bae49bf8cc5886",
+          "Ref": "RestApiDeployment180EC5035a7726d4ef62ccf374fa7bd525261eca",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -996,7 +996,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
             "integration.request.header.Content-Type": "'application/json'",
           },
           "RequestTemplates": {
-            "application/json": "Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=X-GU-GeoIP-Country-Code&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$input.params('X-GU-GeoIP-Country-Code')&MessageAttribute.2.Name=EventPath&MessageAttribute.2.Value.DataType=String&MessageAttribute.2.Value.StringValue=$context.path",
+            "application/json": "Action=SendMessage&MessageBody=$input.body",
           },
           "Type": "AWS",
           "Uri": {
