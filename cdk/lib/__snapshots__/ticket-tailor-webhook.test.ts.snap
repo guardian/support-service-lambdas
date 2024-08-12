@@ -202,7 +202,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5031ab3eb82406e6116192bcb5f69367d0c": {
+    "RestApiDeployment180EC50350aee52e7b6c38995a6e90b70a294c34": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -220,7 +220,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5031ab3eb82406e6116192bcb5f69367d0c",
+          "Ref": "RestApiDeployment180EC50350aee52e7b6c38995a6e90b70a294c34",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -261,13 +261,12 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           "IntegrationHttpMethod": "POST",
           "IntegrationResponses": [
             {
-              "ResponseTemplates": {
-                "application/json": "{ "success": true }",
-              },
               "StatusCode": "200",
             },
           ],
-          "RequestParameters": {},
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
+          },
           "RequestTemplates": {
             "application/json": "Action=SendMessage&MessageBody=$input.body",
           },
@@ -925,7 +924,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5036c7321eb0109688e413ebd1f9041e84b": {
+    "RestApiDeployment180EC503d50c9ac9ee76637a3dfe461e91c4d3eb": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -943,7 +942,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5036c7321eb0109688e413ebd1f9041e84b",
+          "Ref": "RestApiDeployment180EC503d50c9ac9ee76637a3dfe461e91c4d3eb",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -984,13 +983,12 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           "IntegrationHttpMethod": "POST",
           "IntegrationResponses": [
             {
-              "ResponseTemplates": {
-                "application/json": "{ "success": true }",
-              },
               "StatusCode": "200",
             },
           ],
-          "RequestParameters": {},
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
+          },
           "RequestTemplates": {
             "application/json": "Action=SendMessage&MessageBody=$input.body",
           },
