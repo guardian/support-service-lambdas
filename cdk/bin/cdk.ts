@@ -240,14 +240,8 @@ new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-PROD', {
 new TicketTailorWebhook(app, 'ticket-tailor-webhook-CODE', {
 	stack: 'support',
 	stage: 'CODE',
-	domainName: `ticket-tailor-webhook-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
 	stack: 'support',
 	stage: 'PROD',
-	domainName: `ticket-tailor-webhook.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });

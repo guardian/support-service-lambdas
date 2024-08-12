@@ -19,9 +19,6 @@ import { Queue } from 'aws-cdk-lib/aws-sqs';
 export interface TicketTailorWebhookProps extends GuStackProps {
 	stack: string;
 	stage: string;
-	certificateId: string;
-	domainName: string;
-	hostedZoneId: string;
 }
 
 export class TicketTailorWebhook extends GuStack {

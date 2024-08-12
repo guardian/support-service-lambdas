@@ -1,10 +1,5 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import {
-	supportApisDomain,
-	supportCertificateId,
-	supportHostedZoneId,
-} from '../bin/cdk';
 import { TicketTailorWebhook } from './ticket-tailor-webhook';
 
 describe('The Ticket tailor webhook stack', () => {
@@ -16,9 +11,6 @@ describe('The Ticket tailor webhook stack', () => {
 			{
 				stack: 'membership',
 				stage: 'CODE',
-				domainName: `ticket-tailor-webhook.code.${supportApisDomain}`,
-				hostedZoneId: supportHostedZoneId,
-				certificateId: supportCertificateId,
 			},
 		);
 		const prodStack = new TicketTailorWebhook(
@@ -27,9 +19,6 @@ describe('The Ticket tailor webhook stack', () => {
 			{
 				stack: 'membership',
 				stage: 'PROD',
-				domainName: `ticket-tailor-webhook.${supportApisDomain}`,
-				hostedZoneId: supportHostedZoneId,
-				certificateId: supportCertificateId,
 			},
 		);
 
