@@ -202,7 +202,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50350aee52e7b6c38995a6e90b70a294c34": {
+    "RestApiDeployment180EC50309e639d27f184c3fe482f3117d51fbf7": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -220,7 +220,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50350aee52e7b6c38995a6e90b70a294c34",
+          "Ref": "RestApiDeployment180EC50309e639d27f184c3fe482f3117d51fbf7",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -261,6 +261,9 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           "IntegrationHttpMethod": "POST",
           "IntegrationResponses": [
             {
+              "ResponseTemplates": {
+                "application/json": "{ "success": true }",
+              },
               "StatusCode": "200",
             },
           ],
@@ -924,7 +927,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503d50c9ac9ee76637a3dfe461e91c4d3eb": {
+    "RestApiDeployment180EC503270aed40fe513d8bd03fe2f82b8993f2": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -942,7 +945,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503d50c9ac9ee76637a3dfe461e91c4d3eb",
+          "Ref": "RestApiDeployment180EC503270aed40fe513d8bd03fe2f82b8993f2",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -983,6 +986,9 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           "IntegrationHttpMethod": "POST",
           "IntegrationResponses": [
             {
+              "ResponseTemplates": {
+                "application/json": "{ "success": true }",
+              },
               "StatusCode": "200",
             },
           ],
