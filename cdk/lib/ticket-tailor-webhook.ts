@@ -78,9 +78,7 @@ export class TicketTailorWebhook extends GuStack {
 			integrationHttpMethod: 'POST',
 			options: {
 				credentialsRole: apiRole,
-				requestParameters: {
-					'integration.request.header.Content-Type': `'application/json'`,
-				},
+				requestParameters: {},
 				requestTemplates: {
 					'application/json': 'Action=SendMessage&MessageBody=$input.body',
 				},
