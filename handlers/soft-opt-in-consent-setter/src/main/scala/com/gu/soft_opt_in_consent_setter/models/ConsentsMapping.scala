@@ -78,7 +78,6 @@ object ConsentsMapping {
       yourSupportOnboarding,
       similarGuardianProducts,
       supporterNewsletter,
-      digitalSubscriberPreview,
       guardianWeeklyNewsletter,
     ),
     "InAppPurchase" -> Set(

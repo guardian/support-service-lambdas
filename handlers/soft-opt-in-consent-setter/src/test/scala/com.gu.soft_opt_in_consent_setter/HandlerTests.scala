@@ -273,14 +273,6 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         "someIdentityId",
         """[
           |  {
-          |    "id" : "digital_subscriber_preview",
-          |    "consented" : true
-          |  },
-          |  {
-          |    "id" : "guardian_weekly_newsletter",
-          |    "consented" : true
-          |  },
-          |  {
           |    "id" : "your_support_onboarding",
           |    "consented" : true
           |  },
@@ -290,6 +282,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |  },
           |  {
           |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "guardian_weekly_newsletter",
           |    "consented" : true
           |  }
           |]""".stripMargin,
