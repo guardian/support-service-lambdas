@@ -7,7 +7,7 @@ import type { Stage } from '@modules/stage';
 
 export const getWebhookValidationSecret = async (
 	stage: Stage,
-): Promise<String> => {
+): Promise<string> => {
 	const client = new SecretsManagerClient(awsConfig);
 
 	const command = new GetSecretValueCommand({
