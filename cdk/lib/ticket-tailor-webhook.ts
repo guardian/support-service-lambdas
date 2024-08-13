@@ -144,6 +144,19 @@ export class TicketTailorWebhook extends GuStack {
 			],
 		});
 
+		const secretManagerAccessPolicy = new Policy(this, 'Secret manager access policy', {
+			statements: [
+				new PolicyStatement({
+					actions: ['secretsmanager:GetSecretValue'],
+					resources: [
+						//todo-add access to the PROOD secret here when we have it.
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/TicketTailor/Webhook-validation-eEsTGW`,
+					],
+				})
+			],
+		});
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(secretManagerAccessPolicy);
 	}
 }

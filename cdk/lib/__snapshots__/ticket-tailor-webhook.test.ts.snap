@@ -339,6 +339,42 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "Secretmanageraccesspolicy79659139": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/TicketTailor/Webhook-validation-eEsTGW",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "Secretmanageraccesspolicy79659139",
+        "Roles": [
+          {
+            "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "tickettailorwebhookdlqCODE9240ACEF": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -1056,6 +1092,42 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "Secretmanageraccesspolicy79659139": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/TicketTailor/Webhook-validation-eEsTGW",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "Secretmanageraccesspolicy79659139",
         "Roles": [
           {
             "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
