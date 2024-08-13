@@ -12,9 +12,9 @@ export const handler: Handler = async (
 	//code for fetching webhook secret
 	const webhookValidationSecret = getWebhookValidationSecret;
 	//todo - remove the next line before you have an actual secret
-	console.log(`webhookValidationSecret is: ${ webhookValidationSecret }`)
+	console.log(`webhookValidationSecret is: ${webhookValidationSecret}`);
 	return await Promise.resolve({
-		body: `Hello World, secret is: ${ webhookValidationSecret }`,
+		body: `Hello World, secret is: ${webhookValidationSecret}`,
 		statusCode: 200,
 	});
 };
