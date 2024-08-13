@@ -10,6 +10,9 @@
     "check-formatting": "prettier --check **/*.ts",
     "fix-formatting": "prettier --write **/*.ts"
   },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.629.0"
+  },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.129"
   }
