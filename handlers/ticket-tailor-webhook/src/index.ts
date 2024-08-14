@@ -1,7 +1,7 @@
 //import getWebhookValidationSecret from './hMacKey';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { APIGatewayProxyResult, Handler, SQSEvent } from 'aws-lambda';
 import { getWebhookValidationSecret } from './hMacKey';
-import { createHmac, timingSafeEqual } from 'node:crypto';
 
 //import type { Stage } from '@modules/stage'
 
