@@ -202,7 +202,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50376ed769ff527679f7bfd84cad29c2195": {
+    "RestApiDeployment180EC50353e2f3513068988da300b9f8bc2baa39": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -220,7 +220,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50376ed769ff527679f7bfd84cad29c2195",
+          "Ref": "RestApiDeployment180EC50353e2f3513068988da300b9f8bc2baa39",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -262,16 +262,16 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           "IntegrationResponses": [
             {
               "ResponseTemplates": {
-                "application/json": "{ "success": true }",
+                "application/json": "{ "status": "accepted" }",
               },
-              "StatusCode": "200",
+              "StatusCode": "202",
             },
           ],
           "RequestParameters": {
             "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
           },
           "RequestTemplates": {
-            "application/json": "Action=SendMessage&MessageBody={$input.body}&MessageAttribute.1.Name=hmac-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature",
+            "application/json": "Action=SendMessage&MessageBody={$input.body}&MessageAttribute.1.Name=Tickettailor-Webhook-Signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature",
           },
           "Type": "AWS",
           "Uri": {
@@ -963,7 +963,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5039f5f65a77f1bb8cbc84925f060c05397": {
+    "RestApiDeployment180EC50396e4ff15bc9c2a40198c5f42e42faef6": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -981,7 +981,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5039f5f65a77f1bb8cbc84925f060c05397",
+          "Ref": "RestApiDeployment180EC50396e4ff15bc9c2a40198c5f42e42faef6",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1023,16 +1023,16 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           "IntegrationResponses": [
             {
               "ResponseTemplates": {
-                "application/json": "{ "success": true }",
+                "application/json": "{ "status": "accepted" }",
               },
-              "StatusCode": "200",
+              "StatusCode": "202",
             },
           ],
           "RequestParameters": {
             "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
           },
           "RequestTemplates": {
-            "application/json": "Action=SendMessage&MessageBody={$input.body}&MessageAttribute.1.Name=hmac-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature",
+            "application/json": "Action=SendMessage&MessageBody={$input.body}&MessageAttribute.1.Name=Tickettailor-Webhook-Signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature",
           },
           "Type": "AWS",
           "Uri": {
