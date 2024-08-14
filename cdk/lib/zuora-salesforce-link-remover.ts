@@ -1,8 +1,8 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import {
 	Alarm,
 	Metric,
@@ -13,7 +13,7 @@ import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	Choice,
@@ -25,6 +25,7 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { nodeVersion } from './node-version';
 
 export class ZuoraSalesforceLinkRemover extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -44,7 +45,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-billing-accounts-${this.stage}`,
-				runtime: Runtime.NODEJS_20_X,
+				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
@@ -72,7 +73,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-update-zuora-billing-account-${this.stage}`,
-				runtime: Runtime.NODEJS_20_X,
+				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
@@ -98,7 +99,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
-				runtime: Runtime.NODEJS_20_X,
+				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
