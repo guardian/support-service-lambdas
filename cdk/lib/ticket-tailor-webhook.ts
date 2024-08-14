@@ -81,13 +81,13 @@ export class TicketTailorWebhook extends GuStack {
 				},
 				requestTemplates: {
 					'application/json':
-						'Action=SendMessage&MessageBody={$input.body}&MessageAttribute.1.Name=hmac-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature',
+						'Action=SendMessage&MessageBody={$input.body}&MessageAttribute.1.Name=Tickettailor-Webhook-Signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature',
 				},
 				integrationResponses: [
 					{
-						statusCode: '200',
+						statusCode: '202',
 						responseTemplates: {
-							'application/json': '{ "success": true }',
+							'application/json': '{ "status": "accepted" }',
 						},
 					},
 				],

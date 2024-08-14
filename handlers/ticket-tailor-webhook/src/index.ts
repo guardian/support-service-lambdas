@@ -10,26 +10,35 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
 
-	//code for fetching webhook secret
 	// const stage =  Stage("CODE") ???//
 	const webhookValidationSecret = await getWebhookValidationSecret('CODE');
 
-	// Tickettailor-Webhook-Signature
-
 	event.Records.forEach((record) => {
-		const body = record.body;
+		const email = JSON.parse(record.body).buyer_details.email;
 		const hash = createHmac('sha256', webhookValidationSecret)
-			.update(body)
+			.update(record.body)
 			.digest('hex');
 
-		timingSafeEqual(Buffer.from(hash), Buffer.from(hash));
+			const signature = record.messageAttributes['Tickettailor-Webhook-Signature']?.stringValue
+
+			if (typeof signature === 'string') {
+				timingSafeEqual(Buffer.from(hash), Buffer.from(signature)) ? callIdapi(email) : console.error("HMAC signatures do not match");
+				
+			}
+			record
+
+		
 
 		console.log(hash);
 		//todo - remove the next line before you have an actual secret
 	});
 
 	return Promise.resolve({
-		body: `Hello World,}`,
+		body: `Hello World`,
 		statusCode: 200,
 	});
 };
+
+export const callIdapi = async (email: String): Promise<void> => {
+	console.log(email)
+}
