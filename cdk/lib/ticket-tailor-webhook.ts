@@ -80,7 +80,7 @@ export class TicketTailorWebhook extends GuStack {
 						"'application/x-www-form-urlencoded'",
 				},
 				requestTemplates: {
-					'application/json': 'Action=SendMessage&MessageBody=$input.body',
+					'application/json': 'Action=SendMessage&MessageBody={$input.body}&MessageAttribute.1.Name=hmac-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature'
 				},
 				integrationResponses: [
 					{
