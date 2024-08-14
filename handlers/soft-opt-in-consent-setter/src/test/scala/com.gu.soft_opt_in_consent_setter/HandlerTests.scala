@@ -38,10 +38,6 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       .expects(
         identityId,
         """[
-          |  {
-          |    "id" : "digital_subscriber_preview",
-          |    "consented" : true
-          |  }
           |]""".stripMargin,
       )
       .returning(Right(()))
@@ -94,10 +90,6 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |  {
           |    "id" : "supporter_newsletter",
           |    "consented" : true
-          |  },
-          |  {
-          |    "id" : "digital_subscriber_preview",
-          |    "consented" : true
           |  }
           |]""".stripMargin,
       )
@@ -131,13 +123,9 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       .expects(
         "someIdentityId",
         """[
-          |  {
-          |    "id" : "digital_subscriber_preview",
-          |    "consented" : false
-          |  }
           |]""".stripMargin,
       )
-      .returning(Right(()))
+      .never
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
     mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
       SFAssociatedSubResponse(
@@ -179,10 +167,6 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |  },
           |  {
           |    "id" : "supporter_newsletter",
-          |    "consented" : false
-          |  },
-          |  {
-          |    "id" : "digital_subscriber_preview",
           |    "consented" : false
           |  }
           |]""".stripMargin,
@@ -231,10 +215,6 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         """[
           |  {
           |    "id" : "supporter_newsletter",
-          |    "consented" : false
-          |  },
-          |  {
-          |    "id" : "digital_subscriber_preview",
           |    "consented" : false
           |  }
           |]""".stripMargin,

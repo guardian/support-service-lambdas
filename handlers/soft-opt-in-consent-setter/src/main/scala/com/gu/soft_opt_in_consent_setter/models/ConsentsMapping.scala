@@ -6,7 +6,6 @@ object ConsentsMapping {
   val supporterNewsletter = "supporter_newsletter"
   val subscriberPreview = "subscriber_preview"
   val guardianWeeklyNewsletter = "guardian_weekly_newsletter"
-  val digitalSubscriberPreview = "digital_subscriber_preview"
 
   val consentsMapping: Map[String, Set[String]] = Map(
     "Membership" -> Set(
@@ -66,13 +65,11 @@ object ConsentsMapping {
       yourSupportOnboarding,
       similarGuardianProducts,
       supporterNewsletter,
-      digitalSubscriberPreview,
     ),
     "Supporter Plus" -> Set(
       yourSupportOnboarding,
       similarGuardianProducts,
       supporterNewsletter,
-      digitalSubscriberPreview,
     ),
     "Tier Three" -> Set(
       yourSupportOnboarding,
