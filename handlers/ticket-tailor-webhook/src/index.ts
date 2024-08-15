@@ -1,5 +1,5 @@
 import type { APIGatewayProxyResult, Handler, SQSEvent } from 'aws-lambda';
-import type { BuyerDetails} from './signAndVerify';
+import type { BuyerDetails } from './signAndVerify';
 import { hasMatchingSignature } from './signAndVerify';
 
 export const handler: Handler = async (
@@ -12,9 +12,8 @@ export const handler: Handler = async (
 		const matches = await hasMatchingSignature(record);
 		if (matches) {
 			return callIdapi(buyerDetails.buyer_details.email);
-		}
-		else {
-			console.error("Signatures do not match")
+		} else {
+			console.error('Signatures do not match');
 		}
 	});
 
@@ -28,4 +27,3 @@ export const callIdapi = (email: string) => {
 	console.log(`email for idapi ${email}`);
 	return Promise.resolve();
 };
-

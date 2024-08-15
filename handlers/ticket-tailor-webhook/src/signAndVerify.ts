@@ -24,9 +24,9 @@ export const hasMatchingSignature = async (
 		.digest('hex');
 
 	if (typeof signature === 'string') {
-        return timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
+		return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 	} else {
-        console.error("No Signature on incoming request")
+		console.error('No Signature on incoming request');
 		return false;
 	}
 };
