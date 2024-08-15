@@ -6,7 +6,7 @@ import { getWebhookValidationSecret } from './hMacKey';
 const stage = process.env.STAGE as Stage;
 
 export interface Payload {
-	Payload: {
+	payload: {
 		buyer_details: {
 			email: string;
 		};
