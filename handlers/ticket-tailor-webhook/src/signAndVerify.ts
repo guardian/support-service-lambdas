@@ -26,7 +26,6 @@ export const hasMatchingSignature = async (
 	if (typeof signature === 'string') {
 		return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 	} else {
-		console.error('No Signature on incoming request');
-		return false;
+		throw new Error('No Signature on incoming request');
 	}
 };

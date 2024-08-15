@@ -13,7 +13,7 @@ export const handler: Handler = async (
 		if (matches) {
 			return callIdapi(buyerDetails.buyer_details.email);
 		} else {
-			console.error('Signatures do not match');
+			throw new Error('Signatures do not match');
 		}
 	});
 
