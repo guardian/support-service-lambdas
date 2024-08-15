@@ -11,11 +11,10 @@ export interface BuyerDetails {
 	};
 }
 
-export const signAndVerify = async (
+export const hasMatchingSignature = async (
 	record: SQSRecord,
-): Promise<string | void> => {
+): Promise<boolean> => {
 	const webhookValidationSecret = await getWebhookValidationSecret(stage);
-	const buyerDetails = JSON.parse(record.body) as BuyerDetails;
 
 	const signature =
 		record.messageAttributes['Tickettailor-Webhook-Signature']?.stringValue;
@@ -25,10 +24,9 @@ export const signAndVerify = async (
 		.digest('hex');
 
 	if (typeof signature === 'string') {
-		return timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
-			? buyerDetails.buyer_details.email
-			: console.log('invalid');
+        return timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
 	} else {
-		return console.log('invalid');
+        console.error("No Signature on incoming request")
+		return false;
 	}
 };
