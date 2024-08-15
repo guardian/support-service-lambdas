@@ -1,3 +1,5 @@
+import { handler } from "../src";
+
 /**
  * This is a unit test, it can be run by the `pnpm test` command, and will be run by the CI/CD pipeline
  *
@@ -17,5 +19,7 @@ test('my app', () => {
 	//   }
 
 	//todo seperate v1 t=1723730497,v1=69955b67e25acdebed35a369848f97cd59520ae184e25a31a415442818
+
+
 	expect(1 + 1).toEqual(2);
 });

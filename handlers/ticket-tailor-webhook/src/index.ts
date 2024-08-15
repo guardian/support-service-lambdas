@@ -9,7 +9,7 @@ export const handler: Handler = async (
 
 	event.Records.flatMap(async (record) => {
 		const payload = JSON.parse(record.body) as Payload;
-		const email = payload.Payload.buyer_details.email;
+		const email = payload.payload.buyer_details.email;
 		const matches = await hasMatchingSignature(record);
 		if (matches) {
 			return callIdapi(email);
