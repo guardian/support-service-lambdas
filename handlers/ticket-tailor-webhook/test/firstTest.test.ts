@@ -6,7 +6,6 @@
  * The test is retained here simply to prevent the build from failing
  */
 test('my app', () => {
-
 	// {
 	// 	"buyer_details": {
 	// 	  "email": "john@example.com",

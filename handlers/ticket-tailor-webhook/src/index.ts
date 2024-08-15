@@ -6,13 +6,12 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
 
-	event.Records.forEach( (record) => {
-		const email = signAndVerify(record)
-		if (typeof email === "string") {
-			callIdapi(email)
-		}
-		else {
-			console.log("error")
+	event.Records.forEach((record) => {
+		const email = signAndVerify(record);
+		if (typeof email === 'string') {
+			callIdapi(email);
+		} else {
+			console.log('error');
 		}
 	});
 
@@ -22,6 +21,6 @@ export const handler: Handler = async (
 	});
 };
 
-export const callIdapi =  (email: string) => {
-	console.log(`email for idapi ${email}`)
-}
+export const callIdapi = (email: string) => {
+	console.log(`email for idapi ${email}`);
+};
