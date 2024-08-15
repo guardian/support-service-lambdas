@@ -1,5 +1,5 @@
 import type { APIGatewayProxyResult, Handler, SQSEvent } from 'aws-lambda';
-import type { BuyerDetails } from './signAndVerify';
+import type { Payload } from './signAndVerify';
 import { hasMatchingSignature } from './signAndVerify';
 
 export const handler: Handler = async (
@@ -8,10 +8,11 @@ export const handler: Handler = async (
 	console.log(`Input is ${JSON.stringify(event)}`);
 
 	event.Records.flatMap(async (record) => {
-		const buyerDetails = JSON.parse(record.body) as BuyerDetails;
+		const payload = JSON.parse(record.body) as Payload;
+		const email = payload.Payload.buyer_details.email;
 		const matches = await hasMatchingSignature(record);
 		if (matches) {
-			return callIdapi(buyerDetails.buyer_details.email);
+			return callIdapi(email);
 		} else {
 			throw new Error('Signatures do not match');
 		}
