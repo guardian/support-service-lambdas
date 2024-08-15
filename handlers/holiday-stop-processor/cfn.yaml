@@ -121,7 +121,8 @@ Resources:
             Period: 60
             Unit: Count
       ComparisonOperator: GreaterThanOrEqualToThreshold
-      Threshold: 10
+      Threshold: 1
+      DatapointsToAlarm: 10
       EvaluationPeriods: 240
       TreatMissingData: notBreaching
     DependsOn:
