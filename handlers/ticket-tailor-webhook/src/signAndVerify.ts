@@ -16,15 +16,21 @@ export const hasMatchingSignature = async (
 ): Promise<boolean> => {
 	const webhookValidationSecret = await getWebhookValidationSecret(stage);
 
-	const signature =
+	const signatureWithTs =
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
+	//todo seperate v1 t=1723730497,v1=69955b67e25acdebed35a369848f97cd59520ae184e25a31a415442818
 
 	const hash = createHmac('sha256', webhookValidationSecret)
 		.update(record.body)
 		.digest('hex');
 
-	if (typeof signature === 'string') {
-		return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+	if (typeof signatureWithTs === 'string') {
+		const signature = signatureWithTs.split(',')[1]?.split('=')[1];
+		if (typeof signature === 'string') {
+			return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+		} else {
+			throw new Error('Invalid Signature on incoming request');
+		}
 	} else {
 		throw new Error('No Signature on incoming request');
 	}
