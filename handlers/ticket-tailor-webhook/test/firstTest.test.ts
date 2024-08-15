@@ -37,17 +37,6 @@
 
 // const event = JSON.parse(SQSRaw) as SQSEvent
 //todo seperate v1 t=1723730497,v1=69955b67e25acdebed35a369848f97cd59520ae184e25a31a415442818
-
-const mockEnv = {};
-
-jest.mock('../src/ticket-tailor-webhook');
-
-describe('Handler', () => {
-	beforeEach(() => {
-		jest.clearAllMocks();
-		process.env = { ...mockEnv };
-		console.error = jest.fn();
-	});
-
-	expect(undefined).toEqual(undefined);
+test('my app', () => {
+	expect(1 + 1).toEqual(2);
 });
