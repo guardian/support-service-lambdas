@@ -202,7 +202,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50353e2f3513068988da300b9f8bc2baa39": {
+    "RestApiDeployment180EC503c578eb671df87358fbb0c8a83cbc1553": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -220,7 +220,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50353e2f3513068988da300b9f8bc2baa39",
+          "Ref": "RestApiDeployment180EC503c578eb671df87358fbb0c8a83cbc1553",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -264,7 +264,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
               "ResponseTemplates": {
                 "application/json": "{ "status": "accepted" }",
               },
-              "StatusCode": "202",
+              "StatusCode": "200",
             },
           ],
           "RequestParameters": {
@@ -963,7 +963,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50396e4ff15bc9c2a40198c5f42e42faef6": {
+    "RestApiDeployment180EC5036422a9d1d84e2035211c6cab7024917e": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -981,7 +981,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50396e4ff15bc9c2a40198c5f42e42faef6",
+          "Ref": "RestApiDeployment180EC5036422a9d1d84e2035211c6cab7024917e",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1025,7 +1025,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
               "ResponseTemplates": {
                 "application/json": "{ "status": "accepted" }",
               },
-              "StatusCode": "202",
+              "StatusCode": "200",
             },
           ],
           "RequestParameters": {

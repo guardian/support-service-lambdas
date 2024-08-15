@@ -85,7 +85,7 @@ export class TicketTailorWebhook extends GuStack {
 				},
 				integrationResponses: [
 					{
-						statusCode: '202',
+						statusCode: '200',
 						responseTemplates: {
 							'application/json': '{ "status": "accepted" }',
 						},
