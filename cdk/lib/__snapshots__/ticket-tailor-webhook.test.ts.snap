@@ -202,7 +202,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5036776cd7ca763fde8415e283d5a60313f": {
+    "RestApiDeployment180EC503418a6a58e9d3e4aa93352586641228c5": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -220,7 +220,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5036776cd7ca763fde8415e283d5a60313f",
+          "Ref": "RestApiDeployment180EC503418a6a58e9d3e4aa93352586641228c5",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -271,7 +271,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
             "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
           },
           "RequestTemplates": {
-            "application/json": "Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=Tickettailor-Webhook-Signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature",
+            "application/json": "Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=tickettailor-webhook-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.tickettailor-webhook-signature",
           },
           "Type": "AWS",
           "Uri": {
@@ -963,7 +963,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50341709908f0891bc26beb78cd976a581d": {
+    "RestApiDeployment180EC50362d25068961469dde1bf26d3b1260ed0": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -981,7 +981,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50341709908f0891bc26beb78cd976a581d",
+          "Ref": "RestApiDeployment180EC50362d25068961469dde1bf26d3b1260ed0",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1032,7 +1032,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
             "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
           },
           "RequestTemplates": {
-            "application/json": "Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=Tickettailor-Webhook-Signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.Tickettailor-Webhook-Signature",
+            "application/json": "Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=tickettailor-webhook-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.tickettailor-webhook-signature",
           },
           "Type": "AWS",
           "Uri": {

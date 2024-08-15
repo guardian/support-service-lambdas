@@ -17,7 +17,7 @@ export const hasMatchingSignature = async (
 	const webhookValidationSecret = await getWebhookValidationSecret(stage);
 
 	const signature =
-		record.messageAttributes['Tickettailor-Webhook-Signature']?.stringValue;
+		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 
 	const hash = createHmac('sha256', webhookValidationSecret)
 		.update(record.body)
