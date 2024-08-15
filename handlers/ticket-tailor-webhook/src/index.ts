@@ -13,8 +13,15 @@ export const handler: Handler = async (
 	// const stage =  Stage("CODE") ???//
 	const webhookValidationSecret = await getWebhookValidationSecret('CODE');
 
+	interface BuyerDetails {
+		buyer_details:{
+		  email: string;
+		};
+	  }
 	event.Records.forEach((record) => {
-		const email = JSON.parse(record.body).buyer_details.email;
+			  
+		const parsed = JSON.parse(record.body) as BuyerDetails;
+		const email = parsed.buyer_details.email;
 		const hash = createHmac('sha256', webhookValidationSecret)
 			.update(record.body)
 			.digest('hex');
@@ -39,6 +46,6 @@ export const handler: Handler = async (
 	});
 };
 
-export const callIdapi = async (email: String): Promise<void> => {
+export const callIdapi =  (email: string): void => {
 	console.log(email)
 }
