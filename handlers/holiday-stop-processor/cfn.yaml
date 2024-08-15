@@ -99,21 +99,30 @@ Resources:
       AlarmDescription: >
         IMPACT: If this goes unaddressed at least one subscription
         that was supposed to be suspended will be fulfilled.
-        Until we document how to deal with likely problems please alert the SX team.
+        Until we document how to deal with likely problems please alert the Value team.
         For general advice, see
         https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
+      Metrics:
+        - Id: errors
+          Expression: "FILL(m1,0)"
+          Label: ErrorCount
+        - Id: m1
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: AWS/Lambda
+              MetricName: Errors
+              Dimensions:
+              - Name: FunctionName
+                Value: !Ref HolidayStopProcessor
+            Stat: Sum
+            Period: 60
+            Unit: Count
       ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref HolidayStopProcessor
-      EvaluationPeriods: 6
-      MetricName: Errors
-      Namespace: AWS/Lambda
-      Period: 900
-      Statistic: Sum
-      Threshold: 1
+      Threshold: 10
+      EvaluationPeriods: 240
       TreatMissingData: notBreaching
     DependsOn:
       - HolidayStopProcessor
