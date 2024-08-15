@@ -12,9 +12,9 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { nodeVersion } from './node-version';
 
 export interface TicketTailorWebhookProps extends GuStackProps {
 	stack: string;
@@ -100,7 +100,7 @@ export class TicketTailorWebhook extends GuStack {
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
-			runtime: Runtime.NODEJS_18_X,
+			runtime: nodeVersion,
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,

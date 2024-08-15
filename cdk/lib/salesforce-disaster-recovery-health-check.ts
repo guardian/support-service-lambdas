@@ -5,8 +5,8 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
+import { nodeVersion } from './node-version';
 
 export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -26,7 +26,7 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
-			runtime: Runtime.NODEJS_20_X,
+			runtime: nodeVersion,
 			timeout: Duration.minutes(5),
 			environment: {
 				APP: app,
