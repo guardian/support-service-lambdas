@@ -30,7 +30,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'digital-voucher-api',
 		'dotcom-components',
 		'fulfilment-date-calculator',
-		'invoicing-api',
 		...sharedMobilePurchasesApps,
 		'new-product-api',
 		'price-migration-engine-state-machine',
@@ -88,11 +87,17 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'canonical-config',
 	],
 	PLATFORM: [
+		// fulfilment
 		'failed-national-delivery-processor',
 		'fulfilment-lambdas',
 		'national-delivery-fulfilment',
+
+		// salesforce
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
+
+		// zuora
+		'invoicing-api',
 		'zuora-oracle-fusion',
 	],
 };
