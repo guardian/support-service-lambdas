@@ -70,22 +70,6 @@ export const typeObject = {
 		currencies: ['GBP', 'USD', 'AUD', 'EUR', 'NZD', 'CAD'],
 		billingPeriods: ['Month', 'Annual'],
 		productRatePlans: {
-			GuardianWeeklyRestOfWorldMonthly: {
-				SupporterPlus: {},
-				GuardianWeekly: {},
-			},
-			GuardianWeeklyRestOfWorldAnnual: {
-				SupporterPlus: {},
-				GuardianWeekly: {},
-			},
-			GuardianWeeklyDomesticAnnual: {
-				SupporterPlus: {},
-				GuardianWeekly: {},
-			},
-			GuardianWeeklyDomesticMonthly: {
-				SupporterPlus: {},
-				GuardianWeekly: {},
-			},
 			V1DeprecatedMonthly: {
 				Subscription: {},
 			},

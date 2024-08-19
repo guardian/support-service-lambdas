@@ -68,15 +68,8 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// members-data-api
 		'membership-attribute-service',
 
-		// national-delivery-fulfilment
-		'national-delivery-fulfilment',
-
-		// national-delivery-failed-delivery-processor
-		'failed-national-delivery-processor',
-
 		// zuora-finance
 		'zuora-creditor',
-		'zuora-oracle-fusion',
 
 		// zuora-retention
 		'zuora-retention',
@@ -93,10 +86,15 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// other
 		'canonical-config',
+	],
+	PLATFORM: [
+		'failed-national-delivery-processor',
+		'fulfilment-lambdas',
+		'national-delivery-fulfilment',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
+		'zuora-oracle-fusion',
 	],
-	PLATFORM: ['fulfilment-lambdas'],
 };
 
 const buildAppToTeamMappings = (): Record<string, Team[]> => {

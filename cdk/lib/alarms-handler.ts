@@ -11,11 +11,11 @@ import {
 	Policy,
 	PolicyStatement,
 } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { nodeVersion } from './node-version';
 
 export class AlarmsHandler extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -76,7 +76,7 @@ export class AlarmsHandler extends GuStack {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
-			runtime: Runtime.NODEJS_20_X,
+			runtime: nodeVersion,
 			timeout: Duration.seconds(15),
 			handler: 'index.handler',
 			functionName: `${app}-${this.stage}`,
