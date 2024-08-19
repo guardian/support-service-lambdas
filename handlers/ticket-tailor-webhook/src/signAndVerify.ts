@@ -21,8 +21,10 @@ export const hasMatchingSignature = async (
 	const signatureWithTs =
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 
+	const q = JSON.parse(record.body) as Payload;
+
 	const hash = createHmac('sha256', webhookValidationSecret)
-		.update(record.body)
+		.update(JSON.stringify(q.payload))
 		.digest('hex');
 
 	if (typeof signatureWithTs === 'string') {
