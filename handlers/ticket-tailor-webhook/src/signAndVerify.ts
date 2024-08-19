@@ -13,6 +13,14 @@ export interface Payload {
 	};
 }
 
+export interface Foo {
+	id: string;
+	created_at: string;
+	event: string;
+	resource_url: string;
+	payload: string;
+}
+
 export const hasMatchingSignature = async (
 	record: SQSRecord,
 ): Promise<boolean> => {
@@ -21,17 +29,25 @@ export const hasMatchingSignature = async (
 	const signatureWithTs =
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 
-	const q = JSON.parse(record.body) as Payload;
+	//	const q = JSON.parse(record.body) as Payload;
+
+	console.log(`record body is: ${record.body}`);
+	const r = JSON.parse(record.body) as Foo;
+	console.log(`parsed record body is ${JSON.stringify(r)}`);
+	console.log(`parsed record body payload is ${r.payload}`);
 
 	const hash = createHmac('sha256', webhookValidationSecret.secret)
-		.update(JSON.stringify(q.payload))
+		//		.update(JSON.stringify(record.body))
+		.update(r.payload)
 		.digest('hex');
 
 	if (typeof signatureWithTs === 'string') {
 		const signature = signatureWithTs.split(',')[1]?.split('=')[1];
 		if (typeof signature === 'string') {
-			console.log(signature);
-			console.log(hash);
+			console.log(`SignatureWithTS (split out) is:
+			 ${signature}`);
+			console.log(`generated hash is: 
+			${hash}`);
 			return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 		} else {
 			throw new Error('Invalid Signature on incoming request');
