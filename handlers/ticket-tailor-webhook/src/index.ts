@@ -1,6 +1,13 @@
 import type { APIGatewayProxyResult, Handler, SQSEvent } from 'aws-lambda';
-import type { Payload } from './signAndVerify';
 import { hasMatchingSignature } from './signAndVerify';
+
+export interface Payload {
+	payload: {
+		buyer_details: {
+			email: string;
+		};
+	};
+}
 
 export const handler: Handler = async (
 	event: SQSEvent,
@@ -18,10 +25,10 @@ export const handler: Handler = async (
 		}
 	}).at(0);
 
-	if (typeof res === 'undefined') {
-		throw new Error('Unknown Error');
-	} else {
+	if (res) {
 		return res;
+	} else {
+		throw new Error('Unknown Error');
 	}
 };
 

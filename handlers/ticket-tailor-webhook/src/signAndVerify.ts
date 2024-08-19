@@ -5,15 +5,7 @@ import { getWebhookValidationSecret } from './hMacKey';
 
 const stage = process.env.STAGE as Stage;
 
-export interface Payload {
-	payload: {
-		buyer_details: {
-			email: string;
-		};
-	};
-}
-
-export interface Foo {
+export interface WebhookRequest {
 	id: string;
 	created_at: string;
 	event: string;
@@ -29,16 +21,10 @@ export const hasMatchingSignature = async (
 	const signatureWithTs =
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 
-	//	const q = JSON.parse(record.body) as Payload;
-
-	console.log(`record body is: ${record.body}`);
-	const r = JSON.parse(record.body) as Foo;
-	console.log(`parsed record body is ${JSON.stringify(r)}`);
-	console.log(`parsed record body payload is ${JSON.stringify(r.payload)}`);
+	const r = JSON.parse(record.body) as WebhookRequest;
 
 	const hash = createHmac('sha256', webhookValidationSecret.secret)
-		//		.update(JSON.stringify(record.body))
-		.update(JSON.stringify(r.payload))
+		.update(r.payload)
 		.digest('hex');
 
 	if (typeof signatureWithTs === 'string') {
