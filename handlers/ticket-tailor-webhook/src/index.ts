@@ -7,7 +7,7 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
 
-	event.Records.flatMap(async (record) => {
+	const res = await event.Records.flatMap(async (record) => {
 		const payload = JSON.parse(record.body) as Payload;
 		const email = payload.payload.buyer_details.email;
 		const matches = await hasMatchingSignature(record);
@@ -16,15 +16,19 @@ export const handler: Handler = async (
 		} else {
 			throw new Error('Signatures do not match');
 		}
-	});
+	}).at(0);
 
-	return Promise.resolve({
-		body: `Hello World`,
-		statusCode: 200,
-	});
+	if (typeof res === 'undefined') {
+		throw new Error('Unknown Error');
+	} else {
+		return res;
+	}
 };
 
 export const callIdapi = (email: string) => {
 	console.log(`email for idapi ${email}`);
-	return Promise.resolve();
+	return Promise.resolve({
+		statusCode: 200,
+		body: `Hello World`,
+	});
 };
