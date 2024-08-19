@@ -23,10 +23,11 @@ export const hasMatchingSignature = async (
 
 	const webhookRequest = JSON.parse(record.body) as WebhookRequest;
 
-	const payload = JSON.stringify(JSON.parse(webhookRequest.payload)).replaceAll(
-		'\\',
-		'',
-	);
+	console.log(`webhook request ${JSON.stringify(webhookRequest)}`);
+
+	const payload = JSON.stringify(webhookRequest.payload).replaceAll('\\', '');
+
+	console.log(`payload ${payload}`);
 
 	const hash = createHmac('sha256', webhookValidationSecret.secret)
 		.update(payload)
