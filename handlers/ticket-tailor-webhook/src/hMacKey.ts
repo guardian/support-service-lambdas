@@ -5,9 +5,13 @@ import {
 import { awsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
 
+export type HmacKey = {
+	secret: string;
+};
+
 export const getWebhookValidationSecret = async (
 	stage: Stage,
-): Promise<string> => {
+): Promise<HmacKey> => {
 	const client = new SecretsManagerClient(awsConfig);
 
 	const command = new GetSecretValueCommand({
@@ -15,11 +19,11 @@ export const getWebhookValidationSecret = async (
 	});
 
 	const response = await client.send(command);
-	if (!response.SecretString) {
+	if (response.SecretString) {
+		return JSON.parse(response.SecretString) as HmacKey;
+	} else {
 		throw new Error(
 			'SecretString was undefined in response from SecretsManager',
 		);
 	}
-
-	return response.SecretString;
 };

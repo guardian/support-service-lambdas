@@ -23,17 +23,17 @@ export const hasMatchingSignature = async (
 
 	const q = JSON.parse(record.body) as Payload;
 
-	const hash = createHmac('sha256', webhookValidationSecret)
+	const hash = createHmac('sha256', webhookValidationSecret.secret)
 		.update(JSON.stringify(q.payload))
 		.digest('hex');
 
 	if (typeof signatureWithTs === 'string') {
 		const signature = signatureWithTs.split(',')[1]?.split('=')[1];
 		if (typeof signature === 'string') {
-			console.log(q)
-			console.log(signature)
-			console.log(signatureWithTs)
-			console.log(hash)
+			console.log(q);
+			console.log(signature);
+			console.log(signatureWithTs);
+			console.log(hash);
 			return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 		} else {
 			throw new Error('Invalid Signature on incoming request');
