@@ -34,11 +34,11 @@ export const hasMatchingSignature = async (
 	console.log(`record body is: ${record.body}`);
 	const r = JSON.parse(record.body) as Foo;
 	console.log(`parsed record body is ${JSON.stringify(r)}`);
-	console.log(`parsed record body payload is ${r.payload}`);
+	console.log(`parsed record body payload is ${JSON.stringify(r.payload)}`);
 
 	const hash = createHmac('sha256', webhookValidationSecret.secret)
 		//		.update(JSON.stringify(record.body))
-		.update(r.payload)
+		.update(JSON.stringify(r.payload))
 		.digest('hex');
 
 	if (typeof signatureWithTs === 'string') {
