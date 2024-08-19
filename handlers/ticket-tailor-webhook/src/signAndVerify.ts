@@ -30,9 +30,7 @@ export const hasMatchingSignature = async (
 	if (typeof signatureWithTs === 'string') {
 		const signature = signatureWithTs.split(',')[1]?.split('=')[1];
 		if (typeof signature === 'string') {
-			console.log(q);
 			console.log(signature);
-			console.log(signatureWithTs);
 			console.log(hash);
 			return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 		} else {

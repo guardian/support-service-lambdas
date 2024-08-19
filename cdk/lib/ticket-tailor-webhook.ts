@@ -153,8 +153,8 @@ export class TicketTailorWebhook extends GuStack {
 					new PolicyStatement({
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
-							//todo-add access to the PROOD secret here when we have it.
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/TicketTailor/Webhook-validation-eEsTGW`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/TicketTailor/Webhook-validation-ECS6P8`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/TicketTailor/Webhook-validation-eEsTGW`
 						],
 					}),
 				],
