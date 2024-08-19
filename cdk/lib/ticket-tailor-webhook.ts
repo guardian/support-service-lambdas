@@ -161,7 +161,29 @@ export class TicketTailorWebhook extends GuStack {
 			},
 		);
 
+		const cloudwatchLogsInlinePolicy: Policy = new Policy(
+			this,
+			'cloudwatch-logs-inline-policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: [
+							'logs:CreateLogGroup',
+							'logs:CreateLogStream',
+							'logs:PutLogEvents',
+							'lambda:InvokeFunction',
+						],
+						resources: [
+							`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/ticket-tailor-webhook-${this.stage}:log-stream:*`,
+						],
+					}),
+				],
+			},
+		);
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 		lambda.role?.attachInlinePolicy(secretManagerAccessPolicy);
+		lambda.role?.attachInlinePolicy(cloudwatchLogsInlinePolicy);
 	}
 }
