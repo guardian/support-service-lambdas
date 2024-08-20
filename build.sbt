@@ -589,6 +589,8 @@ lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
   "Zuora to Datalake export using Stateful AQuA API which exports incremental changes",
   Seq(scalaLambda, scalajHttp, awsS3, enumeratum),
+).settings(
+  scalaLambdaCirceOverride
 )
 
 lazy val `batch-email-sender` = lambdaProject(
@@ -607,6 +609,8 @@ lazy val `holiday-stop-processor` = lambdaProject(
     `holiday-stops` % "compile->compile;test->test",
     effects,
   ),
+).settings(
+  scalaLambdaCirceOverride
 )
 
 lazy val `delivery-problem-credit-processor` = lambdaProject(
@@ -621,6 +625,8 @@ lazy val `delivery-problem-credit-processor` = lambdaProject(
     diffx,
   ),
   Seq(`credit-processor`, `salesforce-sttp-client`, effects),
+).settings(
+  scalaLambdaCirceOverride
 )
 
 lazy val `product-move-api` = lambdaProject(
@@ -710,6 +716,8 @@ lazy val `fulfilment-date-calculator` = lambdaProject(
   "Generate files in S3 bucket containing relevant fulfilment-related dates, for example, acquisitionsStartDate, holidayStopFirstAvailableDate, etc.",
   Seq(scalaLambda, scalajHttp, enumeratum),
   Seq(testDep, `fulfilment-dates`),
+).settings(
+  scalaLambdaCirceOverride
 )
 
 lazy val `delivery-records-api` = lambdaProject(
