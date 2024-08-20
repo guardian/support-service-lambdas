@@ -1,9 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto';
-import type { Stage } from '@modules/stage';
 import type { SQSRecord } from 'aws-lambda';
-import { getWebhookValidationSecret } from './hMacKey';
-
-const stage = process.env.STAGE as Stage;
+import type { HmacKey } from './hMacKey';
 
 export interface Payload {
 	payload: {
@@ -13,11 +10,10 @@ export interface Payload {
 	};
 }
 
-export const hasMatchingSignature = async (
+export const hasMatchingSignature = (
 	record: SQSRecord,
-): Promise<boolean> => {
-	const webhookValidationSecret = await getWebhookValidationSecret(stage);
-
+	validationSecret: HmacKey,
+): boolean => {
 	const signatureWithTs =
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 
@@ -25,7 +21,7 @@ export const hasMatchingSignature = async (
 		const signature = signatureWithTs.split(',')[1]?.split('=')[1];
 		const ts = signatureWithTs.split(',')[0]?.split('=')[1];
 		if (typeof signature === 'string' && typeof ts === 'string') {
-			const hash = createHmac('sha256', webhookValidationSecret.secret)
+			const hash = createHmac('sha256', validationSecret.secret)
 				.update(ts.concat(record.body))
 				.digest('hex');
 
