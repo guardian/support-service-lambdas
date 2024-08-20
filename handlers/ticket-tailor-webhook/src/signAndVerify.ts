@@ -28,21 +28,25 @@ export const hasMatchingSignature = async (
 	const payload = JSON.stringify(webhookRequest.payload).replaceAll('\\', '');
 
 	console.log(`payload ${payload}`);
-
-	const hash = createHmac('sha256', webhookValidationSecret.secret)
-		.update(payload)
-		.digest('hex');
-
 	if (typeof signatureWithTs === 'string') {
 		const signature = signatureWithTs.split(',')[1]?.split('=')[1];
-		if (typeof signature === 'string') {
-			console.log(`SignatureWithTS (split out) is:
+		const ts = signatureWithTs.split(',')[0]?.split('=')[1];
+		if (typeof ts === 'string') {
+			const hash = createHmac('sha256', webhookValidationSecret.secret)
+				.update(ts + record.body)
+				.digest('hex');
+
+			if (typeof signature === 'string') {
+				console.log(`SignatureWithTS (split out) is:
 			 ${signature}`);
-			console.log(`generated hash is: 
+				console.log(`generated hash is: 
 			${hash}`);
-			return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+				return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+			} else {
+				throw new Error('Invalid Signature on incoming request');
+			}
 		} else {
-			throw new Error('Invalid Signature on incoming request');
+			throw new Error('No ts on incoming request');
 		}
 	} else {
 		throw new Error('No Signature on incoming request');
