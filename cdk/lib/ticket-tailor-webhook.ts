@@ -81,7 +81,7 @@ export class TicketTailorWebhook extends GuStack {
 				},
 				requestTemplates: {
 					'application/json':
-						'Action=SendMessage&MessageBody=$input.body&MessageAttribute.1.Name=tickettailor-webhook-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.tickettailor-webhook-signature',
+						'Action=SendMessage&MessageBody=$util.urlEncode($input.body)&MessageAttribute.1.Name=tickettailor-webhook-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.tickettailor-webhook-signature',
 				},
 				integrationResponses: [
 					{
