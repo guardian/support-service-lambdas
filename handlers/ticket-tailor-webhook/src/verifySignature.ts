@@ -24,11 +24,6 @@ export const hasMatchingSignature = (
 			const hash = createHmac('sha256', validationSecret.secret)
 				.update(ts.concat(record.body))
 				.digest('hex');
-
-			console.log(`SignatureWithTS (split out) is:
-			 ${signature}`);
-			console.log(`generated hash is: 
-			${hash}`);
 			return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 		} else {
 			throw new Error('No ts on incoming request');
