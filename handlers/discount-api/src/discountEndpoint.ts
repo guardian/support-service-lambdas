@@ -6,6 +6,7 @@ import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
 	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
+	getOrderedInvoiceTotals,
 	getNextInvoiceItems,
 	getNextNonFreePaymentDate,
 } from '@modules/zuora/billingPreview';
@@ -38,15 +39,11 @@ export const previewDiscountEndpoint = async (
 		subscriptionNumber,
 	);
 
-	const { discount, dateToApply } = await getDiscountToApply(
-		stage,
-		subscription,
-		account,
-		zuoraClient,
-		today,
-	);
+	const { discount, dateToApply, orderedInvoiceTotals } =
+		await getDiscountToApply(stage, subscription, account, zuoraClient, today);
 
 	console.log('Preview the new price once the discount has been applied');
+	// note that this only returns the next payment - payments are not guaranteed to be identical
 	const previewResponse = await previewDiscount(
 		zuoraClient,
 		subscriptionNumber,
@@ -76,12 +73,20 @@ export const previewDiscountEndpoint = async (
 		dayjs(dateToApply).add(discount.upToPeriods, 'month'),
 	);
 
+	const nonDiscountedPayments = orderedInvoiceTotals
+		.map(({ date, total }) => ({
+			date: zuoraDateFormat(dayjs(date)),
+			amount: total,
+		}))
+		.slice(0, discount.upToPeriods);
+
 	return {
 		discountedPrice,
 		upToPeriods: discount.upToPeriods,
 		upToPeriodsType: discount.upToPeriodsType,
 		firstDiscountedPaymentDate,
 		nextNonDiscountedPaymentDate,
+		nonDiscountedPayments,
 	};
 };
 
@@ -223,10 +228,12 @@ async function getDiscountToApply(
 	const { date: dateToApply, items: nextInvoiceItems } =
 		getNextInvoiceItems(billingPreview);
 
+	const orderedInvoiceTotals = getOrderedInvoiceTotals(billingPreview);
+
 	eligibilityChecker.assertGenerallyEligible(
 		subscription,
 		account.metrics.totalInvoiceBalance,
 		nextInvoiceItems,
 	);
-	return { discount, dateToApply };
+	return { discount, dateToApply, orderedInvoiceTotals };
 }
