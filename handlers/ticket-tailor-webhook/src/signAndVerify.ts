@@ -10,7 +10,7 @@ export interface WebhookRequest {
 	created_at: string;
 	event: string;
 	resource_url: string;
-	payload: string;
+	payload: object;
 }
 
 export const hasMatchingSignature = async (
