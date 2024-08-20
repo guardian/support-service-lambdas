@@ -82,6 +82,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// support-service-lambdas
 		'digital-voucher-suspension-processor',
+		'metric-push-api',
 
 		// other
 		'canonical-config',
