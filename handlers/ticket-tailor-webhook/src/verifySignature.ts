@@ -14,21 +14,22 @@ export const hasMatchingSignature = (
 	record: SQSRecord,
 	validationSecret: HmacKey,
 ): boolean => {
-	const signatureWithTs =
+	const signatureWithTimestamp =
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 
-	if (typeof signatureWithTs === 'string') {
-		const signature = signatureWithTs.split(',')[1]?.split('=')[1];
-		const ts = signatureWithTs.split(',')[0]?.split('=')[1];
-		if (typeof signature === 'string' && typeof ts === 'string') {
+	if (typeof signatureWithTimestamp === 'string') {
+		//Split the header parts out from the format `t=$epoch,v1=$hmacSignature`
+		const signature = signatureWithTimestamp.split('v1=')[1];
+		const timestamp = signatureWithTimestamp.split('t=')[1]?.split(',')[0];
+		if (typeof signature === 'string' && typeof timestamp === 'string') {
 			const hash = createHmac('sha256', validationSecret.secret)
-				.update(ts.concat(record.body))
+				.update(timestamp.concat(record.body))
 				.digest('hex');
 			return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 		} else {
-			throw new Error('No ts on incoming request');
+			throw new Error('Unable to parse header');
 		}
 	} else {
-		throw new Error('No ts on incoming request');
+		throw new Error('No signature on incoming request');
 	}
 };
