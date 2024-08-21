@@ -1,12 +1,10 @@
 import type { Stage } from '@modules/stage';
-import type { APIGatewayProxyResult, Handler, SQSEvent } from 'aws-lambda';
+import type { Handler, SQSEvent } from 'aws-lambda';
 import { getWebhookValidationSecret } from './hMacKey';
 import type { Payload } from './verifySignature';
 import { hasMatchingSignature } from './verifySignature';
 
-export const handler: Handler = async (
-	event: SQSEvent,
-): Promise<APIGatewayProxyResult> => {
+export const handler: Handler = async (event: SQSEvent): Promise<boolean> => {
 	const res = await event.Records.flatMap(async (record) => {
 		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
 		const stage = process.env.STAGE as Stage;
@@ -32,8 +30,5 @@ export const handler: Handler = async (
 
 export const callIdapi = (email: string) => {
 	console.log(`email for idapi ${email}`);
-	return Promise.resolve({
-		statusCode: 200,
-		body: `Hello World`,
-	});
+	return Promise.resolve(true);
 };
