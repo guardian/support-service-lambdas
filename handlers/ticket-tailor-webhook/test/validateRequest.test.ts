@@ -1,5 +1,5 @@
 import { SQSRecord } from 'aws-lambda';
-import { hasMatchingSignature } from '../src/verifySignature';
+import { hasMatchingSignature } from '../src/validateRequest';
 import { HmacKey } from '../src/hMacKey';
 
 /**
@@ -60,12 +60,30 @@ const invalidSQSRecord = {
 	awsRegion: validSQSRecord.awsRegion,
 };
 
+const validSQSRecordTimestamp = '1724160026';
+const validSQSRecordSignature =
+	'a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd50';
+
+const invalidSQSRecordTimestamp = '1724160026';
+const invalidSQSRecordSignature =
+	'a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd51';
+
 test('If the SQS event has a valid signature, hasMatchingSignature() will return true', () => {
-	const signatureCheckResult = hasMatchingSignature(validSQSRecord, mockKey);
+	const signatureCheckResult = hasMatchingSignature(
+		validSQSRecordTimestamp,
+		validSQSRecordSignature,
+		validSQSRecord,
+		mockKey,
+	);
 	expect(signatureCheckResult).toBe(true);
 });
 
 test('If the SQS event has an invalid signature, hasMatchingSignature() will return false', () => {
-	const signatureCheckResult = hasMatchingSignature(invalidSQSRecord, mockKey);
+	const signatureCheckResult = hasMatchingSignature(
+		invalidSQSRecordTimestamp,
+		invalidSQSRecordSignature,
+		invalidSQSRecord,
+		mockKey,
+	);
 	expect(signatureCheckResult).toBe(false);
 });
