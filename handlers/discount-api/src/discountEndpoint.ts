@@ -6,9 +6,9 @@ import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
 	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
-	getOrderedInvoiceTotals,
 	getNextInvoiceItems,
 	getNextNonFreePaymentDate,
+	getOrderedInvoiceTotals,
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
