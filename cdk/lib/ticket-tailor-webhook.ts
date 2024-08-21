@@ -155,6 +155,8 @@ export class TicketTailorWebhook extends GuStack {
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/TicketTailor/Webhook-validation-ECS6P8`,
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/TicketTailor/Webhook-validation-eEsTGW`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/TicketTailor/IdApi-token-JBI5VI`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/TicketTailor/IdApi-token-eu45YS`
 						],
 					}),
 				],

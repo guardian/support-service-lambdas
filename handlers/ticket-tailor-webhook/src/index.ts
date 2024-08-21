@@ -1,13 +1,14 @@
 import type { Stage } from '@modules/stage';
 import type { Handler, SQSEvent } from 'aws-lambda';
-import { getWebhookValidationSecret } from './hMacKey';
+import { getIdApiSecret, getWebhookValidationSecret } from './getSecrets';
 import type { Payload } from './verifySignature';
 import { hasMatchingSignature } from './verifySignature';
 
-export const handler: Handler = async (event: SQSEvent): Promise<boolean> => {
+const stage = process.env.STAGE as Stage;
+
+export const handler: Handler = async (event: SQSEvent) => {
 	const res = await event.Records.flatMap(async (record) => {
 		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
-		const stage = process.env.STAGE as Stage;
 		const validationSecret = await getWebhookValidationSecret(stage);
 		const matches = hasMatchingSignature(record, validationSecret);
 		if (matches) {
@@ -28,7 +29,33 @@ export const handler: Handler = async (event: SQSEvent): Promise<boolean> => {
 	}
 };
 
-export const callIdapi = (email: string) => {
-	console.log(`email for idapi ${email}`);
-	return Promise.resolve(true);
+export type UserTypeResponse = {
+	userType: string;
+};
+
+export const callIdapi = async (email: string) => {
+	const stage = 'CODE';
+	const idapiUrl =
+		stage === 'PROD'
+			? 'https://idapi.theguardian.com'
+			: 'https://idapi.code.dev-theguardian.com';
+
+	const idapiToken = await getIdApiSecret(stage);
+
+	const userTypeEndpoint = `/user/type/`;
+	const guestEndpoint = '/guest';
+
+	const bearerToken = `Bearer ${idapiToken.token}`;
+
+	// { status: 'ok', userType: 'new' }
+
+	const res = await fetch(idapiUrl.concat(userTypeEndpoint).concat(email), {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-GU-ID-Client-Access-Token': bearerToken,
+		},
+	}).then((response) => response.json());
+
+	console.log(res);
 };
