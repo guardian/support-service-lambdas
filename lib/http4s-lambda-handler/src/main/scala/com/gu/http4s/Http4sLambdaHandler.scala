@@ -116,7 +116,7 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
     Headers(
       apiGateWayRequest.multiValueHeaders
         .getOrElse(Nil)
-        .flatMap { case (key, multiValue) => multiValue.map[Header.ToRaw](value => (key, value)) }
+        .flatMap { case (key, multiValue) => multiValue.map[Header.ToRaw](value => (key, value)) } // implicit conversion from pair to "ToRaw"
         .toList: _*,
     )
   }
