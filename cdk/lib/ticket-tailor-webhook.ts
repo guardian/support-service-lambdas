@@ -80,13 +80,14 @@ export class TicketTailorWebhook extends GuStack {
 						"'application/x-www-form-urlencoded'",
 				},
 				requestTemplates: {
-					'application/json': 'Action=SendMessage&MessageBody=$input.body',
+					'application/json':
+						'Action=SendMessage&MessageBody=$util.urlEncode($input.body)&MessageAttribute.1.Name=tickettailor-webhook-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.tickettailor-webhook-signature',
 				},
 				integrationResponses: [
 					{
 						statusCode: '200',
 						responseTemplates: {
-							'application/json': '{ "success": true }',
+							'application/json': '{ "status": "accepted" }',
 						},
 					},
 				],
@@ -144,6 +145,23 @@ export class TicketTailorWebhook extends GuStack {
 			],
 		});
 
+		const secretManagerAccessPolicy = new Policy(
+			this,
+			'Secret manager access policy',
+			{
+				statements: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/TicketTailor/Webhook-validation-ECS6P8`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/TicketTailor/Webhook-validation-eEsTGW`,
+						],
+					}),
+				],
+			},
+		);
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(secretManagerAccessPolicy);
 	}
 }

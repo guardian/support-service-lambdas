@@ -202,7 +202,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50309e639d27f184c3fe482f3117d51fbf7": {
+    "RestApiDeployment180EC5039d3d4ee670b9b15fc6cbe4ecf73efd3f": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -220,7 +220,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50309e639d27f184c3fe482f3117d51fbf7",
+          "Ref": "RestApiDeployment180EC5039d3d4ee670b9b15fc6cbe4ecf73efd3f",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -262,7 +262,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           "IntegrationResponses": [
             {
               "ResponseTemplates": {
-                "application/json": "{ "success": true }",
+                "application/json": "{ "status": "accepted" }",
               },
               "StatusCode": "200",
             },
@@ -271,7 +271,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
             "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
           },
           "RequestTemplates": {
-            "application/json": "Action=SendMessage&MessageBody=$input.body",
+            "application/json": "Action=SendMessage&MessageBody=$util.urlEncode($input.body)&MessageAttribute.1.Name=tickettailor-webhook-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.tickettailor-webhook-signature",
           },
           "Type": "AWS",
           "Uri": {
@@ -331,6 +331,60 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "Secretmanageraccesspolicy79659139": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/TicketTailor/Webhook-validation-ECS6P8",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/TicketTailor/Webhook-validation-eEsTGW",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "Secretmanageraccesspolicy79659139",
         "Roles": [
           {
             "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
@@ -927,7 +981,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503270aed40fe513d8bd03fe2f82b8993f2": {
+    "RestApiDeployment180EC503246f600003669b6f801a03df1c4d1821": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -945,7 +999,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503270aed40fe513d8bd03fe2f82b8993f2",
+          "Ref": "RestApiDeployment180EC503246f600003669b6f801a03df1c4d1821",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -987,7 +1041,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           "IntegrationResponses": [
             {
               "ResponseTemplates": {
-                "application/json": "{ "success": true }",
+                "application/json": "{ "status": "accepted" }",
               },
               "StatusCode": "200",
             },
@@ -996,7 +1050,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
             "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
           },
           "RequestTemplates": {
-            "application/json": "Action=SendMessage&MessageBody=$input.body",
+            "application/json": "Action=SendMessage&MessageBody=$util.urlEncode($input.body)&MessageAttribute.1.Name=tickettailor-webhook-signature&MessageAttribute.1.Value.DataType=String&MessageAttribute.1.Value.StringValue=$method.request.header.tickettailor-webhook-signature",
           },
           "Type": "AWS",
           "Uri": {
@@ -1056,6 +1110,60 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "Secretmanageraccesspolicy79659139": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/TicketTailor/Webhook-validation-ECS6P8",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/TicketTailor/Webhook-validation-eEsTGW",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "Secretmanageraccesspolicy79659139",
         "Roles": [
           {
             "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
