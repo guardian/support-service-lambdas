@@ -1,5 +1,8 @@
 import { SQSRecord } from 'aws-lambda';
-import { hasMatchingSignature } from '../src/validateRequest';
+import {
+	hasMatchingSignature,
+	isWithinTimeWindow,
+} from '../src/validateRequest';
 import { HmacKey } from '../src/hMacKey';
 
 /**
@@ -39,7 +42,7 @@ const validSQSRecord: SQSRecord = {
 	awsRegion: 'eu-west-1',
 };
 
-const invalidSQSRecord = {
+const invalidSignatureSQSRecord = {
 	messageId: validSQSRecord.messageId,
 	receiptHandle: validSQSRecord.receiptHandle,
 	body: validSQSRecord.body,
@@ -60,12 +63,33 @@ const invalidSQSRecord = {
 	awsRegion: validSQSRecord.awsRegion,
 };
 
+const invalidTimestampSQSRecord = {
+	messageId: validSQSRecord.messageId,
+	receiptHandle: validSQSRecord.receiptHandle,
+	body: validSQSRecord.body,
+	attributes: validSQSRecord.attributes,
+	messageAttributes: {
+		'tickettailor-webhook-signature': {
+			//modified the signature to be one higher than the original this is sufficient to make it invalid
+			stringValue:
+				't=1724160027,v1=a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd50',
+			stringListValues: [],
+			binaryListValues: [],
+			dataType: 'String',
+		},
+	},
+	md5OfBody: validSQSRecord.md5OfBody,
+	eventSource: validSQSRecord.eventSource,
+	eventSourceARN: validSQSRecord.eventSourceARN,
+	awsRegion: validSQSRecord.awsRegion,
+};
+
 const validSQSRecordTimestamp = '1724160026';
 const validSQSRecordSignature =
 	'a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd50';
 
-const invalidSQSRecordTimestamp = '1724160026';
-const invalidSQSRecordSignature =
+const invalidTimestamp = '1724160027';
+const invalidSignature =
 	'a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd51';
 
 test('If the SQS event has a valid signature, hasMatchingSignature() will return true', () => {
@@ -80,10 +104,48 @@ test('If the SQS event has a valid signature, hasMatchingSignature() will return
 
 test('If the SQS event has an invalid signature, hasMatchingSignature() will return false', () => {
 	const signatureCheckResult = hasMatchingSignature(
-		invalidSQSRecordTimestamp,
-		invalidSQSRecordSignature,
-		invalidSQSRecord,
+		validSQSRecordTimestamp,
+		invalidSignature,
+		invalidSignatureSQSRecord,
 		mockKey,
 	);
 	expect(signatureCheckResult).toBe(false);
+});
+
+test('If the SQS event has a valid signature but an invalid value for timestamp, hasMatchingSignature() will return false', () => {
+	const signatureCheckResult = hasMatchingSignature(
+		invalidTimestamp,
+		validSQSRecordSignature,
+		invalidTimestampSQSRecord,
+		mockKey,
+	);
+	expect(signatureCheckResult).toBe(false);
+});
+
+test('If a valid SQS event has a timestamp that is just on the allowed time window, isWithinTimeWindow() will return true', () => {
+	const allowedTimeWindowSeconds = 500;
+	const currentTime = new Date();
+	const validTimestamp = String(
+		currentTime.getSeconds() - allowedTimeWindowSeconds,
+	);
+	const withinTimeWindow = isWithinTimeWindow(
+		allowedTimeWindowSeconds,
+		validTimestamp,
+		currentTime,
+	);
+	expect(withinTimeWindow).toBe(true);
+});
+
+test('If a valid SQS event has a timestamp more than the 500 seconds old, isWithinTimeWindow() will return false', () => {
+	const allowedTimeWindowSeconds = 500;
+	const currentTime = new Date();
+	const validTimestamp = String(
+		currentTime.getSeconds() - (allowedTimeWindowSeconds + 1),
+	);
+	const withinTimeWindow = isWithinTimeWindow(
+		allowedTimeWindowSeconds,
+		validTimestamp,
+		currentTime,
+	);
+	expect(withinTimeWindow).toBe(false);
 });
