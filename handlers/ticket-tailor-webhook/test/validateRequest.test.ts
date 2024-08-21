@@ -123,7 +123,7 @@ test('If the SQS event has a valid signature but an invalid value for timestamp,
 });
 
 test('If a valid SQS event has a timestamp that is just on the allowed time window, isWithinTimeWindow() will return true', () => {
-	const allowedTimeWindowSeconds = 500;
+	const allowedTimeWindowSeconds = 300;
 	const currentTime = new Date();
 	const validTimestamp = String(
 		currentTime.getSeconds() - allowedTimeWindowSeconds,
@@ -136,8 +136,8 @@ test('If a valid SQS event has a timestamp that is just on the allowed time wind
 	expect(withinTimeWindow).toBe(true);
 });
 
-test('If a valid SQS event has a timestamp more than the 500 seconds old, isWithinTimeWindow() will return false', () => {
-	const allowedTimeWindowSeconds = 500;
+test('If a valid SQS event has a timestamp 1 second older than the allowed time window, isWithinTimeWindow() will return false', () => {
+	const allowedTimeWindowSeconds = 300;
 	const currentTime = new Date();
 	const validTimestamp = String(
 		currentTime.getSeconds() - (allowedTimeWindowSeconds + 1),
