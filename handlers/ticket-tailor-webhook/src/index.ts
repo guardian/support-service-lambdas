@@ -7,9 +7,8 @@ import { hasMatchingSignature } from './verifySignature';
 export const handler: Handler = async (
 	event: SQSEvent,
 ): Promise<APIGatewayProxyResult> => {
-	console.log(`Input is ${JSON.stringify(event)}`);
-
 	const res = await event.Records.flatMap(async (record) => {
+		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
 		const stage = process.env.STAGE as Stage;
 		const validationSecret = await getWebhookValidationSecret(stage);
 		const matches = hasMatchingSignature(record, validationSecret);
@@ -18,7 +17,9 @@ export const handler: Handler = async (
 			const email = payload.payload.buyer_details.email;
 			return callIdapi(email);
 		} else {
-			throw new Error('Signatures do not match');
+			throw new Error(
+				'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
+			);
 		}
 	}).at(0);
 
