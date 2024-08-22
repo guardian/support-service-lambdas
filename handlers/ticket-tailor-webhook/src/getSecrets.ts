@@ -32,9 +32,12 @@ export const getWebhookValidationSecret = async (
 };
 export const getIdApiSecret = async (stage: Stage): Promise<IdApiToken> => {
 	const client = new SecretsManagerClient(awsConfig);
+	console.log(`Stage is ${stage}`);
 
 	const command = new GetSecretValueCommand({
-		SecretId: `${stage}/TicketTailor/IdApi-token`,
+		//todo: remove hardcoded STAGE variable
+		//		SecretId: `${stage}/TicketTailor/IdApi-token`,
+		SecretId: `CODE/TicketTailor/IdApi-token`,
 	});
 
 	const response = await client.send(command);

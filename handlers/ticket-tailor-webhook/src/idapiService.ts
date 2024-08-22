@@ -1,4 +1,4 @@
-import { Stage } from '@modules/stage';
+import type { Stage } from '@modules/stage';
 import { getIdApiSecret } from './getSecrets';
 
 export type UserTypeResponse = {
@@ -48,10 +48,11 @@ export const createGuestAccount = async (email: string) => {
 		headers: {
 			'Content-Type': 'application/json',
 			'X-GU-ID-Client-Access-Token': bearerToken,
-			'Origin' : 'https://theguardian.com',
+			Origin: 'https://theguardian.com',
 		},
-        body: JSON.stringify({ primaryEmailAddress: email }),
+		body: JSON.stringify({ primaryEmailAddress: email }),
 	}).then((response) => {
+		console.log(`create Guest Account response status: ${response.statusText}`);
 		if (!response.ok) {
 			throw new Error(response.statusText);
 		}
