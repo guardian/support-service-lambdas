@@ -14,7 +14,7 @@ const idapiUrl =
 		: 'https://idapi.code.dev-theguardian.com';
 
 const userTypeEndpoint = `/user/type/`;
-const guestEndpoint = '/guest';
+const guestEndpoint = '/guest?accountVerificationEmail=true';
 
 export const fetchUserType = async (email: string) => {
 	const token = await idapiToken;
@@ -49,8 +49,8 @@ export const createGuestAccount = async (email: string) => {
 			'Content-Type': 'application/json',
 			'X-GU-ID-Client-Access-Token': bearerToken,
 			Origin: 'https://theguardian.com',
-			body: JSON.stringify({ primaryEmailAddress: email }),
 		},
+        body: JSON.stringify({ primaryEmailAddress: email }),
 	}).then((response) => {
 		if (!response.ok) {
 			throw new Error(response.statusText);
