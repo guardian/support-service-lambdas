@@ -48,7 +48,7 @@ export const createGuestAccount = async (email: string) => {
 		headers: {
 			'Content-Type': 'application/json',
 			'X-GU-ID-Client-Access-Token': bearerToken,
-			Origin: 'https://theguardian.com',
+			'Origin' : 'https://theguardian.com',
 		},
         body: JSON.stringify({ primaryEmailAddress: email }),
 	}).then((response) => {
