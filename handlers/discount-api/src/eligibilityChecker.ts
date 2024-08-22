@@ -27,7 +27,9 @@ export class EligibilityChecker {
 			`${accountBalance}`,
 		);
 
-		console.log('Working out the date to apply the discount');
+		console.log(
+			'ensuring there are no refunds/discounts expected on the affected invoices',
+		);
 		this.assertValidState(
 			nextInvoiceItems.every((item) => item.amount >= 0),
 			validationRequirements.noNegativePreviewItems,
