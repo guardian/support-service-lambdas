@@ -6,6 +6,9 @@ export const previewDiscountSchema = z.object({
 	upToPeriodsType: z.string(),
 	firstDiscountedPaymentDate: z.string(),
 	nextNonDiscountedPaymentDate: z.string(),
+	nonDiscountedPayments: z.array(
+		z.object({ amount: z.number(), date: z.string() }),
+	),
 });
 
 export type EligibilityCheckResponseBody = z.infer<

@@ -49,6 +49,14 @@ export function getNextNonFreePaymentDate(
 	return firstNonFree.date;
 }
 
+export function getOrderedInvoiceTotals(
+	invoiceItems: Array<SimpleInvoiceItem>,
+) {
+	return getOrderedInvoiceItemGroups(invoiceItems).map((invoiceGroup) =>
+		convertItemsToTotal(invoiceGroup),
+	);
+}
+
 function getOrderedInvoiceItemGroups(invoiceItems: Array<SimpleInvoiceItem>) {
 	if (invoiceItems[0] === undefined) {
 		throw new Error('no invoice items in preview');

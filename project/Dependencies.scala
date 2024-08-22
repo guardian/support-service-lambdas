@@ -1,18 +1,19 @@
-import sbt._
+import sbt.*
+import sbt.Keys.libraryDependencySchemes
 import sbtassembly.AssemblyKeys.assembly
 import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.21.10"
-  val circeVersion = "0.13.0"
-  val sttpVersion = "3.8.15"
-  val http4sVersion = "0.21.34"
+  val awsSdkVersion = "2.27.7"
+  val circeVersion = "0.14.9"
+  val sttpVersion = "3.9.7"
+  val http4sVersion = "0.22.15" // later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.9.0"
   val catsEffectVersion = "2.5.5"
 
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.4.7",
+    "ch.qos.logback" % "logback-classic" % "1.5.6",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -27,6 +28,14 @@ object Dependencies {
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.2"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.2"
 
+  // scalaLambda depends on the old version of circe, until this PR is merged
+  // https://github.com/mkotsur/aws-lambda-scala/pull/30
+  val scalaLambdaCirceOverride =
+    libraryDependencySchemes ++= Seq(
+      "io.circe" %% "circe-core" % VersionScheme.Always,
+      "io.circe" %% "circe-generic" % VersionScheme.Always,
+      "io.circe" %% "circe-parser" % VersionScheme.Always,
+    )
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
@@ -39,8 +48,8 @@ object Dependencies {
   // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeConfig = "io.circe" %% "circe-config" % "0.8.0"
-  val playJson = "org.playframework" %% "play-json" % "3.0.1"
+  val circeConfig = "io.circe" %% "circe-config" % "0.10.1"
+  val playJson = "org.playframework" %% "play-json" % "3.0.4"
 
   // upickle here is a temporary redundancy of circe while we are migrating to it
   val upickle = "com.lihaoyi" %% "upickle" % "3.1.0"
@@ -52,7 +61,7 @@ object Dependencies {
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
   val sttpOkhttpBackend =
     "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
-  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.10.0"
+  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.12.0"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
   // HTTP4S
@@ -84,15 +93,15 @@ object Dependencies {
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.3.1" % Test
   val nettyCodec = "io.netty" % "netty-codec" % "4.1.92.Final"
-  val jacksonVersion = "2.13.2"
-  val jacksonDatabindVersion = "2.13.2.2"
+  // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
+  val jacksonVersion = "2.17.2"
 
   val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion,
-    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonDatabindVersion,
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
     "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonVersion,
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
@@ -120,6 +129,8 @@ object Dependencies {
      */
     case PathList("codegen-resources", _*) => MergeStrategy.discard
     case PathList("META-INF", "FastDoubleParser-LICENSE") => MergeStrategy.discard
+    case PathList("META-INF", "FastDoubleParser-NOTICE") => MergeStrategy.discard
+    case PathList("META-INF", "okio.kotlin_module") => MergeStrategy.discard
     case x =>
       val oldStrategy = (assembly / assemblyMergeStrategy).value
       oldStrategy(x)
